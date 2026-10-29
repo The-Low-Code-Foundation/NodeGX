@@ -1,0 +1,373 @@
+{
+ "calls": [
+  {
+   "prompt": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.. The one action: View portfolio and book a class.. Tone: minimal.\nThe page's sections, top to bottom: 1. hero, 2. gallery, 3. how it works, 4. schedule or line-up, 5. about, 6. sign-up or contact form, 7. footer.\nWrite the HTML for section 1, the \"hero\" section (Immediate visual impact and primary call to action.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/work-potter.webp, noodl_modules/starter-imagery/work-hands-clay.webp, noodl_modules/starter-imagery/people-market.webp.\nWrite the words a visitor reads, about Potter Portfolio. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 884,
+   "tokensOut": 566,
+   "ms": 24639,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.. The one action: View portfolio and book a class.. Tone: minimal.\nThe page's sections, top to bottom: 1. hero, 2. gallery, 3. how it works, 4. schedule or line-up, 5. about, 6. sign-up or contact form, 7. footer.\nWrite the HTML for section 2, the \"gallery\" section (Showcase the handmade bowls.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/work-potter.webp, noodl_modules/starter-imagery/work-hands-clay.webp, noodl_modules/starter-imagery/people-market.webp.\nWrite the words a visitor reads, about Potter Portfolio. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 881,
+   "tokensOut": 489,
+   "ms": 17890,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.. The one action: View portfolio and book a class.. Tone: minimal.\nThe page's sections, top to bottom: 1. hero, 2. gallery, 3. how it works, 4. schedule or line-up, 5. about, 6. sign-up or contact form, 7. footer.\nWrite the HTML for section 3, the \"how it works\" section (Explain the process of buying bowls and booking classes.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/work-potter.webp, noodl_modules/starter-imagery/work-hands-clay.webp, noodl_modules/starter-imagery/people-market.webp.\nWrite the words a visitor reads, about Potter Portfolio. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 887,
+   "tokensOut": 725,
+   "ms": 25516,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.. The one action: View portfolio and book a class.. Tone: minimal.\nThe page's sections, top to bottom: 1. hero, 2. gallery, 3. how it works, 4. schedule or line-up, 5. about, 6. sign-up or contact form, 7. footer.\nWrite the HTML for section 4, the \"schedule or line-up\" section (Display available weekend class dates and times.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/work-potter.webp, noodl_modules/starter-imagery/work-hands-clay.webp, noodl_modules/starter-imagery/people-market.webp.\nWrite the words a visitor reads, about Potter Portfolio. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 887,
+   "tokensOut": 1233,
+   "ms": 42580,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.. The one action: View portfolio and book a class.. Tone: minimal.\nThe page's sections, top to bottom: 1. hero, 2. gallery, 3. how it works, 4. schedule or line-up, 5. about, 6. sign-up or contact form, 7. footer.\nWrite the HTML for section 5, the \"about\" section (Introduce the potter and their philosophy.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/work-potter.webp, noodl_modules/starter-imagery/work-hands-clay.webp, noodl_modules/starter-imagery/people-market.webp.\nWrite the words a visitor reads, about Potter Portfolio. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 882,
+   "tokensOut": 402,
+   "ms": 15740,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.. The one action: View portfolio and book a class.. Tone: minimal.\nThe page's sections, top to bottom: 1. hero, 2. gallery, 3. how it works, 4. schedule or line-up, 5. about, 6. sign-up or contact form, 7. footer.\nWrite the HTML for section 6, the \"sign-up or contact form\" section (Capture leads for class inquiries and custom orders.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/work-potter.webp, noodl_modules/starter-imagery/work-hands-clay.webp, noodl_modules/starter-imagery/people-market.webp.\nWrite the words a visitor reads, about Potter Portfolio. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 889,
+   "tokensOut": 978,
+   "ms": 35525,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.. The one action: View portfolio and book a class.. Tone: minimal.\nThe page's sections, top to bottom: 1. hero, 2. gallery, 3. how it works, 4. schedule or line-up, 5. about, 6. sign-up or contact form, 7. footer.\nWrite the HTML for section 7, the \"footer\" section (Provide essential contact details and navigation.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/work-potter.webp, noodl_modules/starter-imagery/work-hands-clay.webp, noodl_modules/starter-imagery/people-market.webp.\nWrite the words a visitor reads, about Potter Portfolio. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 882,
+   "tokensOut": 713,
+   "ms": 26142,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.. The one action: View portfolio and book a class.. Tone: minimal.\nThe page's sections, top to bottom: 1. hero, 2. gallery, 3. how it works, 4. schedule or line-up, 5. about, 6. sign-up or contact form, 7. footer.\nWrite the HTML for section 4, the \"schedule or line-up\" section (Display available weekend class dates and times.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/work-potter.webp, noodl_modules/starter-imagery/work-hands-clay.webp, noodl_modules/starter-imagery/people-market.webp.\nWrite the words a visitor reads, about Potter Portfolio. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: \"Date: [Insert Date Here]\" talks about the page instead of to the visitor \"Date: [Insert Date Here]\" talks about the page instead of to the visitor \"Date: [Insert Date Here]\" talks about the page instead of to the visitor Write it again, fixing that.",
+   "tokensIn": 957,
+   "tokensOut": 943,
+   "ms": 36927,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.. The one action: View portfolio and book a class.. Tone: minimal.\nThe page's sections, top to bottom: 1. hero, 2. gallery, 3. how it works, 4. schedule or line-up, 5. about, 6. sign-up or contact form, 7. footer.\nWrite the HTML for section 5, the \"about\" section (Introduce the potter and their philosophy.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/work-potter.webp, noodl_modules/starter-imagery/work-hands-clay.webp, noodl_modules/starter-imagery/people-market.webp.\nWrite the words a visitor reads, about Potter Portfolio. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: reviewer (p=0.022): a line in \"about\" reads odd, cut off, repeated or off-topic Write it again, fixing that.",
+   "tokensIn": 928,
+   "tokensOut": 406,
+   "ms": 16124,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.. The one action: View portfolio and book a class.. Tone: minimal.\nThe page's sections, top to bottom: 1. hero, 2. gallery, 3. how it works, 4. schedule or line-up, 5. about, 6. sign-up or contact form, 7. footer.\nWrite the HTML for section 7, the \"footer\" section (Provide essential contact details and navigation.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/work-potter.webp, noodl_modules/starter-imagery/work-hands-clay.webp, noodl_modules/starter-imagery/people-market.webp.\nWrite the words a visitor reads, about Potter Portfolio. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: \"Inquiries: [Contact Method Placeholder]\" talks about the page instead of to the visitor \"Location: [Location Placeholder]\" talks about the page instead of to the visitor \"&copy; [Current Year] Potter Portfolio. All rights reserved.\" talks about the page instead of to the visitor Write it again, fixing that.",
+   "tokensIn": 958,
+   "tokensOut": 875,
+   "ms": 31547,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.. The one action: View portfolio and book a class.. Tone: minimal.\nThe page's sections, top to bottom: 1. hero, 2. gallery, 3. how it works, 4. schedule or line-up, 5. about, 6. sign-up or contact form, 7. footer.\nWrite the HTML for section 4, the \"schedule or line-up\" section (Display available weekend class dates and times.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/work-potter.webp, noodl_modules/starter-imagery/work-hands-clay.webp, noodl_modules/starter-imagery/people-market.webp.\nWrite the words a visitor reads, about Potter Portfolio. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: reviewer (p=0.096): a line in \"schedule or line-up\" reads odd, cut off, repeated or off-topic Write it again, fixing that.",
+   "tokensIn": 937,
+   "tokensOut": 905,
+   "ms": 35859,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.. The one action: View portfolio and book a class.. Tone: minimal.\nThe page's sections, top to bottom: 1. hero, 2. gallery, 3. how it works, 4. schedule or line-up, 5. about, 6. sign-up or contact form, 7. footer.\nWrite the HTML for section 7, the \"footer\" section (Provide essential contact details and navigation.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nPhotographs you may use (img src exactly as written, or none): noodl_modules/starter-imagery/work-potter.webp, noodl_modules/starter-imagery/work-hands-clay.webp, noodl_modules/starter-imagery/people-market.webp.\nWrite the words a visitor reads, about Potter Portfolio. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: \"Potter Portfolio\" repeats a line in another section \"Contact: [Contact Method Placeholder]\" talks about the page instead of to the visitor \"Location: [Location Placeholder]\" talks about the page instead of to the visitor \"&copy; [Current Year] Potter Portfolio. All rights reserved.\" talks about the page instead of to the visitor Write it again, fixing that.",
+   "tokensIn": 968,
+   "tokensOut": 722,
+   "ms": 26583,
+   "done": "stop"
+  }
+ ],
+ "judgements": [
+  {
+   "round": 0,
+   "key": "s0.sound",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes..\n\nSection \"hero\". Top to bottom:\n- headline: \"Potter Portfolio\"\n- paragraph: \"Handmade bowls and weekend classes. Discover unique pottery crafted with care.\"\n- button: \"View Portfolio\"\n- button: \"Book a Class\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.967,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 136,
+   "ms": 6572
+  },
+  {
+   "round": 0,
+   "key": "s2.sound",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes..\n\nSection \"how it works\". Top to bottom:\n- headline: \"The Process\"\n- title: \"Acquire a Piece\"\n- paragraph: \"Browse the collection of handmade bowls and select your favorite piece.\"\n- title: \"Join a Workshop\"\n- paragraph: \"View the schedule and book your spot for weekend classes.\"\n- title: \"Connect & Create\"\n- paragraph: \"View the full portfolio and begin your creative journey.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.97,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 177,
+   "ms": 980
+  },
+  {
+   "round": 0,
+   "key": "s3.sound",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes..\n\nSection \"schedule or line-up\". Top to bottom:\n- headline: \"Weekend Classes\"\n- paragraph: \"Discover hands-on pottery workshops. Limited spots available for upcoming sessions.\"\n- title: \"Saturday Session\"\n- paragraph: \"Date: [Insert Date Here]\"\n- paragraph: \"Time: 10:00 AM - 2:00 PM\"\n- button: \"View Details\"\n- title: \"Sunday Session\"\n- paragraph: \"Date: [Insert Date Here]\"\n- paragraph: \"Time: 1:00 PM - 5:00 PM\"\n- button: \"View Details\"\n- title: \"Upcoming Workshop\"\n- paragraph: \"Date: [Insert Date Here]\"\n- paragraph: \"Time: 9:00 AM - 1:00 PM\"\n- button: \"View Details\"\n- paragraph: \"For detailed schedules and registration, please contact us.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.823,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 285,
+   "ms": 1456
+  },
+  {
+   "round": 0,
+   "key": "s4.sound",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes..\n\nSection \"about\". Top to bottom:\n- headline: \"About\"\n- paragraph: \"Handmade bowls crafted with intention.\"\n- paragraph: \"A philosophy centered on the tactile beauty of clay and the quiet moments found in handmade objects. Each piece is a unique expression of craft, designed to bri\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.022,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 146,
+   "ms": 819
+  },
+  {
+   "round": 0,
+   "key": "s5.sound",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes..\n\nSection \"sign-up or contact form\". Top to bottom:\n- headline: \"Get In Touch\"\n- paragraph: \"Inquire about weekend classes or custom handmade bowls.\"\n- paragraph: \"Name\"\n- paragraph: \"Email\"\n- paragraph: \"Inquiry Type\"\n- paragraph: \"Message\"\n- button: \"Submit Inquiry\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.867,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 820
+  },
+  {
+   "round": 0,
+   "key": "s6.sound",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes..\n\nSection \"footer\". Top to bottom:\n- button: \"Portfolio\"\n- button: \"Classes\"\n- button: \"About\"\n- headline: \"Get In Touch\"\n- paragraph: \"Email: contact@potterportfolio.com\"\n- paragraph: \"Inquiries: [Contact Method Placeholder]\"\n- paragraph: \"Location: [Location Placeholder]\"\n- paragraph: \"Follow the work:\"\n- button: \"Instagram\"\n- button: \"Facebook\"\n- paragraph: \"&copy; [Current Year] Potter Portfolio. All rights reserved.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.809,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 201,
+   "ms": 1102
+  },
+  {
+   "round": 1,
+   "key": "s0.sound",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes..\n\nSection \"hero\". Top to bottom:\n- headline: \"Potter Portfolio\"\n- paragraph: \"Handmade bowls and weekend classes. Discover unique pottery crafted with care.\"\n- button: \"View Portfolio\"\n- button: \"Book a Class\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.967,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 136,
+   "ms": 6090
+  },
+  {
+   "round": 1,
+   "key": "s2.sound",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes..\n\nSection \"how it works\". Top to bottom:\n- headline: \"The Process\"\n- title: \"Acquire a Piece\"\n- paragraph: \"Browse the collection of handmade bowls and select your favorite piece.\"\n- title: \"Join a Workshop\"\n- paragraph: \"View the schedule and book your spot for weekend classes.\"\n- title: \"Connect & Create\"\n- paragraph: \"View the full portfolio and begin your creative journey.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.97,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 177,
+   "ms": 960
+  },
+  {
+   "round": 1,
+   "key": "s3.sound",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes..\n\nSection \"schedule or line-up\". Top to bottom:\n- headline: \"Weekend Class Schedule\"\n- paragraph: \"View available weekend class dates and times.\"\n- title: \"Saturday Session\"\n- paragraph: \"9:00 AM\"\n- paragraph: \"Focus: Introduction to hand-building techniques.\"\n- title: \"Sunday Session\"\n- paragraph: \"1:00 PM\"\n- paragraph: \"Focus: Glazing basics and finishing your piece.\"\n- title: \"Saturday Session\"\n- paragraph: \"10:00 AM\"\n- paragraph: \"Focus: Advanced form exploration.\"\n- paragraph: \"Please contact for specific availability and registration details.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.096,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 229,
+   "ms": 1247
+  },
+  {
+   "round": 1,
+   "key": "s4.sound",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes..\n\nSection \"about\". Top to bottom:\n- headline: \"About\"\n- paragraph: \"This portfolio showcases handmade bowls crafted with intention. The philosophy behind the work centers on the tactile experience of pottery and the beauty found\"\n- paragraph: \"Through weekend classes, the process is shared—offering a hands-on introduction to the craft for those seeking a mindful, creative escape.\"\n- paragraph: \"Explore the collection and discover how you can join the studio experience.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.923,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 180,
+   "ms": 994
+  },
+  {
+   "round": 1,
+   "key": "s5.sound",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes..\n\nSection \"sign-up or contact form\". Top to bottom:\n- headline: \"Get In Touch\"\n- paragraph: \"Inquire about weekend classes or custom handmade bowls.\"\n- paragraph: \"Name\"\n- paragraph: \"Email\"\n- paragraph: \"Inquiry Type\"\n- paragraph: \"Message\"\n- button: \"Submit Inquiry\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.867,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 905
+  },
+  {
+   "round": 1,
+   "key": "s6.sound",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes..\n\nSection \"footer\". Top to bottom:\n- headline: \"Potter Portfolio\"\n- button: \"Gallery\"\n- button: \"Classes\"\n- button: \"About\"\n- button: \"Book Class\"\n- paragraph: \"Explore handmade pottery and discover weekend classes.\"\n- paragraph: \"Contact: [Contact Method Placeholder]\"\n- paragraph: \"Location: [Location Placeholder]\"\n- button: \"Social\"\n- paragraph: \"&copy; [Current Year] Potter Portfolio. All rights reserved.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.798,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 190,
+   "ms": 1081
+  },
+  {
+   "round": 2,
+   "key": "s0.sound",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes..\n\nSection \"hero\". Top to bottom:\n- headline: \"Potter Portfolio\"\n- paragraph: \"Handmade bowls and weekend classes. Discover unique pottery crafted with care.\"\n- button: \"View Portfolio\"\n- button: \"Book a Class\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.967,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 136,
+   "ms": 6522
+  },
+  {
+   "round": 2,
+   "key": "s2.sound",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes..\n\nSection \"how it works\". Top to bottom:\n- headline: \"The Process\"\n- title: \"Acquire a Piece\"\n- paragraph: \"Browse the collection of handmade bowls and select your favorite piece.\"\n- title: \"Join a Workshop\"\n- paragraph: \"View the schedule and book your spot for weekend classes.\"\n- title: \"Connect & Create\"\n- paragraph: \"View the full portfolio and begin your creative journey.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.97,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 177,
+   "ms": 958
+  },
+  {
+   "round": 2,
+   "key": "s3.sound",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes..\n\nSection \"schedule or line-up\". Top to bottom:\n- headline: \"Weekend Class Schedule\"\n- title: \"Saturday Morning\"\n- paragraph: \"9:00 AM - 12:00 PM\"\n- paragraph: \"Hand-building techniques introduction.\"\n- title: \"Saturday Afternoon\"\n- paragraph: \"1:00 PM - 4:00 PM\"\n- paragraph: \"Introduction to wheel throwing.\"\n- title: \"Sunday Morning\"\n- paragraph: \"10:00 AM - 1:00 PM\"\n- paragraph: \"Glazing workshop.\"\n- title: \"Sunday Afternoon\"\n- paragraph: \"2:00 PM - 5:00 PM\"\n- paragraph: \"Open studio time and critique.\"\n- paragraph: \"Check back regularly for updated availability.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.959,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 263,
+   "ms": 1411
+  },
+  {
+   "round": 2,
+   "key": "s4.sound",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes..\n\nSection \"about\". Top to bottom:\n- headline: \"About\"\n- paragraph: \"This portfolio showcases handmade bowls crafted with intention. The philosophy behind the work centers on the tactile experience of pottery and the beauty found\"\n- paragraph: \"Through weekend classes, the process is shared—offering a hands-on introduction to the craft for those seeking a mindful, creative escape.\"\n- paragraph: \"Explore the collection and discover how you can join the studio experience.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.923,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 180,
+   "ms": 965
+  },
+  {
+   "round": 2,
+   "key": "s5.sound",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes..\n\nSection \"sign-up or contact form\". Top to bottom:\n- headline: \"Get In Touch\"\n- paragraph: \"Inquire about weekend classes or custom handmade bowls.\"\n- paragraph: \"Name\"\n- paragraph: \"Email\"\n- paragraph: \"Inquiry Type\"\n- paragraph: \"Message\"\n- button: \"Submit Inquiry\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.867,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 820
+  },
+  {
+   "round": 2,
+   "key": "s6.sound",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes..\n\nSection \"footer\". Top to bottom:\n- headline: \"Potter Portfolio\"\n- title: \"View Portfolio\"\n- paragraph: \"Explore handmade bowls and craft.\"\n- title: \"Book a Class\"\n- paragraph: \"Join weekend workshops.\"\n- paragraph: \"Connect with the maker.\"\n- button: \"Get in Touch\"\n- button: \"View Schedule\"\n- paragraph: \"&copy; [Current Year] Potter Portfolio. All rights reserved.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.819,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 182,
+   "ms": 954
+  }
+ ],
+ "rounds": [
+  {
+   "round": 0,
+   "perLine": 0.445,
+   "defects": 20.93,
+   "lines": 47,
+   "kept": true,
+   "issues": [
+    {
+     "si": 3,
+     "say": "\"Date: [Insert Date Here]\" talks about the page instead of to the visitor",
+     "weight": 3
+    },
+    {
+     "si": 3,
+     "say": "\"Date: [Insert Date Here]\" talks about the page instead of to the visitor",
+     "weight": 3
+    },
+    {
+     "si": 3,
+     "say": "\"Date: [Insert Date Here]\" talks about the page instead of to the visitor",
+     "weight": 3
+    },
+    {
+     "si": 6,
+     "say": "\"Inquiries: [Contact Method Placeholder]\" talks about the page instead of to the visitor",
+     "weight": 3
+    },
+    {
+     "si": 6,
+     "say": "\"Location: [Location Placeholder]\" talks about the page instead of to the visitor",
+     "weight": 3
+    },
+    {
+     "si": 6,
+     "say": "\"&copy; [Current Year] Potter Portfolio. All rights reserved.\" talks about the page instead of to the visitor",
+     "weight": 3
+    },
+    {
+     "si": 4,
+     "say": "reviewer (p=0.022): a line in \"about\" reads odd, cut off, repeated or off-topic",
+     "weight": 2.93
+    }
+   ],
+   "broken": []
+  },
+  {
+   "round": 1,
+   "perLine": 0.312,
+   "defects": 13.71,
+   "lines": 44,
+   "kept": true,
+   "issues": [
+    {
+     "si": 6,
+     "say": "\"Potter Portfolio\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 6,
+     "say": "\"Contact: [Contact Method Placeholder]\" talks about the page instead of to the visitor",
+     "weight": 3
+    },
+    {
+     "si": 6,
+     "say": "\"Location: [Location Placeholder]\" talks about the page instead of to the visitor",
+     "weight": 3
+    },
+    {
+     "si": 6,
+     "say": "\"&copy; [Current Year] Potter Portfolio. All rights reserved.\" talks about the page instead of to the visitor",
+     "weight": 3
+    },
+    {
+     "si": 3,
+     "say": "reviewer (p=0.096): a line in \"schedule or line-up\" reads odd, cut off, repeated or off-topic",
+     "weight": 2.71
+    }
+   ],
+   "broken": []
+  },
+  {
+   "round": 2,
+   "perLine": 0.156,
+   "defects": 7,
+   "lines": 45,
+   "kept": true,
+   "issues": [
+    {
+     "si": 6,
+     "say": "\"Potter Portfolio\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 6,
+     "say": "\"View Portfolio\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 6,
+     "say": "\"&copy; [Current Year] Potter Portfolio. All rights reserved.\" talks about the page instead of to the visitor",
+     "weight": 3
+    }
+   ],
+   "broken": []
+  }
+ ],
+ "result": {
+  "lane": "code-guided",
+  "brief": "pottery",
+  "from": "G-pottery",
+  "model": "gemma4:e2b-it-qat",
+  "judge": "gemma4:e4b-it-qat",
+  "bestRound": 2,
+  "perLine": 0.156,
+  "minutes": 6.2,
+  "builderCalls": 12,
+  "reviewerCalls": 18,
+  "tokensIn": 10940,
+  "tokensOut": 8957
+ }
+}

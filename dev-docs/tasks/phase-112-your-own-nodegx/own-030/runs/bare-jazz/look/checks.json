@@ -1,0 +1,38 @@
+{
+ "desktop": {
+  "url": "file:///Users/richardosborne/vscode_projects/OpenNoodl/dev-docs/tasks/phase-112-your-own-nodegx/own-030/runs/bare-jazz/site/index.html",
+  "blank": false,
+  "words": 204,
+  "overflowX": 0,
+  "smallText": [],
+  "lowContrast": [
+   {
+    "text": "© 2024 The Blue Room Jazz Evening. All Rights Rese",
+    "ratio": 3.45
+   }
+  ],
+  "unknownGround": 2,
+  "clipped": [],
+  "brokenImages": [],
+  "sections": 6
+ },
+ "phone": {
+  "url": "file:///Users/richardosborne/vscode_projects/OpenNoodl/dev-docs/tasks/phase-112-your-own-nodegx/own-030/runs/bare-jazz/site/index.html",
+  "blank": false,
+  "words": 204,
+  "overflowX": 0,
+  "smallText": [],
+  "lowContrast": [
+   {
+    "text": "© 2024 The Blue Room Jazz Evening. All Rights Rese",
+    "ratio": 3.45
+   }
+  ],
+  "unknownGround": 2,
+  "clipped": [],
+  "brokenImages": [
+   "https://images.unsplash.com/photo-1580489944000-241714133903?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+  ],
+  "sections": 6
+ }
+}

@@ -1,0 +1,36 @@
+{
+ "desktop": {
+  "url": "http://127.0.0.1:55263/",
+  "blank": false,
+  "words": 386,
+  "overflowX": 0,
+  "smallText": [],
+  "lowContrast": [
+   {
+    "text": "Your studio experience awaits.",
+    "ratio": 4.4
+   }
+  ],
+  "unknownGround": 12,
+  "clipped": [],
+  "brokenImages": [],
+  "sections": 7
+ },
+ "phone": {
+  "url": "http://127.0.0.1:55263/",
+  "blank": false,
+  "words": 386,
+  "overflowX": 0,
+  "smallText": [],
+  "lowContrast": [
+   {
+    "text": "Your studio experience awaits.",
+    "ratio": 4.4
+   }
+  ],
+  "unknownGround": 12,
+  "clipped": [],
+  "brokenImages": [],
+  "sections": 7
+ }
+}

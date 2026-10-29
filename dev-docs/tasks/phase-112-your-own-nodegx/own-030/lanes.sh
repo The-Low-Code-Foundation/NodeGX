@@ -8,7 +8,8 @@
 cd "${0:A:h}"
 LOG=runs/lanes.log
 mkdir -p runs
-BRIEFS=(${@:-puppy bakery running jazz pottery plumber})
+# zsh does not word-split a default string: ${@:-a b c} would be ONE brief called "a b c"
+if (( $# )); then BRIEFS=($@); else BRIEFS=(puppy bakery running jazz pottery plumber); fi
 kept() { node -e 'const L=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));const b=L.result.bestRound;console.log(L.roundsLog.find(r=>r.round===b).project+"\t"+b)' ../own-029/runs/G-$1/ledger.json; }
 for b in $BRIEFS; do
   {

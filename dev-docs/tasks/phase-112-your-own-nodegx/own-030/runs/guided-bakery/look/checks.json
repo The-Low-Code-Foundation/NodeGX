@@ -1,0 +1,96 @@
+{
+ "desktop": {
+  "url": "file:///Users/richardosborne/vscode_projects/OpenNoodl/dev-docs/tasks/phase-112-your-own-nodegx/own-030/runs/guided-bakery/site/index.html",
+  "blank": false,
+  "words": 209,
+  "overflowX": 0,
+  "smallText": [],
+  "lowContrast": [
+   {
+    "text": "Our Artisan Offerings",
+    "ratio": 3.16
+   },
+   {
+    "text": "Sourdough",
+    "ratio": 3.16
+   },
+   {
+    "text": "Croissants",
+    "ratio": 3.16
+   },
+   {
+    "text": "Cakes",
+    "ratio": 3.16
+   },
+   {
+    "text": "We are delighted to welcome you to our bakery in L",
+    "ratio": 1.09
+   },
+   {
+    "text": "View Our Offerings",
+    "ratio": 1.01
+   }
+  ],
+  "unknownGround": 4,
+  "clipped": [],
+  "brokenImages": [
+   "noddl_modules/starter-imagery/food-bread.webp",
+   "noddl_modules/starter-imagery/food-bakery.webp",
+   "noddl_modules/starter-imagery/food-bakery.webp",
+   "noddl_modules/starter-imagery/food-bakery.webp",
+   "noddl_modules/starter-imagery/food-bread.webp",
+   "noddl_modules/starter-imagery/food-bakery.webp",
+   "noddl_modules/starter-imagery/food-bakery.webp",
+   "noddl_modules/starter-imagery/food-bread.webp",
+   "noddl_modules/starter-imagery/food-bakery.webp"
+  ],
+  "sections": 6
+ },
+ "phone": {
+  "url": "file:///Users/richardosborne/vscode_projects/OpenNoodl/dev-docs/tasks/phase-112-your-own-nodegx/own-030/runs/guided-bakery/site/index.html",
+  "blank": false,
+  "words": 209,
+  "overflowX": 0,
+  "smallText": [],
+  "lowContrast": [
+   {
+    "text": "Our Artisan Offerings",
+    "ratio": 3.16
+   },
+   {
+    "text": "Sourdough",
+    "ratio": 3.16
+   },
+   {
+    "text": "Croissants",
+    "ratio": 3.16
+   },
+   {
+    "text": "Cakes",
+    "ratio": 3.16
+   },
+   {
+    "text": "We are delighted to welcome you to our bakery in L",
+    "ratio": 1.09
+   },
+   {
+    "text": "View Our Offerings",
+    "ratio": 1.01
+   }
+  ],
+  "unknownGround": 4,
+  "clipped": [],
+  "brokenImages": [
+   "noddl_modules/starter-imagery/food-bread.webp",
+   "noddl_modules/starter-imagery/food-bakery.webp",
+   "noddl_modules/starter-imagery/food-bakery.webp",
+   "noddl_modules/starter-imagery/food-bakery.webp",
+   "noddl_modules/starter-imagery/food-bread.webp",
+   "noddl_modules/starter-imagery/food-bakery.webp",
+   "noddl_modules/starter-imagery/food-bakery.webp",
+   "noddl_modules/starter-imagery/food-bread.webp",
+   "noddl_modules/starter-imagery/food-bakery.webp"
+  ],
+  "sections": 6
+ }
+}

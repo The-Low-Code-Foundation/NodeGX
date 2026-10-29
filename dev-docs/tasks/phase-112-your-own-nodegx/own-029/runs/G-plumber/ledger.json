@@ -1,0 +1,2610 @@
+{
+ "run": "G-plumber",
+ "brief": "plumber",
+ "request": "A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.",
+ "model": "gemma4:e2b-it-qat",
+ "judge": "gemma4:e4b-it-qat",
+ "copyN": 1,
+ "rounds": 4,
+ "build": {
+  "distMtime": "2026-10-29T07:23:59.015Z",
+  "head": "9c6b04732"
+ },
+ "harness": "22989dd1",
+ "startedAt": "2026-10-29T09:05:03.991Z",
+ "calls": [
+  {
+   "round": 0,
+   "key": "s0.deck",
+   "sig": "hero#0|deck|eyebrow,headline,sub-line,button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Customers needing plumbing services. Tone: classic.\nFacts the page must give: plumbing business; customers can ask for a call-back.\nWrite the words of the \"hero\" section, top to bottom:\n01_eyebrow: eyebrow, at most 30 characters\n02_headline: headline, at most 70 characters\n03_sub_line: sub-line, at most 160 characters\n04_button: button, two to four words, a verb first; pressing it lets a visitor Request a call-back\nEach line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_eyebrow": "Reliable Plumbing",
+    "02_headline": "Your Trusted Local Plumbing Experts",
+    "03_sub_line": "Serving our community with dependable, professional plumbing services. Contact us today for a call-back.",
+    "04_button": "Request Call-Back"
+   },
+   "tokensIn": 193,
+   "tokensOut": 78,
+   "ms": 6437
+  },
+  {
+   "round": 0,
+   "key": "s1.deck",
+   "sig": "about#0|deck|headline,sub-line,paragraph,quote,who said it: a name and a role,small print",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Customers needing plumbing services. Tone: classic.\nFacts the page must give: plumbing business; customers can ask for a call-back.\nWrite the words of the \"about\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 200 characters\n03_paragraph: paragraph, at most 200 characters\n04_quote: quote, at most 160 characters\n05_who_said_it_a_name_and_a_role: who said it: a name and a role, at most 60 characters\n06_small_print: small print, at most 60 characters\nAlready on the page: \"Your Trusted Local Plumbing Experts\", \"Serving our community with dependable, professional plumbing\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Plumbing Pro: Dependable Service You Can Trust",
+    "02_sub_line": "We provide honest, high-quality plumbing solutions for every home and business in our area.",
+    "03_paragraph": "For reliable plumbing, trust the hands that know the trade. We offer expert repair, installation, and maintenance with integrity and care.",
+    "04_quote": "Our commitment is simple: quality workmanship and honest service, always. Contact us today for a consultation.",
+    "05_who_said_it_a_name_and_a_role": "John Doe, Master Plumber",
+    "06_small_print": "Call now for a prompt call-back."
+   },
+   "tokensIn": 259,
+   "tokensOut": 167,
+   "ms": 5682
+  },
+  {
+   "round": 0,
+   "key": "s2.deck",
+   "sig": "feature cards#0|deck|headline,sub-line,button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Customers needing plumbing services. Tone: classic.\nFacts the page must give: plumbing business; customers can ask for a call-back.\nWrite the words of the \"feature cards\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\n03_button: button, two to four words, a verb first; pressing it lets a visitor Request a call-back\nAlready on the page: \"Your Trusted Local Plumbing Experts\", \"Serving our community with dependable, professional plumbing\", \"Plumbing Pro: Dependable Service You Can Trust\", \"We provide honest, high-quality plumbing solutions for every\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Reliable Plumbing, Right When You Need It",
+    "02_sub_line": "We offer prompt service and honest solutions for all your plumbing needs.",
+    "03_button": "Request a Call-Back"
+   },
+   "tokensIn": 229,
+   "tokensOut": 62,
+   "ms": 2483
+  },
+  {
+   "round": 0,
+   "key": "s2.list.rows",
+   "sig": "feature cards#0|list.rows|3|title,sentence,button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nBRIEF: a landing page called \"Plumbing Pro\", for Customers needing plumbing services. The one action: Request a call-back. Tone: classic.\nThe \"feature cards\" section (Highlight key services offered.) has a list of 3 items. For EACH item, in order, write: title (max 40 characters), sentence (max 160 characters), button (max 24 characters). Each item different from the others; an item's title and sentence and button must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "title": "Emergency Plumbing Repairs",
+      "sentence": "24/7 reliable service for burst pipes, leaks, and urgent plumbing issues. We respond quickly to keep you safe.",
+      "button": "Request Call-Back"
+     },
+     {
+      "title": "Drain Cleaning Services",
+      "sentence": "Professional equipment for clearing stubborn clogs from sinks, toilets, and main lines. Fast and effective solutions.",
+      "button": "Request Call-Back"
+     },
+     {
+      "title": "Water Heater Repair & Install",
+      "sentence": "Expert service for all water heater problems, from simple maintenance to full unit replacement. Quality guaranteed.",
+      "button": "Request Call-Back"
+     }
+    ]
+   },
+   "tokensIn": 174,
+   "tokensOut": 137,
+   "ms": 4635
+  },
+  {
+   "round": 0,
+   "key": "s3.deck",
+   "sig": "testimonials#0|deck|headline,sub-line,quote,who said it: a name and a role,badge",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "testimonials",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Customers needing plumbing services. Tone: classic.\nFacts the page must give: plumbing business; customers can ask for a call-back.\nWrite the words of the \"testimonials\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\n03_quote: quote, at most 160 characters\n04_who_said_it_a_name_and_a_role: who said it: a name and a role, at most 60 characters\n05_badge: badge, at most 200 characters\nAlready on the page: \"Plumbing Pro: Dependable Service You Can Trust\", \"We provide honest, high-quality plumbing solutions for every\", \"Reliable Plumbing, Right When You Need It\", \"We offer prompt service and honest solutions for all your pl\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Plumbing Pro: Trusted Local Service",
+    "02_sub_line": "We offer transparent pricing and expert repairs you can rely on.",
+    "03_quote": "The crew showed up quickly, solved my major issue, and left everything spotless. Excellent work!",
+    "04_who_said_it_a_name_and_a_role": "Sarah J., Homeowner",
+    "05_badge": "Serving the community with decades of proven expertise and a commitment to quality craftsmanship."
+   },
+   "tokensIn": 274,
+   "tokensOut": 125,
+   "ms": 4461
+  },
+  {
+   "round": 0,
+   "key": "s4.deck",
+   "sig": "sign-up or contact form#0|deck|headline,sub-line,form button,button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "sign-up or contact form",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Customers needing plumbing services. Tone: classic.\nFacts the page must give: plumbing business; customers can ask for a call-back.\nWrite the words of the \"sign-up or contact form\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\n03_form_button: form button, two to four words, a verb first; pressing it lets a visitor send the form\n04_button: button, two to four words, a verb first; pressing it lets a visitor Request a call-back\nAlready on the page: \"Reliable Plumbing, Right When You Need It\", \"We offer prompt service and honest solutions for all your pl\", \"Plumbing Pro: Trusted Local Service\", \"We offer transparent pricing and expert repairs you can rely\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Expert Plumbing Solutions, Fast & Dependable",
+    "02_sub_line": "For reliable plumbing services you can trust. Call us today for a free consultation.",
+    "03_form_button": "Get a Callback",
+    "04_button": "Request Call-Back"
+   },
+   "tokensIn": 264,
+   "tokensOut": 78,
+   "ms": 3166
+  },
+  {
+   "round": 0,
+   "key": "s5.deck",
+   "sig": "location and hours#0|deck|eyebrow,headline,sub-line,button,form button,date and place",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "location and hours",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Customers needing plumbing services. Tone: classic.\nFacts the page must give: plumbing business; customers can ask for a call-back.\nWrite the words of the \"location and hours\" section, top to bottom:\n01_eyebrow: eyebrow, at most 30 characters\n02_headline: headline, at most 60 characters\n03_sub_line: sub-line, at most 160 characters\n04_button: button, two to four words, a verb first; pressing it lets a visitor Request a call-back\n05_form_button: form button, two to four words, a verb first; pressing it lets a visitor send the form\n06_date_and_place: date and place, at most 160 characters\nAlready on the page: \"Plumbing Pro: Trusted Local Service\", \"We offer transparent pricing and expert repairs you can rely\", \"Expert Plumbing Solutions, Fast & Dependable\", \"For reliable plumbing services you can trust. Call us today \". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_eyebrow": "Trusted Local Plumbers",
+    "02_headline": "Your Trusted Home Plumbing Experts",
+    "03_sub_line": "We bring classic, dependable plumbing solutions directly to your door. Quality service you can count on.",
+    "04_button": "Request Call-Back",
+    "05_form_button": "Send Inquiry",
+    "06_date_and_place": "Serving the entire metro area. Available Monday - Saturday, 8 AM to 6 PM."
+   },
+   "tokensIn": 297,
+   "tokensOut": 111,
+   "ms": 4447
+  },
+  {
+   "round": 1,
+   "key": "s2.list.rows",
+   "sig": "feature cards#0|list.rows|3|title,sentence,button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nBRIEF: a landing page called \"Plumbing Pro\", for Customers needing plumbing services. The one action: Request a call-back. Tone: classic.\nThe \"feature cards\" section (Highlight key services offered.) has a list of 3 items. For EACH item, in order, write: title (max 40 characters), sentence (max 160 characters), button (max 24 characters). Each item different from the others; an item's title and sentence and button must agree. Plain words, no numbering.\nA reviewer looked at the built page and said: it repeats words used elsewhere on the page (\"Request Call-Back\"). Say something new.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "title": "Emergency Pipe Repair",
+      "sentence": "Fast response for urgent plumbing issues. We fix leaks and bursts quickly.",
+      "button": "Call Now"
+     },
+     {
+      "title": "Drain Cleaning Service",
+      "sentence": "Clear stubborn clogs with our professional drain cleaning equipment and expertise.",
+      "button": "Get Quote"
+     },
+     {
+      "title": "Water Heater Installation",
+      "sentence": "Reliable installation and maintenance for all residential water heating systems.",
+      "button": "Schedule Visit"
+     }
+    ]
+   },
+   "tokensIn": 203,
+   "tokensOut": 146,
+   "ms": 9662,
+   "hinted": true
+  },
+  {
+   "round": 1,
+   "key": "s3.look.band",
+   "sig": "testimonials#0|look.band|band,bandSurface",
+   "section": 3,
+   "sectionKind": "testimonials",
+   "forced": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 1,
+   "key": "s4.look.band",
+   "sig": "sign-up or contact form#0|look.band|band,bandSurface",
+   "section": 4,
+   "sectionKind": "sign-up or contact form",
+   "forced": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 1,
+   "key": "s4.deck",
+   "sig": "sign-up or contact form#0|deck|headline,sub-line,form button,button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "sign-up or contact form",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Customers needing plumbing services. Tone: classic.\nFacts the page must give: plumbing business; customers can ask for a call-back.\nWrite the words of the \"sign-up or contact form\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\n03_form_button: form button, two to four words, a verb first; pressing it lets a visitor send the form\n04_button: button, two to four words, a verb first; pressing it lets a visitor Request a call-back\nAlready on the page: \"Reliable Plumbing, Right When You Need It\", \"We offer prompt service and honest solutions for all your pl\", \"Plumbing Pro: Trusted Local Service\", \"We offer transparent pricing and expert repairs you can rely\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.\nA reviewer looked at the built page and said: it repeats words used elsewhere on the page (\"Request Call-Back\"). Say something new.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Expert Plumbing Solutions",
+    "02_sub_line": "For dependable home and commercial plumbing needs. Contact us for a service appointment.",
+    "03_form_button": "Schedule a Call",
+    "04_button": "Get a Callback"
+   },
+   "tokensIn": 293,
+   "tokensOut": 71,
+   "ms": 2931,
+   "hinted": true
+  },
+  {
+   "round": 1,
+   "key": "s5.bits",
+   "sig": "location and hours#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "location and hours",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nBRIEF: a landing page called \"Plumbing Pro\", for Customers needing plumbing services. The one action: Request a call-back. Tone: classic.\nThe sections above already have: hero: eyebrow, headline, sub-line, button; about: headline, sub-line, body text, quote, name line, small print; feature cards: headline, sub-line, list of items, button; testimonials: headline, sub-line, quote, name line, badge; sign-up or contact form: headline, sub-line, form, button. Not every section needs a button or a photo; a section can be short.\nThe \"location and hours\" section (Provide essential logistical information.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)\n(This page has no photographs.)\nA reviewer looked at the built page and said: the page already has a form in the \"sign-up or contact form\" section. Do not choose form again.",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "eyebrow",
+     "headline",
+     "sub-line",
+     "button",
+     "quote",
+     "name line"
+    ]
+   },
+   "tokensIn": 429,
+   "tokensOut": 27,
+   "ms": 2039,
+   "hinted": true
+  },
+  {
+   "round": 1,
+   "key": "s5.look.a quotation from a happy customer or visitor",
+   "sig": "location and hours#0|look.a quotation from a happy customer or visitor|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "location and hours",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nBRIEF: a landing page called \"Plumbing Pro\", for Customers needing plumbing services. The one action: Request a call-back. Tone: classic.\nThe \"location and hours\" section (Provide essential logistical information.). A Text whose role is: a quotation from a happy customer or visitor.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.693,
+     "body": 0.307
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.386
+   },
+   "tokensIn": 162,
+   "tokensOut": 12,
+   "ms": 826
+  },
+  {
+   "round": 1,
+   "key": "s5.deck",
+   "sig": "location and hours#0|deck|eyebrow,headline,sub-line,button,quote,who said it: a name and a role",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "location and hours",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Customers needing plumbing services. Tone: classic.\nFacts the page must give: plumbing business; customers can ask for a call-back.\nWrite the words of the \"location and hours\" section, top to bottom:\n01_eyebrow: eyebrow, at most 30 characters\n02_headline: headline, at most 60 characters\n03_sub_line: sub-line, at most 160 characters\n04_button: button, two to four words, a verb first; pressing it lets a visitor Request a call-back\n05_quote: quote, at most 160 characters\n06_who_said_it_a_name_and_a_role: who said it: a name and a role, at most 60 characters\nAlready on the page: \"Plumbing Pro: Trusted Local Service\", \"We offer transparent pricing and expert repairs you can rely\", \"Expert Plumbing Solutions\", \"For dependable home and commercial plumbing needs. Contact u\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_eyebrow": "Service Area",
+    "02_headline": "Plumbing Pro: Dependable Service Near You",
+    "03_sub_line": "We treat every call with the care and professionalism of a true master plumber. Schedule your consultation today.",
+    "04_button": "Request Call-Back",
+    "05_quote": "Experience the peace of mind that comes with service you can trust. Let our seasoned professionals handle your plumbing concerns.",
+    "06_who_said_it_a_name_and_a_role": "The Owner, Plumbing Pro"
+   },
+   "tokensIn": 293,
+   "tokensOut": 142,
+   "ms": 5056
+  },
+  {
+   "round": 2,
+   "key": "s3.look.band",
+   "sig": "testimonials#0|look.band|band,bandSurface",
+   "section": 3,
+   "sectionKind": "testimonials",
+   "forced": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 2,
+   "key": "s4.look.band",
+   "sig": "sign-up or contact form#0|look.band|band,bandSurface",
+   "section": 4,
+   "sectionKind": "sign-up or contact form",
+   "forced": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 2,
+   "key": "s5.bits",
+   "sig": "location and hours#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "location and hours",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nBRIEF: a landing page called \"Plumbing Pro\", for Customers needing plumbing services. The one action: Request a call-back. Tone: classic.\nThe sections above already have: hero: eyebrow, headline, sub-line, button; about: headline, sub-line, body text, quote, name line, small print; feature cards: headline, sub-line, list of items, button; testimonials: headline, sub-line, quote, name line, badge; sign-up or contact form: headline, sub-line, form, button. Not every section needs a button or a photo; a section can be short.\nThe \"location and hours\" section (Provide essential logistical information.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)\n(This page has no photographs.)\nA reviewer looked at the built page and said: the page already has quotes in 2 other sections. Do not choose quote or name line here.",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "headline",
+     "sub-line",
+     "body text",
+     "button",
+     "date and place"
+    ]
+   },
+   "tokensIn": 425,
+   "tokensOut": 24,
+   "ms": 6398,
+   "hinted": true
+  },
+  {
+   "round": 2,
+   "key": "s5.deck",
+   "sig": "location and hours#0|deck|headline,sub-line,paragraph,button,date and place",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "location and hours",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Customers needing plumbing services. Tone: classic.\nFacts the page must give: plumbing business; customers can ask for a call-back.\nWrite the words of the \"location and hours\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\n03_paragraph: paragraph, at most 200 characters\n04_button: button, two to four words, a verb first; pressing it lets a visitor Request a call-back\n05_date_and_place: date and place, at most 160 characters\nAlready on the page: \"Plumbing Pro: Trusted Local Service\", \"We offer transparent pricing and expert repairs you can rely\", \"Expert Plumbing Solutions\", \"For dependable home and commercial plumbing needs. Contact u\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Reliable Plumbing Services Near You",
+    "02_sub_line": "Serving our community with integrity and skill for all your plumbing concerns.",
+    "03_paragraph": "From routine maintenance to complex repairs, our dedicated team provides honest, top-tier plumbing solutions every time.",
+    "04_button": "Request Call-Back",
+    "05_date_and_place": "Monday - Friday: 8:00 AM - 5:00 PM | Saturday: 9:00 AM - 1:00 PM | Serving Metro Area"
+   },
+   "tokensIn": 262,
+   "tokensOut": 139,
+   "ms": 4899
+  },
+  {
+   "round": 3,
+   "key": "s3.look.band",
+   "sig": "testimonials#0|look.band|band,bandSurface",
+   "section": 3,
+   "sectionKind": "testimonials",
+   "forced": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 3,
+   "key": "s4.look.band",
+   "sig": "sign-up or contact form#0|look.band|band,bandSurface",
+   "section": 4,
+   "sectionKind": "sign-up or contact form",
+   "forced": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 3,
+   "key": "s5.bits",
+   "sig": "location and hours#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "location and hours",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nBRIEF: a landing page called \"Plumbing Pro\", for Customers needing plumbing services. The one action: Request a call-back. Tone: classic.\nThe sections above already have: hero: eyebrow, headline, sub-line, button; about: headline, sub-line, body text, quote, name line, small print; feature cards: headline, sub-line, list of items, button; testimonials: headline, sub-line, quote, name line, badge; sign-up or contact form: headline, sub-line, form, button. Not every section needs a button or a photo; a section can be short.\nThe \"location and hours\" section (Provide essential logistical information.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)\n(This page has no photographs.)\nA reviewer looked at the built page and said: the page already has quotes in 2 other sections. Do not choose quote or name line here.",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "headline",
+     "sub-line",
+     "body text",
+     "date and place"
+    ]
+   },
+   "tokensIn": 425,
+   "tokensOut": 38,
+   "ms": 7147,
+   "hinted": true
+  },
+  {
+   "round": 3,
+   "key": "s5.deck",
+   "sig": "location and hours#0|deck|headline,sub-line,paragraph,date and place",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "location and hours",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Customers needing plumbing services. Tone: classic.\nFacts the page must give: plumbing business; customers can ask for a call-back.\nWrite the words of the \"location and hours\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\n03_paragraph: paragraph, at most 200 characters\n04_date_and_place: date and place, at most 160 characters\nAlready on the page: \"Plumbing Pro: Trusted Local Service\", \"We offer transparent pricing and expert repairs you can rely\", \"Expert Plumbing Solutions\", \"For dependable home and commercial plumbing needs. Contact u\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Plumbing Pro: Trusted Local Service",
+    "02_sub_line": "We offer transparent pricing and expert repairs you can rely on.",
+    "03_paragraph": "Expert Plumbing Solutions for dependable home and commercial needs. Schedule your service today.",
+    "04_date_and_place": "Serving the community since 1995. Call us now for a callback."
+   },
+   "tokensIn": 235,
+   "tokensOut": 98,
+   "ms": 3554
+  },
+  {
+   "round": 4,
+   "key": "s3.look.band",
+   "sig": "testimonials#0|look.band|band,bandSurface",
+   "section": 3,
+   "sectionKind": "testimonials",
+   "forced": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 4,
+   "key": "s4.look.band",
+   "sig": "sign-up or contact form#0|look.band|band,bandSurface",
+   "section": 4,
+   "sectionKind": "sign-up or contact form",
+   "forced": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 4,
+   "key": "s5.deck",
+   "sig": "location and hours#0|deck|headline,sub-line,paragraph,date and place",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "location and hours",
+   "user": "BRIEF: \"Plumbing Pro\", a landing page for Customers needing plumbing services. Tone: classic.\nFacts the page must give: plumbing business; customers can ask for a call-back.\nWrite the words of the \"location and hours\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\n03_paragraph: paragraph, at most 200 characters\n04_date_and_place: date and place, at most 160 characters\nAlready on the page: \"Plumbing Pro: Trusted Local Service\", \"We offer transparent pricing and expert repairs you can rely\", \"Expert Plumbing Solutions\", \"For dependable home and commercial plumbing needs. Contact u\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.\nA reviewer looked at the built page and said: it repeats words used elsewhere on the page (\"Plumbing Pro: Trusted Local Service\"). Say something new.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Reliable Plumbing Services, Right Here.",
+    "02_sub_line": "Your trusted local experts are ready to assist with all your plumbing concerns today.",
+    "03_paragraph": "We are your dedicated team, committed to providing honest work and lasting solutions for your home and business. Let us handle the tough jobs.",
+    "04_date_and_place": "Serving the community since 1995. Open Monday-Friday, 8 AM to 6 PM. Call us for a callback."
+   },
+   "tokensIn": 267,
+   "tokensOut": 125,
+   "ms": 8977,
+   "hinted": true
+  }
+ ],
+ "judgements": [
+  {
+   "round": 0,
+   "key": "s0.sound",
+   "section": 0,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"hero\" (dark band). Top to bottom:\n- eyebrow: \"Reliable Plumbing\"\n- headline: \"Your Trusted Local Plumbing Experts\"\n- sub-line: \"Serving our community with dependable, professional plumbing services. Contact us today for a call-back.\"\n- button: \"Request Call-Back\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.99,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 148,
+   "ms": 6054
+  },
+  {
+   "round": 0,
+   "key": "s1.sound",
+   "section": 1,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"about\" (light band). Top to bottom:\n- headline: \"Plumbing Pro: Dependable Service You Can Trust\"\n- sub-line: \"We provide honest, high-quality plumbing solutions for every home and business in our area.\"\n- paragraph: \"For reliable plumbing, trust the hands that know the trade. We offer expert repair, installation, and maintenance with integrity and care.\"\n- quote: \"Our commitment is simple: quality workmanship and honest service, always. Contact us today for a consultation.\"\n- who said it: a name and a role: \"John Doe, Master Plumber\"\n- small print: \"Call now for a prompt call-back.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.976,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 224,
+   "ms": 1131
+  },
+  {
+   "round": 0,
+   "key": "s2.sound",
+   "section": 2,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"feature cards\" (light band). Top to bottom:\n- headline: \"Reliable Plumbing, Right When You Need It\"\n- sub-line: \"We offer prompt service and honest solutions for all your plumbing needs.\"\n- button: \"Request a Call-Back\"\n- 3 featureItems in a grid, each: icon, title, sentence or two, button:\n  1. \"Emergency Plumbing Repairs\" — \"24/7 reliable service for burst pipes, leaks, and urgent plumbing issues. We respond quickly to keep you safe.\" — \"Request Call-Back\"\n  2. \"Drain Cleaning Services\" — \"Professional equipment for clearing stubborn clogs from sinks, toilets, and main lines. Fast and effective solutions.\" — \"Request Call-Back\"\n  3. \"Water Heater Repair & Install\" — \"Expert service for all water heater problems, from simple maintenance to full unit replacement. Quality guaranteed.\" — \"Request Call-Back\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.994,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 282,
+   "ms": 1459
+  },
+  {
+   "round": 0,
+   "key": "s2.fits",
+   "section": 2,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"feature cards\" (light band). Top to bottom:\n- headline: \"Reliable Plumbing, Right When You Need It\"\n- sub-line: \"We offer prompt service and honest solutions for all your plumbing needs.\"\n- button: \"Request a Call-Back\"\n- 3 featureItems in a grid, each: icon, title, sentence or two, button:\n  1. \"Emergency Plumbing Repairs\" — \"24/7 reliable service for burst pipes, leaks, and urgent plumbing issues. We respond quickly to keep you safe.\" — \"Request Call-Back\"\n  2. \"Drain Cleaning Services\" — \"Professional equipment for clearing stubborn clogs from sinks, toilets, and main lines. Fast and effective solutions.\" — \"Request Call-Back\"\n  3. \"Water Heater Repair & Install\" — \"Expert service for all water heater problems, from simple maintenance to full unit replacement. Quality guaranteed.\" — \"Request Call-Back\"\n\nDoes the headline describe the WHOLE section, not just one item in it?",
+   "pYes": 0.996,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 266,
+   "ms": 1412
+  },
+  {
+   "round": 0,
+   "key": "s3.sound",
+   "section": 3,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"testimonials\" (light band). Top to bottom:\n- headline: \"Plumbing Pro: Trusted Local Service\"\n- sub-line: \"We offer transparent pricing and expert repairs you can rely on.\"\n- quote: \"The crew showed up quickly, solved my major issue, and left everything spotless. Excellent work!\"\n- who said it: a name and a role: \"Sarah J., Homeowner\"\n- badge: \"Serving the community with decades of proven expertise and a commitment to quality craftsmanship.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.961,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 187,
+   "ms": 966
+  },
+  {
+   "round": 0,
+   "key": "s4.sound",
+   "section": 4,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"sign-up or contact form\" (light band). Top to bottom:\n- headline: \"Expert Plumbing Solutions, Fast & Dependable\"\n- sub-line: \"For reliable plumbing services you can trust. Call us today for a free consultation.\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Get a Callback\"\n- button: \"Request Call-Back\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.758,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 196,
+   "ms": 956
+  },
+  {
+   "round": 0,
+   "key": "s5.sound",
+   "section": 5,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"location and hours\" (light band). Top to bottom:\n- eyebrow: \"Trusted Local Plumbers\"\n- headline: \"Your Trusted Home Plumbing Experts\"\n- sub-line: \"We bring classic, dependable plumbing solutions directly to your door. Quality service you can count on.\"\n- button: \"Request Call-Back\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Email\" / \"you@example.com\"\n- button: \"Send Inquiry\"\n- date and place: \"Serving the entire metro area. Available Monday - Saturday, 8 AM to 6 PM.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.965,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 231,
+   "ms": 1249
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "plumbing business",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\nEvery line of words on the page, by section:\n[hero] Reliable Plumbing / Your Trusted Local Plumbing Experts / Serving our community with dependable, professional plumbing services. Contact us today fo / Request Call-Back\n[about] Plumbing Pro: Dependable Service You Can Trust / We provide honest, high-quality plumbing solutions for every home and business in our area / For reliable plumbing, trust the hands that know the trade. We offer expert repair, instal / Our commitment is simple: quality workmanship and honest service, always. Contact us today / John Doe, Master Plumber / Call now for a prompt call-back.\n[feature cards] Reliable Plumbing, Right When You Need It / We offer prompt service and honest solutions for all your plumbing needs. / Request a Call-Back / Emergency Plumbing Repairs / 24/7 reliable service for burst pipes, leaks, and urgent plumbing issues. We respond quick / Request Call-Back / Drain Cleaning Services / Professional equipment for clearing stubborn clogs from sinks, toilets, and main lines. Fa / Request Call-Back / Water Heater Repair & Install / Expert service for all water heater problems, from simple maintenance to full unit replace / Request Call-Back\n[testimonials] Plumbing Pro: Trusted Local Service / We offer transparent pricing and expert repairs you can rely on. / The crew showed up quickly, solved my major issue, and left everything spotless. Excellent / Sarah J., Homeowner / Serving the community with decades of proven expertise and a commitment to quality craftsm\n[sign-up or contact form] Expert Plumbing Solutions, Fast & Dependable / For reliable plumbing services you can trust. Call us today for a free consultation. / Get a Callback / Request Call-Back\n[location and hours] Trusted Local Plumbers / Your Trusted Home Plumbing Experts / We bring classic, dependable plumbing solutions directly to your door. Quality service you / Request Call-Back / Send Inquiry / Serving the entire metro area. Available Monday - Saturday, 8 AM to 6 PM.\n\nDoes the page tell a visitor: plumbing business?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 469,
+   "ms": 2455
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "customers can ask for a call-back",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\nEvery line of words on the page, by section:\n[hero] Reliable Plumbing / Your Trusted Local Plumbing Experts / Serving our community with dependable, professional plumbing services. Contact us today fo / Request Call-Back\n[about] Plumbing Pro: Dependable Service You Can Trust / We provide honest, high-quality plumbing solutions for every home and business in our area / For reliable plumbing, trust the hands that know the trade. We offer expert repair, instal / Our commitment is simple: quality workmanship and honest service, always. Contact us today / John Doe, Master Plumber / Call now for a prompt call-back.\n[feature cards] Reliable Plumbing, Right When You Need It / We offer prompt service and honest solutions for all your plumbing needs. / Request a Call-Back / Emergency Plumbing Repairs / 24/7 reliable service for burst pipes, leaks, and urgent plumbing issues. We respond quick / Request Call-Back / Drain Cleaning Services / Professional equipment for clearing stubborn clogs from sinks, toilets, and main lines. Fa / Request Call-Back / Water Heater Repair & Install / Expert service for all water heater problems, from simple maintenance to full unit replace / Request Call-Back\n[testimonials] Plumbing Pro: Trusted Local Service / We offer transparent pricing and expert repairs you can rely on. / The crew showed up quickly, solved my major issue, and left everything spotless. Excellent / Sarah J., Homeowner / Serving the community with decades of proven expertise and a commitment to quality craftsm\n[sign-up or contact form] Expert Plumbing Solutions, Fast & Dependable / For reliable plumbing services you can trust. Call us today for a free consultation. / Get a Callback / Request Call-Back\n[location and hours] Trusted Local Plumbers / Your Trusted Home Plumbing Experts / We bring classic, dependable plumbing solutions directly to your door. Quality service you / Request Call-Back / Send Inquiry / Serving the entire metro area. Available Monday - Saturday, 8 AM to 6 PM.\n\nDoes the page tell a visitor: customers can ask for a call-back?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 475,
+   "ms": 2652
+  },
+  {
+   "round": 0,
+   "key": "page.contradicts",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nEvery line of words on the page, by section:\n[hero] Reliable Plumbing / Your Trusted Local Plumbing Experts / Serving our community with dependable, professional plumbing services. Contact us today fo / Request Call-Back\n[about] Plumbing Pro: Dependable Service You Can Trust / We provide honest, high-quality plumbing solutions for every home and business in our area / For reliable plumbing, trust the hands that know the trade. We offer expert repair, instal / Our commitment is simple: quality workmanship and honest service, always. Contact us today / John Doe, Master Plumber / Call now for a prompt call-back.\n[feature cards] Reliable Plumbing, Right When You Need It / We offer prompt service and honest solutions for all your plumbing needs. / Request a Call-Back / Emergency Plumbing Repairs / 24/7 reliable service for burst pipes, leaks, and urgent plumbing issues. We respond quick / Request Call-Back / Drain Cleaning Services / Professional equipment for clearing stubborn clogs from sinks, toilets, and main lines. Fa / Request Call-Back / Water Heater Repair & Install / Expert service for all water heater problems, from simple maintenance to full unit replace / Request Call-Back\n[testimonials] Plumbing Pro: Trusted Local Service / We offer transparent pricing and expert repairs you can rely on. / The crew showed up quickly, solved my major issue, and left everything spotless. Excellent / Sarah J., Homeowner / Serving the community with decades of proven expertise and a commitment to quality craftsm\n[sign-up or contact form] Expert Plumbing Solutions, Fast & Dependable / For reliable plumbing services you can trust. Call us today for a free consultation. / Get a Callback / Request Call-Back\n[location and hours] Trusted Local Plumbers / Your Trusted Home Plumbing Experts / We bring classic, dependable plumbing solutions directly to your door. Quality service you / Request Call-Back / Send Inquiry / Serving the entire metro area. Available Monday - Saturday, 8 AM to 6 PM.\n\nDoes any line say something the request contradicts, or invent a detail it would need to know (a different day, date, time, place, price, currency or name)?",
+   "pYes": 0.018,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 504,
+   "ms": 3001
+  },
+  {
+   "round": 0,
+   "key": "page.missing",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nA landing page called \"Plumbing Pro\", for Customers needing plumbing services.\nThe page's sections, top to bottom:\n1. hero: \"Your Trusted Local Plumbing Experts\"\n2. about: \"Plumbing Pro: Dependable Service You Can Trust\"\n3. feature cards: \"Reliable Plumbing, Right When You Need It\"\n4. testimonials: \"Plumbing Pro: Trusted Local Service\"\n5. sign-up or contact form: \"Expert Plumbing Solutions, Fast & Dependable\"\n6. location and hours: \"Your Trusted Home Plumbing Experts\"\n\nIs something a visitor would clearly expect on this page missing?",
+   "pYes": 0.473,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 190,
+   "ms": 1164
+  },
+  {
+   "round": 0,
+   "key": "page.extra",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nA landing page called \"Plumbing Pro\", for Customers needing plumbing services.\nThe page's sections, top to bottom:\n1. hero: \"Your Trusted Local Plumbing Experts\"\n2. about: \"Plumbing Pro: Dependable Service You Can Trust\"\n3. feature cards: \"Reliable Plumbing, Right When You Need It\"\n4. testimonials: \"Plumbing Pro: Trusted Local Service\"\n5. sign-up or contact form: \"Expert Plumbing Solutions, Fast & Dependable\"\n6. location and hours: \"Your Trusted Home Plumbing Experts\"\n\nDoes any section repeat another one, or not belong on this page?",
+   "pYes": 0.223,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 192,
+   "ms": 1165
+  },
+  {
+   "round": 0,
+   "key": "page.organised",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): eyebrow, headline, sub-line, button — Your Trusted Local Plumbing Experts\n2. about (band): headline, sub-line, body text, quote, name line, small print — Plumbing Pro: Dependable Service You Can Trust\n3. feature cards (band): headline, sub-line, list of items, button — Reliable Plumbing, Right When You Need It\n4. testimonials (band): headline, sub-line, quote, name line, badge — Plumbing Pro: Trusted Local Service\n5. sign-up or contact form (band): headline, sub-line, form, button — Expert Plumbing Solutions, Fast & Dependable\n6. location and hours (band): eyebrow, headline, sub-line, button, form, date and place — Your Trusted Home Plumbing Experts\n\nIs this page well organised: it opens by saying what it is and what to do, the sections come in a sensible order, and no part is repeated?",
+   "pYes": 0.874,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 272,
+   "ms": 1694
+  },
+  {
+   "round": 0,
+   "key": "page.suits",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): eyebrow, headline, sub-line, button — Your Trusted Local Plumbing Experts\n2. about (band): headline, sub-line, body text, quote, name line, small print — Plumbing Pro: Dependable Service You Can Trust\n3. feature cards (band): headline, sub-line, list of items, button — Reliable Plumbing, Right When You Need It\n4. testimonials (band): headline, sub-line, quote, name line, badge — Plumbing Pro: Trusted Local Service\n5. sign-up or contact form (band): headline, sub-line, form, button — Expert Plumbing Solutions, Fast & Dependable\n6. location and hours (band): eyebrow, headline, sub-line, button, form, date and place — Your Trusted Home Plumbing Experts\n\nDo the type and the parts suit this kind of page?",
+   "pYes": 0.952,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 252,
+   "ms": 1495
+  },
+  {
+   "round": 0,
+   "key": "page.shape",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): eyebrow, headline, sub-line, button\n2. about (band): headline, sub-line, body text, quote, name line, small print\n3. feature cards (band): headline, sub-line, list of items, button\n4. testimonials (band): headline, sub-line, quote, name line, badge\n5. sign-up or contact form (band): headline, sub-line, form, button\n6. location and hours (band): eyebrow, headline, sub-line, button, form, date and place\n\nIs this page well organised for this request: the first section can say what it is and what to do, the sections come in a sensible order, the parts suit each section, and no part is repeated?",
+   "pYes": 0.964,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 235,
+   "ms": 1460
+  },
+  {
+   "round": 1,
+   "key": "s0.sound",
+   "section": 0,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"hero\" (dark band). Top to bottom:\n- eyebrow: \"Reliable Plumbing\"\n- headline: \"Your Trusted Local Plumbing Experts\"\n- sub-line: \"Serving our community with dependable, professional plumbing services. Contact us today for a call-back.\"\n- button: \"Request Call-Back\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.99,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 148,
+   "ms": 6597
+  },
+  {
+   "round": 1,
+   "key": "s1.sound",
+   "section": 1,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"about\" (light band). Top to bottom:\n- headline: \"Plumbing Pro: Dependable Service You Can Trust\"\n- sub-line: \"We provide honest, high-quality plumbing solutions for every home and business in our area.\"\n- paragraph: \"For reliable plumbing, trust the hands that know the trade. We offer expert repair, installation, and maintenance with integrity and care.\"\n- quote: \"Our commitment is simple: quality workmanship and honest service, always. Contact us today for a consultation.\"\n- who said it: a name and a role: \"John Doe, Master Plumber\"\n- small print: \"Call now for a prompt call-back.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.976,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 224,
+   "ms": 1140
+  },
+  {
+   "round": 1,
+   "key": "s2.sound",
+   "section": 2,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"feature cards\" (light band). Top to bottom:\n- headline: \"Reliable Plumbing, Right When You Need It\"\n- sub-line: \"We offer prompt service and honest solutions for all your plumbing needs.\"\n- button: \"Request a Call-Back\"\n- 3 featureItems in a grid, each: icon, title, sentence or two, button:\n  1. \"Emergency Pipe Repair\" — \"Fast response for urgent plumbing issues. We fix leaks and bursts quickly.\" — \"Call Now\"\n  2. \"Drain Cleaning Service\" — \"Clear stubborn clogs with our professional drain cleaning equipment and expertise.\" — \"Get Quote\"\n  3. \"Water Heater Installation\" — \"Reliable installation and maintenance for all residential water heating systems.\" — \"Schedule Visit\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.992,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 248,
+   "ms": 1277
+  },
+  {
+   "round": 1,
+   "key": "s2.fits",
+   "section": 2,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"feature cards\" (light band). Top to bottom:\n- headline: \"Reliable Plumbing, Right When You Need It\"\n- sub-line: \"We offer prompt service and honest solutions for all your plumbing needs.\"\n- button: \"Request a Call-Back\"\n- 3 featureItems in a grid, each: icon, title, sentence or two, button:\n  1. \"Emergency Pipe Repair\" — \"Fast response for urgent plumbing issues. We fix leaks and bursts quickly.\" — \"Call Now\"\n  2. \"Drain Cleaning Service\" — \"Clear stubborn clogs with our professional drain cleaning equipment and expertise.\" — \"Get Quote\"\n  3. \"Water Heater Installation\" — \"Reliable installation and maintenance for all residential water heating systems.\" — \"Schedule Visit\"\n\nDoes the headline describe the WHOLE section, not just one item in it?",
+   "pYes": 0.995,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 232,
+   "ms": 1246
+  },
+  {
+   "round": 1,
+   "key": "s3.sound",
+   "section": 3,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"testimonials\" (light band). Top to bottom:\n- headline: \"Plumbing Pro: Trusted Local Service\"\n- sub-line: \"We offer transparent pricing and expert repairs you can rely on.\"\n- quote: \"The crew showed up quickly, solved my major issue, and left everything spotless. Excellent work!\"\n- who said it: a name and a role: \"Sarah J., Homeowner\"\n- badge: \"Serving the community with decades of proven expertise and a commitment to quality craftsmanship.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.961,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 187,
+   "ms": 967
+  },
+  {
+   "round": 1,
+   "key": "s4.sound",
+   "section": 4,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"sign-up or contact form\" (light band). Top to bottom:\n- headline: \"Expert Plumbing Solutions\"\n- sub-line: \"For dependable home and commercial plumbing needs. Contact us for a service appointment.\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Schedule a Call\"\n- button: \"Get a Callback\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.986,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 189,
+   "ms": 971
+  },
+  {
+   "round": 1,
+   "key": "s5.sound",
+   "section": 5,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"location and hours\" (light band). Top to bottom:\n- eyebrow: \"Service Area\"\n- headline: \"Plumbing Pro: Dependable Service Near You\"\n- sub-line: \"We treat every call with the care and professionalism of a true master plumber. Schedule your consultation today.\"\n- button: \"Request Call-Back\"\n- quote: \"Experience the peace of mind that comes with service you can trust. Let our seasoned professionals handle your plumbing concerns.\"\n- who said it: a name and a role: \"The Owner, Plumbing Pro\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.966,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 200,
+   "ms": 1102
+  },
+  {
+   "round": 1,
+   "key": "page.mustShow",
+   "fact": "plumbing business",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\nEvery line of words on the page, by section:\n[hero] Reliable Plumbing / Your Trusted Local Plumbing Experts / Serving our community with dependable, professional plumbing services. Contact us today fo / Request Call-Back\n[about] Plumbing Pro: Dependable Service You Can Trust / We provide honest, high-quality plumbing solutions for every home and business in our area / For reliable plumbing, trust the hands that know the trade. We offer expert repair, instal / Our commitment is simple: quality workmanship and honest service, always. Contact us today / John Doe, Master Plumber / Call now for a prompt call-back.\n[feature cards] Reliable Plumbing, Right When You Need It / We offer prompt service and honest solutions for all your plumbing needs. / Request a Call-Back / Emergency Pipe Repair / Fast response for urgent plumbing issues. We fix leaks and bursts quickly. / Call Now / Drain Cleaning Service / Clear stubborn clogs with our professional drain cleaning equipment and expertise. / Get Quote / Water Heater Installation / Reliable installation and maintenance for all residential water heating systems. / Schedule Visit\n[testimonials] Plumbing Pro: Trusted Local Service / We offer transparent pricing and expert repairs you can rely on. / The crew showed up quickly, solved my major issue, and left everything spotless. Excellent / Sarah J., Homeowner / Serving the community with decades of proven expertise and a commitment to quality craftsm\n[sign-up or contact form] Expert Plumbing Solutions / For dependable home and commercial plumbing needs. Contact us for a service appointment. / Schedule a Call / Get a Callback\n[location and hours] Service Area / Plumbing Pro: Dependable Service Near You / We treat every call with the care and professionalism of a true master plumber. Schedule y / Request Call-Back / Experience the peace of mind that comes with service you can trust. Let our seasoned profe / The Owner, Plumbing Pro\n\nDoes the page tell a visitor: plumbing business?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 443,
+   "ms": 2286
+  },
+  {
+   "round": 1,
+   "key": "page.mustShow",
+   "fact": "customers can ask for a call-back",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\nEvery line of words on the page, by section:\n[hero] Reliable Plumbing / Your Trusted Local Plumbing Experts / Serving our community with dependable, professional plumbing services. Contact us today fo / Request Call-Back\n[about] Plumbing Pro: Dependable Service You Can Trust / We provide honest, high-quality plumbing solutions for every home and business in our area / For reliable plumbing, trust the hands that know the trade. We offer expert repair, instal / Our commitment is simple: quality workmanship and honest service, always. Contact us today / John Doe, Master Plumber / Call now for a prompt call-back.\n[feature cards] Reliable Plumbing, Right When You Need It / We offer prompt service and honest solutions for all your plumbing needs. / Request a Call-Back / Emergency Pipe Repair / Fast response for urgent plumbing issues. We fix leaks and bursts quickly. / Call Now / Drain Cleaning Service / Clear stubborn clogs with our professional drain cleaning equipment and expertise. / Get Quote / Water Heater Installation / Reliable installation and maintenance for all residential water heating systems. / Schedule Visit\n[testimonials] Plumbing Pro: Trusted Local Service / We offer transparent pricing and expert repairs you can rely on. / The crew showed up quickly, solved my major issue, and left everything spotless. Excellent / Sarah J., Homeowner / Serving the community with decades of proven expertise and a commitment to quality craftsm\n[sign-up or contact form] Expert Plumbing Solutions / For dependable home and commercial plumbing needs. Contact us for a service appointment. / Schedule a Call / Get a Callback\n[location and hours] Service Area / Plumbing Pro: Dependable Service Near You / We treat every call with the care and professionalism of a true master plumber. Schedule y / Request Call-Back / Experience the peace of mind that comes with service you can trust. Let our seasoned profe / The Owner, Plumbing Pro\n\nDoes the page tell a visitor: customers can ask for a call-back?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 449,
+   "ms": 2285
+  },
+  {
+   "round": 1,
+   "key": "page.contradicts",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nEvery line of words on the page, by section:\n[hero] Reliable Plumbing / Your Trusted Local Plumbing Experts / Serving our community with dependable, professional plumbing services. Contact us today fo / Request Call-Back\n[about] Plumbing Pro: Dependable Service You Can Trust / We provide honest, high-quality plumbing solutions for every home and business in our area / For reliable plumbing, trust the hands that know the trade. We offer expert repair, instal / Our commitment is simple: quality workmanship and honest service, always. Contact us today / John Doe, Master Plumber / Call now for a prompt call-back.\n[feature cards] Reliable Plumbing, Right When You Need It / We offer prompt service and honest solutions for all your plumbing needs. / Request a Call-Back / Emergency Pipe Repair / Fast response for urgent plumbing issues. We fix leaks and bursts quickly. / Call Now / Drain Cleaning Service / Clear stubborn clogs with our professional drain cleaning equipment and expertise. / Get Quote / Water Heater Installation / Reliable installation and maintenance for all residential water heating systems. / Schedule Visit\n[testimonials] Plumbing Pro: Trusted Local Service / We offer transparent pricing and expert repairs you can rely on. / The crew showed up quickly, solved my major issue, and left everything spotless. Excellent / Sarah J., Homeowner / Serving the community with decades of proven expertise and a commitment to quality craftsm\n[sign-up or contact form] Expert Plumbing Solutions / For dependable home and commercial plumbing needs. Contact us for a service appointment. / Schedule a Call / Get a Callback\n[location and hours] Service Area / Plumbing Pro: Dependable Service Near You / We treat every call with the care and professionalism of a true master plumber. Schedule y / Request Call-Back / Experience the peace of mind that comes with service you can trust. Let our seasoned profe / The Owner, Plumbing Pro\n\nDoes any line say something the request contradicts, or invent a detail it would need to know (a different day, date, time, place, price, currency or name)?",
+   "pYes": 0.008,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 478,
+   "ms": 2498
+  },
+  {
+   "round": 1,
+   "key": "page.missing",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nA landing page called \"Plumbing Pro\", for Customers needing plumbing services.\nThe page's sections, top to bottom:\n1. hero: \"Your Trusted Local Plumbing Experts\"\n2. about: \"Plumbing Pro: Dependable Service You Can Trust\"\n3. feature cards: \"Reliable Plumbing, Right When You Need It\"\n4. testimonials: \"Plumbing Pro: Trusted Local Service\"\n5. sign-up or contact form: \"Expert Plumbing Solutions\"\n6. location and hours: \"Plumbing Pro: Dependable Service Near You\"\n\nIs something a visitor would clearly expect on this page missing?",
+   "pYes": 0.408,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 189,
+   "ms": 983
+  },
+  {
+   "round": 1,
+   "key": "page.extra",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nA landing page called \"Plumbing Pro\", for Customers needing plumbing services.\nThe page's sections, top to bottom:\n1. hero: \"Your Trusted Local Plumbing Experts\"\n2. about: \"Plumbing Pro: Dependable Service You Can Trust\"\n3. feature cards: \"Reliable Plumbing, Right When You Need It\"\n4. testimonials: \"Plumbing Pro: Trusted Local Service\"\n5. sign-up or contact form: \"Expert Plumbing Solutions\"\n6. location and hours: \"Plumbing Pro: Dependable Service Near You\"\n\nDoes any section repeat another one, or not belong on this page?",
+   "pYes": 0.108,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 191,
+   "ms": 968
+  },
+  {
+   "round": 1,
+   "key": "page.organised",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): eyebrow, headline, sub-line, button — Your Trusted Local Plumbing Experts\n2. about (band): headline, sub-line, body text, quote, name line, small print — Plumbing Pro: Dependable Service You Can Trust\n3. feature cards (band): headline, sub-line, list of items, button — Reliable Plumbing, Right When You Need It\n4. testimonials (bandSurface): headline, sub-line, quote, name line, badge — Plumbing Pro: Trusted Local Service\n5. sign-up or contact form (bandSurface): headline, sub-line, form, button — Expert Plumbing Solutions\n6. location and hours (band): eyebrow, headline, sub-line, button, quote, name line — Plumbing Pro: Dependable Service Near You\n\nIs this page well organised: it opens by saying what it is and what to do, the sections come in a sensible order, and no part is repeated?",
+   "pYes": 0.866,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 271,
+   "ms": 1430
+  },
+  {
+   "round": 1,
+   "key": "page.suits",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): eyebrow, headline, sub-line, button — Your Trusted Local Plumbing Experts\n2. about (band): headline, sub-line, body text, quote, name line, small print — Plumbing Pro: Dependable Service You Can Trust\n3. feature cards (band): headline, sub-line, list of items, button — Reliable Plumbing, Right When You Need It\n4. testimonials (bandSurface): headline, sub-line, quote, name line, badge — Plumbing Pro: Trusted Local Service\n5. sign-up or contact form (bandSurface): headline, sub-line, form, button — Expert Plumbing Solutions\n6. location and hours (band): eyebrow, headline, sub-line, button, quote, name line — Plumbing Pro: Dependable Service Near You\n\nDo the type and the parts suit this kind of page?",
+   "pYes": 0.962,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 251,
+   "ms": 1337
+  },
+  {
+   "round": 1,
+   "key": "page.shape",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): eyebrow, headline, sub-line, button\n2. about (band): headline, sub-line, body text, quote, name line, small print\n3. feature cards (band): headline, sub-line, list of items, button\n4. testimonials (bandSurface): headline, sub-line, quote, name line, badge\n5. sign-up or contact form (bandSurface): headline, sub-line, form, button\n6. location and hours (band): eyebrow, headline, sub-line, button, quote, name line\n\nIs this page well organised for this request: the first section can say what it is and what to do, the sections come in a sensible order, the parts suit each section, and no part is repeated?",
+   "pYes": 0.95,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 236,
+   "ms": 1396
+  },
+  {
+   "round": 2,
+   "key": "s0.sound",
+   "section": 0,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"hero\" (dark band). Top to bottom:\n- eyebrow: \"Reliable Plumbing\"\n- headline: \"Your Trusted Local Plumbing Experts\"\n- sub-line: \"Serving our community with dependable, professional plumbing services. Contact us today for a call-back.\"\n- button: \"Request Call-Back\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.99,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 148,
+   "ms": 6618
+  },
+  {
+   "round": 2,
+   "key": "s1.sound",
+   "section": 1,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"about\" (light band). Top to bottom:\n- headline: \"Plumbing Pro: Dependable Service You Can Trust\"\n- sub-line: \"We provide honest, high-quality plumbing solutions for every home and business in our area.\"\n- paragraph: \"For reliable plumbing, trust the hands that know the trade. We offer expert repair, installation, and maintenance with integrity and care.\"\n- quote: \"Our commitment is simple: quality workmanship and honest service, always. Contact us today for a consultation.\"\n- who said it: a name and a role: \"John Doe, Master Plumber\"\n- small print: \"Call now for a prompt call-back.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.976,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 224,
+   "ms": 1133
+  },
+  {
+   "round": 2,
+   "key": "s2.sound",
+   "section": 2,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"feature cards\" (light band). Top to bottom:\n- headline: \"Reliable Plumbing, Right When You Need It\"\n- sub-line: \"We offer prompt service and honest solutions for all your plumbing needs.\"\n- button: \"Request a Call-Back\"\n- 3 featureItems in a grid, each: icon, title, sentence or two, button:\n  1. \"Emergency Pipe Repair\" — \"Fast response for urgent plumbing issues. We fix leaks and bursts quickly.\" — \"Call Now\"\n  2. \"Drain Cleaning Service\" — \"Clear stubborn clogs with our professional drain cleaning equipment and expertise.\" — \"Get Quote\"\n  3. \"Water Heater Installation\" — \"Reliable installation and maintenance for all residential water heating systems.\" — \"Schedule Visit\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.992,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 248,
+   "ms": 1301
+  },
+  {
+   "round": 2,
+   "key": "s2.fits",
+   "section": 2,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"feature cards\" (light band). Top to bottom:\n- headline: \"Reliable Plumbing, Right When You Need It\"\n- sub-line: \"We offer prompt service and honest solutions for all your plumbing needs.\"\n- button: \"Request a Call-Back\"\n- 3 featureItems in a grid, each: icon, title, sentence or two, button:\n  1. \"Emergency Pipe Repair\" — \"Fast response for urgent plumbing issues. We fix leaks and bursts quickly.\" — \"Call Now\"\n  2. \"Drain Cleaning Service\" — \"Clear stubborn clogs with our professional drain cleaning equipment and expertise.\" — \"Get Quote\"\n  3. \"Water Heater Installation\" — \"Reliable installation and maintenance for all residential water heating systems.\" — \"Schedule Visit\"\n\nDoes the headline describe the WHOLE section, not just one item in it?",
+   "pYes": 0.995,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 232,
+   "ms": 1492
+  },
+  {
+   "round": 2,
+   "key": "s3.sound",
+   "section": 3,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"testimonials\" (light band). Top to bottom:\n- headline: \"Plumbing Pro: Trusted Local Service\"\n- sub-line: \"We offer transparent pricing and expert repairs you can rely on.\"\n- quote: \"The crew showed up quickly, solved my major issue, and left everything spotless. Excellent work!\"\n- who said it: a name and a role: \"Sarah J., Homeowner\"\n- badge: \"Serving the community with decades of proven expertise and a commitment to quality craftsmanship.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.961,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 187,
+   "ms": 1252
+  },
+  {
+   "round": 2,
+   "key": "s4.sound",
+   "section": 4,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"sign-up or contact form\" (light band). Top to bottom:\n- headline: \"Expert Plumbing Solutions\"\n- sub-line: \"For dependable home and commercial plumbing needs. Contact us for a service appointment.\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Schedule a Call\"\n- button: \"Get a Callback\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.986,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 189,
+   "ms": 1232
+  },
+  {
+   "round": 2,
+   "key": "s5.sound",
+   "section": 5,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"location and hours\" (light band). Top to bottom:\n- headline: \"Reliable Plumbing Services Near You\"\n- sub-line: \"Serving our community with integrity and skill for all your plumbing concerns.\"\n- paragraph: \"From routine maintenance to complex repairs, our dedicated team provides honest, top-tier plumbing solutions every time.\"\n- button: \"Request Call-Back\"\n- date and place: \"Monday - Friday: 8:00 AM - 5:00 PM | Saturday: 9:00 AM - 1:00 PM | Serving Metro Area\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.991,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 207,
+   "ms": 1352
+  },
+  {
+   "round": 2,
+   "key": "page.mustShow",
+   "fact": "plumbing business",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\nEvery line of words on the page, by section:\n[hero] Reliable Plumbing / Your Trusted Local Plumbing Experts / Serving our community with dependable, professional plumbing services. Contact us today fo / Request Call-Back\n[about] Plumbing Pro: Dependable Service You Can Trust / We provide honest, high-quality plumbing solutions for every home and business in our area / For reliable plumbing, trust the hands that know the trade. We offer expert repair, instal / Our commitment is simple: quality workmanship and honest service, always. Contact us today / John Doe, Master Plumber / Call now for a prompt call-back.\n[feature cards] Reliable Plumbing, Right When You Need It / We offer prompt service and honest solutions for all your plumbing needs. / Request a Call-Back / Emergency Pipe Repair / Fast response for urgent plumbing issues. We fix leaks and bursts quickly. / Call Now / Drain Cleaning Service / Clear stubborn clogs with our professional drain cleaning equipment and expertise. / Get Quote / Water Heater Installation / Reliable installation and maintenance for all residential water heating systems. / Schedule Visit\n[testimonials] Plumbing Pro: Trusted Local Service / We offer transparent pricing and expert repairs you can rely on. / The crew showed up quickly, solved my major issue, and left everything spotless. Excellent / Sarah J., Homeowner / Serving the community with decades of proven expertise and a commitment to quality craftsm\n[sign-up or contact form] Expert Plumbing Solutions / For dependable home and commercial plumbing needs. Contact us for a service appointment. / Schedule a Call / Get a Callback\n[location and hours] Reliable Plumbing Services Near You / Serving our community with integrity and skill for all your plumbing concerns. / From routine maintenance to complex repairs, our dedicated team provides honest, top-tier  / Request Call-Back / Monday - Friday: 8:00 AM - 5:00 PM | Saturday: 9:00 AM - 1:00 PM | Serving Metro Area\n\nDoes the page tell a visitor: plumbing business?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 465,
+   "ms": 2723
+  },
+  {
+   "round": 2,
+   "key": "page.mustShow",
+   "fact": "customers can ask for a call-back",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\nEvery line of words on the page, by section:\n[hero] Reliable Plumbing / Your Trusted Local Plumbing Experts / Serving our community with dependable, professional plumbing services. Contact us today fo / Request Call-Back\n[about] Plumbing Pro: Dependable Service You Can Trust / We provide honest, high-quality plumbing solutions for every home and business in our area / For reliable plumbing, trust the hands that know the trade. We offer expert repair, instal / Our commitment is simple: quality workmanship and honest service, always. Contact us today / John Doe, Master Plumber / Call now for a prompt call-back.\n[feature cards] Reliable Plumbing, Right When You Need It / We offer prompt service and honest solutions for all your plumbing needs. / Request a Call-Back / Emergency Pipe Repair / Fast response for urgent plumbing issues. We fix leaks and bursts quickly. / Call Now / Drain Cleaning Service / Clear stubborn clogs with our professional drain cleaning equipment and expertise. / Get Quote / Water Heater Installation / Reliable installation and maintenance for all residential water heating systems. / Schedule Visit\n[testimonials] Plumbing Pro: Trusted Local Service / We offer transparent pricing and expert repairs you can rely on. / The crew showed up quickly, solved my major issue, and left everything spotless. Excellent / Sarah J., Homeowner / Serving the community with decades of proven expertise and a commitment to quality craftsm\n[sign-up or contact form] Expert Plumbing Solutions / For dependable home and commercial plumbing needs. Contact us for a service appointment. / Schedule a Call / Get a Callback\n[location and hours] Reliable Plumbing Services Near You / Serving our community with integrity and skill for all your plumbing concerns. / From routine maintenance to complex repairs, our dedicated team provides honest, top-tier  / Request Call-Back / Monday - Friday: 8:00 AM - 5:00 PM | Saturday: 9:00 AM - 1:00 PM | Serving Metro Area\n\nDoes the page tell a visitor: customers can ask for a call-back?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 471,
+   "ms": 2703
+  },
+  {
+   "round": 2,
+   "key": "page.contradicts",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nEvery line of words on the page, by section:\n[hero] Reliable Plumbing / Your Trusted Local Plumbing Experts / Serving our community with dependable, professional plumbing services. Contact us today fo / Request Call-Back\n[about] Plumbing Pro: Dependable Service You Can Trust / We provide honest, high-quality plumbing solutions for every home and business in our area / For reliable plumbing, trust the hands that know the trade. We offer expert repair, instal / Our commitment is simple: quality workmanship and honest service, always. Contact us today / John Doe, Master Plumber / Call now for a prompt call-back.\n[feature cards] Reliable Plumbing, Right When You Need It / We offer prompt service and honest solutions for all your plumbing needs. / Request a Call-Back / Emergency Pipe Repair / Fast response for urgent plumbing issues. We fix leaks and bursts quickly. / Call Now / Drain Cleaning Service / Clear stubborn clogs with our professional drain cleaning equipment and expertise. / Get Quote / Water Heater Installation / Reliable installation and maintenance for all residential water heating systems. / Schedule Visit\n[testimonials] Plumbing Pro: Trusted Local Service / We offer transparent pricing and expert repairs you can rely on. / The crew showed up quickly, solved my major issue, and left everything spotless. Excellent / Sarah J., Homeowner / Serving the community with decades of proven expertise and a commitment to quality craftsm\n[sign-up or contact form] Expert Plumbing Solutions / For dependable home and commercial plumbing needs. Contact us for a service appointment. / Schedule a Call / Get a Callback\n[location and hours] Reliable Plumbing Services Near You / Serving our community with integrity and skill for all your plumbing concerns. / From routine maintenance to complex repairs, our dedicated team provides honest, top-tier  / Request Call-Back / Monday - Friday: 8:00 AM - 5:00 PM | Saturday: 9:00 AM - 1:00 PM | Serving Metro Area\n\nDoes any line say something the request contradicts, or invent a detail it would need to know (a different day, date, time, place, price, currency or name)?",
+   "pYes": 0.011,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 500,
+   "ms": 2910
+  },
+  {
+   "round": 2,
+   "key": "page.missing",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nA landing page called \"Plumbing Pro\", for Customers needing plumbing services.\nThe page's sections, top to bottom:\n1. hero: \"Your Trusted Local Plumbing Experts\"\n2. about: \"Plumbing Pro: Dependable Service You Can Trust\"\n3. feature cards: \"Reliable Plumbing, Right When You Need It\"\n4. testimonials: \"Plumbing Pro: Trusted Local Service\"\n5. sign-up or contact form: \"Expert Plumbing Solutions\"\n6. location and hours: \"Reliable Plumbing Services Near You\"\n\nIs something a visitor would clearly expect on this page missing?",
+   "pYes": 0.422,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 186,
+   "ms": 1127
+  },
+  {
+   "round": 2,
+   "key": "page.extra",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nA landing page called \"Plumbing Pro\", for Customers needing plumbing services.\nThe page's sections, top to bottom:\n1. hero: \"Your Trusted Local Plumbing Experts\"\n2. about: \"Plumbing Pro: Dependable Service You Can Trust\"\n3. feature cards: \"Reliable Plumbing, Right When You Need It\"\n4. testimonials: \"Plumbing Pro: Trusted Local Service\"\n5. sign-up or contact form: \"Expert Plumbing Solutions\"\n6. location and hours: \"Reliable Plumbing Services Near You\"\n\nDoes any section repeat another one, or not belong on this page?",
+   "pYes": 0.074,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 188,
+   "ms": 1122
+  },
+  {
+   "round": 2,
+   "key": "page.organised",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): eyebrow, headline, sub-line, button — Your Trusted Local Plumbing Experts\n2. about (band): headline, sub-line, body text, quote, name line, small print — Plumbing Pro: Dependable Service You Can Trust\n3. feature cards (band): headline, sub-line, list of items, button — Reliable Plumbing, Right When You Need It\n4. testimonials (bandSurface): headline, sub-line, quote, name line, badge — Plumbing Pro: Trusted Local Service\n5. sign-up or contact form (bandSurface): headline, sub-line, form, button — Expert Plumbing Solutions\n6. location and hours (band): headline, sub-line, body text, button, date and place — Reliable Plumbing Services Near You\n\nIs this page well organised: it opens by saying what it is and what to do, the sections come in a sensible order, and no part is repeated?",
+   "pYes": 0.925,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 268,
+   "ms": 1627
+  },
+  {
+   "round": 2,
+   "key": "page.suits",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): eyebrow, headline, sub-line, button — Your Trusted Local Plumbing Experts\n2. about (band): headline, sub-line, body text, quote, name line, small print — Plumbing Pro: Dependable Service You Can Trust\n3. feature cards (band): headline, sub-line, list of items, button — Reliable Plumbing, Right When You Need It\n4. testimonials (bandSurface): headline, sub-line, quote, name line, badge — Plumbing Pro: Trusted Local Service\n5. sign-up or contact form (bandSurface): headline, sub-line, form, button — Expert Plumbing Solutions\n6. location and hours (band): headline, sub-line, body text, button, date and place — Reliable Plumbing Services Near You\n\nDo the type and the parts suit this kind of page?",
+   "pYes": 0.959,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 248,
+   "ms": 1445
+  },
+  {
+   "round": 2,
+   "key": "page.shape",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): eyebrow, headline, sub-line, button\n2. about (band): headline, sub-line, body text, quote, name line, small print\n3. feature cards (band): headline, sub-line, list of items, button\n4. testimonials (bandSurface): headline, sub-line, quote, name line, badge\n5. sign-up or contact form (bandSurface): headline, sub-line, form, button\n6. location and hours (band): headline, sub-line, body text, button, date and place\n\nIs this page well organised for this request: the first section can say what it is and what to do, the sections come in a sensible order, the parts suit each section, and no part is repeated?",
+   "pYes": 0.958,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 236,
+   "ms": 1412
+  },
+  {
+   "round": 3,
+   "key": "s0.sound",
+   "section": 0,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"hero\" (dark band). Top to bottom:\n- eyebrow: \"Reliable Plumbing\"\n- headline: \"Your Trusted Local Plumbing Experts\"\n- sub-line: \"Serving our community with dependable, professional plumbing services. Contact us today for a call-back.\"\n- button: \"Request Call-Back\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.99,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 148,
+   "ms": 6313
+  },
+  {
+   "round": 3,
+   "key": "s1.sound",
+   "section": 1,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"about\" (light band). Top to bottom:\n- headline: \"Plumbing Pro: Dependable Service You Can Trust\"\n- sub-line: \"We provide honest, high-quality plumbing solutions for every home and business in our area.\"\n- paragraph: \"For reliable plumbing, trust the hands that know the trade. We offer expert repair, installation, and maintenance with integrity and care.\"\n- quote: \"Our commitment is simple: quality workmanship and honest service, always. Contact us today for a consultation.\"\n- who said it: a name and a role: \"John Doe, Master Plumber\"\n- small print: \"Call now for a prompt call-back.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.976,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 224,
+   "ms": 1132
+  },
+  {
+   "round": 3,
+   "key": "s2.sound",
+   "section": 2,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"feature cards\" (light band). Top to bottom:\n- headline: \"Reliable Plumbing, Right When You Need It\"\n- sub-line: \"We offer prompt service and honest solutions for all your plumbing needs.\"\n- button: \"Request a Call-Back\"\n- 3 featureItems in a grid, each: icon, title, sentence or two, button:\n  1. \"Emergency Pipe Repair\" — \"Fast response for urgent plumbing issues. We fix leaks and bursts quickly.\" — \"Call Now\"\n  2. \"Drain Cleaning Service\" — \"Clear stubborn clogs with our professional drain cleaning equipment and expertise.\" — \"Get Quote\"\n  3. \"Water Heater Installation\" — \"Reliable installation and maintenance for all residential water heating systems.\" — \"Schedule Visit\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.992,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 248,
+   "ms": 1298
+  },
+  {
+   "round": 3,
+   "key": "s2.fits",
+   "section": 2,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"feature cards\" (light band). Top to bottom:\n- headline: \"Reliable Plumbing, Right When You Need It\"\n- sub-line: \"We offer prompt service and honest solutions for all your plumbing needs.\"\n- button: \"Request a Call-Back\"\n- 3 featureItems in a grid, each: icon, title, sentence or two, button:\n  1. \"Emergency Pipe Repair\" — \"Fast response for urgent plumbing issues. We fix leaks and bursts quickly.\" — \"Call Now\"\n  2. \"Drain Cleaning Service\" — \"Clear stubborn clogs with our professional drain cleaning equipment and expertise.\" — \"Get Quote\"\n  3. \"Water Heater Installation\" — \"Reliable installation and maintenance for all residential water heating systems.\" — \"Schedule Visit\"\n\nDoes the headline describe the WHOLE section, not just one item in it?",
+   "pYes": 0.995,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 232,
+   "ms": 1347
+  },
+  {
+   "round": 3,
+   "key": "s3.sound",
+   "section": 3,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"testimonials\" (light band). Top to bottom:\n- headline: \"Plumbing Pro: Trusted Local Service\"\n- sub-line: \"We offer transparent pricing and expert repairs you can rely on.\"\n- quote: \"The crew showed up quickly, solved my major issue, and left everything spotless. Excellent work!\"\n- who said it: a name and a role: \"Sarah J., Homeowner\"\n- badge: \"Serving the community with decades of proven expertise and a commitment to quality craftsmanship.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.961,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 187,
+   "ms": 1134
+  },
+  {
+   "round": 3,
+   "key": "s4.sound",
+   "section": 4,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"sign-up or contact form\" (light band). Top to bottom:\n- headline: \"Expert Plumbing Solutions\"\n- sub-line: \"For dependable home and commercial plumbing needs. Contact us for a service appointment.\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Schedule a Call\"\n- button: \"Get a Callback\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.986,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 189,
+   "ms": 1151
+  },
+  {
+   "round": 3,
+   "key": "s5.sound",
+   "section": 5,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"location and hours\" (light band). Top to bottom:\n- headline: \"Plumbing Pro: Trusted Local Service\"\n- sub-line: \"We offer transparent pricing and expert repairs you can rely on.\"\n- paragraph: \"Expert Plumbing Solutions for dependable home and commercial needs. Schedule your service today.\"\n- date and place: \"Serving the community since 1995. Call us now for a callback.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.982,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 170,
+   "ms": 1132
+  },
+  {
+   "round": 3,
+   "key": "page.mustShow",
+   "fact": "plumbing business",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\nEvery line of words on the page, by section:\n[hero] Reliable Plumbing / Your Trusted Local Plumbing Experts / Serving our community with dependable, professional plumbing services. Contact us today fo / Request Call-Back\n[about] Plumbing Pro: Dependable Service You Can Trust / We provide honest, high-quality plumbing solutions for every home and business in our area / For reliable plumbing, trust the hands that know the trade. We offer expert repair, instal / Our commitment is simple: quality workmanship and honest service, always. Contact us today / John Doe, Master Plumber / Call now for a prompt call-back.\n[feature cards] Reliable Plumbing, Right When You Need It / We offer prompt service and honest solutions for all your plumbing needs. / Request a Call-Back / Emergency Pipe Repair / Fast response for urgent plumbing issues. We fix leaks and bursts quickly. / Call Now / Drain Cleaning Service / Clear stubborn clogs with our professional drain cleaning equipment and expertise. / Get Quote / Water Heater Installation / Reliable installation and maintenance for all residential water heating systems. / Schedule Visit\n[testimonials] Plumbing Pro: Trusted Local Service / We offer transparent pricing and expert repairs you can rely on. / The crew showed up quickly, solved my major issue, and left everything spotless. Excellent / Sarah J., Homeowner / Serving the community with decades of proven expertise and a commitment to quality craftsm\n[sign-up or contact form] Expert Plumbing Solutions / For dependable home and commercial plumbing needs. Contact us for a service appointment. / Schedule a Call / Get a Callback\n[location and hours] Plumbing Pro: Trusted Local Service / We offer transparent pricing and expert repairs you can rely on. / Expert Plumbing Solutions for dependable home and commercial needs. Schedule your service  / Serving the community since 1995. Call us now for a callback.\n\nDoes the page tell a visitor: plumbing business?",
+   "pYes": 0.999,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 437,
+   "ms": 2511
+  },
+  {
+   "round": 3,
+   "key": "page.mustShow",
+   "fact": "customers can ask for a call-back",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\nEvery line of words on the page, by section:\n[hero] Reliable Plumbing / Your Trusted Local Plumbing Experts / Serving our community with dependable, professional plumbing services. Contact us today fo / Request Call-Back\n[about] Plumbing Pro: Dependable Service You Can Trust / We provide honest, high-quality plumbing solutions for every home and business in our area / For reliable plumbing, trust the hands that know the trade. We offer expert repair, instal / Our commitment is simple: quality workmanship and honest service, always. Contact us today / John Doe, Master Plumber / Call now for a prompt call-back.\n[feature cards] Reliable Plumbing, Right When You Need It / We offer prompt service and honest solutions for all your plumbing needs. / Request a Call-Back / Emergency Pipe Repair / Fast response for urgent plumbing issues. We fix leaks and bursts quickly. / Call Now / Drain Cleaning Service / Clear stubborn clogs with our professional drain cleaning equipment and expertise. / Get Quote / Water Heater Installation / Reliable installation and maintenance for all residential water heating systems. / Schedule Visit\n[testimonials] Plumbing Pro: Trusted Local Service / We offer transparent pricing and expert repairs you can rely on. / The crew showed up quickly, solved my major issue, and left everything spotless. Excellent / Sarah J., Homeowner / Serving the community with decades of proven expertise and a commitment to quality craftsm\n[sign-up or contact form] Expert Plumbing Solutions / For dependable home and commercial plumbing needs. Contact us for a service appointment. / Schedule a Call / Get a Callback\n[location and hours] Plumbing Pro: Trusted Local Service / We offer transparent pricing and expert repairs you can rely on. / Expert Plumbing Solutions for dependable home and commercial needs. Schedule your service  / Serving the community since 1995. Call us now for a callback.\n\nDoes the page tell a visitor: customers can ask for a call-back?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 443,
+   "ms": 2482
+  },
+  {
+   "round": 3,
+   "key": "page.contradicts",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nEvery line of words on the page, by section:\n[hero] Reliable Plumbing / Your Trusted Local Plumbing Experts / Serving our community with dependable, professional plumbing services. Contact us today fo / Request Call-Back\n[about] Plumbing Pro: Dependable Service You Can Trust / We provide honest, high-quality plumbing solutions for every home and business in our area / For reliable plumbing, trust the hands that know the trade. We offer expert repair, instal / Our commitment is simple: quality workmanship and honest service, always. Contact us today / John Doe, Master Plumber / Call now for a prompt call-back.\n[feature cards] Reliable Plumbing, Right When You Need It / We offer prompt service and honest solutions for all your plumbing needs. / Request a Call-Back / Emergency Pipe Repair / Fast response for urgent plumbing issues. We fix leaks and bursts quickly. / Call Now / Drain Cleaning Service / Clear stubborn clogs with our professional drain cleaning equipment and expertise. / Get Quote / Water Heater Installation / Reliable installation and maintenance for all residential water heating systems. / Schedule Visit\n[testimonials] Plumbing Pro: Trusted Local Service / We offer transparent pricing and expert repairs you can rely on. / The crew showed up quickly, solved my major issue, and left everything spotless. Excellent / Sarah J., Homeowner / Serving the community with decades of proven expertise and a commitment to quality craftsm\n[sign-up or contact form] Expert Plumbing Solutions / For dependable home and commercial plumbing needs. Contact us for a service appointment. / Schedule a Call / Get a Callback\n[location and hours] Plumbing Pro: Trusted Local Service / We offer transparent pricing and expert repairs you can rely on. / Expert Plumbing Solutions for dependable home and commercial needs. Schedule your service  / Serving the community since 1995. Call us now for a callback.\n\nDoes any line say something the request contradicts, or invent a detail it would need to know (a different day, date, time, place, price, currency or name)?",
+   "pYes": 0.013,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 472,
+   "ms": 2635
+  },
+  {
+   "round": 3,
+   "key": "page.missing",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nA landing page called \"Plumbing Pro\", for Customers needing plumbing services.\nThe page's sections, top to bottom:\n1. hero: \"Your Trusted Local Plumbing Experts\"\n2. about: \"Plumbing Pro: Dependable Service You Can Trust\"\n3. feature cards: \"Reliable Plumbing, Right When You Need It\"\n4. testimonials: \"Plumbing Pro: Trusted Local Service\"\n5. sign-up or contact form: \"Expert Plumbing Solutions\"\n6. location and hours: \"Plumbing Pro: Trusted Local Service\"\n\nIs something a visitor would clearly expect on this page missing?",
+   "pYes": 0.496,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 187,
+   "ms": 1068
+  },
+  {
+   "round": 3,
+   "key": "page.extra",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nA landing page called \"Plumbing Pro\", for Customers needing plumbing services.\nThe page's sections, top to bottom:\n1. hero: \"Your Trusted Local Plumbing Experts\"\n2. about: \"Plumbing Pro: Dependable Service You Can Trust\"\n3. feature cards: \"Reliable Plumbing, Right When You Need It\"\n4. testimonials: \"Plumbing Pro: Trusted Local Service\"\n5. sign-up or contact form: \"Expert Plumbing Solutions\"\n6. location and hours: \"Plumbing Pro: Trusted Local Service\"\n\nDoes any section repeat another one, or not belong on this page?",
+   "pYes": 0.403,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 189,
+   "ms": 1062
+  },
+  {
+   "round": 3,
+   "key": "page.organised",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): eyebrow, headline, sub-line, button — Your Trusted Local Plumbing Experts\n2. about (band): headline, sub-line, body text, quote, name line, small print — Plumbing Pro: Dependable Service You Can Trust\n3. feature cards (band): headline, sub-line, list of items, button — Reliable Plumbing, Right When You Need It\n4. testimonials (bandSurface): headline, sub-line, quote, name line, badge — Plumbing Pro: Trusted Local Service\n5. sign-up or contact form (bandSurface): headline, sub-line, form, button — Expert Plumbing Solutions\n6. location and hours (band): headline, sub-line, body text, date and place — Plumbing Pro: Trusted Local Service\n\nIs this page well organised: it opens by saying what it is and what to do, the sections come in a sensible order, and no part is repeated?",
+   "pYes": 0.791,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 267,
+   "ms": 1548
+  },
+  {
+   "round": 3,
+   "key": "page.suits",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): eyebrow, headline, sub-line, button — Your Trusted Local Plumbing Experts\n2. about (band): headline, sub-line, body text, quote, name line, small print — Plumbing Pro: Dependable Service You Can Trust\n3. feature cards (band): headline, sub-line, list of items, button — Reliable Plumbing, Right When You Need It\n4. testimonials (bandSurface): headline, sub-line, quote, name line, badge — Plumbing Pro: Trusted Local Service\n5. sign-up or contact form (bandSurface): headline, sub-line, form, button — Expert Plumbing Solutions\n6. location and hours (band): headline, sub-line, body text, date and place — Plumbing Pro: Trusted Local Service\n\nDo the type and the parts suit this kind of page?",
+   "pYes": 0.937,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 247,
+   "ms": 1379
+  },
+  {
+   "round": 3,
+   "key": "page.shape",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): eyebrow, headline, sub-line, button\n2. about (band): headline, sub-line, body text, quote, name line, small print\n3. feature cards (band): headline, sub-line, list of items, button\n4. testimonials (bandSurface): headline, sub-line, quote, name line, badge\n5. sign-up or contact form (bandSurface): headline, sub-line, form, button\n6. location and hours (band): headline, sub-line, body text, date and place\n\nIs this page well organised for this request: the first section can say what it is and what to do, the sections come in a sensible order, the parts suit each section, and no part is repeated?",
+   "pYes": 0.955,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 234,
+   "ms": 1356
+  },
+  {
+   "round": 4,
+   "key": "s0.sound",
+   "section": 0,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"hero\" (dark band). Top to bottom:\n- eyebrow: \"Reliable Plumbing\"\n- headline: \"Your Trusted Local Plumbing Experts\"\n- sub-line: \"Serving our community with dependable, professional plumbing services. Contact us today for a call-back.\"\n- button: \"Request Call-Back\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.99,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 148,
+   "ms": 6583
+  },
+  {
+   "round": 4,
+   "key": "s1.sound",
+   "section": 1,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"about\" (light band). Top to bottom:\n- headline: \"Plumbing Pro: Dependable Service You Can Trust\"\n- sub-line: \"We provide honest, high-quality plumbing solutions for every home and business in our area.\"\n- paragraph: \"For reliable plumbing, trust the hands that know the trade. We offer expert repair, installation, and maintenance with integrity and care.\"\n- quote: \"Our commitment is simple: quality workmanship and honest service, always. Contact us today for a consultation.\"\n- who said it: a name and a role: \"John Doe, Master Plumber\"\n- small print: \"Call now for a prompt call-back.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.976,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 224,
+   "ms": 1133
+  },
+  {
+   "round": 4,
+   "key": "s2.sound",
+   "section": 2,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"feature cards\" (light band). Top to bottom:\n- headline: \"Reliable Plumbing, Right When You Need It\"\n- sub-line: \"We offer prompt service and honest solutions for all your plumbing needs.\"\n- button: \"Request a Call-Back\"\n- 3 featureItems in a grid, each: icon, title, sentence or two, button:\n  1. \"Emergency Pipe Repair\" — \"Fast response for urgent plumbing issues. We fix leaks and bursts quickly.\" — \"Call Now\"\n  2. \"Drain Cleaning Service\" — \"Clear stubborn clogs with our professional drain cleaning equipment and expertise.\" — \"Get Quote\"\n  3. \"Water Heater Installation\" — \"Reliable installation and maintenance for all residential water heating systems.\" — \"Schedule Visit\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.992,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 248,
+   "ms": 1277
+  },
+  {
+   "round": 4,
+   "key": "s2.fits",
+   "section": 2,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"feature cards\" (light band). Top to bottom:\n- headline: \"Reliable Plumbing, Right When You Need It\"\n- sub-line: \"We offer prompt service and honest solutions for all your plumbing needs.\"\n- button: \"Request a Call-Back\"\n- 3 featureItems in a grid, each: icon, title, sentence or two, button:\n  1. \"Emergency Pipe Repair\" — \"Fast response for urgent plumbing issues. We fix leaks and bursts quickly.\" — \"Call Now\"\n  2. \"Drain Cleaning Service\" — \"Clear stubborn clogs with our professional drain cleaning equipment and expertise.\" — \"Get Quote\"\n  3. \"Water Heater Installation\" — \"Reliable installation and maintenance for all residential water heating systems.\" — \"Schedule Visit\"\n\nDoes the headline describe the WHOLE section, not just one item in it?",
+   "pYes": 0.995,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 232,
+   "ms": 1248
+  },
+  {
+   "round": 4,
+   "key": "s3.sound",
+   "section": 3,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"testimonials\" (light band). Top to bottom:\n- headline: \"Plumbing Pro: Trusted Local Service\"\n- sub-line: \"We offer transparent pricing and expert repairs you can rely on.\"\n- quote: \"The crew showed up quickly, solved my major issue, and left everything spotless. Excellent work!\"\n- who said it: a name and a role: \"Sarah J., Homeowner\"\n- badge: \"Serving the community with decades of proven expertise and a commitment to quality craftsmanship.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.961,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 187,
+   "ms": 1035
+  },
+  {
+   "round": 4,
+   "key": "s4.sound",
+   "section": 4,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"sign-up or contact form\" (light band). Top to bottom:\n- headline: \"Expert Plumbing Solutions\"\n- sub-line: \"For dependable home and commercial plumbing needs. Contact us for a service appointment.\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Schedule a Call\"\n- button: \"Get a Callback\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.986,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 189,
+   "ms": 1069
+  },
+  {
+   "round": 4,
+   "key": "s5.sound",
+   "section": 5,
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\n\nSection \"location and hours\" (light band). Top to bottom:\n- headline: \"Reliable Plumbing Services, Right Here.\"\n- sub-line: \"Your trusted local experts are ready to assist with all your plumbing concerns today.\"\n- paragraph: \"We are your dedicated team, committed to providing honest work and lasting solutions for your home and business. Let us handle the tough jobs.\"\n- date and place: \"Serving the community since 1995. Open Monday-Friday, 8 AM to 6 PM. Call us for a callback.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.989,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 197,
+   "ms": 1218
+  },
+  {
+   "round": 4,
+   "key": "page.mustShow",
+   "fact": "plumbing business",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\nEvery line of words on the page, by section:\n[hero] Reliable Plumbing / Your Trusted Local Plumbing Experts / Serving our community with dependable, professional plumbing services. Contact us today fo / Request Call-Back\n[about] Plumbing Pro: Dependable Service You Can Trust / We provide honest, high-quality plumbing solutions for every home and business in our area / For reliable plumbing, trust the hands that know the trade. We offer expert repair, instal / Our commitment is simple: quality workmanship and honest service, always. Contact us today / John Doe, Master Plumber / Call now for a prompt call-back.\n[feature cards] Reliable Plumbing, Right When You Need It / We offer prompt service and honest solutions for all your plumbing needs. / Request a Call-Back / Emergency Pipe Repair / Fast response for urgent plumbing issues. We fix leaks and bursts quickly. / Call Now / Drain Cleaning Service / Clear stubborn clogs with our professional drain cleaning equipment and expertise. / Get Quote / Water Heater Installation / Reliable installation and maintenance for all residential water heating systems. / Schedule Visit\n[testimonials] Plumbing Pro: Trusted Local Service / We offer transparent pricing and expert repairs you can rely on. / The crew showed up quickly, solved my major issue, and left everything spotless. Excellent / Sarah J., Homeowner / Serving the community with decades of proven expertise and a commitment to quality craftsm\n[sign-up or contact form] Expert Plumbing Solutions / For dependable home and commercial plumbing needs. Contact us for a service appointment. / Schedule a Call / Get a Callback\n[location and hours] Reliable Plumbing Services, Right Here. / Your trusted local experts are ready to assist with all your plumbing concerns today. / We are your dedicated team, committed to providing honest work and lasting solutions for y / Serving the community since 1995. Open Monday-Friday, 8 AM to 6 PM. Call us for a callback\n\nDoes the page tell a visitor: plumbing business?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 454,
+   "ms": 2549
+  },
+  {
+   "round": 4,
+   "key": "page.mustShow",
+   "fact": "customers can ask for a call-back",
+   "user": "A landing page called \"Plumbing Pro\", for Customers needing plumbing services.\nEvery line of words on the page, by section:\n[hero] Reliable Plumbing / Your Trusted Local Plumbing Experts / Serving our community with dependable, professional plumbing services. Contact us today fo / Request Call-Back\n[about] Plumbing Pro: Dependable Service You Can Trust / We provide honest, high-quality plumbing solutions for every home and business in our area / For reliable plumbing, trust the hands that know the trade. We offer expert repair, instal / Our commitment is simple: quality workmanship and honest service, always. Contact us today / John Doe, Master Plumber / Call now for a prompt call-back.\n[feature cards] Reliable Plumbing, Right When You Need It / We offer prompt service and honest solutions for all your plumbing needs. / Request a Call-Back / Emergency Pipe Repair / Fast response for urgent plumbing issues. We fix leaks and bursts quickly. / Call Now / Drain Cleaning Service / Clear stubborn clogs with our professional drain cleaning equipment and expertise. / Get Quote / Water Heater Installation / Reliable installation and maintenance for all residential water heating systems. / Schedule Visit\n[testimonials] Plumbing Pro: Trusted Local Service / We offer transparent pricing and expert repairs you can rely on. / The crew showed up quickly, solved my major issue, and left everything spotless. Excellent / Sarah J., Homeowner / Serving the community with decades of proven expertise and a commitment to quality craftsm\n[sign-up or contact form] Expert Plumbing Solutions / For dependable home and commercial plumbing needs. Contact us for a service appointment. / Schedule a Call / Get a Callback\n[location and hours] Reliable Plumbing Services, Right Here. / Your trusted local experts are ready to assist with all your plumbing concerns today. / We are your dedicated team, committed to providing honest work and lasting solutions for y / Serving the community since 1995. Open Monday-Friday, 8 AM to 6 PM. Call us for a callback\n\nDoes the page tell a visitor: customers can ask for a call-back?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 460,
+   "ms": 2561
+  },
+  {
+   "round": 4,
+   "key": "page.contradicts",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nEvery line of words on the page, by section:\n[hero] Reliable Plumbing / Your Trusted Local Plumbing Experts / Serving our community with dependable, professional plumbing services. Contact us today fo / Request Call-Back\n[about] Plumbing Pro: Dependable Service You Can Trust / We provide honest, high-quality plumbing solutions for every home and business in our area / For reliable plumbing, trust the hands that know the trade. We offer expert repair, instal / Our commitment is simple: quality workmanship and honest service, always. Contact us today / John Doe, Master Plumber / Call now for a prompt call-back.\n[feature cards] Reliable Plumbing, Right When You Need It / We offer prompt service and honest solutions for all your plumbing needs. / Request a Call-Back / Emergency Pipe Repair / Fast response for urgent plumbing issues. We fix leaks and bursts quickly. / Call Now / Drain Cleaning Service / Clear stubborn clogs with our professional drain cleaning equipment and expertise. / Get Quote / Water Heater Installation / Reliable installation and maintenance for all residential water heating systems. / Schedule Visit\n[testimonials] Plumbing Pro: Trusted Local Service / We offer transparent pricing and expert repairs you can rely on. / The crew showed up quickly, solved my major issue, and left everything spotless. Excellent / Sarah J., Homeowner / Serving the community with decades of proven expertise and a commitment to quality craftsm\n[sign-up or contact form] Expert Plumbing Solutions / For dependable home and commercial plumbing needs. Contact us for a service appointment. / Schedule a Call / Get a Callback\n[location and hours] Reliable Plumbing Services, Right Here. / Your trusted local experts are ready to assist with all your plumbing concerns today. / We are your dedicated team, committed to providing honest work and lasting solutions for y / Serving the community since 1995. Open Monday-Friday, 8 AM to 6 PM. Call us for a callback\n\nDoes any line say something the request contradicts, or invent a detail it would need to know (a different day, date, time, place, price, currency or name)?",
+   "pYes": 0.022,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 489,
+   "ms": 2734
+  },
+  {
+   "round": 4,
+   "key": "page.missing",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nA landing page called \"Plumbing Pro\", for Customers needing plumbing services.\nThe page's sections, top to bottom:\n1. hero: \"Your Trusted Local Plumbing Experts\"\n2. about: \"Plumbing Pro: Dependable Service You Can Trust\"\n3. feature cards: \"Reliable Plumbing, Right When You Need It\"\n4. testimonials: \"Plumbing Pro: Trusted Local Service\"\n5. sign-up or contact form: \"Expert Plumbing Solutions\"\n6. location and hours: \"Reliable Plumbing Services, Right Here.\"\n\nIs something a visitor would clearly expect on this page missing?",
+   "pYes": 0.468,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 187,
+   "ms": 1058
+  },
+  {
+   "round": 4,
+   "key": "page.extra",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nA landing page called \"Plumbing Pro\", for Customers needing plumbing services.\nThe page's sections, top to bottom:\n1. hero: \"Your Trusted Local Plumbing Experts\"\n2. about: \"Plumbing Pro: Dependable Service You Can Trust\"\n3. feature cards: \"Reliable Plumbing, Right When You Need It\"\n4. testimonials: \"Plumbing Pro: Trusted Local Service\"\n5. sign-up or contact form: \"Expert Plumbing Solutions\"\n6. location and hours: \"Reliable Plumbing Services, Right Here.\"\n\nDoes any section repeat another one, or not belong on this page?",
+   "pYes": 0.115,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 189,
+   "ms": 1056
+  },
+  {
+   "round": 4,
+   "key": "page.organised",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): eyebrow, headline, sub-line, button — Your Trusted Local Plumbing Experts\n2. about (band): headline, sub-line, body text, quote, name line, small print — Plumbing Pro: Dependable Service You Can Trust\n3. feature cards (band): headline, sub-line, list of items, button — Reliable Plumbing, Right When You Need It\n4. testimonials (bandSurface): headline, sub-line, quote, name line, badge — Plumbing Pro: Trusted Local Service\n5. sign-up or contact form (bandSurface): headline, sub-line, form, button — Expert Plumbing Solutions\n6. location and hours (band): headline, sub-line, body text, date and place — Reliable Plumbing Services, Right Here.\n\nIs this page well organised: it opens by saying what it is and what to do, the sections come in a sensible order, and no part is repeated?",
+   "pYes": 0.888,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 268,
+   "ms": 1522
+  },
+  {
+   "round": 4,
+   "key": "page.suits",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): eyebrow, headline, sub-line, button — Your Trusted Local Plumbing Experts\n2. about (band): headline, sub-line, body text, quote, name line, small print — Plumbing Pro: Dependable Service You Can Trust\n3. feature cards (band): headline, sub-line, list of items, button — Reliable Plumbing, Right When You Need It\n4. testimonials (bandSurface): headline, sub-line, quote, name line, badge — Plumbing Pro: Trusted Local Service\n5. sign-up or contact form (bandSurface): headline, sub-line, form, button — Expert Plumbing Solutions\n6. location and hours (band): headline, sub-line, body text, date and place — Reliable Plumbing Services, Right Here.\n\nDo the type and the parts suit this kind of page?",
+   "pYes": 0.953,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 248,
+   "ms": 1361
+  },
+  {
+   "round": 4,
+   "key": "page.shape",
+   "user": "Request: \"A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): eyebrow, headline, sub-line, button\n2. about (band): headline, sub-line, body text, quote, name line, small print\n3. feature cards (band): headline, sub-line, list of items, button\n4. testimonials (bandSurface): headline, sub-line, quote, name line, badge\n5. sign-up or contact form (bandSurface): headline, sub-line, form, button\n6. location and hours (band): headline, sub-line, body text, date and place\n\nIs this page well organised for this request: the first section can say what it is and what to do, the sections come in a sensible order, the parts suit each section, and no part is repeated?",
+   "pYes": 0.955,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 234,
+   "ms": 1339
+  }
+ ],
+ "skipped": [
+  {
+   "key": "card.hue",
+   "why": "S0: the request says it (blue)"
+  },
+  {
+   "key": "card.tone",
+   "why": "S0: the request says it (classic)"
+  },
+  {
+   "key": "card.mustShow",
+   "why": "S0: dropped facts about the look: Trustworthy; blue"
+  },
+  {
+   "key": "card.hue",
+   "why": "S0: the request says it (blue)"
+  },
+  {
+   "key": "card.tone",
+   "why": "S0: the request says it (classic)"
+  },
+  {
+   "key": "card.mustShow",
+   "why": "S0: dropped facts about the look: Trustworthy; blue"
+  },
+  {
+   "key": "card.hue",
+   "why": "S0: the request says it (blue)"
+  },
+  {
+   "key": "card.tone",
+   "why": "S0: the request says it (classic)"
+  },
+  {
+   "key": "card.mustShow",
+   "why": "S0: dropped facts about the look: Trustworthy; blue"
+  },
+  {
+   "key": "card.hue",
+   "why": "S0: the request says it (blue)"
+  },
+  {
+   "key": "card.tone",
+   "why": "S0: the request says it (classic)"
+  },
+  {
+   "key": "card.mustShow",
+   "why": "S0: dropped facts about the look: Trustworthy; blue"
+  },
+  {
+   "key": "card.hue",
+   "why": "S0: the request says it (blue)"
+  },
+  {
+   "key": "card.tone",
+   "why": "S0: the request says it (classic)"
+  },
+  {
+   "key": "card.mustShow",
+   "why": "S0: dropped facts about the look: Trustworthy; blue"
+  }
+ ],
+ "mcp": [
+  {
+   "round": 0,
+   "tool": "create_project",
+   "isError": false,
+   "ms": 256
+  },
+  {
+   "round": 0,
+   "tool": "get_style_vocabulary",
+   "isError": false,
+   "ms": 6
+  },
+  {
+   "round": 0,
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 1
+  },
+  {
+   "round": 0,
+   "tool": "set_style_preset",
+   "isError": false,
+   "ms": 2
+  },
+  {
+   "round": 0,
+   "tool": "set_project_tokens",
+   "isError": false,
+   "ms": 2
+  },
+  {
+   "round": 0,
+   "tool": "list_node_types",
+   "isError": false,
+   "ms": 1
+  },
+  {
+   "round": 0,
+   "tool": "get_component",
+   "isError": false,
+   "ms": 5
+  },
+  {
+   "round": 0,
+   "tool": "create_plan",
+   "isError": false,
+   "ms": 4
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 63
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 22
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 28
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 23
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 22
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 28
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 26
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 26
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 21
+  },
+  {
+   "round": 0,
+   "tool": "apply_plan",
+   "isError": false,
+   "ms": 2047
+  },
+  {
+   "round": 0,
+   "tool": "render_report",
+   "isError": false,
+   "ms": 1511
+  },
+  {
+   "round": 1,
+   "tool": "create_project",
+   "isError": false,
+   "ms": 231
+  },
+  {
+   "round": 1,
+   "tool": "get_style_vocabulary",
+   "isError": false,
+   "ms": 5
+  },
+  {
+   "round": 1,
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 2
+  },
+  {
+   "round": 1,
+   "tool": "set_style_preset",
+   "isError": false,
+   "ms": 4
+  },
+  {
+   "round": 1,
+   "tool": "set_project_tokens",
+   "isError": false,
+   "ms": 2
+  },
+  {
+   "round": 1,
+   "tool": "list_node_types",
+   "isError": false,
+   "ms": 1
+  },
+  {
+   "round": 1,
+   "tool": "get_component",
+   "isError": false,
+   "ms": 7
+  },
+  {
+   "round": 1,
+   "tool": "create_plan",
+   "isError": false,
+   "ms": 4
+  },
+  {
+   "round": 1,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 65
+  },
+  {
+   "round": 1,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 22
+  },
+  {
+   "round": 1,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 1,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 25
+  },
+  {
+   "round": 1,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 21
+  },
+  {
+   "round": 1,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 1,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 20
+  },
+  {
+   "round": 1,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 21
+  },
+  {
+   "round": 1,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 21
+  },
+  {
+   "round": 1,
+   "tool": "apply_plan",
+   "isError": false,
+   "ms": 2819
+  },
+  {
+   "round": 1,
+   "tool": "render_report",
+   "isError": false,
+   "ms": 1579
+  },
+  {
+   "round": 2,
+   "tool": "create_project",
+   "isError": false,
+   "ms": 231
+  },
+  {
+   "round": 2,
+   "tool": "get_style_vocabulary",
+   "isError": false,
+   "ms": 6
+  },
+  {
+   "round": 2,
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 3
+  },
+  {
+   "round": 2,
+   "tool": "set_style_preset",
+   "isError": false,
+   "ms": 3
+  },
+  {
+   "round": 2,
+   "tool": "set_project_tokens",
+   "isError": false,
+   "ms": 2
+  },
+  {
+   "round": 2,
+   "tool": "list_node_types",
+   "isError": false,
+   "ms": 2
+  },
+  {
+   "round": 2,
+   "tool": "get_component",
+   "isError": false,
+   "ms": 10
+  },
+  {
+   "round": 2,
+   "tool": "create_plan",
+   "isError": false,
+   "ms": 4
+  },
+  {
+   "round": 2,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 63
+  },
+  {
+   "round": 2,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 22
+  },
+  {
+   "round": 2,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 2,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 26
+  },
+  {
+   "round": 2,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 21
+  },
+  {
+   "round": 2,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 2,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 21
+  },
+  {
+   "round": 2,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 21
+  },
+  {
+   "round": 2,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 22
+  },
+  {
+   "round": 2,
+   "tool": "apply_plan",
+   "isError": false,
+   "ms": 2515
+  },
+  {
+   "round": 2,
+   "tool": "render_report",
+   "isError": false,
+   "ms": 1546
+  },
+  {
+   "round": 3,
+   "tool": "create_project",
+   "isError": false,
+   "ms": 227
+  },
+  {
+   "round": 3,
+   "tool": "get_style_vocabulary",
+   "isError": false,
+   "ms": 5
+  },
+  {
+   "round": 3,
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 2
+  },
+  {
+   "round": 3,
+   "tool": "set_style_preset",
+   "isError": false,
+   "ms": 4
+  },
+  {
+   "round": 3,
+   "tool": "set_project_tokens",
+   "isError": false,
+   "ms": 2
+  },
+  {
+   "round": 3,
+   "tool": "list_node_types",
+   "isError": false,
+   "ms": 1
+  },
+  {
+   "round": 3,
+   "tool": "get_component",
+   "isError": false,
+   "ms": 10
+  },
+  {
+   "round": 3,
+   "tool": "create_plan",
+   "isError": false,
+   "ms": 5
+  },
+  {
+   "round": 3,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 61
+  },
+  {
+   "round": 3,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 22
+  },
+  {
+   "round": 3,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 3,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 24
+  },
+  {
+   "round": 3,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 20
+  },
+  {
+   "round": 3,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 3,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 3,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 3,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 3,
+   "tool": "apply_plan",
+   "isError": false,
+   "ms": 2197
+  },
+  {
+   "round": 3,
+   "tool": "render_report",
+   "isError": false,
+   "ms": 1574
+  },
+  {
+   "round": 4,
+   "tool": "create_project",
+   "isError": false,
+   "ms": 222
+  },
+  {
+   "round": 4,
+   "tool": "get_style_vocabulary",
+   "isError": false,
+   "ms": 6
+  },
+  {
+   "round": 4,
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 3
+  },
+  {
+   "round": 4,
+   "tool": "set_style_preset",
+   "isError": false,
+   "ms": 2
+  },
+  {
+   "round": 4,
+   "tool": "set_project_tokens",
+   "isError": false,
+   "ms": 1
+  },
+  {
+   "round": 4,
+   "tool": "list_node_types",
+   "isError": false,
+   "ms": 1
+  },
+  {
+   "round": 4,
+   "tool": "get_component",
+   "isError": false,
+   "ms": 5
+  },
+  {
+   "round": 4,
+   "tool": "create_plan",
+   "isError": false,
+   "ms": 5
+  },
+  {
+   "round": 4,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 61
+  },
+  {
+   "round": 4,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 21
+  },
+  {
+   "round": 4,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 4,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 24
+  },
+  {
+   "round": 4,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 20
+  },
+  {
+   "round": 4,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 4,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 20
+  },
+  {
+   "round": 4,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 17
+  },
+  {
+   "round": 4,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 4,
+   "tool": "apply_plan",
+   "isError": false,
+   "ms": 2189
+  },
+  {
+   "round": 4,
+   "tool": "render_report",
+   "isError": false,
+   "ms": 1526
+  }
+ ],
+ "roundsLog": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-G-plumber-r0",
+   "score": 0.595,
+   "sum": 23.2,
+   "defects": 22,
+   "lines": 37,
+   "perLine": 0.595,
+   "org": 0.874,
+   "shape": 0.964,
+   "suits": 0.952,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.99
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.976
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.994,
+     "pFit": 0.996
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "headline",
+      "sub-line",
+      "quote",
+      "name line",
+      "badge"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.961
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.758
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "form",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.965
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|feature cards#0|list.rows|3|title,sentence,button",
+     "weight": 2,
+     "say": "\"Request Call-Back\" repeats \"Request Call-Back\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|sign-up or contact form#0|deck|headline,sub-line,form button,button",
+     "weight": 2,
+     "say": "\"Request Call-Back\" repeats \"Request Call-Back\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|location and hours#0|deck|eyebrow,headline,sub-line,button,form button,date and place",
+     "weight": 2,
+     "say": "\"Request Call-Back\" repeats \"Request Call-Back\"",
+     "op": "reword"
+    },
+    {
+     "id": "S10|form|location and hours#0",
+     "weight": 4,
+     "say": "a second form (already in \"sign-up or contact form\")",
+     "op": "reask"
+    },
+    {
+     "id": "S12|testimonials#0|look.band|band,bandSurface",
+     "weight": 2,
+     "say": "four \"band\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S12|sign-up or contact form#0|look.band|band,bandSurface",
+     "weight": 2,
+     "say": "four \"band\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "R|single-ground|page",
+     "weight": 4,
+     "say": "render: single-ground"
+    },
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    },
+    {
+     "id": "Q|org",
+     "weight": 1.01,
+     "say": "reviewer: organised p=0.874"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.19,
+     "say": "reviewer: type and parts suit p=0.952"
+    }
+   ],
+   "findings": [
+    "single-ground",
+    "minimum-layout-width"
+   ],
+   "modelCalls": 7,
+   "judgements": 15,
+   "words": [
+    "Section \"hero\" (dark band). Top to bottom:\n- eyebrow: \"Reliable Plumbing\"\n- headline: \"Your Trusted Local Plumbing Experts\"\n- sub-line: \"Serving our community with dependable, professional plumbing services. Contact us today for a call-back.\"\n- button: \"Request Call-Back\"",
+    "Section \"about\" (light band). Top to bottom:\n- headline: \"Plumbing Pro: Dependable Service You Can Trust\"\n- sub-line: \"We provide honest, high-quality plumbing solutions for every home and business in our area.\"\n- paragraph: \"For reliable plumbing, trust the hands that know the trade. We offer expert repair, installation, and maintenance with integrity and care.\"\n- quote: \"Our commitment is simple: quality workmanship and honest service, always. Contact us today for a consultation.\"\n- who said it: a name and a role: \"John Doe, Master Plumber\"\n- small print: \"Call now for a prompt call-back.\"",
+    "Section \"feature cards\" (light band). Top to bottom:\n- headline: \"Reliable Plumbing, Right When You Need It\"\n- sub-line: \"We offer prompt service and honest solutions for all your plumbing needs.\"\n- button: \"Request a Call-Back\"\n- 3 featureItems in a grid, each: icon, title, sentence or two, button:\n  1. \"Emergency Plumbing Repairs\" — \"24/7 reliable service for burst pipes, leaks, and urgent plumbing issues. We respond quickly to keep you safe.\" — \"Request Call-Back\"\n  2. \"Drain Cleaning Services\" — \"Professional equipment for clearing stubborn clogs from sinks, toilets, and main lines. Fast and effective solutions.\" — \"Request Call-Back\"\n  3. \"Water Heater Repair & Install\" — \"Expert service for all water heater problems, from simple maintenance to full unit replacement. Quality guaranteed.\" — \"Request Call-Back\"",
+    "Section \"testimonials\" (light band). Top to bottom:\n- headline: \"Plumbing Pro: Trusted Local Service\"\n- sub-line: \"We offer transparent pricing and expert repairs you can rely on.\"\n- quote: \"The crew showed up quickly, solved my major issue, and left everything spotless. Excellent work!\"\n- who said it: a name and a role: \"Sarah J., Homeowner\"\n- badge: \"Serving the community with decades of proven expertise and a commitment to quality craftsmanship.\"",
+    "Section \"sign-up or contact form\" (light band). Top to bottom:\n- headline: \"Expert Plumbing Solutions, Fast & Dependable\"\n- sub-line: \"For reliable plumbing services you can trust. Call us today for a free consultation.\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Get a Callback\"\n- button: \"Request Call-Back\"",
+    "Section \"location and hours\" (light band). Top to bottom:\n- eyebrow: \"Trusted Local Plumbers\"\n- headline: \"Your Trusted Home Plumbing Experts\"\n- sub-line: \"We bring classic, dependable plumbing solutions directly to your door. Quality service you can count on.\"\n- button: \"Request Call-Back\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Email\" / \"you@example.com\"\n- button: \"Send Inquiry\"\n- date and place: \"Serving the entire metro area. Available Monday - Saturday, 8 AM to 6 PM.\""
+   ],
+   "minutes": 1.1,
+   "kept": true,
+   "fixesForNext": [
+    "S10|form|location and hours#0",
+    "S5|feature cards#0|list.rows|3|title,sentence,button",
+    "S5|sign-up or contact form#0|deck|headline,sub-line,form button,button",
+    "S5|location and hours#0|deck|eyebrow,headline,sub-line,button,form button,date and place",
+    "S12|testimonials#0|look.band|band,bandSurface",
+    "S12|sign-up or contact form#0|look.band|band,bandSurface"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-G-plumber-r1",
+   "score": 0.216,
+   "sum": 9.22,
+   "defects": 8,
+   "lines": 37,
+   "perLine": 0.216,
+   "org": 0.866,
+   "shape": 0.95,
+   "suits": 0.962,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.99
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.976
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.992,
+     "pFit": 0.995
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "headline",
+      "sub-line",
+      "quote",
+      "name line",
+      "badge"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.961
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "form",
+      "button"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.986
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.966
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|location and hours#0|deck|eyebrow,headline,sub-line,button,quote,who said it: a name and a role",
+     "weight": 2,
+     "say": "\"Request Call-Back\" repeats \"Request Call-Back\"",
+     "op": "reword"
+    },
+    {
+     "id": "S10|quote|location and hours#0",
+     "weight": 2,
+     "say": "a quote in a 3th section",
+     "op": "reask"
+    },
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    },
+    {
+     "id": "Q|org",
+     "weight": 1.07,
+     "say": "reviewer: organised p=0.866"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.15,
+     "say": "reviewer: type and parts suit p=0.962"
+    }
+   ],
+   "findings": [
+    "minimum-layout-width"
+   ],
+   "modelCalls": 7,
+   "judgements": 15,
+   "words": [
+    "Section \"hero\" (dark band). Top to bottom:\n- eyebrow: \"Reliable Plumbing\"\n- headline: \"Your Trusted Local Plumbing Experts\"\n- sub-line: \"Serving our community with dependable, professional plumbing services. Contact us today for a call-back.\"\n- button: \"Request Call-Back\"",
+    "Section \"about\" (light band). Top to bottom:\n- headline: \"Plumbing Pro: Dependable Service You Can Trust\"\n- sub-line: \"We provide honest, high-quality plumbing solutions for every home and business in our area.\"\n- paragraph: \"For reliable plumbing, trust the hands that know the trade. We offer expert repair, installation, and maintenance with integrity and care.\"\n- quote: \"Our commitment is simple: quality workmanship and honest service, always. Contact us today for a consultation.\"\n- who said it: a name and a role: \"John Doe, Master Plumber\"\n- small print: \"Call now for a prompt call-back.\"",
+    "Section \"feature cards\" (light band). Top to bottom:\n- headline: \"Reliable Plumbing, Right When You Need It\"\n- sub-line: \"We offer prompt service and honest solutions for all your plumbing needs.\"\n- button: \"Request a Call-Back\"\n- 3 featureItems in a grid, each: icon, title, sentence or two, button:\n  1. \"Emergency Pipe Repair\" — \"Fast response for urgent plumbing issues. We fix leaks and bursts quickly.\" — \"Call Now\"\n  2. \"Drain Cleaning Service\" — \"Clear stubborn clogs with our professional drain cleaning equipment and expertise.\" — \"Get Quote\"\n  3. \"Water Heater Installation\" — \"Reliable installation and maintenance for all residential water heating systems.\" — \"Schedule Visit\"",
+    "Section \"testimonials\" (light band). Top to bottom:\n- headline: \"Plumbing Pro: Trusted Local Service\"\n- sub-line: \"We offer transparent pricing and expert repairs you can rely on.\"\n- quote: \"The crew showed up quickly, solved my major issue, and left everything spotless. Excellent work!\"\n- who said it: a name and a role: \"Sarah J., Homeowner\"\n- badge: \"Serving the community with decades of proven expertise and a commitment to quality craftsmanship.\"",
+    "Section \"sign-up or contact form\" (light band). Top to bottom:\n- headline: \"Expert Plumbing Solutions\"\n- sub-line: \"For dependable home and commercial plumbing needs. Contact us for a service appointment.\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Schedule a Call\"\n- button: \"Get a Callback\"",
+    "Section \"location and hours\" (light band). Top to bottom:\n- eyebrow: \"Service Area\"\n- headline: \"Plumbing Pro: Dependable Service Near You\"\n- sub-line: \"We treat every call with the care and professionalism of a true master plumber. Schedule your consultation today.\"\n- button: \"Request Call-Back\"\n- quote: \"Experience the peace of mind that comes with service you can trust. Let our seasoned professionals handle your plumbing concerns.\"\n- who said it: a name and a role: \"The Owner, Plumbing Pro\""
+   ],
+   "minutes": 0.9,
+   "kept": true,
+   "fixesForNext": [
+    "S5|location and hours#0|deck|eyebrow,headline,sub-line,button,quote,who said it: a name and a role",
+    "S10|quote|location and hours#0"
+   ]
+  },
+  {
+   "round": 2,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-G-plumber-r2",
+   "score": 0.278,
+   "sum": 10.76,
+   "defects": 10,
+   "lines": 36,
+   "perLine": 0.278,
+   "org": 0.925,
+   "shape": 0.958,
+   "suits": 0.959,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.99
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.976
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.992,
+     "pFit": 0.995
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "headline",
+      "sub-line",
+      "quote",
+      "name line",
+      "badge"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.961
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "form",
+      "button"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.986
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.991
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|location and hours#0|deck|headline,sub-line,paragraph,button,date and place",
+     "weight": 2,
+     "say": "\"Request Call-Back\" repeats \"Request Call-Back\"",
+     "op": "reword"
+    },
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    },
+    {
+     "id": "R|single-column-grid|page",
+     "weight": 4,
+     "say": "render: single-column-grid"
+    },
+    {
+     "id": "Q|org",
+     "weight": 0.6,
+     "say": "reviewer: organised p=0.925"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.16,
+     "say": "reviewer: type and parts suit p=0.959"
+    }
+   ],
+   "findings": [
+    "minimum-layout-width",
+    "single-column-grid"
+   ],
+   "modelCalls": 4,
+   "judgements": 15,
+   "words": [
+    "Section \"hero\" (dark band). Top to bottom:\n- eyebrow: \"Reliable Plumbing\"\n- headline: \"Your Trusted Local Plumbing Experts\"\n- sub-line: \"Serving our community with dependable, professional plumbing services. Contact us today for a call-back.\"\n- button: \"Request Call-Back\"",
+    "Section \"about\" (light band). Top to bottom:\n- headline: \"Plumbing Pro: Dependable Service You Can Trust\"\n- sub-line: \"We provide honest, high-quality plumbing solutions for every home and business in our area.\"\n- paragraph: \"For reliable plumbing, trust the hands that know the trade. We offer expert repair, installation, and maintenance with integrity and care.\"\n- quote: \"Our commitment is simple: quality workmanship and honest service, always. Contact us today for a consultation.\"\n- who said it: a name and a role: \"John Doe, Master Plumber\"\n- small print: \"Call now for a prompt call-back.\"",
+    "Section \"feature cards\" (light band). Top to bottom:\n- headline: \"Reliable Plumbing, Right When You Need It\"\n- sub-line: \"We offer prompt service and honest solutions for all your plumbing needs.\"\n- button: \"Request a Call-Back\"\n- 3 featureItems in a grid, each: icon, title, sentence or two, button:\n  1. \"Emergency Pipe Repair\" — \"Fast response for urgent plumbing issues. We fix leaks and bursts quickly.\" — \"Call Now\"\n  2. \"Drain Cleaning Service\" — \"Clear stubborn clogs with our professional drain cleaning equipment and expertise.\" — \"Get Quote\"\n  3. \"Water Heater Installation\" — \"Reliable installation and maintenance for all residential water heating systems.\" — \"Schedule Visit\"",
+    "Section \"testimonials\" (light band). Top to bottom:\n- headline: \"Plumbing Pro: Trusted Local Service\"\n- sub-line: \"We offer transparent pricing and expert repairs you can rely on.\"\n- quote: \"The crew showed up quickly, solved my major issue, and left everything spotless. Excellent work!\"\n- who said it: a name and a role: \"Sarah J., Homeowner\"\n- badge: \"Serving the community with decades of proven expertise and a commitment to quality craftsmanship.\"",
+    "Section \"sign-up or contact form\" (light band). Top to bottom:\n- headline: \"Expert Plumbing Solutions\"\n- sub-line: \"For dependable home and commercial plumbing needs. Contact us for a service appointment.\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Schedule a Call\"\n- button: \"Get a Callback\"",
+    "Section \"location and hours\" (light band). Top to bottom:\n- headline: \"Reliable Plumbing Services Near You\"\n- sub-line: \"Serving our community with integrity and skill for all your plumbing concerns.\"\n- paragraph: \"From routine maintenance to complex repairs, our dedicated team provides honest, top-tier plumbing solutions every time.\"\n- button: \"Request Call-Back\"\n- date and place: \"Monday - Friday: 8:00 AM - 5:00 PM | Saturday: 9:00 AM - 1:00 PM | Serving Metro Area\""
+   ],
+   "minutes": 0.8,
+   "reverted": true,
+   "kept": false,
+   "fixesForNext": [
+    "S5|location and hours#0|deck|eyebrow,headline,sub-line,button,quote,who said it: a name and a role",
+    "S10|quote|location and hours#0"
+   ]
+  },
+  {
+   "round": 3,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-G-plumber-r3",
+   "score": 0.171,
+   "sum": 7.92,
+   "defects": 6,
+   "lines": 35,
+   "perLine": 0.171,
+   "org": 0.791,
+   "shape": 0.955,
+   "suits": 0.937,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.99
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.976
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.992,
+     "pFit": 0.995
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "headline",
+      "sub-line",
+      "quote",
+      "name line",
+      "badge"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.961
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "form",
+      "button"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.986
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.982
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|location and hours#0|deck|headline,sub-line,paragraph,date and place",
+     "weight": 2,
+     "say": "\"Plumbing Pro: Trusted Local Service\" repeats \"Plumbing Pro: Trusted Local Service\"",
+     "op": "reword"
+    },
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    },
+    {
+     "id": "Q|org",
+     "weight": 1.67,
+     "say": "reviewer: organised p=0.791"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.25,
+     "say": "reviewer: type and parts suit p=0.937"
+    }
+   ],
+   "findings": [
+    "minimum-layout-width"
+   ],
+   "modelCalls": 4,
+   "judgements": 15,
+   "words": [
+    "Section \"hero\" (dark band). Top to bottom:\n- eyebrow: \"Reliable Plumbing\"\n- headline: \"Your Trusted Local Plumbing Experts\"\n- sub-line: \"Serving our community with dependable, professional plumbing services. Contact us today for a call-back.\"\n- button: \"Request Call-Back\"",
+    "Section \"about\" (light band). Top to bottom:\n- headline: \"Plumbing Pro: Dependable Service You Can Trust\"\n- sub-line: \"We provide honest, high-quality plumbing solutions for every home and business in our area.\"\n- paragraph: \"For reliable plumbing, trust the hands that know the trade. We offer expert repair, installation, and maintenance with integrity and care.\"\n- quote: \"Our commitment is simple: quality workmanship and honest service, always. Contact us today for a consultation.\"\n- who said it: a name and a role: \"John Doe, Master Plumber\"\n- small print: \"Call now for a prompt call-back.\"",
+    "Section \"feature cards\" (light band). Top to bottom:\n- headline: \"Reliable Plumbing, Right When You Need It\"\n- sub-line: \"We offer prompt service and honest solutions for all your plumbing needs.\"\n- button: \"Request a Call-Back\"\n- 3 featureItems in a grid, each: icon, title, sentence or two, button:\n  1. \"Emergency Pipe Repair\" — \"Fast response for urgent plumbing issues. We fix leaks and bursts quickly.\" — \"Call Now\"\n  2. \"Drain Cleaning Service\" — \"Clear stubborn clogs with our professional drain cleaning equipment and expertise.\" — \"Get Quote\"\n  3. \"Water Heater Installation\" — \"Reliable installation and maintenance for all residential water heating systems.\" — \"Schedule Visit\"",
+    "Section \"testimonials\" (light band). Top to bottom:\n- headline: \"Plumbing Pro: Trusted Local Service\"\n- sub-line: \"We offer transparent pricing and expert repairs you can rely on.\"\n- quote: \"The crew showed up quickly, solved my major issue, and left everything spotless. Excellent work!\"\n- who said it: a name and a role: \"Sarah J., Homeowner\"\n- badge: \"Serving the community with decades of proven expertise and a commitment to quality craftsmanship.\"",
+    "Section \"sign-up or contact form\" (light band). Top to bottom:\n- headline: \"Expert Plumbing Solutions\"\n- sub-line: \"For dependable home and commercial plumbing needs. Contact us for a service appointment.\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Schedule a Call\"\n- button: \"Get a Callback\"",
+    "Section \"location and hours\" (light band). Top to bottom:\n- headline: \"Plumbing Pro: Trusted Local Service\"\n- sub-line: \"We offer transparent pricing and expert repairs you can rely on.\"\n- paragraph: \"Expert Plumbing Solutions for dependable home and commercial needs. Schedule your service today.\"\n- date and place: \"Serving the community since 1995. Call us now for a callback.\""
+   ],
+   "minutes": 0.7,
+   "kept": true,
+   "fixesForNext": [
+    "S5|location and hours#0|deck|headline,sub-line,paragraph,date and place"
+   ]
+  },
+  {
+   "round": 4,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-G-plumber-r4",
+   "score": 0.114,
+   "sum": 5.08,
+   "defects": 4,
+   "lines": 35,
+   "perLine": 0.114,
+   "org": 0.888,
+   "shape": 0.955,
+   "suits": 0.953,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.99
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.976
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.992,
+     "pFit": 0.995
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "headline",
+      "sub-line",
+      "quote",
+      "name line",
+      "badge"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.961
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "form",
+      "button"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.986
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.989
+    }
+   ],
+   "issues": [
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    },
+    {
+     "id": "Q|org",
+     "weight": 0.9,
+     "say": "reviewer: organised p=0.888"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.19,
+     "say": "reviewer: type and parts suit p=0.953"
+    }
+   ],
+   "findings": [
+    "minimum-layout-width"
+   ],
+   "modelCalls": 3,
+   "judgements": 15,
+   "words": [
+    "Section \"hero\" (dark band). Top to bottom:\n- eyebrow: \"Reliable Plumbing\"\n- headline: \"Your Trusted Local Plumbing Experts\"\n- sub-line: \"Serving our community with dependable, professional plumbing services. Contact us today for a call-back.\"\n- button: \"Request Call-Back\"",
+    "Section \"about\" (light band). Top to bottom:\n- headline: \"Plumbing Pro: Dependable Service You Can Trust\"\n- sub-line: \"We provide honest, high-quality plumbing solutions for every home and business in our area.\"\n- paragraph: \"For reliable plumbing, trust the hands that know the trade. We offer expert repair, installation, and maintenance with integrity and care.\"\n- quote: \"Our commitment is simple: quality workmanship and honest service, always. Contact us today for a consultation.\"\n- who said it: a name and a role: \"John Doe, Master Plumber\"\n- small print: \"Call now for a prompt call-back.\"",
+    "Section \"feature cards\" (light band). Top to bottom:\n- headline: \"Reliable Plumbing, Right When You Need It\"\n- sub-line: \"We offer prompt service and honest solutions for all your plumbing needs.\"\n- button: \"Request a Call-Back\"\n- 3 featureItems in a grid, each: icon, title, sentence or two, button:\n  1. \"Emergency Pipe Repair\" — \"Fast response for urgent plumbing issues. We fix leaks and bursts quickly.\" — \"Call Now\"\n  2. \"Drain Cleaning Service\" — \"Clear stubborn clogs with our professional drain cleaning equipment and expertise.\" — \"Get Quote\"\n  3. \"Water Heater Installation\" — \"Reliable installation and maintenance for all residential water heating systems.\" — \"Schedule Visit\"",
+    "Section \"testimonials\" (light band). Top to bottom:\n- headline: \"Plumbing Pro: Trusted Local Service\"\n- sub-line: \"We offer transparent pricing and expert repairs you can rely on.\"\n- quote: \"The crew showed up quickly, solved my major issue, and left everything spotless. Excellent work!\"\n- who said it: a name and a role: \"Sarah J., Homeowner\"\n- badge: \"Serving the community with decades of proven expertise and a commitment to quality craftsmanship.\"",
+    "Section \"sign-up or contact form\" (light band). Top to bottom:\n- headline: \"Expert Plumbing Solutions\"\n- sub-line: \"For dependable home and commercial plumbing needs. Contact us for a service appointment.\"\n- a form field: \"Name\" / \"Your name\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Message\" / \"Your message\"\n- button: \"Schedule a Call\"\n- button: \"Get a Callback\"",
+    "Section \"location and hours\" (light band). Top to bottom:\n- headline: \"Reliable Plumbing Services, Right Here.\"\n- sub-line: \"Your trusted local experts are ready to assist with all your plumbing concerns today.\"\n- paragraph: \"We are your dedicated team, committed to providing honest work and lasting solutions for your home and business. Let us handle the tough jobs.\"\n- date and place: \"Serving the community since 1995. Open Monday-Friday, 8 AM to 6 PM. Call us for a callback.\""
+   ],
+   "minutes": 0.7,
+   "kept": true
+  }
+ ],
+ "randomDecisions": false,
+ "flags": [
+  "--brief",
+  "--run",
+  "--rounds",
+  "--decisions-from"
+ ],
+ "mode": {
+  "sectionCopy": true,
+  "contradict": true,
+  "v4": true,
+  "accept": "constraint",
+  "orgOn": "shape",
+  "ratchet": "peak"
+ },
+ "decisionsFrom": {
+  "run": "S0-plumber",
+  "decisions": 47
+ },
+ "replays": 240,
+ "result": {
+  "minutes": 4.1,
+  "accept": "constraint",
+  "bestRound": 4,
+  "bestScore": 0.114,
+  "scores": [
+   0.595,
+   0.216,
+   0.278,
+   0.171,
+   0.114
+  ],
+  "r0": {
+   "perLine": 0.595,
+   "org": 0.874,
+   "shape": 0.964,
+   "suits": 0.952,
+   "sum": 23.2
+  },
+  "kept": {
+   "perLine": 0.114,
+   "org": 0.888,
+   "shape": 0.955,
+   "suits": 0.953,
+   "sum": 5.08,
+   "lines": 35
+  },
+  "builderCalls": 17,
+  "judgements": 75,
+  "replays": 240,
+  "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-G-plumber-r4"
+ }
+}

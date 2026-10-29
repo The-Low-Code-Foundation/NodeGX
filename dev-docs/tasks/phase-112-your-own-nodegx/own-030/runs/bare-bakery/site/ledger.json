@@ -1,0 +1,29 @@
+{
+ "calls": [
+  {
+   "prompt": "Write a complete landing page for: A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.. One HTML file, CSS inline.",
+   "tokensIn": 51,
+   "tokensOut": 2897,
+   "ms": 95497,
+   "done": "stop"
+  }
+ ],
+ "judgements": [],
+ "rounds": [
+  {
+   "round": 0,
+   "broken": [],
+   "words": 28
+  }
+ ],
+ "result": {
+  "lane": "code-bare",
+  "brief": "bakery",
+  "model": "gemma4:e2b-it-qat",
+  "minutes": 1.6,
+  "builderCalls": 1,
+  "reviewerCalls": 0,
+  "tokensIn": 51,
+  "tokensOut": 2897
+ }
+}

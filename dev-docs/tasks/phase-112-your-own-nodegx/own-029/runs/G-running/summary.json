@@ -1,0 +1,971 @@
+{
+ "minutes": 6.1,
+ "accept": "constraint",
+ "bestRound": 4,
+ "bestScore": 0.482,
+ "scores": [
+  0.548,
+  0.572,
+  0.559,
+  0.485,
+  0.482
+ ],
+ "r0": {
+  "perLine": 0.548,
+  "org": 0.093,
+  "shape": 0.915,
+  "suits": 0.821,
+  "sum": 30.44
+ },
+ "kept": {
+  "perLine": 0.482,
+  "org": 0.169,
+  "shape": 0.915,
+  "suits": 0.904,
+  "sum": 26.8,
+  "lines": 41
+ },
+ "builderCalls": 51,
+ "judgements": 94,
+ "replays": 204,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-G-running-r4",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-G-running-r0",
+   "score": 0.548,
+   "sum": 30.44,
+   "defects": 22.47,
+   "lines": 41,
+   "perLine": 0.548,
+   "org": 0.093,
+   "shape": 0.915,
+   "suits": 0.821,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "date and place"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.813
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.419
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "list of items",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.81,
+     "pFit": 0.997
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.938
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.044
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button",
+      "date and place",
+      "body text"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.213
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|about#0|deck|eyebrow,headline,sub-line,paragraph,button,date and place",
+     "weight": 2,
+     "say": "\"Park Runners: Conquer Your Saturday Morning!\" repeats \"Park Runners: Conquer Your Saturday Morning!\"",
+     "op": "reword"
+    },
+    {
+     "id": "S6|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+     "weight": 2,
+     "say": "button \"Sign up for the Saturday morning running club\" is too long for a button",
+     "op": "reword"
+    },
+    {
+     "id": "S5|call to action#0|deck|headline,sub-line,button,date and place,paragraph",
+     "weight": 2,
+     "say": "\"Join the fastest, most energetic running crew in the park every Saturday morning.\" repeats \"Join the fastest, most energetic running crew in the park every Saturday morning. All paces welcome!\"",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|deck|eyebrow,headline,sub-line,paragraph,button,date and place",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 9 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|deck|eyebrow,headline,sub-line,button,date and place",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 9 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 9 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|headline,sub-line,button,date and place,paragraph",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 9 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|schedule or line-up#0|deck|eyebrow,headline,sub-line,date and place",
+     "weight": 1.5,
+     "say": "\"every saturday morning\" is said 9 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S12|location and hours#0|look.band|band,bandSurface",
+     "weight": 2,
+     "say": "four \"band\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "J1|about#0|deck|eyebrow,headline,sub-line,paragraph,button,date and place",
+     "weight": 1.74,
+     "say": "reviewer (p=0.419): weakest line sub-line \"Ignite your weekend with the fastest club in the p\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+     "weight": 2.87,
+     "say": "reviewer (p=0.044): weakest line sub-line \"We conquer the Saturday morning miles together in \"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|call to action#0|deck|headline,sub-line,button,date and place,paragraph",
+     "weight": 2.36,
+     "say": "reviewer (p=0.213): weakest line paragraph \"Sweat, speed, and community. Forget the slow pace;\"",
+     "op": "reword"
+    },
+    {
+     "id": "Q|org",
+     "weight": 7.26,
+     "say": "reviewer: organised p=0.093",
+     "op": "reask"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.72,
+     "say": "reviewer: type and parts suit p=0.821"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 7,
+   "judgements": 18,
+   "minutes": 1.2,
+   "kept": true,
+   "fixesForNext": [
+    "Q|org",
+    "J1|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+    "J1|call to action#0|deck|headline,sub-line,button,date and place,paragraph",
+    "S5|about#0|deck|eyebrow,headline,sub-line,paragraph,button,date and place",
+    "S6|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+    "S5|call to action#0|deck|headline,sub-line,button,date and place,paragraph",
+    "S12|location and hours#0|look.band|band,bandSurface",
+    "J1|about#0|deck|eyebrow,headline,sub-line,paragraph,button,date and place",
+    "S11|about#0|deck|eyebrow,headline,sub-line,paragraph,button,date and place",
+    "S11|location and hours#0|deck|eyebrow,headline,sub-line,button,date and place"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-G-running-r1",
+   "score": 0.572,
+   "sum": 31.37,
+   "defects": 22.87,
+   "lines": 40,
+   "perLine": 0.572,
+   "org": 0.032,
+   "shape": 0.799,
+   "suits": 0.809,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "date and place"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.813
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.036
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.814
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "date and place"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.213
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.673,
+     "pFit": 0.979
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button",
+      "date and place",
+      "body text"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.181
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|call to action#0|deck|headline,sub-line,button,date and place,paragraph",
+     "weight": 2,
+     "say": "\"Every Saturday morning. Meet at the park entrance.\" repeats \"Every Saturday morning. Meet at the park.\"",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|deck|eyebrow,headline,sub-line,paragraph,button,date and place",
+     "weight": 1.5,
+     "say": "\"every saturday morning\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|feature cards#0|list.rows|3|title,sentence,button",
+     "weight": 1.5,
+     "say": "\"every saturday morning\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|headline,sub-line,button,date and place,paragraph",
+     "weight": 1.5,
+     "say": "\"every saturday morning\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "R|single-column-grid|page",
+     "weight": 4,
+     "say": "render: single-column-grid"
+    },
+    {
+     "id": "J1|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+     "weight": 2.89,
+     "say": "reviewer (p=0.036): weakest line sub-line \"Lace up. Run free. We meet every Saturday at the p\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|location and hours#0|deck|eyebrow,headline,sub-line,button,date and place",
+     "weight": 2.36,
+     "say": "reviewer (p=0.213): weakest line sub-line \"Join the elite Saturday morning running squad. Swe\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|call to action#0|deck|headline,sub-line,button,date and place,paragraph",
+     "weight": 2.46,
+     "say": "reviewer (p=0.181): weakest line paragraph \"Stop watching, start leading. We forge a community\"",
+     "op": "reword"
+    },
+    {
+     "id": "P1|how it works",
+     "weight": 1.86,
+     "say": "reviewer (p=0.621): add a \"how it works\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "P2|about#0",
+     "weight": 2.79,
+     "say": "reviewer (p=0.931): drop section 3. about",
+     "op": "dropSection"
+    },
+    {
+     "id": "Q|org",
+     "weight": 7.74,
+     "say": "reviewer: organised p=0.032",
+     "op": "reask"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.76,
+     "say": "reviewer: type and parts suit p=0.809"
+    }
+   ],
+   "findings": [
+    "single-column-grid"
+   ],
+   "modelCalls": 20,
+   "judgements": 20,
+   "minutes": 1.6,
+   "reverted": true,
+   "kept": false,
+   "fixesForNext": [
+    "Q|org",
+    "J1|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+    "J1|call to action#0|deck|headline,sub-line,button,date and place,paragraph",
+    "S5|about#0|deck|eyebrow,headline,sub-line,paragraph,button,date and place",
+    "S6|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+    "S5|call to action#0|deck|headline,sub-line,button,date and place,paragraph",
+    "S12|location and hours#0|look.band|band,bandSurface",
+    "J1|about#0|deck|eyebrow,headline,sub-line,paragraph,button,date and place",
+    "S11|about#0|deck|eyebrow,headline,sub-line,paragraph,button,date and place",
+    "S11|location and hours#0|deck|eyebrow,headline,sub-line,button,date and place"
+   ]
+  },
+  {
+   "round": 2,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-G-running-r2",
+   "score": 0.559,
+   "sum": 31.47,
+   "defects": 23.48,
+   "lines": 42,
+   "perLine": 0.559,
+   "org": 0.052,
+   "shape": 0.772,
+   "suits": 0.899,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "date and place"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.813
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.152
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.15
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "date and place"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.639
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "eyebrow",
+      "badge",
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.936,
+     "pFit": 0.989
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button",
+      "date and place",
+      "body text"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.341
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|about#0|deck|eyebrow,headline,sub-line,paragraph,button,date and place",
+     "weight": 2,
+     "say": "\"Park Runners: Conquer Your Saturday Morning!\" repeats \"Park Runners: Conquer Your Saturday Morning!\"",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|deck|eyebrow,headline,sub-line,paragraph,button,date and place",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|feature cards#0|deck|eyebrow,badge,headline,sub-line,paragraph",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|feature cards#0|list.rows|3|title,sentence,button",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+     "weight": 1.5,
+     "say": "\"every saturday morning\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    },
+    {
+     "id": "J1|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+     "weight": 2.54,
+     "say": "reviewer (p=0.152): weakest line paragraph \"We hit the park every Saturday morning. No excuses\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|about#0|deck|eyebrow,headline,sub-line,paragraph,button,date and place",
+     "weight": 2.55,
+     "say": "reviewer (p=0.15): weakest line sub-line \"Join the most energetic running club in the park. \"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|call to action#0|deck|headline,sub-line,button,date and place,paragraph",
+     "weight": 1.98,
+     "say": "reviewer (p=0.341): weakest line paragraph \"Forget the slow pace. We push limits and conquer t\"",
+     "op": "reword"
+    },
+    {
+     "id": "P1|how it works",
+     "weight": 1.89,
+     "say": "reviewer (p=0.629): add a \"how it works\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "P2|about#0",
+     "weight": 2.52,
+     "say": "reviewer (p=0.841): drop section 3. about",
+     "op": "dropSection"
+    },
+    {
+     "id": "Q|org",
+     "weight": 7.58,
+     "say": "reviewer: organised p=0.052",
+     "op": "reask"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.4,
+     "say": "reviewer: type and parts suit p=0.899"
+    }
+   ],
+   "findings": [
+    "minimum-layout-width"
+   ],
+   "modelCalls": 20,
+   "judgements": 20,
+   "minutes": 1.5,
+   "reverted": true,
+   "kept": false,
+   "fixesForNext": [
+    "S11|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+    "S11|call to action#0|deck|headline,sub-line,button,date and place,paragraph",
+    "S11|schedule or line-up#0|deck|eyebrow,headline,sub-line,date and place"
+   ]
+  },
+  {
+   "round": 3,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-G-running-r3",
+   "score": 0.485,
+   "sum": 27.08,
+   "defects": 19.89,
+   "lines": 41,
+   "perLine": 0.485,
+   "org": 0.149,
+   "shape": 0.915,
+   "suits": 0.903,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "date and place"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.813
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.419
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "list of items",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.868,
+     "pFit": 0.992
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.938
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.199
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button",
+      "date and place",
+      "body text"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.253
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|about#0|deck|eyebrow,headline,sub-line,paragraph,button,date and place",
+     "weight": 2,
+     "say": "\"Park Runners: Conquer Your Saturday Morning!\" repeats \"Park Runners: Conquer Your Saturday Morning!\"",
+     "op": "reword"
+    },
+    {
+     "id": "S6|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+     "weight": 2,
+     "say": "button \"Sign up for the Saturday morning running club\" is too long for a button",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|deck|eyebrow,headline,sub-line,paragraph,button,date and place",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 7 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|deck|eyebrow,headline,sub-line,button,date and place",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 7 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|headline,sub-line,button,date and place,paragraph",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 7 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+     "weight": 1.5,
+     "say": "\"every saturday morning\" is said 7 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|schedule or line-up#0|list.rows|3|title,time,sentence",
+     "weight": 1.5,
+     "say": "\"meet at the\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S12|location and hours#0|look.band|band,bandSurface",
+     "weight": 2,
+     "say": "four \"band\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "J1|about#0|deck|eyebrow,headline,sub-line,paragraph,button,date and place",
+     "weight": 1.74,
+     "say": "reviewer (p=0.419): weakest line sub-line \"Ignite your weekend with the fastest club in the p\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+     "weight": 2.4,
+     "say": "reviewer (p=0.199): weakest line sub-line \"The fastest crew in the city is looking for you. L\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|call to action#0|deck|headline,sub-line,button,date and place,paragraph",
+     "weight": 2.24,
+     "say": "reviewer (p=0.253): weakest line sub-line \"Join the fastest, most energetic running crew in t\"",
+     "op": "reword"
+    },
+    {
+     "id": "Q|org",
+     "weight": 6.81,
+     "say": "reviewer: organised p=0.149",
+     "op": "reask"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.39,
+     "say": "reviewer: type and parts suit p=0.903"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 3,
+   "judgements": 18,
+   "minutes": 0.9,
+   "kept": true,
+   "fixesForNext": [
+    "S11|call to action#0|deck|headline,sub-line,button,date and place,paragraph",
+    "S11|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+    "S11|schedule or line-up#0|list.rows|3|title,time,sentence"
+   ]
+  },
+  {
+   "round": 4,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-G-running-r4",
+   "score": 0.482,
+   "sum": 26.8,
+   "defects": 19.77,
+   "lines": 41,
+   "perLine": 0.482,
+   "org": 0.169,
+   "shape": 0.915,
+   "suits": 0.904,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "date and place"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.813
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.419
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "list of items",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.902,
+     "pFit": 0.988
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.938
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.031
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button",
+      "date and place",
+      "body text"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.127
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|about#0|deck|eyebrow,headline,sub-line,paragraph,button,date and place",
+     "weight": 2,
+     "say": "\"Park Runners: Conquer Your Saturday Morning!\" repeats \"Park Runners: Conquer Your Saturday Morning!\"",
+     "op": "reword"
+    },
+    {
+     "id": "S2|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+     "weight": 2,
+     "say": "\"We're not just running; we're a movement. Lace up, lock in, and experience the adrenaline rush of the freshest kicks and the best company in the city's green expanse. Stop waiting. Start moving!\" talks about the page's styling (\"green\")",
+     "op": "reword"
+    },
+    {
+     "id": "S6|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+     "weight": 2,
+     "say": "button \"Sign up for the Saturday morning running club\" is too long for a button",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|deck|eyebrow,headline,sub-line,paragraph,button,date and place",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 7 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|deck|eyebrow,headline,sub-line,button,date and place",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 7 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|headline,sub-line,button,date and place,paragraph",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 7 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S12|location and hours#0|look.band|band,bandSurface",
+     "weight": 2,
+     "say": "four \"band\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "J1|about#0|deck|eyebrow,headline,sub-line,paragraph,button,date and place",
+     "weight": 1.74,
+     "say": "reviewer (p=0.419): weakest line sub-line \"Ignite your weekend with the fastest club in the p\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+     "weight": 2.91,
+     "say": "reviewer (p=0.031): weakest line sub-line \"Dominate the early miles with our high-octane Satu\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|call to action#0|deck|headline,sub-line,button,date and place,paragraph",
+     "weight": 2.62,
+     "say": "reviewer (p=0.127): weakest line paragraph \"Forget the slow pace. This isn't just a run; it's \"",
+     "op": "reword"
+    },
+    {
+     "id": "Q|org",
+     "weight": 6.65,
+     "say": "reviewer: organised p=0.169",
+     "op": "reask"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.38,
+     "say": "reviewer: type and parts suit p=0.904"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 3,
+   "judgements": 18,
+   "minutes": 1,
+   "kept": true
+  }
+ ]
+}

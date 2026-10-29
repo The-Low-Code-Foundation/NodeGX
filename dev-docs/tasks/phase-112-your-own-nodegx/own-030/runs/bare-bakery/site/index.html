@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Boulangerie de Famille - Lyon</title>
+    <style>
+        /* --- Global Styles --- */
+        body {
+            font-family: 'Georgia', serif; /* Warm, inviting font */
+            margin: 0;
+            padding: 0;
+            background-color: #fff8f0; /* Very light cream/off-white background */
+            color: #4a2c1e; /* Deep, warm brown text color */
+            line-height: 1.6;
+        }
+
+        /* --- Layout & Structure --- */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+
+        /* --- Header & Hero Section --- */
+        header {
+            background-color: #d2b48c; /* Medium warm tan/beige */
+            color: #4a2c1e;
+            padding: 40px 0;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 3.5em;
+            color: #6b4423; /* Darker brown for impact */
+            text-shadow: 1px 2px 4px rgba(255, 255, 255, 0.5);
+        }
+
+        header p {
+            font-size: 1.4em;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        /* --- Navigation --- */
+        nav {
+            background-color: #e0c9a5; /* Slightly lighter warm tone */
+            padding: 15px 0;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        nav a {
+            margin: 0 20px;
+            text-decoration: none;
+            color: #4a2c1e;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #8b4513; /* Saddle brown on hover */
+        }
+
+        /* --- Content Sections --- */
+        section {
+            padding: 60px 0;
+            text-align: center;
+        }
+
+        section:nth-child(odd) {
+            background-color: #fff8f0; /* Light background for contrast */
+        }
+
+        h2 {
+            font-size: 2.5em;
+            color: #6b4423;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #d2b48c;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        /* --- Product Showcase --- */
+        .product-grid {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .product-card {
+            background-color: #fff;
+            border: 1px solid #e0c9a5;
+            border-radius: 10px;
+            padding: 30px;
+            width: 30%;
+            min-width: 280px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .product-card h3 {
+            color: #8b4513;
+            margin-top: 0;
+            font-size: 1.8em;
+        }
+
+        .product-card p {
+            font-size: 1.1em;
+        }
+
+        /* --- Hours & Location --- */
+        #hours {
+            background-color: #e0c9a5;
+            color: #4a2c1e;
+        }
+
+        .hours-list {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 20px;
+        }
+
+        .day-item {
+            background-color: #fff;
+            padding: 15px 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            min-width: 120px;
+        }
+
+        .day-item strong {
+            display: block;
+            font-size: 1.3em;
+            color: #6b4423;
+        }
+
+        /* --- Call to Action --- */
+        #cta {
+            background-color: #6b4423; /* Deep brown for contrast */
+            color: #fff8f0;
+            padding: 50px 0;
+            text-align: center;
+        }
+
+        #cta h2 {
+            color: #fff8f0;
+            border-bottom-color: #fff8f0;
+        }
+
+        #cta a {
+            display: inline-block;
+            background-color: #d2b48c; /* Warm button color */
+            color: #4a2c1e;
+            padding: 15px 35px;
+            text-decoration: none;
+            font-size: 1.3em;
+            font-weight: bold;
+            border-radius: 50px;
+            margin-top: 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        #cta a:hover {
+            background-color: #fff8f0;
+            color: #4a2c1e;
+        }
+
+        /* --- Footer --- */
+        footer {
+            background-color: #4a2c1e;
+            color: #fff8f0;
+            text-align: center;
+            padding: 20px 0;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <a href="#home">Accueil</a>
+            <a href="#products">Nos Pâtisseries</a>
+            <a href="#hours">Horaires</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header id="home">
+        <div class="container">
+            <h1>La Boulangerie de Famille</h1>
+            <p>Le cœur gourmand de Lyon. Pain artisanal, croissants feuilletés et douceurs faites maison.</p>
+        </div>
+    </header>
+
+    <!-- Products Section -->
+    <section id="products">
+        <div class="container">
+            <h2>Nos Créations Artisanales</h2>
+            <div class="product-grid">
+                
+                <!-- Sourdough Card -->
+                <div class="product-card">
+                    <h3>Pain au Levain</h3>
+                    <p>Notre spécialité : une pâte longue fermentation, croustillante à l'extérieur et moelleuse à l'intérieur. Parfait pour accompagner votre repas.</p>
+                    <p><em>Fait avec farine locale.</em></p>
+                </div>
+
+                <!-- Croissant Card -->
+                <div class="product-card">
+                    <h3>Croissants</h3>
+                    <p>Le classique parfait. Beurre de qualité, pliage expert et dorure parfaite pour un matin exceptionnel.</p>
+                    <p><em>Fraîcheur garantie chaque matin.</em></p>
+                </div>
+
+                <!-- Cakes Card -->
+                <div class="product-card">
+                    <h3>Gâteaux Maison</h3>
+                    <p>Des douceurs pour toutes les occasions : tartes aux fruits, éclairs, et gâteaux de fête faits avec amour.</p>
+                    <p><em>Commandez pour vos événements.</em></p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Hours Section -->
+    <section id="hours">
+        <div class="container">
+            <h2>Où et Quand Nous Trouver</h2>
+            <p>Venez nous rendre visite pour découvrir nos produits frais !</p>
+            
+            <div class="hours-list">
+                <div class="day-item">
+                    <strong>Mardi</strong>
+                    <p>Ouvert de 8h00 à 19h00</p>
+                </div>
+                <div class="day-item">
+                    <strong>Mercredi</strong>
+                    <p>Ouvert de 8h00 à 19h00</p>
+                </div>
+                <div class="day-item">
+                    <strong>Jeudi</strong>
+                    <p>Ouvert de 8h00 à 19h00</p>
+                </div>
+                <div class="day-item">
+                    <strong>Vendredi</strong>
+                    <p>Ouvert de 8h00 à 20h00</p>
+                </div>
+                <div class="day-item">
+                    <strong>Samedi</strong>
+                    <p>Ouvert de 8h00 à 19h00</p>
+                </div>
+                <div class="day-item">
+                    <strong>Dimanche</strong>
+                    <p>Ouvert de 9h00 à 18h00</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section id="contact">
+        <div class="container">
+            <h2>Prêt à déguster ?</h2>
+            <p style="font-size: 1.2em; margin-bottom: 30px;">Venez nous voir ou contactez-nous pour des commandes spéciales.</p>
+            <a href="tel:04XX XXX XX XX" style="background-color: #4a2c1e;">Nous Contacter</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 La Boulangerie de Famille. Tous droits réservés. | Situé au cœur de Lyon.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

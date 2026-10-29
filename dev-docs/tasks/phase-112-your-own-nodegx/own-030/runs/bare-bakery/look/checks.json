@@ -1,0 +1,36 @@
+{
+ "desktop": {
+  "url": "file:///Users/richardosborne/vscode_projects/OpenNoodl/dev-docs/tasks/phase-112-your-own-nodegx/own-030/runs/bare-bakery/site/index.html",
+  "blank": false,
+  "words": 176,
+  "overflowX": 0,
+  "smallText": [],
+  "lowContrast": [
+   {
+    "text": "Nous Contacter",
+    "ratio": 1.34
+   }
+  ],
+  "unknownGround": 0,
+  "clipped": [],
+  "brokenImages": [],
+  "sections": 5
+ },
+ "phone": {
+  "url": "file:///Users/richardosborne/vscode_projects/OpenNoodl/dev-docs/tasks/phase-112-your-own-nodegx/own-030/runs/bare-bakery/site/index.html",
+  "blank": false,
+  "words": 176,
+  "overflowX": 445,
+  "smallText": [],
+  "lowContrast": [
+   {
+    "text": "Nous Contacter",
+    "ratio": 1.34
+   }
+  ],
+  "unknownGround": 0,
+  "clipped": [],
+  "brokenImages": [],
+  "sections": 5
+ }
+}

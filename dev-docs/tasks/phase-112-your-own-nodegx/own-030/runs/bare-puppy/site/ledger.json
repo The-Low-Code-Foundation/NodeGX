@@ -1,0 +1,29 @@
+{
+ "calls": [
+  {
+   "prompt": "Write a complete landing page for: Make me a puppy adoption landing page please, blue colour theme, modern style.. One HTML file, CSS inline.",
+   "tokensIn": 39,
+   "tokensOut": 3962,
+   "ms": 133036,
+   "done": "stop"
+  }
+ ],
+ "judgements": [],
+ "rounds": [
+  {
+   "round": 0,
+   "broken": [],
+   "words": 23
+  }
+ ],
+ "result": {
+  "lane": "code-bare",
+  "brief": "puppy",
+  "model": "gemma4:e2b-it-qat",
+  "minutes": 2.2,
+  "builderCalls": 1,
+  "reviewerCalls": 0,
+  "tokensIn": 39,
+  "tokensOut": 3962
+ }
+}

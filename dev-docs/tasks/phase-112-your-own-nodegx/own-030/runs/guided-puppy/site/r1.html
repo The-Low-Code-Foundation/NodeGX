@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Puppy Haven</title>
+<link rel="stylesheet" href="noodl_modules/inter/styles.css">
+<link rel="stylesheet" href="noodl_modules/lucide-icons/styles.css">
+<link rel="stylesheet" href="noodl_modules/preset-font-nunito/styles.css">
+<style>:root {
+  --primary: var(--blue-600);
+  --primary-hover: var(--blue-700);
+  --primary-foreground: #ffffff;
+  --secondary: #db2777;
+  --secondary-hover: #be185d;
+  --secondary-foreground: #ffffff;
+  --destructive: #e11d48;
+  --destructive-hover: #be123c;
+  --destructive-foreground: #ffffff;
+  --muted: #faf5ff;
+  --muted-foreground: #6b7280;
+  --accent: #fce7f3;
+  --accent-foreground: #831843;
+  --background: #ffffff;
+  --foreground: #1e1b4b;
+  --surface: #faf5ff;
+  --surface-raised: #ffffff;
+  --border: #e9d5ff;
+  --border-subtle: #faf5ff;
+  --border-strong: #d8b4fe;
+  --border-control: #a855f7;
+  --ring: var(--blue-500);
+  --ring-offset: #ffffff;
+  --ring-width: 3px;
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1e293b;
+  --gray-900: #0f172a;
+  --gray-950: #020617;
+  --blue-50: #eff6ff;
+  --blue-100: #dbeafe;
+  --blue-200: #bfdbfe;
+  --blue-300: #93c5fd;
+  --blue-400: #60a5fa;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --blue-700: #1d4ed8;
+  --blue-800: #1e40af;
+  --blue-900: #1e3a8a;
+  --red-50: #fef2f2;
+  --red-100: #fee2e2;
+  --red-200: #fecaca;
+  --red-300: #fca5a5;
+  --red-400: #f87171;
+  --red-500: #ef4444;
+  --red-600: #dc2626;
+  --red-700: #b91c1c;
+  --red-800: #991b1b;
+  --red-900: #7f1d1d;
+  --green-50: #f0fdf4;
+  --green-100: #dcfce7;
+  --green-200: #bbf7d0;
+  --green-300: #86efac;
+  --green-400: #4ade80;
+  --green-500: #22c55e;
+  --green-600: #16a34a;
+  --green-700: #15803d;
+  --green-800: #166534;
+  --green-900: #14532d;
+  --amber-50: #fffbeb;
+  --amber-100: #fef3c7;
+  --amber-200: #fde68a;
+  --amber-300: #fcd34d;
+  --amber-400: #fbbf24;
+  --amber-500: #f59e0b;
+  --amber-600: #d97706;
+  --amber-700: #b45309;
+  --amber-800: #92400e;
+  --amber-900: #78350f;
+  --purple-50: #faf5ff;
+  --purple-100: #f3e8ff;
+  --purple-200: #e9d5ff;
+  --purple-300: #d8b4fe;
+  --purple-400: #c084fc;
+  --purple-500: #a855f7;
+  --purple-600: #9333ea;
+  --purple-700: #7e22ce;
+  --purple-800: #6b21a8;
+  --purple-900: #581c87;
+  --space-0: 0px;
+  --space-px: 1px;
+  --space-0-5: 2px;
+  --space-1: 4px;
+  --space-1-5: 6px;
+  --space-2: 8px;
+  --space-2-5: 10px;
+  --space-3: 12px;
+  --space-3-5: 14px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-9: 36px;
+  --space-10: 40px;
+  --space-11: 44px;
+  --space-12: 48px;
+  --space-14: 56px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --space-28: 112px;
+  --space-32: 128px;
+  --space-xs: var(--space-1);
+  --space-sm: var(--space-2);
+  --space-md: var(--space-4);
+  --space-lg: var(--space-6);
+  --space-xl: var(--space-8);
+  --space-2xl: var(--space-12);
+  --space-3xl: var(--space-16);
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+  --text-4xl: 36px;
+  --text-5xl: 48px;
+  --text-6xl: 60px;
+  --display-sm: clamp(1.875rem, 1.2rem + 2.4vw, 3rem);
+  --display-md: clamp(2.25rem, 1.2rem + 4.2vw, 4.5rem);
+  --display-lg: clamp(2.75rem, 1.4rem + 5.6vw, 6rem);
+  --font-thin: 100;
+  --font-extralight: 200;
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+  --font-black: 900;
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+  --font-sans: "Nunito", "Quicksand", ui-sans-serif, sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  --radius-none: 0px;
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-2xl: 40px;
+  --radius-3xl: 48px;
+  --radius-full: 9999px;
+  --border-0: 0px;
+  --border-1: 1px;
+  --border-2: 2px;
+  --border-4: 4px;
+  --border-8: 8px;
+  --shadow-none: none;
+  --shadow-sm: 0 1px 3px rgb(139 92 246 / 0.1);
+  --shadow-md: 0 4px 12px rgb(139 92 246 / 0.15);
+  --shadow-lg: 0 10px 20px rgb(139 92 246 / 0.15);
+  --shadow-xl: 0 20px 30px rgb(139 92 246 / 0.12);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+  --surface-glass: rgb(255 255 255 / 0.12);
+  --border-glass: rgb(255 255 255 / 0.28);
+  --gradient-brand: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 45%, var(--foreground) 115%);
+  --gradient-deep: linear-gradient(160deg, var(--foreground) 0%, var(--primary-hover) 100%);
+  --gradient-spotlight: radial-gradient(90% 120% at 20% 0%, var(--primary) 0%, var(--foreground) 70%);
+  --gradient-surface: linear-gradient(180deg, var(--surface) 0%, var(--background) 100%);
+  --gradient-scrim: linear-gradient(180deg, rgb(0 0 0 / 0.15) 0%, rgb(0 0 0 / 0.78) 100%);
+  --duration-75: 75ms;
+  --duration-100: 100ms;
+  --duration-150: 150ms;
+  --duration-200: 200ms;
+  --duration-300: 300ms;
+  --duration-500: 500ms;
+  --duration-700: 700ms;
+  --duration-1000: 1000ms;
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--foreground);
+}
+body{margin:0;font-family:var(--font-sans);color:var(--foreground);background:var(--background)}</style></head>
+<body>
+<section style="background-color: var(--background); color: var(--foreground); padding: 80px 20px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 80vh; position: relative; overflow: hidden;">
+    <!-- Background visual element (simulated with a gradient/overlay for blue theme) -->
+    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, var(--gradient-deep) 0%, var(--gradient-brand) 100%); opacity: 0.8;"></div>
+
+    <div style="z-index: 10; max-width: 900px;">
+        <h1 style="font-size: var(--text-6xl); margin-bottom: var(--space-4); font-weight: var(--font-extrabold); line-height: var(--leading-tight); color: var(--primary-foreground); text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);">
+            Puppy Haven
+        </h1>
+        <p style="font-size: var(--text-2xl); margin-bottom: var(--space-6); color: var(--muted-foreground); max-width: 700px; margin-left: auto; margin-right: auto;">
+            Find your loving new companion. Open your heart to a wonderful puppy today.
+        </p>
+
+        <!-- Main Call to Action Button -->
+        <a href="#adoption-form" style="display: inline-block; background-color: var(--primary) !important; color: var(--primary-foreground); padding: 15px 35px; text-decoration: none; border-radius: var(--radius-full); font-size: var(--text-xl); font-weight: var(--font-bold); margin-top: var(--space-8); transition: all 0.3s ease; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);">
+            Adopt a Puppy Today
+        </a>
+
+        <!-- Subtle visual element placeholder (Image) -->
+        <div style="margin-top: var(--space-10); max-width: 100%; height: 300px; background-color: var(--surface-glass); border-radius: var(--radius-2xl); display: flex; justify-content: center; align-items: center; overflow: hidden; border: 1px solid var(--border-subtle);">
+            <img src="noddl_modules/starter-imagery/animal-dog.webp" alt="A happy puppy" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+    </div>
+</section>
+<section style="background-color: var(--background); padding: var(--space-12) 0; color: var(--foreground); text-align: center;">
+    <div style="max-width: 900px; margin: 0 auto;">
+        <h2 style="font-size: var(--text-4xl); margin-bottom: var(--space-6); color: var(--gradient-brand);">Welcome to Puppy Haven</h2>
+        <p style="font-size: var(--text-lg); line-height: var(--leading-relaxed); margin-bottom: var(--space-4);">
+            At Puppy Haven, our mission is simple: to connect loving families with wonderful, deserving puppies who are ready to bring joy into your home. We believe every puppy deserves a second chance at a happy life filled with unconditional love and warmth.
+        </p>
+        <p style="font-size: var(--text-lg); line-height: var(--leading-relaxed); margin-bottom: var(--space-4);">
+            We carefully curate our community of puppies, ensuring each one is healthy, happy, and ready to become the cherished companion you've been dreaming of. Discover the perfect match for your lifestyle and start your journey toward welcoming a new family member today.
+        </p>
+    </div>
+</section>
+<section style="background-color: var(--background); padding: var(--space-3xl) 0; color: var(--foreground);">
+    <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+        <h2 style="font-size: var(--text-4xl); margin-bottom: var(--space-10); font-weight: var(--font-extrabold); color: var(--primary);">Why Choose Puppy Haven?</h2>
+        <p style="font-size: var(--text-xl); margin-bottom: var(--space-20); color: var(--muted-foreground);">
+            Discover the incredible benefits of welcoming a loving new companion into your life.
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px)); gap: var(--space-6);">
+            
+            <!-- Feature Card 1 -->
+            <div style="background-color: var(--surface-glass); padding: var(--space-8); border-radius: var(--radius-2xl); border: 1px solid var(--border-glass); transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                <div style="color: var(--primary); font-size: var(--text-3xl); margin-bottom: var(--space-4);">❤️</div>
+                <h3 style="font-size: var(--text-xl); margin-bottom: var(--space-3); font-weight: var(--font-bold);">Unconditional Love</h3>
+                <p style="color: var(--muted-foreground); line-height: var(--leading-normal);">Puppies offer boundless affection and bring joy and companionship into your home every single day.</p>
+            </div>
+
+            <!-- Feature Card 2 -->
+            <div style="background-color: var(--surface-glass); padding: var(--space-8); border-radius: var(--radius-2xl); border: 1px solid var(--border-glass); transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                <div style="color: var(--primary); font-size: var(--text-3xl); margin-bottom: var(--space-4);">🐾</div>
+                <h3 style="font-size: var(--text-xl); margin-bottom: var(--space-3); font-weight: var(--font-bold);">Expert Care</h3>
+                <p style="color: var(--muted-foreground); line-height: var(--leading-normal);">We ensure every puppy receives the proper care and support needed to thrive in their new environment.</p>
+            </div>
+
+            <!-- Feature Card 3 -->
+            <div style="background-color: var(--surface-glass); padding: var(--space-8); border-radius: var(--radius-2xl); border: 1px solid var(--border-glass); transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                <div style="color: var(--primary); font-size: var(--text-3xl); margin-bottom: var(--space-4);">🏡</div>
+                <h3 style="font-size: var(--text-xl); margin-bottom: var(--space-3); font-weight: var(--font-bold);">Perfect Fit</h3>
+                <p style="color: var(--muted-foreground); line-height: var(--leading-normal);">Find the ideal match for your lifestyle and home with our carefully curated selection of puppies.</p>
+            </div>
+
+            <!-- Feature Card 4 -->
+            <div style="background-color: var(--surface-glass); padding: var(--space-8); border-radius: var(--radius-2xl); border: 1px solid var(--border-glass); transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                <div style="color: var(--primary); font-size: var(--text-3xl); margin-bottom: var(--space-4);">🌟</div>
+                <h3 style="font-size: var(--text-xl); margin-bottom: var(--space-3); font-weight: var(--font-bold);">Happy Beginnings</h3>
+                <p style="color: var(--muted-foreground); line-height: var(--leading-normal);">Start your journey with a puppy who is ready to bring endless happiness and adventure.</p>
+            </div>
+
+        </div>
+    </div>
+</section>
+<section id="gallery" style="background-color: var(--background); padding: var(--space-24) 0; display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-16);">
+    <div style="flex: 1 1 calc(33.333% - var(--space-16)); min-width: 300px; max-width: 400px; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); transition: transform 0.3s ease-in-out;">
+        <img src="noddl_modules/starter-imagery/animal-dog.webp" alt="Adorable puppy portrait" style="width: 100%; height: 250px; object-fit: cover; display: block;">
+        <div style="padding: var(--space-4); text-align: center;">
+            <h3 style="color: var(--foreground); margin-top: 0; font-size: var(--text-xl); font-weight: var(--font-bold);">Sweet Companion</h3>
+            <p style="color: var(--muted-foreground); font-size: var(--text-sm);">Ready to bring unconditional love into your life.</p>
+        </div>
+    </div>
+    <div style="flex: 1 1 calc(33.333% - var(--space-16)); min-width: 300px; max-width: 400px; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); transition: transform 0.3s ease-in-out;">
+        <img src="noddl_modules/starter-imagery/animal-dog.webp" alt="Playful puppy portrait" style="width: 100%; height: 250px; object-fit: cover; display: block;">
+        <div style="padding: var(--space-4); text-align: center;">
+            <h3 style="color: var(--foreground); margin-top: 0; font-size: var(--text-xl); font-weight: var(--font-bold);">Playful Spirit</h3>
+            <p style="color: var(--muted-foreground); font-size: var(--text-sm);">Discover the joy of having a new friend in your life.</p>
+        </div>
+    </div>
+    <div style="flex: 1 1 calc(33.333% - var(--space-16)); min-width: 300px; max-width: 400px; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); transition: transform 0.3s ease-in-out;">
+        <img src="noddl_modules/starter-imagery/animal-dog.webp" alt="Cuddly puppy portrait" style="width: 100%; height: 250px; object-fit: cover; display: block;">
+        <div style="padding: var(--space-4); text-align: center;">
+            <h3 style="color: var(--foreground); margin-top: 0; font-size: var(--text-xl); font-weight: var(--font-bold);">Cuddle Bug</h3>
+            <p style="color: var(--muted-foreground); font-size: var(--text-sm);">Perfect for adding warmth to your life.</p>
+        </div>
+    </div>
+    <div style="flex: 1 1 calc(33.333% - var(--space-16)); min-width: 300px; max-width: 400px; border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); transition: transform 0.3s ease-in-out;">
+        <img src="noddl_modules/starter-imagery/animal-dog.webp" alt="Puppy looking happy" style="width: 100%; height: 250px; object-fit: cover; display: block;">
+        <div style="padding: var(--space-4); text-align: center;">
+            <h3 style="color: var(--foreground); margin-top: 0; font-size: var(--text-xl); font-weight: var(--font-bold);">Happy Heart</h3>
+            <p style="color: var(--muted-foreground); font-size: var(--text-sm);">Experience pure happiness in your life.</p>
+        </div>
+    </div>
+</section>
+<section id="testimonials" style="background-color: var(--background); padding: var(--space-3xl) 0; color: var(--foreground);">
+    <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+        <h2 style="font-size: var(--text-4xl); margin-bottom: var(--space-10); color: var(--gradient-brand);">Trusted by Happy Families</h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px)); gap: var(--space-8);">
+            
+            <!-- Testimonial Card 1 -->
+            <div style="background-color: var(--surface-glass); padding: var(--space-6) border-radius: var(--radius-xl); border: 1px solid var(--border-glass); box-shadow: var(--shadow-md); transition: transform 0.3s ease;">
+                <p style="font-style: italic; margin-bottom: var(--space-4); font-size: var(--text-lg); color: var(--foreground);">
+                    "Bringing our new puppy home was the best decision. Puppy Haven provided everything we needed for a loving companion."
+                </p>
+                <div style="display: flex; justify-content: center; align-items: center; margin-top: var(--space-4);">
+                    <img src="noddl_modules/starter-imagery/animal-dog.webp" alt="Happy puppy" style="width: 80px; height: 80px; object-fit: cover; border-radius: var(--radius-lg); margin-right: var(--space-4);">
+                    <p style="font-weight: var(--font-semibold); color: var(--primary);">Sarah M.</p>
+                </div>
+            </div>
+
+            <!-- Testimonial Card 2 -->
+            <div style="background-color: var(--surface-glass); padding: var(--space-6) border-radius: var(--radius-xl); border: 1px solid var(--border-glass); box-shadow: var(--shadow-md); transition: transform 0.3s ease;">
+                <p style="font-style: italic; margin-bottom: var(--space-4); font-size: var(--text-lg); color: var(--foreground);">
+                    "The process was smooth, and we found the perfect match for our lifestyle. Highly recommend Puppy Haven for any prospective adopter."
+                </p>
+                <div style="display: flex; justify-content: center; align-items: center; margin-top: var(--space-4);">
+                    <img src="noddl_modules/starter-imagery/animal-dog.webp" alt="Happy puppy" style="width: 80px; height: 80px; object-fit: cover; border-radius: var(--radius-lg); margin-right: var(--space-4);">
+                    <p style="font-weight: var(--font-semibold); color: var(--primary);">David L.</p>
+                </div>
+            </div>
+
+            <!-- Testimonial Card 3 -->
+            <div style="background-color: var(--surface-glass); padding: var(--space-6) border-radius: var(--radius-xl); border: 1px solid var(--border-glass); box-shadow: var(--shadow-md); transition: transform 0.3s ease;">
+                <p style="font-style: italic; margin-bottom: var(--space-4); font-size: var(--text-lg); color: var(--foreground);">
+                    "From the first interaction to bringing our puppy home, the care and attention at Puppy Haven were exceptional. A truly wonderful experience."
+                </p>
+                <div style="display: flex; justify-content: center; align-items: center; margin-top: var(--space-4);">
+                    <img src="noddl_modules/starter-imagery/animal-dog.webp" alt="Happy puppy" style="width: 80px; height: 80px; object-fit: cover; border-radius: var(--radius-lg); margin-right: var(--space-4);">
+                    <p style="font-weight: var(--font-semibold); color: var(--primary);">Jessica R.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+<section style="background-color: var(--background); color: var(--foreground); padding: var(--space-3xl) 4rem; display: flex; justify-content: center; align-items: center; text-align: center;">
+    <div style="max-width: 800px; width: 100%; padding: var(--space-6) 2rem; background-color: var(--surface-glass); border-radius: var(--radius-3xl); box-shadow: var(--shadow-2xl); border: 1px solid var(--border-subtle);">
+        <h2 style="font-size: var(--text-4xl); margin-bottom: var(--space-4); color: var(--gradient-brand); font-weight: var(--font-extrabold);">Ready to Welcome Your Best Friend?</h2>
+        <p style="font-size: var(--text-xl); margin-bottom: var(--space-6); line-height: var(--leading-relaxed); color: var(--muted-foreground);">
+            Find the perfect loving new companion waiting for you at Puppy Haven.
+        </p>
+
+        <h3 style="font-size: var(--text-2xl); margin-bottom: var(--space-4); color: var(--primary);">Start Your Adoption Journey</h3>
+
+        <form style="display: flex; flex-direction: column; gap: var(--space-4);">
+            <input type="text" placeholder="Your Name" style="padding: var(--space-3) var(--space-5); border: 1px solid var(--border-control); border-radius: var(--radius-lg); background-color: var(--surface); color: var(--foreground); font-size: var(--text-base); transition: border-color 0.3s; margin-bottom: var(--space-3);">
+            <input type="email" placeholder="Your Email" style="padding: var(--space-3) var(--space-5); border: 1px solid var(--border-control); border-radius: var(--radius-lg); background-color: var(--surface); color: var(--foreground); font-size: var(--text-base); transition: border-color 0.3s; margin-bottom: var(--space-3);">
+            <input type="tel" placeholder="Your Phone Number (Optional)" style="padding: var(--space-3) var(--space-5); border: 1px solid var(--border-control); border-radius: var(--radius-lg); background-color: var(--surface); color: var(--foreground); font-size: var(--text-base); transition: border-color 0.3s; margin-bottom: var(--space-3);">
+            <textarea placeholder="Tell us about your ideal puppy match (Optional)" rows="4" style="padding: var(--space-3) var(--space-5); border: 1px solid var(--border-control); border-radius: var(--radius-lg); background-color: var(--surface); color: var(--foreground); font-size: var(--text-base); transition: border-color 0.3s; margin-bottom: var(--space-4); resize: vertical;"></textarea>
+            
+            <button type="submit" style="background-color: var(--gradient-brand); color: var(--primary-foreground); padding: var(--space-3) var(--space-8); border: none; border-radius: var(--radius-full); font-size: var(--text-lg); font-weight: var(--font-bold); cursor: pointer; transition: all 0.3s ease; margin-top: var(--space-4); width: 100%; text-transform: uppercase; letter-spacing: var(--space-1);">
+                Adopt a Puppy Today
+            </button>
+        </form>
+    </div>
+</section>
+<section style="background-color: var(--background); padding: var(--space-3xl) 0; text-align: center; border-top: var(--border-2); border-bottom: var(--border-2);">
+    <div style="max-width: 900px; margin: 0 auto; padding: var(--space-0-5);">
+        <h2 style="font-size: var(--text-4xl); color: var(--foreground); margin-bottom: var(--space-4); font-weight: var(--font-extrabold);">Ready to Welcome Your Best Friend?</h2>
+        <p style="font-size: var(--text-xl); color: var(--muted-foreground); margin-bottom: var(--space-8); line-height: var(--leading-relaxed);">
+            Your loving new companion is waiting. Take the next step in bringing unconditional joy into your life.
+        </p>
+        
+        <div style="display: flex; justify-content: center; gap: var(--space-4); flex-wrap: wrap;">
+            <button style="background-color: var(--gradient-brand); color: var(--primary-foreground); padding: var(--space-4) var(--space-12); border: none; border-radius: var(--radius-full); font-size: var(--text-xl); font-weight: var(--font-bold); cursor: pointer; text-transform: uppercase; transition: all 0.3s ease; box-shadow: var(--shadow-md);">
+                Adopt a Puppy Today
+            </button>
+            <button style="background-color: var(--secondary); color: var(--secondary-foreground); padding: var(--space-4) var(--space-12); border: 1px solid var(--secondary); border-radius: var(--radius-full); font-size: var(--text-xl); font-weight: var(--font-bold); cursor: pointer; transition: all 0.3s ease;">
+                Find Your Perfect Puppy Now
+            </button>
+        </div>
+        
+        <p style="margin-top: var(--space-6); font-size: var(--text-sm); color: var(--muted-foreground);">
+            Complete our simple application to start your journey.
+        </p>
+    </div>
+</section>
+</body></html>

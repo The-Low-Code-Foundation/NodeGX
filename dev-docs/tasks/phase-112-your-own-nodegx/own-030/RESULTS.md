@@ -41,15 +41,81 @@ The s0 guesses from the task file, made specific enough to grade:
 
 ## 2. Per run
 
-_After the series._
+The series ran 2026-10-29 08:45–10:15 (`runs/lanes.log`), 48 steps, every one exit 0. `node analyse.mjs` makes these
+tables from the ledgers and `look/checks.json`. Graph's cost includes S0's round-0 decision calls it replayed; guided's
+includes the card and section calls it reused; emit costs nothing beyond graph.
+
+| brief | lane | min | builder calls | reviewer | tokens in / out | kept round | defects/line | reviewer "sounds real" | broken | blank | phone overflow px | small text | low contrast (d/p) | clipped | broken images |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| puppy | graph | 17.2 | 142 | 76 | 32157 / 6418 | 4 | 0.32 | 0.97 | 0 | 0 | 295 | 0 | 0 / 0 | 0 | 0 |
+| puppy | emit | 0 | 0 | 0 | 0 / 0 | — | — | — | — | 0 | 0 | 0 | 0 / 0 | 0 | 0 |
+| puppy | guided | 8.1 | 20 | 21 | 13924 / 12937 | 0 | 0.33 | 0.75 | 0 | 0 | 10 | 0 | 2 / 2 | 0 | 10 |
+| puppy | bare | 2.2 | 1 | 0 | 39 / 3962 | — | — | — | 0 | 0 | 0 | 0 | 2 / 2 | 0 | 0 |
+| bakery | graph | 4.7 | 102 | 79 | 22091 / 3496 | 3 | 0 | 0.98 | 0 | 0 | 0 | 0 | 9 / 9 | 0 | 0 |
+| bakery | emit | 0 | 0 | 0 | 0 / 0 | — | — | — | — | 0 | 0 | 0 | 9 / 9 | 0 | 0 |
+| bakery | guided | 4.2 | 16 | 18 | 9839 / 6231 | 2 | 0 | 0.98 | 0 | 0 | 0 | 0 | 6 / 6 | 0 | 9 |
+| bakery | bare | 1.6 | 1 | 0 | 51 / 2897 | — | — | — | 0 | 0 | 445 | 0 | 1 / 1 | 0 | 0 |
+| running | graph | 6.1 | 97 | 94 | 21492 / 4972 | 4 | 0.48 | 0.54 | 0 | 0 | 0 | 0 | 13 / 13 | 0 | 0 |
+| running | emit | 0 | 0 | 0 | 0 / 0 | — | — | — | — | 0 | 0 | 0 | 13 / 13 | 0 | 0 |
+| running | guided | 5.3 | 19 | 18 | 11979 / 8309 | 1 | 0.19 | 0.67 | 0 | 0 | 0 | 0 | 8 / 8 | 0 | 0 |
+| running | bare | 1.2 | 1 | 0 | 43 / 2205 | — | — | — | 0 | 0 | 0 | 0 | 11 / 11 | 0 | 0 |
+| jazz | graph | 6 | 114 | 101 | 25817 / 4831 | 3 | 0.36 | 0.97 | 0 | 0 | 0 | 0 | 1 / 1 | 0 | 0 |
+| jazz | emit | 0 | 0 | 0 | 0 / 0 | — | — | — | — | 0 | 0 | 0 | 1 / 1 | 0 | 0 |
+| jazz | guided | 7.6 | 23 | 21 | 15848 / 11420 | 1 | 0.38 | 0.76 | 0 | 0 | 0 | 0 | 5 / 5 | 0 | 0 |
+| jazz | bare | 1.8 | 1 | 0 | 55 / 3201 | — | — | — | 0 | 0 | 0 | 0 | 1 / 1 | 0 | 0 |
+| pottery | graph | 3.1 | 69 | 51 | 14123 / 2744 | 1 | 0.03 | 0.98 | 0 | 0 | 0 | 0 | 1 / 1 | 0 | 0 |
+| pottery | emit | 0 | 0 | 0 | 0 / 0 | — | — | — | — | 0 | 0 | 0 | 1 / 1 | 0 | 0 |
+| pottery | guided | 6.2 | 17 | 18 | 11711 / 9302 | 2 | 0.16 | 0.92 | 0 | 0 | 10 | 0 | 0 / 0 | 0 | 8 |
+| pottery | bare | 1.9 | 1 | 0 | 45 / 3241 | — | — | — | 0 | 0 | 37 | 0 | 3 / 3 | 0 | 0 |
+| plumber | graph | 4.1 | 72 | 75 | 13338 / 2532 | 4 | 0.11 | 0.98 | 0 | 0 | 402 | 0 | 0 / 0 | 0 | 0 |
+| plumber | emit | 0 | 0 | 0 | 0 / 0 | — | — | — | — | 0 | 0 | 0 | 0 / 0 | 0 | 0 |
+| plumber | guided | 5.2 | 17 | 18 | 10035 / 8293 | 2 | 0.1 | 0.82 | 0 | 0 | 35 | 0 | 0 / 0 | 0 | 0 |
+| plumber | bare | 1.1 | 1 | 0 | 45 / 2069 | — | — | — | 0 | 0 | 0 | 0 | 0 / 0 | 0 | 0 |
 
 ## 3. Per lane
 
-_After the series._
+| lane | min | builder calls | tokens out | "sounds real" | runs broken | runs with phone overflow | runs with low contrast | runs with broken images |
+|---|---|---|---|---|---|---|---|---|
+| graph | 5.3 | 100 | 4164 | 0.97 | 0 | 2 | 4 | 0 |
+| emit | 0 | 0 | 0 | — | 0 | 0 | 4 | 0 |
+| guided | 5.8 | 18 | 8806 | 0.79 | 0 | 3 | 4 | 3 |
+| bare | 1.7 | 1 | 3049 | — | 0 | 2 | 5 | 0 |
+
+What the numbers say, and what they cannot see:
+
+- **No lane broke the way prediction 3 feared.** No unpaired tags, no blank page, no section without words in any
+  lane. code-guided's breakage is quieter:
+  - **broken images** on 3 of 6: it wrote `noddl_modules/` for `noodl_modules/` (puppy, bakery, pottery);
+  - **placeholders** left in the words ("[Insert Start Time Here]", jazz);
+  - **a squeezed column** (jazz: the line-up runs one or two words to a line down the middle of the page).
+  The look checks see the images and **miss the other two**: no check reads a column's width against its words, and
+  no check reads brackets. The reviewer half-sees them: guided's "sounds real" median is 0.79 against graph's 0.97.
+- **emit is not a faithful copy of the runtime on one point.** The graph lane overflows the phone on puppy (295 px)
+  and plumber (402 px); emit, from the same tree, does not. The overflow is a sentence in a `badge` pill: the runtime's
+  content-sized Text never wraps, emit's `width:auto` does. Filed as `P112-OWN030-PILLSENTENCE` (kit). For the
+  comparison, emit is the more forgiving of the two on this one shape.
+- **The low-contrast counts are the kit's, not the lanes'.** Graph and emit share the token sheet and match exactly
+  (running 13/13, bakery 9/9). The harness sets `--primary` to the 600 of the hue; green-600 and amber-600 are 3.30 and
+  3.19 against white. Nothing in the kit checks the pair. Filed as `P112-OWN030-PRIMARYCONTRAST` (kit). guided inherits
+  the same sheet, so it shows the same pattern; bare chose its own colours and fails on running (11) the same way.
+- **Cost.** graph: median 100 builder calls and 4,164 output tokens, 5.3 min. guided: 18 calls but 8,806 output tokens
+  (it writes markup), 5.8 min. bare: one call, ~3,000 tokens, under 2 min. Prediction 5 holds on tokens (6/6 briefs)
+  and on minutes only for the median (guided slower on 3 of 6).
+- **What the eye sees first (Opus, before the ranking, not a grade).** bare is far better than predicted: on jazz it
+  is a coherent dark page with prices and a line-up. That is what the blind ranking is for.
+
+**OWN-029 s3 in these runs (the graph lane is s3's validation).** S13's exclude repair fired on bakery (the gallery and
+the call to action both repeated the feature cards' items); bakery reached 0 defects/line at round 3. S14from/S14list
+never fired: no page said "from $X" against a list. The shape-judge floor let running keep rounds 3 and 4 with the
+words judge's "organised" at 0.15 (shape 0.915): the floor reads the outline, as designed. **The peak ratchet never
+bound:** every revert in the six runs was on defects per line (e.g. puppy r2/r3 at 0.54/0.51 against 0.43), and every
+kept round's shape was within 0.1 of the peak (the closest: jazz r3, 0.837 against 0.902, and bakery r1, 0.815 against
+0.896). It is a guard that this series did not test.
 
 ## 4. Richard's ranking (blind), then the lanes revealed
 
-_After the gallery._
+The gallery: https://claude.ai/artifact/GrLH8ZBCXAHCkBaEtgC9Wy (seed 30, key in `runs/blind-key.json`; ranks save to the
+page's db as `rankings/<brief>`). _Waiting on Richard._
 
 ## 5. The predictions, graded
 

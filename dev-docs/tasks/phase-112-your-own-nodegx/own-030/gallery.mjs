@@ -39,7 +39,11 @@ const cards = BRIEFS.map((b) => {
   <div class="frame phone">${p ? `<img src="${p}" alt="page ${L}, phone" loading="lazy">` : '<p class="small">no screenshot</p>'}</div></div></figure>`;
   }).join('\n');
   return `<section class="brief" id="${b}"><p class="eyebrow">${esc(b)}</p><h2>“${esc(request(b))}”</h2>
-<div class="grid">${figs}</div></section>`;
+<div class="grid">${figs}</div>
+<form class="rank" data-brief="${b}"><span class="small">Your ranking, 1 = best:</span>
+${'ABCD'.split('').map((L) => `<label>${L} <select name="${L}"><option value="">–</option>${[1, 2, 3, 4].map((n) => `<option>${n}</option>`).join('')}</select></label>`).join(' ')}
+<input name="why" placeholder="a word on why (optional)" aria-label="why, optional">
+<button type="submit">Save</button> <output class="small"></output></form></section>`;
 }).join('\n');
 fs.writeFileSync(path.join(HERE, 'runs', 'blind-key.json'), JSON.stringify({ seed: SEED, key }, null, 1));
 
@@ -64,6 +68,12 @@ figcaption b { font:600 1.4rem/1 var(--mono); }
 .views { display:grid; grid-template-columns:minmax(0,3fr) minmax(0,1fr); gap:8px; }
 .frame { height:520px; overflow-y:auto; border:1px solid var(--rule); border-radius:4px; background:var(--panel); }
 .frame img { display:block; width:100%; height:auto; }
+.rank { display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px; padding:12px 14px; border:1px solid var(--rule); border-radius:6px; background:var(--panel); }
+.rank label { font:600 1rem/1 var(--mono); display:flex; gap:6px; align-items:center; }
+.rank select, .rank input, .rank button { font:inherit; font-size:.95rem; color:var(--ink); background:var(--paper); border:1px solid var(--rule); border-radius:4px; padding:5px 8px; }
+.rank input { flex:1 1 200px; min-width:0; }
+.rank button { background:var(--signal); color:#fff; border-color:var(--signal); cursor:pointer; }
+.rank button:focus-visible, .rank select:focus-visible, .rank input:focus-visible { outline:2px solid var(--signal); outline-offset:2px; }
 @media (max-width:900px) { .grid { grid-template-columns:1fr; } }
 @media (max-width:520px) { .views { grid-template-columns:1fr; } .frame { height:420px; } }
 </style>
@@ -75,6 +85,31 @@ figcaption b { font:600 1.4rem/1 var(--mono); }
   <p><b>For each brief, rank A–D from best (1) to worst (4)</b> as the first draft you would rather start from. Which letter is which way is revealed after you rank.</p>
 </header>
 ${cards}
+<p class="small" id="store-note">Your ranking saves to this page's own store, where Claude reads it. If saving is not available here, the Save button shows your ranking as a line to paste back instead.</p>
+<script>
+// ranks live in the page's db: rankings/<brief> = { ranks: { A: 1, … }, why, at }. Without a db, Save shows the line.
+(async () => {
+  const forms = [...document.querySelectorAll('form.rank')];
+  const db = window.claude && window.claude.use ? await window.claude.use('db') : null;
+  const fill = (f, d) => { if (!d) return; for (const L of 'ABCD') if (d.ranks && d.ranks[L]) f.elements[L].value = String(d.ranks[L]); if (d.why) f.elements.why.value = d.why; f.querySelector('output').textContent = 'saved'; };
+  for (const f of forms) {
+    const brief = f.dataset.brief, out = f.querySelector('output');
+    if (db) { try { const snap = await db.doc('rankings/' + brief).get(); if (snap.exists) fill(f, snap.data()); } catch (e) {} }
+    f.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const ranks = {}; for (const L of 'ABCD') ranks[L] = Number(f.elements[L].value) || null;
+      const vals = Object.values(ranks);
+      if (vals.some((v) => !v) || new Set(vals).size !== 4) { out.textContent = 'give A–D each a different rank, 1 to 4'; return; }
+      const why = f.elements.why.value.trim().slice(0, 300);
+      const line = brief + ': ' + 'ABCD'.split('').map((L) => L + '=' + ranks[L]).join(' ') + (why ? ' (' + why + ')' : '');
+      if (!db) { out.textContent = line; return; }
+      out.textContent = 'saving…';
+      try { await db.doc('rankings/' + brief).set({ ranks, why, at: new Date().toISOString() }); out.textContent = 'saved'; }
+      catch (e) { out.textContent = 'could not save here; paste this back: ' + line; }
+    });
+  }
+})();
+</script>
 <p class="small">OWN-030 · <a href="https://nodegx.io" target="_blank" rel="noopener" style="color:var(--signal)">nodegx.io ↗</a></p>
 </div>`;
 fs.writeFileSync(path.join(OUT, 'index.html'), html);

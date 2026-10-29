@@ -1,0 +1,41 @@
+{
+ "seed": 30,
+ "key": {
+  "puppy": {
+   "A": "emit",
+   "B": "guided",
+   "C": "bare",
+   "D": "graph"
+  },
+  "bakery": {
+   "A": "guided",
+   "B": "emit",
+   "C": "graph",
+   "D": "bare"
+  },
+  "running": {
+   "A": "bare",
+   "B": "graph",
+   "C": "emit",
+   "D": "guided"
+  },
+  "jazz": {
+   "A": "bare",
+   "B": "graph",
+   "C": "guided",
+   "D": "emit"
+  },
+  "pottery": {
+   "A": "graph",
+   "B": "guided",
+   "C": "emit",
+   "D": "bare"
+  },
+  "plumber": {
+   "A": "graph",
+   "B": "emit",
+   "C": "bare",
+   "D": "guided"
+  }
+ }
+}

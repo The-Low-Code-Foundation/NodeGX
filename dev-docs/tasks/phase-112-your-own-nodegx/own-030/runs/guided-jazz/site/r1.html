@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>The Blue Room</title>
+<link rel="stylesheet" href="noodl_modules/inter/styles.css">
+<link rel="stylesheet" href="noodl_modules/lucide-icons/styles.css">
+<style>:root {
+  --primary: var(--purple-600);
+  --primary-hover: var(--purple-700);
+  --primary-foreground: #ffffff;
+  --secondary: #71717a;
+  --secondary-hover: #52525b;
+  --secondary-foreground: #ffffff;
+  --destructive: #dc2626;
+  --destructive-hover: #b91c1c;
+  --destructive-foreground: #ffffff;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+  --background: #ffffff;
+  --foreground: #18181b;
+  --surface: #fafafa;
+  --surface-raised: #ffffff;
+  --border: #e4e4e7;
+  --border-subtle: #f4f4f5;
+  --border-strong: #d4d4d8;
+  --border-control: #71717a;
+  --ring: var(--purple-500);
+  --ring-offset: #ffffff;
+  --ring-width: 3px;
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1e293b;
+  --gray-900: #0f172a;
+  --gray-950: #020617;
+  --blue-50: #eff6ff;
+  --blue-100: #dbeafe;
+  --blue-200: #bfdbfe;
+  --blue-300: #93c5fd;
+  --blue-400: #60a5fa;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --blue-700: #1d4ed8;
+  --blue-800: #1e40af;
+  --blue-900: #1e3a8a;
+  --red-50: #fef2f2;
+  --red-100: #fee2e2;
+  --red-200: #fecaca;
+  --red-300: #fca5a5;
+  --red-400: #f87171;
+  --red-500: #ef4444;
+  --red-600: #dc2626;
+  --red-700: #b91c1c;
+  --red-800: #991b1b;
+  --red-900: #7f1d1d;
+  --green-50: #f0fdf4;
+  --green-100: #dcfce7;
+  --green-200: #bbf7d0;
+  --green-300: #86efac;
+  --green-400: #4ade80;
+  --green-500: #22c55e;
+  --green-600: #16a34a;
+  --green-700: #15803d;
+  --green-800: #166534;
+  --green-900: #14532d;
+  --amber-50: #fffbeb;
+  --amber-100: #fef3c7;
+  --amber-200: #fde68a;
+  --amber-300: #fcd34d;
+  --amber-400: #fbbf24;
+  --amber-500: #f59e0b;
+  --amber-600: #d97706;
+  --amber-700: #b45309;
+  --amber-800: #92400e;
+  --amber-900: #78350f;
+  --purple-50: #faf5ff;
+  --purple-100: #f3e8ff;
+  --purple-200: #e9d5ff;
+  --purple-300: #d8b4fe;
+  --purple-400: #c084fc;
+  --purple-500: #a855f7;
+  --purple-600: #9333ea;
+  --purple-700: #7e22ce;
+  --purple-800: #6b21a8;
+  --purple-900: #581c87;
+  --space-0: 0px;
+  --space-px: 1px;
+  --space-0-5: 2px;
+  --space-1: 4px;
+  --space-1-5: 6px;
+  --space-2: 8px;
+  --space-2-5: 10px;
+  --space-3: 12px;
+  --space-3-5: 14px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-9: 36px;
+  --space-10: 40px;
+  --space-11: 44px;
+  --space-12: 48px;
+  --space-14: 56px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --space-28: 112px;
+  --space-32: 128px;
+  --space-xs: var(--space-1);
+  --space-sm: var(--space-2);
+  --space-md: var(--space-4);
+  --space-lg: var(--space-6);
+  --space-xl: var(--space-8);
+  --space-2xl: var(--space-12);
+  --space-3xl: var(--space-16);
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+  --text-4xl: 36px;
+  --text-5xl: 48px;
+  --text-6xl: 60px;
+  --display-sm: clamp(1.875rem, 1.2rem + 2.4vw, 3rem);
+  --display-md: clamp(2.25rem, 1.2rem + 4.2vw, 4.5rem);
+  --display-lg: clamp(2.75rem, 1.4rem + 5.6vw, 6rem);
+  --font-thin: 100;
+  --font-extralight: 200;
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+  --font-black: 900;
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+  --font-sans: system-ui, -apple-system, sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  --radius-none: 0px;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --radius-2xl: 10px;
+  --radius-3xl: 12px;
+  --radius-full: 9999px;
+  --border-0: 0px;
+  --border-1: 1px;
+  --border-2: 2px;
+  --border-4: 4px;
+  --border-8: 8px;
+  --shadow-none: none;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
+  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+  --surface-glass: rgb(255 255 255 / 0.12);
+  --border-glass: rgb(255 255 255 / 0.28);
+  --gradient-brand: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 45%, var(--foreground) 115%);
+  --gradient-deep: linear-gradient(160deg, var(--foreground) 0%, var(--primary-hover) 100%);
+  --gradient-spotlight: radial-gradient(90% 120% at 20% 0%, var(--primary) 0%, var(--foreground) 70%);
+  --gradient-surface: linear-gradient(180deg, var(--surface) 0%, var(--background) 100%);
+  --gradient-scrim: linear-gradient(180deg, rgb(0 0 0 / 0.15) 0%, rgb(0 0 0 / 0.78) 100%);
+  --duration-75: 75ms;
+  --duration-100: 100ms;
+  --duration-150: 150ms;
+  --duration-200: 200ms;
+  --duration-300: 300ms;
+  --duration-500: 500ms;
+  --duration-700: 700ms;
+  --duration-1000: 1000ms;
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--foreground);
+}
+body{margin:0;font-family:var(--font-sans);color:var(--foreground);background:var(--background)}</style></head>
+<body>
+<section style="background-color: var(--background); padding: 64px 24px; text-align: center; border-bottom: var(--border-2); border-top: var(--border-2);">
+    <div style="max-width: 900px; margin: 0 auto; color: var(--foreground);">
+        <h1 style="font-family: var(--font-serif); font-size: var(--text-6xl); margin-bottom: var(--space-4); color: var(--primary);">
+            A Jazz Evening
+        </h1>
+        <h2 style="font-family: var(--font-light); font-size: var(--text-3xl); margin-bottom: var(--space-6); color: var(--muted);">
+            At The Blue Room
+        </h2>
+        <p style="font-family: var(--font-normal); font-size: var(--text-xl); margin-bottom: var(--space-8); color: var(--muted);">
+            An elegant evening dedicated to the timeless art of jazz. Experience sophisticated ambiance and exceptional musical performance.
+        </p>
+        <div style="margin-top: var(--space-10); display: flex; justify-content: center; gap: var(--space-16);">
+            <a href="#tickets" style="background-color: var(--primary); color: var(--primary-foreground); padding: var(--space-4) var(--space-8); text-decoration: none; border-radius: var(--radius-lg); font-weight: var(--font-bold); font-size: var(--text-lg); transition: background-color 0.3s ease; border: 2px solid var(--primary); box-shadow: var(--shadow-md);">
+                Purchase Tickets
+            </a>
+            <a href="#lineup" style="background-color: transparent; color: var(--primary); padding: var(--space-4) var(--space-8); text-decoration: none; border-radius: var(--radius-lg); font-weight: var(--font-semibold); font-size: var(--text-lg); transition: background-color 0.3s ease; border: 2px solid var(--primary);">
+                View Line-up
+            </a>
+        </div>
+    </div>
+</section>
+<section style="padding: var(--space-20) 0; background-color: var(--background); color: var(--foreground);">
+    <div style="max-width: var(--space-12); margin: 0 auto; text-align: center;">
+        <h2 style="font-size: var(--text-3xl) margin-bottom: var(--space-10); color: var(--primary);">The Evening's Line-Up</h2>
+        <p style="font-size: var(--text-lg) margin-bottom: var(--space-10); color: var(--muted-foreground);">An exquisite selection of musicians curated for a truly dark and elegant jazz experience.</p>
+
+        <div style="display: flex; flex-direction: column; gap: var(--space-10);">
+            
+            <!-- Musician 1 -->
+            <div style="border-bottom: 1px solid var(--border-subtle); padding-bottom: var(--space-10);">
+                <h3 style="font-size: var(--text-xl) margin-bottom: var(--space-4); color: var(--primary);">Featured Artist</h3>
+                <p style="font-size: var(--text-2xl) margin-bottom: var(--space-4); font-weight: var(--font-semibold);">The Velvet Trio</p>
+                <p style="font-size: var(--text-base); color: var(--muted-foreground);">A sophisticated ensemble known for their timeless, nuanced interpretations of classic jazz standards.</p>
+            </div>
+
+            <!-- Musician 2 -->
+            <div style="border-bottom: 1px solid var(--border-subtle); padding-bottom: var(--space-10);">
+                <h3 style="font-size: var(--text-xl) margin-bottom: var(--space-4); color: var(--primary);">Accompaniment</h3>
+                <p style="font-size: var(--text-2xl) margin-bottom: var(--space-4); font-weight: var(--font-semibold);">Evelyn Reed</p>
+                <p style="font-size: var(--text-base); color: var(--muted-foreground);">A master of the piano, providing the perfect, understated backdrop to the evening's atmosphere.</p>
+            </div>
+
+            <!-- Musician 3 -->
+            <div style="border-bottom: 1px solid var(--border-subtle); padding-bottom: var(--space-10);">
+                <h3 style="font-size: var(--text-xl) margin-bottom: var(--space-4); color: var(--primary);">Special Guest</h3>
+                <p style="font-size: var(--text-2xl) margin-bottom: var(--space-4); font-weight: var(--font-semibold);">Miles Ellington</p>
+                <p style="font-size: var(--text-base); color: var(--muted-foreground);">Bringing a touch of modern elegance to the traditional jazz framework.</p>
+            </div>
+
+        </div>
+        
+        <div style="margin-top: var(--space-12); padding: var(--space-8); background-color: var(--surface-glass); border-radius: var(--radius-lg); border: 1px solid var(--border-subtle);">
+            <p style="font-size: var(--text-lg) margin-bottom: var(--space-4); font-style: var(--font-light); color: var(--foreground);">The musical direction for this evening is a curated journey through the golden eras of jazz, emphasizing smooth improvisation and intimate performance.</p>
+        </div>
+    </div>
+</section>
+<section style="background-color: var(--background); padding: var(--space-3xl) 0; color: var(--foreground); border-top: var(--border-2); border-bottom: var(--border-2);">
+    <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+        <h2 style="font-family: var(--font-serif); font-size: var(--text-4xl); margin-bottom: var(--space-6); color: var(--primary);">The Blue Room</h2>
+        <p style="font-family: var(--font-light); font-size: var(--text-lg); line-height: var(--leading-relaxed); margin-bottom: var(--space-4); max-width: 800px; margin-left: auto; margin-right: auto;">
+            An intimate sanctuary dedicated to the timeless art of jazz. The Blue Room offers an evening steeped in classic elegance, where the atmosphere is refined, the music is soulful, and the experience is purely immersive.
+        </p>
+        <p style="font-family: var(--font-light); font-size: var(--text-lg); line-height: var(--leading-relaxed); margin-bottom: var(--space-4); max-width: 800px; margin-left: auto; margin-right: auto;">
+            We invite you to step into an atmosphere of sophisticated charm, perfect for those who appreciate the nuanced beauty of live jazz. Prepare for an evening where every note tells a story, and every moment is savored.
+        </p>
+    </div>
+</section>
+<section style="background-color: var(--background); padding: var(--space-24); border-radius: var(--radius-2xl); margin-bottom: var(--space-24); border: 1px solid var(--border-subtle);">
+    <h2 style="font-size: var(--text-3xl); font-weight: var(--font-extrabold); margin-bottom: var(--space-16); text-align: center; color: var(--foreground);">How to Secure Your Evening</h2>
+    
+    <div style="display: flex; flex-direction: column; gap: var(--space-12);">
+        
+        <div style="border: 1px solid var(--border-subtle); padding: var(--space-8); border-radius: var(--radius-lg); background-color: var(--surface-glass);">
+            <h3 style="font-size: var(--text-xl); font-weight: var(--font-bold); margin-bottom: var(--space-6); color: var(--primary);">Step 1: Select Your Experience</h3>
+            <p style="color: var(--muted-foreground); margin-bottom: var(--space-4); line-height: var(--leading-normal);">Review the available evening details and choose the package that suits your preference for an elegant jazz experience.</p>
+        </div>
+
+        <div style="border: 1px solid var(--border-subtle); padding: var(--space-8); border-radius: var(--radius-lg); background-color: var(--surface-glass);">
+            <h3 style="font-size: var(--text-xl); font-weight: var(--font-bold); margin-bottom: var(--space-6); color: var(--primary);">Step 2: Purchase Tickets</h3>
+            <p style="color: var(--muted-foreground); margin-bottom: var(--space-4); line-height: var(--leading-normal);">Proceed to the secure portal to finalize your reservation for the jazz evening at The Blue Room.</p>
+        </div>
+
+        <div style="border: 1px solid var(--border-subtle); padding: var(--space-8); border-radius: var(--radius-lg); background-color: var(--surface-glass);">
+            <h3 style="font-size: var(--text-xl); font-weight: var(--font-bold); margin-bottom: var(--space-6); color: var(--primary);">Step 3: Arrival and Enjoy</h3>
+            <p style="color: var(--muted-foreground); line-height: var(--leading-normal);">Upon ticket confirmation, you will receive further details regarding the location and schedule for your arrival at The Blue Room.</p>
+        </div>
+
+    </div>
+</section>
+<section style="background-color: var(--background); padding: var(--space-24); color: var(--foreground); border-top: var(--border-2); border-bottom: var(--border-2);">
+    <h2 style="font-family: var(--font-serif); font-size: var(--text-3xl); margin-bottom: var(--space-16); color: var(--gradient-deep);">Location & Hours</h2>
+    <div style="display: flex; flex-direction: column; gap: var(--space-12);">
+        <div style="border-left: 4px solid var(--gradient-brand); padding-left: var(--space-4); background-color: var(--surface-glass); padding: var(--space-6); border-radius: var(--radius-lg);">
+            <h3 style="font-family: var(--font-semibold); margin-top: 0; color: var(--primary-foreground);">Venue</h3>
+            <p style="margin-bottom: var(--space-4); font-size: var(--text-lg);">The Blue Room</p>
+            <p style="margin-bottom: var(--space-4); font-size: var(--text-base);">Details regarding the precise location and directions to this elegant venue will be provided upon ticket purchase.</p>
+        </div>
+        
+        <div style="border-left: 4px solid var(--gradient-brand); padding-left: var(--space-4); background-color: var(--surface-glass); padding: var(--space-6); border-radius: var(--radius-lg);">
+            <h3 style="font-family: var(--font-semibold); margin-top: 0; color: var(--primary-foreground);">Evening Schedule</h3>
+            <p style="margin-bottom: var(--space-4); font-size: var(--text-lg);">Date: 14 November</p>
+            <p style="margin-bottom: var(--space-4); font-size: var(--text-base);">The evening commences at [Insert Start Time Here].</p>
+            <p style="margin-bottom: var(--space-4); font-size: var(--text-base);">The event concludes at [Insert End Time Here].</p>
+        </div>
+        
+        <div style="border-left: 4px solid var(--gradient-brand); padding-left: var(--space-4); background-color: var(--surface-glass); padding: var(--space-6); border-radius: var(--radius-lg);">
+            <h3 style="font-family: var(--font-semibold); margin-top: 0; color: var(--primary-foreground);">Entry Information</h3>
+            <p style="margin-bottom: var(--space-4); font-size: var(--text-lg);">Tickets are required for attendance at this jazz evening.</p>
+            <p style="margin-bottom: var(--space-4); font-size: var(--text-base);">Further details on ticket acquisition are available through the main information section of this page.</p>
+        </div>
+    </div>
+</section>
+<section style="background-color: var(--background); padding: var(--space-3xl) center; text-align: center; border-top: var(--border-2); border-bottom: var(--border-2);">
+    <h2 style="color: var(--foreground); margin-bottom: var(--space-6) font-family: var(--font-serif); font-size: var(--text-4xl); font-weight: var(--font-bold);">Secure Your Evening</h2>
+    <p style="color: var(--muted-foreground); margin-bottom: var(--space-12) max-width: 600px; margin-left: auto; margin-right: auto;">
+        Experience an elegant evening of world-class jazz at The Blue Room on 14 November. Limited tickets are available for this exclusive event.
+    </p>
+    <div style="display: flex; justify-content: center; gap: var(--space-10); flex-wrap: wrap;">
+        <a href="#" style="background-color: var(--primary); color: var(--primary-foreground); padding: var(--space-6) border-radius: var(--radius-lg); text-decoration: none; font-weight: var(--font-bold); font-size: var(--text-xl); transition: background-color var(--primary-hover) 0.3s ease; border: 2px solid var(--primary); box-shadow: var(--shadow-md);">
+            Purchase Tickets Now
+        </a>
+        <a href="#" style="background-color: var(--secondary); color: var(--secondary-foreground); padding: var(--space-6) border-radius: var(--radius-lg); text-decoration: none; font-weight: var(--font-medium); font-size: var(--text-xl); transition: background-color var(--secondary-hover) 0.3s ease; border: 2px solid var(--secondary); box-shadow: var(--shadow-md);">
+            View Details
+        </a>
+    </div>
+</section>
+<section style="background-color: var(--background); color: var(--foreground); padding: var(--space-3xl) 0; border-top: var(--border-2); border-bottom: var(--border-2);">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--space-10); text-align: center;">
+        
+        <!-- Branding and Copyright -->
+        <div style="border-bottom: var(--border-1) padding-bottom: var(--space-6);">
+            <p style="font-family: var(--font-serif); font-size: var(--text-sm); color: var(--muted-foreground); margin: 0;">
+                &copy; The Blue Room. All Rights Reserved.
+            </p>
+        </div>
+
+        <!-- Secondary Links -->
+        <div style="display: flex; justify-content: center; gap: var(--space-6); margin-bottom: var(--space-10);">
+            <a href="#" style="color: var(--foreground); text-decoration: none; font-family: var(--font-sans); font-size: var(--text-sm);">Privacy Policy</a>
+            <a href="#" style="color: var(--foreground); text-decoration: none; font-family: var(--font-sans); font-size: var(--text-sm);">Terms of Service</a>
+            <a href="#" style="color: var(--foreground); text-decoration: none; font-family: var(--font-sans); font-size: var(--text-sm);">Contact</a>
+        </div>
+
+        <!-- Social Media Placeholder (Conceptual) -->
+        <div style="display: flex; justify-content: center; gap: var(--space-6); margin-bottom: var(--space-10);">
+            <a href="#" style="color: var(--foreground); text-decoration: none; font-family: var(--font-sans); font-size: var(--text-2xl);">
+                <!-- Placeholder for Instagram/Facebook Icon -->
+                Jazz Social
+            </a>
+        </div>
+
+        <!-- Location and Hours Summary -->
+        <div style="border-top: var(--border-1) border-bottom: var(--border-1) padding-bottom: var(--space-6); margin-bottom: var(--space-10);">
+            <h3 style="font-family: var(--font-sans); font-size: var(--text-lg); margin-bottom: var(--space-4); color: var(--primary);">The Blue Room</h3>
+            <p style="font-family: var(--font-sans); font-size: var(--text-sm); color: var(--muted-foreground); margin-bottom: var(--space-2);">
+                Experience an evening of classic jazz.
+            </p>
+            <p style="font-family: var(--font-sans); font-size: var(--text-sm); color: var(--muted-foreground); margin-bottom: var(--space-2);">
+                Location and operating hours are detailed on the main event page.
+            </p>
+        </div>
+
+    </div>
+</section>
+</body></html>

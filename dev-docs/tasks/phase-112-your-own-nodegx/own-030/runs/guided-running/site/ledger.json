@@ -1,0 +1,365 @@
+{
+ "calls": [
+  {
+   "prompt": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club.. The one action: Sign up for the Saturday morning running club.. Tone: bold.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. schedule or line-up, 4. location and hours, 5. sign-up or contact form, 6. call to action.\nWrite the HTML for section 1, the \"hero\" section (Bold, energetic introduction to the club.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about Park Runners. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 831,
+   "tokensOut": 447,
+   "ms": 20528,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club.. The one action: Sign up for the Saturday morning running club.. Tone: bold.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. schedule or line-up, 4. location and hours, 5. sign-up or contact form, 6. call to action.\nWrite the HTML for section 2, the \"about\" section (Briefly explain the club's mission and vibe.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about Park Runners. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 834,
+   "tokensOut": 267,
+   "ms": 10629,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club.. The one action: Sign up for the Saturday morning running club.. Tone: bold.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. schedule or line-up, 4. location and hours, 5. sign-up or contact form, 6. call to action.\nWrite the HTML for section 3, the \"schedule or line-up\" section (Show when and where the club meets.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about Park Runners. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 835,
+   "tokensOut": 1074,
+   "ms": 35953,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club.. The one action: Sign up for the Saturday morning running club.. Tone: bold.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. schedule or line-up, 4. location and hours, 5. sign-up or contact form, 6. call to action.\nWrite the HTML for section 4, the \"location and hours\" section (Clearly state the park and meeting times.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about Park Runners. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 833,
+   "tokensOut": 476,
+   "ms": 17295,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club.. The one action: Sign up for the Saturday morning running club.. Tone: bold.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. schedule or line-up, 4. location and hours, 5. sign-up or contact form, 6. call to action.\nWrite the HTML for section 5, the \"sign-up or contact form\" section (The primary action for interested users.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about Park Runners. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 835,
+   "tokensOut": 840,
+   "ms": 28998,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club.. The one action: Sign up for the Saturday morning running club.. Tone: bold.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. schedule or line-up, 4. location and hours, 5. sign-up or contact form, 6. call to action.\nWrite the HTML for section 6, the \"call to action\" section (A final, urgent prompt to join.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about Park Runners. Use only facts from the request; invent no address, phone number, price or name it does not give.",
+   "tokensIn": 833,
+   "tokensOut": 612,
+   "ms": 21864,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club.. The one action: Sign up for the Saturday morning running club.. Tone: bold.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. schedule or line-up, 4. location and hours, 5. sign-up or contact form, 6. call to action.\nWrite the HTML for section 2, the \"about\" section (Briefly explain the club's mission and vibe.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about Park Runners. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: reviewer (p=0.014): a line in \"about\" reads odd, cut off, repeated or off-topic Write it again, fixing that.",
+   "tokensIn": 880,
+   "tokensOut": 373,
+   "ms": 18870,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club.. The one action: Sign up for the Saturday morning running club.. Tone: bold.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. schedule or line-up, 4. location and hours, 5. sign-up or contact form, 6. call to action.\nWrite the HTML for section 3, the \"schedule or line-up\" section (Show when and where the club meets.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about Park Runners. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: reviewer (p=0.384): a line in \"schedule or line-up\" reads odd, cut off, repeated or off-topic Write it again, fixing that.",
+   "tokensIn": 885,
+   "tokensOut": 972,
+   "ms": 33382,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club.. The one action: Sign up for the Saturday morning running club.. Tone: bold.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. schedule or line-up, 4. location and hours, 5. sign-up or contact form, 6. call to action.\nWrite the HTML for section 5, the \"sign-up or contact form\" section (The primary action for interested users.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about Park Runners. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: \"sign up now\" is said 5 times on the page Write it again, fixing that.",
+   "tokensIn": 867,
+   "tokensOut": 978,
+   "ms": 35436,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club.. The one action: Sign up for the Saturday morning running club.. Tone: bold.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. schedule or line-up, 4. location and hours, 5. sign-up or contact form, 6. call to action.\nWrite the HTML for section 6, the \"call to action\" section (A final, urgent prompt to join.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about Park Runners. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: \"sign up now\" is said 5 times on the page \"sign up now\" is said 5 times on the page reviewer (p=0.179): a line in \"call to action\" reads odd, cut off, repeated or off-topic Write it again, fixing that.",
+   "tokensIn": 907,
+   "tokensOut": 391,
+   "ms": 15610,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club.. The one action: Sign up for the Saturday morning running club.. Tone: bold.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. schedule or line-up, 4. location and hours, 5. sign-up or contact form, 6. call to action.\nWrite the HTML for section 2, the \"about\" section (Briefly explain the club's mission and vibe.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about Park Runners. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: reviewer (p=0.02): a line in \"about\" reads odd, cut off, repeated or off-topic Write it again, fixing that.",
+   "tokensIn": 879,
+   "tokensOut": 326,
+   "ms": 12283,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club.. The one action: Sign up for the Saturday morning running club.. Tone: bold.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. schedule or line-up, 4. location and hours, 5. sign-up or contact form, 6. call to action.\nWrite the HTML for section 5, the \"sign-up or contact form\" section (The primary action for interested users.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about Park Runners. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: button \"SIGN UP FOR THE RUN\" is too long for a button Write it again, fixing that.",
+   "tokensIn": 868,
+   "tokensOut": 941,
+   "ms": 33334,
+   "done": "stop"
+  },
+  {
+   "prompt": "Request: \"A sign-up page for a Saturday morning running club in the park. Energetic, green.\"\nBRIEF: a sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club.. The one action: Sign up for the Saturday morning running club.. Tone: bold.\nThe page's sections, top to bottom: 1. hero, 2. about, 3. schedule or line-up, 4. location and hours, 5. sign-up or contact form, 6. call to action.\nWrite the HTML for section 6, the \"call to action\" section (A final, urgent prompt to join.).\nWrite ONE <section> element with its content and a <style> block or inline styles for it. No <html>, <head> or <body>.\nStyle it ONLY with these CSS custom properties, as var(--name): --primary, --primary-hover, --primary-foreground, --secondary, --secondary-hover, --secondary-foreground, --muted, --muted-foreground, --accent, --accent-foreground, --background, --foreground, --surface, --surface-raised, --border, --border-subtle, --border-strong, --border-control, --space-0, --space-px, --space-0-5, --space-1, --space-1-5, --space-2, --space-2-5, --space-3, --space-3-5, --space-4, --space-5, --space-6, --space-7, --space-8, --space-9, --space-10, --space-11, --space-12, --space-14, --space-16, --space-20, --space-24, --space-28, --space-32, --space-xs, --space-sm, --space-md, --space-lg, --space-xl, --space-2xl, --space-3xl, --text-xs, --text-sm, --text-base, --text-lg, --text-xl, --text-2xl, --text-3xl, --text-4xl, --text-5xl, --text-6xl, --display-sm, --display-md, --display-lg, --font-thin, --font-extralight, --font-light, --font-normal, --font-medium, --font-semibold, --font-bold, --font-extrabold, --font-black, --leading-none, --leading-tight, --leading-snug, --leading-normal, --leading-relaxed, --leading-loose, --tracking-tighter, --tracking-tight, --tracking-normal, --tracking-wide, --tracking-wider, --tracking-widest, --font-sans, --font-serif, --font-mono, --radius-none, --radius-sm, --radius-md, --radius-lg, --radius-xl, --radius-2xl, --radius-3xl, --radius-full, --border-0, --border-1, --border-2, --border-4, --border-8, --shadow-none, --shadow-sm, --shadow-md, --shadow-lg, --shadow-xl, --shadow-2xl, --shadow-inner, --surface-glass, --border-glass, --gradient-brand, --gradient-deep, --gradient-spotlight, --gradient-surface, --gradient-scrim.\nUse no photographs and no image URLs.\nWrite the words a visitor reads, about Park Runners. Use only facts from the request; invent no address, phone number, price or name it does not give.\nThis section was written before, and a reviewer found: \"JOIN THE MOVEMENT.\" repeats a line in another section Write it again, fixing that.",
+   "tokensIn": 864,
+   "tokensOut": 293,
+   "ms": 11332,
+   "done": "stop"
+  }
+ ],
+ "judgements": [
+  {
+   "round": 0,
+   "key": "s0.sound",
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club..\n\nSection \"hero\". Top to bottom:\n- headline: \"Park Runners\"\n- paragraph: \"Unleash your energy. Join the most dynamic Saturday morning running club in the park. Sweat, socialize, and conquer the morning together.\"\n- button: \"Sign Up Now!\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.942,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 147,
+   "ms": 6603
+  },
+  {
+   "round": 0,
+   "key": "s1.sound",
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club..\n\nSection \"about\". Top to bottom:\n- headline: \"About Park Runners\"\n- paragraph: \"Welcome to Park Runners—your home for an energetic Saturday morning running club! We are a community fueled by passion, speed, and sunshine. Our mission is simp\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.014,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 819
+  },
+  {
+   "round": 0,
+   "key": "s2.sound",
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club..\n\nSection \"schedule or line-up\". Top to bottom:\n- headline: \"The Park Runners Line-Up\"\n- paragraph: \"See when and where the action happens. Join the movement!\"\n- paragraph: \"Saturday Morning Runs\"\n- paragraph: \"Every Saturday\"\n- paragraph: \"8:00 AM\"\n- paragraph: \"Meeting Point\"\n- paragraph: \"Central Park Entrance\"\n- paragraph: \"Park Runners Hub\"\n- paragraph: \"Vibe\"\n- paragraph: \"Energetic & Bold\"\n- paragraph: \"Go!\"\n- paragraph: \"No experience? No problem. Just bring your energy.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.384,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 225,
+   "ms": 1148
+  },
+  {
+   "round": 0,
+   "key": "s3.sound",
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club..\n\nSection \"location and hours\". Top to bottom:\n- headline: \"Where the Action Happens\"\n- paragraph: \"Find us in the heart of the green! Join the movement every Saturday morning.\"\n- title: \"The Park\"\n- paragraph: \"Meet us at the designated running spot in the local park. We run where the energy is!\"\n- title: \"The Times\"\n- paragraph: \"Our energetic sessions kick off every Saturday morning. Check the schedule for the exact start times!\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.755,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 193,
+   "ms": 993
+  },
+  {
+   "round": 0,
+   "key": "s4.sound",
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club..\n\nSection \"sign-up or contact form\". Top to bottom:\n- headline: \"Join the Movement\"\n- paragraph: \"Ready to conquer your Saturday mornings? Sign up now for the most energetic running club in the park!\"\n- paragraph: \"Your Name\"\n- paragraph: \"Email Address\"\n- paragraph: \"Running Level (Optional)\"\n- button: \"Sign Up Now!\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.671,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 171,
+   "ms": 970
+  },
+  {
+   "round": 0,
+   "key": "s5.sound",
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club..\n\nSection \"call to action\". Top to bottom:\n- headline: \"RUN. JOIN. DOMINATE.\"\n- paragraph: \"The Saturday Morning Running Club is officially OPEN.\"\n- paragraph: \"Your energy starts here. Sign up now and lace up for the run!\"\n- button: \"SIGN UP NOW\"\n- button: \"CONTACT US\"\n- paragraph: \"Don't miss the movement. Be part of the Park Runners family.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.179,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 183,
+   "ms": 987
+  },
+  {
+   "round": 1,
+   "key": "s0.sound",
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club..\n\nSection \"hero\". Top to bottom:\n- headline: \"Park Runners\"\n- paragraph: \"Unleash your energy. Join the most dynamic Saturday morning running club in the park. Sweat, socialize, and conquer the morning together.\"\n- button: \"Sign Up Now!\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.942,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 147,
+   "ms": 204
+  },
+  {
+   "round": 1,
+   "key": "s1.sound",
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club..\n\nSection \"about\". Top to bottom:\n- headline: \"About Park Runners\"\n- paragraph: \"Welcome to Park Runners—the ultimate Saturday morning running club! We are a high-energy community dedicated to pushing limits, building camaraderie, and enjoyi\"\n- paragraph: \"Our mission is simple: to keep the energy high and the miles moving. Whether you're a seasoned runner or just starting out, join a crew where every run is an ad\"\n- paragraph: \"If you're ready to trade the snooze button for the starting line, this is your place. Get ready to run with the best!\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.02,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 217,
+   "ms": 1270
+  },
+  {
+   "round": 1,
+   "key": "s2.sound",
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club..\n\nSection \"schedule or line-up\". Top to bottom:\n- headline: \"Our Saturday Line-Up\"\n- paragraph: \"See when and where the action happens!\"\n- title: \"Saturday Morning Runs\"\n- paragraph: \"Every Saturday morning, we hit the park for an energetic run.\"\n- paragraph: \"Time: 8:00 AM sharp\"\n- title: \"Meeting Point\"\n- paragraph: \"We gather at the designated park location.\"\n- paragraph: \"Location: The Park\"\n- title: \"What to Expect\"\n- item: \"⚡ High energy and motivation.\"\n- item: \"🏃 A fun, supportive running community.\"\n- item: \"🌳 Running through the green space.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.824,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 243,
+   "ms": 1419
+  },
+  {
+   "round": 1,
+   "key": "s3.sound",
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club..\n\nSection \"location and hours\". Top to bottom:\n- headline: \"Where the Action Happens\"\n- paragraph: \"Find us in the heart of the green! Join the movement every Saturday morning.\"\n- title: \"The Park\"\n- paragraph: \"Meet us at the designated running spot in the local park. We run where the energy is!\"\n- title: \"The Times\"\n- paragraph: \"Our energetic sessions kick off every Saturday morning. Check the schedule for the exact start times!\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.755,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 193,
+   "ms": 176
+  },
+  {
+   "round": 1,
+   "key": "s4.sound",
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club..\n\nSection \"sign-up or contact form\". Top to bottom:\n- headline: \"JOIN THE MOVEMENT\"\n- paragraph: \"Ready to conquer the Saturday morning miles? Secure your spot with Park Runners!\"\n- paragraph: \"Your Name\"\n- paragraph: \"Email Address\"\n- paragraph: \"Running Experience (Optional)\"\n- button: \"SIGN UP FOR THE RUN\"\n- paragraph: \"Join Park Runners today and start your energetic Saturday morning!\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.568,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 185,
+   "ms": 1080
+  },
+  {
+   "round": 1,
+   "key": "s5.sound",
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club..\n\nSection \"call to action\". Top to bottom:\n- headline: \"JOIN THE MOVEMENT.\"\n- paragraph: \"Don't just run. Run with Park Runners.\"\n- paragraph: \"Your Saturday morning adventure starts here. Spots are limited.\"\n- button: \"SIGN UP NOW\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.923,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 150,
+   "ms": 898
+  },
+  {
+   "round": 2,
+   "key": "s0.sound",
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club..\n\nSection \"hero\". Top to bottom:\n- headline: \"Park Runners\"\n- paragraph: \"Unleash your energy. Join the most dynamic Saturday morning running club in the park. Sweat, socialize, and conquer the morning together.\"\n- button: \"Sign Up Now!\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.942,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 147,
+   "ms": 206
+  },
+  {
+   "round": 2,
+   "key": "s1.sound",
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club..\n\nSection \"about\". Top to bottom:\n- headline: \"About Park Runners\"\n- paragraph: \"Welcome to Park Runners, where energy meets the open green space! We are an energetic running club dedicated to making Saturday mornings the best part of your w\"\n- paragraph: \"Whether you're a seasoned marathoner or just starting your running journey, Park Runners is for everyone. We thrive on positive vibes, consistent effort, and th\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.021,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 180,
+   "ms": 1087
+  },
+  {
+   "round": 2,
+   "key": "s2.sound",
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club..\n\nSection \"schedule or line-up\". Top to bottom:\n- headline: \"Our Saturday Line-Up\"\n- paragraph: \"See when and where the action happens!\"\n- title: \"Saturday Morning Runs\"\n- paragraph: \"Every Saturday morning, we hit the park for an energetic run.\"\n- paragraph: \"Time: 8:00 AM sharp\"\n- title: \"Meeting Point\"\n- paragraph: \"We gather at the designated park location.\"\n- paragraph: \"Location: The Park\"\n- title: \"What to Expect\"\n- item: \"⚡ High energy and motivation.\"\n- item: \"🏃 A fun, supportive running community.\"\n- item: \"🌳 Running through the green space.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.824,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 243,
+   "ms": 228
+  },
+  {
+   "round": 2,
+   "key": "s3.sound",
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club..\n\nSection \"location and hours\". Top to bottom:\n- headline: \"Where the Action Happens\"\n- paragraph: \"Find us in the heart of the green! Join the movement every Saturday morning.\"\n- title: \"The Park\"\n- paragraph: \"Meet us at the designated running spot in the local park. We run where the energy is!\"\n- title: \"The Times\"\n- paragraph: \"Our energetic sessions kick off every Saturday morning. Check the schedule for the exact start times!\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.755,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 193,
+   "ms": 146
+  },
+  {
+   "round": 2,
+   "key": "s4.sound",
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club..\n\nSection \"sign-up or contact form\". Top to bottom:\n- headline: \"Join the Movement\"\n- paragraph: \"Ready to conquer your Saturday mornings with an energetic running club in the park? Sign up now and let's run!\"\n- paragraph: \"Your Name\"\n- paragraph: \"Email Address\"\n- paragraph: \"Interest Level\"\n- button: \"Join Park Runners\"\n- input placeholder: \"Enter your name\"\n- input placeholder: \"Enter your email\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.046,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 193,
+   "ms": 1071
+  },
+  {
+   "round": 2,
+   "key": "s5.sound",
+   "user": "A sign-up or contact page called \"Park Runners\", for People interested in joining an energetic Saturday morning running club..\n\nSection \"call to action\". Top to bottom:\n- headline: \"RUN. JOIN. DOMINATE.\"\n- paragraph: \"The Saturday Morning Run starts NOW.\"\n- paragraph: \"Don't just run. Run with Park Runners. Sign up today!\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.116,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 896
+  }
+ ],
+ "rounds": [
+  {
+   "round": 0,
+   "perLine": 0.336,
+   "defects": 11.77,
+   "lines": 35,
+   "kept": true,
+   "issues": [
+    {
+     "si": 4,
+     "say": "\"sign up now\" is said 5 times on the page",
+     "weight": 1.5
+    },
+    {
+     "si": 5,
+     "say": "\"sign up now\" is said 5 times on the page",
+     "weight": 1.5
+    },
+    {
+     "si": 5,
+     "say": "\"sign up now\" is said 5 times on the page",
+     "weight": 1.5
+    },
+    {
+     "si": 1,
+     "say": "reviewer (p=0.014): a line in \"about\" reads odd, cut off, repeated or off-topic",
+     "weight": 2.96
+    },
+    {
+     "si": 2,
+     "say": "reviewer (p=0.384): a line in \"schedule or line-up\" reads odd, cut off, repeated or off-topic",
+     "weight": 1.85
+    },
+    {
+     "si": 5,
+     "say": "reviewer (p=0.179): a line in \"call to action\" reads odd, cut off, repeated or off-topic",
+     "weight": 2.46
+    }
+   ],
+   "broken": []
+  },
+  {
+   "round": 1,
+   "perLine": 0.193,
+   "defects": 6.94,
+   "lines": 36,
+   "kept": true,
+   "issues": [
+    {
+     "si": 4,
+     "say": "button \"SIGN UP FOR THE RUN\" is too long for a button",
+     "weight": 2
+    },
+    {
+     "si": 5,
+     "say": "\"JOIN THE MOVEMENT.\" repeats a line in another section",
+     "weight": 2
+    },
+    {
+     "si": 1,
+     "say": "reviewer (p=0.02): a line in \"about\" reads odd, cut off, repeated or off-topic",
+     "weight": 2.94
+    }
+   ],
+   "broken": []
+  },
+  {
+   "round": 2,
+   "perLine": 0.241,
+   "defects": 8.45,
+   "lines": 35,
+   "kept": false,
+   "issues": [
+    {
+     "si": 1,
+     "say": "reviewer (p=0.021): a line in \"about\" reads odd, cut off, repeated or off-topic",
+     "weight": 2.94
+    },
+    {
+     "si": 4,
+     "say": "reviewer (p=0.046): a line in \"sign-up or contact form\" reads odd, cut off, repeated or off-topic",
+     "weight": 2.86
+    },
+    {
+     "si": 5,
+     "say": "reviewer (p=0.116): a line in \"call to action\" reads odd, cut off, repeated or off-topic",
+     "weight": 2.65
+    }
+   ],
+   "broken": []
+  }
+ ],
+ "result": {
+  "lane": "code-guided",
+  "brief": "running",
+  "from": "G-running",
+  "model": "gemma4:e2b-it-qat",
+  "judge": "gemma4:e4b-it-qat",
+  "bestRound": 1,
+  "perLine": 0.193,
+  "minutes": 5.3,
+  "builderCalls": 13,
+  "reviewerCalls": 18,
+  "tokensIn": 11151,
+  "tokensOut": 7990
+ }
+}

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jazz Evening at The Blue Room | November 14th</title>
+    <style>
+        /* --- Global Styles --- */
+        body {
+            font-family: 'Georgia', serif;
+            background-color: #121212; /* Very dark background */
+            color: #e0e0e0; /* Light grey text for elegance */
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* --- Layout & Structure --- */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 0;
+        }
+
+        header {
+            background-color: #000000;
+            padding: 60px 0;
+            text-align: center;
+            border-bottom: 1px solid #333;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 3.5em;
+            color: #c0c0c0; /* Silver/muted white */
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 300;
+        }
+
+        h2 {
+            font-size: 2.2em;
+            color: #a0a0a0;
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+        }
+
+        section {
+            padding: 60px 0;
+            border-bottom: 1px solid #222;
+        }
+
+        /* --- Hero Section --- */
+        #hero {
+            background: url('https://images.unsplash.com/photo-1519923538440-9e1073322740?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') no-repeat center center/cover;
+            color: white;
+            text-align: center;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        #hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6); /* Dark overlay for text readability */
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            padding: 20px;
+        }
+
+        .hero-content h1 {
+            font-size: 4.5em;
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+        }
+
+        .hero-content p {
+            font-size: 1.5em;
+            color: #ccc;
+            font-style: italic;
+            margin-bottom: 30px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: #b38f5a; /* Gold/Bronze accent color */
+            color: #121212;
+            padding: 15px 35px;
+            text-decoration: none;
+            border: none;
+            font-size: 1.1em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            border-radius: 3px;
+        }
+
+        .cta-button:hover {
+            background-color: #d4af37; /* Lighter gold on hover */
+            transform: translateY(-3px);
+        }
+
+        /* --- Lineup Section --- */
+        .lineup-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .artist-card {
+            background-color: #1e1e1e;
+            padding: 30px;
+            border-left: 3px solid #444;
+            width: 300px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .artist-card:hover {
+            transform: translateY(-10px);
+            border-left-color: #b38f5a;
+        }
+
+        .artist-card h3 {
+            color: #c0c0c0;
+            margin-top: 0;
+            font-size: 1.5em;
+        }
+
+        .artist-card p {
+            color: #888;
+            font-size: 0.95em;
+        }
+
+        /* --- Tickets Section --- */
+        .ticket-info {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .ticket-box {
+            background-color: #1e1e1e;
+            padding: 40px;
+            border: 1px solid #333;
+            width: 350px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .ticket-box h3 {
+            color: #b38f5a;
+            font-size: 2em;
+            margin-top: 0;
+        }
+
+        .price {
+            font-size: 2.5em;
+            color: #fff;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .buy-now {
+            display: block;
+            background-color: #4CAF50; /* Green for action */
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border: none;
+            font-size: 1.1em;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .buy-now:hover {
+            background-color: #45a049;
+        }
+
+        /* --- Venue & Location Section --- */
+        .venue-details {
+            display: flex;
+            gap: 50px;
+            align-items: center;
+            text-align: center;
+        }
+
+        .venue-image {
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .venue-image img {
+            width: 100%;
+            height: auto;
+            border: 3px solid #333;
+            border-radius: 5px;
+        }
+
+        .venue-text {
+            flex: 1;
+        }
+
+        .venue-text h3 {
+            color: #c0c0c0;
+            font-size: 1.8em;
+        }
+
+        .location-list {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .location-list li {
+            margin-bottom: 10px;
+            color: #ccc;
+        }
+
+        /* --- Footer --- */
+        footer {
+            background-color: #0a0a0a;
+            color: #666;
+            text-align: center;
+            padding: 20px 0;
+            border-top: 1px solid #222;
+        }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 900px) {
+            .venue-details {
+                flex-direction: column;
+            }
+            h1 {
+                font-size: 2.8em;
+            }
+            .hero-content h1 {
+                font-size: 3em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <h1>The Blue Room</h1>
+            <p style="color: #888; font-size: 1.2em;">An Evening of Immersive Jazz</p>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="hero">
+        <div class="hero-content">
+            <h1>Jazz Night</h1>
+            <p>November 14th | Experience the Soul of the City</p>
+            <a href="#tickets" class="cta-button">View Tickets</a>
+        </div>
+    </section>
+
+    <!-- Lineup Section -->
+    <section id="lineup">
+        <div class="container">
+            <h2>The Lineup</h2>
+            <div class="lineup-grid">
+                
+                <div class="artist-card">
+                    <h3>Miles Davis Tribute</h3>
+                    <p>The legendary sounds of cool jazz reimagined for the modern era.</p>
+                </div>
+
+                <div class="artist-card">
+                    <h3>Sarah Jenkins</h3>
+                    <p>Vocalist bringing a smoky, intimate atmosphere to the stage.</p>
+                </div>
+
+                <div class="artist-card">
+                    <h3>The Blue Notes Trio</h3>
+                    <p>Improvisational mastery with a focus on complex, soulful arrangements.</p>
+                </div>
+
+                <div class="artist-card">
+                    <h3>Ella Fitzgerald</h3>
+                    <p>Classic standards and timeless elegance—a true master at work.</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Tickets Section -->
+    <section id="tickets" style="background-color: #181818;">
+        <div class="container">
+            <h2>Tickets & Entry</h2>
+            <div class="ticket-info">
+                
+                <div class="ticket-box">
+                    <h3>General Admission</h3>
+                    <p>Experience the full evening, including all featured acts and premium seating.</p>
+                    <div class="price">$45.00</div>
+                    <a href="#" class="cta-button">Purchase Tickets</a>
+                </div>
+
+                <div class="ticket-box" style="border-color: #b38f5a;">
+                    <h3>VIP Lounge</h3>
+                    <p>Reserved seating, complimentary signature cocktail, and early entry access.</p>
+                    <div class="price">$85.00</div>
+                    <a href="#" class="cta-button" style="background-color: #b38f5a; color: #121212;">Reserve VIP</a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Venue Section -->
+    <section id="venue">
+        <div class="container venue-details">
+            <div class="venue-image">
+                <!-- Placeholder Image - Replace with actual venue photo -->
+                <img src="https://images.unsplash.com/photo-1580489944000-241714133903?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="The Blue Room Interior">
+            </div>
+            <div class="venue-text">
+                <h3>The Blue Room</h3>
+                <p>
+                    Step into an atmosphere steeped in history and refined elegance. The Blue Room offers an intimate setting perfect for savoring the nuances of live jazz. We invite you to leave the everyday behind and immerse yourself in a night of sophisticated musical artistry.
+                </p>
+                
+                <ul class="location-list">
+                    <li><strong>Location:</strong> 123 Midnight Lane, Downtown Arts District</li>
+                    <li><strong>Date:</strong> Saturday, November 14th, 2024</li>
+                    <li><strong>Time:</strong> Doors open at 7:00 PM | Show starts at 8:00 PM</li>
+                    <li><strong>Dress Code:</strong> Smart Casual / Cocktail Attire Encouraged</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 The Blue Room Jazz Evening. All Rights Reserved. | Follow us on social media.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

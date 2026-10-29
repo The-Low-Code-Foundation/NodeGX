@@ -1,0 +1,36 @@
+{
+ "desktop": {
+  "url": "file:///Users/richardosborne/vscode_projects/OpenNoodl/dev-docs/tasks/phase-112-your-own-nodegx/own-030/runs/emit-jazz/site/index.html",
+  "blank": false,
+  "words": 415,
+  "overflowX": 0,
+  "smallText": [],
+  "lowContrast": [
+   {
+    "text": "Reserve your seat now for this classic musical eve",
+    "ratio": 4.4
+   }
+  ],
+  "unknownGround": 7,
+  "clipped": [],
+  "brokenImages": [],
+  "sections": 7
+ },
+ "phone": {
+  "url": "file:///Users/richardosborne/vscode_projects/OpenNoodl/dev-docs/tasks/phase-112-your-own-nodegx/own-030/runs/emit-jazz/site/index.html",
+  "blank": false,
+  "words": 415,
+  "overflowX": 0,
+  "smallText": [],
+  "lowContrast": [
+   {
+    "text": "Reserve your seat now for this classic musical eve",
+    "ratio": 4.4
+   }
+  ],
+  "unknownGround": 7,
+  "clipped": [],
+  "brokenImages": [],
+  "sections": 7
+ }
+}
