@@ -1,0 +1,144 @@
+{
+ "htmlMs": 99,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [
+    {
+     "text": "Maison Levain",
+     "left": 0,
+     "right": 1176
+    },
+    {
+     "text": "Artisan breads, sweet pastries, and warm",
+     "left": 0,
+     "right": 770
+    },
+    {
+     "text": "Lyon's family bakery",
+     "left": 0,
+     "right": 1133
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Maison Levain",
+     "x": 0,
+     "y": 0,
+     "w": 104,
+     "h": 21,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Artisan breads, sweet pastries, and warm",
+     "x": 0,
+     "y": 37,
+     "w": 510,
+     "h": 21,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Lyon's family bakery",
+     "x": 0,
+     "y": 74,
+     "w": 147,
+     "h": 21,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:52314/",
+   "blank": false,
+   "words": 15,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [
+    {
+     "text": "Maison Levain",
+     "left": 0,
+     "right": 286
+    },
+    {
+     "text": "Artisan breads, sweet pastries, and warm",
+     "left": 0,
+     "right": 8
+    },
+    {
+     "text": "Lyon's family bakery",
+     "left": 0,
+     "right": 243
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Maison Levain",
+     "x": 0,
+     "y": 0,
+     "w": 104,
+     "h": 21,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Artisan breads, sweet pastries, and warm",
+     "x": 0,
+     "y": 37,
+     "w": 382,
+     "h": 42,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Lyon's family bakery",
+     "x": 0,
+     "y": 95,
+     "w": 147,
+     "h": 21,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:52314/",
+   "blank": false,
+   "words": 15,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "ms": 2269
+}

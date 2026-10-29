@@ -9,9 +9,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { openBench, writeHero } from './bench.mjs';
+import { addWarmFonts } from './fonts.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const REPO = path.resolve(HERE, '../../../..');
 const [run = 'w17m-bakery', brief = 'bakery', eyebrowWords = ''] = process.argv.slice(2);
 const L = JSON.parse(fs.readFileSync(path.join(HERE, 'runs', `arm-${run}`, 'ledger.json'), 'utf8'));
 const base = L.turns.filter((t) => t.shot).at(-1).nodes;
@@ -24,15 +24,7 @@ const clone = () => JSON.parse(JSON.stringify(base));
 const SRC = path.join(process.env.HOME, 'vscode_projects/NodeGX test projects', `own-032-bench-${brief}`);
 const BENCH = `${SRC}-warm`;
 if (!fs.existsSync(BENCH)) fs.cpSync(SRC, BENCH, { recursive: true });
-const mods = path.join(BENCH, 'noodl_modules');
-fs.cpSync(path.join(REPO, 'library/modules/bot-garden-fonts/project/noodl_modules/bot-garden-fonts'), path.join(mods, 'bot-garden-fonts'), { recursive: true });
-const caveat = path.join(mods, 'warm-caveat');
-fs.mkdirSync(caveat, { recursive: true });
-const NB = path.join(REPO, 'library/modules/nightbook-kit/fonts');
-for (const f of fs.readdirSync(NB).filter((f) => f.startsWith('caveat') || f === 'LICENSE-caveat.txt')) fs.copyFileSync(path.join(NB, f), path.join(caveat, f));
-const css = fs.readFileSync(path.join(NB, 'styles.css'), 'utf8').split(/(?=@font-face)/).filter((b) => b.includes("'Caveat'")).join('');
-fs.writeFileSync(path.join(caveat, 'styles.css'), css);
-fs.writeFileSync(path.join(caveat, 'manifest.json'), JSON.stringify({ name: 'Caveat (from the nightbook kit)', browser: { stylesheets: ['noodl_modules/warm-caveat/styles.css'] } }, null, 2));
+addWarmFonts(BENCH);
 
 // the shared warm treatment: a pastel wash of the brand colour, everything rounded, the words close together
 const PASTEL = 'color-mix(in srgb, var(--primary) 12%, var(--background))';

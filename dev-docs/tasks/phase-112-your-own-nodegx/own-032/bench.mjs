@@ -83,7 +83,10 @@ export const FACTS = `(() => {
   const unaligned = col.length >= 2 && spread(lefts) > 4 && spread(mids) > 12 ? [{ lefts: lefts.map(Math.round), mids: mids.map(Math.round) }] : [];
   // contrast, including over a gradient: the WORST of the gradient's colour stops (look.mjs skips any gradient, so a
   // dark line on the dark hero ground was never reported). A photo ground is still skipped: no script reads it honestly.
-  const rgb = (c) => { const m = c.match(/rgba?\\(([^)]+)\\)/); if (!m) return null; const v = m[1].split(/[ ,\\/]+/).filter(Boolean).map(Number); return { r: v[0], g: v[1], b: v[2], a: v.length > 3 ? v[3] : 1 }; };
+  // s6: a color-mix() ground computes to color(srgb r g b), 0–1 each; before this it read as no colour, and the words
+  // were measured against the white page behind it (10c's bakery wash)
+  const rgb = (c) => { const s = c.match(/color\\(srgb ([^)]+)\\)/); if (s) { const v = s[1].split(/[ \\/]+/).filter(Boolean).map(Number); return { r: v[0] * 255, g: v[1] * 255, b: v[2] * 255, a: v.length > 3 ? v[3] : 1 }; }
+    const m = c.match(/rgba?\\(([^)]+)\\)/); if (!m) return null; const v = m[1].split(/[ ,\\/]+/).filter(Boolean).map(Number); return { r: v[0], g: v[1], b: v[2], a: v.length > 3 ? v[3] : 1 }; };
   const lum = ({ r, g, b }) => { const f = (x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
   const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
   const grounds = (e) => { for (let x = e; x; x = x.parentElement) { const s = getComputedStyle(x);
@@ -95,7 +98,9 @@ export const FACTS = `(() => {
     const px = parseFloat(s.fontSize), large = px >= 24 || (px >= 18.66 && +s.fontWeight >= 700), worst = Math.min(...gs.map((g) => ratio(fg, g)));
     if (worst < (large ? 3 : 4.5)) lowContrast.push({ text: b.text, ratio: +worst.toFixed(2) }); }
   const overflowX = Math.max(0, document.scrollingElement.scrollWidth - document.scrollingElement.clientWidth, ...[...document.body.querySelectorAll('*')].filter((e) => /auto|scroll/.test(getComputedStyle(e).overflowX)).map((e) => e.scrollWidth - e.clientWidth));
-  return { width: W, touching, atEdge, photoCut, buttonWide, unaligned, lowContrast, overflowX, blocks: blocks.map((b) => ({ kind: b.kind, text: b.text, x: Math.round(b.ink.left), y: Math.round(b.ink.top), w: Math.round(b.ink.width), h: Math.round(b.ink.height), lines: b.kind === 'words' ? linesOf(b.el) : 1 })) };
+  // s6: the photo's own box (9c's 'centre the words beside the photo' needs it; nothing graded reads it)
+  const photos = [...document.querySelectorAll('img')].filter(shown).map((e) => { const r = e.getBoundingClientRect(); return { x: Math.round(r.left), y: Math.round(r.top), w: Math.round(r.width), h: Math.round(r.height) }; });
+  return { width: W, touching, atEdge, photoCut, buttonWide, unaligned, lowContrast, overflowX, photos, blocks: blocks.map((b) => ({ kind: b.kind, text: b.text, x: Math.round(b.ink.left), y: Math.round(b.ink.top), w: Math.round(b.ink.width), h: Math.round(b.ink.height), lines: b.kind === 'words' ? linesOf(b.el) : 1 })) };
 })()`;
 
 // the bottom of what is drawn: the lowest element with a background, a picture, words or a control. The window is

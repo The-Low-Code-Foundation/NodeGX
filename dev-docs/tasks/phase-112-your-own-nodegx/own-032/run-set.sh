@@ -15,6 +15,11 @@ REQ[m-running]="A calm, simple page for Park Runners, our Saturday morning runni
 REQ[s-running]="Park Runners, our Saturday morning running club in the park. Make it bold, punchy and full of energy."
 REQ[m-pottery]="A quiet, minimal page for Potter Portfolio: handmade bowls and weekend pottery classes. Lots of white space."
 REQ[s-pottery]="Potter Portfolio: handmade bowls and weekend classes. Something striking and stylish, with a dark background."
+# s6 (11a): a calm puppy control, and the three warm requests
+REQ[m-puppy]="A simple, calm page for Puppy Haven, a puppy adoption site. Lots of white space."
+REQ[w-bakery]="A warm, friendly page for Maison Levain, our family bakery in Lyon. Soft and welcoming."
+REQ[w-pottery]="A warm, gentle page for Potter Portfolio: handmade bowls and weekend pottery classes. Soft and welcoming."
+REQ[w-puppy]="A warm, friendly page for Puppy Haven, where families adopt puppies. Soft and welcoming."
 for k in "$@"; do
   brief=${k#*-}
   while [ -n "$(ollama ps | tail -n +2)" ]; do sleep 20; done

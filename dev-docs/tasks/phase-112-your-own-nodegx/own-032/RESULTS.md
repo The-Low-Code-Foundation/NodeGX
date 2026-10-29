@@ -940,3 +940,137 @@ w17m-pottery (which w19 replays exactly). The test is w20 = w19 + `rhythmCalm`.
 | m-pottery | 21 → 22 | → **16/24** | nothing |
 
 **Kept:** `rhythmCalm` joins the final harness, `runs/w20.edit.json`. Both looks now space their words alike.
+
+## 11. s6 — the warm look in the arm, a stricter third-look probe, the words beside the photo (2026-10-29, night)
+
+**Richard's pick (asked at the start of s6, on https://claude.ai/artifact/P7umD3HEoDJrTiv1Q3KQqh):** the warm look is
+**"rounded, with a handwritten line"** (a Fredoka headline with a small Caveat line above it), and for a brand with no
+colour, the **pale lavender** of the Soft preset rather than a grey wash.
+
+### 11a. The warm look in the arm (`look3`)
+
+**The change (one switch, off by default):**
+- `--style auto` asks "minimal / stylish / warm" in all 6 orders, in 9d's words (`lookq.mjs` `lookOf3`). With
+  `askBand`, it asks the person when the top look's mean P is under the band's top (0.9). For two looks that is the
+  same rule as before.
+- **The warm look:**
+  - the goal adds a small handwritten line above a rounded headline, on a soft pastel ground;
+  - the vocabulary gains, in a warm run only: a `font` setting on Text (plain, rounded = Fredoka, handwritten =
+    Caveat at text-2xl, bold) and on Button (plain, rounded), a `soft pastel` ground, and a `very soft` 40 px photo
+    corner;
+  - the ground is a 12 % wash of the brand colour, or `#f5f3ff` when the theme's `--primary` is a grey of its palette
+    (`fonts.mjs` `brandColourless`; pottery is `var(--gray-900)`);
+  - eight `only` fixes, in the stylish pattern:
+    - the pastel ground;
+    - the headline rounded and semibold;
+    - the small line handwritten, in the brand colour, straight above the headline;
+    - the photo's 40 px corners;
+    - a pill button in the rounded face.
+
+    The calm rhythm (`rhythmCalm`, 16/24 px) applies as it does to the calm look.
+  - A warm run copies the two font modules into its bench (`fonts.mjs`, shared with `warm.mjs`).
+- **A bench fix found on the way:** Chrome computes a `color-mix()` ground as `color(srgb r g b)`, which the bench's
+  colour reader did not parse. So words on a wash were measured against the white page behind it, and 10c's bakery
+  contrast numbers on the wash were measured against white. The reader parses it now. No earlier arm run had such a
+  ground, so no recorded measure changes.
+
+**The runs:** `runs/w21.edit.json` = w20 + `look3`. Three warm requests, written before any run:
+- w-bakery: "A warm, friendly page for Maison Levain, our family bakery in Lyon. Soft and welcoming."
+- w-pottery: "A warm, gentle page for Potter Portfolio: handmade bowls and weekend pottery classes. Soft and welcoming."
+- w-puppy: "A warm, friendly page for Puppy Haven, where families adopt puppies. Soft and welcoming."
+
+**The controls:** the calm runs of the final harness, w20m-bakery (23 turns) and w20m-pottery (22). Puppy had no calm
+run under it, so w20m-puppy runs first, under w20 unchanged: "A simple, calm page for Puppy Haven, a puppy adoption
+site. Lots of white space." A warm run parts from its control at turn 1 (the goal line differs), so the comparison is of
+ends, not of turns where they part.
+
+**Pre-registered (before any w21 run):**
+- the look question picks warm for all three requests, with a top mean P of at least 0.9, so none asks;
+- **all three end by `endGate` before the 40-turn cap, with every warm check closed:**
+  - the pastel ground (lavender on pottery, a wash elsewhere);
+  - a Fredoka semibold headline, with a Caveat line straight above it, in the brand colour;
+  - a 40 px photo;
+  - a pill button in Fredoka;
+  - 16/24 px in the words column;
+- each warm run takes 8 to 14 more turns than its calm control (the bold look took 10 to 13 more);
+- each ends with the brief's name in the headline, on at most 2 lines;
+- **the end findings are contrast only:**
+  - bakery keeps the kit's white-on-amber button (3.19);
+  - the amber line above the headline fails on the amber wash (amber-600 on white is about 3.2, and the wash is
+    darker);
+  - pottery's grey line under the headline fails on the lavender (10c: 4.41);
+  - puppy ends with nothing left.
+
+**A caveat, found before any result:** with three looks, 9d's requests that named minimal or stylish do not all reach
+0.9. 7 of those 16 have a top mean P of 0.68–0.89: the bakery 0.82, the pottery 0.84, the yoga studio 0.86, the barber
+0.84, the jazz 0.89, the festival 0.79 and the trampoline park 0.68. So `look3`'s "ask when the top is under
+0.9" would ask people who did name a look. The three warm requests above are not touched by this (9d's warm requests
+sit at 1.00), but the three-look threshold must come from 11b's data, not from the two-look band.
+
+### 11b. A stricter third-look probe (`probe-look3b.mjs`, probe only)
+
+**The method:** `lookq.mjs` `lookOf3` (all 6 orders, E2B at T 0, the answer is the look with the highest mean P) on
+three sets:
+- **strict:** 8 warm requests written without "warm", "friendly", "welcoming", "soft", "light" or "rounded" (the look's
+  description is "warm and friendly: a soft light colour ground, rounded shapes, a welcoming headline"). They lean on
+  pastel, cosy, gentle, kind, caring, a hug;
+- **plain:** 8d's 20 requests that name no look;
+- **sets:** the 11 requests the arm runs are made from (s3/s4's ten, and s6's m-puppy).
+
+**Pre-registered (before the probe runs):**
+- the bar for "E2B hears the warm look without its own words" is the same as 9d's: at least 7 of 8 strict requests
+  right. **My prediction: it does not clear the bar.** 5 or 6 of 8 come out right, and the misses go to minimal (gentle
+  and caring read as quiet);
+- no plain request reaches a top of 0.9, and most go to minimal;
+- **no single threshold separates "named a look" from "named none" with three looks.** The requests that named one go
+  as low as 0.68 (9d, above), and I expect plain ones up to about 0.85;
+- the 11 set requests all land on their own look.
+
+**Result (`w21w-*`, the control `w20m-puppy`):** ✅ **E2B builds Richard's warm look on all three briefs**, every
+warm check closed, by `endGate`. Two lines of the pre-registration were wrong, both in the contrast I predicted.
+
+| run | look asked (mean P warm, orders agreeing) | turns (calm control → warm) | free moves | left at the end |
+|---|---|---|---|---|
+| bakery | 1.00, 6/6 | 23 → **33** | 1 (t1, the section) | the amber line above the headline **2.78** on the wash; the kit's button 3.19 |
+| pottery | 1.00, 6/6 | 22 → **35** | 1 | nothing |
+| puppy | 1.00, 6/6 | 22 → **33** | 1 | nothing |
+
+The same end on all three, in the parameters:
+- the root on the pastel: a wash on bakery and puppy, `#f5f3ff` on pottery;
+- a Fredoka semibold headline at display-lg, on 2 lines on a desktop;
+- a Caveat line above it (text-2xl, bold, brand colour);
+- a Fredoka pill button with 8 px above it;
+- a 40 px photo;
+- 16/16/24 px down the words column, at both widths.
+
+Every turn after the first was a fix from the menu. Pictures: `runs/arm-w21w-<brief>/t<last>/{desktop,phone}.png`.
+
+The model wrote these words:
+
+| brief | the line above | the headline | the line under |
+|---|---|---|---|
+| bakery | "Lyon's family bakery" | "Maison Levain" | "Artisan breads, sweet pastries, and warm moments crafted with love." |
+| pottery | "Crafted with care" | "Potter Portfolio" | "Handmade bowls and cozy weekend pottery classes await you." |
+| puppy | "A place for loving pups" | "Welcome to Puppy Haven" | "Find your perfect furry friend and start a loving new adventure today." |
+
+**Against the pre-registration:**
+- ✅ the look question gave warm 1.00 on all three, in all 6 orders, so none asked;
+- ✅ all three ended by `endGate`, far from the cap, with every warm check closed;
+- ✅ +10, +13 and +11 turns against the calm controls (bar: 8 to 14);
+- ✅ the name is in every headline, on 2 lines;
+- ✅ the bakery's amber line fails on the amber wash (2.78; the bar for words this big is 3), and the kit's button
+  stays at 3.19;
+- ❌ **pottery ended with nothing open.** I predicted that its grey line under the headline would fail on the lavender
+  (10c's 4.41), but in this run the line is in the dark text colour, not grey, so it reads.
+- puppy ended with nothing left, as predicted.
+
+**Seen, for Richard's eye:**
+- **The bakery headline is the name alone**, "Maison Levain", written on the first write, not by the shorten fix.
+  `nameAndMore` acts only when a headline is shortened, so it never fired here.
+- **The headline is display-lg**, the biggest size, so "Maison Levain" breaks onto 2 lines at 228 px tall. The calm
+  heroes end at display-md.
+- **The amber line on the amber wash (2.78) is the warm look's own fault, not the kit's.** The fix would be the line in
+  dark text, or a deeper wash colour for the line, and Richard's eye decides that.
+
+**Kept:** `look3` joins the final harness, `runs/w21.edit.json`, with 11a's caveat: its "ask when the top is under 0.9"
+rule needs 11b's data before a plain request goes through it.

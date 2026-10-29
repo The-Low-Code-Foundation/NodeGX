@@ -24,6 +24,7 @@ import { openBench, writeHero } from './bench.mjs';
 import { outline, kidsOf } from './outline.mjs';
 import { QUESTIONS } from './probe-vision.mjs';
 import { SYSTEM, chat, dist, used } from './door.mjs';
+import { addWarmFonts, brandColourless } from './fonts.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
@@ -60,14 +61,18 @@ const GOAL = { ...GOALS[opt('--brief', 'puppy')] };
 // a bold headline, a white pill button (OWN-029 G-plumber r4's hero, read param by param)
 const REQUEST = opt('--request', EDIT.request);
 // `--style auto` asks the builder model which look the request names (lookq.mjs), before turn 1; the answer is ledgered
-const LOOK_ASKED = (opt('--style', EDIT.style) === 'auto') ? await (await import('./lookq.mjs')).lookOf(MODEL, REQUEST || GOAL.about) : null;
+// look3 (s6): the question offers three looks (lookq.mjs lookOf3), and the third, `warm`, can be built (`--style warm`)
+const LOOK3 = !!EDIT.rules?.look3;
+const LOOK_ASKED = (opt('--style', EDIT.style) === 'auto') ? await (await import('./lookq.mjs'))[LOOK3 ? 'lookOf3' : 'lookOf'](MODEL, REQUEST || GOAL.about) : null;
 const STYLE = LOOK_ASKED ? LOOK_ASKED.style : opt('--style', EDIT.style || 'minimal');
 const ASK_BAND = opt('--ask-band') ? opt('--ask-band').split(',').map(Number) : EDIT.askBand;
-if (ASK_BAND && LOOK_ASKED && LOOK_ASKED.pStylish > ASK_BAND[0] && LOOK_ASKED.pStylish < ASK_BAND[1]) {
+// with two looks, P(stylish) inside the band; with three, the top look under the band's top (the same rule, for two)
+const UNSAID = ASK_BAND && LOOK_ASKED && (LOOK3 ? LOOK_ASKED.top < ASK_BAND[1] : LOOK_ASKED.pStylish > ASK_BAND[0] && LOOK_ASKED.pStylish < ASK_BAND[1]);
+if (UNSAID) {
   // the request does not say which look: nothing is built, and the question goes back to the person
   const out = path.join(HERE, 'runs', `arm-${RUN}`);
   fs.mkdirSync(out, { recursive: true });
-  const end = { ask: 'clean or bold?', pStylish: LOOK_ASKED.pStylish, band: ASK_BAND };
+  const end = LOOK3 ? { ask: 'clean, bold or warm?', mean: LOOK_ASKED.mean, band: ASK_BAND } : { ask: 'clean or bold?', pStylish: LOOK_ASKED.pStylish, band: ASK_BAND };
   fs.writeFileSync(path.join(out, 'ledger.json'), JSON.stringify({ run: RUN, request: REQUEST, lookAsked: LOOK_ASKED, edit: EDIT, turns: [], end, at: new Date().toISOString() }, null, 1));
   await fetch('http://127.0.0.1:11434/api/generate', { method: 'POST', body: JSON.stringify({ model: MODEL, keep_alive: 0 }) }).catch(() => {});
   console.log(JSON.stringify(end));
@@ -75,6 +80,12 @@ if (ASK_BAND && LOOK_ASKED && LOOK_ASKED.pStylish > ASK_BAND[0] && LOOK_ASKED.pS
 }
 if (REQUEST) GOAL.about = REQUEST;
 if (STYLE === 'stylish') GOAL.want = 'a small line above the headline, a headline, one line under it, a button, and a photo on the right, all on a dark brand-colour ground';
+// warm (s6, Richard's pick on 10c's page): a rounded headline with a small handwritten line above it, on a pastel ground
+if (STYLE === 'warm') GOAL.want = 'a small handwritten line above the headline, a rounded headline, one line under it, a button, and a photo on the right, all on a soft pastel ground';
+// the looks with a small line above the headline
+const EYEBROW = STYLE === 'stylish' || STYLE === 'warm';
+// the warm ground: a 12 % wash of the brand colour, or, for a brand with no colour, the Soft preset's pastel (Richard)
+const PASTEL = STYLE === 'warm' && brandColourless(BENCH) ? '#f5f3ff' : 'color-mix(in srgb, var(--primary) 12%, var(--background))';
 // factsKept (s5, 9b): what the request names that the hero must say — the brief's name, and any date (a day and a month,
 // either order). A date is there when the hero's words hold the same day and month in any form
 const MONTH = '(January|February|March|April|May|June|July|August|September|October|November|December)';
@@ -106,7 +117,7 @@ export const SETTINGS = {
     justify: { say: 'where its parts sit along it', options: { start: { justifyContent: 'flex-start' }, centre: { justifyContent: 'center' }, end: { justifyContent: 'flex-end' }, 'spread out': { justifyContent: 'space-between' } } },
     'max width': { say: 'how wide it may grow', options: maxW },
     'self align': { say: 'where it sits inside its own parent', options: { 'parent decides': { alignSelf: undefined }, start: { alignSelf: 'flex-start' }, centre: { alignSelf: 'center' }, end: { alignSelf: 'flex-end' } } },
-    ground: { say: 'what is behind it', options: { none: { backgroundColor: undefined, backgroundGradient: undefined }, 'page colour': { backgroundColor: 'var(--background)', backgroundGradient: undefined }, 'soft grey': { backgroundColor: 'var(--muted)', backgroundGradient: undefined }, 'brand colour': { backgroundColor: 'var(--primary)', backgroundGradient: undefined }, 'dark brand gradient': { backgroundGradient: 'var(--gradient-spotlight)', backgroundColor: undefined } } }
+    ground: { say: 'what is behind it', options: { none: { backgroundColor: undefined, backgroundGradient: undefined }, 'page colour': { backgroundColor: 'var(--background)', backgroundGradient: undefined }, 'soft grey': { backgroundColor: 'var(--muted)', backgroundGradient: undefined }, 'brand colour': { backgroundColor: 'var(--primary)', backgroundGradient: undefined }, 'dark brand gradient': { backgroundGradient: 'var(--gradient-spotlight)', backgroundColor: undefined }, ...(STYLE === 'warm' ? { 'soft pastel': { backgroundColor: PASTEL, backgroundGradient: undefined } } : {}) } }
   },
   Columns: {
     split: { say: 'how wide each column is', options: { 'half and half': { layoutString: '1 1' }, 'wider first column': { layoutString: '3 2' }, 'wider second column': { layoutString: '2 3' } } },
@@ -118,17 +129,20 @@ export const SETTINGS = {
     'text align': { say: 'how the lines of words line up', options: { left: { textAlignX: 'left' }, centre: { textAlignX: 'center' } } },
     colour: { say: 'the colour of the words', options: Object.fromEntries(Object.entries(colour).map(([k, v]) => [k, { color: v }])) },
     'max width': { say: 'how wide the lines may run', options: Object.fromEntries([['none', undefined], ['480px', 480], ['560px', 560], ['640px', 640]].map(([k, n]) => [k, { maxWidth: n && { value: n, unit: 'px' } }])) },
-    ...(STYLE === 'stylish' ? { style: { say: 'what kind of line it is', options: { plain: { textTransform: undefined, letterSpacing: undefined }, 'small capitals': { fontSize: 'var(--text-xs)', textTransform: 'uppercase', letterSpacing: 'var(--tracking-widest)', fontWeight: 'var(--font-semibold)' } } } } : {})
+    ...(STYLE === 'stylish' ? { style: { say: 'what kind of line it is', options: { plain: { textTransform: undefined, letterSpacing: undefined }, 'small capitals': { fontSize: 'var(--text-xs)', textTransform: 'uppercase', letterSpacing: 'var(--tracking-widest)', fontWeight: 'var(--font-semibold)' } } } } : {}),
+    // warm (s6): the two faces of Richard's pick; the handwritten line is bigger and bolder than ordinary words, as on 10c's page
+    ...(STYLE === 'warm' ? { font: { say: 'the face the words are in', options: { plain: { fontFamily: undefined }, rounded: { fontFamily: 'Fredoka' }, handwritten: { fontFamily: 'Caveat', fontSize: 'var(--text-2xl)', fontWeight: 'var(--font-bold)' } } } } : {})
   },
   Image: {
     height: { say: 'how tall the photo is', options: Object.fromEntries([240, 320, 400, 480].map((n) => [`${n}px`, { height: { value: n, unit: 'px' } }])) },
-    corners: { say: 'how round its corners are', options: { square: { borderRadius: undefined }, rounded: { borderRadius: 'var(--radius-lg)' }, 'very rounded': { borderRadius: 'var(--radius-2xl)' } } }
+    corners: { say: 'how round its corners are', options: { square: { borderRadius: undefined }, rounded: { borderRadius: 'var(--radius-lg)' }, 'very rounded': { borderRadius: 'var(--radius-2xl)' }, ...(STYLE === 'warm' ? { 'very soft': { borderRadius: '40px' } } : {}) } }
   },
   Button: {
     colours: { say: 'its colours', options: { 'brand fill, white words': { backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)' }, 'white fill, brand words': { backgroundColor: 'var(--background)', color: 'var(--primary)' } } },
     size: { say: 'how big it is', options: { small: { paddingLeft: sp(3), paddingRight: sp(3), paddingTop: sp(1), paddingBottom: sp(1), fontSize: 'var(--text-sm)' }, medium: { paddingLeft: sp(4), paddingRight: sp(4), paddingTop: sp(2), paddingBottom: sp(2), fontSize: 'var(--text-sm)' }, large: { paddingLeft: sp(6), paddingRight: sp(6), paddingTop: sp(3), paddingBottom: sp(3), fontSize: 'var(--text-base)' } } },
     corners: { say: 'how round its corners are', options: { slightly: { borderRadius: 'var(--radius-md)' }, pill: { borderRadius: 'var(--radius-full)' } } },
     'self align': { say: 'where it sits inside its parent', options: { 'parent decides': { alignSelf: undefined }, start: { alignSelf: 'flex-start' }, centre: { alignSelf: 'center' }, end: { alignSelf: 'flex-end' } } },
+    ...(STYLE === 'warm' ? { font: { say: 'the face its words are in', options: { plain: { fontFamily: undefined }, rounded: { fontFamily: 'Fredoka' } } } } : {}),
     ...(EDIT.rules?.rhythm ? { 'space above': { say: 'extra space between it and the part above it', options: { none: { marginTop: undefined }, small: { marginTop: { value: 8, unit: 'px' } } } } } : {})
   }
 };
@@ -232,15 +246,23 @@ async function judge(q, png) {
 //                 long: use fewer words" (w18m-running: at T 0 the same prompt gave the same 5-word headline 22 times)
 //   rhythmCalm    (rhythm) the calm look's words column takes the medium rhythm too: 16 px between the lines, 8 px more
 //                 above the button (Richard, 10: "I haven't got the eye for it", so one rhythm for both looks)
+// s6 switch (default off):
+//   look3         `--style auto` asks "minimal / stylish / warm" in all 6 orders (lookq.mjs lookOf3, 9d's wording: 24 of
+//                 24), and with askBand asks the person when the top look's mean P is under the band's top. The third
+//                 look, `warm` (also `--style warm`), is Richard's pick on 10c's page, "rounded, with a handwritten line":
+//                 a soft pastel ground (a 12 % wash of the brand, or the Soft preset's #f5f3ff when --primary is a grey),
+//                 a Fredoka semibold headline, a Caveat line above it in the brand colour, a 40 px photo corner, a pill
+//                 button in Fredoka, and the calm rhythm. The font, pastel and 40 px options exist only in a warm run,
+//                 and the run copies the two font modules into its bench (fonts.mjs)
 // The touching / edge thresholds are not rules: bench.mjs FACTS fixes them (4 px, 8 px), and probe-vision's key with them.
-const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false, roles: false, endGate: false, addWhileMissing: false, shortHeadline: false, blankRetry: false, rhythm: false, fixesOnly: false, factsKept: false, nameAndMore: false, writeRepeat: false, rhythmCalm: false }, ...(EDIT.rules || {}) };
+const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false, roles: false, endGate: false, addWhileMissing: false, shortHeadline: false, blankRetry: false, rhythm: false, fixesOnly: false, factsKept: false, nameAndMore: false, writeRepeat: false, rhythmCalm: false, look3: false }, ...(EDIT.rules || {}) };
 // roles (s2, after w4-t15a): each part is told what it is when it is added, and keeps it through moves and removes;
 // the shape checks read the roles, never the document order (t15a: a move made the headline texts[1], and the size
 // fix went to the other Text, so the hero ended with two headlines and no line under them)
 const ROLE_SAY = { eyebrow: 'the small line above the headline', headline: 'the headline', line: 'the line under the headline', button: 'the button', photo: 'the photo' };
-const roleFor = (n, kind) => { const has = (r) => n.some((x) => x.role === r); if (kind === 'Text') return !has('headline') ? 'headline' : !has('line') ? 'line' : STYLE === 'stylish' && !has('eyebrow') ? 'eyebrow' : ''; if (kind === 'Button') return has('button') ? '' : 'button'; if (kind === 'Image') return has('photo') ? '' : 'photo'; return ''; };
+const roleFor = (n, kind) => { const has = (r) => n.some((x) => x.role === r); if (kind === 'Text') return !has('headline') ? 'headline' : !has('line') ? 'line' : EYEBROW && !has('eyebrow') ? 'eyebrow' : ''; if (kind === 'Button') return has('button') ? '' : 'button'; if (kind === 'Image') return has('photo') ? '' : 'photo'; return ''; };
 const byRole = (n, r) => { const i = n.findIndex((x) => x.role === r); return i < 0 ? undefined : i; };
-const missingKinds = (nodes) => { const k = nodes.map(kindOf); return [...(k.filter((x) => x === 'Text').length < (STYLE === 'stylish' ? 3 : 2) ? ['Text'] : []), ...(k.includes('Button') ? [] : ['Button']), ...(k.includes('Image') ? [] : ['Image'])]; };
+const missingKinds = (nodes) => { const k = nodes.map(kindOf); return [...(k.filter((x) => x === 'Text').length < (EYEBROW ? 3 : 2) ? ['Text'] : []), ...(k.includes('Button') ? [] : ['Button']), ...(k.includes('Image') ? [] : ['Image'])]; };
 export function findingsFrom(shot, nodes) {
   const out = [];
   const q = (s) => `"${s.length > 30 ? `${s.slice(0, 28)}…` : s}"`;
@@ -273,7 +295,7 @@ export function findingsFrom(shot, nodes) {
   const seen = new Map();
   for (const f of out) { const k = f.say.replace(/^On a (desktop|phone), /, ''); if (seen.has(k)) seen.get(k).say = seen.get(k).say.replace(/^On a (desktop|phone), /, 'On both, '); else seen.set(k, f); }
   const kinds = nodes.map(kindOf);
-  const missing = [['a headline', kinds.filter((k) => k === 'Text').length >= 1], ['a line under the headline', kinds.filter((k) => k === 'Text').length >= 2], ...(STYLE === 'stylish' ? [['a small line above the headline', kinds.filter((k) => k === 'Text').length >= 3]] : []), ['a button', kinds.includes('Button')], ['a photo', kinds.includes('Image')]].filter(([, has]) => !has).map(([s]) => s);
+  const missing = [['a headline', kinds.filter((k) => k === 'Text').length >= 1], ['a line under the headline', kinds.filter((k) => k === 'Text').length >= 2], ...(EYEBROW ? [['a small line above the headline', kinds.filter((k) => k === 'Text').length >= 3]] : []), ['a button', kinds.includes('Button')], ['a photo', kinds.includes('Image')]].filter(([, has]) => !has).map(([s]) => s);
   const res = [...seen.values()];
   const KIND_OF = { 'a small line above the headline': 'a Text', 'a headline': 'a Text', 'a line under the headline': 'a Text', 'a button': 'a Button', 'a photo': 'an Image' };
   if (RULES.shapeChecks && root >= 0) {
@@ -328,6 +350,20 @@ export function findingsFrom(shot, nodes) {
         if (currentOf(nodes[col], 'gap') !== 'medium') res.push({ check: 'rhythm', say: `The words column ${name(col)} spaces its lines ${currentOf(nodes[col], 'gap')}: the look asked for keeps them close together.`, fix: { node: col, setting: 'gap', only: ['medium'], say: `give ${name(col)} a medium gap (the look keeps the lines of the words close together; now: ${currentOf(nodes[col], 'gap')})` } });
         if (btn !== undefined && nodes[btn].parent === col && currentOf(nodes[btn], 'space above') !== 'small') res.push({ check: 'rhythmButton', say: `The button ${name(btn)} sits as close to the line above it as the lines sit to each other.`, fix: { node: btn, setting: 'space above', only: ['small'], say: `give ${name(btn)} a little space above (it sits as close as the lines do; now: ${currentOf(nodes[btn], 'space above')})` } });
       }
+      if (eb !== undefined && h !== undefined && nodes[eb].parent === nodes[h].parent && leaves[leaves.indexOf(h) - 1] !== eb) res.push({ check: 'eyebrowOrder', say: `${ROLE_SAY.eyebrow} ${name(eb)} is not straight above the headline.`, fix: { act: { kind: 'move', node: eb, into: nodes[h].parent, before: h }, say: `move ${name(eb)} straight above the headline ${name(h)}` } });
+    }
+    if (RULES.roles && STYLE === 'warm') {
+      // warm (s6): Richard's pick on 10c's page, "rounded, with a handwritten line", on the Soft pastel for a brand with no
+      // colour. The same `only` pattern as the stylish look: each fix offers just the value the look asks for
+      const eb = byRole(nodes, 'eyebrow');
+      if (kindOf(nodes[root]) === 'Group' && currentOf(nodes[root], 'ground') !== 'soft pastel') res.push({ check: 'ground', say: `The section ${name(root)} is not on a soft pastel ground: the look asked for is warm.`, fix: { node: root, setting: 'ground', only: ['soft pastel'], say: `give ${name(root)} a soft pastel ground (the look asked for is warm; now: ${currentOf(nodes[root], 'ground')})` } });
+      if (h !== undefined && currentOf(nodes[h], 'font') !== 'rounded') res.push({ check: 'headlineFont', say: `The headline ${name(h)} is not in a rounded face: the look asked for is soft and round.`, fix: { node: h, setting: 'font', only: ['rounded'], say: `put ${name(h)} in the rounded face (the look asked for is soft and round; now: ${currentOf(nodes[h], 'font')})` } });
+      if (h !== undefined && currentOf(nodes[h], 'weight') !== 'semibold') res.push({ check: 'headlineWeight', say: `The headline ${name(h)} is not semibold: the rounded face reads thin without it.`, fix: { node: h, setting: 'weight', only: ['semibold'], say: `make ${name(h)} semibold (the rounded face reads thin without it; now: ${currentOf(nodes[h], 'weight')})` } });
+      if (eb !== undefined && currentOf(nodes[eb], 'font') !== 'handwritten') res.push({ check: 'eyebrowFont', say: `${ROLE_SAY.eyebrow} ${name(eb)} is not handwritten: the look asked for has a small handwritten line.`, fix: { node: eb, setting: 'font', only: ['handwritten'], say: `make ${name(eb)} handwritten (it is the small line above the headline; now: ${currentOf(nodes[eb], 'font')})` } });
+      if (eb !== undefined && currentOf(nodes[eb], 'colour') !== 'brand colour text') res.push({ check: 'eyebrowColour', say: `${ROLE_SAY.eyebrow} ${name(eb)} is not in the brand colour.`, fix: { node: eb, setting: 'colour', only: ['brand colour text'], say: `put ${name(eb)} in the brand colour (it is the small handwritten line; now: ${currentOf(nodes[eb], 'colour')})` } });
+      if (img !== undefined && currentOf(nodes[img], 'corners') !== 'very soft') res.push({ check: 'photoCorners', say: `The photo ${name(img)} has hard corners: the look asked for has everything rounded.`, fix: { node: img, setting: 'corners', only: ['very soft'], say: `give ${name(img)} very soft corners (the look asked for has everything rounded; now: ${currentOf(nodes[img], 'corners')})` } });
+      if (btn !== undefined && currentOf(nodes[btn], 'corners') !== 'pill') res.push({ check: 'buttonShape', say: `The button ${name(btn)} has square-ish corners: the look asked for has a pill button.`, fix: { node: btn, setting: 'corners', only: ['pill'], say: `make ${name(btn)} a pill (now: ${currentOf(nodes[btn], 'corners')})` } });
+      if (btn !== undefined && currentOf(nodes[btn], 'font') !== 'rounded') res.push({ check: 'buttonFont', say: `The button ${name(btn)} is not in the rounded face, as the headline is.`, fix: { node: btn, setting: 'font', only: ['rounded'], say: `put ${name(btn)} in the rounded face (as the headline; now: ${currentOf(nodes[btn], 'font')})` } });
       if (eb !== undefined && h !== undefined && nodes[eb].parent === nodes[h].parent && leaves[leaves.indexOf(h) - 1] !== eb) res.push({ check: 'eyebrowOrder', say: `${ROLE_SAY.eyebrow} ${name(eb)} is not straight above the headline.`, fix: { act: { kind: 'move', node: eb, into: nodes[h].parent, before: h }, say: `move ${name(eb)} straight above the headline ${name(h)}` } });
     }
     if (RULES.roles && RULES.rhythm && RULES.rhythmCalm && STYLE !== 'stylish') {
@@ -534,6 +570,8 @@ const ledger = { style: STYLE, lookAsked: LOOK_ASKED || undefined, request: REQU
   surgery: fs.existsSync(path.join(OUT, 'surgery.json')) ? JSON.parse(fs.readFileSync(path.join(OUT, 'surgery.json'), 'utf8')) : undefined, turns: [] };
 const save = () => { fs.writeFileSync(path.join(OUT, 'ledger.json'), JSON.stringify(ledger, null, 1)); writeTimeline(ledger); };
 const state = { nodes: [], undo: [], history: [] };
+// a warm run needs its two faces in the bench (a module that only declares @font-face changes no other look)
+if (STYLE === 'warm') addWarmFonts(BENCH);
 const bench = await openBench(BENCH, { retryBlank: RULES.blankRetry });
 let findings = [], lastLook = null;
 try {
