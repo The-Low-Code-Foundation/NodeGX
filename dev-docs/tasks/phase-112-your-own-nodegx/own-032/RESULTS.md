@@ -160,8 +160,8 @@ button, **"Edit and re-run from here"**, that opens a form with:
 - the call's prompt, editable;
 - its answer, which can be overridden with any of its options, or with fixed words on a `write.text`;
 - a note added to every prompt of that turn;
-- for the whole run from there on: words at temperature 0, the `emptyParts` / `unchanged` findings, the
-  touching / edge thresholds, the menu's question and the goal line;
+- for the whole run from there on: words at temperature 0, the `emptyParts` / `unchanged` findings, the s2 switches
+  (below), the menu's question and the goal line;
 - what you are trying, saved with the fork.
 
 `POST /api/fork` turns the form into the arm's flags:
@@ -191,7 +191,56 @@ Two fixes on the way:
   it first, beside a peer's).
 - The "placeholder words" finding now uses the fixed-width names (`n05`, not `n5`).
 
-**No fork has been asked yet:** a peer's `gemma4-e4b-32k` held Ollama all through s2's build.
+Richard found the prompts too many to sift ("can you try to do it instead?"), so Opus ran the pokes. Method: read the
+odds to find the call where the loop lives, probe that call alone on its recorded prompts with one change at a time
+(the unchanged prompt is the control and must give back the recorded odds), then fork with the winner.
+
+### 5a. The empty-Group loop lives in "which kind?", not in the move
+
+In w2/w3 the move "add" was reasonable (the goal said a line, a button and a photo were missing). The loop is the
+next call: **"Which kind?" gives Group 0.45–0.94** while the kinds the goal lacks get 0.01–0.37. Group is listed first,
+and every Group added becomes a "your last steps" line that invites the next.
+
+`probe-kind.mjs`, the 38 asked `add.kind` calls of w2 + w3 with a part missing, E2B at temperature 0:
+
+| change to the prompt | P(a missing kind) | P(Group) | picks a missing kind |
+|---|---|---|---|
+| none (control; max drift from recorded 0.003) | 0.25 | 0.66 | 5/38 |
+| missing kinds listed first, Group last | 0.55 | 0.35 | 21/38 |
+| missing kinds marked "— still missing" | 0.34 | 0.58 | 9/38 |
+| the goal names each part's kind ("a photo (an Image)") | 0.39 | 0.54 | 8/38 |
+| last steps hidden | 0.18 | 0.77 | 2/38 |
+| all four | 0.77 | 0.20 | 32/38 |
+| **first three, last steps kept** | **0.85** | **0.10** | **37/38** |
+
+Order is the biggest single lever, so this is largely position bias. Hiding the last steps HURTS on its own.
+
+### 5b. The move never sets: a fix menu does
+
+Once every part was there (t8a, turns 14–30), P("change one setting") stayed at 0.04–0.08. `probe-move.mjs`, those 17
+move calls:
+
+| change | P(set or a fix) | picks it |
+|---|---|---|
+| none (control; drift 0.006) | 0.06 | 0/17 |
+| the finding names the owner ("n00 (the whole section) has padding left and right: none") | 0.06 | 0/17 |
+| "Every part of the goal is there" | 0.07 | 0/17 |
+| "change one setting" first on the menu | 0.12 | 0/17 |
+| the "n03, n08 are empty" line dropped | 0.08 | 0/17 |
+| owner + goal line + set first | 0.34 | 4/17 |
+| …and the empty line dropped | 0.76 | 17/17 |
+| **each traced finding its own move ("give n00 padding left and right (words are at the edge…)")** | **0.92** | **17/17** |
+
+### 5c. The forks
+
+Rules are switches in `--edit` (`arm.mjs` header); all default off, so w1–w3 replay unchanged. Words at temperature 0
+from t7a on.
 
 | fork | from, step | the change | what it did |
 |---|---|---|---|
+| `w3-puppy-t7a` | w3, turn 7 | `missingFirst`, `markMissing`, `namedGoal`; words at T 0 | A Button at turn 7 (w3 added a Group). Then **23 refused "add inside n01"** (a full Columns): at T 0 a refused step leaves the prompt as it was, so the same answer comes back. |
+| `…-t8a` | t7a, turn 8 | `legalOnly`: "inside which part?" lists only parts that can take one | No refusals. **Every part by turn 13.** Then empty Groups/Columns and headline rewrites; P(set) 0.04–0.08, no setting changed. |
+| `…-t14a` | t8a, turn 14 | `fixMenu`, `goalLine`, `ownerNamed`, `emptyParts` off | A fix picked on every turn, but the value was **"none" 16 times** (P 1.00): "none" listed first, and equal to the "(not set)" it already was. |
+| `…-t14a-t14a` | t14a, turn 14 | a fix offers only values that change something, and says what it fixes | padding left/right `large` (turn 14), gap `huge` (15): **the measures went clean** and it said **done** at turn 30. The picture is not a hero: a body-size headline at the top edge, the line under it after the photo, the photo below the words. Nothing measured those. |
+| `w4-puppy` | fresh, every switch | + `shapeChecks`: headline size, space above/below, order, photo on the right (from the tree) | Four fixes taken by turn 12 (padding, gap, headline `text-xl`, padding top/bottom `huge`). Then 15 turns of adding Columns: the right idea for "photo not on the right", but **no action could move a part**. |
+| `w4-puppy-t15a` | w4, turn 15 | `move` / `remove` actions; "photo on the right" offers the next structural step | (waiting on Ollama) |

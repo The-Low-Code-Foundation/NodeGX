@@ -1,0 +1,112 @@
+{
+ "htmlMs": 121,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [
+    {
+     "a": "Welcome to Puppy Haven",
+     "b": "Adopt Now",
+     "gap": 0
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Welcome to Puppy Haven",
+     "x": 32,
+     "y": 0,
+     "w": 187,
+     "h": 22
+    },
+    {
+     "kind": "button",
+     "text": "Adopt Now",
+     "x": 32,
+     "y": 22,
+     "w": 105,
+     "h": 35
+    },
+    {
+     "kind": "words",
+     "text": "Find Your Perfect Puppy",
+     "x": 32,
+     "y": 377,
+     "w": 172,
+     "h": 22
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:54206/",
+   "blank": false,
+   "words": 10,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 399
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Welcome to Puppy Haven",
+     "x": 32,
+     "y": 0,
+     "w": 187,
+     "h": 22
+    },
+    {
+     "kind": "button",
+     "text": "Adopt Now",
+     "x": 32,
+     "y": 38,
+     "w": 105,
+     "h": 35
+    },
+    {
+     "kind": "words",
+     "text": "Find Your Perfect Puppy",
+     "x": 32,
+     "y": 393,
+     "w": 172,
+     "h": 22
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:54206/",
+   "blank": false,
+   "words": 10,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 415
+ },
+ "ms": 2356
+}

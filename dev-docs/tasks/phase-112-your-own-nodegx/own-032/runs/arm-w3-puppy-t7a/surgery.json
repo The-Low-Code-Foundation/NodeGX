@@ -1,0 +1,38 @@
+{
+ "from": "w3-puppy",
+ "turn": 7,
+ "key": "move",
+ "note": "probe-kind: missing kinds first, marked, named in the goal (37/38 on the recorded prompts); words at temperature 0",
+ "change": {
+  "edit": {
+   "wordsTemperature": 0,
+   "rules": {
+    "missingFirst": true,
+    "markMissing": true,
+    "namedGoal": true
+   }
+  }
+ },
+ "args": [
+  "arm.mjs",
+  "--run",
+  "w3-puppy-t7a",
+  "--brief",
+  "puppy",
+  "--turns",
+  "30",
+  "--look",
+  "script",
+  "--model",
+  "gemma4:e2b-it-qat",
+  "--judge",
+  "gemma4:e4b-it-qat",
+  "--replay",
+  "w3-puppy",
+  "--upto",
+  "7",
+  "--edit",
+  "/Users/richardosborne/vscode_projects/OpenNoodl/dev-docs/tasks/phase-112-your-own-nodegx/own-032/runs/arm-w3-puppy-t7a/edit.json"
+ ],
+ "at": "2026-10-29T14:02:05.126Z"
+}

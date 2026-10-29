@@ -12,6 +12,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { kidsOf } from './outline.mjs';
 const require = createRequire(import.meta.url);
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../..');
 const { withRenderedPage } = require(path.join(REPO, 'scripts/devtools/render-report.js'));
@@ -34,7 +35,7 @@ export function writeHero(dir, nodes) {
   const doc = JSON.parse(fs.readFileSync(file, 'utf8'));
   doc.nodes = nodes.map((n, i) => ({
     id: `b${i}`, type: n.type, label: (n.role || n.type).slice(0, 60), ...(n.parent >= 0 ? { parent: `b${n.parent}` } : {}),
-    parameters: n.params || {}, children: nodes.map((m, j) => (m.parent === i ? `b${j}` : null)).filter(Boolean), x: 40 + 60 * depth(nodes, i), y: 40 + 120 * i
+    parameters: n.params || {}, children: kidsOf(nodes, i).map((j) => `b${j}`), x: 40 + 60 * depth(nodes, i), y: 40 + 120 * i
   }));
   doc.visualRoots = nodes.length ? ['b0'] : [];
   fs.writeFileSync(file, JSON.stringify(doc, null, 2));

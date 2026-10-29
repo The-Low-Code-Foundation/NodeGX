@@ -21,8 +21,9 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { openBench, writeHero } from './bench.mjs';
-import { outline } from './outline.mjs';
+import { outline, kidsOf } from './outline.mjs';
 import { QUESTIONS } from './probe-vision.mjs';
+import { SYSTEM, chat, dist, used } from './door.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
@@ -108,41 +109,6 @@ const currentOf = (n, setting) => {
 };
 
 // ─── The model door: single-enum questions with their distribution, and the one free-words question ─────────────
-const SYSTEM = 'You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.';
-const used = new Set();   // the models this run asked: only these are unloaded at the end
-async function chat(model, messages, { format, temperature = 0, numPredict = 60, logprobs = false }) {
-  used.add(model);
-  const r = await fetch(`${OLLAMA}/api/chat`, { method: 'POST', body: JSON.stringify({ model, messages, stream: false, think: false, format, ...(logprobs ? { logprobs: true, top_logprobs: 10 } : {}), options: { temperature, num_predict: numPredict, num_ctx: 4096 }, keep_alive: '15m' }) });
-  if (!r.ok) throw new Error(`ollama ${r.status}: ${(await r.text()).slice(0, 200)}`);
-  return r.json();
-}
-// the distribution over enum options, read where the options' spellings diverge (lm.mjs `confidence`)
-function dist(j, options) {
-  const lp = j.logprobs || [];
-  // the value starts after the text so far reads `…": "`. lm.mjs looks only one token back, which misses `":` ` ` `"`
-  // (three tokens): E2B answers a digit enum that way, and every move's odds came back empty (w1-puppy).
-  let at = -1, text = '';
-  for (let i = 0; i < lp.length - 1; i++) { text += lp[i].token; if (/:\s*"$/.test(text)) { at = i + 1; break; } }
-  if (at < 0) return null;
-  const d = Object.fromEntries(options.map((o) => [o, 0]));
-  let prefix = '';
-  for (let i = at; i < lp.length; i++) {
-    const cands = options.filter((o) => o.toLowerCase().startsWith(prefix));
-    if (cands.length <= 1) { if (cands[0]) d[cands[0]] = 1; break; }
-    const chosen = lp[i].token.toLowerCase();
-    if (cands.every((o) => o.toLowerCase().startsWith(prefix + chosen))) { prefix += chosen; continue; }
-    for (const t of lp[i].top_logprobs || []) {
-      const ext = prefix + t.token.toLowerCase();
-      if (ext === prefix) continue;
-      const hit = cands.filter((o) => o.toLowerCase().startsWith(ext) || (ext.startsWith(o.toLowerCase()) && ext.length > o.length - 1));
-      for (const o of hit) d[o] += Math.exp(t.logprob) / hit.length;
-    }
-    break;
-  }
-  const sum = Object.values(d).reduce((a, b) => a + b, 0);
-  if (!sum) return null;
-  return options.map((o) => ({ label: o, p: +(d[o] / sum).toFixed(3) })).sort((a, b) => b.p - a.p);
-}
 // what surgery did to one call: its prompt replaced (`--prompt`), or the turn's hint in it (`--hint`)
 const touched = (turnLog, key) => ({ edited: PROMPT[turnLog.turn]?.[key] != null || undefined, hinted: !!HINT[turnLog.turn] || undefined });
 async function choose(key, prompt, options, turnLog) {
@@ -176,16 +142,54 @@ async function judge(q, png) {
 // ─── Findings in words: the script's measures, and the goal's parts ──────────────────────────────────────────────
 // emptyParts / unchanged: findings about what the picture cannot show (w1-puppy added 22 empty Groups in a row, and
 // nothing it was told said they drew nothing). On by default from w2; `--edit` with rules:{…:false} turns one off.
-const RULES = { ...{ minGapPx: 4, edgePx: 8, emptyParts: true, unchanged: true }, ...(EDIT.rules || {}) };
+// s2 switches, all off by default so w1–w3 stay reproducible (probe-kind.mjs measured each on the recorded prompts):
+//   missingFirst  the "which kind?" list puts the kinds the goal still lacks first and Group last
+//   markMissing   …and marks each of them "— still missing"
+//   namedGoal     "Not there yet: a photo (an Image), …": the goal finding names the kind of each missing part
+//   lastSteps     false drops YOUR LAST STEPS (a run of "added a Group" lines invites the next one)
+//   legalOnly     "inside which part?" lists only the parts that can take one more (a Group, or Columns holding fewer
+//                 than two); with none, "add" leaves the move menu. w3-puppy-t7a: 23 refused "inside n01" in a row — at
+//                 temperature 0 a refused step leaves the prompt as it was, so the same wrong answer comes back
+//   fixMenu       each finding the script can trace to a setting becomes its own move, ahead of the generic ones
+//                 ("give n00 padding left and right (words are at the edge of the screen)"); the model then picks the
+//                 value. probe-move.mjs on t7a-t8a turns 14–30: P(a fix) 0.92, 17/17, against P(set) 0.06, 0/17
+//   shapeChecks   findings the DOM measures cannot see, read from the tree: the headline no bigger than ordinary words,
+//                 no space above and below the section, the line not straight under the headline, the photo not on
+//                 the right of the words. t14a-t14a ended "clean" with all four (the first two become fixes)
+//                 With fixMenu, "photo not on the right" offers the NEXT structural step as a fix (add the Columns, add
+//                 the words column, move the photo in beside it, move the headline, the line, the button into the words
+//                 column, in that order), and, once the photo is on the right, one fix that removes the empty parts. w4-puppy: every part and every
+//                 spacing right by turn 12, then 15 turns of empty Columns, because no action could move a part
+//   goalLine      once no part is missing, the findings open with "Every part of the goal is there…"
+//   ownerNamed    a spacing finding names the part that owns the space and its setting now (s1's outline probe: E2B
+//                 finds parts, never which part owns a space): "n00 (the whole section) has padding left and right: none"
+// The touching / edge thresholds are not rules: bench.mjs FACTS fixes them (4 px, 8 px), and probe-vision's key with them.
+const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false }, ...(EDIT.rules || {}) };
+const missingKinds = (nodes) => { const k = nodes.map(kindOf); return [...(k.filter((x) => x === 'Text').length < 2 ? ['Text'] : []), ...(k.includes('Button') ? [] : ['Button']), ...(k.includes('Image') ? [] : ['Image'])]; };
 export function findingsFrom(shot, nodes) {
   const out = [];
   const q = (s) => `"${s.length > 30 ? `${s.slice(0, 28)}…` : s}"`;
+  // the part a measured block of words is: bench.mjs names a block by its first 40 characters, spaces folded
+  const partOf = (text) => nodes.findIndex((n) => String(n.params.text ?? n.params.label ?? '').trim().replace(/\s+/g, ' ').slice(0, 40) === text);
+  const up = (i) => { const a = []; for (let p = nodes[i]?.parent; p !== undefined && p >= 0; p = nodes[p].parent) a.push(p); return a; };
+  const root = nodes.findIndex((n) => n.parent === -1);
+  // each traced finding carries `fix` { node, setting, say } for the fix menu; its owner sentence is said only with ownerNamed
+  const edgeFix = () => (kindOf(nodes[root]) === 'Group' ? { node: root, setting: 'padding left and right', say: `give ${name(root)} padding left and right (words are at the edge of the screen; now: ${currentOf(nodes[root], 'padding left and right')})` } : undefined);
+  const edgeOwner = () => (RULES.ownerNamed && kindOf(nodes[root]) === 'Group' ? ` ${name(root)} (the whole section) has padding left and right: ${currentOf(nodes[root], 'padding left and right')}.` : '');
+  const common = (a, b) => { const ia = partOf(a), ib = partOf(b); if (ia < 0 || ib < 0) return undefined; return up(ia).find((x) => x === ib || up(ib).includes(x)); };
+  const gapFix = (a, b) => { const c = common(a, b); return c !== undefined && kindOf(nodes[c]) === 'Group' ? { node: c, setting: 'gap', say: `give ${name(c)} more space between its parts (words are touching; now: ${currentOf(nodes[c], 'gap')})` } : undefined; };
+  const gapOwner = (a, b) => {
+    if (!RULES.ownerNamed) return '';
+    const c = common(a, b); if (c === undefined) return '';
+    return kindOf(nodes[c]) === 'Group' ? ` The space between them is the gap of ${name(c)}, which holds both: ${currentOf(nodes[c], 'gap')}.` : ` Both sit in ${name(c)} (${kindOf(nodes[c])}).`;
+  };
+  const wideFix = (text) => { const i = partOf(text); return i >= 0 && kindOf(nodes[i]) === 'Button' ? { node: i, setting: 'self align', say: `set where ${name(i)} sits inside its parent (the button is much wider than its words; now: ${currentOf(nodes[i], 'self align')})` } : undefined; };
   for (const w of ['desktop', 'phone']) {
     const f = shot[w].facts, on = w === 'desktop' ? 'On a desktop' : 'On a phone';
-    for (const t of f.touching) out.push({ check: 'touching', width: w, say: `${on}, ${q(t.a)} and ${q(t.b)} are touching (${t.gap}px apart).` });
-    for (const t of f.atEdge) out.push({ check: 'atEdge', width: w, say: `${on}, ${q(t.text)} is ${Math.min(t.left, t.right)}px from the ${t.left <= t.right ? 'left' : 'right'} edge of the screen.` });
+    for (const t of f.touching) out.push({ check: 'touching', width: w, say: `${on}, ${q(t.a)} and ${q(t.b)} are touching (${t.gap}px apart).${gapOwner(t.a, t.b)}`, fix: gapFix(t.a, t.b) });
+    for (const t of f.atEdge) out.push({ check: 'atEdge', width: w, say: `${on}, ${q(t.text)} is ${Math.min(t.left, t.right)}px from the ${t.left <= t.right ? 'left' : 'right'} edge of the screen.${edgeOwner()}`, fix: edgeFix() });
     if (f.photoCut.length) out.push({ check: 'photoCut', width: w, say: `${on}, the photo runs past the edge of the screen.` });
-    for (const b of f.buttonWide) out.push({ check: 'buttonWide', width: w, say: `${on}, the button ${q(b.text)} is ${b.w}px wide for ${b.words}px of words.` });
+    for (const b of f.buttonWide) out.push({ check: 'buttonWide', width: w, say: `${on}, the button ${q(b.text)} is ${b.w}px wide for ${b.words}px of words.`, fix: wideFix(b.text) });
     if (f.unaligned.length) out.push({ check: 'unaligned', width: w, say: `${on}, the words and the button are not lined up: neither their left edges nor their centres match.` });
     if (f.overflowX > 1) out.push({ check: 'overflowX', width: w, say: `${on}, the page is ${f.overflowX}px too wide and scrolls sideways.` });
     for (const l of f.lowContrast || []) out.push({ check: 'contrast', width: w, say: `${on}, ${q(l.text)} is hard to read against what is behind it (contrast ${l.ratio}).` });
@@ -196,15 +200,54 @@ export function findingsFrom(shot, nodes) {
   const kinds = nodes.map(kindOf);
   const missing = [['a headline', kinds.filter((k) => k === 'Text').length >= 1], ['a line under the headline', kinds.filter((k) => k === 'Text').length >= 2], ['a button', kinds.includes('Button')], ['a photo', kinds.includes('Image')]].filter(([, has]) => !has).map(([s]) => s);
   const res = [...seen.values()];
-  if (missing.length) res.unshift({ check: 'goal', say: `Not there yet: ${missing.join(', ')}.` });
+  const KIND_OF = { 'a headline': 'a Text', 'a line under the headline': 'a Text', 'a button': 'a Button', 'a photo': 'an Image' };
+  if (RULES.shapeChecks && root >= 0) {
+    // document order: a part's children in the order they were added
+    const order = []; const walk = (i) => { order.push(i); kidsOf(nodes, i).forEach(walk); }; walk(root);
+    const leaves = order.filter((i) => ['Text', 'Button', 'Image'].includes(kindOf(nodes[i])));
+    const texts = leaves.filter((i) => kindOf(nodes[i]) === 'Text'), img = leaves.find((i) => kindOf(nodes[i]) === 'Image');
+    const h = texts[0], line = texts[1];
+    const big = ['text-xl', 'display-sm', 'display-md', 'display-lg'];
+    if (h !== undefined && !big.some((t) => nodes[h].params.fontSize === `var(--${t})`)) res.push({ check: 'hierarchy', say: `The headline ${name(h)} is the size of ordinary words (${currentOf(nodes[h], 'size')}): it does not stand out.`, fix: { node: h, setting: 'size', bigger: true, say: `make ${name(h)} bigger (the headline does not stand out; now: ${currentOf(nodes[h], 'size')})` } });
+    if (kindOf(nodes[root]) === 'Group' && !nodes[root].params.paddingTop) res.push({ check: 'airY', say: `The section ${name(root)} has no space above and below its parts: the words touch its top.`, fix: { node: root, setting: 'padding top and bottom', say: `give ${name(root)} padding top and bottom (no space above and below; now: ${currentOf(nodes[root], 'padding top and bottom')})` } });
+    if (h !== undefined && line !== undefined && leaves[leaves.indexOf(h) + 1] !== line) res.push({ check: 'order', say: `The line under the headline (${name(line)}) is not straight under it: ${name(leaves[leaves.indexOf(h) + 1])} comes between them.` });
+    if (img !== undefined && h !== undefined) {
+      const up2 = (i) => { const a = []; for (let q = nodes[i].parent; q >= 0; q = nodes[q].parent) a.push(q); return a; };
+      const cols = up2(img).find((c) => kindOf(nodes[c]) === 'Columns' && up2(h).includes(c));
+      const kids = cols === undefined ? [] : kidsOf(nodes, cols);
+      const side = (i) => kids.findIndex((k) => k === i || up2(i).includes(k));
+      if (cols === undefined || side(h) !== 0 || side(img) !== 1) res.push({ check: 'photoRight', say: `The photo ${name(img)} is not on the right of the words: for that, one Columns must hold the words in its first column and the photo in its second.`, fix: structureStep(nodes, root, [h, line, leaves.find((i) => kindOf(nodes[i]) === 'Button')], img) });
+    }
+  }
+  if (!missing.length && RULES.goalLine) res.unshift({ check: 'goalMet', say: 'Every part of the goal is there. What is left is how it looks: the findings below.' });
+  if (missing.length) res.unshift({ check: 'goal', say: `Not there yet: ${missing.map((s) => (RULES.namedGoal ? `${s} (${KIND_OF[s]})` : s)).join(', ')}.` });
   if (RULES.emptyParts) {
     const empty = nodes.map((n, i) => i).filter((i) => KINDS[kindOf(nodes[i])].holds && !nodes.some((m) => m.parent === i));
-    if (empty.length) res.push({ check: 'empty', say: `${empty.map(name).join(', ')} ${empty.length > 1 ? 'are' : 'is'} empty: ${empty.length > 1 ? 'they show' : 'it shows'} nothing until something is put inside.` });
+    if (empty.length) res.push({ check: 'empty', fix: empty.some((i) => i !== root) && !res.some((f) => f.check === 'photoRight') ? { act: { kind: 'remove', nodes: empty.filter((i) => i !== root) }, say: `remove the empty parts ${empty.filter((i) => i !== root).map(name).join(', ')} (they show nothing)` } : undefined, say: `${empty.map(name).join(', ')} ${empty.length > 1 ? 'are' : 'is'} empty: ${empty.length > 1 ? 'they show' : 'it shows'} nothing until something is put inside.` });
   }
   if (RULES.unchanged && shot.unchanged) res.push({ check: 'unchanged', say: 'Your last step changed nothing a person can see, on a desktop or on a phone.' });
   const unwritten = nodes.map((n, i) => ({ n, i })).filter(({ n }) => (n.params.text === 'Text' || n.params.label === 'Button'));
   if (unwritten.length) res.push({ check: 'words', say: `Still holding placeholder words: ${unwritten.map(({ i }) => name(i)).join(', ')}.` });
   return res;
+}
+
+// the next step toward "words in the first column, the photo in the second" (shapeChecks + fixMenu), or nothing when
+// the tree is in a shape these steps do not cover; each step is one action the model can take or leave
+function structureStep(nodes, root, words, img) {
+  const under = (x, a) => { for (let q = x; q !== undefined && q >= 0; q = nodes[q].parent) if (q === a) return true; return false; };
+  const C = kidsOf(nodes, root).find((i) => kindOf(nodes[i]) === 'Columns' && kidsOf(nodes, i).every((k) => kindOf(nodes[k]) === 'Group' || k === img));
+  if (C === undefined) return { act: { kind: 'add', what: 'Columns', inside: root }, say: `add a Columns inside ${name(root)}, to put the words and the photo side by side` };
+  const [c1, c2] = kidsOf(nodes, C);
+  if (c1 === undefined) return { act: { kind: 'add', what: 'Group', inside: C }, say: `add a Group inside ${name(C)} as its first column, for the words` };
+  if (c1 === img || kindOf(nodes[c1]) !== 'Group' || under(img, c1)) return undefined;
+  if (!under(img, C)) {
+    if (c2 === undefined) return { act: { kind: 'move', node: img, into: C }, say: `move the photo ${name(img)} into ${name(C)} as its second column, beside the words` };
+    if (kindOf(nodes[c2]) === 'Group' && !kidsOf(nodes, c2).length) return { act: { kind: 'move', node: img, into: c2 }, say: `move the photo ${name(img)} into ${name(c2)}, the second column of ${name(C)}` };
+    return undefined;
+  }
+  const what = ['the headline', 'the line under it', 'the button'];
+  for (const [k, x] of words.entries()) if (x !== undefined && !under(x, c1)) return { act: { kind: 'move', node: x, into: c1 }, say: `move ${what[k]} ${name(x)} into ${name(c1)}, the words column` };
+  return undefined;
 }
 
 // ─── The prompt ──────────────────────────────────────────────────────────────────────────────────────────────────
@@ -217,7 +260,7 @@ function context(state, turn, findings) {
   const last = state.history.slice(-4).map((h) => `- turn ${h.turn}: ${h.say}${h.legal === false ? ' (REFUSED)' : ''}`).join('\n');
   return `${intro}\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\n${tree(state.nodes)}\n\n` +
     `WHAT THE LAST LOOK FOUND:\n${findings.length ? findings.map((f) => `- ${f.say}`).join('\n') : '- nothing wrong.'}\n` +
-    (last ? `\nYOUR LAST STEPS:\n${last}\n` : '') + (HINT[turn] ? `\nNOTE: ${HINT[turn]}\n` : '') + `\nThis is turn ${turn} of ${TURNS}.`;
+    (last && RULES.lastSteps ? `\nYOUR LAST STEPS:\n${last}\n` : '') + (HINT[turn] ? `\nNOTE: ${HINT[turn]}\n` : '') + `\nThis is turn ${turn} of ${TURNS}.`;
 }
 
 // ─── One turn ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -225,19 +268,36 @@ async function decide(state, turn, findings, T) {
   const ctx = context(state, turn, findings);
   const n = state.nodes;
   const writable = n.map((x, i) => i).filter((i) => KINDS[kindOf(n[i])].words);
-  const moves = [['add', 'add a part (a Group, Columns, Text, Image or Button) inside a part'], ...(n.length ? [['set', 'change one setting of a part']] : []),
+  const canTake = (i) => KINDS[kindOf(n[i])].holds && !(kindOf(n[i]) === 'Columns' && n.filter((x) => x.parent === i).length >= 2);
+  const takers = n.map((x, i) => i).filter(canTake);
+  const moves = [...(!RULES.legalOnly || !n.length || takers.length ? [['add', 'add a part (a Group, Columns, Text, Image or Button) inside a part']] : []), ...(n.length ? [['set', 'change one setting of a part']] : []),
     ...(writable.length ? [['write', 'write the words of a Text or a Button']] : []), ...(state.history.length ? [['undo', 'undo your last step']] : []), ['done', 'stop: the section is finished']];
+  if (RULES.fixMenu) moves.unshift(...[...new Map(findings.filter((f) => f.fix).map((f) => [`${f.fix.node}|${f.fix.setting}`, f.fix])).values()].map((f) => ['fix', f.say, f]));
   const menu = moves.map(([k, s], i) => `${i + 1}. ${s}`).join('\n');
   const move = await choose('move', `${ctx}\n\n${EDIT.menuWording || 'What do you do next? Pick one:'}\n${menu}`, moves.map((_, i) => String(i + 1)), T);
   const m = moves[Number(move) - 1]?.[0];
+  if (m === 'fix' && moves[Number(move) - 1][2].act) { const f = moves[Number(move) - 1][2]; return { ...f.act, via: 'fix', say: `${f.say.replace(/ \(.*\)$/, '')} (a fix from the menu)` }; }
+  if (m === 'fix') {
+    // a fix offers only values that change something: never the current one, and never "none" for a fault of too
+    // little space (t14a: "set gap of n00 to none" 16 times, P(none) 1.00, "none" listed first and equal to "not set")
+    const f = moves[Number(move) - 1][2], k = kindOf(n[f.node]), now = currentOf(n[f.node], f.setting);
+    const all = Object.keys(SETTINGS[k][f.setting].options);
+    const opts = f.bigger ? all.slice(all.indexOf(now) + 1) : all.filter((o) => o !== now && !(o === 'none' && f.setting !== 'self align'));
+    const why = f.say.match(/\(([^;]*);/)?.[1];
+    const value = await choose('set.value', `${ctx}\n\nYou are fixing this: ${why}. You are changing "${f.setting}" of ${name(f.node)} (${k}): ${SETTINGS[k][f.setting].say}. It is now: ${now}. Change it to:`, opts, T);
+    return { kind: 'set', node: f.node, setting: f.setting, value, via: 'fix', say: `set ${f.setting} of ${name(f.node)} to ${value} (a fix from the menu)` };
+  }
   if (!m) return { kind: 'invalid', say: `answered "${move}"` };
   if (m === 'done' || m === 'undo') return { kind: m, say: m === 'done' ? 'said the section is finished' : 'undid the last step' };
   if (m === 'add') {
-    const kinds = Object.keys(KINDS);
-    const kind = await choose('add.kind', `${ctx}\n\nYou are adding a part. Which kind?\n${kinds.map((k) => `- ${KINDS[k].say}`).join('\n')}`, kinds, T);
+    const lack = missingKinds(n);
+    const kinds = RULES.missingFirst ? [...lack, ...Object.keys(KINDS).filter((k) => !lack.includes(k) && k !== 'Group'), 'Group'] : Object.keys(KINDS);
+    const kind = await choose('add.kind', `${ctx}\n\nYou are adding a part. Which kind?\n${kinds.map((k) => `- ${KINDS[k].say}${RULES.markMissing && lack.includes(k) ? ' — still missing' : ''}`).join('\n')}`, kinds, T);
     if (!n.length) return { kind: 'add', what: kind, inside: -1, say: `added a ${kind} as the whole section` };
     const holders = n.map((x, i) => i).filter((i) => KINDS[kindOf(n[i])].holds);
-    const inside = await choose('add.inside', `${ctx}\n\nYou are adding a ${kind}. Inside which part? (Only a Group or Columns can hold parts.)`, n.map((_, i) => name(i)), T);
+    const inside = RULES.legalOnly
+      ? await choose('add.inside', `${ctx}\n\nYou are adding a ${kind}. Inside which part? These are the parts that can take it:\n${takers.map((i) => `- ${name(i)} (${kindOf(n[i])}, holding ${n.filter((x) => x.parent === i).length})`).join('\n')}`, takers.map(name), T)
+      : await choose('add.inside', `${ctx}\n\nYou are adding a ${kind}. Inside which part? (Only a Group or Columns can hold parts.)`, n.map((_, i) => name(i)), T);
     const at = Number(String(inside).slice(1));
     return { kind: 'add', what: kind, inside: at, legal: holders.includes(at) || undefined, say: `added a ${kind} inside ${inside}` };
   }
@@ -271,6 +331,18 @@ function apply(state, a) {
     if (a.inside >= 0 && !KINDS[kindOf(n[a.inside])]?.holds) return `${name(a.inside)} is a ${kindOf(n[a.inside])}; only a Group or Columns can hold parts.`;
     if (a.inside >= 0 && kindOf(n[a.inside]) === 'Columns' && n.filter((x) => x.parent === a.inside).length >= 2) return `${name(a.inside)} (Columns) already holds its two columns.`;
     n.push({ type: KINDS[a.what].type, role: '', parent: a.inside, params: KINDS[a.what].make() });
+  }
+  if (a.kind === 'move') {
+    const under = (x, y) => { for (let q = x; q !== undefined && q >= 0; q = n[q].parent) if (q === y) return true; return false; };
+    if (n[a.node]?.parent === -1) return 'The section itself cannot move.';
+    if (!KINDS[kindOf(n[a.into])]?.holds) return `${name(a.into)} cannot hold parts.`;
+    if (under(a.into, a.node)) return `${name(a.into)} is inside ${name(a.node)}.`;
+    if (kindOf(n[a.into]) === 'Columns' && n.filter((x, j) => x.parent === a.into && j !== a.node).length >= 2) return `${name(a.into)} (Columns) already holds its two columns.`;
+    n[a.node].parent = a.into; n[a.node].seq = Math.max(...n.map((x, j) => x.seq ?? j)) + 1;
+  }
+  if (a.kind === 'remove') {
+    if (a.nodes.some((i) => n[i].parent === -1 || n.some((x) => x.parent === i))) return 'Only an empty part can be removed.';
+    for (const i of [...a.nodes].sort((x, y) => y - x)) { n.splice(i, 1); for (const x of n) if (x.parent > i) x.parent--; }
   }
   if (a.kind === 'set') {
     if (a.legal === false) return `${name(a.node)} has no settings to change.`;

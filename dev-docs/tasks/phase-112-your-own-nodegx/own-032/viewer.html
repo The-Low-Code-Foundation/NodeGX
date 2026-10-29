@@ -251,8 +251,15 @@ function openSurgery(i) {
       <label class="row"><input type="checkbox" name="w0" ${ed.wordsTemperature === 0 ? 'checked' : ''}> write words at temperature 0, so forks differ only by the edit</label>
       <label class="row"><input type="checkbox" name="emptyParts" ${rules.emptyParts !== false ? 'checked' : ''}> say which parts are empty</label>
       <label class="row"><input type="checkbox" name="unchanged" ${rules.unchanged !== false ? 'checked' : ''}> say when a step changed nothing a person can see</label>
-      <label class="row">“touching” under <input type="number" name="minGapPx" min="0" value="${rules.minGapPx ?? 4}"> px</label>
-      <label class="row">“at the edge” within <input type="number" name="edgePx" min="0" value="${rules.edgePx ?? 8}"> px</label>
+      <label class="row"><input type="checkbox" name="missingFirst" ${rules.missingFirst ? 'checked' : ''}> list the kinds still missing first when adding, Group last</label>
+      <label class="row"><input type="checkbox" name="markMissing" ${rules.markMissing ? 'checked' : ''}> mark those kinds “still missing”</label>
+      <label class="row"><input type="checkbox" name="namedGoal" ${rules.namedGoal ? 'checked' : ''}> name the kind of each missing part (“a photo (an Image)”)</label>
+      <label class="row"><input type="checkbox" name="ownerNamed" ${rules.ownerNamed ? 'checked' : ''}> a spacing finding names the part that owns the space</label>
+      <label class="row"><input type="checkbox" name="legalOnly" ${rules.legalOnly ? 'checked' : ''}> “inside which part?” lists only the parts that can take one</label>
+      <label class="row"><input type="checkbox" name="fixMenu" ${rules.fixMenu ? 'checked' : ''}> each traceable finding becomes its own fix on the move menu</label>
+      <label class="row"><input type="checkbox" name="goalLine" ${rules.goalLine ? 'checked' : ''}> say “every part of the goal is there” once it is</label>
+      <label class="row"><input type="checkbox" name="shapeChecks" ${rules.shapeChecks ? 'checked' : ''}> check the shape from the tree: headline size, space above and below, order, photo on the right</label>
+      <label class="row"><input type="checkbox" name="lastSteps" ${rules.lastSteps !== false ? 'checked' : ''}> show its last four steps</label>
       <label>The menu's question (blank: keep it)<input type="text" name="menuWording" value="${esc(ed.menuWording || '')}"></label>
       <label>The goal line at the top of every prompt (blank: keep it)<input type="text" name="intro" value="${esc(ed.intro || '')}"></label>
     </div></details>
@@ -264,8 +271,8 @@ function openSurgery(i) {
     e.preventDefault();
     const v = Object.fromEntries(new FormData(f)), edit = {}, r = {};
     if (f.w0.checked !== (ed.wordsTemperature === 0)) edit.wordsTemperature = f.w0.checked ? 0 : 0.7;
-    for (const k of ['emptyParts', 'unchanged']) if (f[k].checked !== (rules[k] !== false)) r[k] = f[k].checked;
-    for (const k of ['minGapPx', 'edgePx']) if (Number(v[k]) !== (rules[k] ?? (k === 'minGapPx' ? 4 : 8))) r[k] = Number(v[k]);
+    for (const k of ['emptyParts', 'unchanged', 'lastSteps']) if (f[k].checked !== (rules[k] !== false)) r[k] = f[k].checked;
+    for (const k of ['missingFirst', 'markMissing', 'namedGoal', 'ownerNamed', 'legalOnly', 'fixMenu', 'goalLine', 'shapeChecks']) if (f[k].checked !== !!rules[k]) r[k] = f[k].checked;
     if (Object.keys(r).length) edit.rules = r;
     for (const k of ['menuWording', 'intro']) if (v[k] && v[k] !== ed[k]) edit[k] = v[k];
     const body = { from: TL.run, turn: st.round, key: st.key, prompt: v.prompt, answer: v.answer || undefined, hint: v.hint || undefined, edit: Object.keys(edit).length ? edit : undefined, note: v.note || undefined };

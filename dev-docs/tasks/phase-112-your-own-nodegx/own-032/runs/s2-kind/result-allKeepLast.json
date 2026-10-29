@@ -1,0 +1,478 @@
+{
+ "model": "gemma4:e2b-it-qat",
+ "runs": [
+  "w2-puppy",
+  "w3-puppy"
+ ],
+ "cases": 38,
+ "variants": {
+  "allKeepLast": {
+   "pLacking": 0.845,
+   "pGroup": 0.098,
+   "picksALackingKind": "37/38"
+  }
+ },
+ "rows": [
+  {
+   "variant": "allKeepLast",
+   "run": "w2-puppy",
+   "turn": 7,
+   "missing": [
+    "Text",
+    "Button",
+    "Image"
+   ],
+   "pick": "Button",
+   "pLacking": 0.725,
+   "pGroup": 0.179
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w2-puppy",
+   "turn": 8,
+   "missing": [
+    "Text",
+    "Button",
+    "Image"
+   ],
+   "pick": "Text",
+   "pLacking": 0.928,
+   "pGroup": 0.043
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w2-puppy",
+   "turn": 9,
+   "missing": [
+    "Text",
+    "Button",
+    "Image"
+   ],
+   "pick": "Text",
+   "pLacking": 0.958,
+   "pGroup": 0.029
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w2-puppy",
+   "turn": 10,
+   "missing": [
+    "Text",
+    "Button",
+    "Image"
+   ],
+   "pick": "Text",
+   "pLacking": 0.922,
+   "pGroup": 0.04
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w2-puppy",
+   "turn": 13,
+   "missing": [
+    "Text",
+    "Button"
+   ],
+   "pick": "Text",
+   "pLacking": 0.966,
+   "pGroup": 0.026
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w2-puppy",
+   "turn": 14,
+   "missing": [
+    "Text"
+   ],
+   "pick": "Text",
+   "pLacking": 0.858,
+   "pGroup": 0.095
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w2-puppy",
+   "turn": 15,
+   "missing": [
+    "Text"
+   ],
+   "pick": "Text",
+   "pLacking": 0.848,
+   "pGroup": 0.066
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w2-puppy",
+   "turn": 16,
+   "missing": [
+    "Text"
+   ],
+   "pick": "Text",
+   "pLacking": 0.906,
+   "pGroup": 0.049
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w2-puppy",
+   "turn": 17,
+   "missing": [
+    "Text"
+   ],
+   "pick": "Text",
+   "pLacking": 0.788,
+   "pGroup": 0.084
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w2-puppy",
+   "turn": 18,
+   "missing": [
+    "Text"
+   ],
+   "pick": "Text",
+   "pLacking": 0.857,
+   "pGroup": 0.061
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w2-puppy",
+   "turn": 20,
+   "missing": [
+    "Text"
+   ],
+   "pick": "Text",
+   "pLacking": 0.929,
+   "pGroup": 0.028
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w2-puppy",
+   "turn": 21,
+   "missing": [
+    "Text"
+   ],
+   "pick": "Text",
+   "pLacking": 0.89,
+   "pGroup": 0.042
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w2-puppy",
+   "turn": 22,
+   "missing": [
+    "Text"
+   ],
+   "pick": "Text",
+   "pLacking": 0.883,
+   "pGroup": 0.059
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w2-puppy",
+   "turn": 23,
+   "missing": [
+    "Text"
+   ],
+   "pick": "Text",
+   "pLacking": 0.862,
+   "pGroup": 0.058
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w2-puppy",
+   "turn": 25,
+   "missing": [
+    "Text"
+   ],
+   "pick": "Text",
+   "pLacking": 0.926,
+   "pGroup": 0.042
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w2-puppy",
+   "turn": 26,
+   "missing": [
+    "Text"
+   ],
+   "pick": "Text",
+   "pLacking": 0.648,
+   "pGroup": 0.145
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w2-puppy",
+   "turn": 27,
+   "missing": [
+    "Text"
+   ],
+   "pick": "Text",
+   "pLacking": 0.695,
+   "pGroup": 0.142
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w2-puppy",
+   "turn": 28,
+   "missing": [
+    "Text"
+   ],
+   "pick": "Group",
+   "pLacking": 0.205,
+   "pGroup": 0.636
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w2-puppy",
+   "turn": 29,
+   "missing": [
+    "Text"
+   ],
+   "pick": "Text",
+   "pLacking": 0.791,
+   "pGroup": 0.148
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w3-puppy",
+   "turn": 7,
+   "missing": [
+    "Text",
+    "Button",
+    "Image"
+   ],
+   "pick": "Button",
+   "pLacking": 0.799,
+   "pGroup": 0.154
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w3-puppy",
+   "turn": 8,
+   "missing": [
+    "Text",
+    "Button",
+    "Image"
+   ],
+   "pick": "Text",
+   "pLacking": 0.946,
+   "pGroup": 0.041
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w3-puppy",
+   "turn": 9,
+   "missing": [
+    "Text",
+    "Button",
+    "Image"
+   ],
+   "pick": "Text",
+   "pLacking": 0.956,
+   "pGroup": 0.036
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w3-puppy",
+   "turn": 10,
+   "missing": [
+    "Text",
+    "Button",
+    "Image"
+   ],
+   "pick": "Text",
+   "pLacking": 0.912,
+   "pGroup": 0.052
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w3-puppy",
+   "turn": 11,
+   "missing": [
+    "Text",
+    "Button",
+    "Image"
+   ],
+   "pick": "Text",
+   "pLacking": 0.876,
+   "pGroup": 0.097
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w3-puppy",
+   "turn": 12,
+   "missing": [
+    "Text",
+    "Button",
+    "Image"
+   ],
+   "pick": "Text",
+   "pLacking": 0.936,
+   "pGroup": 0.048
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w3-puppy",
+   "turn": 14,
+   "missing": [
+    "Text",
+    "Button",
+    "Image"
+   ],
+   "pick": "Text",
+   "pLacking": 0.918,
+   "pGroup": 0.071
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w3-puppy",
+   "turn": 15,
+   "missing": [
+    "Text",
+    "Button",
+    "Image"
+   ],
+   "pick": "Text",
+   "pLacking": 0.818,
+   "pGroup": 0.138
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w3-puppy",
+   "turn": 16,
+   "missing": [
+    "Text",
+    "Button",
+    "Image"
+   ],
+   "pick": "Text",
+   "pLacking": 0.812,
+   "pGroup": 0.133
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w3-puppy",
+   "turn": 17,
+   "missing": [
+    "Text",
+    "Button",
+    "Image"
+   ],
+   "pick": "Text",
+   "pLacking": 0.896,
+   "pGroup": 0.079
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w3-puppy",
+   "turn": 19,
+   "missing": [
+    "Text",
+    "Button",
+    "Image"
+   ],
+   "pick": "Text",
+   "pLacking": 0.953,
+   "pGroup": 0.036
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w3-puppy",
+   "turn": 20,
+   "missing": [
+    "Text",
+    "Button",
+    "Image"
+   ],
+   "pick": "Text",
+   "pLacking": 0.842,
+   "pGroup": 0.124
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w3-puppy",
+   "turn": 21,
+   "missing": [
+    "Text",
+    "Button",
+    "Image"
+   ],
+   "pick": "Image",
+   "pLacking": 0.764,
+   "pGroup": 0.168
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w3-puppy",
+   "turn": 22,
+   "missing": [
+    "Text",
+    "Button",
+    "Image"
+   ],
+   "pick": "Text",
+   "pLacking": 0.862,
+   "pGroup": 0.11
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w3-puppy",
+   "turn": 23,
+   "missing": [
+    "Text",
+    "Button",
+    "Image"
+   ],
+   "pick": "Text",
+   "pLacking": 0.931,
+   "pGroup": 0.048
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w3-puppy",
+   "turn": 26,
+   "missing": [
+    "Text",
+    "Button"
+   ],
+   "pick": "Button",
+   "pLacking": 0.945,
+   "pGroup": 0.037
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w3-puppy",
+   "turn": 27,
+   "missing": [
+    "Text",
+    "Button"
+   ],
+   "pick": "Button",
+   "pLacking": 0.876,
+   "pGroup": 0.076
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w3-puppy",
+   "turn": 28,
+   "missing": [
+    "Text",
+    "Button"
+   ],
+   "pick": "Text",
+   "pLacking": 0.727,
+   "pGroup": 0.156
+  },
+  {
+   "variant": "allKeepLast",
+   "run": "w3-puppy",
+   "turn": 29,
+   "missing": [
+    "Text",
+    "Button"
+   ],
+   "pick": "Text",
+   "pLacking": 0.743,
+   "pGroup": 0.131
+  }
+ ]
+}

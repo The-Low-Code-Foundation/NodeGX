@@ -1,0 +1,144 @@
+{
+ "htmlMs": 95,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [
+    {
+     "a": "Welcome to Puppy Haven",
+     "b": "Adopt Now",
+     "gap": 0
+    }
+   ],
+   "atEdge": [
+    {
+     "text": "Welcome to Puppy Haven",
+     "left": 0,
+     "right": 1093
+    },
+    {
+     "text": "Adopt Now",
+     "left": 0,
+     "right": 1175
+    },
+    {
+     "text": "Find Your Perfect Puppy",
+     "left": 0,
+     "right": 1108
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Welcome to Puppy Haven",
+     "x": 0,
+     "y": 0,
+     "w": 187,
+     "h": 22
+    },
+    {
+     "kind": "button",
+     "text": "Adopt Now",
+     "x": 0,
+     "y": 22,
+     "w": 105,
+     "h": 35
+    },
+    {
+     "kind": "words",
+     "text": "Find Your Perfect Puppy",
+     "x": 0,
+     "y": 377,
+     "w": 172,
+     "h": 22
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:53901/",
+   "blank": false,
+   "words": 10,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 399
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [
+    {
+     "text": "Welcome to Puppy Haven",
+     "left": 0,
+     "right": 203
+    },
+    {
+     "text": "Adopt Now",
+     "left": 0,
+     "right": 285
+    },
+    {
+     "text": "Find Your Perfect Puppy",
+     "left": 0,
+     "right": 218
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Welcome to Puppy Haven",
+     "x": 0,
+     "y": 0,
+     "w": 187,
+     "h": 22
+    },
+    {
+     "kind": "button",
+     "text": "Adopt Now",
+     "x": 0,
+     "y": 38,
+     "w": 105,
+     "h": 35
+    },
+    {
+     "kind": "words",
+     "text": "Find Your Perfect Puppy",
+     "x": 0,
+     "y": 393,
+     "w": 172,
+     "h": 22
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:53901/",
+   "blank": false,
+   "words": 10,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 415
+ },
+ "ms": 2354
+}

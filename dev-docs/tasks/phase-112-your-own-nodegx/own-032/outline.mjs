@@ -31,6 +31,9 @@ export function describeParams(p = {}) {
   return out;
 }
 
+// a part's children in order: by `seq` when a move gave one (arm.mjs `move` re-appends a part), else as added
+export const kidsOf = (nodes, i) => nodes.map((m, j) => j).filter((j) => nodes[j].parent === i).sort((a, b) => (nodes[a].seq ?? a) - (nodes[b].seq ?? b));
+
 export function outline(nodes, { words = true } = {}) {
   const lines = [];
   const walk = (i, d) => {
@@ -39,7 +42,7 @@ export function outline(nodes, { words = true } = {}) {
     const said = words && w ? `: "${w.length > 60 ? `${w.slice(0, 57)}…` : w}"` : '';
     const src = n.type === 'Image' && p.src ? ` (${p.src.split('/').pop()})` : '';
     lines.push(`${'  '.repeat(d)}#${i} ${KIND[n.type] || n.type}${n.role ? ` "${n.role}"` : ''}${src} [${describeParams(p).join(', ')}]${said}`);
-    nodes.forEach((m, j) => { if (m.parent === i) walk(j, d + 1); });
+    for (const j of kidsOf(nodes, i)) walk(j, d + 1);
   };
   nodes.forEach((n, i) => { if (!(n.parent >= 0)) walk(i, 0); });
   return lines.join('\n');

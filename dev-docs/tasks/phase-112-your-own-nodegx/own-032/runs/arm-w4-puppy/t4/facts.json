@@ -1,0 +1,86 @@
+{
+ "htmlMs": 119,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [
+    {
+     "text": "Find Your Forever Friend",
+     "left": 0,
+     "right": 1106
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Find Your Forever Friend",
+     "x": 0,
+     "y": 0,
+     "w": 174,
+     "h": 22
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:54559/",
+   "blank": true,
+   "words": 4,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [
+    {
+     "text": "Find Your Forever Friend",
+     "left": 0,
+     "right": 216
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Find Your Forever Friend",
+     "x": 0,
+     "y": 0,
+     "w": 174,
+     "h": 22
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:54559/",
+   "blank": true,
+   "words": 4,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "ms": 2258
+}
