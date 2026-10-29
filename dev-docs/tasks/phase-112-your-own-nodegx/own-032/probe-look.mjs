@@ -60,6 +60,8 @@ const ask = (request, order) => {
     : `A person asked for a web page:\n"${request}"\n\nWhich look are they asking for?\n${opts}`;
 };
 
+// run only as a script: probe-look3.mjs imports REQUESTS
+if (path.resolve(process.argv[1] || '') === fileURLToPath(import.meta.url)) {
 const rows = [];
 for (const [want, request] of SET === 'plain' ? PLAIN : REQUESTS) {
   const per = {};
@@ -83,3 +85,4 @@ if (SET === 'plain') console.log(`undecided (0.3–0.7): ${band.length}/${rows.l
 fs.writeFileSync(path.join(HERE, 'runs', `probe-look-${MODEL.replace(/[:/]/g, '_')}-q${Q}${SET === 'plain' ? '-plain' : ''}.json`), JSON.stringify({ model: MODEL, question: Q, set: SET, looks: LOOKS, right, of: explicit.length, band: band.length, split: split.length, rows }, null, 1));
 // unload what this probe loaded (16 GB box: the next job must find Ollama empty)
 await fetch('http://127.0.0.1:11434/api/generate', { method: 'POST', body: JSON.stringify({ model: MODEL, keep_alive: 0 }) }).catch(() => {});
+}

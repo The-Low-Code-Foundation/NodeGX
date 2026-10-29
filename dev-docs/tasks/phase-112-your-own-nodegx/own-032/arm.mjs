@@ -212,8 +212,11 @@ async function judge(q, png) {
 //                 (Richard, 8c: of four spacings of w8s-puppy, "medium looks best overall"; the arm's "huge" 48 px
 //                 held the small line as far from the headline as the line from the button). Two `only` fixes; the
 //                 button's "space above" setting exists only with this switch
+// s5 switches (default off):
+//   fixesOnly     (fixMenu, endGate) once the findings open with goalMet and while a fix is on the menu, the menu is the
+//                 fixes plus undo: no generic set or write (8a's miss: with "add" gone its odds moved onto "set")
 // The touching / edge thresholds are not rules: bench.mjs FACTS fixes them (4 px, 8 px), and probe-vision's key with them.
-const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false, roles: false, endGate: false, addWhileMissing: false, shortHeadline: false, blankRetry: false, rhythm: false }, ...(EDIT.rules || {}) };
+const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false, roles: false, endGate: false, addWhileMissing: false, shortHeadline: false, blankRetry: false, rhythm: false, fixesOnly: false }, ...(EDIT.rules || {}) };
 // roles (s2, after w4-t15a): each part is told what it is when it is added, and keeps it through moves and removes;
 // the shape checks read the roles, never the document order (t15a: a move made the headline texts[1], and the size
 // fix went to the other Text, so the hero ended with two headlines and no line under them)
@@ -376,9 +379,13 @@ async function decide(state, turn, findings, T) {
   const writable = n.map((x, i) => i).filter((i) => KINDS[kindOf(n[i])].words);
   const canTake = (i) => KINDS[kindOf(n[i])].holds && !(kindOf(n[i]) === 'Columns' && n.filter((x) => x.parent === i).length >= 2);
   const takers = n.map((x, i) => i).filter(canTake);
-  const goalMet = RULES.addWhileMissing && RULES.endGate && findings.some((f) => f.check === 'goalMet');
-  const moves = [...((!RULES.legalOnly || !n.length || takers.length) && !goalMet ? [['add', 'add a part (a Group, Columns, Text, Image or Button) inside a part']] : []), ...(n.length ? [['set', 'change one setting of a part']] : []),
-    ...(writable.length ? [['write', 'write the words of a Text or a Button']] : []), ...(state.history.length ? [['undo', 'undo your last step']] : []), ...(RULES.endGate && findings.some((f) => f.fix) ? [] : [['done', 'stop: the section is finished']])];
+  const goalHere = RULES.endGate && findings.some((f) => f.check === 'goalMet');
+  const goalMet = RULES.addWhileMissing && goalHere;
+  // fixesOnly: once every part is there and a fix is on the menu, the generic set and write go too (8a: without "add",
+  // its odds moved onto "set", and w11m-bakery nudged the headline's size by hand twice before taking the move fix)
+  const fixesOnly = RULES.fixesOnly && RULES.fixMenu && goalHere && findings.some((f) => f.fix);
+  const moves = [...((!RULES.legalOnly || !n.length || takers.length) && !goalMet ? [['add', 'add a part (a Group, Columns, Text, Image or Button) inside a part']] : []), ...(n.length && !fixesOnly ? [['set', 'change one setting of a part']] : []),
+    ...(writable.length && !fixesOnly ? [['write', 'write the words of a Text or a Button']] : []), ...(state.history.length ? [['undo', 'undo your last step']] : []), ...(RULES.endGate && findings.some((f) => f.fix) ? [] : [['done', 'stop: the section is finished']])];
   if (RULES.fixMenu) moves.unshift(...[...new Map(findings.filter((f) => f.fix).map((f) => [`${f.fix.node}|${f.fix.setting}`, f.fix])).values()].map((f) => ['fix', f.say, f]));
   const menu = moves.map(([k, s], i) => `${i + 1}. ${s}`).join('\n');
   const move = await choose('move', `${ctx}\n\n${EDIT.menuWording || 'What do you do next? Pick one:'}\n${menu}`, moves.map((_, i) => String(i + 1)), T);

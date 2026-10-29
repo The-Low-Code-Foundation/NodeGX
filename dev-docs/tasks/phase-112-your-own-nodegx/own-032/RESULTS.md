@@ -629,3 +629,107 @@ The final harness is `runs/w15.edit.json`. Every switch is off by default, so ev
 - **a request that names no look:** asks "clean or bold?" (band 0.1–0.9).
 
 The page is updated (same URL): https://claude.ai/artifact/2M1WenHSVPsUE21P3N1NcB.
+
+## 9. s5 — fixes only, the request's facts, the minimal rhythm, a third look (2026-10-29)
+
+Each one runs alone on Ollama (E2B, words at T 0), against a control, behind a switch that is off by default.
+
+### 9a. Only fixes once every part is there (`fixesOnly`)
+
+**The change:** under `endGate`, once the findings open with `goalMet` and while any fix is on the menu, the move menu
+is the fixes plus "undo": no generic "set" or "write" (8a's `addWhileMissing` already took "add" off). This is 8a's
+miss: with "add" gone, its odds moved onto the generic "set", not onto the fix.
+
+**The control:** the final harness's runs, ten requests: w12m-bakery, w12m-jazz, w12m-plumber, w14m-running,
+w14m-pottery, and w15s-* for the five stylish ones. The test is `runs/w16.edit.json` = w15 + `fixesOnly`. On the
+minimal runs, w15's only difference from w12/w14 is the Button's "space above" setting, which appears only in a
+generic "set" on a Button; none of the five minimal controls made one, so they replay exactly up to `goalMet`.
+
+Free moves after `goalMet` in the controls: m-bakery 2 (t18, t20: the headline's size by hand, display-lg then back
+to display-md), s-running 1 (t14: a gap by hand), the other eight 0.
+
+**Pre-registered (before any w16 run):**
+- free (non-fix) moves after `goalMet` are 0 in all ten runs, "undo" included;
+- no run gains turns against its control;
+- m-bakery falls by at least 2 turns (25 → ≤ 23), s-running by at least 1 (36 → ≤ 35);
+- no run's end findings grow, and every run still ends by `endGate`.
+
+The other eight change only in the menu text after `goalMet` (the "set" and "write" lines go), so their picks may
+drift; the test there is that they do not get worse.
+
+**The control holds where the prompts match:** `drift.mjs <control> <test>` compares the odds on every call asked the
+very same prompt. That is 8 to 30 calls per pair, and the drift is 0.0000 on all ten.
+
+**Result (`w16*`, `node compare.mjs w12|w14|w15 w16 <run>`):** ✅ on every line.
+
+| run | turns | free after `goalMet` | where it parts | the end |
+|---|---|---|---|---|
+| **m-bakery** | **25 → 22** | t18, t20 "set" → none | t18: the move fix, where the control nudged the size | the same measures (the kit's contrast); the words column's gap small → huge, and "Artisanal Baking" capitalised |
+| m-jazz | 22 → 22 | none → none | never | the same tree |
+| m-plumber | 21 → 21 | none → none | never | the same tree |
+| m-running | 23 → 23 | none → none | never | the same tree |
+| m-pottery | 23 → **22** | none → none | t10 | clean; the section's padding top and bottom 32 → 96 px, sides 48 → 24 px, and reworded words ("Create Your Piece") |
+| s-bakery | 33 → 33 | none → none | t16 | the same 3 kit contrasts; the small line capitalised |
+| s-jazz | 33 → 33 | none → none | never | the same tree |
+| s-plumber | 33 → 33 | none → none | t22: two fixes swap order | the same tree |
+| **s-running** | **36 → 35** | t14 "set" → none | t14 | the same 3 kit contrasts; the line reworded |
+| s-pottery | 33 → 33 | none → none | t19 | clean; three parts reworded ("Artisan Pottery", "Create") |
+
+Totals: turns 282 → 277, free moves after `goalMet` 3 → 0. "Undo" stayed on the menu and was never taken.
+
+**Against the pre-registration:**
+- ✅ free moves after `goalMet` are 0 in all ten;
+- ✅ no run gains turns;
+- ✅ m-bakery falls by 3, s-running by 1;
+- ✅ no run's end findings grow, and all ten end by `endGate`.
+
+**Not graded:** where a run parts, the words it writes after that differ. The write prompt carries YOUR LAST STEPS,
+which have changed. Two runs also end with different spacing that the script measures as clean: m-bakery's words
+column at 48 px, and m-pottery's section padding. Richard judges looks; these are pictures to show him, not results.
+
+**Kept:** `fixesOnly` joins the final harness, `runs/w16.edit.json`.
+
+### 9b. The request's facts stay in the hero (`factsKept`)
+
+**What the controls show (read from the ledgers before any change):** the handoff named two losses, and there are
+four, plus one that healed by chance:
+- **the date "14 November" is in neither jazz hero:** m-jazz's 8b rewrite dropped it, and s-jazz never wrote it;
+- **the name is missing at the end of two:** s-running ("RUN. EXPLORE. CONNECT.") and **m-plumber** ("Expert Plumbing
+  Services": "Dupont" is nowhere, from t3 to the end);
+- m-pottery's headline lacked "Potter Portfolio" from t3 to t19, and got it back only because 8b's shorten fix
+  happened to rewrite it.
+
+**The change:** with roles, once the part that should carry a fact holds written words (not the placeholder), a fact
+of the request that is nowhere in the hero's words is a finding with a write fix on that part:
+- the brief's name goes on the headline;
+- a date in the request (a day and a month, either order) goes on the line under the headline.
+
+The write prompt adds `It must say "<fact>".` With this switch on, 8b's shorten fix also says "It must say
+"<name>"", so a shorter headline cannot drop the name. A date counts as there when the hero's words hold the same day
+and month in any form ("14 November", "November 14th").
+
+**The control:** the 9a runs (w16, the final harness then); the test is w17 = w16 + `factsKept`, on all ten requests.
+
+**Pre-registered (before any w17 run):**
+- the finding appears on m-jazz and s-jazz (the date), m-plumber and s-running (the name), and on m-pottery while its
+  headline lacks the name; on no other run;
+- all ten end with the brief's name, and the jazz two with "14 November", somewhere in the hero's words;
+- no run grows by more than 3 turns, and none hits the 40-turn cap;
+- no run's end findings grow, and the five runs without the finding end on the same tree as their control.
+
+### 9d. A third look? (`probe-look3.mjs`, probe only)
+
+**The method:** "minimal / stylish / warm and friendly" ("warm and friendly: a soft light colour ground, rounded
+shapes, a welcoming headline"), asked of E2B at T 0 in all 6 orders of the three looks. A request's answer is the look
+with the highest mean P across the six orders. 8 requests per look: §7a's 8 minimal and 8 stylish, and 8 warm ones
+written into `probe-look3.mjs` before any model was asked.
+
+A slip to record: while I was checking that the file loaded, the probe ran its first two rows (two §7a minimal
+requests, both answered minimal) beside an arm run, then died on a closed pipe. w16m-bakery, which ran at the same
+time, shows no odds drift on the 16 calls whose prompts match its control (`drift.mjs`), so the overlap did not touch
+it. The probe is run in full, alone, below.
+
+**Pre-registered (before the full probe runs):**
+- the bar for "E2B separates a third look": at least 7 of 8 right for each of the three looks;
+- my prediction: it does not clear the bar, and the confusions are between warm and minimal (both are light pages),
+  not with stylish.

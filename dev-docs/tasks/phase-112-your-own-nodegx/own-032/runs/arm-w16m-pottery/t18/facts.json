@@ -1,0 +1,112 @@
+{
+ "htmlMs": 108,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Discover unique, handcrafted bowls and j",
+     "x": 24,
+     "y": 96,
+     "w": 688,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Create Your Piece",
+     "x": 24,
+     "y": 162,
+     "w": 152,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Handmade pottery for mindful moments.",
+     "x": 24,
+     "y": 243,
+     "w": 581,
+     "h": 255,
+     "lines": 3
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:52019/",
+   "blank": false,
+   "words": 22,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 659
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Discover unique, handcrafted bowls and j",
+     "x": 24,
+     "y": 96,
+     "w": 325,
+     "h": 54,
+     "lines": 3
+    },
+    {
+     "kind": "button",
+     "text": "Create Your Piece",
+     "x": 24,
+     "y": 198,
+     "w": 152,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Handmade pottery for mindful moments.",
+     "x": 24,
+     "y": 279,
+     "w": 344,
+     "h": 86,
+     "lines": 2
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:52019/",
+   "blank": false,
+   "words": 22,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 797
+ },
+ "ms": 2315
+}

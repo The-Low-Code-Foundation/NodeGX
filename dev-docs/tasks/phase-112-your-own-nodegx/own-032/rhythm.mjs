@@ -22,11 +22,13 @@ const gap = (k) => ({ rowGap: sp(k), columnGap: sp(k) });
 export const VARIANTS = {
   // as the arm left it: one gap for the whole words column (huge, space-12 = 48px)
   before: () => clone(),
-  // the small line belongs to the headline: both in a Group of their own with a small gap; the column keeps its gap
+  // the small line belongs to the headline: both in a Group of their own with a small gap; the column keeps its gap.
+  // A minimal hero has no small line (s5 9c), so there the headline and the line under it share the Group
   together: () => {
     const n = clone(), eb = role(n, 'eyebrow'), h = role(n, 'headline'), col = n[h].parent;
-    n.push({ type: 'Group', role: '', parent: col, seq: (n[eb].seq ?? eb) - 0.25, params: { width: { value: 100, unit: '%' }, sizeMode: 'contentHeight', flexDirection: 'column', ...gap(2) } });
-    n[eb].parent = n.length - 1; n[eb].seq = 0; n[h].parent = n.length - 1; n[h].seq = 1;
+    const [a, b] = eb >= 0 ? [eb, h] : [h, role(n, 'line')];
+    n.push({ type: 'Group', role: '', parent: col, seq: (n[a].seq ?? a) - 0.25, params: { width: { value: 100, unit: '%' }, sizeMode: 'contentHeight', flexDirection: 'column', ...gap(2) } });
+    n[a].parent = n.length - 1; n[a].seq = 0; n[b].parent = n.length - 1; n[b].seq = 1;
     return n;
   },
   // a gap by role pair: the column gap small (8px), the line 16px further down, the button 32px further down
