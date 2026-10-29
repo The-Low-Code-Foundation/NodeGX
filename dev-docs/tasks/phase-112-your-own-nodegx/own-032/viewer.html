@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>The Workbench Timeline</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column of steps down a rail; each step's actor is a coloured stripe on the rail, so who acted
+   is visible while scrolling. Pictures break out to the column's full width. */
+:root {
+  --bg: #f6f7f9; --panel: #ffffff; --ink: #1b1f27; --muted: #5d6573; --line: #dde1e8; --code: #eef1f5;
+  --builder: #2f62d8; --reviewer: #b4561d; --script: #4b7d4f; --chosen: #2f62d8; --warn: #b3261e;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif; --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12151b; --panel: #1a1e26; --ink: #e6e9ef; --muted: #9aa3b2; --line: #2c323d; --code: #222833;
+  --builder: #7aa2ff; --reviewer: #f0995e; --script: #8cc48f; --chosen: #7aa2ff; --warn: #ff8a80; color-scheme: dark } }
+:root[data-theme="dark"] { --bg: #12151b; --panel: #1a1e26; --ink: #e6e9ef; --muted: #9aa3b2; --line: #2c323d; --code: #222833;
+  --builder: #7aa2ff; --reviewer: #f0995e; --script: #8cc48f; --chosen: #7aa2ff; --warn: #ff8a80; color-scheme: dark }
+* { box-sizing: border-box }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+main { max-width: 980px; margin: 0 auto; padding-block: 28px 80px; display: flex; flex-direction: column; gap: 18px }
+h1 { font-size: 1.6rem; line-height: 1.2; margin: 0; text-wrap: balance }
+.sub { color: var(--muted); margin: 4px 0 0 }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: .9rem; color: var(--muted) }
+.meta b { color: var(--ink); font-variant-numeric: tabular-nums }
+.bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 8px; border-bottom: 1px solid var(--line) }
+.bar button { font: inherit; font-size: .85rem; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 999px; padding: 3px 12px; cursor: pointer }
+.bar button[aria-pressed="false"] { opacity: .45 }
+.bar button:focus-visible, summary:focus-visible { outline: 2px solid var(--chosen); outline-offset: 2px }
+.bar .sep { flex: 1 }
+.steps { display: flex; flex-direction: column; gap: 10px }
+.round { font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 14px 0 0; padding-left: 14px }
+.step { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--a); border-radius: 6px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0 }
+.step[data-actor="builder"] { --a: var(--builder) } .step[data-actor="reviewer"] { --a: var(--reviewer) } .step[data-actor="script"] { --a: var(--script) }
+.head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px }
+.who { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--a) }
+.key { font-family: var(--mono); font-size: .88rem; font-weight: 600; overflow-wrap: anywhere }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; font-size: .78rem; color: var(--muted); font-variant-numeric: tabular-nums }
+.tag { border: 1px solid var(--line); border-radius: 4px; padding: 0 6px }
+.tag.warn { color: var(--warn); border-color: var(--warn) }
+.note { color: var(--muted); font-size: .92rem; margin: 0 }
+details > summary { cursor: pointer; color: var(--muted); font-size: .85rem; list-style: none }
+details > summary::before { content: "▸ "; } details[open] > summary::before { content: "▾ " }
+pre { margin: 6px 0 0; background: var(--code); border-radius: 4px; padding: 10px 12px; font: 12.5px/1.55 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 420px; overflow: auto }
+pre.tree { white-space: pre; overflow-x: auto; overflow-wrap: normal }
+.label { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 4px }
+.opts { display: grid; grid-template-columns: minmax(0, 14rem) 1fr 3.2rem; gap: 3px 10px; align-items: center; font-size: .88rem }
+.opts .o { font-family: var(--mono); font-size: .8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.opts .o.ch { color: var(--chosen); font-weight: 600 }
+.meter { height: 8px; background: var(--code); border-radius: 4px; overflow: hidden }
+.meter i { display: block; height: 100%; background: var(--muted) }
+.opts .ch + .meter i { background: var(--chosen) }
+.num { font-variant-numeric: tabular-nums; text-align: right; font-size: .82rem }
+.answer { font-family: var(--mono); font-size: .85rem; display: grid; grid-template-columns: auto 1fr; gap: 2px 12px }
+.answer dt { color: var(--muted) } .answer dd { margin: 0; overflow-wrap: anywhere }
+.did { display: flex; flex-direction: column; gap: 4px }
+.did p { margin: 0 }
+.pics { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap }
+.pics figure { margin: 0; display: flex; flex-direction: column; gap: 4px; min-width: 0 }
+.pics img { display: block; border: 1px solid var(--line); border-radius: 4px; max-width: 100% }
+.pics.shots figure:first-child { flex: 3 1 320px } .pics.shots figure:nth-child(2) { flex: 1 1 140px; max-width: 240px }
+.pics.thumbs { gap: 8px } .pics.thumbs figure { width: 92px }
+.pics.thumbs img { width: 92px; height: 62px; object-fit: cover }
+figcaption { font-size: .75rem; color: var(--muted); font-variant-numeric: tabular-nums; overflow-wrap: anywhere }
+.p { display: inline-block; min-width: 3.2em; text-align: center; border-radius: 3px; padding: 0 4px; font-variant-numeric: tabular-nums; font-size: .78rem; background: var(--code) }
+.p.hi { color: var(--bg); background: var(--reviewer) }
+.judges { display: grid; grid-template-columns: minmax(0, 1fr) 7rem 3.2rem; gap: 4px 10px; align-items: center; font-size: .88rem }
+.judges .q { min-width: 0 }
+.findings { margin: 0; padding-left: 1.2em; font-size: .92rem } .findings li { margin: 2px 0 }
+.facts { font-size: .85rem; display: flex; flex-wrap: wrap; gap: 6px }
+.fact { border-radius: 4px; padding: 0 8px; border: 1px solid var(--line) } .fact.bad { color: var(--warn); border-color: var(--warn) }
+.empty { color: var(--muted) }
+@media (prefers-reduced-motion: no-preference) { .step { transition: opacity .15s } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1 id="title">Loading the timeline…</h1>
+    <p class="sub" id="request"></p>
+  </header>
+  <div class="meta" id="meta"></div>
+  <div class="bar" role="toolbar" aria-label="Show">
+    <button type="button" data-actor="builder" aria-pressed="true">Builder</button>
+    <button type="button" data-actor="reviewer" aria-pressed="true">Reviewer</button>
+    <button type="button" data-actor="script" aria-pressed="true">Script</button>
+    <span class="sep"></span>
+    <button type="button" id="prompts" aria-pressed="false">Open every prompt</button>
+  </div>
+  <div class="steps" id="steps"></div>
+</main>
+<script>
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const pct = (p) => (p == null ? '—' : p.toFixed(2));
+const base = new URLSearchParams(location.search).get('t') || (window.TIMELINE_BASE ?? '');
+const at = (src) => (window.PICS && window.PICS[src]) || (base ? `${base}/${src}` : src);
+
+function render(tl) {
+  document.title = tl.title;
+  $('#title').textContent = tl.title;
+  $('#request').textContent = tl.request ? `The request: “${tl.request}”` : '';
+  const s = tl.summary || {};
+  $('#meta').innerHTML = [
+    ['Builder', tl.model], ['Reviewer', tl.judge], ['Builder calls', s.builderCalls], ['Reviewer answers', s.reviewerCalls],
+    tl.decisionsFrom ? ['Decisions replayed from', tl.decisionsFrom] : null, ['Harness', tl.harness]
+  ].filter(Boolean).filter(([, v]) => v != null).map(([k, v]) => `<span>${esc(k)} <b>${esc(v)}</b></span>`).join('');
+  const out = [];
+  let round = null;
+  for (const st of tl.steps) {
+    if (st.round !== round) { round = st.round; out.push(`<p class="round">${esc(st.roundTitle || `Round ${round}${round === 0 ? ': the first build' : ': review and repair'}`)}</p>`); }
+    out.push(step(st));
+  }
+  $('#steps').innerHTML = out.join('');
+}
+
+function step(st) {
+  const tags = [];
+  if (st.from) tags.push(`<span class="tag" title="Asked in ${esc(st.from)}; this run replayed the answer">asked in ${esc(st.from)}</span>`);
+  if (st.forced) tags.push('<span class="tag warn">answer forced</span>');
+  if (st.hinted) tags.push('<span class="tag">re-asked with a hint</span>');
+  if (st.model) tags.push(`<span class="tag">${esc(st.model)}</span>`);
+  if (st.ms) tags.push(`<span class="tag">${(st.ms / 1000).toFixed(1)} s</span>`);
+  if (st.tokensIn) tags.push(`<span class="tag">${st.tokensIn} → ${st.tokensOut ?? '?'} tok</span>`);
+  if (st.pYes != null) tags.push(`<span class="p ${st.pYes >= .5 ? 'hi' : ''}" title="P(yes)">yes ${pct(st.pYes)}</span>`);
+  const who = { builder: 'Builder', reviewer: 'Reviewer', script: 'Script' }[st.actor];
+  const parts = [`<div class="head"><span class="who">${who}</span><span class="key">${esc(st.key)}</span><span class="tags">${tags.join('')}</span></div>`];
+  if (st.note) parts.push(`<p class="note">${esc(st.note)}</p>`);
+  if (st.prompt) parts.push(`<details class="prompt"><summary>The prompt, as the model got it (${st.prompt.length} characters)</summary>${st.system ? `<pre>${esc('SYSTEM: ' + st.system)}</pre>` : ''}<pre>${esc(st.prompt)}</pre></details>`);
+  if (st.options) {
+    const chosen = st.answer && Object.values(st.answer)[0];
+    parts.push(`<div><p class="label">The options, and how likely the model was to pick each</p><div class="opts">${st.options.map((o) =>
+      `<span class="o ${o.label === chosen ? 'ch' : ''}" title="${esc(o.label)}">${o.label === chosen ? '→ ' : ''}${esc(o.label)}</span><span class="meter"><i style="width:${(o.p * 100).toFixed(1)}%"></i></span><span class="num">${pct(o.p)}</span>`).join('')}</div></div>`);
+  }
+  if (st.answer && !st.options) parts.push(`<div><p class="label">The answer</p><dl class="answer">${Object.entries(st.answer).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(typeof v === 'string' ? v : JSON.stringify(v))}</dd>`).join('')}</dl></div>`);
+  if (st.did) parts.push(`<div class="did"><p class="label">What the script did with it</p><p>${esc(st.did.say)}</p>${st.did.nodes ? `<pre class="tree">${esc(st.did.nodes)}</pre>` : ''}</div>`);
+  if (st.judgements) parts.push(`<div class="judges">${st.judgements.map((j) => `<span class="q"><details><summary>${esc(j.key)}</summary><pre>${esc(j.prompt)}</pre></details></span><span class="meter"><i style="width:${((j.pYes ?? 0) * 100).toFixed(1)}%"></i></span><span class="num">${pct(j.pYes)}</span>`).join('')}</div>`);
+  if (st.findings) parts.push(st.findings.length ? `<div><p class="label">Findings about this section or the whole page${st.elsewhere ? ` (and ${st.elsewhere} elsewhere)` : ''}</p><ul class="findings">${st.findings.map((f) => `<li>${esc(f.say)} <span class="tag">${esc(f.repair || 'no repair')}</span></li>`).join('')}</ul></div>` : `<p class="note empty">Nothing found about this section${st.elsewhere ? `; ${st.elsewhere} issues elsewhere on the page` : ''}.</p>`);
+  if (st.pictures?.length) {
+    // the section's own shots (desktop beside phone) are drawn large; anything else the reviewer saw is a thumbnail
+    const thumbs = !st.pictures.every((p) => /desktop|phone/.test(p.label));
+    const pics = thumbs ? [...st.pictures].sort((a, b) => (b.pYes ?? 0) - (a.pYes ?? 0)) : st.pictures;
+    parts.push(`<div class="pics ${thumbs ? 'thumbs' : 'shots'}">${pics.map((p) => `<figure><img loading="lazy" src="${esc(at(p.src))}" alt="${esc(p.label)}"><figcaption>${esc(p.label)}${p.question ? `<br>${esc(p.question)}` : ''}${p.pYes != null ? ` <span class="p ${p.pYes >= .5 ? 'hi' : ''}">yes ${pct(p.pYes)}</span>` : ''}</figcaption></figure>`).join('')}</div>`);
+  }
+  if (st.factsData) parts.push(facts(st.factsData));
+  return `<article class="step" data-actor="${st.actor}">${parts.join('')}</article>`;
+}
+
+// the measured facts at both widths, red where a person would see a fault
+function facts(f) {
+  const rows = [];
+  for (const w of ['desktop', 'phone']) {
+    const x = f[w]?.facts; if (!x) continue;
+    const c = f[w].checks || {};
+    const items = [['touching', x.touching.length], ['text at an edge', x.atEdge.length], ['photo cut off', x.photoCut.length], ['button too wide', x.buttonWide.length], ['not lined up', x.unaligned.length], ['scrolls sideways', x.overflowX > 1 ? 1 : 0], ['low contrast', (c.lowContrast || []).length]];
+    rows.push(`<span class="label" style="margin:0">${w}</span>${items.map(([k, n]) => `<span class="fact ${n ? 'bad' : ''}">${k}: ${n ? 'yes' : 'no'}</span>`).join('')}`);
+  }
+  return `<div><p class="label">Measured from the page</p>${rows.map((r) => `<div class="facts">${r}</div>`).join('')}</div>`;
+}
+
+document.querySelectorAll('.bar [data-actor]').forEach((b) => b.addEventListener('click', () => {
+  const on = b.getAttribute('aria-pressed') !== 'true';
+  b.setAttribute('aria-pressed', on);
+  document.querySelectorAll(`.step[data-actor="${b.dataset.actor}"]`).forEach((s) => (s.hidden = !on));
+}));
+$('#prompts').addEventListener('click', (e) => {
+  const on = e.currentTarget.getAttribute('aria-pressed') !== 'true';
+  e.currentTarget.setAttribute('aria-pressed', on);
+  e.currentTarget.textContent = on ? 'Close every prompt' : 'Open every prompt';
+  document.querySelectorAll('details.prompt').forEach((d) => (d.open = on));
+});
+
+async function load() {
+  if (window.TIMELINE) return render(window.TIMELINE);
+  const tl = await (await fetch(`${base}/timeline.json`)).json();
+  await Promise.all(tl.steps.filter((s) => s.facts).map(async (s) => { try { s.factsData = await (await fetch(`${base}/${s.facts}`)).json(); } catch {} }));
+  render(tl);
+}
+load().catch((e) => { $('#title').textContent = `Could not read the timeline: ${e.message}`; });
+// ?live: re-read the timeline every 4 s while a run is writing it, keeping open prompts open
+if (new URLSearchParams(location.search).has('live') && !window.TIMELINE) setInterval(async () => {
+  const open = [...document.querySelectorAll('details')].map((d) => d.open);
+  try { await load(); } catch {}
+  document.querySelectorAll('details').forEach((d, i) => { if (open[i]) d.open = true; });
+}, 4000);
+</script>
+</body>
+</html>

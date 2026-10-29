@@ -1,0 +1,86 @@
+{
+ "htmlMs": 115,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [
+    {
+     "text": "Welcome to Puppy Haven",
+     "left": 0,
+     "right": 1093
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Welcome to Puppy Haven",
+     "x": 0,
+     "y": 0,
+     "w": 187,
+     "h": 22
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63730/",
+   "blank": true,
+   "words": 4,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [
+    {
+     "text": "Welcome to Puppy Haven",
+     "left": 0,
+     "right": 203
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Welcome to Puppy Haven",
+     "x": 0,
+     "y": 0,
+     "w": 187,
+     "h": 22
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63730/",
+   "blank": true,
+   "words": 4,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "ms": 2288
+}

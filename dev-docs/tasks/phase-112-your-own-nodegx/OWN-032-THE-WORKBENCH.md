@@ -1,6 +1,10 @@
 # OWN-032 — The workbench: one hero, step by step, with the model's brain open
 
-**Opened 2026-10-29** (Opus, end of OWN-030, at Richard's ask). **Status: ⬜ scoped, not started.**
+**Opened 2026-10-29** (Opus, end of OWN-030, at Richard's ask). **Status: 🔶 s1 done 2026-10-29: s0 probes, the
+viewer (3a), the arm's first three runs (3b); surgery from the page (3c) is next.** Results in `own-032/RESULTS.md`:
+- E4B fact vision does NOT separate (touching 0.02, edge 0.04), so the script's measures feed the builder.
+- E2B reads the outline back, 11 of 12.
+- At node level, E2B loops on "add a Group" and never changes a setting in 3 × 30 turns.
 **Model:** Opus runs the session. The builder is Gemma 4 E2B and the reviewer Gemma 4 E4B, the same digests as
 OWN-030 §0 (`07ea59a47401`, `ee6656371218`), Ollama 0.40.12.
 

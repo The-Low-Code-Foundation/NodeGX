@@ -1,0 +1,128 @@
+{
+ "htmlMs": 676,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [
+    {
+     "a": "Find Your Perfect Puppy Companion",
+     "b": "Discover loving, ready-to-play puppies w",
+     "gap": -11
+    },
+    {
+     "a": "Discover loving, ready-to-play puppies w",
+     "b": "Adopt a Puppy",
+     "gap": 3
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Find Your Perfect Puppy Companion",
+     "x": 64,
+     "y": 83,
+     "w": 531,
+     "h": 242
+    },
+    {
+     "kind": "words",
+     "text": "Discover loving, ready-to-play puppies w",
+     "x": 64,
+     "y": 314,
+     "w": 511,
+     "h": 53
+    },
+    {
+     "kind": "button",
+     "text": "Adopt a Puppy",
+     "x": 64,
+     "y": 371,
+     "w": 143,
+     "h": 43
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:58931/",
+   "blank": false,
+   "words": 20,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 2,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 1
+  },
+  "height": 510
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [
+    {
+     "a": "Find Your Perfect Puppy Companion",
+     "b": "Discover loving, ready-to-play puppies w",
+     "gap": -4
+    },
+    {
+     "a": "Discover loving, ready-to-play puppies w",
+     "b": "Adopt a Puppy",
+     "gap": 3
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Find Your Perfect Puppy Companion",
+     "x": 24,
+     "y": 89,
+     "w": 277,
+     "h": 85
+    },
+    {
+     "kind": "words",
+     "text": "Discover loving, ready-to-play puppies w",
+     "x": 24,
+     "y": 170,
+     "w": 321,
+     "h": 83
+    },
+    {
+     "kind": "button",
+     "text": "Adopt a Puppy",
+     "x": 24,
+     "y": 256,
+     "w": 143,
+     "h": 43
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:58931/",
+   "blank": false,
+   "words": 20,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 2,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 1
+  },
+  "height": 711
+ },
+ "ms": 3597
+}
