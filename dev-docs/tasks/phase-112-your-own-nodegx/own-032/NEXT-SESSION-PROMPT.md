@@ -3,47 +3,47 @@
 **Paste this to start the session:**
 
 > OWN-032 s6. Read `dev-docs/tasks/phase-112-your-own-nodegx/own-032/NEXT-SESSION-PROMPT.md` (this section), then
-> `RESULTS.md` §9. First read Richard's answers on https://claude.ai/artifact/P7umD3HEoDJrTiv1Q3KQqh (ask him if
-> there are none). Then run the experiments below in order: one at a time on Ollama, each against a control, each
-> pre-registered in RESULTS §10 before it runs. Commit after each one lands.
+> `RESULTS.md` §9–§10. First read Richard's pick of a warm look on https://claude.ai/artifact/P7umD3HEoDJrTiv1Q3KQqh
+> (ask him if he has not picked). Then run the experiments below in order: one at a time on Ollama, each against a
+> control, each pre-registered in RESULTS §11 before it runs. Commit after each one lands.
 
-## Where it stands (s5, `b64efabb0`, 2026-10-29)
+## Where it stands (s5 + s5b, `62d0cae45`, 2026-10-29)
 
-- **The final harness is `runs/w17.edit.json`.** It is w15 plus two s5 switches, both off by default:
-  - `fixesOnly` (9a): once every part is there and a fix is on the menu, the menu is the fixes plus undo. Free moves
-    after `goalMet` went from 3 to 0 and turns from 282 to 277 on ten requests, and no run got worse;
-  - `factsKept` (9b): the brief's name (on the headline) and a date in the request (on the line) that none of the
-    hero's words say become a write fix, and 8b's shorten fix says `It must say "<name>"`. 10 of 10 heroes end with
-    the name and both jazz heroes with "14 November", at most +1 turn.
-- **E2B separates a third look (9d):** "minimal / stylish / warm and friendly", all 6 orders, 24 of 24 right, no
-  confusion. The caveat: 7 of 8 warm requests use the look's own words.
-- **9c, the calm look's spacing:** four pictures of w17m-jazz (48/48, 8/48, 24/40, 16/24 px). Nothing changes in the
-  arm until Richard picks.
-- **`drift.mjs <control> <test>`** gives where two runs part and the odds drift on calls asked the same prompt. It was
-  0.0000 on all 20 s5 pairs, so at T 0 a control is exact wherever the prompts match.
+- **The final harness is `runs/w20.edit.json`.** It is w15 plus six switches from s5, all off by default:
+  - `fixesOnly` (9a): once every part is there, the menu is the fixes plus undo;
+  - `factsKept` (9b): the brief's name and a date in the request must be in the hero's words;
+  - `nameAndMore` (10a, Richard: "saying a bit more is nice"): a shortened headline is the name and a few words
+    ("Maison Levain: Family Bakery", "The Blue Room: Live Jazz");
+  - `writeRepeat` (10a′): a rewrite that came back too long is told so. Without it, w18m-running wrote the same 5
+    words 22 times to the cap;
+  - `rhythmCalm` (10b, Richard left the pick to me): the calm look takes the bold look's 16/24 px rhythm, 5 of 5.
+- **The last full set per request:**
+  - calm: w20m-* (all five);
+  - bold: w19s-running, and w17s-* for the other four (w19 and w20 do not change them: no shorten fix fires, and
+    `rhythmCalm` is calm-only).
+- **E2B separates a third look** (9d): "minimal / stylish / warm and friendly", 24 of 24.
+- **The warm look, drawn by hand for Richard** (10c, `warm.mjs` on `-warm` bench copies): a pastel wash, rounded
+  photo and pill, and a Fredoka or Caveat headline. Five pictures across bakery and pottery.
+- `drift.mjs <control> <test>` read 0.0000 on every s5 pair: at T 0 a control is exact wherever the prompts match.
 
-## Waiting on Richard (the page above, plain-words questions on real heroes)
+## Waiting on Richard
 
-1. **The calm look's spacing:** which of the four? (For the bold look he picked "medium", 16/16/24.)
-2. **A headline that is only the name:** with `factsKept`, all four shortened headlines became the name alone ("Maison
-   Levain", "The Blue Room", "Park Runners" ×2). Is that right, or should a short headline say a little more?
-3. **(Not on the page yet) what "warm and friendly" looks like:** the ground, the corners, the headline. The arm
-   cannot learn a third look until he has seen one he likes. The stylish look was read from a hero he had already
-   seen (OWN-029 G-plumber r4).
+1. **Which warm look** (the page above): rounded headline, handwritten headline, or rounded with a small handwritten
+   line. Also, for a black-and-white brand, the Soft theme's lavender instead of a grey wash.
 
 ## The experiments, in order
 
-1. **Richard's answers, if he has given them:**
-   - Q1 → the `rhythm` switch learns the calm look's spacing. Control: the five w17m runs;
-   - Q2 → if "say more", the shorten fix asks for the name plus a few words about what it is. Control: w17m-bakery,
-     w17m-jazz, w17m-running, w17s-running.
-2. **Centre the words beside the photo.** Seen in 9c, not measured: the words column is top-aligned beside a 320 px
-   photo, so tighter spacing leaves empty space under the button. First measure it (the column's height against the
-   photo's, from facts.json `blocks`) across the ten w17 heroes; then, if it is common, a finding with a fix on the
-   Columns or the words column. Show Richard before keeping it.
-3. **A stricter third-look probe (9d's caveats):** 8 warm requests written WITHOUT "warm", "friendly" or
-   "welcoming", and the 20 `PLAIN` requests against three looks. The second asks whether "named a look or not" still
-   separates (≤ 0.001 / ≥ 0.91 with two looks).
+1. **The warm look in the arm, once he picks.**
+   - The arm's vocabulary needs three things it lacks: a font setting (Fredoka / Caveat, with the font module
+     copied into the bench, as `warm.mjs` does), a soft ground (a wash of the brand, or the Soft pastel when the
+     brand has no colour), and a 40 px photo corner;
+   - then `only` fixes for the look, as the stylish ones are (8g's pattern);
+   - `--style auto` learns three looks (`lookq.mjs` LOOKS + `probe-look3.mjs`'s description);
+   - test on bakery, pottery and puppy, with a warm request each, against the calm runs.
+2. **A stricter third-look probe (9d's caveats):** 8 warm requests written WITHOUT "warm", "friendly" or
+   "welcoming", and the 20 `PLAIN` requests against three looks, to see whether "named a look or not" still
+   separates.
+3. **Centre the words beside the photo** (seen in 9c): measure first, across the ten heroes, then show Richard.
 
 ## Not this session
 
@@ -55,12 +55,13 @@
 ## Traps (s5)
 
 - **Importing a probe module runs it.** `probe-look.mjs` had top-level code, so `import { REQUESTS }` ran the whole
-  probe on Ollama beside an arm run. Its main body is now guarded. Check any other script for this before importing
-  from it. A `node -e 'import(…)'` "load check" is a run.
-- **A switch that changes an existing fix's prompt moves every run where that fix fires.** 9b pre-registered only
-  for its new finding and missed two runs that the shorten-fix wording changed. Pre-register for both.
-- **`compare.mjs` "parts at" is the first different ACTION.** A menu change moves the odds from the first turn it
-  applies; `drift.mjs` compares only calls with the same prompt.
+  probe on Ollama beside an arm run. Its main body is now guarded. A `node -e 'import(…)'` "load check" is a run.
+- **A switch that changes an existing fix's prompt moves every run where that fix fires.** 9b missed two runs that
+  way. Pre-register for both.
+- **A write fix can loop at T 0 like a menu can.** A rewrite that does not clear its finding is offered the same
+  prompt and returns the same words. `writeRepeat` cures the shorten fix; any new write fix needs the same.
+- **`warm.mjs` writes only to `-warm` copies of a bench.** Never render a hand variant on a bench an arm run is
+  using: `writeHero` overwrites the hero mid-run.
 - Everything in s4's traps below still holds.
 
 ---
