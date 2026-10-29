@@ -41,6 +41,7 @@ import * as os from 'os';
 import * as path from 'path';
 
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { z } from 'zod';
 
 import type { ProjectBinding } from '../project/ProjectBinding';
 import type { ListProjectsResponse, ProjectListRow } from './responses';
@@ -287,25 +288,47 @@ export function noteFor(result: ProjectScanResult, isBound: boolean): string {
  * capture the unbound state and keep advertising `open_project` for the life of
  * the process — including after `create_project` or `open_project` had bound it.
  */
+/**
+ * P125-GOOSE-LONGLIST — at most this many rows unless the caller searched. Measured 2026-10-29: 71 rows (lab runs)
+ * on Richard's machine, and Gemma 4 E4B in Goose lost the person's request under them before its second call.
+ */
+export const LIST_PROJECTS_CAP = 10;
+
+/** Rows whose name or folder name contains `query` (case-insensitive), or the newest `LIST_PROJECTS_CAP`. */
+export function pickProjects(projects: ProjectListRow[], query?: string): { rows: ProjectListRow[]; more: number } {
+  const q = query?.trim().toLowerCase();
+  const matched = q ? projects.filter((p) => p.name.toLowerCase().includes(q) || path.basename(p.directory).toLowerCase().includes(q)) : projects;
+  const rows = q ? matched : matched.slice(0, LIST_PROJECTS_CAP);
+  return { rows, more: matched.length - rows.length };
+}
+
 export function registerListProjectsTools(server: McpServer, binding?: ProjectBinding): void {
   server.registerTool(
     'list_projects',
     {
       title: 'List NodeGX projects on this machine',
       description:
-        'The NodeGX projects this machine has opened, newest first: name, directory, format and when it was ' +
+        `The NodeGX projects this machine has opened, newest first (the ${LIST_PROJECTS_CAP} newest; pass \`query\` ` +
+        'with part of a name to find an older one): name, directory, format and when it was ' +
         'last opened. Read from the launcher\'s list, this folder and the projects made in chats. Call this ' +
         'BEFORE create_project when the user talks about their app as something that already exists — building ' +
         'a second copy beside the real one is not undoable by a tool call, and open_project turns a row of this ' +
         'list into a project this server is serving. An empty list is a valid answer and means this is a fresh ' +
         'machine.',
-      inputSchema: {}
+      inputSchema: {
+        query: z.string().optional().describe('Part of the project\'s name, e.g. "puppy". Leave out for the newest projects.')
+      }
     },
-    guarded(() => {
+    guarded((args: { query?: string }) => {
       const result = scanProjects();
+      const { rows, more } = pickProjects(result.projects, args?.query);
       const payload: ListProjectsResponse = {
-        projects: result.projects,
-        note: noteFor(result, binding?.isBound ?? false),
+        projects: rows,
+        ...(more > 0 ? { more } : {}),
+        note:
+          noteFor(result, binding?.isBound ?? false) +
+          (more > 0 ? ` Showing the ${rows.length} newest of ${result.projects.length}; pass query to find another.` : '') +
+          (args?.query && rows.length === 0 ? ` None matches "${args.query}".` : ''),
         // Only when there is nothing, and then it is the whole diagnosis: a
         // person whose projects are missing needs to know which file was read,
         // and a build under a different product name writes to a different one.

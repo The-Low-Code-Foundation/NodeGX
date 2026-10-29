@@ -631,6 +631,8 @@ export interface ProjectListRow {
 
 export interface ListProjectsResponse {
   projects: ProjectListRow[];
+  /** P125-GOOSE-LONGLIST — rows not shown (beyond the cap, or beyond what `query` matched). */
+  more?: number;
   note: string;
   /** Only when the list is empty: the store files that were looked for, in order. */
   searched?: string[];

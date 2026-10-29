@@ -42,7 +42,7 @@ import { z } from 'zod';
 
 import type { McpServer, RegisteredResource } from '@modelcontextprotocol/sdk/server/mcp.js';
 
-import { clientRendersApps, consumeOpenStudioProxied } from '../clientApps';
+import { clientForbidsEval, clientRendersApps, consumeOpenStudioProxied } from '../clientApps';
 import { ToolError } from '../errors';
 import { EDITOR_DOWNLOAD } from '../surfaces';
 import { HOLD_FILE, mayRelease, oldHoldWords, readHold, RELEASE_AFTER_REFUSAL_MS } from '../hold';
@@ -60,23 +60,50 @@ export const STUDIO_RESOURCE_URI = 'ui://nodegx/studio.html';
 const MIME = 'text/html;profile=mcp-app';
 const FONTS = ['https://fonts.googleapis.com', 'https://fonts.gstatic.com'];
 
-/** The resource's `_meta` for a Studio at `origin` — the CSP the panel needs, and nothing it does not. */
-export function studioResourceMeta(origin: string | null): Record<string, unknown> {
+/**
+ * The resource's `_meta` for a Studio at `origin` — the CSP the panel needs, and nothing it does not. `framed`: the
+ * panel is `framedPanelHtml`, so the origin is named in `frameDomains` too (Claude restricts them; only a host that
+ * forbids eval is sent one).
+ */
+export function studioResourceMeta(origin: string | null, framed = false): Record<string, unknown> {
   return {
     ui: {
       prefersBorder: false,
       csp: origin
-        ? { connectDomains: [origin], resourceDomains: [origin, ...FONTS], baseUriDomains: [origin] }
+        ? {
+            connectDomains: [origin],
+            resourceDomains: [origin, ...FONTS],
+            baseUriDomains: [origin],
+            ...(framed ? { frameDomains: [origin] } : {})
+          }
         : { connectDomains: [], resourceDomains: FONTS, baseUriDomains: [] }
     }
   };
 }
 
-// A client that does not render MCP Apps — Claude Code, Cline, Vibe, a script somebody wrote around this server —
-// gets Studio opened in the browser instead, beside whatever it is (`clientRendersApps`, `../clientApps.ts`).
-// Measured 2026-10-23: a Claude Desktop Cowork session connected this server, listed its tools, and then drove a
-// second copy from a shell script; nothing it did could have drawn a panel, and the person saw no editor. The URL
-// in a result is not "on screen"; a browser window is.
+/**
+ * P125-GOOSE-NOEVAL — the panel for a host whose sandbox forbids eval (`clientForbidsEval`): Studio's own panel page
+ * (`/panel`, the compact inline layout) in a frame from Studio's origin, whose document carries no CSP, and this page
+ * a relay between that frame and the host. Studio's bridge (`hosted.js`) does the whole MCP Apps handshake through
+ * it (the size, which panel is live, HOLD, the display modes) as if this page were not there; only `eval` is
+ * Studio's origin's. Measured 2026-10-29 in Goose 1.57.0: framing Studio's full page (`/`) put the desktop layout,
+ * both side panels open, into a 789px panel, and the app preview was 150px wide.
+ */
+export function framedPanelHtml(origin: string): string {
+  return (
+    '<!doctype html><html style="height:100%;overflow:hidden"><meta charset="utf-8">' +
+    '<body style="margin:0;height:100%;background:#0b0e12">' +
+    `<iframe id="studio" src="${origin}/panel" title="NodeGX Studio" style="border:0;width:100%;height:100%;display:block" ` +
+    'allow="clipboard-read; clipboard-write; fullscreen"></iframe>' +
+    '<script>' +
+    "const inner = document.getElementById('studio');" +
+    'addEventListener("message", (e) => {' +
+    '  if (e.source === inner.contentWindow) parent.postMessage(e.data, "*");' +
+    '  else if (e.source === parent) inner.contentWindow?.postMessage(e.data, "*");' +
+    '});' +
+    '</script>'
+  );
+}
 
 /** The person's browser, on the platform's own opener. `NODEGX_STUDIO_NO_OPEN` keeps a test from opening windows. */
 export function openInBrowser(url: string): boolean {
@@ -132,8 +159,12 @@ export function registerOpenStudioTools(rec: McpServer, server: McpServer, bindi
       _meta: studioResourceMeta(proxy?.origin ?? null)
     },
     async (uri) => {
+      const framed = clientForbidsEval(server);
       // With the proxy (the CLI's server): the install's page at the proxy's origin, valid before Studio exists.
       if (proxy) {
+        if (framed && findStudio().dir !== null) {
+          return { contents: [{ uri: uri.href, mimeType: MIME, text: framedPanelHtml(proxy.origin), _meta: studioResourceMeta(proxy.origin, true) }] };
+        }
         const text =
           panelFromInstall(proxy.origin) ??
           holdingPage(
@@ -151,6 +182,8 @@ export function registerOpenStudioTools(rec: McpServer, server: McpServer, bindi
             ? 'No project is open yet. Ask the agent to create or open one; Studio appears here once it has.'
             : 'Studio is not running for this project. Ask the agent to call open_studio.'
         );
+      } else if (framed) {
+        return { contents: [{ uri: uri.href, mimeType: MIME, text: framedPanelHtml(origin), _meta: studioResourceMeta(origin, true) }] };
       } else {
         try {
           const res = await fetch(`${origin}/panel`);

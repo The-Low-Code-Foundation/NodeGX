@@ -45,6 +45,7 @@ import { registerExportReactTools } from './tools/exportReact';
 import { registerOpenInEditorTools } from './tools/openInEditor';
 import { registerMiniEditorTools } from './tools/miniEditor';
 import { registerOpenStudioTools } from './tools/openStudio';
+import { registerBuildAppTools } from './tools/buildApp';
 import { holdGate } from './hold';
 import { applyResultSizeMeta, clientLoadsToolsItself, clientRendersApps } from './clientApps';
 import type { StudioProxy } from './studio/studioProxy';
@@ -357,6 +358,9 @@ export function createServer(options: ServerOptions): CreatedServer {
     // was already there. Same `CreateProjectBinding`, deliberately — they share
     // `completeBind`, so a bind through either door has the same side effects.
     registerOpenProjectTools(rec, { binding, disclosure, deferTools });
+    // P112 OWN-031 — the whole app in one call, the server asking a local model (`NODEGX_LOCAL_MODEL`). It drives the
+    // tools above in-process through the disclosure's handles, the way `call_tool` does.
+    registerBuildAppTools(rec, disclosure);
     // UNI-010. Takes no store, for the same reason `create_project` does not: a
     // lesson bundle is assembled out of two project directories the caller names,
     // and neither of them is the one this server is pointed at. It writes a

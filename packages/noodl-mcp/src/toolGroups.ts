@@ -549,6 +549,10 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
       // in tests/ccn008MiniEditor.test.ts via the surface gate's own number).
       'show_mini_editor',
       'get_mini_editor',
+      // P112 OWN-031 — `build_app`, the whole app in one call with the server asking a local model. Appended on the same
+      // arithmetic ("20 tools" and "21 tools" are the same length, 0 resident tokens); advertised outright in bootstrap
+      // mode only when NODEGX_LOCAL_MODEL is set (BOOTSTRAP_TOOLS below).
+      'build_app',
       // P109 ISL-016 — appended on the arithmetic the notes above record: 0 resident tokens ("8
       // tools" and "9 tools" are the same length). `tests/isl016ProjectSettings.test.ts` measures
       // that and reaches it through `find_tools` by keyword.
@@ -664,6 +668,7 @@ export const WRITE_ONLY_TOOLS: ReadonlySet<string> = new Set<string>([
   'write_world',
   'seed_project_docs',
   'create_project',
+  'build_app',
   // FIX-008 D. Binding is not a write, and this is still honest rather than
   // aspirational: it ships inside `server.ts`'s write gate beside
   // `create_project`, so it is write-only in fact. It costs nothing, because an
@@ -743,6 +748,9 @@ export const WRITE_ONLY_TOOLS: ReadonlySet<string> = new Set<string>([
  * asserts it, because a typo would silently produce a three-tool server.
  */
 export const BOOTSTRAP_TOOLS: readonly string[] = Object.freeze([
+  // P112 OWN-031 — first, and only with a local model to ask (`buildApp.ts` `localModel`): a small model reads the
+  // list top down and the one-call door must be the first thing it meets.
+  ...(process.env.NODEGX_LOCAL_MODEL?.trim() ? ['build_app'] : []),
   'list_projects',
   'open_project',
   'create_project',

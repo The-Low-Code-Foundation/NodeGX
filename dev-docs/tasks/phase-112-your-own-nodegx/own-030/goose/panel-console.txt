@@ -1,0 +1,15 @@
+console.error Error compiling schema, function code: const schema2 = scope.schema[2];const schema1 = scope.schema[1];return function validate1(data, {instancePath="", parentData, parentDataProperty, rootData=data}={}){let vErrors = null;let errors = 0;if(!((typeof data == "number") && (!(data % 1) && !isNaN(data)))){const err0 = {instancePath,schemaPath:"#/definitions/nonNegativeInteger/type",keyword:"type",par
+EXC Uncaught EvalError: Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: script-src 'self' 'unsafe-inline' http://127.0.0.1:63774 https://fonts.googleapis.com https://fonts.gstatic.com".
+
+console.debug Sending message Object
+console.debug Parsed message Object
+console.debug Sending message Object
+console.debug Sending message Object
+console.debug Parsed message Object
+console.debug Parsed message Object
+console.debug Parsed message Object
+EXC TypeError: Cannot read properties of undefined (reading 'memoryFiles')
+    at http://127.0.0.1:64665/mcp-app-guest?nonce=8a94fbf8-2d5f-4389-86b2-2504cf2f8ae2:1031:27
+console.error Error compiling schema, function code: const schema2 = scope.schema[2];const schema1 = scope.schema[1];return function validate1(data, {instancePath="", parentData, parentDataProperty, rootData=data}={}){let vErrors = null;let errors = 0;if(!((typeof data == "number") && (!(data % 1) && !isNaN(data)))){const err0 = {instancePath,schemaPath:"#/definitions/nonNegativeInteger/type",keyword:"type",par
+EXC Uncaught EvalError: Evaluating a string as JavaScript violates the following Content Security Policy directive because 'unsafe-eval' is not an allowed source of script: script-src 'self' 'unsafe-inline' http://127.0.0.1:63774 https://fonts.googleapis.com https://fonts.gstatic.com".
+

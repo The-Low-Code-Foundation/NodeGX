@@ -3,6 +3,27 @@
 **Opened 2026-10-28** (OWN-029 s2, Opus, from `own-029/NEXT-SESSION-PROMPT.md` step 5: *"move the loop into the MCP …
 so a person with Gemma in Cline gets the harness without running it. Scope it as its own task file first."*).
 **Status: ⬜ scoped 2026-10-28, not started. The three rulings in §7 were decided 2026-10-29 (Richard handed them over); step 1, the probe, is next once OWN-030 has run.**
+**🟡 2026-10-29 ~11:40 — TAKEN by the Goose session (Opus, d57192da).** Richard, after the Goose measurements (own-030/goose/FINDINGS.md): *"Yep absolutely"* to a `build_app` tool where the SERVER asks Ollama directly, one call from the chat. That reverses ruling 2 below for hosts that already run Ollama: per turn in Goose, E4B carries 15–25k tokens at 3–13 tok/s, so 25 round trips is 30+ min, against 2–4 min direct, and only direct keeps logprobs. Goose advertises no `sampling`. First target: a counter app (an interactive branch the tree lacks), drawn in Studio in the Goose chat. Do not start this task in another session without asking. **s1 result (same day):** `build_app` built (`noodl-mcp/src/tools/buildApp.ts`, uncommitted), with a counter branch only. In Goose, E4B made one call and got a working counter in Studio in the chat (`own-030/goose/FINDINGS.md` rows 8–12). Next: landing pages through the same door (port OWN-029's tree), then more interactive kinds.
+**s2 result (2026-10-29 afternoon, same lane after a `/clear`):** pages through `build_app`.
+- **The port:** OWN-029's round 0 (harness 22989dd1) is in `noodl-mcp/src/guided/` (`door.ts` is lm.mjs; `page.ts` holds
+  the question tree, the assembly and the staging). It has the same signatures, so a recorded run replays. `build_app`'s kind
+  question now offers counter, page or other.
+- **AC3 ✅ (the paired gate):** `tests/own031GuidedPage.test.ts` replays the six frozen G-runs' round-0 answers
+  (`tests/fixtures/own031/`). Card, sections, bits and every node's params equal `r0/tree.json`, and each page applies
+  with nothing left out. Mutation check: flipping the zigzag turns the three briefs with photos red.
+- **New in the port, the photo scout's pre-filter:** one text question picks up to 3 photo subjects, then the two
+  vision gates run on those files only. Bakery: 15 of 32 looked at, and it kept the same two photos the lab's full
+  scan kept. Ollama takes `.webp` as it is, so the lab's `sips` conversion is not needed.
+- **Live, E4B (`gemma4-e4b-32k`), bakery, through stdio (`own-031/probe.mjs`):** one call, 266 s, 57 asks and 17
+  photo judgements. The biggest prompt was 413 tokens. It applied, with 1 render warning (low-contrast date line in the
+  footer). Shots: `own-031/runs/projects/family-bakery-lyon/.previews/shots/`. The ledger of each build is written beside
+  the project (`.previews/build-app.json`).
+- **What round 0 gets wrong (step 3's job):** two photos repeated across five bands and the hero cards; three dark
+  photo bands in a row; a "schedule or line-up" section on a bakery.
+- **Not yet:** the review loop (step 3), the other five briefs live, and a run in Goose by Richard. Goose's bundle
+  `dist/noodl-mcp-goose.cjs` was rebuilt at 14:2x, and Goose picks it up when it restarts the extension.
+- **Progress:** `build_app` sends `notifications/progress` when the call carries a progress token (a page takes
+  minutes). Whether Goose sends one, and its tool timeout, are not measured yet.
 **Model:** Opus. The client model in every test is a local Gemma, the same one OWN-029 used as builder.
 
 ## 1. The person sentence

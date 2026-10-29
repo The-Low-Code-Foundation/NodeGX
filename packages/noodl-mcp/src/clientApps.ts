@@ -23,6 +23,20 @@ export function clientRendersApps(server: McpServer): boolean {
 }
 
 /**
+ * P125-GOOSE-NOEVAL — does the client's MCP Apps sandbox forbid `eval`?
+ *
+ * Measured 2026-10-29, Goose Desktop 1.57.0 (`goose-app`): the guest frame's CSP is built from the resource's
+ * domains with no `'unsafe-eval'` and no way to ask for it, and Studio's in-page preview compiles its validators with
+ * `new Function` at load, so the panel drew Studio's chrome and stopped at "starting…". Goose does honour
+ * `frameDomains`, so such a host gets Studio framed from its own origin (`framedPanelHtml`), where eval runs.
+ * `NODEGX_PANEL_FRAME=1` forces it for any host.
+ */
+export function clientForbidsEval(server: McpServer): boolean {
+  if (process.env.NODEGX_PANEL_FRAME === '1') return true;
+  return server.server.getClientVersion()?.name === 'goose-app';
+}
+
+/**
  * Does the client load tools itself, from the FIRST `tools/list`, and never see a later reveal?
  *
  * Measured 2026-10-23, Richard's third run: Claude Desktop (`claude-ai 0.1.0`, calling as
