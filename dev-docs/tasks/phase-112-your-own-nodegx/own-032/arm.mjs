@@ -4,7 +4,10 @@
 //                [--replay <run> --upto <k>]          surgery: take turns 1..k-1 from <run> without asking (§3c)
 //                [--override k=<json action>]          surgery: turn k does this action instead of asking
 //                [--hint k=<text>]                     surgery: turn k's prompts carry this line
-//                [--edit <json file>]                  surgery: { menuWording?, intro?, rules? } for the whole run
+//                [--edit <json file>]                  surgery: { menuWording?, intro?, rules?, wordsTemperature? } for the whole run
+//                [--force k.<key>=<answer>]            surgery: one call of turn k answers this instead of asking
+//                [--prompt k.<key>=<file>]             surgery: one call of turn k is asked this text, verbatim
+//                (the viewer's "edit and re-run from here" composes these: server.mjs POST /fork)
 //
 // A turn: the builder picks a MOVE from a short numbered menu (add / set / write / undo / done); each move then asks
 // the one or two small closed questions it needs (which node, which setting, which value), every one a single-enum
@@ -35,6 +38,11 @@ const OVERRIDE = Object.fromEntries(all('--override').map((s) => [Number(s.split
 const HINT = Object.fromEntries(all('--hint').map((s) => [Number(s.split('=')[0]), s.slice(s.indexOf('=') + 1)]));
 const REPLAY = opt('--replay') ? JSON.parse(fs.readFileSync(path.join(HERE, 'runs', `arm-${opt('--replay')}`, 'ledger.json'), 'utf8')) : null;
 const UPTO = Number(opt('--upto', 0));
+// `k.key=…` → { k: { key: … } }; the key itself holds a dot (`set.value`), so split at the first dot only
+const perCall = (flag, read) => all(flag).reduce((m, s) => { const eq = s.indexOf('='), dot = s.indexOf('.'); const k = Number(s.slice(0, dot)); (m[k] ||= {})[s.slice(dot + 1, eq)] = read(s.slice(eq + 1)); return m; }, {});
+const FORCE = perCall('--force', (v) => v);
+const PROMPT = perCall('--prompt', (f) => fs.readFileSync(f, 'utf8'));
+const WORDS_T = EDIT.wordsTemperature ?? 0.7;
 
 export const GOALS = {
   puppy: { name: 'Puppy Haven', about: 'a puppy adoption site; blue, modern', photo: 'animal-dog.webp', want: 'a headline, one line under it, a button, and a photo on the right' },
@@ -101,7 +109,9 @@ const currentOf = (n, setting) => {
 
 // ─── The model door: single-enum questions with their distribution, and the one free-words question ─────────────
 const SYSTEM = 'You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.';
+const used = new Set();   // the models this run asked: only these are unloaded at the end
 async function chat(model, messages, { format, temperature = 0, numPredict = 60, logprobs = false }) {
+  used.add(model);
   const r = await fetch(`${OLLAMA}/api/chat`, { method: 'POST', body: JSON.stringify({ model, messages, stream: false, think: false, format, ...(logprobs ? { logprobs: true, top_logprobs: 10 } : {}), options: { temperature, num_predict: numPredict, num_ctx: 4096 }, keep_alive: '15m' }) });
   if (!r.ok) throw new Error(`ollama ${r.status}: ${(await r.text()).slice(0, 200)}`);
   return r.json();
@@ -133,22 +143,26 @@ function dist(j, options) {
   if (!sum) return null;
   return options.map((o) => ({ label: o, p: +(d[o] / sum).toFixed(3) })).sort((a, b) => b.p - a.p);
 }
+// what surgery did to one call: its prompt replaced (`--prompt`), or the turn's hint in it (`--hint`)
+const touched = (turnLog, key) => ({ edited: PROMPT[turnLog.turn]?.[key] != null || undefined, hinted: !!HINT[turnLog.turn] || undefined });
 async function choose(key, prompt, options, turnLog) {
+  prompt = PROMPT[turnLog.turn]?.[key] ?? prompt;
   const forced = turnLog.forced?.[key];
   if (forced !== undefined) { turnLog.calls.push({ key, prompt, options: options.map((label) => ({ label, p: null })), answer: forced, forced: true }); return forced; }
   const t = Date.now();
   const j = await chat(MODEL, [{ role: 'system', content: SYSTEM }, { role: 'user', content: prompt }], { format: { type: 'object', properties: { pick: { type: 'string', enum: options } }, required: ['pick'] }, logprobs: true });
   let answer = null; try { answer = JSON.parse(j.message.content).pick; } catch {}
-  turnLog.calls.push({ key, model: MODEL, prompt, options: dist(j, options) || options.map((label) => ({ label, p: null })), answer, raw: answer ? undefined : j.message?.content, tokensIn: j.prompt_eval_count, tokensOut: j.eval_count, ms: Date.now() - t });
+  turnLog.calls.push({ key, model: MODEL, prompt, options: dist(j, options) || options.map((label) => ({ label, p: null })), answer, raw: answer ? undefined : j.message?.content, tokensIn: j.prompt_eval_count, tokensOut: j.eval_count, ms: Date.now() - t, ...touched(turnLog, key) });
   return answer;
 }
 async function words(key, prompt, max, turnLog) {
+  prompt = PROMPT[turnLog.turn]?.[key] ?? prompt;
   const forced = turnLog.forced?.[key];
   if (forced !== undefined) { turnLog.calls.push({ key, prompt, answer: forced, forced: true }); return forced; }
   const t = Date.now();
-  const j = await chat(MODEL, [{ role: 'system', content: SYSTEM }, { role: 'user', content: prompt }], { format: { type: 'object', properties: { text: { type: 'string', maxLength: max } }, required: ['text'] }, temperature: 0.7, numPredict: 120 });
+  const j = await chat(MODEL, [{ role: 'system', content: SYSTEM }, { role: 'user', content: prompt }], { format: { type: 'object', properties: { text: { type: 'string', maxLength: max } }, required: ['text'] }, temperature: WORDS_T, numPredict: 120 });
   let answer = null; try { answer = JSON.parse(j.message.content).text; } catch {}
-  turnLog.calls.push({ key, model: MODEL, prompt, answer, tokensIn: j.prompt_eval_count, tokensOut: j.eval_count, ms: Date.now() - t });
+  turnLog.calls.push({ key, model: MODEL, prompt, answer, temperature: WORDS_T, tokensIn: j.prompt_eval_count, tokensOut: j.eval_count, ms: Date.now() - t, ...touched(turnLog, key) });
   return answer;
 }
 async function judge(q, png) {
@@ -189,7 +203,7 @@ export function findingsFrom(shot, nodes) {
   }
   if (RULES.unchanged && shot.unchanged) res.push({ check: 'unchanged', say: 'Your last step changed nothing a person can see, on a desktop or on a phone.' });
   const unwritten = nodes.map((n, i) => ({ n, i })).filter(({ n }) => (n.params.text === 'Text' || n.params.label === 'Button'));
-  if (unwritten.length) res.push({ check: 'words', say: `Still holding placeholder words: ${unwritten.map(({ i }) => `n${i}`).join(', ')}.` });
+  if (unwritten.length) res.push({ check: 'words', say: `Still holding placeholder words: ${unwritten.map(({ i }) => name(i)).join(', ')}.` });
   return res;
 }
 
@@ -275,15 +289,17 @@ function apply(state, a) {
 
 // ─── The run ─────────────────────────────────────────────────────────────────────────────────────────────────────
 fs.mkdirSync(OUT, { recursive: true });
-const ledger = { run: RUN, goal: GOAL, model: MODEL, judge: JUDGE, look: LOOK, turnsCap: TURNS, rules: RULES, edit: EDIT, startedAt: new Date().toISOString(),
-  fork: REPLAY ? { from: REPLAY.run, upto: UPTO, override: OVERRIDE, hint: HINT } : undefined, turns: [] };
+const ledger = { run: RUN, brief: opt('--brief', 'puppy'), bench: BENCH, goal: GOAL, model: MODEL, judge: JUDGE, look: LOOK, turnsCap: TURNS, rules: RULES, edit: EDIT, startedAt: new Date().toISOString(),
+  fork: REPLAY ? { from: REPLAY.run, upto: UPTO, override: OVERRIDE, hint: HINT, force: FORCE, prompt: Object.keys(PROMPT).length ? PROMPT : undefined } : undefined,
+  // what the viewer's "edit and re-run" asked for, in its own words (server.mjs writes it before starting the run)
+  surgery: fs.existsSync(path.join(OUT, 'surgery.json')) ? JSON.parse(fs.readFileSync(path.join(OUT, 'surgery.json'), 'utf8')) : undefined, turns: [] };
 const save = () => { fs.writeFileSync(path.join(OUT, 'ledger.json'), JSON.stringify(ledger, null, 1)); writeTimeline(ledger); };
 const state = { nodes: [], undo: [], history: [] };
 const bench = await openBench(BENCH);
 let findings = [], lastLook = null;
 try {
   for (let turn = 1; turn <= TURNS; turn++) {
-    const T = { turn, calls: [] };
+    const T = { turn, calls: [], forced: FORCE[turn] };
     let action;
     const prior = REPLAY && turn < UPTO ? REPLAY.turns.find((t) => t.turn === turn) : null;
     if (prior) { action = prior.action; T.replayed = true; T.calls = prior.calls.map((c) => ({ ...c, replayed: true })); }
@@ -294,7 +310,7 @@ try {
     state.history.push({ turn, say: action.say + (refused ? ` — refused: ${refused}` : ''), legal: !refused });
     T.nodes = JSON.parse(JSON.stringify(state.nodes)); T.tree = tree(state.nodes);
     T.findingsIn = findings;
-    if (action.kind === 'done') { ledger.turns.push(T); save(); break; }
+    if (action.kind === 'done') { delete T.forced; ledger.turns.push(T); save(); break; }
     if (state.nodes.length && !refused) {
       writeHero(BENCH, state.nodes);
       const shot = await bench.shoot(path.join(OUT, `t${turn}`));
@@ -312,13 +328,15 @@ try {
       }
     } else if (refused) findings = [{ check: 'refused', say: `Your last step was refused: ${refused}` }, ...findings.filter((f) => f.check !== 'refused')];
     T.findingsOut = findings;
+    delete T.forced;
     ledger.turns.push(T);
     save();
-    console.log(`turn ${turn}: ${action.say}${refused ? ` — REFUSED: ${refused}` : ''} | ${findings.length} findings | ${T.calls.reduce((s, c) => s + (c.ms || 0), 0)} ms model`);
+    console.log(`turn ${turn}: ${action.say}${refused ? ` — REFUSED: ${refused}` : ''} | ${findings.length} findings | ${T.calls.reduce((s, c) => s + (c.replayed ? 0 : c.ms || 0), 0)} ms model`);
   }
 } finally {
   await bench.close();
-  for (const m of [MODEL, JUDGE]) await fetch(`${OLLAMA}/api/generate`, { method: 'POST', body: JSON.stringify({ model: m, keep_alive: 0 }) }).catch(() => {});
+  // a keep_alive:0 request for a model that is not loaded can load it first: never touch one this run did not ask
+  for (const m of used) await fetch(`${OLLAMA}/api/generate`, { method: 'POST', body: JSON.stringify({ model: m, keep_alive: 0 }) }).catch(() => {});
 }
 ledger.endedAt = new Date().toISOString();
 ledger.end = { turns: ledger.turns.length, done: ledger.turns.at(-1)?.action.kind === 'done', nodes: state.nodes.length, findings };
@@ -331,7 +349,7 @@ function writeTimeline(L) {
   for (const t of L.turns) {
     const rt = `Turn ${t.turn}${t.replayed ? ' (replayed)' : t.overridden ? ' (answer overridden)' : ''}`;
     for (const c of t.calls) steps.push({ actor: 'builder', round: t.turn, roundTitle: rt, key: c.key, model: c.model, prompt: c.prompt, system: SYSTEM, options: c.options?.some((o) => o.p != null) ? c.options : null,
-      answer: { pick: c.answer }, ms: c.ms, tokensIn: c.tokensIn, tokensOut: c.tokensOut, forced: c.forced, from: c.replayed ? `arm-${L.fork?.from}` : undefined });
+      answer: { pick: c.answer }, ms: c.ms, tokensIn: c.tokensIn, tokensOut: c.tokensOut, forced: c.forced, edited: c.edited, hinted: c.hinted, from: c.replayed ? `arm-${L.fork?.from}` : undefined });
     steps.push({ actor: 'script', round: t.turn, roundTitle: rt, key: t.legal ? t.action.kind : 'refused',
       did: { say: t.legal ? `Did it: ${t.action.say}.` : `Refused "${t.action.say}": ${t.refused}`, nodes: t.tree },
       pictures: t.shot ? [{ src: t.shot.desktop, label: 'desktop, 1280' }, { src: t.shot.phone, label: 'phone, 390' }] : undefined, facts: t.shot?.facts,
@@ -340,7 +358,7 @@ function writeTimeline(L) {
       judgements: t.look.map((l) => ({ key: `${l.width} · ${l.check} (measured: ${l.truth ? 'yes' : 'no'})`, prompt: l.question, pYes: l.pYes, ms: l.ms })) });
   }
   const tl = { title: `${GOAL.name}: the hero, turn by turn (${L.run})`, run: L.run, request: `${GOAL.want} — for ${GOAL.name}, ${GOAL.about}`, model: L.model, judge: L.look === 'script' ? null : L.judge, harness: `arm.mjs, look=${L.look}`,
-    decisionsFrom: L.fork ? `arm-${L.fork.from}, turns 1–${L.fork.upto - 1}` : undefined,
+    decisionsFrom: L.fork?.upto > 1 ? `arm-${L.fork.from}, turns 1–${L.fork.upto - 1}` : undefined, surgery: L.surgery,
     summary: { builderCalls: L.turns.reduce((s, t) => s + t.calls.filter((c) => !c.replayed).length, 0), reviewerCalls: L.turns.reduce((s, t) => s + (t.look?.length || 0), 0) }, steps };
   fs.writeFileSync(path.join(OUT, 'timeline.json'), JSON.stringify(tl, null, 1));
 }

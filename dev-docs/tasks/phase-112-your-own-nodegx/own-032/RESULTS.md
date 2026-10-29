@@ -152,3 +152,46 @@ straight back into the loop. The headline is rewritten at temperature 0.7, and e
 
 Pictures are not committed (as in OWN-029/030): the `t<k>/*.png` and `s0-vision/*/*.png` files stay on disk, and every
 ledger, timeline and facts file is committed.
+
+## 5. Surgery from the page (3c, s2)
+
+**Built 2026-10-29 s2.** Open a run in the viewer (`node server.mjs`, `?t=runs/arm-<run>`). Every builder call has a
+button, **"Edit and re-run from here"**, that opens a form with:
+- the call's prompt, editable;
+- its answer, which can be overridden with any of its options, or with fixed words on a `write.text`;
+- a note added to every prompt of that turn;
+- for the whole run from there on: words at temperature 0, the `emptyParts` / `unchanged` findings, the
+  touching / edge thresholds, the menu's question and the goal line;
+- what you are trying, saved with the fork.
+
+`POST /api/fork` turns the form into the arm's flags:
+- turns 1..k−1 replay (`--replay --upto k`);
+- **the calls of turn k before the edited one keep their answers**, so the edit is the only thing that moves (new
+  `--force k.<key>=<answer>`);
+- an edited prompt goes in verbatim (new `--prompt k.<key>=<file>`);
+- a whole-run edit stacks on the parent's, so a chain of forks keeps every earlier edit.
+
+The edit is saved beside the fork as `surgery.json`, holding the step, the old and new prompt, the old and new answer,
+and the note. The fork is named `<parent>-t<k><letter>`. One run at a time. The server **refuses while another model
+is loaded in Ollama** (the 16 GB trap), with a "Run it anyway" button.
+
+The top of every arm run's page shows **the run, its ancestors, its siblings and its children side by side**, each with
+its last desktop and phone picture, its turn and part count, and what its edit changed. A fork's page opens with a
+banner: the parent, the step, the change, and a line diff of the prompt.
+
+Checked:
+- The page at 1280 and 390: 89 edit buttons on `w3-puppy`, 3 fork cards, nothing scrolls sideways.
+- The route's three refusals: a call the turn does not have, an answer not on the menu, Ollama busy.
+- A fully forced smoke fork from the command line (`w3-puppy` at turn 7, every call of turn 7 forced, `--turns 7`):
+  turns 1–6 replayed and turn 7 was forced, with no model asked; the hint reached every prompt of turn 7. The run was
+  deleted afterwards.
+
+Two fixes on the way:
+- The arm unloads only the models it actually asked (a `keep_alive: 0` sent for a model that is not loaded can load
+  it first, beside a peer's).
+- The "placeholder words" finding now uses the fixed-width names (`n05`, not `n5`).
+
+**No fork has been asked yet:** a peer's `gemma4-e4b-32k` held Ollama all through s2's build.
+
+| fork | from, step | the change | what it did |
+|---|---|---|---|
