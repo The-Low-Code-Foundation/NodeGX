@@ -1,0 +1,144 @@
+{
+ "htmlMs": 99,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [
+    {
+     "a": "Maison Levain: Family Bakery",
+     "b": "Experience the warmth and tradition of o",
+     "gap": 0
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Bake Now",
+     "ratio": 3.19
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "button",
+     "text": "Bake Now",
+     "x": 32,
+     "y": 96,
+     "w": 97,
+     "h": 34,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Maison Levain: Family Bakery",
+     "x": 32,
+     "y": 178,
+     "w": 500,
+     "h": 186,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Experience the warmth and tradition of o",
+     "x": 32,
+     "y": 364,
+     "w": 574,
+     "h": 21,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:62604/",
+   "blank": false,
+   "words": 17,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Bake Now",
+     "ratio": 3.19
+    }
+   ],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 594
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [
+    {
+     "a": "Maison Levain: Family Bakery",
+     "b": "Experience the warmth and tradition of o",
+     "gap": 0
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Bake Now",
+     "ratio": 3.19
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "button",
+     "text": "Bake Now",
+     "x": 32,
+     "y": 96,
+     "w": 97,
+     "h": 34,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Maison Levain: Family Bakery",
+     "x": 32,
+     "y": 178,
+     "w": 250,
+     "h": 94,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Experience the warmth and tradition of o",
+     "x": 32,
+     "y": 272,
+     "w": 324,
+     "h": 42,
+     "lines": 2
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:62604/",
+   "blank": false,
+   "words": 17,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Bake Now",
+     "ratio": 3.19
+    }
+   ],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 746
+ },
+ "ms": 2433
+}

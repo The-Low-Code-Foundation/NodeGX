@@ -225,8 +225,13 @@ async function judge(q, png) {
 //                 a write fix on the part that should carry it (the name on the headline, a date on the line), once that
 //                 part holds written words; 8b's shorten fix also says "It must say <name>" (w12m-jazz lost "14 November",
 //                 w12m-plumber never said "Dupont", w15s-running never said "Park Runners")
+//   nameAndMore   (factsKept) the shorten fix asks for the name AND a few words about what it is, never the name alone,
+//                 in at least (name's words + 2) words (9b: "It must say <name>" shortened 4 of 4 headlines to the name
+//                 alone; Richard, 9b: "I think saying a bit more is nice")
+//   writeRepeat   the shorten fix, offered again for a headline it already rewrote, says "your last try … is still too
+//                 long: use fewer words" (w18m-running: at T 0 the same prompt gave the same 5-word headline 22 times)
 // The touching / edge thresholds are not rules: bench.mjs FACTS fixes them (4 px, 8 px), and probe-vision's key with them.
-const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false, roles: false, endGate: false, addWhileMissing: false, shortHeadline: false, blankRetry: false, rhythm: false, fixesOnly: false, factsKept: false }, ...(EDIT.rules || {}) };
+const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false, roles: false, endGate: false, addWhileMissing: false, shortHeadline: false, blankRetry: false, rhythm: false, fixesOnly: false, factsKept: false, nameAndMore: false, writeRepeat: false }, ...(EDIT.rules || {}) };
 // roles (s2, after w4-t15a): each part is told what it is when it is added, and keeps it through moves and removes;
 // the shape checks read the roles, never the document order (t15a: a move made the headline texts[1], and the size
 // fix went to the other Text, so the hero ended with two headlines and no line under them)
@@ -284,7 +289,7 @@ export function findingsFrom(shot, nodes) {
       // only above text-base: at text-base the headline's own size finding is the one to fix (and nothing is smaller)
       const hb = shot.desktop.facts.blocks?.find((b) => b.kind === 'words' && b.text === String(nodes[h].params.text ?? '').trim().replace(/\s+/g, ' ').slice(0, 40));
       const hw = String(nodes[h].params.text ?? '').trim().split(/\s+/).length, most = Math.max(3, Math.floor((2 * hw) / (hb?.lines || 1)));
-      if (RULES.shortHeadline && hb && hb.lines >= 3 && sz(h) === SIZES.indexOf(big[0])) res.push({ check: 'headlineLong', say: `On a desktop, the headline ${name(h)} breaks onto ${hb.lines} lines at the smallest headline size: it has too many words (${hw}).`, fix: { node: h, setting: 'words', write: true, ask: `It is now ${hw} words and breaks onto ${hb.lines} lines on a desktop: write it again in at most ${most} words.${RULES.factsKept ? ` It must say "${GOAL.name}".` : ''}`, say: `make the headline ${name(h)} shorter (${hw} words, it breaks onto ${hb.lines} lines on a desktop)` } });
+      if (RULES.shortHeadline && hb && hb.lines >= 3 && sz(h) === SIZES.indexOf(big[0])) res.push({ check: 'headlineLong', say: `On a desktop, the headline ${name(h)} breaks onto ${hb.lines} lines at the smallest headline size: it has too many words (${hw}).`, fix: { node: h, setting: 'words', write: true, shorten: hb.lines, ask: `It is now ${hw} words and breaks onto ${hb.lines} lines on a desktop: write it again in at most ${RULES.nameAndMore ? Math.max(most, GOAL.name.split(/\s+/).length + 2) : most} words.${RULES.factsKept ? (RULES.nameAndMore ? ` It must say "${GOAL.name}" and, with it, a few words about what ${GOAL.name} is: never the name alone.` : ` It must say "${GOAL.name}".`) : ''}`, say: `make the headline ${name(h)} shorter (${hw} words, it breaks onto ${hb.lines} lines on a desktop)` } });
       if (hb && hb.lines >= 3 && sz(h) > SIZES.indexOf(big[0])) res.push({ check: 'headlineWraps', say: `On a desktop, the headline ${name(h)} breaks onto ${hb.lines} lines: it is too big for its column.`, fix: { node: h, setting: 'size', smaller: true, floor: big[0], say: `make ${name(h)} a little smaller (it breaks onto ${hb.lines} lines on a desktop; now: ${currentOf(nodes[h], 'size')})` } });
       if (sz(line) >= sz(h) && sz(line) > SIZES.indexOf('text-base')) res.push({ check: 'lineSize', say: `The line under the headline (${name(line)}) is as big as the headline: they read as two headlines.`, fix: { node: line, setting: 'size', smaller: true, say: `make ${name(line)} smaller than the headline (it reads as a second headline; now: ${currentOf(nodes[line], 'size')})` } });
     }
@@ -413,7 +418,13 @@ async function decide(state, turn, findings, T) {
   const move = await choose('move', `${ctx}\n\n${EDIT.menuWording || 'What do you do next? Pick one:'}\n${menu}`, moves.map((_, i) => String(i + 1)), T);
   const m = moves[Number(move) - 1]?.[0];
   if (m === 'fix' && moves[Number(move) - 1][2].act) { const f = moves[Number(move) - 1][2]; return { ...f.act, via: 'fix', say: `${f.say.replace(/ \(.*\)$/, '')} (a fix from the menu)` }; }
-  if (m === 'fix' && moves[Number(move) - 1][2].write) { const i = moves[Number(move) - 1][2].node; const text = await words('write.text', writeAsk(ctx, n, i) + (moves[Number(move) - 1][2].ask ? ` ${moves[Number(move) - 1][2].ask}` : ''), kindOf(n[i]) === 'Button' ? 30 : 140, T); return { kind: 'write', node: i, text, via: 'fix', say: `wrote ${name(i)}: "${text}" (a fix from the menu)` }; }
+  if (m === 'fix' && moves[Number(move) - 1][2].write) {
+    const f = moves[Number(move) - 1][2], i = f.node;
+    // writeRepeat: a shorten fix offered again for a headline it already rewrote says the last try was still too long
+    // (w18m-running: at T 0 the same prompt wrote the same 5 words 22 times, each still 3 lines on a desktop)
+    const again = RULES.writeRepeat && f.shorten && state.shortened?.[i] ? ` Your last try, "${n[i].params.text}", is still too long (${f.shorten} lines): use fewer words than that.` : '';
+    if (f.shorten) (state.shortened ||= {})[i] = true;
+    const text = await words('write.text', writeAsk(ctx, n, i) + (f.ask ? ` ${f.ask}` : '') + again, kindOf(n[i]) === 'Button' ? 30 : 140, T); return { kind: 'write', node: i, text, via: 'fix', say: `wrote ${name(i)}: "${text}" (a fix from the menu)` }; }
   if (m === 'fix') {
     // a fix offers only values that change something: never the current one, and never "none" for a fault of too
     // little space (t14a: "set gap of n00 to none" 16 times, P(none) 1.00, "none" listed first and equal to "not set")

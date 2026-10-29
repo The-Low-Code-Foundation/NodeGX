@@ -813,3 +813,77 @@ and stylish → warm (the festival 0.20, the trampoline park 0.31). Stylish and 
 - **The arm cannot build a warm look yet.** What "warm and friendly" looks like (the ground, the corners, the headline)
   is a design question for Richard before any arm code. The stylish look was read param by param from a hero he had
   already seen (OWN-029 G-plumber r4); warm has no such hero.
+
+## 10. s5b — Richard's answers on the calm look (2026-10-29, late)
+
+**Richard, on the page (https://claude.ai/artifact/P7umD3HEoDJrTiv1Q3KQqh):**
+1. **The calm spacing:** *"I dunno, I'm shit at this design styling stuff, I haven't got the eye for it."* He left it
+   to me. I took **medium (16/24 px)**, the rhythm he picked for the bold look, so the two looks space their words
+   alike (10b).
+2. **A headline that is only the name:** *"I think saying a bit more is nice."* (10a)
+3. **What "warm and friendly" looks like:** *"like if you look up yoga landing pages or buddhist stuff … very pastel
+   soft light colours, everything rounded, round soft fonts or calligraphy."* (10c)
+
+### 10a. The name and a bit more (`nameAndMore`)
+
+**The change:** with `factsKept`, the shorten fix asked `It must say "<name>"`, and E2B wrote the name alone 4 of 4
+times. With `nameAndMore`, it asks for the name and, with it, a few words about what the place is, never the name
+alone. The word limit becomes at least the name's words + 2.
+
+**The control:** w17. The switch changes only the shorten fix's write prompt, which appears only where that fix
+fires: m-bakery (t18), m-jazz (t18), m-running (t18) and s-running (t30–31). The other six replay w17 exactly, so the
+test is w18 (`runs/w18.edit.json` = w17 + `nameAndMore`) on those four.
+
+**Pre-registered (before any w18 run):**
+- all four end with a headline that holds the name and at least one more word;
+- each ends at most 2 lines on a desktop, and no run hits the cap;
+- no run grows by more than 2 turns, and no run's end findings grow;
+- both jazz heroes still say "14 November" somewhere (m-jazz is the one run here).
+
+**Result (`w18*`, `node compare.mjs w17 w18 …`):** ❌ **2 of 4 runs are what Richard asked for. Both running runs fall
+into a T 0 loop.**
+
+| run | turns | the shorten rewrite | the end |
+|---|---|---|---|
+| m-bakery | 22 → 22 | t19: **"Maison Levain: Family Bakery"** (4 words, 2 lines) | the same measures |
+| m-jazz | 23 → 23 | t19: **"The Blue Room: Live Jazz"** (5 words, 2 lines); the line keeps "on 14 November" | clean |
+| **m-running** | 22 → **40 (the cap)** | t19–t40: **"Park Runners: Saturday Morning Runs"**, word for word, 22 times. Asked for at most 4 words, it wrote 5, which still breaks onto 3 lines | capped, with the shorten, order and "together" fixes still open |
+| s-running | 35 → **38** | t32–t34: "Park Runners: Saturday Morning Club" three times, then "Park Runners: Saturday Club" (4 words, 2 lines) | the same 3 kit contrasts |
+
+**Against the pre-registration:**
+- ✅ all four headlines hold the name and more;
+- ❌ m-running ends on 3 lines, at the cap;
+- ❌ s-running grows by 3 turns, against a bar of 2;
+- ✅ m-jazz keeps "14 November".
+
+**The defect:** a write fix whose answer is too long is offered again with the very same prompt, and at T 0 the same
+prompt gets the same words. It is the menu loop of §5 again, in the words. Before, "It must say <name>" asked for so
+little that the first rewrite always fit. The cure that worked for the menu should work here: the next prompt must
+differ. That is 10a′.
+
+### 10a′. A rewrite that comes back too long is told so (`writeRepeat`)
+
+**The change:** when the shorten fix is offered again for a headline it has already rewritten, the write prompt adds:
+`Your last try, "<words>", is still too long (k lines): use fewer words than that.` The first rewrite's prompt is
+unchanged, so every run replays w18 up to its second shorten.
+
+**The control:** w18 on the same four. w19 = w18 + `writeRepeat`.
+
+**Pre-registered (before any w19 run):**
+- m-bakery and m-jazz replay w18 exactly: their first rewrite fit, so the new line never appears;
+- m-running and s-running take at most one repeat each, and end with the name and more on at most 2 lines;
+- against w17, no run grows by more than 2 turns, and no run hits the cap.
+
+**Result (`w19*`):** ✅ on every line.
+
+| run | turns (w17 → w18 → w19) | the headline at the end |
+|---|---|---|
+| m-bakery | 22 → 22 → 22 (replays w18, 0.0000 drift) | **"Maison Levain: Family Bakery"**, 2 lines |
+| m-jazz | 23 → 23 → 23 (replays w18) | **"The Blue Room: Live Jazz"**, 2 lines; the line keeps "on 14 November" |
+| m-running | 22 → 40 → **23** | t19 "Park Runners: Saturday Morning Runs" (3 lines), t20 **"Park Runners: Saturday Runs"**, 2 lines |
+| s-running | 35 → 38 → **36** | t32 "Park Runners: Saturday Morning Club", t33 **"Park Runners: Saturday Club"**, 2 lines |
+
+The other six requests never reach a shorten fix, so their prompts are the same as w17's and they replay it.
+
+**Kept:** `nameAndMore` and `writeRepeat` join the final harness, `runs/w19.edit.json`. A shortened headline now
+says the name and a few words about the place, as Richard asked.

@@ -1,0 +1,174 @@
+{
+ "htmlMs": 308,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Text",
+     "ratio": 1
+    },
+    {
+     "text": "RUN. EXPLORE. CONNECT. PARK RUNNERS.",
+     "ratio": 1
+    },
+    {
+     "text": "Text",
+     "ratio": 1
+    },
+    {
+     "text": "Button",
+     "ratio": 3.3
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 48,
+     "y": 96,
+     "w": 34,
+     "h": 16,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "RUN. EXPLORE. CONNECT. PARK RUNNERS.",
+     "x": 48,
+     "y": 160,
+     "w": 1149,
+     "h": 196,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 48,
+     "y": 404,
+     "w": 31,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 48,
+     "y": 474,
+     "w": 75,
+     "h": 35,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:61972/",
+   "blank": false,
+   "words": 8,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Button",
+     "ratio": 3.3
+    }
+   ],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 973
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Text",
+     "ratio": 1
+    },
+    {
+     "text": "RUN. EXPLORE. CONNECT. PARK RUNNERS.",
+     "ratio": 1
+    },
+    {
+     "text": "Text",
+     "ratio": 1
+    },
+    {
+     "text": "Button",
+     "ratio": 3.3
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 48,
+     "y": 96,
+     "w": 34,
+     "h": 16,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "RUN. EXPLORE. CONNECT. PARK RUNNERS.",
+     "x": 48,
+     "y": 160,
+     "w": 296,
+     "h": 147,
+     "lines": 3
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 48,
+     "y": 355,
+     "w": 31,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 48,
+     "y": 425,
+     "w": 75,
+     "h": 35,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:61972/",
+   "blank": false,
+   "words": 8,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Button",
+     "ratio": 3.3
+    }
+   ],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 940
+ },
+ "ms": 2944
+}

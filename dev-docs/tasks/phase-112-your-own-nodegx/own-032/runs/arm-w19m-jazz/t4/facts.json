@@ -1,0 +1,128 @@
+{
+ "htmlMs": 112,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [
+    {
+     "a": "The Blue Room: Jazz Evening on 14 Novemb",
+     "b": "Text",
+     "gap": 0
+    }
+   ],
+   "atEdge": [
+    {
+     "text": "The Blue Room: Jazz Evening on 14 Novemb",
+     "left": 0,
+     "right": 944
+    },
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 1250
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "The Blue Room: Jazz Evening on 14 Novemb",
+     "x": 0,
+     "y": 0,
+     "w": 336,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 18,
+     "w": 30,
+     "h": 18,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:62909/",
+   "blank": false,
+   "words": 9,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [
+    {
+     "a": "The Blue Room: Jazz Evening on 14 Novemb",
+     "b": "Text",
+     "gap": 0
+    }
+   ],
+   "atEdge": [
+    {
+     "text": "The Blue Room: Jazz Evening on 14 Novemb",
+     "left": 0,
+     "right": 54
+    },
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 360
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "The Blue Room: Jazz Evening on 14 Novemb",
+     "x": 0,
+     "y": 0,
+     "w": 336,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 18,
+     "w": 30,
+     "h": 18,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:62909/",
+   "blank": false,
+   "words": 9,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "ms": 2243
+}
