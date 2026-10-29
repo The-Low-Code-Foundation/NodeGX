@@ -230,8 +230,10 @@ async function judge(q, png) {
 //                 alone; Richard, 9b: "I think saying a bit more is nice")
 //   writeRepeat   the shorten fix, offered again for a headline it already rewrote, says "your last try … is still too
 //                 long: use fewer words" (w18m-running: at T 0 the same prompt gave the same 5-word headline 22 times)
+//   rhythmCalm    (rhythm) the calm look's words column takes the medium rhythm too: 16 px between the lines, 8 px more
+//                 above the button (Richard, 10: "I haven't got the eye for it", so one rhythm for both looks)
 // The touching / edge thresholds are not rules: bench.mjs FACTS fixes them (4 px, 8 px), and probe-vision's key with them.
-const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false, roles: false, endGate: false, addWhileMissing: false, shortHeadline: false, blankRetry: false, rhythm: false, fixesOnly: false, factsKept: false, nameAndMore: false, writeRepeat: false }, ...(EDIT.rules || {}) };
+const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false, roles: false, endGate: false, addWhileMissing: false, shortHeadline: false, blankRetry: false, rhythm: false, fixesOnly: false, factsKept: false, nameAndMore: false, writeRepeat: false, rhythmCalm: false }, ...(EDIT.rules || {}) };
 // roles (s2, after w4-t15a): each part is told what it is when it is added, and keeps it through moves and removes;
 // the shape checks read the roles, never the document order (t15a: a move made the headline texts[1], and the size
 // fix went to the other Text, so the hero ended with two headlines and no line under them)
@@ -327,6 +329,15 @@ export function findingsFrom(shot, nodes) {
         if (btn !== undefined && nodes[btn].parent === col && currentOf(nodes[btn], 'space above') !== 'small') res.push({ check: 'rhythmButton', say: `The button ${name(btn)} sits as close to the line above it as the lines sit to each other.`, fix: { node: btn, setting: 'space above', only: ['small'], say: `give ${name(btn)} a little space above (it sits as close as the lines do; now: ${currentOf(nodes[btn], 'space above')})` } });
       }
       if (eb !== undefined && h !== undefined && nodes[eb].parent === nodes[h].parent && leaves[leaves.indexOf(h) - 1] !== eb) res.push({ check: 'eyebrowOrder', say: `${ROLE_SAY.eyebrow} ${name(eb)} is not straight above the headline.`, fix: { act: { kind: 'move', node: eb, into: nodes[h].parent, before: h }, say: `move ${name(eb)} straight above the headline ${name(h)}` } });
+    }
+    if (RULES.roles && RULES.rhythm && RULES.rhythmCalm && STYLE !== 'stylish') {
+      // rhythmCalm (10b): the calm look's words column takes the same medium rhythm as the bold one (Richard left the
+      // pick to me; one rhythm for both looks). After the stylish block, so a stylish run's findings keep their order
+      const col = h !== undefined ? nodes[h].parent : undefined;
+      if (col !== undefined && col !== root && kindOf(nodes[col]) === 'Group') {
+        if (currentOf(nodes[col], 'gap') !== 'medium') res.push({ check: 'rhythm', say: `The words column ${name(col)} spaces its lines ${currentOf(nodes[col], 'gap')}: the words read best close together.`, fix: { node: col, setting: 'gap', only: ['medium'], say: `give ${name(col)} a medium gap (the lines of the words belong together; now: ${currentOf(nodes[col], 'gap')})` } });
+        if (btn !== undefined && nodes[btn].parent === col && currentOf(nodes[btn], 'space above') !== 'small') res.push({ check: 'rhythmButton', say: `The button ${name(btn)} sits as close to the line above it as the lines sit to each other.`, fix: { node: btn, setting: 'space above', only: ['small'], say: `give ${name(btn)} a little space above (it sits as close as the lines do; now: ${currentOf(nodes[btn], 'space above')})` } });
+      }
     }
     if (RULES.factsKept && RULES.roles) {
       // a fact of the request that none of the hero's words say: a write fix on the part that should carry it, once that

@@ -1,0 +1,112 @@
+{
+ "htmlMs": 97,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Dupont Plumbing",
+     "x": 48,
+     "y": 96,
+     "w": 684,
+     "h": 111,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Reliable and professional plumbing servi",
+     "x": 48,
+     "y": 255,
+     "w": 513,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Fix your pipes today",
+     "x": 48,
+     "y": 321,
+     "w": 167,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:64288/",
+   "blank": false,
+   "words": 16,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 818
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Dupont Plumbing",
+     "x": 48,
+     "y": 96,
+     "w": 178,
+     "h": 104,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Reliable and professional plumbing servi",
+     "x": 48,
+     "y": 248,
+     "w": 257,
+     "h": 36,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Fix your pipes today",
+     "x": 48,
+     "y": 332,
+     "w": 167,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:64288/",
+   "blank": false,
+   "words": 16,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 845
+ },
+ "ms": 2341
+}

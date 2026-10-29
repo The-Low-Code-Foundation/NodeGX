@@ -887,3 +887,56 @@ The other six requests never reach a shorten fix, so their prompts are the same 
 
 **Kept:** `nameAndMore` and `writeRepeat` join the final harness, `runs/w19.edit.json`. A shortened headline now
 says the name and a few words about the place, as Richard asked.
+
+### 10b. The calm look's rhythm (`rhythmCalm`)
+
+**The change:** Richard left the pick to me, so the calm look's words column takes the bold look's rhythm. That is
+the same two `only` fixes as 8g: the column's gap is medium (16 px), and the button has 8 px more above it.
+
+**The control:** the five calm runs of the final harness: w19m-bakery, w19m-jazz, w19m-running, and w17m-plumber and
+w17m-pottery (which w19 replays exactly). The test is w20 = w19 + `rhythmCalm`.
+
+**Pre-registered (before any w20 run):** as 8g found on the stylish five:
+- all five end with 16 px from the headline to the line and 24 px from the line to the button, on a desktop;
+- no run grows by more than 3 turns;
+- no run ends with a finding its control did not have.
+
+### 10c. What a warm look could be: pictures made, waiting on Richard's eye
+
+**What NodeGX already ships for it** (checked before drawing anything):
+- **Two theme presets close to his words:** Soft ("Gentle colors and soft shapes for a calming aesthetic": pale
+  lavender `--muted` #f5f3ff, 12–20 px corners, DM Sans) and Playful (Nunito, a rounded face, 16–24 px corners). The
+  bakery bench is already on Soft, and puppy and running are on Playful.
+- **Fonts, bundled for offline use:** Fredoka (`library/modules/bot-garden-fonts`, Olive's Island's rounded title
+  face) and Caveat (a handwriting face in the nightbook kit). A Text takes them as `fontFamily: "Fredoka"`, as the
+  templates do (37 and 3 uses).
+- **The arm's vocabulary has no font setting.** A warm look needs one, plus a soft-ground option and a bigger corner
+  for the photo.
+
+**The pictures (`warm.mjs`, on `-warm` copies of the benches, so no arm run is touched):** the shared treatment is a
+12 % wash of the brand colour (`color-mix`), a 40 px photo corner, a pill button in Fredoka, and the medium rhythm.
+- bakery (w19m-bakery): `calm` (as built), `rounded` (Fredoka headline), `handwritten` (Caveat headline), `both`
+  (Fredoka headline, a small Caveat line above it, in the request's words: "our family bakery in Lyon");
+- pottery (w17m-pottery): `calm`, `both`, `softGround`.
+
+**Seen while making them:**
+- **A wash of a colourless brand is grey.** Pottery's primary is near-black, so the 12 % wash is a flat grey, not
+  warm. `softGround` uses the Soft preset's own pastel instead. A warm look has to bring its own pastel when the
+  brand has no colour.
+- **Contrast:** the bakery's white-on-amber button is 3.19 in every variant (the kit's, P112-OWN030-PRIMARYCONTRAST).
+  On the lavender, pottery's grey line reads 4.41, just under 4.5.
+- The small handwritten line's words are mine, taken from each request; the model did not write them.
+
+**For Richard:** https://claude.ai/artifact/P7umD3HEoDJrTiv1Q3KQqh (same link, round two).
+
+**Result (`w20m-*`):** ✅ on every line. As in 8g, each run parts late (t18–t19), takes both fixes, and costs one turn.
+
+| run | turns (control → w20) | words column (desktop): headline → line → button | left at the end |
+|---|---|---|---|
+| m-bakery | 22 → 23 | 48/48 → **16/24** | the same kit contrast |
+| m-jazz | 23 → 24 | → **16/24** | nothing |
+| m-plumber | 21 → 22 | → **16/24** | nothing |
+| m-running | 23 → 24 | → **16/24** | the same kit contrast |
+| m-pottery | 21 → 22 | → **16/24** | nothing |
+
+**Kept:** `rhythmCalm` joins the final harness, `runs/w20.edit.json`. Both looks now space their words alike.
