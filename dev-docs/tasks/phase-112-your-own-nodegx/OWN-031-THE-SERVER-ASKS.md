@@ -24,6 +24,28 @@ so a person with Gemma in Cline gets the harness without running it. Scope it as
   `dist/noodl-mcp-goose.cjs` was rebuilt at 14:2x, and Goose picks it up when it restarts the extension.
 - **Progress:** `build_app` sends `notifications/progress` when the call carries a progress token (a page takes
   minutes). Whether Goose sends one, and its tool timeout, are not measured yet.
+**s2b (same day): step 3, the review loop, is ported.** It is in `src/guided/review.ts`: describe, S1–S14, V, R, J,
+M, C, P and Q, keep-or-undo (`constraint`, organisation read on the outline without words, `peak` ratchet), and repair.
+- **The paired gate** (`tests/own031GuidedReview.test.ts`, fixtures `tests/fixtures/own031-review/*.json.gz`, 68 KB)
+  replays all rounds of the six G-runs. Each judgement is found by its exact words, which hold the section's whole
+  description, and the replay fails if anything the run recorded is left unasked. Every round's per-line defects,
+  organisation, issues and weights, keep or undo, and chosen fixes equal the lab's. Render findings are rebuilt from
+  the recorded `R|` issues. Mutation checks: S11's weight 1.5 → 1.6 turns the four briefs with S11 issues red, and
+  "light band" → "pale band" turns all six red.
+- **In `build_app`:** `NODEGX_BUILD_ROUNDS` repair rounds after round 0 (default 2; the lab ran 4). Round k builds into
+  `Sections vk+1/` and deletes the round before it. When the kept round is not the one on disk, or sits in a vN folder,
+  it is rebuilt under `Sections/` from the cache, with no model calls. The result carries `review`: each round's
+  issues, defects per line, organisation and keep or undo, the kept round, and the issues left.
+- **Ruling 2, noted in review.ts:** `organised`/`shape` decide whether a round is kept, as in the lab. The ruling's
+  reason (no logprobs through MCP) does not apply to a model on the server's own machine.
+- **Live, bakery, E4B, 2 repair rounds, render on (15:24, once OWN-032 had left Ollama idle):** one call, 483 s,
+  169 questions. Defects per line 0.781 → 0.465 → 0.289, both repair rounds kept, organised (shape) 0.89 → 0.84. The
+  kept round was rebuilt under `Sections/` with no model calls. The hero cards no longer repeat a photo, the repeated
+  lines are reworded, and "schedule or line-up" now reads as opening hours. Left: a low-contrast date line in the
+  footer, a single-column grid, three dark bands in a row, and "in the heart" said four times.
+- 🐛 **P112-OWN031-BGPHOTOREPEAT:** S1 never counts a band's background photo, so two photos fill five bands and no
+  round sees it. Inherited from the lab, so fixing it is a deliberate fork from the paired gate.
+- The empty `Sections vN` folders a round leaves behind are now removed after the final write.
 **Model:** Opus. The client model in every test is a local Gemma, the same one OWN-029 used as builder.
 
 ## 1. The person sentence

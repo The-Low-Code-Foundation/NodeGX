@@ -54,13 +54,86 @@ export interface DoorCall {
   raw?: string;
 }
 
+export interface Judgement {
+  round: number;
+  key: string;
+  user: string;
+  pYes?: number | null;
+  pick?: string | null;
+  ms?: number;
+  tag?: Record<string, unknown>;
+}
+
+type Cached = { answer: any; conf?: Confidence | null; forced?: boolean };
+
 export interface Door {
   ask(key: string, sig: string, q: Question, temperature: number, tag?: Record<string, unknown>): Promise<Answer>;
   judge(key: string, user: string, tag?: Record<string, unknown>, images?: string[]): Promise<number | null>;
-  cache: Map<string, { answer: any; conf?: Confidence | null }>;
+  /** Pick-one: which of the labelled lines. One letter, read from the logprobs. */
+  pick(key: string, user: string, labels: string[], tag?: Record<string, unknown>): Promise<string | null>;
+  cache: Map<string, Cached>;
   hints: Map<string, string>;
-  calls: DoorCall[];
-  judgements: { key: string; pYes: number | null; ms?: number; tag?: Record<string, unknown> }[];
+  forced: Map<string, any>;
+  calls: (DoorCall & { round: number; forced?: boolean })[];
+  judgements: Judgement[];
+  setRound(r: number): void;
+  /** Forget an answer, so it is asked again, with a reviewer's reason appended. */
+  invalidate(sig: string, hint?: string): void;
+  /** Answer a single-enum question with this value, without asking (the "flip": the model's own second choice). */
+  force(sig: string, value: any): void;
+  snapshot(): { cache: Map<string, Cached>; forced: Map<string, any> };
+  restore(s: { cache: Map<string, Cached>; forced: Map<string, any> }): void;
+}
+
+/** The state every door shares: the cache, hints, forced answers, and the round's bookkeeping. */
+function doorState() {
+  const st = {
+    round: 0,
+    cache: new Map<string, Cached>(),
+    hints: new Map<string, string>(),
+    forced: new Map<string, any>(),
+    calls: [] as Door['calls'],
+    judgements: [] as Judgement[]
+  };
+  const common = {
+    cache: st.cache,
+    hints: st.hints,
+    forced: st.forced,
+    calls: st.calls,
+    judgements: st.judgements,
+    setRound: (r: number) => {
+      st.round = r;
+    },
+    invalidate: (sig: string, hint?: string) => {
+      st.cache.delete(sig);
+      if (hint) st.hints.set(sig, hint);
+    },
+    force: (sig: string, value: any) => {
+      st.forced.set(sig, value);
+    },
+    snapshot: () => ({ cache: new Map(st.cache), forced: new Map(st.forced) }),
+    restore: (s: { cache: Map<string, Cached>; forced: Map<string, any> }) => {
+      st.cache.clear();
+      for (const [k, v] of s.cache) st.cache.set(k, v);
+      st.forced.clear();
+      for (const [k, v] of s.forced) st.forced.set(k, v);
+      st.hints.clear();
+    }
+  };
+  // a forced or cached answer, before any model is asked; null when the question must be asked
+  const settled = (key: string, sig: string, q: Question): Answer | null => {
+    const props = Object.keys(q.schema.properties || {});
+    if (st.forced.has(sig)) {
+      const answer = { [props[0]]: st.forced.get(sig) };
+      const prev = st.cache.get(sig);
+      st.cache.set(sig, { answer, conf: prev?.conf, forced: true });
+      st.calls.push({ round: st.round, key, sig, answer, forced: true });
+      return { answer, conf: prev?.conf };
+    }
+    if (st.cache.has(sig) && !st.hints.has(sig)) return { ...st.cache.get(sig)!, replay: true };
+    return null;
+  };
+  return { st, common, settled };
 }
 
 /** The distribution over a single enum's options, read at the first token of the answer value. */
@@ -108,10 +181,7 @@ export function confidence(j: any, options: string[]): Confidence | null {
 
 /** The door to an Ollama model on this machine. */
 export function ollamaDoor({ model, host, judgeModel }: { model: string; host: string; judgeModel?: string }): Door {
-  const cache: Door['cache'] = new Map();
-  const hints = new Map<string, string>();
-  const calls: DoorCall[] = [];
-  const judgements: Door['judgements'] = [];
+  const { st, common, settled } = doorState();
 
   async function chat(m: string, messages: unknown[], { format, temperature, numPredict = 400, logprobs = false }: { format?: unknown; temperature: number; numPredict?: number; logprobs?: boolean }): Promise<any> {
     const body = {
@@ -135,11 +205,12 @@ export function ollamaDoor({ model, host, judgeModel }: { model: string; host: s
   }
 
   async function ask(key: string, sig: string, q: Question, temperature: number): Promise<Answer> {
+    const done = settled(key, sig, q);
+    if (done) return done;
     const props = Object.keys(q.schema.properties || {});
     const single: string[] | null = props.length === 1 && q.schema.properties[props[0]].enum ? q.schema.properties[props[0]].enum : null;
-    if (cache.has(sig) && !hints.has(sig)) return { ...cache.get(sig)!, replay: true };
-    const hint = hints.get(sig);
-    hints.delete(sig);
+    const hint = st.hints.get(sig);
+    st.hints.delete(sig);
     const user = hint ? `${q.user}\nA reviewer looked at the built page and said: ${hint}` : q.user;
     const t = Date.now();
     const j = await chat(model, [{ role: 'system', content: SYSTEM }, { role: 'user', content: user }], { format: q.schema, temperature, numPredict: q.numPredict || 400, logprobs: !!single });
@@ -150,8 +221,8 @@ export function ollamaDoor({ model, host, judgeModel }: { model: string; host: s
       /* answer stays null; the caller has a default for every question */
     }
     const conf = single && answer ? confidence(j, single) : null;
-    cache.set(sig, { answer, conf });
-    calls.push({ key, sig, answer, conf: conf || undefined, hinted: hint ? true : undefined, tokensIn: j.prompt_eval_count, tokensOut: j.eval_count, ms: Date.now() - t, raw: answer ? undefined : j.message?.content });
+    st.cache.set(sig, { answer, conf });
+    st.calls.push({ round: st.round, key, sig, answer, conf: conf || undefined, hinted: hint ? true : undefined, tokensIn: j.prompt_eval_count, tokensOut: j.eval_count, ms: Date.now() - t, raw: answer ? undefined : j.message?.content });
     return { answer, conf };
   }
 
@@ -167,33 +238,97 @@ export function ollamaDoor({ model, host, judgeModel }: { model: string; host: s
       if (k === 'no') n += Math.exp(x.logprob);
     }
     const p = y + n ? +(y / (y + n)).toFixed(3) : null;
-    judgements.push({ key, pYes: p, ms: Date.now() - t, tag });
+    st.judgements.push({ round: st.round, key, user, pYes: p, ms: Date.now() - t, tag });
     return p;
   }
 
-  return { ask, judge, cache, hints, calls, judgements };
+  // Pick-one judgement: which of the labelled lines. Letters, one token, distribution from logprobs.
+  async function pick(key: string, user: string, labels: string[], tag?: Record<string, unknown>): Promise<string | null> {
+    const t = Date.now();
+    const letters = labels.map((_, i) => String.fromCharCode(65 + i));
+    const j = await chat(
+      judgeModel || model,
+      [
+        { role: 'system', content: 'You review a web page described in words. Answer with one letter.' },
+        { role: 'user', content: `${user}\n${labels.map((l, i) => `${letters[i]}: ${l}`).join('\n')}\nAnswer with one letter.` }
+      ],
+      { temperature: 0, numPredict: 1, logprobs: true }
+    );
+    const dist: Record<string, number> = {};
+    for (const x of j.logprobs?.[0]?.top_logprobs || []) {
+      const i = letters.indexOf(x.token.trim().toUpperCase());
+      if (i >= 0) dist[labels[i]] = (dist[labels[i]] || 0) + Math.exp(x.logprob);
+    }
+    const best = Object.entries(dist).sort((a, b) => b[1] - a[1])[0];
+    st.judgements.push({ round: st.round, key, user, pick: best?.[0] ?? null, ms: Date.now() - t, tag });
+    return best?.[0] ?? null;
+  }
+
+  return { ...common, ask, judge, pick };
+}
+
+/** A recorded run's model side: what was asked and judged, by round (an OWN-029 ledger's `calls` and `judgements`). */
+export interface Recording {
+  /** Answers known before round 0 (a paired run's preloaded decisions with their confidence, the photos). */
+  preload: Record<string, { answer: any; conf?: Confidence | null }>;
+  calls: { round: number; sig: string; answer: any; conf?: Confidence | null; forced?: boolean }[];
+  judgements: { round: number; key: string; user: string; pYes?: number | null; pick?: string | null }[];
 }
 
 /**
- * A door that only replays: every answer comes from a recorded run, and a question the run never answered is an
- * error, so a port that asks something new (or asks it under a new signature) fails the paired gate loudly.
+ * A door that only replays: every answer and every judgement comes from a recorded run, matched by round and by
+ * signature (a judgement by its exact words). A question the run never asked in that round is an error, so a port that
+ * asks something new, asks it in another round, or words a judgement differently fails the paired gate loudly.
  */
-export function replayDoor(answers: Record<string, any>): Door {
-  const cache: Door['cache'] = new Map(Object.entries(answers).map(([sig, answer]) => [sig, { answer }]));
-  const calls: DoorCall[] = [];
+export function replayDoor(rec: Recording | Record<string, any>): Door {
+  const isRec = 'calls' in rec && Array.isArray((rec as Recording).calls);
+  // a plain sig → answer map is one round's asks (the photos, which the scout reads from the cache, preloaded)
+  const plain = rec as Record<string, any>;
+  const r: Recording = isRec
+    ? (rec as Recording)
+    : { preload: 'card|photos' in plain ? { 'card|photos': { answer: plain['card|photos'] } } : {}, calls: Object.entries(plain).filter(([k]) => k !== 'card|photos').map(([sig, answer]) => ({ round: 0, sig, answer })), judgements: [] };
+  const { st, common, settled } = doorState();
+  for (const [sig, v] of Object.entries(r.preload)) st.cache.set(sig, { answer: v.answer, conf: v.conf });
+  const asks = new Map<string, any[]>();
+  for (const c of r.calls) if (!c.forced) (asks.get(`${c.round}|${c.sig}`) || asks.set(`${c.round}|${c.sig}`, []).get(`${c.round}|${c.sig}`)!).push(c);
+  const said = new Map<string, any[]>();
+  for (const j of r.judgements) (said.get(`${j.round}|${j.key}|${j.user}`) || said.set(`${j.round}|${j.key}|${j.user}`, []).get(`${j.round}|${j.key}|${j.user}`)!).push(j);
+  const take = (m: Map<string, any[]>, k: string, what: string) => {
+    const q = m.get(k);
+    if (!q?.length) throw new Error(`replay: the recorded run never ${what} (round ${k.split('|')[0]}): ${k.slice(k.indexOf('|') + 1, k.indexOf('|') + 1 + 300)}`);
+    return q.shift();
+  };
   return {
-    cache,
-    hints: new Map(),
-    calls,
-    judgements: [],
-    async ask(key, sig) {
-      const c = cache.get(sig);
-      if (!c) throw new Error(`replay: the recorded run never answered ${sig} (${key})`);
-      calls.push({ key, sig, answer: c.answer });
-      return { ...c, replay: true };
+    ...common,
+    async ask(key, sig, q) {
+      const done = settled(key, sig, q);
+      if (done) return done;
+      st.hints.delete(sig);
+      const c = take(asks, `${st.round}|${sig}`, 'asked this');
+      st.cache.set(sig, { answer: c.answer, conf: c.conf });
+      st.calls.push({ round: st.round, key, sig, answer: c.answer });
+      return { answer: c.answer, conf: c.conf };
     },
-    async judge(key) {
-      throw new Error(`replay: a judgement was asked (${key}); a recorded run's photos come from card|photos`);
+    async judge(key, user) {
+      const j = take(said, `${st.round}|${key}|${user}`, 'judged this');
+      st.judgements.push({ round: st.round, key, user, pYes: j.pYes });
+      return j.pYes ?? null;
+    },
+    async pick(key, user) {
+      const j = take(said, `${st.round}|${key}|${user}`, 'picked from this');
+      st.judgements.push({ round: st.round, key, user, pick: j.pick });
+      return j.pick ?? null;
     }
   };
+}
+
+/** What a recorded run left unasked: a port that skips a question its lab asked is as wrong as one that adds one. */
+export function unconsumed(rec: Recording, door: Door): string[] {
+  const used = new Map<string, number>();
+  for (const c of door.calls) if (!c.forced) used.set(`${c.round}|${c.sig}`, (used.get(`${c.round}|${c.sig}`) || 0) + 1);
+  for (const j of door.judgements) used.set(`${j.round}|${j.key}|${j.user}`, (used.get(`${j.round}|${j.key}|${j.user}`) || 0) + 1);
+  const want = new Map<string, number>();
+  for (const c of rec.calls) if (!c.forced) want.set(`${c.round}|${c.sig}`, (want.get(`${c.round}|${c.sig}`) || 0) + 1);
+  for (const j of rec.judgements) want.set(`${j.round}|${j.key}|${j.user}`, (want.get(`${j.round}|${j.key}|${j.user}`) || 0) + 1);
+  return [...want].filter(([k, n]) => (used.get(k) || 0) < n).map(([k]) => k.slice(0, 160));
 }

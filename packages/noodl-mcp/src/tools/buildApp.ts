@@ -31,7 +31,8 @@ import { normalizeObjectSchema, safeParseAsync } from '@modelcontextprotocol/sdk
 
 import { ToolError } from '../errors';
 import { ollamaDoor } from '../guided/door';
-import { buildPage, startCard, treeOf, type Skipped, type ToolOut } from '../guided/page';
+import { deleteRound, planRound, preparePage, startCard, treeOf, writeRound, type Planned, type Skipped, type ToolOut, type Written } from '../guided/page';
+import { reviewLoop } from '../guided/review';
 import type { ToolDisclosure } from './disclosure';
 import { STUDIO_RESOURCE_URI } from './openStudio';
 import { guarded, jsonResult } from './util';
@@ -41,6 +42,12 @@ export function localModel(): { model: string; host: string } | null {
   const model = process.env.NODEGX_LOCAL_MODEL?.trim();
   if (!model) return null;
   return { model, host: (process.env.NODEGX_OLLAMA_HOST || 'http://127.0.0.1:11434').replace(/\/$/, '') };
+}
+
+/** How many repair rounds a page gets after round 0: `NODEGX_BUILD_ROUNDS`, else 2 (the lab ran 4; each costs minutes). */
+export function buildRounds(): number {
+  const n = Number(process.env.NODEGX_BUILD_ROUNDS);
+  return Number.isInteger(n) && n >= 0 && n <= 6 ? n : 2;
 }
 
 /** Where a project goes when the call names no folder: `NODEGX_PROJECTS_DIR`, else `~/NodeGX projects`. */
@@ -218,13 +225,16 @@ export function registerBuildAppTools(server: McpServer, disclosure: ToolDisclos
       const req = `Request: "${args.request.trim()}"`;
       const t0 = Date.now();
 
-      // The page: OWN-029's question tree (../guided/page.ts), every question to the same local model.
+      // The page: OWN-029's question tree (../guided/page.ts) and its review loop (../guided/review.ts), every
+      // question to the same local model. Round 0 builds; each repair round rebuilds only what its fixes invalidated,
+      // beside the last round, which is deleted once the new one is written; the kept round ends up under Sections/.
       const buildPageApp = async () => {
         const door = ollamaDoor({ model: lm.model, host: lm.host });
         const skipped: Skipped = [];
-        const deps = { door, request: args.request.trim(), skipped, progress };
+        const exclude = new Map<string, Set<string>>();
+        const request = args.request.trim();
         progress('reading the request');
-        const card = await startCard(deps);
+        const card = await startCard({ door, request, skipped, progress });
         const title = card.name.slice(0, 60);
         const directory = args.directory?.trim() ? path.resolve(args.directory.trim()) : freeFolder(projectsHome(), title);
         if (fs.existsSync(directory) && fs.readdirSync(directory).length > 0) {
@@ -240,8 +250,35 @@ export function registerBuildAppTools(server: McpServer, disclosure: ToolDisclos
           backend: { kind: 'none', description: 'None: a page with no stored data.' },
           agreed: false
         });
-        const page = await buildPage({ ...deps, projectDir: directory }, card, invoke);
-        if (!page.applied) throw new ToolError('io-error', `build_app could not write the page: ${page.applyHead}`);
+        const deps = { door, request, skipped, progress, exclude, projectDir: directory };
+        const prep = await preparePage(deps, card, invoke);
+        let previous: string[] = [];
+        let last: { planned: Planned; written: Written } | null = null;
+        const writeAs = async (folder: string) => {
+          const planned = await planRound(deps, card, prep, folder);
+          const written = await writeRound(deps, card, planned, invoke);
+          if (!written.applied) throw new ToolError('io-error', `build_app could not write the page: ${written.applyHead}`);
+          await deleteRound(invoke, previous);
+          previous = written.paths;
+          last = { planned, written };
+          return { card, built: planned.built, staging: written.staging, findings: written.findings };
+        };
+        const loop = await reviewLoop({ door, request, card, exclude, rounds: buildRounds(), progress, build: (round) => writeAs(round === 0 ? 'Sections' : `Sections v${round + 1}`) });
+        // The project holds the last round built. When that is not the kept one, or it sits in a "Sections vN" folder,
+        // build the kept one again under Sections/: every answer is cached, so this asks the model nothing.
+        if (loop.lastBuilt !== loop.best.round || previous.some((p) => !p.startsWith('Sections/'))) {
+          door.setRound(loop.lastBuilt + 1);
+          progress('putting the best round on the page');
+          await writeAs('Sections');
+        }
+        const final = last!;
+        // delete_component removes a component's files, not its folder: the empty "Sections vN" folders go too
+        try {
+          const comps = path.join(directory, 'components');
+          for (const f of fs.readdirSync(comps)) if (/^Sections v\d+$/.test(f) && fs.readdirSync(path.join(comps, f)).length === 0) fs.rmdirSync(path.join(comps, f));
+        } catch {
+          /* a leftover empty folder is untidy, not wrong */
+        }
         progress('opening Studio');
         // a host that draws no Studio still gets the project: the panel is a view of it, not part of the build
         const opened = await invoke('open_studio', {});
@@ -252,26 +289,31 @@ export function registerBuildAppTools(server: McpServer, disclosure: ToolDisclos
           fs.mkdirSync(path.join(directory, '.previews'), { recursive: true });
           fs.writeFileSync(
             path.join(directory, '.previews', 'build-app.json'),
-            JSON.stringify({ request: args.request, model: lm.model, calls: door.calls, judgements: door.judgements, skipped, staging: page.staging, tree: treeOf(page.card, page.built) }, null, 1)
+            JSON.stringify({ request: args.request, model: lm.model, rounds: loop.log, keptRound: loop.best.round, calls: door.calls, judgements: door.judgements, skipped, staging: final.written.staging, tree: treeOf(card, final.planned.built) }, null, 1)
           );
         } catch {
           /* a ledger that cannot be written is not a failed build */
         }
+        const left = loop.best.crit.issues.filter((x) => !x.quality).sort((a, b) => b.weight - a.weight);
         return jsonResult({
           ok: true,
           built: true,
           ...studio,
           projectDir: directory,
-          decided: { kind: card.kind, tone: card.tone, name: card.name, preset: card.preset, colour: card.hue, photos: card.photos, sections: page.built.map((b) => `${b.sec.kind}: ${b.bits.join(', ')}`) },
+          decided: { kind: card.kind, tone: card.tone, name: card.name, preset: card.preset, colour: card.hue, photos: card.photos, sections: final.planned.built.map((b) => `${b.sec.kind}: ${b.bits.join(', ')}`) },
+          review: {
+            rounds: loop.log.map((r) => `round ${r.round}: ${r.issues.filter((x) => !x.id.startsWith('Q|')).length} issues, ${r.perLine} per line, organised ${r.shape}${r.round === 0 ? '' : r.kept ? ', kept' : ', undone'}`),
+            kept: loop.best.round,
+            issuesLeft: left.slice(0, 6).map((x) => x.say)
+          },
           questions: door.calls.length + door.judgements.length,
           seconds: Math.round((Date.now() - t0) / 1000),
           modelSeconds: Math.round(ms / 1000),
-          ...(page.staging.length ? { sectionsLeftOut: page.staging.map((x) => `${x.target}: ${x.text.slice(0, 200)}`) } : {}),
-          render: page.render,
+          ...(final.written.staging.length ? { sectionsLeftOut: final.written.staging.map((x) => `${x.target}: ${x.text.slice(0, 200)}`) } : {}),
           note:
-            `Built "${title}" in ${directory} and put it on screen in Studio. Tell the person in one or two sentences ` +
-            'what is on the page. This server is now bound to that project: to change it, use the ordinary tools ' +
-            '(get_component, update_component).'
+            `Built "${title}" in ${directory}, looked at it and repaired it, and put it on screen in Studio. Tell the ` +
+            'person in one or two sentences what is on the page. This server is now bound to that project: to change ' +
+            'it, use the ordinary tools (get_component, update_component).'
         });
       };
 

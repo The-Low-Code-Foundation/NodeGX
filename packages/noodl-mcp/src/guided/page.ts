@@ -866,37 +866,28 @@ export interface ToolOut {
   json: any;
 }
 
-export interface PageResult {
-  card: Card;
-  sections: Section[];
-  built: Built[];
-  itemComps: ItemComp[];
-  staging: { target: string; text: string }[];
-  applied: boolean;
-  applyHead?: string;
-  /** apply_plan's render numbers, when it rendered. */
-  render?: unknown;
+export type Tool = (name: string, args: Record<string, unknown>) => Promise<ToolOut>;
+
+async function need(tool: Tool, name: string, args: Record<string, unknown>): Promise<any> {
+  const r = await tool(name, args);
+  if (r.isError) throw new Error(`${name}: ${r.text.slice(0, 400)}`);
+  return r.json;
 }
 
-/**
- * The whole page into the bound project: the rest of the card, the sections, every section asked and filled, the
- * theme set, the plan staged and applied. A section the validator refuses is skipped and reported, not fatal: a page
- * with five good sections beats no page.
- */
-export async function buildPage(d: PageDeps, card: Card, tool: (name: string, args: Record<string, unknown>) => Promise<ToolOut>): Promise<PageResult> {
-  const need = async (name: string, args: Record<string, unknown>) => {
-    const r = await tool(name, args);
-    if (r.isError) throw new Error(`${name}: ${r.text.slice(0, 400)}`);
-    return r.json;
-  };
-  const vocab = await need('get_style_vocabulary', {});
+/** What every round shares: the vocabulary and the node types' names. */
+export interface Prepared {
+  vocab: any;
+  nodeTypes: { typeName: string; displayName?: string }[];
+}
+
+/** Once per page: the rest of the card, then the theme it chose (preset, colour, corners). */
+export async function preparePage(d: PageDeps, card: Card, tool: Tool): Promise<Prepared> {
+  const vocab = await need(tool, 'get_style_vocabulary', {});
   d.progress?.('choosing the look');
   await finishCard(d, card, vocab);
-  d.progress?.('choosing the sections');
-  const sections = await stage1(d, card);
-  if (card.preset) await need('set_style_preset', { preset_id: card.preset });
+  if (card.preset) await need(tool, 'set_style_preset', { preset_id: card.preset });
   const h = HUES[card.hue || 'blue'] || 'blue';
-  await need('set_project_tokens', {
+  await need(tool, 'set_project_tokens', {
     tokens: [
       { name: '--primary', value: `var(--${h}-${h === 'gray' ? 900 : 600})` },
       { name: '--primary-hover', value: `var(--${h}-${h === 'gray' ? 800 : 700})` },
@@ -904,31 +895,77 @@ export async function buildPage(d: PageDeps, card: Card, tool: (name: string, ar
       ...Object.entries(RADII[card.radius || ''] || {}).map(([name, value]) => ({ name, value }))
     ]
   });
-  const nt: { typeName: string; displayName?: string }[] = (await need('list_node_types', { visual_only: true })).nodeTypes || [];
+  const nodeTypes = (await need(tool, 'list_node_types', { visual_only: true })).nodeTypes || [];
+  return { vocab, nodeTypes };
+}
+
+/** One round's page, asked and filled, not yet written. */
+export interface Planned {
+  sections: Section[];
+  built: Built[];
+  itemComps: ItemComp[];
+}
+
+/**
+ * The sections, every section asked and filled, and the lists made into item components. A cached answer replays,
+ * so a repair round asks only what was invalidated. `folder` is where its components go (`Sections` in round 0; a
+ * later round builds beside the last one and the last one is deleted once the new one is written).
+ */
+export async function planRound(d: PageDeps, card: Card, prep: Prepared, folder = 'Sections'): Promise<Planned> {
+  d.progress?.('choosing the sections');
+  const sections = await stage1(d, card);
   const ctx: BuildCtx = {
-    vocab,
-    comps: vocab.compositions || [],
-    glyphs: vocab.icons?.[0]?.glyphs || [],
-    iconShape: vocab.icons?.[0]?.valueShape,
+    vocab: prep.vocab,
+    comps: prep.vocab.compositions || [],
+    glyphs: prep.vocab.icons?.[0]?.glyphs || [],
+    iconShape: prep.vocab.icons?.[0]?.valueShape,
     pageTaken: new Set(),
     photoCursor: 0,
     besideCount: 0,
     bitsSoFar: [],
     saidSoFar: [],
-    labelOf: (t) => nt.find((x) => x.typeName === t)?.displayName || t
+    labelOf: (t) => prep.nodeTypes.find((x) => x.typeName === t)?.displayName || t
   };
   const built: Built[] = [];
   for (let si = 0; si < sections.length; si++) {
     d.progress?.(`section ${si + 1} of ${sections.length}: ${sections[si].kind}`);
-    built.push(await fillSection(d, ctx, card, await buildSection(d, ctx, card, sections, si), si));
+    const b = await fillSection(d, ctx, card, await buildSection(d, ctx, card, sections, si), si);
+    if (folder !== 'Sections') b.path = b.path!.replace(/^Sections\//, `${folder}/`);
+    built.push(b);
   }
-  const itemComps = assemble(built);
+  return { sections, built, itemComps: assemble(built) };
+}
 
+/** A section the validator refused: left out of the page, and reported (the critics re-ask its bits). */
+export interface Refusal {
+  target: string;
+  text: string;
+  S: string;
+  si: number;
+}
+
+export interface Written {
+  staging: Refusal[];
+  applied: boolean;
+  applyHead?: string;
+  /** apply_plan's render block: the summary and the findings, when it rendered. */
+  render?: any;
+  findings: any[];
+  /** Every component this round wrote, sections before their items (the order they can be deleted in). */
+  paths: string[];
+}
+
+/**
+ * One round into the bound project: the plan staged and applied, Home pointing at its sections. A section the
+ * validator refuses is skipped and reported, not fatal: a page with five good sections beats no page.
+ */
+export async function writeRound(d: PageDeps, card: Card, planned: Planned, tool: Tool): Promise<Written> {
+  const { built, itemComps } = planned;
   d.progress?.('building the page');
-  const home = await need('get_component', { path: 'Pages/Home' });
+  const home = await need(tool, 'get_component', { path: 'Pages/Home' });
   const pageNode = (home.nodes || []).find((n: any) => n.type === 'Page');
-  if (!pageNode) throw new Error('The new project has no Page node on Pages/Home.');
-  const plan = await need('create_plan', {
+  if (!pageNode) throw new Error('The project has no Page node on Pages/Home.');
+  const plan = await need(tool, 'create_plan', {
     request: d.request,
     scroll: 'page',
     operations: [
@@ -938,16 +975,16 @@ export async function buildPage(d: PageDeps, card: Card, tool: (name: string, ar
     ]
   });
   const opFor = (t: string) => plan.operations.find((o: any) => o.target === t).id;
-  const staging: PageResult['staging'] = [];
+  const staging: Refusal[] = [];
   const failed = new Set<string>();
   for (const c of itemComps) {
     const r = await tool('stage_plan_operation', { plan_id: plan.planId, operation_id: opFor(c.path), ...c.graph });
     if (r.isError) {
       failed.add(c.path);
-      staging.push({ target: c.path, text: r.text.slice(0, 500) });
+      staging.push({ target: c.path, text: r.text.slice(0, 500), S: c.b.S, si: built.indexOf(c.b) });
     }
   }
-  for (const b of built) {
+  for (const [si, b] of built.entries()) {
     if ((b.instantiates || []).some((p) => failed.has(p))) {
       b.staged = false;
       continue;
@@ -956,9 +993,9 @@ export async function buildPage(d: PageDeps, card: Card, tool: (name: string, ar
     const diags: any[] = r.json?.validation?.diagnostics || r.json?.diagnostics || r.json?.error?.diagnostics || [];
     b.warnings = diags.filter((x) => x.severity === 'warning').map((x) => ({ code: x.code, message: String(x.message).slice(0, 240), nodeId: x.location?.nodeId }));
     b.staged = !r.isError && !diags.some((x) => x.severity === 'error');
-    if (!b.staged) staging.push({ target: b.path!, text: (diags.filter((x) => x.severity === 'error').map((x) => `${x.code}: ${x.message}`).join(' | ') || r.text).slice(0, 500) });
+    if (!b.staged) staging.push({ target: b.path!, text: (diags.filter((x) => x.severity === 'error').map((x) => `${x.code}: ${x.message}`).join(' | ') || r.text).slice(0, 500), S: b.S, si });
   }
-  await need('stage_plan_operation', {
+  await need(tool, 'stage_plan_operation', {
     plan_id: plan.planId,
     operation_id: opFor('Pages/Home'),
     nodes: [{ id: pageNode.id, type: 'Page', label: 'Home', parameters: { title: card.name || 'Home', urlPath: 'home' } }, ...built.flatMap((b, i) => (b.staged ? [{ id: `home-s${i + 1}`, type: `/${b.path}`, parent: pageNode.id, label: b.sec.kind }] : []))],
@@ -967,7 +1004,25 @@ export async function buildPage(d: PageDeps, card: Card, tool: (name: string, ar
   });
   const skip = [...itemComps.filter((c) => failed.has(c.path) || !c.b.staged).map((c) => opFor(c.path)), ...built.filter((b) => !b.staged).map((b) => opFor(b.path!))];
   const ap = await tool('apply_plan', { plan_id: plan.planId, render: 'summary', ...(skip.length ? { skip } : {}) });
-  return { card, sections, built, itemComps, staging, applied: !ap.isError, applyHead: ap.isError ? ap.text.slice(0, 400) : undefined, render: ap.json?.render };
+  const render = ap.json?.render;
+  const paths = [...built.filter((b) => b.staged).map((b) => b.path!), ...itemComps.filter((c) => !failed.has(c.path) && c.b.staged).map((c) => c.path)];
+  return { staging, applied: !ap.isError, applyHead: ap.isError ? ap.text.slice(0, 400) : undefined, render, findings: Array.isArray(render?.findings) ? render.findings : [], paths };
+}
+
+/** Delete a round's components once nothing points at them any more (sections first: they instantiate the items). */
+export async function deleteRound(tool: Tool, paths: string[]): Promise<void> {
+  for (const p of paths) await tool('delete_component', { path: p });
+}
+
+export interface PageResult extends Planned, Written {
+  card: Card;
+}
+
+/** Round 0 alone: the card, the theme, the page asked, filled and written. */
+export async function buildPage(d: PageDeps, card: Card, tool: Tool): Promise<PageResult> {
+  const prep = await preparePage(d, card, tool);
+  const planned = await planRound(d, card, prep);
+  return { card, ...planned, ...(await writeRound(d, card, planned, tool)) };
 }
 
 /** A stock photo reader for the bound project: the file as base64, or null. */
