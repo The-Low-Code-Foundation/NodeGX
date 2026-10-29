@@ -1,0 +1,112 @@
+{
+ "htmlMs": 109,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Potter Portfolio",
+     "x": 32,
+     "y": 96,
+     "w": 578,
+     "h": 111,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Handmade bowls and weekend pottery class",
+     "x": 32,
+     "y": 255,
+     "w": 345,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Create Your Piece",
+     "x": 32,
+     "y": 321,
+     "w": 152,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:55296/",
+   "blank": false,
+   "words": 11,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 512
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Potter Portfolio",
+     "x": 32,
+     "y": 96,
+     "w": 278,
+     "h": 52,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Handmade bowls and weekend pottery class",
+     "x": 32,
+     "y": 196,
+     "w": 287,
+     "h": 36,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Create Your Piece",
+     "x": 32,
+     "y": 280,
+     "w": 152,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:55296/",
+   "blank": false,
+   "words": 11,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 745
+ },
+ "ms": 2344
+}

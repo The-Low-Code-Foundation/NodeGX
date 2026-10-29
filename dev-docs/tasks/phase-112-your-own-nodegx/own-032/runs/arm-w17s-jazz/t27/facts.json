@@ -1,0 +1,130 @@
+{
+ "htmlMs": 105,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "The Blue Room",
+     "x": 32,
+     "y": 96,
+     "w": 598,
+     "h": 111,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Experience the magic of jazz on 14 Novem",
+     "x": 32,
+     "y": 255,
+     "w": 334,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 32,
+     "y": 321,
+     "w": 77,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "A Jazz Evening",
+     "x": 32,
+     "y": 402,
+     "w": 117,
+     "h": 15,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:55978/",
+   "blank": false,
+   "words": 15,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 818
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "The Blue Room",
+     "x": 32,
+     "y": 96,
+     "w": 286,
+     "h": 52,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Experience the magic of jazz on 14 Novem",
+     "x": 32,
+     "y": 196,
+     "w": 256,
+     "h": 36,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 32,
+     "y": 280,
+     "w": 77,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "A Jazz Evening",
+     "x": 32,
+     "y": 361,
+     "w": 117,
+     "h": 15,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:55978/",
+   "blank": false,
+   "words": 15,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 808
+ },
+ "ms": 2446
+}

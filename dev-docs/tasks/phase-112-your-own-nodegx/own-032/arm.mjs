@@ -75,6 +75,12 @@ if (ASK_BAND && LOOK_ASKED && LOOK_ASKED.pStylish > ASK_BAND[0] && LOOK_ASKED.pS
 }
 if (REQUEST) GOAL.about = REQUEST;
 if (STYLE === 'stylish') GOAL.want = 'a small line above the headline, a headline, one line under it, a button, and a photo on the right, all on a dark brand-colour ground';
+// factsKept (s5, 9b): what the request names that the hero must say — the brief's name, and any date (a day and a month,
+// either order). A date is there when the hero's words hold the same day and month in any form
+const MONTH = '(January|February|March|April|May|June|July|August|September|October|November|December)';
+const datesIn = (s) => new Map([...String(s).matchAll(new RegExp(`\\b(\\d{1,2})(?:st|nd|rd|th)?\\s+(?:of\\s+)?${MONTH}\\b|\\b${MONTH}\\s+(\\d{1,2})(?:st|nd|rd|th)?\\b`, 'gi'))].map((m) => [`${Number(m[1] ?? m[4])} ${(m[2] ?? m[3]).toLowerCase()}`, m[0]]));
+const FACTS = [{ what: 'the name', text: GOAL.name, on: 'headline', in: (s) => s.toLowerCase().includes(GOAL.name.toLowerCase()) },
+  ...[...datesIn(GOAL.about)].map(([k, text]) => ({ what: 'the date', text, on: 'line', in: (s) => datesIn(s).has(k) }))];
 
 // ─── The vocabulary: what can be added, and every setting with its closed options ───────────────────────────────
 const sp = (n) => (n === 0 ? '0px' : `var(--space-${n})`);
@@ -215,8 +221,12 @@ async function judge(q, png) {
 // s5 switches (default off):
 //   fixesOnly     (fixMenu, endGate) once the findings open with goalMet and while a fix is on the menu, the menu is the
 //                 fixes plus undo: no generic set or write (8a's miss: with "add" gone its odds moved onto "set")
+//   factsKept     (roles) the brief's name and any date the request gives must be in the hero's words: a missing one is
+//                 a write fix on the part that should carry it (the name on the headline, a date on the line), once that
+//                 part holds written words; 8b's shorten fix also says "It must say <name>" (w12m-jazz lost "14 November",
+//                 w12m-plumber never said "Dupont", w15s-running never said "Park Runners")
 // The touching / edge thresholds are not rules: bench.mjs FACTS fixes them (4 px, 8 px), and probe-vision's key with them.
-const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false, roles: false, endGate: false, addWhileMissing: false, shortHeadline: false, blankRetry: false, rhythm: false, fixesOnly: false }, ...(EDIT.rules || {}) };
+const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false, roles: false, endGate: false, addWhileMissing: false, shortHeadline: false, blankRetry: false, rhythm: false, fixesOnly: false, factsKept: false }, ...(EDIT.rules || {}) };
 // roles (s2, after w4-t15a): each part is told what it is when it is added, and keeps it through moves and removes;
 // the shape checks read the roles, never the document order (t15a: a move made the headline texts[1], and the size
 // fix went to the other Text, so the hero ended with two headlines and no line under them)
@@ -274,7 +284,7 @@ export function findingsFrom(shot, nodes) {
       // only above text-base: at text-base the headline's own size finding is the one to fix (and nothing is smaller)
       const hb = shot.desktop.facts.blocks?.find((b) => b.kind === 'words' && b.text === String(nodes[h].params.text ?? '').trim().replace(/\s+/g, ' ').slice(0, 40));
       const hw = String(nodes[h].params.text ?? '').trim().split(/\s+/).length, most = Math.max(3, Math.floor((2 * hw) / (hb?.lines || 1)));
-      if (RULES.shortHeadline && hb && hb.lines >= 3 && sz(h) === SIZES.indexOf(big[0])) res.push({ check: 'headlineLong', say: `On a desktop, the headline ${name(h)} breaks onto ${hb.lines} lines at the smallest headline size: it has too many words (${hw}).`, fix: { node: h, setting: 'words', write: true, ask: `It is now ${hw} words and breaks onto ${hb.lines} lines on a desktop: write it again in at most ${most} words.`, say: `make the headline ${name(h)} shorter (${hw} words, it breaks onto ${hb.lines} lines on a desktop)` } });
+      if (RULES.shortHeadline && hb && hb.lines >= 3 && sz(h) === SIZES.indexOf(big[0])) res.push({ check: 'headlineLong', say: `On a desktop, the headline ${name(h)} breaks onto ${hb.lines} lines at the smallest headline size: it has too many words (${hw}).`, fix: { node: h, setting: 'words', write: true, ask: `It is now ${hw} words and breaks onto ${hb.lines} lines on a desktop: write it again in at most ${most} words.${RULES.factsKept ? ` It must say "${GOAL.name}".` : ''}`, say: `make the headline ${name(h)} shorter (${hw} words, it breaks onto ${hb.lines} lines on a desktop)` } });
       if (hb && hb.lines >= 3 && sz(h) > SIZES.indexOf(big[0])) res.push({ check: 'headlineWraps', say: `On a desktop, the headline ${name(h)} breaks onto ${hb.lines} lines: it is too big for its column.`, fix: { node: h, setting: 'size', smaller: true, floor: big[0], say: `make ${name(h)} a little smaller (it breaks onto ${hb.lines} lines on a desktop; now: ${currentOf(nodes[h], 'size')})` } });
       if (sz(line) >= sz(h) && sz(line) > SIZES.indexOf('text-base')) res.push({ check: 'lineSize', say: `The line under the headline (${name(line)}) is as big as the headline: they read as two headlines.`, fix: { node: line, setting: 'size', smaller: true, say: `make ${name(line)} smaller than the headline (it reads as a second headline; now: ${currentOf(nodes[line], 'size')})` } });
     }
@@ -312,6 +322,18 @@ export function findingsFrom(shot, nodes) {
         if (btn !== undefined && nodes[btn].parent === col && currentOf(nodes[btn], 'space above') !== 'small') res.push({ check: 'rhythmButton', say: `The button ${name(btn)} sits as close to the line above it as the lines sit to each other.`, fix: { node: btn, setting: 'space above', only: ['small'], say: `give ${name(btn)} a little space above (it sits as close as the lines do; now: ${currentOf(nodes[btn], 'space above')})` } });
       }
       if (eb !== undefined && h !== undefined && nodes[eb].parent === nodes[h].parent && leaves[leaves.indexOf(h) - 1] !== eb) res.push({ check: 'eyebrowOrder', say: `${ROLE_SAY.eyebrow} ${name(eb)} is not straight above the headline.`, fix: { act: { kind: 'move', node: eb, into: nodes[h].parent, before: h }, say: `move ${name(eb)} straight above the headline ${name(h)}` } });
+    }
+    if (RULES.factsKept && RULES.roles) {
+      // a fact of the request that none of the hero's words say: a write fix on the part that should carry it, once that
+      // part holds written words (w12m-jazz's shortened headline dropped "14 November"; w12m-plumber never said "Dupont")
+      const said = nodes.map((x) => String(x.params.text ?? x.params.label ?? '')).join(' ');
+      const written = (i) => i !== undefined && !['Text', 'Button'].includes(String(nodes[i].params.text ?? nodes[i].params.label));
+      for (const f of FACTS) {
+        const at = f.on === 'headline' ? h : line;
+        // the shorten fix on the same part already says "It must say <name>"
+        if (!written(at) || f.in(said) || res.some((r) => r.fix?.node === at && r.fix?.write)) continue;
+        res.push({ check: 'factLost', say: `The request gives ${f.what} "${f.text}", and none of the hero's words say it.`, fix: { node: at, setting: 'words', write: true, ask: `It must say "${f.text}".`, say: `write ${ROLE_SAY[nodes[at].role]} ${name(at)} again so it says "${f.text}" (the request gives it, and the hero never says it)` } });
+      }
     }
   }
   if (!missing.length && RULES.goalLine) res.unshift({ check: 'goalMet', say: 'Every part of the goal is there. What is left is how it looks: the findings below.' });

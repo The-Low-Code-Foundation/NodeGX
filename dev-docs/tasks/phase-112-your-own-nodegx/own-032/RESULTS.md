@@ -717,6 +717,42 @@ and month in any form ("14 November", "November 14th").
 - no run grows by more than 3 turns, and none hits the 40-turn cap;
 - no run's end findings grow, and the five runs without the finding end on the same tree as their control.
 
+**Checked before the runs:** w16m-jazz and w16m-plumber, replayed under the w17 rules (`--replay … --upto 99`, no model
+call). The finding appears where expected: jazz from t19, once the shortened headline has dropped the date; plumber
+from t3, once the headline is written without "Dupont".
+
+**Result (`w17*`, `node compare.mjs w16 w17 …`):** every hero ends with its facts, and no run grows by more than 1
+turn. The odds drift is 0.0000 on every call asked the same prompt (`drift.mjs`).
+
+| run | turns | `factLost` | what was written | the headline at the end |
+|---|---|---|---|---|
+| m-bakery | 22 → 22 | never | t19, the shorten fix: "Maison Levain" | "Maison Levain: Artisanal Baking" → **"Maison Levain"** |
+| **m-jazz** | 22 → **23** | t19 (the date) | t19 shorten → "The Blue Room"; t20 the line: "Join us for a sophisticated jazz evening **on 14 November**." | "The Blue Room" |
+| **m-plumber** | 21 → 21 | t3–t11 (the name) | t12: **"Dupont Plumbing"** | "Expert Plumbing Services" → "Dupont Plumbing" |
+| m-running | 23 → **22** | never | t19 shorten → "Park Runners" (the control first wrote the same 7 words again) | "Run with Park Runners" → "Park Runners" |
+| **m-pottery** | 22 → **21** | t3–t11 (the name) | t12: "Potter Portfolio" (the control got it only at t20, through the shorten fix) | the same |
+| s-bakery, s-plumber, s-pottery | unchanged | never | — | the same tree |
+| **s-jazz** | 33 → **34** | t21–t22 (the date) | t23 the line: "Experience the magic of jazz **on 14 November**." | the same |
+| **s-running** | 35 → 35 | **never** | t32, the shorten fix: **"Park Runners"** | "RUN. EXPLORE. CONNECT." → "Park Runners" |
+
+**Against the pre-registration:**
+- ✅ / ❌ **the finding appears on m-jazz, s-jazz, m-plumber and m-pottery, and on no other run, but not on
+  s-running.** Its headline "RUN. EXPLORE. CONNECT. PARK RUNNERS." (t5) held the name until the shorten fix. With this
+  switch, that fix says `It must say "Park Runners"`, so the rewrite kept it, and the finding never had to fire;
+- ✅ all ten end with the brief's name in the hero's words, and both jazz heroes with "14 November";
+- ✅ no run grows by more than 1 turn, and none hits the cap;
+- ✅ no run's end findings grow;
+- ❌ **the runs without the finding did not all end on their control's tree:** m-bakery and m-running changed. The
+  switch changes the shorten fix's prompt too, and I predicted only for the new finding. Both changes are in that one
+  rewrite; m-running is a turn shorter.
+
+**Seen, for Richard's eye:** with `It must say "<name>"`, all four shorten rewrites became the name alone: "Maison
+Levain", "The Blue Room", "Park Runners" twice. In the stylish look that is the composition hero's own shape (the name
+as the headline). In the minimal look it gives up a headline that says something ("Maison Levain: Artisanal Baking").
+Whether a headline that is only the name is right is a words question, not the script's.
+
+**Kept:** `factsKept` joins the final harness, `runs/w17.edit.json`.
+
 ### 9d. A third look? (`probe-look3.mjs`, probe only)
 
 **The method:** "minimal / stylish / warm and friendly" ("warm and friendly: a soft light colour ground, rounded
