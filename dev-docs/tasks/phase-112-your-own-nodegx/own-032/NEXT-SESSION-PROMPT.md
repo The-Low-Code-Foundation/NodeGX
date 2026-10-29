@@ -17,7 +17,15 @@ are on disk only.
 - **Arm** (`arm.mjs`): E2B at node level loops on "add a Group" and never changes a setting (P(set) 0.03–0.13, 0 sets
   in 3 × 30 turns).
 
-## s2, in order
+## s2 status (2026-10-29)
+
+- Step 1: Richard was given the viewer links; his changes to what it shows are not in yet.
+- Step 2 (surgery from the page) is **built and committed** (`b308c4c83`). RESULTS §5 describes it.
+- **No fork has been asked yet**: a peer's `gemma4-e4b-32k` held Ollama through the whole build. The server refuses
+  a fork while another model is loaded.
+- Next: Richard's pokes (step 3), each recorded in the RESULTS §5 table.
+
+## s2, as it was planned
 
 1. **Show Richard the viewer first** (build order step 2; he has not seen it yet). He may change what it shows.
 2. **Surgery from the page (3c, AC3):**
