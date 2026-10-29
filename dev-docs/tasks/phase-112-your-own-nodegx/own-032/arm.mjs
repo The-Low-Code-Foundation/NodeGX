@@ -180,8 +180,17 @@ async function judge(q, png) {
 //   goalLine      once no part is missing, the findings open with "Every part of the goal is there…"
 //   ownerNamed    a spacing finding names the part that owns the space and its setting now (s1's outline probe: E2B
 //                 finds parts, never which part owns a space): "n00 (the whole section) has padding left and right: none"
+// s4 switches (default off, so every earlier run replays unchanged):
+//   addWhileMissing  under endGate, the generic "add" leaves the move menu once every part of the goal is there
+//                 (w10s-jazz: 7 free "add a Columns / Group" turns while fixes were on the menu, later removed as empty)
+//   shortHeadline (roles) a headline at the display-md floor that still breaks onto 3+ lines on a desktop gets a write
+//                 fix: "make the headline shorter (n words, it breaks onto k lines)"; the rewrite is asked for at most
+//                 max(3, ⌊2n/k⌋) words (w10m-bakery: 9 words on 4 lines, and the size fix had no smaller value left)
+//   blankRetry    the bench measures a page that reads blank again, up to 3 times (bench.mjs retryBlank): w11m-jazz
+//                 ended by endGate on a desktop shot taken before the page drew (P112-OWN032-BLANKSHOT); a shot still
+//                 blank after that, with words in the tree, is ledgered (`blank`) and cannot end the run
 // The touching / edge thresholds are not rules: bench.mjs FACTS fixes them (4 px, 8 px), and probe-vision's key with them.
-const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false, roles: false, endGate: false }, ...(EDIT.rules || {}) };
+const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false, roles: false, endGate: false, addWhileMissing: false, shortHeadline: false, blankRetry: false }, ...(EDIT.rules || {}) };
 // roles (s2, after w4-t15a): each part is told what it is when it is added, and keeps it through moves and removes;
 // the shape checks read the roles, never the document order (t15a: a move made the headline texts[1], and the size
 // fix went to the other Text, so the hero ended with two headlines and no line under them)
@@ -238,6 +247,8 @@ export function findingsFrom(shot, nodes) {
       const sz = (i) => SIZES.indexOf(currentOf(nodes[i], 'size'));
       // only above text-base: at text-base the headline's own size finding is the one to fix (and nothing is smaller)
       const hb = shot.desktop.facts.blocks?.find((b) => b.kind === 'words' && b.text === String(nodes[h].params.text ?? '').trim().replace(/\s+/g, ' ').slice(0, 40));
+      const hw = String(nodes[h].params.text ?? '').trim().split(/\s+/).length, most = Math.max(3, Math.floor((2 * hw) / (hb?.lines || 1)));
+      if (RULES.shortHeadline && hb && hb.lines >= 3 && sz(h) === SIZES.indexOf(big[0])) res.push({ check: 'headlineLong', say: `On a desktop, the headline ${name(h)} breaks onto ${hb.lines} lines at the smallest headline size: it has too many words (${hw}).`, fix: { node: h, setting: 'words', write: true, ask: `It is now ${hw} words and breaks onto ${hb.lines} lines on a desktop: write it again in at most ${most} words.`, say: `make the headline ${name(h)} shorter (${hw} words, it breaks onto ${hb.lines} lines on a desktop)` } });
       if (hb && hb.lines >= 3 && sz(h) > SIZES.indexOf(big[0])) res.push({ check: 'headlineWraps', say: `On a desktop, the headline ${name(h)} breaks onto ${hb.lines} lines: it is too big for its column.`, fix: { node: h, setting: 'size', smaller: true, floor: big[0], say: `make ${name(h)} a little smaller (it breaks onto ${hb.lines} lines on a desktop; now: ${currentOf(nodes[h], 'size')})` } });
       if (sz(line) >= sz(h) && sz(line) > SIZES.indexOf('text-base')) res.push({ check: 'lineSize', say: `The line under the headline (${name(line)}) is as big as the headline: they read as two headlines.`, fix: { node: line, setting: 'size', smaller: true, say: `make ${name(line)} smaller than the headline (it reads as a second headline; now: ${currentOf(nodes[line], 'size')})` } });
     }
@@ -337,14 +348,15 @@ async function decide(state, turn, findings, T) {
   const writable = n.map((x, i) => i).filter((i) => KINDS[kindOf(n[i])].words);
   const canTake = (i) => KINDS[kindOf(n[i])].holds && !(kindOf(n[i]) === 'Columns' && n.filter((x) => x.parent === i).length >= 2);
   const takers = n.map((x, i) => i).filter(canTake);
-  const moves = [...(!RULES.legalOnly || !n.length || takers.length ? [['add', 'add a part (a Group, Columns, Text, Image or Button) inside a part']] : []), ...(n.length ? [['set', 'change one setting of a part']] : []),
+  const goalMet = RULES.addWhileMissing && RULES.endGate && findings.some((f) => f.check === 'goalMet');
+  const moves = [...((!RULES.legalOnly || !n.length || takers.length) && !goalMet ? [['add', 'add a part (a Group, Columns, Text, Image or Button) inside a part']] : []), ...(n.length ? [['set', 'change one setting of a part']] : []),
     ...(writable.length ? [['write', 'write the words of a Text or a Button']] : []), ...(state.history.length ? [['undo', 'undo your last step']] : []), ...(RULES.endGate && findings.some((f) => f.fix) ? [] : [['done', 'stop: the section is finished']])];
   if (RULES.fixMenu) moves.unshift(...[...new Map(findings.filter((f) => f.fix).map((f) => [`${f.fix.node}|${f.fix.setting}`, f.fix])).values()].map((f) => ['fix', f.say, f]));
   const menu = moves.map(([k, s], i) => `${i + 1}. ${s}`).join('\n');
   const move = await choose('move', `${ctx}\n\n${EDIT.menuWording || 'What do you do next? Pick one:'}\n${menu}`, moves.map((_, i) => String(i + 1)), T);
   const m = moves[Number(move) - 1]?.[0];
   if (m === 'fix' && moves[Number(move) - 1][2].act) { const f = moves[Number(move) - 1][2]; return { ...f.act, via: 'fix', say: `${f.say.replace(/ \(.*\)$/, '')} (a fix from the menu)` }; }
-  if (m === 'fix' && moves[Number(move) - 1][2].write) { const i = moves[Number(move) - 1][2].node; const text = await words('write.text', writeAsk(ctx, n, i), kindOf(n[i]) === 'Button' ? 30 : 140, T); return { kind: 'write', node: i, text, via: 'fix', say: `wrote ${name(i)}: "${text}" (a fix from the menu)` }; }
+  if (m === 'fix' && moves[Number(move) - 1][2].write) { const i = moves[Number(move) - 1][2].node; const text = await words('write.text', writeAsk(ctx, n, i) + (moves[Number(move) - 1][2].ask ? ` ${moves[Number(move) - 1][2].ask}` : ''), kindOf(n[i]) === 'Button' ? 30 : 140, T); return { kind: 'write', node: i, text, via: 'fix', say: `wrote ${name(i)}: "${text}" (a fix from the menu)` }; }
   if (m === 'fix') {
     // a fix offers only values that change something: never the current one, and never "none" for a fault of too
     // little space (t14a: "set gap of n00 to none" 16 times, P(none) 1.00, "none" listed first and equal to "not set")
@@ -443,7 +455,7 @@ const ledger = { style: STYLE, lookAsked: LOOK_ASKED || undefined, request: REQU
   surgery: fs.existsSync(path.join(OUT, 'surgery.json')) ? JSON.parse(fs.readFileSync(path.join(OUT, 'surgery.json'), 'utf8')) : undefined, turns: [] };
 const save = () => { fs.writeFileSync(path.join(OUT, 'ledger.json'), JSON.stringify(ledger, null, 1)); writeTimeline(ledger); };
 const state = { nodes: [], undo: [], history: [] };
-const bench = await openBench(BENCH);
+const bench = await openBench(BENCH, { retryBlank: RULES.blankRetry });
 let findings = [], lastLook = null;
 try {
   for (let turn = 1; turn <= TURNS; turn++) {
@@ -466,6 +478,8 @@ try {
       shot.unchanged = look === lastLook; lastLook = look;
       T.shot = { desktop: `t${turn}/desktop.png`, phone: `t${turn}/phone.png`, facts: `t${turn}/facts.json`, ms: shot.ms };
       findings = findingsFrom(shot, state.nodes);
+      // blankRetry: a shot still blank after the retries, with words in the tree, measured nothing; it cannot end the run
+      if (RULES.blankRetry && state.nodes.some((x) => KINDS[kindOf(x)].words) && ['desktop', 'phone'].some((w) => shot[w].checks?.blank)) T.blank = ['desktop', 'phone'].filter((w) => shot[w].checks?.blank);
       if (LOOK !== 'script') {
         T.look = [];
         for (const w of ['desktop', 'phone']) {
@@ -480,7 +494,7 @@ try {
     // endGate (s3): "done" waits while a finding has a fix (w9s-plumber said done with the photo still below the words),
     // and the run ends itself once every part is there and nothing left has a fix (both w9 bakery runs spent 15 turns on
     // the kit's contrast, which no move can reach)
-    if (RULES.endGate && findings.some((f) => f.check === 'goalMet') && !findings.some((f) => f.fix)) T.ended = `nothing on the menu fixes what is left (${findings.filter((f) => f.check !== 'goalMet').map((f) => f.check).join(', ') || 'nothing'})`;
+    if (RULES.endGate && !T.blank && findings.some((f) => f.check === 'goalMet') && !findings.some((f) => f.fix)) T.ended = `nothing on the menu fixes what is left (${findings.filter((f) => f.check !== 'goalMet').map((f) => f.check).join(', ') || 'nothing'})`;
     ledger.turns.push(T);
     save();
     if (T.ended) { console.log(`turn ${turn}: ${action.say} | ended: ${T.ended}`); break; }

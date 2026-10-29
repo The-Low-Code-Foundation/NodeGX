@@ -373,3 +373,62 @@ line straight under the headline).
 - An undecided request (0.3–0.7) should ask the person. Not built yet.
 - **Both looks as product:** fold `lookq` + the look's fixes into OWN-031 `build_app`. That is the other session's lane,
   so ask first.
+
+## 8. s4 — the next experiments (2026-10-29, late)
+
+Each one runs alone on Ollama (E2B, words at T 0), against a control, behind a switch that is off by default.
+
+### 8a. "Add" only while a part is missing (`addWhileMissing`)
+
+**The change:** under `endGate`, the generic "add a part" leaves the move menu once the findings open with `goalMet`.
+Structural fixes that add (the Columns, the words column) stay, because they are fixes, not the generic move.
+
+**The control:** the six w10 runs, with the same requests, benches and edit (`runs/arm-w10s-jazz/edit.json`). To check
+that T 0 replays exactly, w10s-jazz is re-run unchanged as `w11c-jazz`. Free (non-fix) moves after `goalMet` in w10:
+- bakery-m 0, jazz-m 0, plumber-m 1 (an add);
+- bakery-s 0, **jazz-s 7 (all adds)**, plumber-s 1 (a write).
+
+**Pre-registered (before any w11 run):**
+- turns fall on jazz-s (40 → under 34) and on plumber-m;
+- no run gains turns by more than 2;
+- the end findings of no run grow, and every run still ends by `endGate` with every part there.
+
+The other three runs change only in the menu text after `goalMet`, so their picks may drift; the test is that they do
+not get worse.
+
+**The control holds:** `w11c-jazz` (w10s-jazz re-run unchanged) took the same 40 actions, and no option's odds moved
+(max drift 0.0000). At T 0 a w10 ledger is an exact control, and a w11 run that parts from it parts because of the
+switch.
+
+**Result (`w11*`, `node compare.mjs w10 w11`):**
+
+| run | turns | free moves | free after `goalMet` | where it parts | the end |
+|---|---|---|---|---|---|
+| m-bakery | 21 → **24** | 1 → 3 | none → 2 generic "set" | t18 | same measures (the kit's contrast); words column gap huge → small |
+| s-bakery | 32 → 32 | 1 → 1 | none → none | never | the same tree |
+| m-jazz | 21 → 21 | 1 → 1 | none → none | t10, two fixes swap order | same measures; the section's side padding 48 → 32 px, gap 16 → 48 px |
+| **s-jazz** | **40 → 32** | **8 → 1** | 7 adds → none | t14 | the same tree; the sentence under the headline reworded |
+| m-plumber | 23 → 21 | 2 → 1 | 1 add → none | t8 | `unchanged` left → nothing left |
+| s-plumber | 32 → 32 | 2 → 1 | 1 write → none | t26: the same write, taken as the placeholder fix | the same tree |
+
+Totals: turns 169 → 162, free moves 15 → 8.
+
+**Against the pre-registration:**
+- ✅ turns fall on jazz-s (40 → 32) and on plumber-m (23 → 21);
+- ❌ **m-bakery gains 3 turns, against a bar of 2.** At t18 the w10 menu had the move fix at 0.35, "add" at 0.27 and
+  "set" at 0.26. Without "add", "set" took 0.47 and the fix 0.30. The model then nudged the headline's size twice by
+  hand (display-lg, back to display-md) before taking the fix;
+- ✅ no run's end findings grow, and every run ends by `endGate` with every part there.
+
+**Kept, with the miss named:** taking "add" away moves its odds onto the next generic move, not onto the fix. The
+candidate that follows: under `endGate`, once `goalMet`, the menu is the fixes plus undo, with no generic "set" or
+"write" while any fix is on it. It was not run here, because it is not on the s4 list.
+
+**A bench defect found on the way (P112-OWN032-BLANKSHOT):** w11m-jazz's last desktop shot was taken before the page
+drew. It is 120 px tall, with `blank: true`, no words and no findings, and `endGate` ended the run on it. Across
+every arm run, 11 of 1003 shots have one width blank while the other has words, mostly late in a run (five at t21).
+It did not reproduce in 50 idle shots of the same tree.
+
+The fix is the `blankRetry` switch: the bench measures a blank page again, up to 3 times, and a shot still blank with
+words in the tree cannot end a run. From 8b on, every run has it on. The w10 and w11 runs were measured without it on
+both sides.
