@@ -114,13 +114,59 @@ kept round's shape was within 0.1 of the peak (the closest: jazz r3, 0.837 again
 
 ## 4. Richard's ranking (blind), then the lanes revealed
 
-The gallery: https://claude.ai/artifact/GrLH8ZBCXAHCkBaEtgC9Wy (seed 30, key in `runs/blind-key.json`; ranks save to the
-page's db as `rankings/<brief>`). _Waiting on Richard._
+The gallery: https://claude.ai/artifact/GrLH8ZBCXAHCkBaEtgC9Wy (seed 30, key in `runs/blind-key.json`; ranks in the
+page's db as `rankings/<brief>`). Richard ranked three briefs and stopped: "I can already guess at what I'm seeing". The
+order was the same on all three, so three is enough for the order (not for a rate).
+
+| brief | graph | emit | code-bare | code-guided |
+|---|---|---|---|---|
+| puppy | 2 | 1 | 3 | 4 |
+| bakery | 1 | 2 | 3 | 4 |
+| running | 1 | 2 | 3 | 4 |
+
+His words, blind (from the db, `why`, and in chat after):
+- graph and emit: "two in each that are identical. Either that's a bug, or…" — "I can't see a difference" (bakery). On
+  puppy he split them: "D fucked up the responsive mobile version, it's a squeezed desktop view, vs the other NodeGX one
+  where the responsive looked good". D was graph; the squeeze is `P112-OWN030-PILLSENTENCE` (one 685 px pill makes the
+  phone lay the whole page out wide), which emit does not reproduce.
+- code-bare: "a nice clean one but that looks like an early Geocities template from the early 2000s"; "the cleanest in
+  terms of styling, spacing etc but it missed the initial prompt of a 'modern' looking site, this looks like an early
+  Wordpress template" (puppy); "very clean and well styled and spaced, but too simple to satisfy the prompt" (bakery);
+  "laughably simple" (running).
+- code-guided: "mostly just a shitty mess"; "A is shit" (bakery); "D is a mess" (running).
+- His guess at the key was half right: he took the mess for the one-shot. It was the guided lane, the harness with the
+  model writing the markup.
+
+The form cut "why" at 300 characters (`gallery.mjs`, `.slice(0, 300)`); the puppy note was cut there and he gave the rest
+in chat.
 
 ## 5. The predictions, graded
 
-_After the ranking._
+1. **code-bare worst: WRONG.** It was third on 3/3. code-guided was last on 3/3. Its phone overflow (2/6) equals graph's.
+2. **emit adjacent to graph: RIGHT,** 3/3, and their checks differ only by the pill overflow (graph's runtime).
+3. **code-guided breaks more, words no worse: HALF.** It broke quietly (broken images 3/6, placeholders, a squeezed
+   column); its reviewer "sounds real" median is 0.79 against graph's 0.97, outside the 0.1.
+4. **graph wins the editability probe: NOT RUN.** Richard moved on to OWN-032.
+5. **code-guided costs more output tokens: RIGHT** (6/6, median 8,806 against 4,164); slower in minutes only at the
+   median (3/6).
 
 ## 6. Does NodeGX help a small model build a page, and what does it cost?
 
-_After the ranking._
+Yes, and the lanes say where the help is. The harness made the small model better **only while the model did not write
+markup**. Give the same model the same questions and the same critics, but let it write each section's HTML (guided),
+and it does worse than one unguided prompt (bare): last on every brief, at twice graph's output tokens. With the same
+answers turned into HTML by a script (emit), the page is as good as graph's. So the quality is in the answers plus the
+kit's compositions, and the model's job is to choose, not to lay out. NodeGX is the medium that makes "choose" possible:
+its compositions and tokens are the vocabulary the questions are asked in. What the runtime adds on top is the editable
+app (prediction 4, untested) and, today, one defect emit does not have (the pill).
+
+The cost: about 100 small calls and 5 minutes on a laptop per page, against one call and 2 minutes for a page that is
+tidy, dated and thin.
+
+Richard's reading (2026-10-29): "building harnesses and using script and restricting output from small models can get
+output that's near the output of a frontier Chinese model at maybe 100B parameters, at 2B". **This series did not run a
+large model, so it cannot grade that claim.** The lane that would: the same six briefs one-shot by a ~100B open model
+(GLM / Qwen / Mistral Large), into the same gallery.
+
+Next: OWN-032 (`../OWN-032-THE-WORKBENCH.md`), Richard's: one hero, built step by step, every prompt and every look
+visible and editable.

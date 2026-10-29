@@ -3,7 +3,7 @@
 **Opened 2026-10-28** (Richard, after OWN-029 s1: *"it'd be worth adding a third lane to the experiments where we
 compare the small models building using our harness in pure code vs being forced to use NodeGX, just out of
 curiosity"*; then *"yes to OWN 030 and the code lanes, love it"*).
-**Status: 🟡 s1 (2026-10-29, Opus): built: `lanes.sh`, `emit.mjs` (the token sheet from the editor's own `ProjectTokenCss`, bundled), `code.mjs`, `look.mjs` (one Chrome for every lane, through render-report's `withRenderedPage`), `gallery.mjs` (blind, seeded). Frozen and predictions pre-registered in `own-030/RESULTS.md` §0–§1 before any run.** Scoped 2026-10-28. Code goes in `own-030/`, runs in `own-030/runs/<lane>-<brief>/`, and results in
+**Status: ✅ done 2026-10-29 (Opus). Series run (48 steps), Richard ranked blind 3/6 briefs and called it (graph ≈ emit 1–2, bare 3, guided 4 every time); predictions graded in `own-030/RESULTS.md` §5, the answer in §6; the editability probe (prediction 4) not run, Richard moved to OWN-032.** Earlier, s1: built: `lanes.sh`, `emit.mjs` (the token sheet from the editor's own `ProjectTokenCss`, bundled), `code.mjs`, `look.mjs` (one Chrome for every lane, through render-report's `withRenderedPage`), `gallery.mjs` (blind, seeded). Frozen and predictions pre-registered in `own-030/RESULTS.md` §0–§1 before any run.** Scoped 2026-10-28. Code goes in `own-030/`, runs in `own-030/runs/<lane>-<brief>/`, and results in
 `own-030/RESULTS.md`.
 **Model:** Opus writes and runs the harness (never Fable). The builder and reviewer are the same local models in every
 lane, frozen at the start (§5).
