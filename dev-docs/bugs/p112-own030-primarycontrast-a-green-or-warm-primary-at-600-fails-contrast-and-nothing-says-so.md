@@ -27,3 +27,9 @@ Not seen by: set_project_tokens, validate_project, render_report. The kit has no
 Fix candidates: a contrast finding on the `--primary` / `--primary-foreground` pair (and `--primary` on
 `--background`) in validate_project or as a set_project_tokens warning, naming the darker shade that passes; and the
 description's example made hue-neutral, or saying "the 700 for green and warm".
+
+**Seen again, 2026-10-29 (OWN-032 s3, `runs/arm-w9s-bakery`):** a stylish hero on the bakery theme puts white words
+on `--gradient-spotlight`. Its bright end is the primary, so the small line, the sentence and the button all measure
+3.16–3.19. That is the same pair from the other side: white on amber-600. The arm cannot reach it (no token is on its
+menu), so a 2B builder spent 15 turns making settings that changed nothing. The same fix covers both: a darker
+primary, or a contrast finding on the primary pair.

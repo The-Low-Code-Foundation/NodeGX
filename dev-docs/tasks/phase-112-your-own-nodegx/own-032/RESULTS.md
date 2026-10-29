@@ -282,3 +282,94 @@ menu:
 Jazz and plumber's composition heroes have no photo at all, so those two pairs also compare two different goals.
 If this holds, the next step is to add those three moves as findings with fixes, then test on the two briefs not yet
 used here (running, pottery), not on these three.
+
+## 7. Richard's ruling on AC5, and the look the person asks for (s3, 2026-10-29 evening)
+
+**Richard, after seeing the pairs (he did not use the page's buttons):** *"I like the new style in all of the
+templates. It's much cleaner and I think it's shippable, but you could argue it's a bit too clean … I wouldn't say the
+old attempts were 'bad' or 'worse', they're different. … the originals would be someone who wants a stylish modern
+look, and the new ones would be really the minimalist, clean look. … a further win. … It would be good if we could be
+sure the model is responding to the prompt."*
+
+So AC5 is reframed, not failed. The prediction in §6 was half right: the composition heroes look richer for the three
+moves named there. But Richard reads the two as two LOOKS, both shippable, not as better and worse. The new
+criterion: **the look follows the request.**
+
+**His defect, "the button at the bottom looks like the hero has no inner padding":** it was the BENCH. `HEIGHT`
+cropped each picture at the last painted element, and the arm's sections have no ground, so their bottom padding
+(space-24 on w6-puppy) was cut off. A composition hero paints a ground, so its padding survived. Now any element with
+bottom padding counts too. w6-puppy desktop went from 467 to 563 px, an even 96 px above and below. `runs/ac5-w6/*`
+were re-shot. The facts the arm read each turn were DOM measures, so no turn's findings change.
+
+### 7a. Does E2B hear the look? (`probe-look.mjs`, `lookq.mjs`)
+
+One closed question, E2B at temperature 0, asked with the two looks in both orders, taking the mean. Bar, written
+before the run: ≥ 14 of 16 requests that name a look.
+
+- **16 / 16.** Minimal requests: P(stylish) 0.00 every time. Stylish requests: 0.91–1.00. Order moved it by at most
+  0.14, on "dark and elegant".
+- **No look named:**
+  - "family bakery in Lyon, warm colours" → stylish, 0.99;
+  - "puppy … blue colour theme, modern style" → stylish, 0.86;
+  - "a page for my jazz night" → stylish, 0.88;
+  - "plumbing business" → minimal, 0.39;
+  - "running club" → minimal, 0.31;
+  - **"a website for my bakery" → 0.56, and it flips with the order (0.73 / 0.40).**
+
+  That last case is the one to ask about. In the product, between 0.3 and 0.7 means "ask the person which look". The
+  three stylish ones match what OWN-029's composition gave those briefs.
+
+### 7b. The stylish look in the arm (`--style stylish`, roles on)
+
+Read param by param from G-plumber r4's hero:
+- a dark brand ground on the section;
+- white words;
+- a bold headline;
+- a small line above the headline in small capitals (text-xs, uppercase, widest tracking);
+- a white pill button.
+
+Each is a finding whose fix offers only the value the look asks for (`only`). "Small line above the headline" is a third
+Text role, `eyebrow`. A structure step moves it into the words column above the headline, and a move can now take
+`before`.
+
+| run | change | what happened |
+|---|---|---|
+| `w7s-puppy` | stylish | Every look fix taken (ground at t2, white, bold, small capitals, moved above the headline), but **no Button in 40 turns.** "Which kind?" gave Group 0.50–0.59 and Button 0.03–0.05: the goal line ("all on a dark brand-colour ground") seems to invite a box. |
+| **`w8s-puppy`** | the first missing part is its own fix: "add a button (a Button) inside n00: the goal still lacks it" (roles only) | **Done at turn 34, every check clean.** Every part was added by turn 10. A dark brand gradient, "YOUR JOURNEY STARTS HERE" in small capitals, a bold white display-md headline, a white sentence, a white pill "Adopt Now", the photo on the right; on a phone it stacks. Nit: the words column's one gap (huge) holds the small line as far from the headline as the line from the button. |
+
+**What the model still decides:** with roles + fixMenu, every step in w8s was a fix from the menu. E2B picks which
+finding to fix next, picks the value where more than one is offered (sizes, gaps, padding), and writes every word. The
+script holds the look. That is OWN-029's thesis ("the taste lives in the system") made literal. The probe in 7a is
+where the person's words reach the system.
+
+### 7c. The whole chain: request words → E2B picks the look → the arm builds it (`--style auto --request …`)
+
+Six requests none of the probes had seen, one calm and one bold for each untuned brief. Harness: w6's switches +
+`style: auto`.
+
+| run | request (abridged) | heard (P stylish) | turns | end |
+|---|---|---|---|---|
+| w9m/w10m-bakery | "simple, calm … lots of white space" | minimal (0.00) | 40 → **21** | w9: looped on "gap huge" for 15 turns; w10: ended, only the kit's contrast left |
+| w9s/w10s-bakery | "bold and stylish … make it stand out" | stylish (1.00) | 40 → **32** | as above (white on amber 3.16–3.19, P112-OWN030-PRIMARYCONTRAST, noted on the bug) |
+| w9m/w10m-jazz | "clean, quiet page … 14 November" | minimal (0.00) | 25 → 21 | clean |
+| w9s/w10s-jazz | "dark, moody and glamorous" | stylish (0.99) | 35 → 40 | clean, but 7 free "add a Columns / Group" turns while fixes were on the menu |
+| w9m/w10m-plumber | "plain, uncluttered" | minimal (0.00) | 24 → 23 | clean |
+| w9s/w10s-plumber | "cool and confident, with strong colours" | stylish (1.00) | 29 → **32** | w9: **said done with "photo on the right" open** (the small line under the button, the photo on a 2nd row); w10: clean |
+
+**6 of 6 heard right, 6 of 6 built in the look they heard.** Page: https://claude.ai/artifact/2M1WenHSVPsUE21P3N1NcB,
+with the two puppy heroes too.
+
+What changed between w9 and w10 (`endGate`, `roles`): "done" leaves the menu while any finding has a fix, and the run
+ends itself once every part is there and nothing left has a fix. With roles, the order finding is a fix too (move the
+line straight under the headline).
+
+**Next, seen in these runs:**
+- The generic "add" is still on the menu once every part exists. w10s-jazz spent 7 turns adding Columns and Groups
+  that the empty-parts fix then removed. Offer "add" only while the goal lacks a part.
+- A long headline at the display-md floor still breaks onto 4 lines (w10m-bakery: "Maison Levain: Artisanal baking
+  from our family kitchen."). Offer a write fix: "make the headline shorter".
+- Spacing rhythm in the stylish words column: the small line sits as far from the headline as the line from the
+  button.
+- An undecided request (0.3–0.7) should ask the person. Not built yet.
+- **Both looks as product:** fold `lookq` + the look's fixes into OWN-031 `build_app`. That is the other session's lane,
+  so ask first.

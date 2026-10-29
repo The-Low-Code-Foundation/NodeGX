@@ -1,0 +1,164 @@
+{
+ "htmlMs": 116,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [
+    {
+     "text": "Maison Levain: Artisanal baking from our",
+     "left": 0,
+     "right": 873
+    },
+    {
+     "text": "Handcrafted breads and pastries made wit",
+     "left": 0,
+     "right": 781
+    },
+    {
+     "text": "Button",
+     "left": 0,
+     "right": 1202
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Button",
+     "ratio": 3.19
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Maison Levain: Artisanal baking from our",
+     "x": 0,
+     "y": 0,
+     "w": 407,
+     "h": 21,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Handcrafted breads and pastries made wit",
+     "x": 0,
+     "y": 37,
+     "w": 499,
+     "h": 21,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 0,
+     "y": 74,
+     "w": 78,
+     "h": 34,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63851/",
+   "blank": false,
+   "words": 20,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Button",
+     "ratio": 3.19
+    }
+   ],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 444
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [
+    {
+     "text": "Maison Levain: Artisanal baking from our",
+     "left": 0,
+     "right": 40
+    },
+    {
+     "text": "Handcrafted breads and pastries made wit",
+     "left": 0,
+     "right": 22
+    },
+    {
+     "text": "Button",
+     "left": 0,
+     "right": 312
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Button",
+     "ratio": 3.19
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Maison Levain: Artisanal baking from our",
+     "x": 0,
+     "y": 0,
+     "w": 350,
+     "h": 42,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Handcrafted breads and pastries made wit",
+     "x": 0,
+     "y": 58,
+     "w": 368,
+     "h": 42,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 0,
+     "y": 116,
+     "w": 78,
+     "h": 34,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63851/",
+   "blank": false,
+   "words": 20,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Button",
+     "ratio": 3.19
+    }
+   ],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 486
+ },
+ "ms": 2414
+}

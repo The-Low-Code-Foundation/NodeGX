@@ -25,6 +25,14 @@ are on disk only.
   a fork while another model is loaded.
 - Next: Richard's pokes (step 3), each recorded in the RESULTS §5 table.
 
+## s3 status (2026-10-29 late, opennoodl-9f)
+
+- Richard's ruling on AC5 (RESULTS §7): the two harnesses give two LOOKS, both shippable. The criterion is now "the
+  look follows the request". It does, 6 of 6 (§7c, page https://claude.ai/artifact/2M1WenHSVPsUE21P3N1NcB).
+- New in arm.mjs: `style` (minimal | stylish | auto + `--request`, via `lookq.mjs`), `endGate`, a missing part as a
+  fix, order as a fix. The bench crop now keeps bottom padding (his "no inner padding" was the crop).
+- Next: the four items at the end of §7c.
+
 ## s2b status (2026-10-29 evening, Opus session opennoodl-9f)
 
 - **The puppy hero is solved at the arm level.** `w6-puppy` is done at turn 24 with every check clean

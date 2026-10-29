@@ -1,0 +1,144 @@
+{
+ "htmlMs": 556,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [
+    {
+     "text": "Expert Plumbing Services",
+     "left": 0,
+     "right": 1095
+    },
+    {
+     "text": "Reliable and professional plumbing solut",
+     "left": 0,
+     "right": 762
+    },
+    {
+     "text": "Button",
+     "left": 0,
+     "right": 1203
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Expert Plumbing Services",
+     "x": 0,
+     "y": 0,
+     "w": 185,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Reliable and professional plumbing solut",
+     "x": 0,
+     "y": 66,
+     "w": 518,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 0,
+     "y": 132,
+     "w": 77,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:49865/",
+   "blank": false,
+   "words": 14,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 533
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [
+    {
+     "text": "Expert Plumbing Services",
+     "left": 0,
+     "right": 205
+    },
+    {
+     "text": "Reliable and professional plumbing solut",
+     "left": 0,
+     "right": 4
+    },
+    {
+     "text": "Button",
+     "left": 0,
+     "right": 313
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Expert Plumbing Services",
+     "x": 0,
+     "y": 0,
+     "w": 185,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Reliable and professional plumbing solut",
+     "x": 0,
+     "y": 66,
+     "w": 386,
+     "h": 36,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 0,
+     "y": 150,
+     "w": 77,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:49865/",
+   "blank": false,
+   "words": 14,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 551
+ },
+ "ms": 2992
+}

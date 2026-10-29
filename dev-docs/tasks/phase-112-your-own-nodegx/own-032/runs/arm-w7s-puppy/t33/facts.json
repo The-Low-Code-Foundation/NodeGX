@@ -1,0 +1,122 @@
+{
+ "htmlMs": 119,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Text",
+     "ratio": 1
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Puppy Haven",
+     "x": 48,
+     "y": 96,
+     "w": 580,
+     "h": 128,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Discover loving companions and start you",
+     "x": 48,
+     "y": 368,
+     "w": 633,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 48,
+     "y": 950,
+     "w": 31,
+     "h": 22,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:62806/",
+   "blank": false,
+   "words": 17,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 1068
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Text",
+     "ratio": 1
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Puppy Haven",
+     "x": 48,
+     "y": 96,
+     "w": 273,
+     "h": 61,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Discover loving companions and start you",
+     "x": 48,
+     "y": 301,
+     "w": 273,
+     "h": 66,
+     "lines": 3
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 48,
+     "y": 943,
+     "w": 31,
+     "h": 22,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:62806/",
+   "blank": false,
+   "words": 17,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 1061
+ },
+ "ms": 2577
+}

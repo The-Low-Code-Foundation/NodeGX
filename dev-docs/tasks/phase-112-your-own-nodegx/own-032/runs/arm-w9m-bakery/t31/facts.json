@@ -1,0 +1,132 @@
+{
+ "htmlMs": 113,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Bake Now",
+     "ratio": 3.19
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Maison Levain: Artisanal baking from our",
+     "x": 32,
+     "y": 96,
+     "w": 549,
+     "h": 372,
+     "lines": 4
+    },
+    {
+     "kind": "words",
+     "text": "Handcrafted breads and pastries made wit",
+     "x": 32,
+     "y": 516,
+     "w": 499,
+     "h": 21,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Bake Now",
+     "x": 32,
+     "y": 585,
+     "w": 97,
+     "h": 34,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63851/",
+   "blank": false,
+   "words": 21,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Bake Now",
+     "ratio": 3.19
+    }
+   ],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 715
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Bake Now",
+     "ratio": 3.19
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Maison Levain: Artisanal baking from our",
+     "x": 32,
+     "y": 96,
+     "w": 275,
+     "h": 188,
+     "lines": 4
+    },
+    {
+     "kind": "words",
+     "text": "Handcrafted breads and pastries made wit",
+     "x": 32,
+     "y": 332,
+     "w": 296,
+     "h": 42,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Bake Now",
+     "x": 32,
+     "y": 422,
+     "w": 97,
+     "h": 34,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63851/",
+   "blank": false,
+   "words": 21,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Bake Now",
+     "ratio": 3.19
+    }
+   ],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 888
+ },
+ "ms": 2409
+}

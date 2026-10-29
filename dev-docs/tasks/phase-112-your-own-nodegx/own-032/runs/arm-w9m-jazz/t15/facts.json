@@ -1,0 +1,112 @@
+{
+ "htmlMs": 226,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "The Blue Room: Jazz Evening on 14 Novemb",
+     "x": 32,
+     "y": 96,
+     "w": 336,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Experience the perfect atmosphere for a ",
+     "x": 32,
+     "y": 162,
+     "w": 498,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Listen Now",
+     "x": 32,
+     "y": 228,
+     "w": 107,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:65051/",
+   "blank": false,
+   "words": 20,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 725
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "The Blue Room: Jazz Evening on 14 Novemb",
+     "x": 32,
+     "y": 96,
+     "w": 261,
+     "h": 36,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Experience the perfect atmosphere for a ",
+     "x": 32,
+     "y": 180,
+     "w": 297,
+     "h": 36,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Listen Now",
+     "x": 32,
+     "y": 264,
+     "w": 107,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:65051/",
+   "blank": false,
+   "words": 20,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 777
+ },
+ "ms": 2442
+}

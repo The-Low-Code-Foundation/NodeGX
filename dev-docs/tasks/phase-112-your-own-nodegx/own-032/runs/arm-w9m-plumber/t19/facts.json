@@ -1,0 +1,90 @@
+{
+ "htmlMs": 2390,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": []
+  },
+  "checks": {
+   "url": "http://127.0.0.1:49865/",
+   "blank": true,
+   "words": 0,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [
+    {
+     "a": "Expert Plumbing Services",
+     "b": "Reliable and professional plumbing solut",
+     "gap": 0
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "button",
+     "text": "Fix the leak",
+     "x": 32,
+     "y": 96,
+     "w": 108,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Expert Plumbing Services",
+     "x": 32,
+     "y": 177,
+     "w": 319,
+     "h": 104,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Reliable and professional plumbing solut",
+     "x": 32,
+     "y": 281,
+     "w": 326,
+     "h": 36,
+     "lines": 2
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:49865/",
+   "blank": false,
+   "words": 16,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 749
+ },
+ "ms": 6463
+}

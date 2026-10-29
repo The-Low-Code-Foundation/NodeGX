@@ -51,7 +51,16 @@ export const GOALS = {
   jazz: { name: 'The Blue Room', about: 'a jazz evening on 14 November; dark and elegant', photo: 'people-cafe.webp', want: 'a headline, one line under it, a button, and a photo on the right' },
   plumber: { name: 'Dupont Plumbing', about: 'a plumbing business; trustworthy, blue', photo: 'work-welder.webp', want: 'a headline, one line under it, a button, and a photo on the right' }
 };
-const GOAL = GOALS[opt('--brief', 'puppy')];
+const GOAL = { ...GOALS[opt('--brief', 'puppy')] };
+// s3, the look the person asked for (probe-look.mjs: E2B names it in 16 of 16 requests that say it). `minimal` is w6's
+// hero; `stylish` adds the composition hero's moves: a small line above the headline, a dark brand ground, white words,
+// a bold headline, a white pill button (OWN-029 G-plumber r4's hero, read param by param)
+const REQUEST = opt('--request', EDIT.request);
+// `--style auto` asks the builder model which look the request names (lookq.mjs), before turn 1; the answer is ledgered
+const LOOK_ASKED = (opt('--style', EDIT.style) === 'auto') ? await (await import('./lookq.mjs')).lookOf(MODEL, REQUEST || GOAL.about) : null;
+const STYLE = LOOK_ASKED ? LOOK_ASKED.style : opt('--style', EDIT.style || 'minimal');
+if (REQUEST) GOAL.about = REQUEST;
+if (STYLE === 'stylish') GOAL.want = 'a small line above the headline, a headline, one line under it, a button, and a photo on the right, all on a dark brand-colour ground';
 
 // ─── The vocabulary: what can be added, and every setting with its closed options ───────────────────────────────
 const sp = (n) => (n === 0 ? '0px' : `var(--space-${n})`);
@@ -88,7 +97,8 @@ export const SETTINGS = {
     weight: { say: 'how heavy the words are', options: { normal: { fontWeight: undefined }, semibold: { fontWeight: 'var(--font-semibold)' }, bold: { fontWeight: 'var(--font-bold)' } } },
     'text align': { say: 'how the lines of words line up', options: { left: { textAlignX: 'left' }, centre: { textAlignX: 'center' } } },
     colour: { say: 'the colour of the words', options: Object.fromEntries(Object.entries(colour).map(([k, v]) => [k, { color: v }])) },
-    'max width': { say: 'how wide the lines may run', options: Object.fromEntries([['none', undefined], ['480px', 480], ['560px', 560], ['640px', 640]].map(([k, n]) => [k, { maxWidth: n && { value: n, unit: 'px' } }])) }
+    'max width': { say: 'how wide the lines may run', options: Object.fromEntries([['none', undefined], ['480px', 480], ['560px', 560], ['640px', 640]].map(([k, n]) => [k, { maxWidth: n && { value: n, unit: 'px' } }])) },
+    ...(STYLE === 'stylish' ? { style: { say: 'what kind of line it is', options: { plain: { textTransform: undefined, letterSpacing: undefined }, 'small capitals': { fontSize: 'var(--text-xs)', textTransform: 'uppercase', letterSpacing: 'var(--tracking-widest)', fontWeight: 'var(--font-semibold)' } } } } : {})
   },
   Image: {
     height: { say: 'how tall the photo is', options: Object.fromEntries([240, 320, 400, 480].map((n) => [`${n}px`, { height: { value: n, unit: 'px' } }])) },
@@ -171,14 +181,14 @@ async function judge(q, png) {
 //   ownerNamed    a spacing finding names the part that owns the space and its setting now (s1's outline probe: E2B
 //                 finds parts, never which part owns a space): "n00 (the whole section) has padding left and right: none"
 // The touching / edge thresholds are not rules: bench.mjs FACTS fixes them (4 px, 8 px), and probe-vision's key with them.
-const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false, roles: false }, ...(EDIT.rules || {}) };
+const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false, roles: false, endGate: false }, ...(EDIT.rules || {}) };
 // roles (s2, after w4-t15a): each part is told what it is when it is added, and keeps it through moves and removes;
 // the shape checks read the roles, never the document order (t15a: a move made the headline texts[1], and the size
 // fix went to the other Text, so the hero ended with two headlines and no line under them)
-const ROLE_SAY = { headline: 'the headline', line: 'the line under the headline', button: 'the button', photo: 'the photo' };
-const roleFor = (n, kind) => { const has = (r) => n.some((x) => x.role === r); if (kind === 'Text') return !has('headline') ? 'headline' : !has('line') ? 'line' : ''; if (kind === 'Button') return has('button') ? '' : 'button'; if (kind === 'Image') return has('photo') ? '' : 'photo'; return ''; };
+const ROLE_SAY = { eyebrow: 'the small line above the headline', headline: 'the headline', line: 'the line under the headline', button: 'the button', photo: 'the photo' };
+const roleFor = (n, kind) => { const has = (r) => n.some((x) => x.role === r); if (kind === 'Text') return !has('headline') ? 'headline' : !has('line') ? 'line' : STYLE === 'stylish' && !has('eyebrow') ? 'eyebrow' : ''; if (kind === 'Button') return has('button') ? '' : 'button'; if (kind === 'Image') return has('photo') ? '' : 'photo'; return ''; };
 const byRole = (n, r) => { const i = n.findIndex((x) => x.role === r); return i < 0 ? undefined : i; };
-const missingKinds = (nodes) => { const k = nodes.map(kindOf); return [...(k.filter((x) => x === 'Text').length < 2 ? ['Text'] : []), ...(k.includes('Button') ? [] : ['Button']), ...(k.includes('Image') ? [] : ['Image'])]; };
+const missingKinds = (nodes) => { const k = nodes.map(kindOf); return [...(k.filter((x) => x === 'Text').length < (STYLE === 'stylish' ? 3 : 2) ? ['Text'] : []), ...(k.includes('Button') ? [] : ['Button']), ...(k.includes('Image') ? [] : ['Image'])]; };
 export function findingsFrom(shot, nodes) {
   const out = [];
   const q = (s) => `"${s.length > 30 ? `${s.slice(0, 28)}…` : s}"`;
@@ -211,9 +221,9 @@ export function findingsFrom(shot, nodes) {
   const seen = new Map();
   for (const f of out) { const k = f.say.replace(/^On a (desktop|phone), /, ''); if (seen.has(k)) seen.get(k).say = seen.get(k).say.replace(/^On a (desktop|phone), /, 'On both, '); else seen.set(k, f); }
   const kinds = nodes.map(kindOf);
-  const missing = [['a headline', kinds.filter((k) => k === 'Text').length >= 1], ['a line under the headline', kinds.filter((k) => k === 'Text').length >= 2], ['a button', kinds.includes('Button')], ['a photo', kinds.includes('Image')]].filter(([, has]) => !has).map(([s]) => s);
+  const missing = [['a headline', kinds.filter((k) => k === 'Text').length >= 1], ['a line under the headline', kinds.filter((k) => k === 'Text').length >= 2], ...(STYLE === 'stylish' ? [['a small line above the headline', kinds.filter((k) => k === 'Text').length >= 3]] : []), ['a button', kinds.includes('Button')], ['a photo', kinds.includes('Image')]].filter(([, has]) => !has).map(([s]) => s);
   const res = [...seen.values()];
-  const KIND_OF = { 'a headline': 'a Text', 'a line under the headline': 'a Text', 'a button': 'a Button', 'a photo': 'an Image' };
+  const KIND_OF = { 'a small line above the headline': 'a Text', 'a headline': 'a Text', 'a line under the headline': 'a Text', 'a button': 'a Button', 'a photo': 'an Image' };
   if (RULES.shapeChecks && root >= 0) {
     // document order: a part's children in the order they were added
     const order = []; const walk = (i) => { order.push(i); kidsOf(nodes, i).forEach(walk); }; walk(root);
@@ -233,19 +243,45 @@ export function findingsFrom(shot, nodes) {
     }
     if (h !== undefined && !big.some((t) => nodes[h].params.fontSize === `var(--${t})`)) res.push({ check: 'hierarchy', say: `The headline ${name(h)} is the size of ordinary words (${currentOf(nodes[h], 'size')}): it does not stand out.`, fix: { node: h, setting: 'size', bigger: true, say: `make ${name(h)} bigger (the headline does not stand out; now: ${currentOf(nodes[h], 'size')})` } });
     if (kindOf(nodes[root]) === 'Group' && !nodes[root].params.paddingTop) res.push({ check: 'airY', say: `The section ${name(root)} has no space above and below its parts: the words touch its top.`, fix: { node: root, setting: 'padding top and bottom', say: `give ${name(root)} padding top and bottom (no space above and below; now: ${currentOf(nodes[root], 'padding top and bottom')})` } });
-    if (h !== undefined && line !== undefined && leaves[leaves.indexOf(h) + 1] !== line) res.push({ check: 'order', say: `The line under the headline (${name(line)}) is not straight under it: ${name(leaves[leaves.indexOf(h) + 1])} comes between them.` });
+    if (h !== undefined && line !== undefined && leaves[leaves.indexOf(h) + 1] !== line) {
+      // with roles the order is a fix too: the line goes into the headline's parent, straight after it
+      const sib = kidsOf(nodes, nodes[h].parent), next = sib[sib.indexOf(h) + 1];
+      res.push({ check: 'order', say: `The line under the headline (${name(line)}) is not straight under it: ${name(leaves[leaves.indexOf(h) + 1])} comes between them.`, fix: RULES.roles ? { act: { kind: 'move', node: line, into: nodes[h].parent, before: next === line ? undefined : next }, say: `move ${name(line)} straight under the headline ${name(h)}` } : undefined });
+    }
     if (img !== undefined && h !== undefined) {
       const up2 = (i) => { const a = []; for (let q = nodes[i].parent; q >= 0; q = nodes[q].parent) a.push(q); return a; };
       const cols = up2(img).find((c) => kindOf(nodes[c]) === 'Columns' && up2(h).includes(c));
       const kids = cols === undefined ? [] : kidsOf(nodes, cols);
       const side = (i) => kids.findIndex((k) => k === i || up2(i).includes(k));
-      const words = [h, line, btn];
+      const eb = RULES.roles ? byRole(nodes, 'eyebrow') : undefined;
+      const words = [...(eb !== undefined ? [eb] : []), h, line, btn];
       if (cols === undefined || side(h) !== 0 || side(img) !== 1) res.push({ check: 'photoRight', say: `The photo ${name(img)} is not on the right of the words: for that, one Columns must hold the words in its first column and the photo in its second.`, fix: structureStep(nodes, root, words, img) });
       else if (RULES.roles && words.some((x) => x !== undefined && side(x) !== 0)) { const out = words.filter((x) => x !== undefined && side(x) !== 0); res.push({ check: 'together', say: `${out.map((x) => `${ROLE_SAY[nodes[x].role]} ${name(x)}`).join(' and ')} ${out.length > 1 ? 'are' : 'is'} not in the words column, beside the photo.`, fix: structureStep(nodes, root, words, img) }); }
     }
+    if (RULES.roles && STYLE === 'stylish') {
+      // each fix offers only the values the look asks for (`only`), so the model takes the fix or leaves it
+      const eb = byRole(nodes, 'eyebrow'), dark = ['dark brand gradient', 'brand colour'];
+      if (kindOf(nodes[root]) === 'Group' && !dark.includes(currentOf(nodes[root], 'ground'))) res.push({ check: 'ground', say: `The section ${name(root)} is on a plain ground: the look asked for is bold, on a dark brand-colour ground.`, fix: { node: root, setting: 'ground', only: dark, say: `give ${name(root)} a dark brand-colour ground (the look asked for is bold; now: ${currentOf(nodes[root], 'ground')})` } });
+      else {
+        for (const i of [eb, h, line]) if (i !== undefined && currentOf(nodes[i], 'colour') !== 'white text') res.push({ check: 'onDark', say: `${ROLE_SAY[nodes[i].role]} ${name(i)} is not white on the dark ground.`, fix: { node: i, setting: 'colour', only: ['white text'], say: `make ${name(i)} white (it sits on the dark ground; now: ${currentOf(nodes[i], 'colour')})` } });
+        if (btn !== undefined && currentOf(nodes[btn], 'colours') !== 'white fill, brand words') res.push({ check: 'buttonOnDark', say: `The button ${name(btn)} disappears into the dark ground.`, fix: { node: btn, setting: 'colours', only: ['white fill, brand words'], say: `give ${name(btn)} a white fill (it sits on the dark ground; now: ${currentOf(nodes[btn], 'colours')})` } });
+      }
+      if (h !== undefined && currentOf(nodes[h], 'weight') !== 'bold') res.push({ check: 'headlineWeight', say: `The headline ${name(h)} is not bold: the look asked for has a big, heavy headline.`, fix: { node: h, setting: 'weight', only: ['bold'], say: `make ${name(h)} bold (the look asked for has a heavy headline; now: ${currentOf(nodes[h], 'weight')})` } });
+      if (btn !== undefined && currentOf(nodes[btn], 'corners') !== 'pill') res.push({ check: 'buttonShape', say: `The button ${name(btn)} has square-ish corners: the look asked for has a pill button.`, fix: { node: btn, setting: 'corners', only: ['pill'], say: `make ${name(btn)} a pill (now: ${currentOf(nodes[btn], 'corners')})` } });
+      if (eb !== undefined && currentOf(nodes[eb], 'style') !== 'small capitals') res.push({ check: 'eyebrowStyle', say: `${ROLE_SAY.eyebrow} ${name(eb)} looks like ordinary words: it should be small capitals.`, fix: { node: eb, setting: 'style', only: ['small capitals'], say: `make ${name(eb)} small capitals (it is the small line above the headline; now: ${currentOf(nodes[eb], 'style')})` } });
+      if (eb !== undefined && h !== undefined && nodes[eb].parent === nodes[h].parent && leaves[leaves.indexOf(h) - 1] !== eb) res.push({ check: 'eyebrowOrder', say: `${ROLE_SAY.eyebrow} ${name(eb)} is not straight above the headline.`, fix: { act: { kind: 'move', node: eb, into: nodes[h].parent, before: h }, say: `move ${name(eb)} straight above the headline ${name(h)}` } });
+    }
   }
   if (!missing.length && RULES.goalLine) res.unshift({ check: 'goalMet', say: 'Every part of the goal is there. What is left is how it looks: the findings below.' });
-  if (missing.length) res.unshift({ check: 'goal', say: `Not there yet: ${missing.map((s) => (RULES.namedGoal ? `${s} (${KIND_OF[s]})` : s)).join(', ')}.` });
+  // with roles, the first missing part is its own fix (w7s-puppy: with a Button missing for 30 turns, "which kind?" gave
+  // Group 0.50–0.59 and Button 0.03–0.05; the same cure as 5b). Words go in the words column once there is one.
+  const addFix = () => {
+    const kind = KIND_OF[missing[0]].split(' ')[1];
+    const C = kidsOf(nodes, root).find((i) => kindOf(nodes[i]) === 'Columns'), c1 = C === undefined ? undefined : kidsOf(nodes, C)[0];
+    const inside = kind !== 'Image' && c1 !== undefined && kindOf(nodes[c1]) === 'Group' ? c1 : root;
+    return { act: { kind: 'add', what: kind, inside }, say: `add ${missing[0]} (${KIND_OF[missing[0]]}) inside ${name(inside)}: the goal still lacks it` };
+  };
+  if (missing.length) res.unshift({ check: 'goal', say: `Not there yet: ${missing.map((s) => (RULES.namedGoal ? `${s} (${KIND_OF[s]})` : s)).join(', ')}.`, fix: RULES.roles && root >= 0 ? addFix() : undefined });
   if (RULES.emptyParts) {
     const empty = nodes.map((n, i) => i).filter((i) => KINDS[kindOf(nodes[i])].holds && !nodes.some((m) => m.parent === i));
     if (empty.length) res.push({ check: 'empty', fix: empty.some((i) => i !== root) && !res.some((f) => f.check === 'photoRight' || f.check === 'together') ? { act: { kind: 'remove', nodes: empty.filter((i) => i !== root) }, say: `remove the empty parts ${empty.filter((i) => i !== root).map(name).join(', ')} (they show nothing)` } : undefined, say: `${empty.map(name).join(', ')} ${empty.length > 1 ? 'are' : 'is'} empty: ${empty.length > 1 ? 'they show' : 'it shows'} nothing until something is put inside.` });
@@ -273,8 +309,11 @@ function structureStep(nodes, root, words, img) {
     if (kindOf(nodes[c2]) === 'Group' && !kidsOf(nodes, c2).length) return { act: { kind: 'move', node: img, into: c2 }, say: `move the photo ${name(img)} into ${name(c2)}, the second column of ${name(C)}` };
     return undefined;
   }
-  const what = ['the headline', 'the line under it', 'the button'];
-  for (const [k, x] of words.entries()) if (x !== undefined && !under(x, c1)) return { act: { kind: 'move', node: x, into: c1 }, say: `move ${what[k]} ${name(x)} into ${name(c1)}, the words column` };
+  for (const x of words) if (x !== undefined && !under(x, c1)) {
+    const h = words.find((y) => nodes[y]?.role === 'headline');
+    const before = nodes[x].role === 'eyebrow' && h !== undefined && nodes[h].parent === c1 ? h : undefined;
+    return { act: { kind: 'move', node: x, into: c1, before }, say: `move ${ROLE_SAY[nodes[x].role] || 'the part'} ${name(x)} into ${name(c1)}, the words column${before !== undefined ? ', above the headline' : ''}` };
+  }
   return undefined;
 }
 
@@ -299,7 +338,7 @@ async function decide(state, turn, findings, T) {
   const canTake = (i) => KINDS[kindOf(n[i])].holds && !(kindOf(n[i]) === 'Columns' && n.filter((x) => x.parent === i).length >= 2);
   const takers = n.map((x, i) => i).filter(canTake);
   const moves = [...(!RULES.legalOnly || !n.length || takers.length ? [['add', 'add a part (a Group, Columns, Text, Image or Button) inside a part']] : []), ...(n.length ? [['set', 'change one setting of a part']] : []),
-    ...(writable.length ? [['write', 'write the words of a Text or a Button']] : []), ...(state.history.length ? [['undo', 'undo your last step']] : []), ['done', 'stop: the section is finished']];
+    ...(writable.length ? [['write', 'write the words of a Text or a Button']] : []), ...(state.history.length ? [['undo', 'undo your last step']] : []), ...(RULES.endGate && findings.some((f) => f.fix) ? [] : [['done', 'stop: the section is finished']])];
   if (RULES.fixMenu) moves.unshift(...[...new Map(findings.filter((f) => f.fix).map((f) => [`${f.fix.node}|${f.fix.setting}`, f.fix])).values()].map((f) => ['fix', f.say, f]));
   const menu = moves.map(([k, s], i) => `${i + 1}. ${s}`).join('\n');
   const move = await choose('move', `${ctx}\n\n${EDIT.menuWording || 'What do you do next? Pick one:'}\n${menu}`, moves.map((_, i) => String(i + 1)), T);
@@ -311,7 +350,7 @@ async function decide(state, turn, findings, T) {
     // little space (t14a: "set gap of n00 to none" 16 times, P(none) 1.00, "none" listed first and equal to "not set")
     const f = moves[Number(move) - 1][2], k = kindOf(n[f.node]), now = currentOf(n[f.node], f.setting);
     const all = Object.keys(SETTINGS[k][f.setting].options);
-    const opts = f.bigger ? all.slice(all.indexOf(now) + 1) : f.smaller ? all.slice(all.indexOf(f.floor || 'text-base'), all.indexOf(now)).reverse() : all.filter((o) => o !== now && !(o === 'none' && f.setting !== 'self align'));
+    const opts = f.only ? f.only.filter((o) => o !== now) : f.bigger ? all.slice(all.indexOf(now) + 1) : f.smaller ? all.slice(all.indexOf(f.floor || 'text-base'), all.indexOf(now)).reverse() : all.filter((o) => o !== now && !(o === 'none' && f.setting !== 'self align'));
     const why = f.say.match(/\(([^;]*);/)?.[1];
     const value = await choose('set.value', `${ctx}\n\nYou are fixing this: ${why}. You are changing "${f.setting}" of ${name(f.node)} (${k}): ${SETTINGS[k][f.setting].say}. It is now: ${now}. Change it to:`, opts, T);
     return { kind: 'set', node: f.node, setting: f.setting, value, via: 'fix', say: `set ${f.setting} of ${name(f.node)} to ${value} (a fix from the menu)` };
@@ -348,7 +387,7 @@ async function decide(state, turn, findings, T) {
   }
 }
 
-const writeAsk = (ctx, n, i) => { const k = kindOf(n[i]); return `${ctx}\n\nWrite the words of ${name(i)} (${k}) for "${GOAL.name}". ${k === 'Button' ? 'Two to four words, a verb first.' : RULES.roles && n[i].role === 'headline' ? 'This is the headline: three to seven words a visitor reads first, never a description of the page.' : RULES.roles && n[i].role === 'line' ? 'This is the line under the headline: one sentence of ten to twenty words that says what a visitor gets here. It must not repeat the headline.' : 'One headline or one sentence: what a visitor reads, never a description of the page.'}`; };
+const writeAsk = (ctx, n, i) => { const k = kindOf(n[i]); return `${ctx}\n\nWrite the words of ${name(i)} (${k}) for "${GOAL.name}". ${k === 'Button' ? 'Two to four words, a verb first.' : RULES.roles && n[i].role === 'eyebrow' ? 'This is the small line above the headline: two to four words that name what this place is. It must not repeat the headline.' : RULES.roles && n[i].role === 'headline' ? 'This is the headline: three to seven words a visitor reads first, never a description of the page.' : RULES.roles && n[i].role === 'line' ? 'This is the line under the headline: one sentence of ten to twenty words that says what a visitor gets here. It must not repeat the headline.' : 'One headline or one sentence: what a visitor reads, never a description of the page.'}`; };
 
 function apply(state, a) {
   const n = state.nodes;
@@ -369,7 +408,7 @@ function apply(state, a) {
     if (!KINDS[kindOf(n[a.into])]?.holds) return `${name(a.into)} cannot hold parts.`;
     if (under(a.into, a.node)) return `${name(a.into)} is inside ${name(a.node)}.`;
     if (kindOf(n[a.into]) === 'Columns' && n.filter((x, j) => x.parent === a.into && j !== a.node).length >= 2) return `${name(a.into)} (Columns) already holds its two columns.`;
-    n[a.node].parent = a.into; n[a.node].seq = Math.max(...n.map((x, j) => x.seq ?? j)) + 1;
+    n[a.node].parent = a.into; n[a.node].seq = a.before !== undefined ? (n[a.before].seq ?? a.before) - 0.5 : Math.max(...n.map((x, j) => x.seq ?? j)) + 1;
   }
   if (a.kind === 'wrap') {
     // a new Group takes the part's place among its siblings, and the part goes inside it
@@ -398,7 +437,7 @@ function apply(state, a) {
 
 // ─── The run ─────────────────────────────────────────────────────────────────────────────────────────────────────
 fs.mkdirSync(OUT, { recursive: true });
-const ledger = { run: RUN, brief: opt('--brief', 'puppy'), bench: BENCH, goal: GOAL, model: MODEL, judge: JUDGE, look: LOOK, turnsCap: TURNS, rules: RULES, edit: EDIT, startedAt: new Date().toISOString(),
+const ledger = { style: STYLE, lookAsked: LOOK_ASKED || undefined, request: REQUEST, run: RUN, brief: opt('--brief', 'puppy'), bench: BENCH, goal: GOAL, model: MODEL, judge: JUDGE, look: LOOK, turnsCap: TURNS, rules: RULES, edit: EDIT, startedAt: new Date().toISOString(),
   fork: REPLAY ? { from: REPLAY.run, upto: UPTO, override: OVERRIDE, hint: HINT, force: FORCE, prompt: Object.keys(PROMPT).length ? PROMPT : undefined } : undefined,
   // what the viewer's "edit and re-run" asked for, in its own words (server.mjs writes it before starting the run)
   surgery: fs.existsSync(path.join(OUT, 'surgery.json')) ? JSON.parse(fs.readFileSync(path.join(OUT, 'surgery.json'), 'utf8')) : undefined, turns: [] };
@@ -438,8 +477,13 @@ try {
     } else if (refused) findings = [{ check: 'refused', say: `Your last step was refused: ${refused}` }, ...findings.filter((f) => f.check !== 'refused')];
     T.findingsOut = findings;
     delete T.forced;
+    // endGate (s3): "done" waits while a finding has a fix (w9s-plumber said done with the photo still below the words),
+    // and the run ends itself once every part is there and nothing left has a fix (both w9 bakery runs spent 15 turns on
+    // the kit's contrast, which no move can reach)
+    if (RULES.endGate && findings.some((f) => f.check === 'goalMet') && !findings.some((f) => f.fix)) T.ended = `nothing on the menu fixes what is left (${findings.filter((f) => f.check !== 'goalMet').map((f) => f.check).join(', ') || 'nothing'})`;
     ledger.turns.push(T);
     save();
+    if (T.ended) { console.log(`turn ${turn}: ${action.say} | ended: ${T.ended}`); break; }
     console.log(`turn ${turn}: ${action.say}${refused ? ` — REFUSED: ${refused}` : ''} | ${findings.length} findings | ${T.calls.reduce((s, c) => s + (c.replayed ? 0 : c.ms || 0), 0)} ms model`);
   }
 } finally {
@@ -448,7 +492,7 @@ try {
   for (const m of used) await fetch(`${OLLAMA}/api/generate`, { method: 'POST', body: JSON.stringify({ model: m, keep_alive: 0 }) }).catch(() => {});
 }
 ledger.endedAt = new Date().toISOString();
-ledger.end = { turns: ledger.turns.length, done: ledger.turns.at(-1)?.action.kind === 'done', nodes: state.nodes.length, findings };
+ledger.end = { turns: ledger.turns.length, done: ledger.turns.at(-1)?.action.kind === 'done', ended: ledger.turns.at(-1)?.ended, nodes: state.nodes.length, findings };
 save();
 console.log(JSON.stringify(ledger.end));
 

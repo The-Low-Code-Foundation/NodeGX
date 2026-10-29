@@ -102,7 +102,10 @@ export const FACTS = `(() => {
 // 900 px tall, and a short hero would otherwise come with a band of empty white below it in every shot.
 const HEIGHT = `(() => { let h = 0; for (const e of document.body.querySelectorAll('*')) { const s = getComputedStyle(e), r = e.getBoundingClientRect();
   if (!r.height || s.display === 'none' || s.visibility === 'hidden') continue;
-  const painted = (s.backgroundColor && !/rgba\\(0, 0, 0, 0\\)|transparent/.test(s.backgroundColor)) || s.backgroundImage !== 'none' || /^(IMG|BUTTON|INPUT|TEXTAREA|SELECT)$/.test(e.tagName) || [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
+  const painted = (s.backgroundColor && !/rgba\\(0, 0, 0, 0\\)|transparent/.test(s.backgroundColor)) || s.backgroundImage !== 'none' || /^(IMG|BUTTON|INPUT|TEXTAREA|SELECT)$/.test(e.tagName) || [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())
+    // a section with no ground still owns its bottom padding: cropping at the last painted part cut it off (w6: Richard saw
+    // "Adopt Now" on the bottom edge, as if the hero had no padding, though it had space-24)
+    || parseFloat(s.paddingBottom) > 0;
   if (painted) h = Math.max(h, r.bottom + scrollY); }
   return Math.min(Math.max(Math.ceil(h), 120), 6000); })()`;
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));

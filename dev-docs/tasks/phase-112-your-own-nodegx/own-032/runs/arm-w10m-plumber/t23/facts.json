@@ -1,0 +1,112 @@
+{
+ "htmlMs": 615,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Expert Plumbing Services",
+     "x": 32,
+     "y": 96,
+     "w": 511,
+     "h": 170,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Reliable and professional plumbing solut",
+     "x": 32,
+     "y": 314,
+     "w": 518,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Fix the leak",
+     "x": 32,
+     "y": 380,
+     "w": 108,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:52997/",
+   "blank": false,
+   "words": 16,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 512
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Expert Plumbing Services",
+     "x": 32,
+     "y": 96,
+     "w": 261,
+     "h": 86,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Reliable and professional plumbing solut",
+     "x": 32,
+     "y": 230,
+     "w": 326,
+     "h": 36,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Fix the leak",
+     "x": 32,
+     "y": 314,
+     "w": 108,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:52997/",
+   "blank": false,
+   "words": 16,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 779
+ },
+ "ms": 3293
+}

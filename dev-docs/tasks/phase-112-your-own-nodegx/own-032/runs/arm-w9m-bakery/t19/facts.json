@@ -1,0 +1,144 @@
+{
+ "htmlMs": 114,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [
+    {
+     "a": "Maison Levain: Artisanal baking from our",
+     "b": "Handcrafted breads and pastries made wit",
+     "gap": 0
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Bake Now",
+     "ratio": 3.19
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "button",
+     "text": "Bake Now",
+     "x": 32,
+     "y": 96,
+     "w": 97,
+     "h": 34,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Maison Levain: Artisanal baking from our",
+     "x": 32,
+     "y": 146,
+     "w": 549,
+     "h": 372,
+     "lines": 4
+    },
+    {
+     "kind": "words",
+     "text": "Handcrafted breads and pastries made wit",
+     "x": 32,
+     "y": 518,
+     "w": 499,
+     "h": 21,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63851/",
+   "blank": false,
+   "words": 21,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Bake Now",
+     "ratio": 3.19
+    }
+   ],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 635
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [
+    {
+     "a": "Maison Levain: Artisanal baking from our",
+     "b": "Handcrafted breads and pastries made wit",
+     "gap": 0
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Bake Now",
+     "ratio": 3.19
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "button",
+     "text": "Bake Now",
+     "x": 32,
+     "y": 96,
+     "w": 97,
+     "h": 34,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Maison Levain: Artisanal baking from our",
+     "x": 32,
+     "y": 146,
+     "w": 275,
+     "h": 188,
+     "lines": 4
+    },
+    {
+     "kind": "words",
+     "text": "Handcrafted breads and pastries made wit",
+     "x": 32,
+     "y": 334,
+     "w": 296,
+     "h": 42,
+     "lines": 2
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63851/",
+   "blank": false,
+   "words": 21,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Bake Now",
+     "ratio": 3.19
+    }
+   ],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 808
+ },
+ "ms": 2368
+}

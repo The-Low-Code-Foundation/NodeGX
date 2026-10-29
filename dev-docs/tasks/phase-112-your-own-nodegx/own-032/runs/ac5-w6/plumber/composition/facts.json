@@ -1,5 +1,5 @@
 {
- "htmlMs": 221,
+ "htmlMs": 93,
  "desktop": {
   "facts": {
    "width": 1280,
@@ -50,7 +50,7 @@
    ]
   },
   "checks": {
-   "url": "http://127.0.0.1:61343/",
+   "url": "http://127.0.0.1:62483/",
    "blank": false,
    "words": 23,
    "overflowX": 0,
@@ -113,7 +113,7 @@
    ]
   },
   "checks": {
-   "url": "http://127.0.0.1:61343/",
+   "url": "http://127.0.0.1:62483/",
    "blank": false,
    "words": 23,
    "overflowX": 0,
@@ -126,5 +126,5 @@
   },
   "height": 481
  },
- "ms": 2703
+ "ms": 2341
 }

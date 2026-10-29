@@ -1,0 +1,130 @@
+{
+ "htmlMs": 104,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Welcome to a loving home where your new ",
+     "x": 32,
+     "y": 96,
+     "w": 586,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Adopt Now",
+     "x": 32,
+     "y": 166,
+     "w": 105,
+     "h": 35,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Your Journey Starts Here",
+     "x": 32,
+     "y": 249,
+     "w": 201,
+     "h": 16,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Find Your Perfect Puppy",
+     "x": 32,
+     "y": 313,
+     "w": 439,
+     "h": 384,
+     "lines": 3
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63456/",
+   "blank": false,
+   "words": 24,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 793
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Welcome to a loving home where your new ",
+     "x": 32,
+     "y": 96,
+     "w": 316,
+     "h": 44,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Adopt Now",
+     "x": 32,
+     "y": 188,
+     "w": 105,
+     "h": 35,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Your Journey Starts Here",
+     "x": 32,
+     "y": 271,
+     "w": 201,
+     "h": 16,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Find Your Perfect Puppy",
+     "x": 32,
+     "y": 335,
+     "w": 290,
+     "h": 122,
+     "lines": 2
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63456/",
+   "blank": false,
+   "words": 24,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 889
+ },
+ "ms": 2426
+}
