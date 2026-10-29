@@ -1,7 +1,7 @@
 ---
 id: P123-STU008-APPCHECKPUBLISH
 title: Studio's app gate stops at Publish, which never answers, so check:app reads 26/30 at HEAD
-status: fixed
+status: open
 commit: nodegx-studio d0d16b2 (not reproduced; see the last section)
 severity: medium
 area: nodegx-studio `app/check.mjs` step 3b (STU-008 Publish through the header button)
@@ -27,3 +27,10 @@ Next: run 3b with the app's stdout shown (the gate keeps `running.log()`), and r
 `check:app` **54/54** at nodegx-studio d0d16b2 (pins @nodegx/mcp 0.2.6, @nodegx/preview 0.2.5, vendor/ at NodeGX
 2cac89c05), run alone under HEAVY.lock with nothing else on the box. The pins are the only change from the 26/30
 trees; the cause was not identified. If 3b stops at Publish again, reopen this with the app's stdout.
+
+## Seen again, 2026-10-30 (STU-090, opennoodl-33)
+
+`check:app` 36/40 on the STU-090 tree, the same four rows: "clicking it publishes the open app to the folder chosen —
+{}", the next two, and "the gate ran to the end — ENOENT … user-data/published-sites.json". STU-090 does not touch
+Publish (its diff names publish only in package.json's script names). Load average 16–20 during the run (peers' work).
+Not re-measured at the base commit in a clean worktree, so whether it is load or a defect is still open.
