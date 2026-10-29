@@ -59,6 +59,17 @@ const REQUEST = opt('--request', EDIT.request);
 // `--style auto` asks the builder model which look the request names (lookq.mjs), before turn 1; the answer is ledgered
 const LOOK_ASKED = (opt('--style', EDIT.style) === 'auto') ? await (await import('./lookq.mjs')).lookOf(MODEL, REQUEST || GOAL.about) : null;
 const STYLE = LOOK_ASKED ? LOOK_ASKED.style : opt('--style', EDIT.style || 'minimal');
+const ASK_BAND = opt('--ask-band') ? opt('--ask-band').split(',').map(Number) : EDIT.askBand;
+if (ASK_BAND && LOOK_ASKED && LOOK_ASKED.pStylish > ASK_BAND[0] && LOOK_ASKED.pStylish < ASK_BAND[1]) {
+  // the request does not say which look: nothing is built, and the question goes back to the person
+  const out = path.join(HERE, 'runs', `arm-${RUN}`);
+  fs.mkdirSync(out, { recursive: true });
+  const end = { ask: 'clean or bold?', pStylish: LOOK_ASKED.pStylish, band: ASK_BAND };
+  fs.writeFileSync(path.join(out, 'ledger.json'), JSON.stringify({ run: RUN, request: REQUEST, lookAsked: LOOK_ASKED, edit: EDIT, turns: [], end, at: new Date().toISOString() }, null, 1));
+  await fetch('http://127.0.0.1:11434/api/generate', { method: 'POST', body: JSON.stringify({ model: MODEL, keep_alive: 0 }) }).catch(() => {});
+  console.log(JSON.stringify(end));
+  process.exit(0);
+}
 if (REQUEST) GOAL.about = REQUEST;
 if (STYLE === 'stylish') GOAL.want = 'a small line above the headline, a headline, one line under it, a button, and a photo on the right, all on a dark brand-colour ground';
 
@@ -189,6 +200,10 @@ async function judge(q, png) {
 //   blankRetry    the bench measures a page that reads blank again, up to 3 times (bench.mjs retryBlank): w11m-jazz
 //                 ended by endGate on a desktop shot taken before the page drew (P112-OWN032-BLANKSHOT); a shot still
 //                 blank after that, with words in the tree, is ledgered (`blank`) and cannot end the run
+//   askBand       (edit.askBand [lo, hi], or --ask-band lo,hi; with --style auto) when the look question's mean P(stylish)
+//                 falls inside the band, the arm stops before turn 1 and returns "ask: clean or bold?" — in the product,
+//                 the client asks the person. 8d: E2B puts every request that NAMES a look at ≤ 0.001 or ≥ 0.91, and
+//                 20 plain ones at 0.11–0.70, so the band decides "did they say?", not "which way do they lean"
 // The touching / edge thresholds are not rules: bench.mjs FACTS fixes them (4 px, 8 px), and probe-vision's key with them.
 const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false, roles: false, endGate: false, addWhileMissing: false, shortHeadline: false, blankRetry: false }, ...(EDIT.rules || {}) };
 // roles (s2, after w4-t15a): each part is told what it is when it is added, and keeps it through moves and removes;

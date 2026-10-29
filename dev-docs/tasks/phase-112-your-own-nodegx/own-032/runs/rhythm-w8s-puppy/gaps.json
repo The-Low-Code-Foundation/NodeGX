@@ -1,0 +1,50 @@
+{
+ "before": {
+  "desktop": [
+   "Your Journey S → Find Your Perf: 48px",
+   "Find Your Perf → Welcome to a l: 48px",
+   "Welcome to a l → Adopt Now: 48px"
+  ],
+  "phone": [
+   "Your Journey S → Find Your Perf: 48px",
+   "Find Your Perf → Welcome to a l: 48px",
+   "Welcome to a l → Adopt Now: 48px"
+  ]
+ },
+ "together": {
+  "desktop": [
+   "Your Journey S → Find Your Perf: 8px",
+   "Find Your Perf → Welcome to a l: 48px",
+   "Welcome to a l → Adopt Now: 48px"
+  ],
+  "phone": [
+   "Your Journey S → Find Your Perf: 8px",
+   "Find Your Perf → Welcome to a l: 48px",
+   "Welcome to a l → Adopt Now: 48px"
+  ]
+ },
+ "pairs": {
+  "desktop": [
+   "Your Journey S → Find Your Perf: 8px",
+   "Find Your Perf → Welcome to a l: 24px",
+   "Welcome to a l → Adopt Now: 40px"
+  ],
+  "phone": [
+   "Your Journey S → Find Your Perf: 8px",
+   "Find Your Perf → Welcome to a l: 24px",
+   "Welcome to a l → Adopt Now: 40px"
+  ]
+ },
+ "medium": {
+  "desktop": [
+   "Your Journey S → Find Your Perf: 16px",
+   "Find Your Perf → Welcome to a l: 16px",
+   "Welcome to a l → Adopt Now: 24px"
+  ],
+  "phone": [
+   "Your Journey S → Find Your Perf: 16px",
+   "Find Your Perf → Welcome to a l: 16px",
+   "Welcome to a l → Adopt Now: 24px"
+  ]
+ }
+}

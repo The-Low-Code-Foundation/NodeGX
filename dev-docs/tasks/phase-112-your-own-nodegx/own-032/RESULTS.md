@@ -472,3 +472,55 @@ words. No w12 shot stayed blank with words in the tree.
 drew". So early turns with a three-word placeholder tripped the retry (3 × 700 ms each) and the `blank` mark. Neither
 changed a finding, because a retry re-measures a page that has already settled. The retry and the guard now ask for
 `words === 0`, which picks out exactly the same 11 shots of 1003 as "one width blank while the other has words".
+
+### 8c. Spacing rhythm in the stylish words column — pictures made, waiting on Richard's eye
+
+`rhythm.mjs` renders w8s-puppy's last tree on the puppy bench, as the arm left it and with three candidates applied
+by hand. No arm code changes until Richard picks one. Gaps measured between the word blocks, desktop and phone alike:
+
+| variant | small line → headline | headline → line | line → button |
+|---|---|---|---|
+| `before` (the arm's one "huge" gap) | 48 px | 48 | 48 |
+| `together`: the small line and the headline in a Group of their own, gap small | **8** | 48 | 48 |
+| `pairs`: the column gap small, then margins on the line and the button | **8** | 24 | 40 |
+| `medium`: the composition hero's rhythm (G-plumber r4), one medium gap and 8 px more before the button | 16 | 16 | 24 |
+
+Pictures: `runs/rhythm-w8s-puppy/<variant>/{desktop,phone}.png`.
+
+### 8d. Ask when the request doesn't say (`probe-look.mjs --set plain`)
+
+Twenty requests that name no look, written into `probe-look.mjs` (`PLAIN`) before any model saw them: five trades,
+five shops, five clubs and five events. The same question as §7a, E2B at T 0, in both option orders.
+
+**Pre-registered:** fewer than a third (at most 6 of 20) land in the band, a mean P(stylish) between 0.3 and 0.7.
+Also counted: on how many the two orders pick different looks, and whether those are the ones in the band.
+
+**Result (`runs/probe-look-gemma4_e2b-it-qat-q1-plain.json`):** ❌ **17 of 20 land in the band, against at most 6.**
+
+- **Out of the band:** the village choir 0.11, the rowing club 0.21, the craft beer festival 0.703.
+- **In it:** everything else, 0.34–0.70. The bookshop is 0.35; the cheese shop, the wedding, the pottery weekend and
+  the under-12s football team are 0.62–0.70.
+- **The two orders pick different looks on 9 of 20, and all 9 are in the band.** Order moves P(stylish) by 0.16 on
+  average, up to 0.41. The look listed second draws the odds.
+
+**What this says:** the question does not measure which way a plain request leans. It separates "the person named
+a look" from "the person did not":
+
+| band (ask inside it) | plain requests asked | requests that name a look asked (§7a's 16) |
+|---|---|---|
+| 0.3–0.7 (the handoff's) | 17 / 20 | 0 / 16 |
+| 0.2–0.8 | 19 / 20 | 0 / 16 |
+| 0.1–0.9 | 20 / 20 | 0 / 16 |
+
+Every request that names a look sits at ≤ 0.001 or ≥ 0.91. §7a's requests with a look-ish word ("modern style",
+"warm colours") sit at 0.86–0.99, and "a page for my jazz night" at 0.88.
+
+**Built anyway, behind a switch:** `askBand` (`edit.askBand: [lo, hi]` or `--ask-band lo,hi`, with `--style auto`).
+Inside the band the arm stops before turn 1, ledgers `{ ask: 'clean or bold?' }`, and builds nothing. Checked:
+- "A website for my bakery." (0.565) asks (`arm-w13ask-bakery`);
+- w10s-bakery's bold request (1.00) builds stylish (`arm-w13go-bakery`, 1 turn).
+
+**For Richard (a product call, not the script's):** with a plain request the person gets a question nearly every
+time, whatever band is picked. The choices are to ask whenever the request names no look, which is honest because
+E2B's lean on a plain request is near a coin and flips with the option order, or to build a default look and offer
+the other one after.
