@@ -1072,5 +1072,79 @@ The model wrote these words:
 - **The amber line on the amber wash (2.78) is the warm look's own fault, not the kit's.** The fix would be the line in
   dark text, or a deeper wash colour for the line, and Richard's eye decides that.
 
-**Kept:** `look3` joins the final harness, `runs/w21.edit.json`, with 11a's caveat: its "ask when the top is under 0.9"
-rule needs 11b's data before a plain request goes through it.
+**Kept, for building only:** with `--style warm`, the warm look is built and shippable (Richard's eye still to see
+it). **`look3`'s `--style auto` is not safe**: 11b found that it sends plain requests to warm without asking.
+
+**Result (`runs/probe-look3b-gemma4_e2b-it-qat.json`):** ❌ **with three looks, warm is where every request goes when it
+does not name a look strongly.** My predictions were wrong in both directions.
+
+| set | went to minimal / stylish / warm | top mean P | agreeing orders |
+|---|---|---|---|
+| strict warm (8) | 0 / 0 / **8** | 0.976–1.000 | 6/6 on all eight |
+| plain (20) | 0 / 0 / **20** | 0.671–0.967; **11 of 20 at ≥ 0.9** | 6/6 on 19, 5/6 on one |
+| sets (11) | 5 minimal, 5 stylish right; **m-running → warm** | 0.947–0.998, m-running **0.541** | 6/6 on ten, 4/6 on m-running |
+
+**Against the pre-registration:**
+- ✅ (my prediction ❌) **E2B hears the warm look without its own words: 8 of 8.** Gentle, cosy, kind, caring, pastel and
+  "a hug" all score at least 0.976. I predicted 5 or 6, with the misses going to minimal.
+- ❌ **no plain request reaches 0.9, most go to minimal:** all 20 go to warm, and 11 reach 0.9. The highest are the
+  cheese shop 0.97, the pottery weekend 0.96 and the record store 0.95. Asked "clean or bold?" (8d), these sat at
+  0.11–0.70. Offered a third look, E2B takes warm as its default for a request that says nothing.
+- ✅ no single threshold separates "named a look" from "named none". The plain ones go up to 0.967, above 9d's
+  named minimal and stylish requests (as low as 0.68) and above three of the set requests.
+- ❌ **the 11 set requests do not all land on their own look.** "A calm, simple page for Park Runners, our Saturday
+  morning running club in the park" goes to warm at 0.54 (minimal 0.46), in 4 of 6 orders. It names calm, and "calm"
+  is not in the warm look's description. The other ten land on their own look at 0.947 or more.
+
+**What it means for the product:**
+- **Built as it is, `look3` would give every plain request the warm look without asking**, and would flip at least one
+  calm request.
+- The two-look question (8d) separates "named a look" from "named none" cleanly. The three-look question cannot.
+- **Candidates, not run:**
+  - **ask first:** keep the two-look question for "did they say?", and add warm only when a separate question finds it
+    named. Strict requests and 9d's warm ones score 0.976 or more, which leaves room for a yes/no "do they ask for
+    warm and friendly?";
+  - **or** describe warm without words that fit any small business ("welcoming" may be the sink);
+  - **or** always ask the person when no look is named, with all three as the choices.
+
+  Which of these is right is a product question, partly Richard's. Whichever it is, it needs the same strict, plain
+  and sets probe before `--style auto` can offer warm.
+
+### 11c. The words column beside the photo (`centre.mjs`)
+
+**Measured on all ten final heroes** (`runs/centre-report.json`; the photo's box is now in the facts). The photo starts at
+96 px, level with the words, in every hero, so the 96 px assumption I made before rendering holds.
+- **Calm heroes:** the words column is shorter than the 320 px photo, by 7 to 118 px. That is empty space under the
+  button, worst on pottery (words 202 px tall).
+- **Bold heroes:** the words column is 24 to 51 px taller than the photo, so the empty space is under the photo
+  instead.
+
+**The candidate:** a Columns has no input for vertical centring. Its column wrappers stretch to the row, and the words
+Group takes its content's height. `centred` sets the words Group to 100 % of its column's height, with its parts
+justified to the centre.
+
+| hero | built: middle of the words − middle of the photo | centred |
+|---|---|---|
+| m-bakery | −19 px | **+1** |
+| m-jazz | −29 | **+1** |
+| m-plumber | −3 | +1 |
+| m-running | −2 | +1 |
+| **m-pottery** | **−59** | **0** |
+| s-bakery, s-jazz, s-plumber, s-running, s-pottery | +26, +12, +12, +14, +12 | the same: the words fill their column |
+
+On a phone, every hero's height and word count are the same in both variants. The Columns stack there, so the words
+Group's 100 % is its own height.
+
+**Seen:** on a bold hero the photo is the short column, so centring the words cannot help. The candidate there is the
+photo's height (a 400 px photo is already on the menu) or centring the photo; neither was run.
+
+**Pictures for Richard:** `runs/centre-<run>/{built,centred}/{desktop,phone}.png`. No arm code changes until he has
+seen them; as a fix it would be one more `only` setting on the words Group.
+
+### 11d. Round three for Richard
+
+https://claude.ai/artifact/P7umD3HEoDJrTiv1Q3KQqh (same link, version 3) asks three questions, with real pictures:
+1. **Is the warm look as built (11a) the one he meant?** And should the bakery's amber line above the headline be dark
+   (2.78 on the wash)?
+2. **Top or centred** words beside the photo (11c: pottery, jazz, bakery, calm)?
+3. **When a request names no look** (11b): ask "clean, bold or warm?", build calm by default, or something else?

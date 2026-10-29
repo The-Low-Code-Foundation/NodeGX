@@ -1,0 +1,342 @@
+{
+ "w20m-bakery": {
+  "built": {
+   "desktop": {
+    "words": [
+     96,
+     377
+    ],
+    "photo": [
+     96,
+     416
+    ],
+    "offset": -19
+   },
+   "phoneHeight": 738,
+   "desktopHeight": 512,
+   "phoneWords": 17
+  },
+  "centred": {
+   "desktop": {
+    "words": [
+     116,
+     397
+    ],
+    "photo": [
+     96,
+     416
+    ],
+    "offset": 1
+   },
+   "phoneHeight": 738,
+   "desktopHeight": 512,
+   "phoneWords": 17
+  }
+ },
+ "w20m-jazz": {
+  "built": {
+   "desktop": {
+    "words": [
+     96,
+     357
+    ],
+    "photo": [
+     96,
+     416
+    ],
+    "offset": -29
+   },
+   "phoneHeight": 723,
+   "desktopHeight": 512,
+   "phoneWords": 20
+  },
+  "centred": {
+   "desktop": {
+    "words": [
+     126,
+     387
+    ],
+    "photo": [
+     96,
+     416
+    ],
+    "offset": 1
+   },
+   "phoneHeight": 723,
+   "desktopHeight": 512,
+   "phoneWords": 20
+  }
+ },
+ "w20m-plumber": {
+  "built": {
+   "desktop": {
+    "words": [
+     96,
+     409
+    ],
+    "photo": [
+     96,
+     416
+    ],
+    "offset": -3
+   },
+   "phoneHeight": 741,
+   "desktopHeight": 512,
+   "phoneWords": 16
+  },
+  "centred": {
+   "desktop": {
+    "words": [
+     100,
+     413
+    ],
+    "photo": [
+     96,
+     416
+    ],
+    "offset": 1
+   },
+   "phoneHeight": 741,
+   "desktopHeight": 512,
+   "phoneWords": 16
+  }
+ },
+ "w20m-running": {
+  "built": {
+   "desktop": {
+    "words": [
+     96,
+     411
+    ],
+    "photo": [
+     96,
+     416
+    ],
+    "offset": -2
+   },
+   "phoneHeight": 767,
+   "desktopHeight": 512,
+   "phoneWords": 19
+  },
+  "centred": {
+   "desktop": {
+    "words": [
+     99,
+     414
+    ],
+    "photo": [
+     96,
+     416
+    ],
+    "offset": 1
+   },
+   "phoneHeight": 767,
+   "desktopHeight": 512,
+   "phoneWords": 19
+  }
+ },
+ "w20m-pottery": {
+  "built": {
+   "desktop": {
+    "words": [
+     96,
+     298
+    ],
+    "photo": [
+     96,
+     416
+    ],
+    "offset": -59
+   },
+   "phoneHeight": 689,
+   "desktopHeight": 512,
+   "phoneWords": 11
+  },
+  "centred": {
+   "desktop": {
+    "words": [
+     155,
+     357
+    ],
+    "photo": [
+     96,
+     416
+    ],
+    "offset": 0
+   },
+   "phoneHeight": 689,
+   "desktopHeight": 512,
+   "phoneWords": 11
+  }
+ },
+ "w17s-bakery": {
+  "built": {
+   "desktop": {
+    "words": [
+     96,
+     467
+    ],
+    "photo": [
+     96,
+     416
+    ],
+    "offset": 26
+   },
+   "phoneHeight": 734,
+   "desktopHeight": 563,
+   "phoneWords": 19
+  },
+  "centred": {
+   "desktop": {
+    "words": [
+     96,
+     467
+    ],
+    "photo": [
+     96,
+     416
+    ],
+    "offset": 26
+   },
+   "phoneHeight": 734,
+   "desktopHeight": 563,
+   "phoneWords": 19
+  }
+ },
+ "w17s-jazz": {
+  "built": {
+   "desktop": {
+    "words": [
+     96,
+     440
+    ],
+    "photo": [
+     96,
+     416
+    ],
+    "offset": 12
+   },
+   "phoneHeight": 720,
+   "desktopHeight": 536,
+   "phoneWords": 16
+  },
+  "centred": {
+   "desktop": {
+    "words": [
+     96,
+     440
+    ],
+    "photo": [
+     96,
+     416
+    ],
+    "offset": 12
+   },
+   "phoneHeight": 720,
+   "desktopHeight": 536,
+   "phoneWords": 16
+  }
+ },
+ "w17s-plumber": {
+  "built": {
+   "desktop": {
+    "words": [
+     96,
+     440
+    ],
+    "photo": [
+     96,
+     416
+    ],
+    "offset": 12
+   },
+   "phoneHeight": 772,
+   "desktopHeight": 536,
+   "phoneWords": 17
+  },
+  "centred": {
+   "desktop": {
+    "words": [
+     96,
+     440
+    ],
+    "photo": [
+     96,
+     416
+    ],
+    "offset": 12
+   },
+   "phoneHeight": 772,
+   "desktopHeight": 536,
+   "phoneWords": 17
+  }
+ },
+ "w19s-running": {
+  "built": {
+   "desktop": {
+    "words": [
+     96,
+     443
+    ],
+    "photo": [
+     96,
+     416
+    ],
+    "offset": 14
+   },
+   "phoneHeight": 799,
+   "desktopHeight": 539,
+   "phoneWords": 23
+  },
+  "centred": {
+   "desktop": {
+    "words": [
+     96,
+     443
+    ],
+    "photo": [
+     96,
+     416
+    ],
+    "offset": 14
+   },
+   "phoneHeight": 799,
+   "desktopHeight": 539,
+   "phoneWords": 23
+  }
+ },
+ "w17s-pottery": {
+  "built": {
+   "desktop": {
+    "words": [
+     96,
+     440
+    ],
+    "photo": [
+     96,
+     416
+    ],
+    "offset": 12
+   },
+   "phoneHeight": 720,
+   "desktopHeight": 536,
+   "phoneWords": 12
+  },
+  "centred": {
+   "desktop": {
+    "words": [
+     96,
+     440
+    ],
+    "photo": [
+     96,
+     416
+    ],
+    "offset": 12
+   },
+   "phoneHeight": 720,
+   "desktopHeight": 536,
+   "phoneWords": 12
+  }
+ }
+}

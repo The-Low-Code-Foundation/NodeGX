@@ -1,4 +1,76 @@
-# OWN-032 — next session (s6)
+# OWN-032 — next session (s7)
+
+**Paste this to start the session:**
+
+> OWN-032 s7. Read `dev-docs/tasks/phase-112-your-own-nodegx/own-032/NEXT-SESSION-PROMPT.md` (this section), then
+> `RESULTS.md` §11. First read Richard's three answers on https://claude.ai/artifact/P7umD3HEoDJrTiv1Q3KQqh (version 3;
+> it has no answer store, so ask him in chat if he has not commented). Then run the experiments below in order: one at a
+> time on Ollama, each against a control, each pre-registered in RESULTS §12 before it runs. Commit after each one.
+
+## Where it stands (s6, 2026-10-29 night)
+
+- **The warm look is built by the arm (11a, `a2781b475`).**
+  - The switch is `look3` in `runs/w21.edit.json` = w20 + `look3`.
+  - Richard picked "rounded, with a handwritten line", on the Soft lavender for a brand with no colour.
+  - w21w-bakery, -pottery and -puppy ended by `endGate` in 33, 35 and 33 turns (calm controls 23, 22 and 22, the
+    last being the new w20m-puppy). Every warm check closed; only bakery left contrast open.
+- **`look3`'s `--style auto` is NOT safe (11b).**
+  - With three looks, E2B sends all 20 plain requests to warm, 11 of them at ≥ 0.9, so they would be built warm
+    without asking.
+  - It flips "A calm, simple page for Park Runners…" to warm (0.54).
+  - It does hear warm without its own words: 8 of 8 strict requests at ≥ 0.976.
+  - Use `--style warm` to build the look; do not run `look3` with `style: auto` on a request that does not name warm.
+- **Centring the words beside the photo works on the calm look (11c, `centre.mjs`):**
+  - the gap between the middles of the words and the photo goes from −2 to −59 px down to 0–1 px;
+  - phones do not change;
+  - the bold look is unaffected, because its words are taller than its photo.
+
+  No arm code yet.
+- **Bench fixes:** a `color-mix()` ground is now read (Chrome gives `color(srgb …)`, which used to read as white), and
+  the facts carry `photos`.
+
+## Waiting on Richard (the page above, version 3)
+
+1. Is the warm look right? Should the bakery's amber line above the headline be dark (2.78 on the amber wash)?
+2. Top or centred words beside the photo?
+3. A request that names no look: ask "clean, bold or warm?", calm by default, or something else?
+
+## The experiments, in order
+
+1. **The look question with three looks, by his answer to 3.** Whichever he picks needs the 11b probe (strict, plain
+   and sets: `probe-look3b.mjs`) to pass before `--style auto` offers warm. Candidates:
+   - a separate yes/no "do they ask for warm and friendly?" after the two-look question (strict ≥ 0.976 leaves room);
+   - a warm description without "welcoming", which may be the sink;
+   - asking whenever no look is named.
+
+   Pre-register: plain requests do not reach warm at ≥ 0.9, and m-running stays minimal.
+2. **The centred words as an `only` fix**, if he says centred. Set the words Group to `height 100 %` with `justify
+   centre` on the calm and warm looks. Control: w20m-* and w21w-*. Pre-register: 0–1 px offset, no phone change, +1
+   turn each.
+3. **The bakery's warm line, if he says dark:** the `eyebrowColour` fix offers dark text on the warm look instead of
+   the brand colour, or the brand colour only when it reads (≥ 3). Control: w21w-bakery.
+
+## Not this session
+
+- **Folding the looks, the "ask" and the s5/s6 switches into OWN-031 `build_app`** is the other session's lane. Ask
+  first, briefly.
+- **OWN-033 stitching** waits until the hero work settles.
+- **The kit's contrast** (P112-OWN030-PRIMARYCONTRAST): bakery's white on amber, 3.19, is still open.
+
+## Traps (s6)
+
+- **The three-look question has a default.** Offered a third, friendlier look, E2B puts requests that name nothing on
+  it, with high confidence. A probe of only named requests (9d) cannot show this: always include plain ones.
+- **The bench's colour reader saw only `rgb()`.** Any new CSS colour form (`color-mix`, `oklch`) needs a check of what
+  Chrome computes before a contrast number on it is trusted.
+- **Peers drive Chrome with software GL all evening** (lifesim, threadspace); load stays at about 9. Arm runs were fine
+  at `nice -n 10`, one at a time.
+- Everything in s5's traps below still holds.
+
+---
+
+# s6 plan (done: RESULTS §11)
+
 
 **Paste this to start the session:**
 
