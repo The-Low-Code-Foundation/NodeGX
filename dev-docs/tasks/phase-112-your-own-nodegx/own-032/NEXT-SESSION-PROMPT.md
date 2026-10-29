@@ -1,29 +1,73 @@
-# OWN-032 — next session (s2)
+# OWN-032 — next session (s4): the next experiments
 
-Read `../OWN-032-THE-WORKBENCH.md`, then `RESULTS.md` (§2–§4). s1 is committed in `a9564d568`; the pictures (`*.png`)
-are on disk only.
+**Paste this to start the session:**
 
-## Where it stands
+> OWN-032 s4. Read `dev-docs/tasks/phase-112-your-own-nodegx/own-032/NEXT-SESSION-PROMPT.md` (this section), then
+> `RESULTS.md` §7. Run the experiments below in order: one at a time on Ollama, each with a control. Record each in
+> RESULTS §8 and commit after each one lands.
 
-- **Bench** (`bench.mjs`): the hero alone, 1280 + 390, ~2.5 s a turn. The bench project is
-  `~/vscode_projects/NodeGX test projects/own-032-bench-puppy` (a copy of G-puppy r4). For bakery, jazz and plumber
-  (AC5), make one per brief from that brief's `own-029-G-<brief>-r4` project: `node bench.mjs make <src> <dir>`.
-- **Vision:** E4B cannot answer the layout facts from a picture (separation 0.01–0.04; photo cut off 0.47). Each image
-  costs it ~70–100 tokens, which looks like Gemma 4's lowest vision budget. The arm feeds the builder the SCRIPT's
-  measures (`--look script`). Open lead: raise the budget (560/1120) outside Ollama and re-ask
-  (`probe-vision.mjs ask`).
-- **Viewer:** `node server.mjs`, then `http://127.0.0.1:8732/?t=runs/<dir>`, adding `&live` while a run writes.
-  Timelines: `view-G-puppy-s0` (today's harness), `arm-w1-puppy`, `arm-w2-puppy`, `arm-w3-puppy`.
-- **Arm** (`arm.mjs`): E2B at node level loops on "add a Group" and never changes a setting (P(set) 0.03–0.13, 0 sets
-  in 3 × 30 turns).
+## Where it stands (s3, `179343f8b`)
 
-## s2 status (2026-10-29)
+- The arm (`arm.mjs`) builds a hero one step at a time with Gemma 4 E2B, from closed menus. With `roles` +
+  `fixMenu` + `endGate`, every finding the script can trace becomes a fix on the menu. The model picks which fix to
+  make, picks values (size, gap, padding), and writes every word.
+- **Two looks, both shippable (Richard's ruling, §7):** `minimal` (w6) and `stylish` (w8s: dark brand gradient,
+  small-capitals line above the headline, bold white headline, white pill button).
+- **The look follows the words:**
+  - `lookq.mjs` asks E2B "minimal or stylish?" in both option orders. It got 16 of 16 requests that name a look right.
+  - `--style auto --request "…"` built in the right look 6 of 6 times (w10m/w10s × bakery, jazz, plumber). Page:
+    https://claude.ai/artifact/2M1WenHSVPsUE21P3N1NcB
+- Benches: `~/vscode_projects/NodeGX test projects/own-032-bench-{puppy,bakery,jazz,plumber}`. The viewer is
+  `node server.mjs` → `127.0.0.1:8732/?t=runs/arm-<run>`. Picture pairs come from `ac5.mjs`.
+- The command that reproduces w10:
+  `node arm.mjs --run <name> --brief <b> --turns 40 --look script --bench "<bench>" --edit <edit.json> --request "<words>"`.
+  The edit is `runs/arm-w10s-jazz/edit.json`.
 
-- Step 1: Richard was given the viewer links; his changes to what it shows are not in yet.
-- Step 2 (surgery from the page) is **built and committed** (`b308c4c83`). RESULTS §5 describes it.
-- **No fork has been asked yet**: a peer's `gemma4-e4b-32k` held Ollama through the whole build. The server refuses
-  a fork while another model is loaded.
-- Next: Richard's pokes (step 3), each recorded in the RESULTS §5 table.
+## The experiments, in order
+
+1. **"Add" only while a part is missing.** Under `endGate`, drop the generic `add` move once `goalMet`. Control:
+   w10s-jazz, which spent 7 free turns adding Columns and Groups. Measure turns to the end and how many were free
+   (non-fix) moves, on all six w10 requests. Pre-register: turns fall, and no look or measure gets worse.
+2. **A headline too long for its column.** At the display-md floor, a headline that breaks onto 3+ lines on a
+   desktop gets a write fix: "make the headline shorter (n words, it breaks onto k lines)". Control: w10m-bakery
+   ("Maison Levain: Artisanal baking from our family kitchen.", 4 lines). Watch for the old trap: the rewrite must
+   not lose the name.
+3. **Spacing rhythm in the words column.** The stylish small line floats as far from the headline as the line sits
+   from the button. Options:
+   - a "the small line belongs to the headline" finding: wrap the eyebrow and the headline in their own Group with a
+     small gap;
+   - or a gap rule by role pair.
+
+   Show Richard a before/after of w8s-puppy before keeping either.
+4. **Ask when the request doesn't say.** If `lookOf` gives P(stylish) between 0.3 and 0.7, the arm stops before
+   turn 1 and returns "ask: clean or bold?". In the product, the client shows that question.
+   - First widen `probe-look.mjs`'s undecided set to ~20 requests that name no look (trades, shops, clubs, events).
+   - Report how many fall in the band, and whether the band holds across both option orders.
+   - Pre-register: fewer than a third of plain requests are undecided.
+5. **A third look?** Only if 1–4 land. Probe first, no arm code: can E2B separate three looks ("minimal / stylish
+   / warm and friendly", or "playful")? Same both-orders method, 8 requests per look. If it can't separate a third,
+   stop there and record that.
+6. **Held-out briefs:** running and pottery. Neither has a bench yet: `node bench.mjs make` from
+   `own-029-G-running-r4` / `own-029-G-pottery-r2`. Run the final harness on a calm and a bold request for each.
+   Then update the two-looks page (same file path, same URL).
+
+## Not this session
+
+- **Folding the looks into OWN-031 `build_app`** (what Richard sees in Goose) belongs to the other session's lane.
+  Ask it first (ListAgents → SendMessage, short).
+- **OWN-033 stitching** waits until the hero work settles.
+
+## Traps
+
+- **16 GB box:** one Ollama job at a time. Check that `ollama ps` is empty before a run, and run with `nice -n 10`.
+  The fork server refuses while another model is loaded.
+- **Every new behaviour is a switch, default off,** so old runs replay unchanged. Document it in the arm.mjs header.
+- **Commit through a temporary index** (`--pathspec-from-file`, guard the staged count, `update-ref` with the old
+  HEAD), then `git reset -q HEAD --pathspec-from-file` to sync the real index. Never commit `*.png`.
+- **The bakery theme's white on amber (3.19)** is the kit (P112-OWN030-PRIMARYCONTRAST). Under endGate the run ends
+  with it open; that is expected.
+- **Goose** starts with `~/.config/goose/start-goose.sh` (it hides `~/.claude/skills`). Never from the Dock.
+- **Richard judges looks; the script judges measures.** Never call a look "better" without his eye on it.
 
 ## s3 status (2026-10-29 late, opennoodl-9f)
 
