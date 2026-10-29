@@ -1,0 +1,214 @@
+{
+ "minutes": 1.8,
+ "bestRound": 0,
+ "bestScore": 25.5,
+ "scores": [
+  25.5
+ ],
+ "builderCalls": 37,
+ "judgements": 13,
+ "replays": 72,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-P1-puppy-r0",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-P1-puppy-r0",
+   "score": 25.5,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "quote",
+      "name line"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.816
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.967,
+     "pFit": 0.94
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "body text",
+      "button",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.896,
+     "pFit": 0.996
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.956,
+     "pFit": 0.997
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "quote",
+      "name line"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.919
+    },
+    {
+     "kind": "faq",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "list of items",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.973,
+     "pFit": 0.998
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.9
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|gallery#0",
+     "weight": 3,
+     "say": "the list in \"gallery\" shows the same photo 6 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|gallery#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 10 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|call to action#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 10 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|feature cards#0|list.rows|3|title,sentence,button",
+     "weight": 2,
+     "say": "\"Find Your Perfect Match\" repeats \"Find Your Perfect Match\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|how it works#0|list.rows|3|title,sentence",
+     "weight": 2,
+     "say": "\"View Profiles\" repeats \"View Profiles\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|copy|the main action of the footer section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"View Adoption Profiles\" repeats \"View Adoption Profiles\"",
+     "op": "reword"
+    },
+    {
+     "id": "S8|feature cards#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S11|feature cards#0|list.rows|3|title,sentence,button",
+     "weight": 1.5,
+     "say": "\"find your perfect\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|gallery#0|copy|a short paragraph|Text",
+     "weight": 1.5,
+     "say": "\"find your perfect\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|how it works#0|copy|the how it works headline|Text",
+     "weight": 1.5,
+     "say": "\"find your perfect\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|footer#0|copy|a short paragraph|Text",
+     "weight": 1.5,
+     "say": "\"find your perfect\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|copy|the call to action headline|Text",
+     "weight": 1.5,
+     "say": "\"new best friend\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|copy|a quotation from a happy customer or visitor|Text",
+     "weight": 1.5,
+     "say": "\"new best friend\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|faq#0|copy|a short paragraph|Text",
+     "weight": 1.5,
+     "say": "\"new best friend\" is said 6 times on the page",
+     "op": "reword"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 37,
+   "judgements": 13,
+   "minutes": 1.8,
+   "kept": true
+  }
+ ]
+}

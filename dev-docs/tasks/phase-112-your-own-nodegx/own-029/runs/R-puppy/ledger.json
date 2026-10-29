@@ -1,0 +1,1938 @@
+{
+ "run": "R-puppy",
+ "brief": "puppy",
+ "request": "Make me a puppy adoption landing page please, blue colour theme, modern style.",
+ "model": "gemma4:e2b-it-qat",
+ "judge": "gemma4:e4b-it-qat",
+ "copyN": 1,
+ "rounds": 0,
+ "build": {
+  "distMtime": "2026-10-28T15:27:11.116Z",
+  "head": "1f31ab2f8"
+ },
+ "harness": "02df955c",
+ "startedAt": "2026-10-28T19:37:32.127Z",
+ "calls": [
+  {
+   "round": 0,
+   "key": "card.audience+action+name",
+   "sig": "card|audience",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nWho is the page for (one line, max 20 words)? What is the ONE action the page wants a visitor to take (max 20 words)? What is the business, event or person called (max 4 words; use the name in the request, or invent a short one)?",
+   "temperature": 0.4,
+   "answer": {
+    "action": "Visit the adoption profiles and apply to adopt a puppy today.",
+    "audience": "Potential puppy adopters looking for a loving companion.",
+    "name": "Puppy Love"
+   },
+   "tokensIn": 118,
+   "tokensOut": 48,
+   "ms": 1791
+  },
+  {
+   "round": 0,
+   "key": "card.preset+hue",
+   "sig": "card|preset",
+   "random": true,
+   "answer": {
+    "preset": "modern"
+   }
+  },
+  {
+   "round": 0,
+   "key": "card.pairing+density+radius",
+   "sig": "card|type",
+   "random": true,
+   "answer": {
+    "density": "regular",
+    "pairing": "mono-sans",
+    "radius": "sharp"
+   }
+  },
+  {
+   "round": 0,
+   "key": "card.mustShow",
+   "sig": "card|mustShow",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nWhat must a visitor be able to find on this page? List 1 to 4 short facts taken from the request about the business, event or person (a date, a place, what is sold, opening days, what to do). Only what the request says, and nothing about how the page should look.",
+   "temperature": 0.2,
+   "answer": {
+    "texts": [
+     "puppy adoption landing page",
+     "blue colour theme",
+     "modern style"
+    ]
+   },
+   "tokensIn": 120,
+   "tokensOut": 36,
+   "ms": 1268
+  },
+  {
+   "round": 0,
+   "key": "sections",
+   "sig": "sections",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Love\", for Potential puppy adopters looking for a loving companion. The one action: Visit the adoption profiles and apply to adopt a puppy today. Tone: modern.\nWhich sections should the page have, top to bottom? Give 3 to 7. For each, one line saying what a VISITOR finds there (not what the section does for the page). Choose what THIS page needs; not every page needs every kind.\nSection kinds: hero, about, feature cards, how it works, gallery, menu or prices, schedule or line-up, testimonials, team, faq, location and hours, sign-up or contact form, call to action, footer",
+   "temperature": 0.3,
+   "answer": {
+    "sections": [
+     {
+      "kind": "hero",
+      "purpose": "Grabs immediate attention with a strong visual and main message."
+     },
+     {
+      "kind": "feature cards",
+      "purpose": "Highlights key benefits of adopting a puppy."
+     },
+     {
+      "kind": "gallery",
+      "purpose": "Showcases adorable puppies to build emotional connection."
+     },
+     {
+      "kind": "how it works",
+      "purpose": "Simplifies the adoption process for potential adopters."
+     },
+     {
+      "kind": "call to action",
+      "purpose": "Directly prompts visitors to view profiles and apply."
+     },
+     {
+      "kind": "testimonials",
+      "purpose": "Builds trust through positive feedback from previous adopters."
+     },
+     {
+      "kind": "sign-up or contact form",
+      "purpose": "Provides a clear way for interested users to get in touch."
+     }
+    ]
+   },
+   "tokensIn": 201,
+   "tokensOut": 233,
+   "ms": 9283
+  },
+  {
+   "round": 0,
+   "key": "s0.bits",
+   "sig": "hero#0|bits",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "bits": [
+     "badge",
+     "body text",
+     "date and place",
+     "list of items",
+     "button",
+     "price"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.align",
+   "sig": "hero#0|align",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "answer": "left-aligned"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.items.count",
+   "sig": "hero#0|items.count",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "answer": "6"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.items.bits",
+   "sig": "hero#0|items.bits",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "bits": [
+     "price",
+     "text"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.items.layout",
+   "sig": "hero#0|items.layout",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "answer": "grid"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.look.band",
+   "sig": "hero#0|look.band|band,bandSurface,heroGround,imageGround",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "look": "imageGround"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.look.item",
+   "sig": "hero#0|look.item|card,statTile,testimonialCard,featureItem",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "look": "featureItem"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.look.the main action of the hero section",
+   "sig": "hero#0|look.the main action of the hero section|primaryButton,outlineButton",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "look": "outlineButton"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.copy.the few words in the pill",
+   "sig": "hero#0|copy|the few words in the pill|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion. Tone: modern.\nWrite the few words in the pill in the \"hero\" section. At most 200 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Find your forever friend. Open your heart to puppy love."
+   },
+   "tokensIn": 100,
+   "tokensOut": 22,
+   "ms": 1635
+  },
+  {
+   "round": 0,
+   "key": "s0.copy.a short paragraph",
+   "sig": "hero#0|copy|a short paragraph|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion. Tone: modern.\nWrite a short paragraph in the \"hero\" section. At most 200 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Find your perfect match. Open your heart to unconditional love and start your happy puppy journey today. Your new best friend is waiting."
+   },
+   "tokensIn": 97,
+   "tokensOut": 32,
+   "ms": 1710
+  },
+  {
+   "round": 0,
+   "key": "s0.copy.when and where, in one line",
+   "sig": "hero#0|copy|when and where, in one line|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion. Tone: modern.\nWrite when and where, in one line in the \"hero\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Find your forever best friend. Adopt a puppy today."
+   },
+   "tokensIn": 101,
+   "tokensOut": 17,
+   "ms": 1274
+  },
+  {
+   "round": 0,
+   "key": "s0.copy.the main action of the hero section",
+   "sig": "hero#0|copy|the main action of the hero section|net.noodl.controls.button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion. Tone: modern.\nWrite the label of the main button in the \"hero\" section. Pressing it lets a visitor: Visit the adoption profiles and apply to adopt a puppy today. Two to four words, a verb first.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Adopt a Puppy"
+   },
+   "tokensIn": 104,
+   "tokensOut": 14,
+   "ms": 1080
+  },
+  {
+   "round": 0,
+   "key": "s0.copy.the price",
+   "sig": "hero#0|copy|the price|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion. Tone: modern.\nWrite the price in the \"hero\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Adoption Fees Start At $499"
+   },
+   "tokensIn": 95,
+   "tokensOut": 15,
+   "ms": 1026
+  },
+  {
+   "round": 0,
+   "key": "s0.list.rows",
+   "sig": "hero#0|list.rows|6|price,sentence",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Love\", for Potential puppy adopters looking for a loving companion. The one action: Visit the adoption profiles and apply to adopt a puppy today. Tone: modern.\nThe \"hero\" section (Grabs immediate attention with a strong visual and main message.) has a list of 6 items. For EACH item, in order, write: price (max 20 characters), sentence (max 160 characters). Each item different from the others; an item's price and sentence must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "price": "$250",
+      "sentence": "Meet a playful golden retriever ready for adventure and endless cuddles. Perfect for active families."
+     },
+     {
+      "price": "$350",
+      "sentence": "Sweet beagle mix seeking a home with lots of attention and playtime. A loyal companion awaits you."
+     },
+     {
+      "price": "$400",
+      "sentence": "Energetic husky puppy ready to explore the great outdoors. Ideal for couples looking for an exciting bond."
+     },
+     {
+      "price": "$200",
+      "sentence": "Calm labrador puppy, perfect for families and quiet evenings. A gentle soul ready to spread joy."
+     },
+     {
+      "price": "$300",
+      "sentence": "Adorable french bulldog, known for its charming personality and playful spirit. Great for apartment living."
+     },
+     {
+      "price": "$225",
+      "sentence": "Spotted terrier mix, full of boundless energy and love. Ready to become your best friend."
+     }
+    ]
+   },
+   "tokensIn": 174,
+   "tokensOut": 260,
+   "ms": 10950
+  },
+  {
+   "round": 0,
+   "key": "s1.bits",
+   "sig": "feature cards#0|bits",
+   "section": 1,
+   "sectionKind": "feature cards",
+   "random": true,
+   "answer": {
+    "bits": [
+     "body text",
+     "small print",
+     "button",
+     "second button"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.align",
+   "sig": "feature cards#0|align",
+   "section": 1,
+   "sectionKind": "feature cards",
+   "random": true,
+   "answer": {
+    "answer": "centred"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.look.band",
+   "sig": "feature cards#0|look.band|band,bandSurface,imageGround",
+   "section": 1,
+   "sectionKind": "feature cards",
+   "random": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.look.the main action of the feature cards section",
+   "sig": "feature cards#0|look.the main action of the feature cards section|primaryButton,outlineButton",
+   "section": 1,
+   "sectionKind": "feature cards",
+   "random": true,
+   "answer": {
+    "look": "outlineButton"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.look.a quieter second action",
+   "sig": "feature cards#0|look.a quieter second action|primaryButton,outlineButton",
+   "section": 1,
+   "sectionKind": "feature cards",
+   "random": true,
+   "answer": {
+    "look": "primaryButton"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.copy.a short paragraph",
+   "sig": "feature cards#0|copy|a short paragraph|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "feature cards",
+   "user": "BRIEF: \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion. Tone: modern.\nWrite a short paragraph in the \"feature cards\" section. At most 200 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Meet your perfect match! Discover curated puppy profiles, interactive adoption guides, and heartwarming stories to find your best new friend."
+   },
+   "tokensIn": 98,
+   "tokensOut": 34,
+   "ms": 1996
+  },
+  {
+   "round": 0,
+   "key": "s1.copy.a line of fine print",
+   "sig": "feature cards#0|copy|a line of fine print|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "feature cards",
+   "user": "BRIEF: \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion. Tone: modern.\nWrite a line of fine print in the \"feature cards\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Adoption requires commitment and responsible ownership."
+   },
+   "tokensIn": 99,
+   "tokensOut": 18,
+   "ms": 1162
+  },
+  {
+   "round": 0,
+   "key": "s1.copy.the main action of the feature cards section",
+   "sig": "feature cards#0|copy|the main action of the feature cards section|net.noodl.controls.button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "feature cards",
+   "user": "BRIEF: \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion. Tone: modern.\nWrite the label of the main button in the \"feature cards\" section. Pressing it lets a visitor: Visit the adoption profiles and apply to adopt a puppy today. Two to four words, a verb first.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "View Profiles & Apply"
+   },
+   "tokensIn": 105,
+   "tokensOut": 15,
+   "ms": 1142
+  },
+  {
+   "round": 0,
+   "key": "s1.copy.a quieter second action",
+   "sig": "feature cards#0|copy|a quieter second action|net.noodl.controls.button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "feature cards",
+   "user": "BRIEF: \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion. Tone: modern.\nWrite the label of a quieter second button in the \"feature cards\" section. Pressing it lets a visitor: do something else useful here. Two to four words, a verb first.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Browse adoption profiles"
+   },
+   "tokensIn": 100,
+   "tokensOut": 14,
+   "ms": 947
+  },
+  {
+   "round": 0,
+   "key": "s2.bits",
+   "sig": "gallery#0|bits",
+   "section": 2,
+   "sectionKind": "gallery",
+   "random": true,
+   "answer": {
+    "bits": [
+     "date and place"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s2.align",
+   "sig": "gallery#0|align",
+   "section": 2,
+   "sectionKind": "gallery",
+   "random": true,
+   "answer": {
+    "answer": "left-aligned"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s2.look.band",
+   "sig": "gallery#0|look.band|band,bandSurface,imageGround",
+   "section": 2,
+   "sectionKind": "gallery",
+   "random": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s2.copy.when and where, in one line",
+   "sig": "gallery#0|copy|when and where, in one line|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "gallery",
+   "user": "BRIEF: \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion. Tone: modern.\nWrite when and where, in one line in the \"gallery\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Cozy afternoons and playful adventures in your forever home."
+   },
+   "tokensIn": 101,
+   "tokensOut": 17,
+   "ms": 1160
+  },
+  {
+   "round": 0,
+   "key": "s3.bits",
+   "sig": "how it works#0|bits",
+   "section": 3,
+   "sectionKind": "how it works",
+   "random": true,
+   "answer": {
+    "bits": [
+     "photo",
+     "badge",
+     "date and place",
+     "name line"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.align",
+   "sig": "how it works#0|align",
+   "section": 3,
+   "sectionKind": "how it works",
+   "random": true,
+   "answer": {
+    "answer": "centred"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.photoPlace",
+   "sig": "how it works#0|photoPlace",
+   "section": 3,
+   "sectionKind": "how it works",
+   "random": true,
+   "answer": {
+    "answer": "below"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.look.band",
+   "sig": "how it works#0|look.band|band,bandSurface,imageGround",
+   "section": 3,
+   "sectionKind": "how it works",
+   "random": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.copy.the few words in the pill",
+   "sig": "how it works#0|copy|the few words in the pill|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "how it works",
+   "user": "BRIEF: \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion. Tone: modern.\nWrite the few words in the pill in the \"how it works\" section. At most 200 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Swipe through profiles. Match with your perfect match instantly. Find your best friend now."
+   },
+   "tokensIn": 102,
+   "tokensOut": 23,
+   "ms": 1366
+  },
+  {
+   "round": 0,
+   "key": "s3.copy.when and where, in one line",
+   "sig": "how it works#0|copy|when and where, in one line|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "how it works",
+   "user": "BRIEF: \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion. Tone: modern.\nWrite when and where, in one line in the \"how it works\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Find your perfect furry friend. Browse adorable puppies and start your adoption journey today."
+   },
+   "tokensIn": 103,
+   "tokensOut": 26,
+   "ms": 1497
+  },
+  {
+   "round": 0,
+   "key": "s3.copy.who said it: a name and a role",
+   "sig": "how it works#0|copy|who said it: a name and a role|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "how it works",
+   "user": "BRIEF: \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion. Tone: modern.\nWrite who said it: a name and a role in the \"how it works\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Ava, Lead Adopter Coach"
+   },
+   "tokensIn": 104,
+   "tokensOut": 17,
+   "ms": 1157
+  },
+  {
+   "round": 0,
+   "key": "s4.bits",
+   "sig": "call to action#0|bits",
+   "section": 4,
+   "sectionKind": "call to action",
+   "random": true,
+   "answer": {
+    "bits": [
+     "name line",
+     "list of items",
+     "quote",
+     "price",
+     "small print",
+     "sub-line"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.align",
+   "sig": "call to action#0|align",
+   "section": 4,
+   "sectionKind": "call to action",
+   "random": true,
+   "answer": {
+    "answer": "centred"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.items.count",
+   "sig": "call to action#0|items.count",
+   "section": 4,
+   "sectionKind": "call to action",
+   "random": true,
+   "answer": {
+    "answer": "6"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.items.bits",
+   "sig": "call to action#0|items.bits",
+   "section": 4,
+   "sectionKind": "call to action",
+   "random": true,
+   "answer": {
+    "bits": [
+     "photo",
+     "title"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.items.layout",
+   "sig": "call to action#0|items.layout",
+   "section": 4,
+   "sectionKind": "call to action",
+   "random": true,
+   "answer": {
+    "answer": "one column"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.look.band",
+   "sig": "call to action#0|look.band|bandSurface,ctaBand,imageGround",
+   "section": 4,
+   "sectionKind": "call to action",
+   "random": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.look.item",
+   "sig": "call to action#0|look.item|card,statTile,testimonialCard,featureItem",
+   "section": 4,
+   "sectionKind": "call to action",
+   "random": true,
+   "answer": {
+    "look": "testimonialCard"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.look.a quotation from a happy customer or visitor",
+   "sig": "call to action#0|look.a quotation from a happy customer or visitor|lead,body",
+   "section": 4,
+   "sectionKind": "call to action",
+   "random": true,
+   "answer": {
+    "look": "lead"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.look.one sentence under the headline",
+   "sig": "call to action#0|look.one sentence under the headline|lead,body",
+   "section": 4,
+   "sectionKind": "call to action",
+   "random": true,
+   "answer": {
+    "look": "lead"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.copy.who said it: a name and a role",
+   "sig": "call to action#0|copy|who said it: a name and a role|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "call to action",
+   "user": "BRIEF: \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion. Tone: modern.\nWrite who said it: a name and a role in the \"call to action\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Sarah, Adoption Coordinator"
+   },
+   "tokensIn": 104,
+   "tokensOut": 15,
+   "ms": 1101
+  },
+  {
+   "round": 0,
+   "key": "s4.copy.a quotation from a happy customer or visitor",
+   "sig": "call to action#0|copy|a quotation from a happy customer or visitor|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "call to action",
+   "user": "BRIEF: \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion. Tone: modern.\nWrite a quotation from a happy customer or visitor in the \"call to action\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "My new best friend is the perfect addition to our home! Puppy Love found my soulmate."
+   },
+   "tokensIn": 104,
+   "tokensOut": 29,
+   "ms": 1600
+  },
+  {
+   "round": 0,
+   "key": "s4.copy.the price",
+   "sig": "call to action#0|copy|the price|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "call to action",
+   "user": "BRIEF: \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion. Tone: modern.\nWrite the price in the \"call to action\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Adopt a Friend Today"
+   },
+   "tokensIn": 97,
+   "tokensOut": 15,
+   "ms": 1010
+  },
+  {
+   "round": 0,
+   "key": "s4.copy.a line of fine print",
+   "sig": "call to action#0|copy|a line of fine print|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "call to action",
+   "user": "BRIEF: \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion. Tone: modern.\nWrite a line of fine print in the \"call to action\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Apply now and start your loving journey!"
+   },
+   "tokensIn": 100,
+   "tokensOut": 18,
+   "ms": 1066
+  },
+  {
+   "round": 0,
+   "key": "s4.copy.one sentence under the headline",
+   "sig": "call to action#0|copy|one sentence under the headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "call to action",
+   "user": "BRIEF: \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion. Tone: modern.\nWrite one sentence under the headline in the \"call to action\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Find your perfect furry match today and start your happy journey with a loving companion."
+   },
+   "tokensIn": 101,
+   "tokensOut": 22,
+   "ms": 1327
+  },
+  {
+   "round": 0,
+   "key": "s4.list.rows",
+   "sig": "call to action#0|list.rows|6|title",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "call to action",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nBRIEF: a landing page called \"Puppy Love\", for Potential puppy adopters looking for a loving companion. The one action: Visit the adoption profiles and apply to adopt a puppy today. Tone: modern.\nThe \"call to action\" section (Directly prompts visitors to view profiles and apply.) has a list of 6 items. For EACH item, in order, write: title (max 40 characters). Each item different from the others; an item's title must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "title": "Meet Our Wonderful Puppies"
+     },
+     {
+      "title": "View All Adoption Profiles"
+     },
+     {
+      "title": "Start Your Adoption Journey"
+     },
+     {
+      "title": "Learn About Our Process"
+     },
+     {
+      "title": "Read Success Stories"
+     },
+     {
+      "title": "Apply to Adopt Today"
+     }
+    ]
+   },
+   "tokensIn": 163,
+   "tokensOut": 115,
+   "ms": 4761
+  },
+  {
+   "round": 0,
+   "key": "s5.bits",
+   "sig": "testimonials#0|bits",
+   "section": 5,
+   "sectionKind": "testimonials",
+   "random": true,
+   "answer": {
+    "bits": [
+     "small print",
+     "sub-line"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s5.align",
+   "sig": "testimonials#0|align",
+   "section": 5,
+   "sectionKind": "testimonials",
+   "random": true,
+   "answer": {
+    "answer": "centred"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s5.look.band",
+   "sig": "testimonials#0|look.band|band,bandSurface,imageGround",
+   "section": 5,
+   "sectionKind": "testimonials",
+   "random": true,
+   "answer": {
+    "look": "band"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s5.look.one sentence under the headline",
+   "sig": "testimonials#0|look.one sentence under the headline|lead,body",
+   "section": 5,
+   "sectionKind": "testimonials",
+   "random": true,
+   "answer": {
+    "look": "body"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s5.copy.a line of fine print",
+   "sig": "testimonials#0|copy|a line of fine print|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "testimonials",
+   "user": "BRIEF: \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion. Tone: modern.\nWrite a line of fine print in the \"testimonials\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Adoption requires commitment. Read all profiles carefully."
+   },
+   "tokensIn": 98,
+   "tokensOut": 16,
+   "ms": 1106
+  },
+  {
+   "round": 0,
+   "key": "s5.copy.one sentence under the headline",
+   "sig": "testimonials#0|copy|one sentence under the headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "testimonials",
+   "user": "BRIEF: \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion. Tone: modern.\nWrite one sentence under the headline in the \"testimonials\" section. At most 200 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Find your perfect furry match today and start your happy jou\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "These amazing pups make every day brighter and fill your heart with unconditional joy."
+   },
+   "tokensIn": 121,
+   "tokensOut": 21,
+   "ms": 1493
+  },
+  {
+   "round": 0,
+   "key": "s6.bits",
+   "sig": "sign-up or contact form#0|bits",
+   "section": 6,
+   "sectionKind": "sign-up or contact form",
+   "random": true,
+   "answer": {
+    "bits": [
+     "quote",
+     "headline"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s6.align",
+   "sig": "sign-up or contact form#0|align",
+   "section": 6,
+   "sectionKind": "sign-up or contact form",
+   "random": true,
+   "answer": {
+    "answer": "left-aligned"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s6.look.band",
+   "sig": "sign-up or contact form#0|look.band|band,bandSurface,imageGround",
+   "section": 6,
+   "sectionKind": "sign-up or contact form",
+   "random": true,
+   "answer": {
+    "look": "band"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s6.look.a quotation from a happy customer or visitor",
+   "sig": "sign-up or contact form#0|look.a quotation from a happy customer or visitor|lead,body",
+   "section": 6,
+   "sectionKind": "sign-up or contact form",
+   "random": true,
+   "answer": {
+    "look": "lead"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s6.look.the sign-up or contact form headline",
+   "sig": "sign-up or contact form#0|look.the sign-up or contact form headline|displayHeadline,sectionHeading",
+   "section": 6,
+   "sectionKind": "sign-up or contact form",
+   "random": true,
+   "answer": {
+    "look": "displayHeadline"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s6.copy.a quotation from a happy customer or visitor",
+   "sig": "sign-up or contact form#0|copy|a quotation from a happy customer or visitor|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "sign-up or contact form",
+   "user": "BRIEF: \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion. Tone: modern.\nWrite a quotation from a happy customer or visitor in the \"sign-up or contact form\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "My new best friend arrived! Puppy Love found the perfect companion for our family."
+   },
+   "tokensIn": 107,
+   "tokensOut": 26,
+   "ms": 1619
+  },
+  {
+   "round": 0,
+   "key": "s6.copy.who said it: a name and a role",
+   "sig": "sign-up or contact form#0|copy|who said it: a name and a role|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "sign-up or contact form",
+   "user": "BRIEF: \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion. Tone: modern.\nWrite who said it: a name and a role in the \"sign-up or contact form\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Sarah, Adoption Coordinator"
+   },
+   "tokensIn": 107,
+   "tokensOut": 15,
+   "ms": 1177
+  },
+  {
+   "round": 0,
+   "key": "s6.copy.the sign-up or contact form headline",
+   "sig": "sign-up or contact form#0|copy|the sign-up or contact form headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "sign-up or contact form",
+   "user": "BRIEF: \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion. Tone: modern.\nWrite the sign-up or contact form headline in the \"sign-up or contact form\" section. At most 70 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Find your perfect furry match today and start your happy jou\", \"These amazing pups make every day brighter and fill your hea\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Ready for unconditional love? Join our puppy family now!"
+   },
+   "tokensIn": 141,
+   "tokensOut": 17,
+   "ms": 1395
+  }
+ ],
+ "judgements": [
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-city-dusk.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.021,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 128,
+   "ms": 1300
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-forest-fog.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.037,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 128,
+   "ms": 1197
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-canyon.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.05,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 128,
+   "ms": 1193
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-dune.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.029,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 128,
+   "ms": 1198
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-coast.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.06,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 128,
+   "ms": 1281
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-shore.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.122,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 128,
+   "ms": 1397
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-red-rock.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.033,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 128,
+   "ms": 1536
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-skyline.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.023,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 128,
+   "ms": 1635
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-welder.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.007,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 1700
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-potter.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.158,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 1702
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-baker.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.011,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 1665
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-chef.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.016,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 1652
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-carpenter.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.061,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 1637
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-leather-bench.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.069,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 1622
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-machine-shop.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.027,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 1615
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-hands-clay.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.06,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 1623
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-cafe.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.195,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 1639
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-coffee-shop.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.155,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 1667
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-meeting.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.048,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 1676
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-market.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.02,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 1693
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-desk.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.04,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 1677
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-market.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.023,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 1692
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-bread.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.027,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 1677
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-board.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.037,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 1645
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-plate.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.008,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 1657
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-grocer.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.041,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 1607
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-carrots.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.048,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 1640
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-bakery.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.018,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 1655
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-cat.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.008,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 1642
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-horse.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.027,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 1657
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-sheep.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.016,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 1639
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-dog.webp",
+   "user": "Would this photo make sense on a web page for \"Puppy Love\", a landing page for Potential puppy adopters looking for a loving companion? Answer yes or no.",
+   "pYes": 0.978,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 132,
+   "ms": 1589
+  },
+  {
+   "round": 0,
+   "key": "s0.sound",
+   "section": 0,
+   "user": "A landing page called \"Puppy Love\", for Potential puppy adopters looking for a loving companion.\n\nSection \"hero\" (dark band). Top to bottom:\n- badge: \"Find your forever friend. Open your heart to puppy love.\"\n- paragraph: \"Find your perfect match. Open your heart to unconditional love and start your happy puppy journey today. Your new best friend is waiting.\"\n- date and place: \"Find your forever best friend. Adopt a puppy today.\"\n- button: \"Adopt a Puppy\"\n- price: \"Adoption Fees Start At $499\"\n- 6 featureItems in a grid, each: price, sentence or two:\n  1. \"$250\" — \"Meet a playful golden retriever ready for adventure and endless cuddles. Perfect for active families.\"\n  2. \"$350\" — \"Sweet beagle mix seeking a home with lots of attention and playtime. A loyal companion awaits you.\"\n  3. \"$400\" — \"Energetic husky puppy ready to explore the great outdoors. Ideal for couples looking for an exciting bond.\"\n  4. \"$200\" — \"Calm labrador puppy, perfect for families and quiet evenings. A gentle soul ready to spread joy.\"\n  5. \"$300\" — \"Adorable french bulldog, known for its charming personality and playful spirit. Great for apartment living.\"\n  6. \"$225\" — \"Spotted terrier mix, full of boundless energy and love. Ready to become your best friend.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.291,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 384,
+   "ms": 2275
+  },
+  {
+   "round": 0,
+   "key": "s0.weakest",
+   "section": 0,
+   "user": "A landing page called \"Puppy Love\", for Potential puppy adopters looking for a loving companion.\n\nSection \"hero\" (dark band). Top to bottom:\n- badge: \"Find your forever friend. Open your heart to puppy love.\"\n- paragraph: \"Find your perfect match. Open your heart to unconditional love and start your happy puppy journey today. Your new best friend is waiting.\"\n- date and place: \"Find your forever best friend. Adopt a puppy today.\"\n- button: \"Adopt a Puppy\"\n- price: \"Adoption Fees Start At $499\"\n- 6 featureItems in a grid, each: price, sentence or two:\n  1. \"$250\" — \"Meet a playful golden retriever ready for adventure and endless cuddles. Perfect for active families.\"\n  2. \"$350\" — \"Sweet beagle mix seeking a home with lots of attention and playtime. A loyal companion awaits you.\"\n  3. \"$400\" — \"Energetic husky puppy ready to explore the great outdoors. Ideal for couples looking for an exciting bond.\"\n  4. \"$200\" — \"Calm labrador puppy, perfect for families and quiet evenings. A gentle soul ready to spread joy.\"\n  5. \"$300\" — \"Adorable french bulldog, known for its charming personality and playful spirit. Great for apartment living.\"\n  6. \"$225\" — \"Spotted terrier mix, full of boundless energy and love. Ready to become your best friend.\"\n\nWhich line is the weakest: odd, cut off, repeated or off-topic?",
+   "pick": "paragraph: \"Find your perfect match. Open your heart to unconditional love and sta\"",
+   "dist": {
+    "paragraph: \"Find your perfect match. Open your heart to unconditional love and sta\"": 0.7855430234122871,
+    "date and place: \"Find your forever best friend. Adopt a puppy today.\"": 0.08368552234924628,
+    "item 2 sentence or two: \"Sweet beagle mix seeking a home with lots of attention and playtime. A\"": 0.07212024245139685,
+    "item 6 sentence or two: \"Spotted terrier mix, full of boundless energy and love. Ready to becom\"": 0.03296789092990493,
+    "button: \"Adopt a Puppy\"": 0.005885099501850066,
+    "item 6 price: \"$225\"": 0.004974473204804265,
+    "badge: \"Find your forever friend. Open your heart to puppy love.\"": 0.0025220320475585934,
+    "item 1 price: \"$250\"": 0.0013736761698393786,
+    "price: \"Adoption Fees Start At $499\"": 0.0010605071060271083
+   },
+   "model": "gemma4:e4b-it-qat"
+  },
+  {
+   "round": 0,
+   "key": "s1.sound",
+   "section": 1,
+   "user": "A landing page called \"Puppy Love\", for Potential puppy adopters looking for a loving companion.\n\nSection \"feature cards\" (light band). Top to bottom:\n- paragraph: \"Meet your perfect match! Discover curated puppy profiles, interactive adoption guides, and heartwarming stories to find your best new friend.\"\n- small print: \"Adoption requires commitment and responsible ownership.\"\n- button: \"View Profiles & Apply\"\n- button: \"Browse adoption profiles\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.724,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 159,
+   "ms": 1297
+  },
+  {
+   "round": 0,
+   "key": "s2.sound",
+   "section": 2,
+   "user": "A landing page called \"Puppy Love\", for Potential puppy adopters looking for a loving companion.\n\nSection \"gallery\" (light band). Top to bottom:\n- date and place: \"Cozy afternoons and playful adventures in your forever home.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.073,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 114,
+   "ms": 991
+  },
+  {
+   "round": 0,
+   "key": "s2.weakest",
+   "section": 2,
+   "user": "A landing page called \"Puppy Love\", for Potential puppy adopters looking for a loving companion.\n\nSection \"gallery\" (light band). Top to bottom:\n- date and place: \"Cozy afternoons and playful adventures in your forever home.\"\n\nWhich line is the weakest: odd, cut off, repeated or off-topic?",
+   "pick": "date and place: \"Cozy afternoons and playful adventures in your forever home.\"",
+   "dist": {
+    "date and place: \"Cozy afternoons and playful adventures in your forever home.\"": 0.5727706688663418
+   },
+   "model": "gemma4:e4b-it-qat"
+  },
+  {
+   "round": 0,
+   "key": "s3.sound",
+   "section": 3,
+   "user": "A landing page called \"Puppy Love\", for Potential puppy adopters looking for a loving companion.\n\nSection \"how it works\" (light band). Top to bottom:\n- badge: \"Swipe through profiles. Match with your perfect match instantly. Find your best friend now.\"\n- date and place: \"Find your perfect furry friend. Browse adorable puppies and start your adoption journey today.\"\n- who said it: a name and a role: \"Ava, Lead Adopter Coach\"\n- a photo (animal-dog.webp)\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.536,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 174,
+   "ms": 1376
+  },
+  {
+   "round": 0,
+   "key": "s4.sound",
+   "section": 4,
+   "user": "A landing page called \"Puppy Love\", for Potential puppy adopters looking for a loving companion.\n\nSection \"call to action\" (light band). Top to bottom:\n- who said it: a name and a role: \"Sarah, Adoption Coordinator\"\n- quote: \"My new best friend is the perfect addition to our home! Puppy Love found my soulmate.\"\n- price: \"Adopt a Friend Today\"\n- small print: \"Apply now and start your loving journey!\"\n- sub-line: \"Find your perfect furry match today and start your happy journey with a loving companion.\"\n- 6 testimonialCards in a single column, each: photo, title:\n  1. \"Meet Our Wonderful Puppies\"\n  2. \"View All Adoption Profiles\"\n  3. \"Start Your Adoption Journey\"\n  4. \"Learn About Our Process\"\n  5. \"Read Success Stories\"\n  6. \"Apply to Adopt Today\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.327,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 264,
+   "ms": 2045
+  },
+  {
+   "round": 0,
+   "key": "s4.weakest",
+   "section": 4,
+   "user": "A landing page called \"Puppy Love\", for Potential puppy adopters looking for a loving companion.\n\nSection \"call to action\" (light band). Top to bottom:\n- who said it: a name and a role: \"Sarah, Adoption Coordinator\"\n- quote: \"My new best friend is the perfect addition to our home! Puppy Love found my soulmate.\"\n- price: \"Adopt a Friend Today\"\n- small print: \"Apply now and start your loving journey!\"\n- sub-line: \"Find your perfect furry match today and start your happy journey with a loving companion.\"\n- 6 testimonialCards in a single column, each: photo, title:\n  1. \"Meet Our Wonderful Puppies\"\n  2. \"View All Adoption Profiles\"\n  3. \"Start Your Adoption Journey\"\n  4. \"Learn About Our Process\"\n  5. \"Read Success Stories\"\n  6. \"Apply to Adopt Today\"\n\nWhich line is the weakest: odd, cut off, repeated or off-topic?",
+   "pick": "quote: \"My new best friend is the perfect addition to our home! Puppy Love fou\"",
+   "dist": {
+    "quote: \"My new best friend is the perfect addition to our home! Puppy Love fou\"": 0.778718762996222,
+    "sub-line: \"Find your perfect furry match today and start your happy journey with \"": 0.1275940792554902,
+    "price: \"Adopt a Friend Today\"": 0.06531902128379602,
+    "small print: \"Apply now and start your loving journey!\"": 0.014285954708040009,
+    "item 1 title: \"Meet Our Wonderful Puppies\"": 0.009181771964585028,
+    "item 3 title: \"Start Your Adoption Journey\"": 0.0010102121418575608,
+    "who said it: a name and a role: \"Sarah, Adoption Coordinator\"": 0.0008779219180121338,
+    "item 4 title: \"Learn About Our Process\"": 0.00059076286807503,
+    "item 5 title: \"Read Success Stories\"": 0.00010887429263255617
+   },
+   "model": "gemma4:e4b-it-qat"
+  },
+  {
+   "round": 0,
+   "key": "s5.sound",
+   "section": 5,
+   "user": "A landing page called \"Puppy Love\", for Potential puppy adopters looking for a loving companion.\n\nSection \"testimonials\" (light band). Top to bottom:\n- small print: \"Adoption requires commitment. Read all profiles carefully.\"\n- sub-line: \"These amazing pups make every day brighter and fill your heart with unconditional joy.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.741,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 134,
+   "ms": 1212
+  },
+  {
+   "round": 0,
+   "key": "s6.sound",
+   "section": 6,
+   "user": "A landing page called \"Puppy Love\", for Potential puppy adopters looking for a loving companion.\n\nSection \"sign-up or contact form\" (light band). Top to bottom:\n- quote: \"My new best friend arrived! Puppy Love found the perfect companion for our family.\"\n- who said it: a name and a role: \"Sarah, Adoption Coordinator\"\n- headline: \"Ready for unconditional love? Join our puppy family now!\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.699,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 156,
+   "ms": 1200
+  },
+  {
+   "round": 0,
+   "key": "page.missing",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nA landing page called \"Puppy Love\", for Potential puppy adopters looking for a loving companion.\nThe page's sections, top to bottom:\n1. hero: \"Find your forever friend. Open your heart to puppy love.\"\n2. feature cards: \"Meet your perfect match! Discover curated puppy profiles, interactive adoption guides, and heartwarming stories to find your best new friend.\"\n3. gallery: \"Cozy afternoons and playful adventures in your forever home.\"\n4. how it works: \"Swipe through profiles. Match with your perfect match instantly. Find your best friend now.\"\n5. call to action: \"Sarah, Adoption Coordinator\"\n6. testimonials: \"Adoption requires commitment. Read all profiles carefully.\"\n7. sign-up or contact form: \"Ready for unconditional love? Join our puppy family now!\"\n\nIs something a visitor would clearly expect on this page missing?",
+   "pYes": 0.409,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 236,
+   "ms": 1851
+  },
+  {
+   "round": 0,
+   "key": "page.extra",
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nA landing page called \"Puppy Love\", for Potential puppy adopters looking for a loving companion.\nThe page's sections, top to bottom:\n1. hero: \"Find your forever friend. Open your heart to puppy love.\"\n2. feature cards: \"Meet your perfect match! Discover curated puppy profiles, interactive adoption guides, and heartwarming stories to find your best new friend.\"\n3. gallery: \"Cozy afternoons and playful adventures in your forever home.\"\n4. how it works: \"Swipe through profiles. Match with your perfect match instantly. Find your best friend now.\"\n5. call to action: \"Sarah, Adoption Coordinator\"\n6. testimonials: \"Adoption requires commitment. Read all profiles carefully.\"\n7. sign-up or contact form: \"Ready for unconditional love? Join our puppy family now!\"\n\nDoes any section repeat another one, or not belong on this page?",
+   "pYes": 0.081,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 238,
+   "ms": 1817
+  }
+ ],
+ "skipped": [
+  {
+   "key": "card.hue",
+   "why": "S0: the request says it (blue)"
+  },
+  {
+   "key": "card.tone",
+   "why": "S0: the request says it (modern)"
+  },
+  {
+   "key": "card.kind",
+   "why": "S0: the request says it (landing page)"
+  },
+  {
+   "key": "card.mustShow",
+   "why": "S0: dropped facts about the look: puppy adoption landing page; blue colour theme; modern style"
+  },
+  {
+   "key": "card.photos",
+   "why": "photo scout (reviewer vision): kept animal-dog.webp of 32"
+  },
+  {
+   "key": "s6.bits",
+   "why": "rule: a quote gets a name line"
+  }
+ ],
+ "mcp": [
+  {
+   "round": 0,
+   "tool": "create_project",
+   "isError": false,
+   "ms": 253
+  },
+  {
+   "round": 0,
+   "tool": "get_style_vocabulary",
+   "isError": false,
+   "ms": 5
+  },
+  {
+   "round": 0,
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 21
+  },
+  {
+   "round": 0,
+   "tool": "set_style_preset",
+   "isError": false,
+   "ms": 8
+  },
+  {
+   "round": 0,
+   "tool": "set_project_tokens",
+   "isError": false,
+   "ms": 5
+  },
+  {
+   "round": 0,
+   "tool": "list_node_types",
+   "isError": false,
+   "ms": 4
+  },
+  {
+   "round": 0,
+   "tool": "get_component",
+   "isError": false,
+   "ms": 15
+  },
+  {
+   "round": 0,
+   "tool": "create_plan",
+   "isError": false,
+   "ms": 7
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 61
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 22
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 28
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 20
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 17
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 17
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "apply_plan",
+   "isError": false,
+   "ms": 2866
+  },
+  {
+   "round": 0,
+   "tool": "render_report",
+   "isError": false,
+   "ms": 1802
+  }
+ ],
+ "roundsLog": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R-puppy-r0",
+   "score": 25.93,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "badge",
+      "body text",
+      "date and place",
+      "list of items",
+      "button",
+      "price"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.291
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "body text",
+      "small print",
+      "button",
+      "second button"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.724
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "date and place"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.073
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "photo",
+      "badge",
+      "date and place",
+      "name line"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.536
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "name line",
+      "list of items",
+      "quote",
+      "price",
+      "small print",
+      "sub-line"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.327
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "small print",
+      "sub-line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.741
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "quote",
+      "name line",
+      "headline"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.699
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|call to action#0",
+     "weight": 3,
+     "say": "the list in \"call to action\" shows the same photo 6 times",
+     "op": "reask"
+    },
+    {
+     "id": "S7|gallery#0",
+     "weight": 2,
+     "say": "\"gallery\" is only a date and place",
+     "op": "reask"
+    },
+    {
+     "id": "S5|call to action#0|list.rows|6|title",
+     "weight": 2,
+     "say": "\"Start Your Adoption Journey\" repeats \"Find your perfect furry friend. Browse adorable puppies and start your adoption journey today.\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|sign-up or contact form#0|copy|who said it: a name and a role|Text",
+     "weight": 2,
+     "say": "\"Sarah, Adoption Coordinator\" repeats \"Sarah, Adoption Coordinator\"",
+     "op": "reword"
+    },
+    {
+     "id": "S12|how it works#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "four \"bandSurface\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    },
+    {
+     "id": "R|single-column-grid|page",
+     "weight": 4,
+     "say": "render: single-column-grid"
+    },
+    {
+     "id": "J1|hero#0|copy|a short paragraph|Text",
+     "weight": 2.13,
+     "say": "reviewer (p=0.291): weakest line paragraph \"Find your perfect match. Open your heart to uncond\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|gallery#0|copy|when and where, in one line|Text",
+     "weight": 2.78,
+     "say": "reviewer (p=0.073): weakest line date and place \"Cozy afternoons and playful adventures in your for\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|call to action#0|copy|a quotation from a happy customer or visitor|Text",
+     "weight": 2.02,
+     "say": "reviewer (p=0.327): weakest line quote \"My new best friend is the perfect addition to our \"",
+     "op": "reword"
+    }
+   ],
+   "findings": [
+    "minimum-layout-width",
+    "single-column-grid"
+   ],
+   "modelCalls": 68,
+   "judgements": 44,
+   "words": [
+    "Section \"hero\" (dark band). Top to bottom:\n- badge: \"Find your forever friend. Open your heart to puppy love.\"\n- paragraph: \"Find your perfect match. Open your heart to unconditional love and start your happy puppy journey today. Your new best friend is waiting.\"\n- date and place: \"Find your forever best friend. Adopt a puppy today.\"\n- button: \"Adopt a Puppy\"\n- price: \"Adoption Fees Start At $499\"\n- 6 featureItems in a grid, each: price, sentence or two:\n  1. \"$250\" — \"Meet a playful golden retriever ready for adventure and endless cuddles. Perfect for active families.\"\n  2. \"$350\" — \"Sweet beagle mix seeking a home with lots of attention and playtime. A loyal companion awaits you.\"\n  3. \"$400\" — \"Energetic husky puppy ready to explore the great outdoors. Ideal for couples looking for an exciting bond.\"\n  4. \"$200\" — \"Calm labrador puppy, perfect for families and quiet evenings. A gentle soul ready to spread joy.\"\n  5. \"$300\" — \"Adorable french bulldog, known for its charming personality and playful spirit. Great for apartment living.\"\n  6. \"$225\" — \"Spotted terrier mix, full of boundless energy and love. Ready to become your best friend.\"",
+    "Section \"feature cards\" (light band). Top to bottom:\n- paragraph: \"Meet your perfect match! Discover curated puppy profiles, interactive adoption guides, and heartwarming stories to find your best new friend.\"\n- small print: \"Adoption requires commitment and responsible ownership.\"\n- button: \"View Profiles & Apply\"\n- button: \"Browse adoption profiles\"",
+    "Section \"gallery\" (light band). Top to bottom:\n- date and place: \"Cozy afternoons and playful adventures in your forever home.\"",
+    "Section \"how it works\" (light band). Top to bottom:\n- badge: \"Swipe through profiles. Match with your perfect match instantly. Find your best friend now.\"\n- date and place: \"Find your perfect furry friend. Browse adorable puppies and start your adoption journey today.\"\n- who said it: a name and a role: \"Ava, Lead Adopter Coach\"\n- a photo (animal-dog.webp)",
+    "Section \"call to action\" (light band). Top to bottom:\n- who said it: a name and a role: \"Sarah, Adoption Coordinator\"\n- quote: \"My new best friend is the perfect addition to our home! Puppy Love found my soulmate.\"\n- price: \"Adopt a Friend Today\"\n- small print: \"Apply now and start your loving journey!\"\n- sub-line: \"Find your perfect furry match today and start your happy journey with a loving companion.\"\n- 6 testimonialCards in a single column, each: photo, title:\n  1. \"Meet Our Wonderful Puppies\"\n  2. \"View All Adoption Profiles\"\n  3. \"Start Your Adoption Journey\"\n  4. \"Learn About Our Process\"\n  5. \"Read Success Stories\"\n  6. \"Apply to Adopt Today\"",
+    "Section \"testimonials\" (light band). Top to bottom:\n- small print: \"Adoption requires commitment. Read all profiles carefully.\"\n- sub-line: \"These amazing pups make every day brighter and fill your heart with unconditional joy.\"",
+    "Section \"sign-up or contact form\" (light band). Top to bottom:\n- quote: \"My new best friend arrived! Puppy Love found the perfect companion for our family.\"\n- who said it: a name and a role: \"Sarah, Adoption Coordinator\"\n- headline: \"Ready for unconditional love? Join our puppy family now!\""
+   ],
+   "minutes": 2.3,
+   "kept": true
+  }
+ ],
+ "randomDecisions": true,
+ "flags": [
+  "--brief",
+  "--run",
+  "--no-review",
+  "--random-decisions"
+ ],
+ "photoScout": [
+  [
+   "animal-dog.webp",
+   0.978
+  ],
+  [
+   "people-cafe.webp",
+   0.195
+  ],
+  [
+   "work-potter.webp",
+   0.158
+  ],
+  [
+   "people-coffee-shop.webp",
+   0.155
+  ],
+  [
+   "ground-shore.webp",
+   0.122
+  ],
+  [
+   "work-leather-bench.webp",
+   0.069
+  ],
+  [
+   "work-carpenter.webp",
+   0.061
+  ],
+  [
+   "ground-coast.webp",
+   0.06
+  ],
+  [
+   "work-hands-clay.webp",
+   0.06
+  ],
+  [
+   "ground-canyon.webp",
+   0.05
+  ],
+  [
+   "people-meeting.webp",
+   0.048
+  ],
+  [
+   "food-carrots.webp",
+   0.048
+  ],
+  [
+   "food-grocer.webp",
+   0.041
+  ],
+  [
+   "people-desk.webp",
+   0.04
+  ],
+  [
+   "ground-forest-fog.webp",
+   0.037
+  ],
+  [
+   "food-board.webp",
+   0.037
+  ],
+  [
+   "ground-red-rock.webp",
+   0.033
+  ],
+  [
+   "ground-dune.webp",
+   0.029
+  ],
+  [
+   "work-machine-shop.webp",
+   0.027
+  ],
+  [
+   "food-bread.webp",
+   0.027
+  ],
+  [
+   "animal-horse.webp",
+   0.027
+  ],
+  [
+   "ground-skyline.webp",
+   0.023
+  ],
+  [
+   "food-market.webp",
+   0.023
+  ],
+  [
+   "ground-city-dusk.webp",
+   0.021
+  ],
+  [
+   "people-market.webp",
+   0.02
+  ],
+  [
+   "food-bakery.webp",
+   0.018
+  ],
+  [
+   "work-chef.webp",
+   0.016
+  ],
+  [
+   "animal-sheep.webp",
+   0.016
+  ],
+  [
+   "work-baker.webp",
+   0.011
+  ],
+  [
+   "food-plate.webp",
+   0.008
+  ],
+  [
+   "animal-cat.webp",
+   0.008
+  ],
+  [
+   "work-welder.webp",
+   0.007
+  ]
+ ],
+ "result": {
+  "minutes": 2.3,
+  "bestRound": 0,
+  "bestScore": 25.93,
+  "scores": [
+   25.93
+  ],
+  "builderCalls": 68,
+  "judgements": 44,
+  "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R-puppy-r0"
+ }
+}

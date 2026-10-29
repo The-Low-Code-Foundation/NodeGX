@@ -1,0 +1,4866 @@
+{
+ "arm": "T",
+ "run": "r2",
+ "model": "gemma4:e2b-it-qat",
+ "request": "Make me a puppy adoption landing page please, blue colour theme, modern style.",
+ "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-027-T-r2",
+ "startedAt": "2026-10-28T12:49:01.512Z",
+ "tuning": {
+  "tuning": 1,
+  "date": "2026-10-28",
+  "after": "r1",
+  "changes": [
+   "(a) every enum's options are written into the question's words (photo files, section kinds, port values, glyphs, kind/tone, hue). In r1 they were in the Ollama format schema only, which constrains the output but is never shown to the model: it picked avatar-1.webp (a man's face) as the puppy page's photo from a list it never read. A harness defect, counted as a tuning because it changes what the model sees.",
+   "(b) stage 2 asks for a role saying what the node is FOR, never the type name: in r1 every role was the type name ('Group', 'Text'), so every later question had no context.",
+   "(c) a copy question for a node with same-type siblings says 'item k of n … write only this one': in r1 the three how-it-works texts each wrote all three steps. Structure only; no sibling answer is shown."
+  ],
+  "not_from": "arm C's screenshot was not consulted for any of these; each is read off r1's ledger."
+ },
+ "rules": [
+  "R1 offered types: the visual types from list_node_types that render from parameters alone and that the vocabulary has content for. Out, with the reason: Component Children, For Each (Repeater), Page Stack, Router — they need another component or data, which stage 2 cannot make; Drag — behaviour, not a part; Video — the imagery has no video; Radio Button Group, Radio Button, Dropdown, Slider — they need an options list or a value no question supplies.",
+  "R2 the type description in stage 2 is list_node_types' summary cut at its first \":\" / \"—\" / \".\" and to 70 characters, so the call stays under the 600-token budget.",
+  "R3 looks: the compositions get_style_vocabulary returns for the node's type. A section root (depth 0) is offered the \"spine\" compositions except shell and sectionHead; any other Group is offered the rest of the Group compositions plus shell and sectionHead. When a type has exactly one composition (Image → cardImage, Text Input → textField) the script applies it without asking; a type with none (Icon, Checkbox, Shape) is not asked.",
+  "R4 a look's parameters are copied verbatim onto the node. A Group with look \"none\" gets width 100% + sizeMode contentHeight (what every Group composition in the vocabulary carries) and nothing else.",
+  "R5 enum ports asked: Group flexDirection and alignItems, each only when the look does not already set it; Text textAlignX always. Not asked, with the reason: Group justifyContent (default flex-start is right for a stacked section), every other enum port (its default is the right one for a static landing section, or the look sets it).",
+  "R6 dark ground: a node with an ancestor-or-self look in heroGround, ctaBand, imageGround (whose descriptions say \"light text only\"): Text color → var(--primary-foreground); a primaryButton → backgroundColor var(--background), color var(--primary); an outlineButton → color var(--primary-foreground), borderColor var(--border-glass); an Icon → iconColor var(--primary-foreground). Elsewhere an Icon is var(--primary).",
+  "R7 a badge NOT on a dark ground swaps its fill to var(--surface) and border to var(--border) (the badge composition's own description says so).",
+  "R8 Text \"as\": displayHeadline → h1, sectionHeading → h2, cardTitle → h3. Section root \"as\": hero → header, footer → footer, else section.",
+  "R9 type pairing: the card's pairing sets fontFamily on heading-look Text (displayHeadline, sectionHeading, cardTitle) and on all other Text, only where the pairing names a family other than --font-sans (the project default).",
+  "R10 density on spine looks' paddingTop/paddingBottom: airy → --space-24, regular → as the look says, compact → --space-12.",
+  "R11 radius via set_project_tokens: sharp → radius-md 2px … radius-3xl 8px; soft → the preset's own; round → radius-md 10px … radius-3xl 36px. Hue via set_project_tokens: --primary var(--<hue>-600), --primary-hover var(--<hue>-700), --ring var(--<hue>-500) (neutral → gray-900/800/500).",
+  "R12 images: every Image (and an imageGround's backgroundImage) is the card's photo, from noodl_modules/starter-imagery; alt is the node's role.",
+  "R13 a Text whose parent look is badge or actionRow takes sizeMode contentSize (the badge composition says the Texts inside it must hug).",
+  "R14 copy lengths by look: displayHeadline 70, sectionHeading 60, cardTitle 40, eyebrow 30, meta 60, lead 160, fieldLabel 30, fieldHint 80, fieldError 80, otherwise 200. A Button label 28, a Text Input placeholder 40, a Checkbox label 60.",
+  "R15 an Icon: iconSourceType icon, iconSize 24, glyph from the vocabulary's glyph list (the one model question it gets). A Shape: fillColor var(--primary), size 48.",
+  "R16 assembly: one component per section (Sections/S<n><Kind>), the page Pages/Home is its Page node holding one instance per section, title = card.name. One create_plan, apply_plan once, scroll \"page\".",
+  "R17 retries: a rejection whose diagnostic names a node and a port re-asks only the question that set that port, with the diagnostic appended, at most twice; then the port is unset (script default) and the ledger says so. A port a rule set is unset at once (a harness defect, ledgered).",
+  "R18 stage 2 check: every type offered, item 0 a Group with parent -1, parents earlier, only Group/Columns parents, depth ≤ 3, ≤ 6 children. One re-ask with the diagnostic; a second failure is repaired by the script (offending items dropped), ledgered as a default."
+ ],
+ "card": {
+  "kind": "landing page",
+  "tone": "playful",
+  "action": "Adopt a puppy today by filling out our application form.",
+  "audience": "Potential puppy adopters looking for a loving new companion.",
+  "name": "Pawsitive Pals",
+  "hue": "blue",
+  "preset": "modern",
+  "density": "compact",
+  "pairing": "sans-sans",
+  "radius": "sharp",
+  "photo": "animal-dog.webp"
+ },
+ "sections": [
+  {
+   "kind": "hero",
+   "purpose": "Grab attention with a welcoming image and a catchy headline."
+  },
+  {
+   "kind": "feature cards",
+   "purpose": "Highlight the unique benefits of adopting a puppy from Pawsitive Pals."
+  },
+  {
+   "kind": "how it works",
+   "purpose": "Simplify the adoption process into easy, bite-sized steps."
+  },
+  {
+   "kind": "gallery",
+   "purpose": "Showcase adorable puppies and happy adopters to build trust."
+  },
+  {
+   "kind": "testimonials",
+   "purpose": "Provide social proof with heartwarming stories from past adopters."
+  },
+  {
+   "kind": "faq",
+   "purpose": "Address common concerns quickly to reduce friction."
+  },
+  {
+   "kind": "call to action",
+   "purpose": "Direct users clearly to the main goal: filling out the application form."
+  }
+ ],
+ "calls": [
+  {
+   "key": "card.kind+tone",
+   "stage": 0,
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nWhat kind of thing is this (landing page, internal tool, game, other), and what tone should it have (modern, playful, classic, minimal, bold)?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "kind",
+     "tone"
+    ],
+    "properties": {
+     "kind": {
+      "type": "string",
+      "enum": [
+       "landing page",
+       "internal tool",
+       "game",
+       "other"
+      ]
+     },
+     "tone": {
+      "type": "string",
+      "enum": [
+       "modern",
+       "playful",
+       "classic",
+       "minimal",
+       "bold"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "kind": "landing page",
+    "tone": "playful"
+   },
+   "tokensIn": 90,
+   "tokensOut": 22,
+   "promptChars": 335,
+   "ms": 1067
+  },
+  {
+   "key": "card.audience+action+name",
+   "stage": 0,
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nWho is the page for (one line, max 20 words)? What is the ONE action the page wants a visitor to take (max 20 words)? What is the site or organisation called (max 4 words; invent a short name if none is given)?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "action",
+     "audience",
+     "name"
+    ],
+    "properties": {
+     "action": {
+      "type": "string",
+      "maxLength": 140
+     },
+     "audience": {
+      "type": "string",
+      "maxLength": 140
+     },
+     "name": {
+      "type": "string",
+      "maxLength": 40
+     }
+    }
+   },
+   "temperature": 0.4,
+   "answer": {
+    "action": "Adopt a puppy today by filling out our application form.",
+    "audience": "Potential puppy adopters looking for a loving new companion.",
+    "name": "Pawsitive Pals"
+   },
+   "tokensIn": 112,
+   "tokensOut": 48,
+   "promptChars": 403,
+   "ms": 1906
+  },
+  {
+   "key": "card.preset+hue",
+   "stage": 0,
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nPick the style preset and the primary colour (blue, green, warm, neutral, purple).\nPresets:\n- modern: The balanced default — clean, neutral, Tailwind-scale.\n- minimal: Restrained: subtle borders, muted palette, tight radius.\n- playful: Vivid colors, rounded corners, generous spacing.\n- enterprise: Dense, conservative, high-contrast for data-heavy UIs.\n- soft: Gentle pastels, large radius, airy spacing.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "hue",
+     "preset"
+    ],
+    "properties": {
+     "hue": {
+      "type": "string",
+      "enum": [
+       "blue",
+       "green",
+       "warm",
+       "neutral",
+       "purple"
+      ]
+     },
+     "preset": {
+      "type": "string",
+      "enum": [
+       "modern",
+       "minimal",
+       "playful",
+       "enterprise",
+       "soft"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "hue": "blue",
+    "preset": "modern"
+   },
+   "tokensIn": 155,
+   "tokensOut": 22,
+   "promptChars": 598,
+   "ms": 1112
+  },
+  {
+   "key": "card.pairing+density+radius",
+   "stage": 0,
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nPick the type pairing (headings / body), the density and the corner radius.\nPairings:\n- sans-sans: Inter headings / Inter body\n- serif-sans: serif headings / Inter body\n- sans-serif: Inter headings / serif body\n- serif-serif: serif headings / serif body\n- mono-sans: monospace headings / Inter body",
+   "schema": {
+    "type": "object",
+    "required": [
+     "density",
+     "pairing",
+     "radius"
+    ],
+    "properties": {
+     "density": {
+      "type": "string",
+      "enum": [
+       "airy",
+       "regular",
+       "compact"
+      ]
+     },
+     "pairing": {
+      "type": "string",
+      "enum": [
+       "sans-sans",
+       "serif-sans",
+       "sans-serif",
+       "serif-serif",
+       "mono-sans"
+      ]
+     },
+     "radius": {
+      "type": "string",
+      "enum": [
+       "sharp",
+       "soft",
+       "round"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "density": "compact",
+    "pairing": "sans-sans",
+    "radius": "sharp"
+   },
+   "tokensIn": 131,
+   "tokensOut": 21,
+   "promptChars": 491,
+   "ms": 796
+  },
+  {
+   "key": "card.photo",
+   "stage": 0,
+   "user": "Request: \"Make me a puppy adoption landing page please, blue colour theme, modern style.\"\nThe page will use ONE stock photograph wherever it shows a picture. Which file fits the request best?\nFiles: ground-city-dusk.webp, ground-forest-fog.webp, ground-canyon.webp, ground-dune.webp, ground-coast.webp, ground-shore.webp, ground-red-rock.webp, ground-skyline.webp, work-welder.webp, work-potter.webp, work-baker.webp, work-chef.webp, work-carpenter.webp, work-leather-bench.webp, work-machine-shop.webp, work-hands-clay.webp, people-cafe.webp, people-coffee-shop.webp, people-meeting.webp, people-market.webp, people-desk.webp, food-market.webp, food-bread.webp, food-board.webp, food-plate.webp, food-grocer.webp, food-carrots.webp, food-bakery.webp, animal-cat.webp, animal-horse.webp, animal-sheep.webp, animal-dog.webp, texture-brick.webp, texture-soil.webp, texture-snow.webp, texture-pebbles.webp, texture-coffee.webp, texture-earth.webp, avatar-1.webp, avatar-2.webp, avatar-3.webp, avatar-4.webp, avatar-5.webp, avatar-6.webp",
+   "schema": {
+    "type": "object",
+    "required": [
+     "photo"
+    ],
+    "properties": {
+     "photo": {
+      "type": "string",
+      "enum": [
+       "ground-city-dusk.webp",
+       "ground-forest-fog.webp",
+       "ground-canyon.webp",
+       "ground-dune.webp",
+       "ground-coast.webp",
+       "ground-shore.webp",
+       "ground-red-rock.webp",
+       "ground-skyline.webp",
+       "work-welder.webp",
+       "work-potter.webp",
+       "work-baker.webp",
+       "work-chef.webp",
+       "work-carpenter.webp",
+       "work-leather-bench.webp",
+       "work-machine-shop.webp",
+       "work-hands-clay.webp",
+       "people-cafe.webp",
+       "people-coffee-shop.webp",
+       "people-meeting.webp",
+       "people-market.webp",
+       "people-desk.webp",
+       "food-market.webp",
+       "food-bread.webp",
+       "food-board.webp",
+       "food-plate.webp",
+       "food-grocer.webp",
+       "food-carrots.webp",
+       "food-bakery.webp",
+       "animal-cat.webp",
+       "animal-horse.webp",
+       "animal-sheep.webp",
+       "animal-dog.webp",
+       "texture-brick.webp",
+       "texture-soil.webp",
+       "texture-snow.webp",
+       "texture-pebbles.webp",
+       "texture-coffee.webp",
+       "texture-earth.webp",
+       "avatar-1.webp",
+       "avatar-2.webp",
+       "avatar-3.webp",
+       "avatar-4.webp",
+       "avatar-5.webp",
+       "avatar-6.webp"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "photo": "animal-dog.webp"
+   },
+   "tokensIn": 369,
+   "tokensOut": 16,
+   "promptChars": 1136,
+   "ms": 1320
+  },
+  {
+   "key": "sections",
+   "stage": 1,
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nA landing page for: Potential puppy adopters looking for a loving new companion.. Tone: playful. Which sections, top to bottom? Give 3 to 7, each with a one-line purpose.\nSection kinds: hero, feature cards, how it works, gallery, testimonials, pricing, faq, call to action, footer",
+   "schema": {
+    "type": "object",
+    "required": [
+     "sections"
+    ],
+    "properties": {
+     "sections": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 7,
+      "items": {
+       "type": "object",
+       "required": [
+        "kind",
+        "purpose"
+       ],
+       "properties": {
+        "kind": {
+         "type": "string",
+         "enum": [
+          "hero",
+          "feature cards",
+          "how it works",
+          "gallery",
+          "testimonials",
+          "pricing",
+          "faq",
+          "call to action",
+          "footer"
+         ]
+        },
+        "purpose": {
+         "type": "string",
+         "maxLength": 120
+        }
+       }
+      }
+     }
+    }
+   },
+   "temperature": 0.3,
+   "answer": {
+    "sections": [
+     {
+      "kind": "hero",
+      "purpose": "Grab attention with a welcoming image and a catchy headline."
+     },
+     {
+      "kind": "feature cards",
+      "purpose": "Highlight the unique benefits of adopting a puppy from Pawsitive Pals."
+     },
+     {
+      "kind": "how it works",
+      "purpose": "Simplify the adoption process into easy, bite-sized steps."
+     },
+     {
+      "kind": "gallery",
+      "purpose": "Showcase adorable puppies and happy adopters to build trust."
+     },
+     {
+      "kind": "testimonials",
+      "purpose": "Provide social proof with heartwarming stories from past adopters."
+     },
+     {
+      "kind": "faq",
+      "purpose": "Address common concerns quickly to reduce friction."
+     },
+     {
+      "kind": "call to action",
+      "purpose": "Direct users clearly to the main goal: filling out the application form."
+     }
+    ]
+   },
+   "tokensIn": 183,
+   "tokensOut": 160,
+   "promptChars": 718,
+   "ms": 5537
+  },
+  {
+   "key": "s0.tree",
+   "stage": 2,
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nBuild the \"hero\" section. Purpose: Grab attention with a welcoming image and a catchy headline.\nVisual node types you may use:\n- Group: The universal layout container\n- net.noodl.visual.columns: Responsive multi-column layout\n- Text: Renders a piece of text with typography controlled by a text style or…\n- Image: Displays an image from a project asset or URL, with fit control, srcS…\n- net.noodl.controls.button: The standard clickable button control, with label, optional icon, and…\n- net.noodl.visual.icon: Displays a glyph from a project icon font, or an image, at a given si…\n- net.noodl.controls.textinput: Single-line or multi-line text entry control with label, icon, placeh…\n- net.noodl.controls.checkbox: Checkbox control\n- Circle: An SVG circle or arc with fill, stroke and start/end angles\nGive the node tree as a flat list. Item 0 is the root (parent -1) and must be a Group. Every other item's parent is the index of an EARLIER item, and only Group or Columns can be a parent. Max depth 3 below the root, max 6 children per node, max 14 nodes. Each item: type, and a one-line role saying what it is FOR on this page (e.g. \"the headline\", \"a photo of a puppy\", \"card for one step\"), never the type name.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "nodes"
+    ],
+    "properties": {
+     "nodes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 14,
+      "items": {
+       "type": "object",
+       "required": [
+        "parent",
+        "role",
+        "type"
+       ],
+       "properties": {
+        "parent": {
+         "type": "integer",
+         "minimum": -1,
+         "maximum": 13
+        },
+        "role": {
+         "type": "string",
+         "maxLength": 80
+        },
+        "type": {
+         "type": "string",
+         "enum": [
+          "Group",
+          "net.noodl.visual.columns",
+          "Text",
+          "Image",
+          "net.noodl.controls.button",
+          "net.noodl.visual.icon",
+          "net.noodl.controls.textinput",
+          "net.noodl.controls.checkbox",
+          "Circle"
+         ]
+        }
+       }
+      }
+     }
+    }
+   },
+   "temperature": 0.3,
+   "answer": {
+    "nodes": [
+     {
+      "parent": -1,
+      "role": "the main container for the hero section",
+      "type": "Group"
+     },
+     {
+      "parent": 0,
+      "role": "the main headline",
+      "type": "Text"
+     },
+     {
+      "parent": 0,
+      "role": "a welcoming image of a puppy",
+      "type": "Image"
+     },
+     {
+      "parent": 0,
+      "role": "a call to action button",
+      "type": "net.noodl.controls.button"
+     }
+    ]
+   },
+   "tokensIn": 449,
+   "tokensOut": 112,
+   "promptChars": 1654,
+   "ms": 4527
+  },
+  {
+   "key": "s0n0.look",
+   "stage": 3,
+   "section": 0,
+   "sectionKind": "hero",
+   "node": "s0n0",
+   "type": "Group",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"hero\" (Grab attention with a welcoming image and a catchy headline.). A Group node whose role is: the main container for the hero section.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band\n- ctaBand: The closing call-to-action band\n- footerBand: The band a page ends in\n- heroGround: The band a landing page opens with\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "band",
+       "bandSurface",
+       "ctaBand",
+       "footerBand",
+       "heroGround",
+       "imageGround",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "heroGround"
+   },
+   "tokensIn": 243,
+   "tokensOut": 8,
+   "promptChars": 957,
+   "ms": 870
+  },
+  {
+   "key": "s0n1.look",
+   "stage": 3,
+   "section": 0,
+   "sectionKind": "hero",
+   "node": "s0n1",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"hero\" (Grab attention with a welcoming image and a catchy headline.). A Text node whose role is: the main headline. It sits inside a \"heroGround\".\nWhich look should it take?\n- displayHeadline: Exactly ONE per page\n- sectionHeading: The heading of a section head\n- cardTitle: The title inside a card or tile.\n- eyebrow: The small uppercase line that announces a section\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text\n- fieldLabel: The label above a form control\n- fieldError: The validation message under a form control\n- fieldHint: The quiet helper line under a form control\n- meta: Secondary text\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "displayHeadline",
+       "sectionHeading",
+       "cardTitle",
+       "eyebrow",
+       "lead",
+       "body",
+       "fieldLabel",
+       "fieldError",
+       "fieldHint",
+       "meta",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "displayHeadline"
+   },
+   "tokensIn": 284,
+   "tokensOut": 8,
+   "promptChars": 1149,
+   "ms": 1005
+  },
+  {
+   "key": "s0n3.look",
+   "stage": 3,
+   "section": 0,
+   "sectionKind": "hero",
+   "node": "s0n3",
+   "type": "net.noodl.controls.button",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"hero\" (Grab attention with a welcoming image and a catchy headline.). A net.noodl.controls.button node whose role is: a call to action button. It sits inside a \"heroGround\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "primaryButton",
+       "outlineButton",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "tokensIn": 192,
+   "tokensOut": 8,
+   "promptChars": 747,
+   "ms": 734
+  },
+  {
+   "key": "s0n1.textAlignX",
+   "stage": 3,
+   "section": 0,
+   "sectionKind": "hero",
+   "node": "s0n1",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"hero\". A Text node, role: the main headline, look: displayHeadline. Children: none.\nPort \"textAlignX\" of Text. Which value: left, center, right?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "value"
+    ],
+    "properties": {
+     "value": {
+      "type": "string",
+      "enum": [
+       "left",
+       "center",
+       "right"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "value": "center"
+   },
+   "tokensIn": 157,
+   "tokensOut": 7,
+   "promptChars": 591,
+   "ms": 636
+  },
+  {
+   "key": "s0n1.text",
+   "stage": 3,
+   "section": 0,
+   "sectionKind": "hero",
+   "node": "s0n1",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"hero\" (Grab attention with a welcoming image and a catchy headline.). Write the words for a Text whose role is: the main headline (style: displayHeadline). Max 70 characters. Plain words, no markdown, no quotes around it.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 70
+     }
+    }
+   },
+   "temperature": 0.8,
+   "answer": {
+    "text": "Meet Your New Best Friend Today!"
+   },
+   "tokensIn": 168,
+   "tokensOut": 13,
+   "promptChars": 668,
+   "ms": 832
+  },
+  {
+   "key": "s0n3.label",
+   "stage": 3,
+   "section": 0,
+   "sectionKind": "hero",
+   "node": "s0n3",
+   "type": "net.noodl.controls.button",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"hero\" (Grab attention with a welcoming image and a catchy headline.). Write the button label for a net.noodl.controls.button whose role is: a call to action button (style: primaryButton). Max 28 characters. Plain words, no markdown, no quotes around it.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 28
+     }
+    }
+   },
+   "temperature": 0.8,
+   "answer": {
+    "text": "Meet Your New Best Friend"
+   },
+   "tokensIn": 179,
+   "tokensOut": 16,
+   "promptChars": 700,
+   "ms": 913
+  },
+  {
+   "key": "s1.tree",
+   "stage": 2,
+   "section": 1,
+   "sectionKind": "feature cards",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nBuild the \"feature cards\" section. Purpose: Highlight the unique benefits of adopting a puppy from Pawsitive Pals.\nVisual node types you may use:\n- Group: The universal layout container\n- net.noodl.visual.columns: Responsive multi-column layout\n- Text: Renders a piece of text with typography controlled by a text style or…\n- Image: Displays an image from a project asset or URL, with fit control, srcS…\n- net.noodl.controls.button: The standard clickable button control, with label, optional icon, and…\n- net.noodl.visual.icon: Displays a glyph from a project icon font, or an image, at a given si…\n- net.noodl.controls.textinput: Single-line or multi-line text entry control with label, icon, placeh…\n- net.noodl.controls.checkbox: Checkbox control\n- Circle: An SVG circle or arc with fill, stroke and start/end angles\nGive the node tree as a flat list. Item 0 is the root (parent -1) and must be a Group. Every other item's parent is the index of an EARLIER item, and only Group or Columns can be a parent. Max depth 3 below the root, max 6 children per node, max 14 nodes. Each item: type, and a one-line role saying what it is FOR on this page (e.g. \"the headline\", \"a photo of a puppy\", \"card for one step\"), never the type name.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "nodes"
+    ],
+    "properties": {
+     "nodes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 14,
+      "items": {
+       "type": "object",
+       "required": [
+        "parent",
+        "role",
+        "type"
+       ],
+       "properties": {
+        "parent": {
+         "type": "integer",
+         "minimum": -1,
+         "maximum": 13
+        },
+        "role": {
+         "type": "string",
+         "maxLength": 80
+        },
+        "type": {
+         "type": "string",
+         "enum": [
+          "Group",
+          "net.noodl.visual.columns",
+          "Text",
+          "Image",
+          "net.noodl.controls.button",
+          "net.noodl.visual.icon",
+          "net.noodl.controls.textinput",
+          "net.noodl.controls.checkbox",
+          "Circle"
+         ]
+        }
+       }
+      }
+     }
+    }
+   },
+   "temperature": 0.3,
+   "answer": {
+    "nodes": [
+     {
+      "parent": -1,
+      "role": "main container for feature cards",
+      "type": "Group"
+     },
+     {
+      "parent": 0,
+      "role": "card for step one",
+      "type": "Group"
+     },
+     {
+      "parent": 0,
+      "role": "card for step two",
+      "type": "Group"
+     },
+     {
+      "parent": 0,
+      "role": "card for step three",
+      "type": "Group"
+     }
+    ]
+   },
+   "tokensIn": 453,
+   "tokensOut": 100,
+   "promptChars": 1673,
+   "ms": 4255
+  },
+  {
+   "key": "s1.tree",
+   "stage": 2,
+   "section": 1,
+   "sectionKind": "feature cards",
+   "retry": 1,
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nBuild the \"feature cards\" section. Purpose: Highlight the unique benefits of adopting a puppy from Pawsitive Pals.\nVisual node types you may use:\n- Group: The universal layout container\n- net.noodl.visual.columns: Responsive multi-column layout\n- Text: Renders a piece of text with typography controlled by a text style or…\n- Image: Displays an image from a project asset or URL, with fit control, srcS…\n- net.noodl.controls.button: The standard clickable button control, with label, optional icon, and…\n- net.noodl.visual.icon: Displays a glyph from a project icon font, or an image, at a given si…\n- net.noodl.controls.textinput: Single-line or multi-line text entry control with label, icon, placeh…\n- net.noodl.controls.checkbox: Checkbox control\n- Circle: An SVG circle or arc with fill, stroke and start/end angles\nGive the node tree as a flat list. Item 0 is the root (parent -1) and must be a Group. Every other item's parent is the index of an EARLIER item, and only Group or Columns can be a parent. Max depth 3 below the root, max 6 children per node, max 14 nodes. Each item: type, and a one-line role saying what it is FOR on this page (e.g. \"the headline\", \"a photo of a puppy\", \"card for one step\"), never the type name.\nYour last answer was rejected: the tree has no Text, Image or Button — nothing to see",
+   "schema": {
+    "type": "object",
+    "required": [
+     "nodes"
+    ],
+    "properties": {
+     "nodes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 14,
+      "items": {
+       "type": "object",
+       "required": [
+        "parent",
+        "role",
+        "type"
+       ],
+       "properties": {
+        "parent": {
+         "type": "integer",
+         "minimum": -1,
+         "maximum": 13
+        },
+        "role": {
+         "type": "string",
+         "maxLength": 80
+        },
+        "type": {
+         "type": "string",
+         "enum": [
+          "Group",
+          "net.noodl.visual.columns",
+          "Text",
+          "Image",
+          "net.noodl.controls.button",
+          "net.noodl.visual.icon",
+          "net.noodl.controls.textinput",
+          "net.noodl.controls.checkbox",
+          "Circle"
+         ]
+        }
+       }
+      }
+     }
+    }
+   },
+   "temperature": 0.3,
+   "answer": {
+    "nodes": [
+     {
+      "parent": -1,
+      "role": "section container for features",
+      "type": "Group"
+     },
+     {
+      "parent": 0,
+      "role": "feature card title",
+      "type": "Text"
+     },
+     {
+      "parent": 0,
+      "role": "feature card description",
+      "type": "Text"
+     },
+     {
+      "parent": 0,
+      "role": "feature card icon",
+      "type": "Image"
+     },
+     {
+      "parent": 0,
+      "role": "feature card button",
+      "type": "net.noodl.controls.button"
+     }
+    ]
+   },
+   "tokensIn": 473,
+   "tokensOut": 126,
+   "promptChars": 1759,
+   "ms": 4622
+  },
+  {
+   "key": "s1n0.look",
+   "stage": 3,
+   "section": 1,
+   "sectionKind": "feature cards",
+   "node": "s1n0",
+   "type": "Group",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"feature cards\" (Highlight the unique benefits of adopting a puppy from Pawsitive Pals.). A Group node whose role is: section container for features.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band\n- ctaBand: The closing call-to-action band\n- footerBand: The band a page ends in\n- heroGround: The band a landing page opens with\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "band",
+       "bandSurface",
+       "ctaBand",
+       "footerBand",
+       "heroGround",
+       "imageGround",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "band"
+   },
+   "tokensIn": 244,
+   "tokensOut": 7,
+   "promptChars": 967,
+   "ms": 854
+  },
+  {
+   "key": "s1n1.look",
+   "stage": 3,
+   "section": 1,
+   "sectionKind": "feature cards",
+   "node": "s1n1",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"feature cards\" (Highlight the unique benefits of adopting a puppy from Pawsitive Pals.). A Text node whose role is: feature card title. It sits inside a \"band\".\nWhich look should it take?\n- displayHeadline: Exactly ONE per page\n- sectionHeading: The heading of a section head\n- cardTitle: The title inside a card or tile.\n- eyebrow: The small uppercase line that announces a section\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text\n- fieldLabel: The label above a form control\n- fieldError: The validation message under a form control\n- fieldHint: The quiet helper line under a form control\n- meta: Secondary text\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "displayHeadline",
+       "sectionHeading",
+       "cardTitle",
+       "eyebrow",
+       "lead",
+       "body",
+       "fieldLabel",
+       "fieldError",
+       "fieldHint",
+       "meta",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "cardTitle"
+   },
+   "tokensIn": 287,
+   "tokensOut": 8,
+   "promptChars": 1163,
+   "ms": 954
+  },
+  {
+   "key": "s1n2.look",
+   "stage": 3,
+   "section": 1,
+   "sectionKind": "feature cards",
+   "node": "s1n2",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"feature cards\" (Highlight the unique benefits of adopting a puppy from Pawsitive Pals.). A Text node whose role is: feature card description. It sits inside a \"band\".\nWhich look should it take?\n- displayHeadline: Exactly ONE per page\n- sectionHeading: The heading of a section head\n- cardTitle: The title inside a card or tile.\n- eyebrow: The small uppercase line that announces a section\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text\n- fieldLabel: The label above a form control\n- fieldError: The validation message under a form control\n- fieldHint: The quiet helper line under a form control\n- meta: Secondary text\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "displayHeadline",
+       "sectionHeading",
+       "cardTitle",
+       "eyebrow",
+       "lead",
+       "body",
+       "fieldLabel",
+       "fieldError",
+       "fieldHint",
+       "meta",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "none"
+   },
+   "tokensIn": 287,
+   "tokensOut": 12,
+   "promptChars": 1169,
+   "ms": 1101
+  },
+  {
+   "key": "s1n4.look",
+   "stage": 3,
+   "section": 1,
+   "sectionKind": "feature cards",
+   "node": "s1n4",
+   "type": "net.noodl.controls.button",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"feature cards\" (Highlight the unique benefits of adopting a puppy from Pawsitive Pals.). A net.noodl.controls.button node whose role is: feature card button. It sits inside a \"band\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "primaryButton",
+       "outlineButton",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "tokensIn": 193,
+   "tokensOut": 8,
+   "promptChars": 756,
+   "ms": 690
+  },
+  {
+   "key": "s1n1.textAlignX",
+   "stage": 3,
+   "section": 1,
+   "sectionKind": "feature cards",
+   "node": "s1n1",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"feature cards\". A Text node, role: feature card title, look: cardTitle. Children: none.\nPort \"textAlignX\" of Text. Which value: left, center, right?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "value"
+    ],
+    "properties": {
+     "value": {
+      "type": "string",
+      "enum": [
+       "left",
+       "center",
+       "right"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "value": "left"
+   },
+   "tokensIn": 158,
+   "tokensOut": 7,
+   "promptChars": 595,
+   "ms": 620
+  },
+  {
+   "key": "s1n1.text",
+   "stage": 3,
+   "section": 1,
+   "sectionKind": "feature cards",
+   "node": "s1n1",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"feature cards\" (Highlight the unique benefits of adopting a puppy from Pawsitive Pals.). Write the words for a Text whose role is: feature card title (style: cardTitle). It is item 1 of 2 Text nodes side by side in the same parent: write only this one's words, not the others'. Max 40 characters. Plain words, no markdown, no quotes around it.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 40
+     }
+    }
+   },
+   "temperature": 0.8,
+   "answer": {
+    "text": "Instant Best Friend"
+   },
+   "tokensIn": 202,
+   "tokensOut": 9,
+   "promptChars": 790,
+   "ms": 801
+  },
+  {
+   "key": "s1n2.textAlignX",
+   "stage": 3,
+   "section": 1,
+   "sectionKind": "feature cards",
+   "node": "s1n2",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"feature cards\". A Text node, role: feature card description. Children: none.\nPort \"textAlignX\" of Text. Which value: left, center, right?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "value"
+    ],
+    "properties": {
+     "value": {
+      "type": "string",
+      "enum": [
+       "left",
+       "center",
+       "right"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "value": "left"
+   },
+   "tokensIn": 153,
+   "tokensOut": 7,
+   "promptChars": 584,
+   "ms": 619
+  },
+  {
+   "key": "s1n2.text",
+   "stage": 3,
+   "section": 1,
+   "sectionKind": "feature cards",
+   "node": "s1n2",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"feature cards\" (Highlight the unique benefits of adopting a puppy from Pawsitive Pals.). Write the words for a Text whose role is: feature card description. It is item 2 of 2 Text nodes side by side in the same parent: write only this one's words, not the others'. Max 200 characters. Plain words, no markdown, no quotes around it.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 200
+     }
+    }
+   },
+   "temperature": 0.8,
+   "answer": {
+    "text": "Instant happy vibes! Puppies bring endless joy and love into your life, making every day an adventure. Get ready for cuddles and endless fun with your new best friend."
+   },
+   "tokensIn": 198,
+   "tokensOut": 41,
+   "promptChars": 778,
+   "ms": 1887
+  },
+  {
+   "key": "s1n4.label",
+   "stage": 3,
+   "section": 1,
+   "sectionKind": "feature cards",
+   "node": "s1n4",
+   "type": "net.noodl.controls.button",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"feature cards\" (Highlight the unique benefits of adopting a puppy from Pawsitive Pals.). Write the button label for a net.noodl.controls.button whose role is: feature card button (style: primaryButton). Max 28 characters. Plain words, no markdown, no quotes around it.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 28
+     }
+    }
+   },
+   "temperature": 0.8,
+   "answer": {
+    "text": "Meet Your New Best Friend"
+   },
+   "tokensIn": 181,
+   "tokensOut": 16,
+   "promptChars": 715,
+   "ms": 953
+  },
+  {
+   "key": "s2.tree",
+   "stage": 2,
+   "section": 2,
+   "sectionKind": "how it works",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nBuild the \"how it works\" section. Purpose: Simplify the adoption process into easy, bite-sized steps.\nVisual node types you may use:\n- Group: The universal layout container\n- net.noodl.visual.columns: Responsive multi-column layout\n- Text: Renders a piece of text with typography controlled by a text style or…\n- Image: Displays an image from a project asset or URL, with fit control, srcS…\n- net.noodl.controls.button: The standard clickable button control, with label, optional icon, and…\n- net.noodl.visual.icon: Displays a glyph from a project icon font, or an image, at a given si…\n- net.noodl.controls.textinput: Single-line or multi-line text entry control with label, icon, placeh…\n- net.noodl.controls.checkbox: Checkbox control\n- Circle: An SVG circle or arc with fill, stroke and start/end angles\nGive the node tree as a flat list. Item 0 is the root (parent -1) and must be a Group. Every other item's parent is the index of an EARLIER item, and only Group or Columns can be a parent. Max depth 3 below the root, max 6 children per node, max 14 nodes. Each item: type, and a one-line role saying what it is FOR on this page (e.g. \"the headline\", \"a photo of a puppy\", \"card for one step\"), never the type name.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "nodes"
+    ],
+    "properties": {
+     "nodes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 14,
+      "items": {
+       "type": "object",
+       "required": [
+        "parent",
+        "role",
+        "type"
+       ],
+       "properties": {
+        "parent": {
+         "type": "integer",
+         "minimum": -1,
+         "maximum": 13
+        },
+        "role": {
+         "type": "string",
+         "maxLength": 80
+        },
+        "type": {
+         "type": "string",
+         "enum": [
+          "Group",
+          "net.noodl.visual.columns",
+          "Text",
+          "Image",
+          "net.noodl.controls.button",
+          "net.noodl.visual.icon",
+          "net.noodl.controls.textinput",
+          "net.noodl.controls.checkbox",
+          "Circle"
+         ]
+        }
+       }
+      }
+     }
+    }
+   },
+   "temperature": 0.3,
+   "answer": {
+    "nodes": [
+     {
+      "parent": -1,
+      "role": "section container for the steps",
+      "type": "Group"
+     },
+     {
+      "parent": 0,
+      "role": "step title",
+      "type": "Text"
+     },
+     {
+      "parent": 0,
+      "role": "step description",
+      "type": "Text"
+     },
+     {
+      "parent": 0,
+      "role": "step icon",
+      "type": "Image"
+     },
+     {
+      "parent": 0,
+      "role": "step card container",
+      "type": "Group"
+     },
+     {
+      "parent": 3,
+      "role": "step 1 content",
+      "type": "Text"
+     },
+     {
+      "parent": 3,
+      "role": "step 1 indicator",
+      "type": "Circle"
+     },
+     {
+      "parent": 3,
+      "role": "step 2 content",
+      "type": "Text"
+     },
+     {
+      "parent": 3,
+      "role": "step 2 indicator",
+      "type": "Circle"
+     },
+     {
+      "parent": 3,
+      "role": "step 3 content",
+      "type": "Text"
+     },
+     {
+      "parent": 3,
+      "role": "step 3 indicator",
+      "type": "Circle"
+     }
+    ]
+   },
+   "tokensIn": 452,
+   "tokensOut": 254,
+   "promptChars": 1660,
+   "ms": 9146
+  },
+  {
+   "key": "s2.tree",
+   "stage": 2,
+   "section": 2,
+   "sectionKind": "how it works",
+   "retry": 1,
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nBuild the \"how it works\" section. Purpose: Simplify the adoption process into easy, bite-sized steps.\nVisual node types you may use:\n- Group: The universal layout container\n- net.noodl.visual.columns: Responsive multi-column layout\n- Text: Renders a piece of text with typography controlled by a text style or…\n- Image: Displays an image from a project asset or URL, with fit control, srcS…\n- net.noodl.controls.button: The standard clickable button control, with label, optional icon, and…\n- net.noodl.visual.icon: Displays a glyph from a project icon font, or an image, at a given si…\n- net.noodl.controls.textinput: Single-line or multi-line text entry control with label, icon, placeh…\n- net.noodl.controls.checkbox: Checkbox control\n- Circle: An SVG circle or arc with fill, stroke and start/end angles\nGive the node tree as a flat list. Item 0 is the root (parent -1) and must be a Group. Every other item's parent is the index of an EARLIER item, and only Group or Columns can be a parent. Max depth 3 below the root, max 6 children per node, max 14 nodes. Each item: type, and a one-line role saying what it is FOR on this page (e.g. \"the headline\", \"a photo of a puppy\", \"card for one step\"), never the type name.\nYour last answer was rejected: item 5: parent 3 is a Image, which cannot hold children; item 6: parent 3 is a Image, which cannot hold children; item 7: parent 3 is a Image, which cannot hold children; item 8: parent 3 is a Image, which cannot hold children; item 9: parent 3 is a Image, which cannot hold children; item 10: parent 3 is a Image, which cannot hold children",
+   "schema": {
+    "type": "object",
+    "required": [
+     "nodes"
+    ],
+    "properties": {
+     "nodes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 14,
+      "items": {
+       "type": "object",
+       "required": [
+        "parent",
+        "role",
+        "type"
+       ],
+       "properties": {
+        "parent": {
+         "type": "integer",
+         "minimum": -1,
+         "maximum": 13
+        },
+        "role": {
+         "type": "string",
+         "maxLength": 80
+        },
+        "type": {
+         "type": "string",
+         "enum": [
+          "Group",
+          "net.noodl.visual.columns",
+          "Text",
+          "Image",
+          "net.noodl.controls.button",
+          "net.noodl.visual.icon",
+          "net.noodl.controls.textinput",
+          "net.noodl.controls.checkbox",
+          "Circle"
+         ]
+        }
+       }
+      }
+     }
+    }
+   },
+   "temperature": 0.3,
+   "answer": {
+    "nodes": [
+     {
+      "parent": -1,
+      "role": "section title",
+      "type": "Group"
+     },
+     {
+      "parent": 0,
+      "role": "step 1 title",
+      "type": "Text"
+     },
+     {
+      "parent": 0,
+      "role": "step 1 description",
+      "type": "Text"
+     },
+     {
+      "parent": 0,
+      "role": "step 1 visual",
+      "type": "Image"
+     },
+     {
+      "parent": 0,
+      "role": "step 1 action",
+      "type": "Text"
+     },
+     {
+      "parent": 0,
+      "role": "step 1 button",
+      "type": "net.noodl.controls.button"
+     },
+     {
+      "parent": 0,
+      "role": "step 2 title",
+      "type": "Text"
+     },
+     {
+      "parent": 0,
+      "role": "step 2 description",
+      "type": "Text"
+     },
+     {
+      "parent": 0,
+      "role": "step 2 visual",
+      "type": "Image"
+     },
+     {
+      "parent": 0,
+      "role": "step 2 action",
+      "type": "Text"
+     },
+     {
+      "parent": 0,
+      "role": "step 2 button",
+      "type": "net.noodl.controls.button"
+     },
+     {
+      "parent": 0,
+      "role": "step 3 title",
+      "type": "Text"
+     },
+     {
+      "parent": 0,
+      "role": "step 3 description",
+      "type": "Text"
+     },
+     {
+      "parent": 0,
+      "role": "step 3 visual",
+      "type": "Image"
+     }
+    ]
+   },
+   "tokensIn": 555,
+   "tokensOut": 343,
+   "promptChars": 2033,
+   "ms": 11714
+  },
+  {
+   "key": "s2n0.look",
+   "stage": 3,
+   "section": 2,
+   "sectionKind": "how it works",
+   "node": "s2n0",
+   "type": "Group",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"how it works\" (Simplify the adoption process into easy, bite-sized steps.). A Group node whose role is: section title.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band\n- ctaBand: The closing call-to-action band\n- footerBand: The band a page ends in\n- heroGround: The band a landing page opens with\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "band",
+       "bandSurface",
+       "ctaBand",
+       "footerBand",
+       "heroGround",
+       "imageGround",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "band"
+   },
+   "tokensIn": 241,
+   "tokensOut": 7,
+   "promptChars": 937,
+   "ms": 815
+  },
+  {
+   "key": "s2n1.look",
+   "stage": 3,
+   "section": 2,
+   "sectionKind": "how it works",
+   "node": "s2n1",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"how it works\" (Simplify the adoption process into easy, bite-sized steps.). A Text node whose role is: step 1 title. It sits inside a \"band\".\nWhich look should it take?\n- displayHeadline: Exactly ONE per page\n- sectionHeading: The heading of a section head\n- cardTitle: The title inside a card or tile.\n- eyebrow: The small uppercase line that announces a section\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text\n- fieldLabel: The label above a form control\n- fieldError: The validation message under a form control\n- fieldHint: The quiet helper line under a form control\n- meta: Secondary text\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "displayHeadline",
+       "sectionHeading",
+       "cardTitle",
+       "eyebrow",
+       "lead",
+       "body",
+       "fieldLabel",
+       "fieldError",
+       "fieldHint",
+       "meta",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "displayHeadline"
+   },
+   "tokensIn": 287,
+   "tokensOut": 8,
+   "promptChars": 1144,
+   "ms": 936
+  },
+  {
+   "key": "s2n2.look",
+   "stage": 3,
+   "section": 2,
+   "sectionKind": "how it works",
+   "node": "s2n2",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"how it works\" (Simplify the adoption process into easy, bite-sized steps.). A Text node whose role is: step 1 description. It sits inside a \"band\".\nWhich look should it take?\n- displayHeadline: Exactly ONE per page\n- sectionHeading: The heading of a section head\n- cardTitle: The title inside a card or tile.\n- eyebrow: The small uppercase line that announces a section\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text\n- fieldLabel: The label above a form control\n- fieldError: The validation message under a form control\n- fieldHint: The quiet helper line under a form control\n- meta: Secondary text\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "displayHeadline",
+       "sectionHeading",
+       "cardTitle",
+       "eyebrow",
+       "lead",
+       "body",
+       "fieldLabel",
+       "fieldError",
+       "fieldHint",
+       "meta",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "none"
+   },
+   "tokensIn": 287,
+   "tokensOut": 7,
+   "promptChars": 1150,
+   "ms": 946
+  },
+  {
+   "key": "s2n4.look",
+   "stage": 3,
+   "section": 2,
+   "sectionKind": "how it works",
+   "node": "s2n4",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"how it works\" (Simplify the adoption process into easy, bite-sized steps.). A Text node whose role is: step 1 action. It sits inside a \"band\".\nWhich look should it take?\n- displayHeadline: Exactly ONE per page\n- sectionHeading: The heading of a section head\n- cardTitle: The title inside a card or tile.\n- eyebrow: The small uppercase line that announces a section\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text\n- fieldLabel: The label above a form control\n- fieldError: The validation message under a form control\n- fieldHint: The quiet helper line under a form control\n- meta: Secondary text\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "displayHeadline",
+       "sectionHeading",
+       "cardTitle",
+       "eyebrow",
+       "lead",
+       "body",
+       "fieldLabel",
+       "fieldError",
+       "fieldHint",
+       "meta",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "none"
+   },
+   "tokensIn": 287,
+   "tokensOut": 12,
+   "promptChars": 1145,
+   "ms": 1138
+  },
+  {
+   "key": "s2n5.look",
+   "stage": 3,
+   "section": 2,
+   "sectionKind": "how it works",
+   "node": "s2n5",
+   "type": "net.noodl.controls.button",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"how it works\" (Simplify the adoption process into easy, bite-sized steps.). A net.noodl.controls.button node whose role is: step 1 button. It sits inside a \"band\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "primaryButton",
+       "outlineButton",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "tokensIn": 193,
+   "tokensOut": 8,
+   "promptChars": 737,
+   "ms": 691
+  },
+  {
+   "key": "s2n6.look",
+   "stage": 3,
+   "section": 2,
+   "sectionKind": "how it works",
+   "node": "s2n6",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"how it works\" (Simplify the adoption process into easy, bite-sized steps.). A Text node whose role is: step 2 title. It sits inside a \"band\".\nWhich look should it take?\n- displayHeadline: Exactly ONE per page\n- sectionHeading: The heading of a section head\n- cardTitle: The title inside a card or tile.\n- eyebrow: The small uppercase line that announces a section\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text\n- fieldLabel: The label above a form control\n- fieldError: The validation message under a form control\n- fieldHint: The quiet helper line under a form control\n- meta: Secondary text\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "displayHeadline",
+       "sectionHeading",
+       "cardTitle",
+       "eyebrow",
+       "lead",
+       "body",
+       "fieldLabel",
+       "fieldError",
+       "fieldHint",
+       "meta",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "none"
+   },
+   "tokensIn": 287,
+   "tokensOut": 12,
+   "promptChars": 1144,
+   "ms": 1097
+  },
+  {
+   "key": "s2n1.textAlignX",
+   "stage": 3,
+   "section": 2,
+   "sectionKind": "how it works",
+   "node": "s2n1",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"how it works\". A Text node, role: step 1 title, look: displayHeadline. Children: none.\nPort \"textAlignX\" of Text. Which value: left, center, right?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "value"
+    ],
+    "properties": {
+     "value": {
+      "type": "string",
+      "enum": [
+       "left",
+       "center",
+       "right"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "value": "left"
+   },
+   "tokensIn": 160,
+   "tokensOut": 7,
+   "promptChars": 594,
+   "ms": 612
+  },
+  {
+   "key": "s2n1.text",
+   "stage": 3,
+   "section": 2,
+   "sectionKind": "how it works",
+   "node": "s2n1",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"how it works\" (Simplify the adoption process into easy, bite-sized steps.). Write the words for a Text whose role is: step 1 title (style: displayHeadline). It is item 1 of 4 Text nodes side by side in the same parent: write only this one's words, not the others'. Max 70 characters. Plain words, no markdown, no quotes around it.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 70
+     }
+    }
+   },
+   "temperature": 0.8,
+   "answer": {
+    "text": "Step 1: Fill out our fun application"
+   },
+   "tokensIn": 202,
+   "tokensOut": 20,
+   "promptChars": 777,
+   "ms": 1076
+  },
+  {
+   "key": "s2n2.textAlignX",
+   "stage": 3,
+   "section": 2,
+   "sectionKind": "how it works",
+   "node": "s2n2",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"how it works\". A Text node, role: step 1 description. Children: none.\nPort \"textAlignX\" of Text. Which value: left, center, right?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "value"
+    ],
+    "properties": {
+     "value": {
+      "type": "string",
+      "enum": [
+       "left",
+       "center",
+       "right"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "value": "left"
+   },
+   "tokensIn": 155,
+   "tokensOut": 7,
+   "promptChars": 577,
+   "ms": 666
+  },
+  {
+   "key": "s2n2.text",
+   "stage": 3,
+   "section": 2,
+   "sectionKind": "how it works",
+   "node": "s2n2",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"how it works\" (Simplify the adoption process into easy, bite-sized steps.). Write the words for a Text whose role is: step 1 description. It is item 2 of 4 Text nodes side by side in the same parent: write only this one's words, not the others'. Max 200 characters. Plain words, no markdown, no quotes around it.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 200
+     }
+    }
+   },
+   "temperature": 0.8,
+   "answer": {
+    "text": "Step 1: Tell us about your home and answer a few quick questions so we can match you with your perfect new best friend!"
+   },
+   "tokensIn": 198,
+   "tokensOut": 37,
+   "promptChars": 759,
+   "ms": 1689
+  },
+  {
+   "key": "s2n4.textAlignX",
+   "stage": 3,
+   "section": 2,
+   "sectionKind": "how it works",
+   "node": "s2n4",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"how it works\". A Text node, role: step 1 action. Children: none.\nPort \"textAlignX\" of Text. Which value: left, center, right?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "value"
+    ],
+    "properties": {
+     "value": {
+      "type": "string",
+      "enum": [
+       "left",
+       "center",
+       "right"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "value": "left"
+   },
+   "tokensIn": 155,
+   "tokensOut": 7,
+   "promptChars": 572,
+   "ms": 646
+  },
+  {
+   "key": "s2n4.text",
+   "stage": 3,
+   "section": 2,
+   "sectionKind": "how it works",
+   "node": "s2n4",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"how it works\" (Simplify the adoption process into easy, bite-sized steps.). Write the words for a Text whose role is: step 1 action. It is item 3 of 4 Text nodes side by side in the same parent: write only this one's words, not the others'. Max 200 characters. Plain words, no markdown, no quotes around it.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 200
+     }
+    }
+   },
+   "temperature": 0.8,
+   "answer": {
+    "text": "Fill out our easy application form to start your puppy journey!"
+   },
+   "tokensIn": 198,
+   "tokensOut": 18,
+   "promptChars": 754,
+   "ms": 1078
+  },
+  {
+   "key": "s2n5.label",
+   "stage": 3,
+   "section": 2,
+   "sectionKind": "how it works",
+   "node": "s2n5",
+   "type": "net.noodl.controls.button",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"how it works\" (Simplify the adoption process into easy, bite-sized steps.). Write the button label for a net.noodl.controls.button whose role is: step 1 button (style: primaryButton). Max 28 characters. Plain words, no markdown, no quotes around it.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 28
+     }
+    }
+   },
+   "temperature": 0.8,
+   "answer": {
+    "text": "Start Your Adventure"
+   },
+   "tokensIn": 181,
+   "tokensOut": 14,
+   "promptChars": 696,
+   "ms": 875
+  },
+  {
+   "key": "s2n6.textAlignX",
+   "stage": 3,
+   "section": 2,
+   "sectionKind": "how it works",
+   "node": "s2n6",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"how it works\". A Text node, role: step 2 title. Children: none.\nPort \"textAlignX\" of Text. Which value: left, center, right?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "value"
+    ],
+    "properties": {
+     "value": {
+      "type": "string",
+      "enum": [
+       "left",
+       "center",
+       "right"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "value": "left"
+   },
+   "tokensIn": 155,
+   "tokensOut": 7,
+   "promptChars": 571,
+   "ms": 643
+  },
+  {
+   "key": "s2n6.text",
+   "stage": 3,
+   "section": 2,
+   "sectionKind": "how it works",
+   "node": "s2n6",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"how it works\" (Simplify the adoption process into easy, bite-sized steps.). Write the words for a Text whose role is: step 2 title. It is item 4 of 4 Text nodes side by side in the same parent: write only this one's words, not the others'. Max 200 characters. Plain words, no markdown, no quotes around it.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 200
+     }
+    }
+   },
+   "temperature": 0.8,
+   "answer": {
+    "text": "Choose your perfect pal from our cute lineup! Click here to see all available puppies and get started."
+   },
+   "tokensIn": 198,
+   "tokensOut": 30,
+   "promptChars": 753,
+   "ms": 1471
+  },
+  {
+   "key": "s3.tree",
+   "stage": 2,
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nBuild the \"gallery\" section. Purpose: Showcase adorable puppies and happy adopters to build trust.\nVisual node types you may use:\n- Group: The universal layout container\n- net.noodl.visual.columns: Responsive multi-column layout\n- Text: Renders a piece of text with typography controlled by a text style or…\n- Image: Displays an image from a project asset or URL, with fit control, srcS…\n- net.noodl.controls.button: The standard clickable button control, with label, optional icon, and…\n- net.noodl.visual.icon: Displays a glyph from a project icon font, or an image, at a given si…\n- net.noodl.controls.textinput: Single-line or multi-line text entry control with label, icon, placeh…\n- net.noodl.controls.checkbox: Checkbox control\n- Circle: An SVG circle or arc with fill, stroke and start/end angles\nGive the node tree as a flat list. Item 0 is the root (parent -1) and must be a Group. Every other item's parent is the index of an EARLIER item, and only Group or Columns can be a parent. Max depth 3 below the root, max 6 children per node, max 14 nodes. Each item: type, and a one-line role saying what it is FOR on this page (e.g. \"the headline\", \"a photo of a puppy\", \"card for one step\"), never the type name.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "nodes"
+    ],
+    "properties": {
+     "nodes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 14,
+      "items": {
+       "type": "object",
+       "required": [
+        "parent",
+        "role",
+        "type"
+       ],
+       "properties": {
+        "parent": {
+         "type": "integer",
+         "minimum": -1,
+         "maximum": 13
+        },
+        "role": {
+         "type": "string",
+         "maxLength": 80
+        },
+        "type": {
+         "type": "string",
+         "enum": [
+          "Group",
+          "net.noodl.visual.columns",
+          "Text",
+          "Image",
+          "net.noodl.controls.button",
+          "net.noodl.visual.icon",
+          "net.noodl.controls.textinput",
+          "net.noodl.controls.checkbox",
+          "Circle"
+         ]
+        }
+       }
+      }
+     }
+    }
+   },
+   "temperature": 0.3,
+   "answer": {
+    "nodes": [
+     {
+      "parent": -1,
+      "role": "main gallery container",
+      "type": "Group"
+     },
+     {
+      "parent": 0,
+      "role": "column for puppy image 1",
+      "type": "net.noodl.visual.columns"
+     },
+     {
+      "parent": 0,
+      "role": "image of a puppy",
+      "type": "Image"
+     },
+     {
+      "parent": 0,
+      "role": "card for adopter testimonial 1",
+      "type": "Group"
+     },
+     {
+      "parent": 0,
+      "role": "text for testimonial 1",
+      "type": "Text"
+     },
+     {
+      "parent": 0,
+      "role": "button to view more puppies",
+      "type": "net.noodl.controls.button"
+     },
+     {
+      "parent": 0,
+      "role": "column for puppy image 2",
+      "type": "net.noodl.visual.columns"
+     },
+     {
+      "parent": 0,
+      "role": "image of a puppy",
+      "type": "Image"
+     },
+     {
+      "parent": 0,
+      "role": "card for adoption step 1",
+      "type": "Group"
+     },
+     {
+      "parent": 0,
+      "role": "text for adoption step 1",
+      "type": "Text"
+     },
+     {
+      "parent": 0,
+      "role": "checkbox for step 1",
+      "type": "net.noodl.controls.checkbox"
+     }
+    ]
+   },
+   "tokensIn": 448,
+   "tokensOut": 280,
+   "promptChars": 1657,
+   "ms": 10617
+  },
+  {
+   "key": "s3.tree",
+   "stage": 2,
+   "section": 3,
+   "sectionKind": "gallery",
+   "retry": 1,
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nBuild the \"gallery\" section. Purpose: Showcase adorable puppies and happy adopters to build trust.\nVisual node types you may use:\n- Group: The universal layout container\n- net.noodl.visual.columns: Responsive multi-column layout\n- Text: Renders a piece of text with typography controlled by a text style or…\n- Image: Displays an image from a project asset or URL, with fit control, srcS…\n- net.noodl.controls.button: The standard clickable button control, with label, optional icon, and…\n- net.noodl.visual.icon: Displays a glyph from a project icon font, or an image, at a given si…\n- net.noodl.controls.textinput: Single-line or multi-line text entry control with label, icon, placeh…\n- net.noodl.controls.checkbox: Checkbox control\n- Circle: An SVG circle or arc with fill, stroke and start/end angles\nGive the node tree as a flat list. Item 0 is the root (parent -1) and must be a Group. Every other item's parent is the index of an EARLIER item, and only Group or Columns can be a parent. Max depth 3 below the root, max 6 children per node, max 14 nodes. Each item: type, and a one-line role saying what it is FOR on this page (e.g. \"the headline\", \"a photo of a puppy\", \"card for one step\"), never the type name.\nYour last answer was rejected: item 0 has more than 6 children",
+   "schema": {
+    "type": "object",
+    "required": [
+     "nodes"
+    ],
+    "properties": {
+     "nodes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 14,
+      "items": {
+       "type": "object",
+       "required": [
+        "parent",
+        "role",
+        "type"
+       ],
+       "properties": {
+        "parent": {
+         "type": "integer",
+         "minimum": -1,
+         "maximum": 13
+        },
+        "role": {
+         "type": "string",
+         "maxLength": 80
+        },
+        "type": {
+         "type": "string",
+         "enum": [
+          "Group",
+          "net.noodl.visual.columns",
+          "Text",
+          "Image",
+          "net.noodl.controls.button",
+          "net.noodl.visual.icon",
+          "net.noodl.controls.textinput",
+          "net.noodl.controls.checkbox",
+          "Circle"
+         ]
+        }
+       }
+      }
+     }
+    }
+   },
+   "temperature": 0.3,
+   "answer": {
+    "nodes": [
+     {
+      "parent": -1,
+      "role": "main gallery container",
+      "type": "Group"
+     },
+     {
+      "parent": 0,
+      "role": "gallery title",
+      "type": "Text"
+     },
+     {
+      "parent": 0,
+      "role": "responsive puppy grid",
+      "type": "net.noodl.visual.columns"
+     },
+     {
+      "parent": 2,
+      "role": "puppy image slot",
+      "type": "Image"
+     },
+     {
+      "parent": 2,
+      "role": "adopter image slot",
+      "type": "Image"
+     },
+     {
+      "parent": 2,
+      "role": "puppy info card",
+      "type": "Group"
+     },
+     {
+      "parent": 2,
+      "role": "adopter info card",
+      "type": "Group"
+     }
+    ]
+   },
+   "tokensIn": 464,
+   "tokensOut": 172,
+   "promptChars": 1720,
+   "ms": 5718
+  },
+  {
+   "key": "s3n0.look",
+   "stage": 3,
+   "section": 3,
+   "sectionKind": "gallery",
+   "node": "s3n0",
+   "type": "Group",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"gallery\" (Showcase adorable puppies and happy adopters to build trust.). A Group node whose role is: main gallery container.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band\n- ctaBand: The closing call-to-action band\n- footerBand: The band a page ends in\n- heroGround: The band a landing page opens with\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "band",
+       "bandSurface",
+       "ctaBand",
+       "footerBand",
+       "heroGround",
+       "imageGround",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "imageGround"
+   },
+   "tokensIn": 239,
+   "tokensOut": 8,
+   "promptChars": 943,
+   "ms": 1076
+  },
+  {
+   "key": "s3n1.look",
+   "stage": 3,
+   "section": 3,
+   "sectionKind": "gallery",
+   "node": "s3n1",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"gallery\" (Showcase adorable puppies and happy adopters to build trust.). A Text node whose role is: gallery title. It sits inside a \"imageGround\".\nWhich look should it take?\n- displayHeadline: Exactly ONE per page\n- sectionHeading: The heading of a section head\n- cardTitle: The title inside a card or tile.\n- eyebrow: The small uppercase line that announces a section\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text\n- fieldLabel: The label above a form control\n- fieldError: The validation message under a form control\n- fieldHint: The quiet helper line under a form control\n- meta: Secondary text\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "displayHeadline",
+       "sectionHeading",
+       "cardTitle",
+       "eyebrow",
+       "lead",
+       "body",
+       "fieldLabel",
+       "fieldError",
+       "fieldHint",
+       "meta",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "displayHeadline"
+   },
+   "tokensIn": 283,
+   "tokensOut": 8,
+   "promptChars": 1149,
+   "ms": 1015
+  },
+  {
+   "key": "s3n2.look",
+   "stage": 3,
+   "section": 3,
+   "sectionKind": "gallery",
+   "node": "s3n2",
+   "type": "net.noodl.visual.columns",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"gallery\" (Showcase adorable puppies and happy adopters to build trust.). A net.noodl.visual.columns node whose role is: responsive puppy grid. It sits inside a \"imageGround\".\nWhich look should it take?\n- gridAutoFit: A grid of unknown length\n- columnsTwoUp: A fixed 2-up that collapses to one column\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "gridAutoFit",
+       "columnsTwoUp",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "columnsTwoUp"
+   },
+   "tokensIn": 201,
+   "tokensOut": 9,
+   "promptChars": 769,
+   "ms": 899
+  },
+  {
+   "key": "s3n5.look",
+   "stage": 3,
+   "section": 3,
+   "sectionKind": "gallery",
+   "node": "s3n5",
+   "type": "Group",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"gallery\" (Showcase adorable puppies and happy adopters to build trust.). A Group node whose role is: puppy info card. It sits inside a \"columnsTwoUp\".\nWhich look should it take?\n- shell: The one centred container inside a band\n- sectionHead: Wrapper for eyebrow + sectionHeading + lead, with the air before the content built in.\n- card: The card shell\n- raised: A band that sits above the surface it is on\n- ruled: One row in a list, separated from the next by a hairline instead of being boxed\n- cardBody: The padded half of a card, below the media\n- emptyState: The empty half of a list\n- statTile: A tile whose only large thing is the number\n- testimonialCard: A quote card that sits ABOVE its band rather than in it\n- badge: A pill\n- glassPanel: A translucent, frosted panel for sitting ON a gradient or image ground\n- featureItem: One item of a feature or trust strip\n- actionRow: The button pair under a headline\n- field: One labelled form field\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "shell",
+       "sectionHead",
+       "card",
+       "raised",
+       "ruled",
+       "cardBody",
+       "emptyState",
+       "statTile",
+       "testimonialCard",
+       "badge",
+       "glassPanel",
+       "featureItem",
+       "actionRow",
+       "field",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "card"
+   },
+   "tokensIn": 355,
+   "tokensOut": 7,
+   "promptChars": 1421,
+   "ms": 1289
+  },
+  {
+   "key": "s3n6.look",
+   "stage": 3,
+   "section": 3,
+   "sectionKind": "gallery",
+   "node": "s3n6",
+   "type": "Group",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"gallery\" (Showcase adorable puppies and happy adopters to build trust.). A Group node whose role is: adopter info card. It sits inside a \"columnsTwoUp\".\nWhich look should it take?\n- shell: The one centred container inside a band\n- sectionHead: Wrapper for eyebrow + sectionHeading + lead, with the air before the content built in.\n- card: The card shell\n- raised: A band that sits above the surface it is on\n- ruled: One row in a list, separated from the next by a hairline instead of being boxed\n- cardBody: The padded half of a card, below the media\n- emptyState: The empty half of a list\n- statTile: A tile whose only large thing is the number\n- testimonialCard: A quote card that sits ABOVE its band rather than in it\n- badge: A pill\n- glassPanel: A translucent, frosted panel for sitting ON a gradient or image ground\n- featureItem: One item of a feature or trust strip\n- actionRow: The button pair under a headline\n- field: One labelled form field\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "shell",
+       "sectionHead",
+       "card",
+       "raised",
+       "ruled",
+       "cardBody",
+       "emptyState",
+       "statTile",
+       "testimonialCard",
+       "badge",
+       "glassPanel",
+       "featureItem",
+       "actionRow",
+       "field",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "card"
+   },
+   "tokensIn": 355,
+   "tokensOut": 7,
+   "promptChars": 1423,
+   "ms": 1090
+  },
+  {
+   "key": "s3n1.textAlignX",
+   "stage": 3,
+   "section": 3,
+   "sectionKind": "gallery",
+   "node": "s3n1",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"gallery\". A Text node, role: gallery title, look: displayHeadline. Children: none.\nPort \"textAlignX\" of Text. Which value: left, center, right?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "value"
+    ],
+    "properties": {
+     "value": {
+      "type": "string",
+      "enum": [
+       "left",
+       "center",
+       "right"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "value": "center"
+   },
+   "tokensIn": 156,
+   "tokensOut": 7,
+   "promptChars": 590,
+   "ms": 642
+  },
+  {
+   "key": "s3n1.text",
+   "stage": 3,
+   "section": 3,
+   "sectionKind": "gallery",
+   "node": "s3n1",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"gallery\" (Showcase adorable puppies and happy adopters to build trust.). Write the words for a Text whose role is: gallery title (style: displayHeadline). Max 70 characters. Plain words, no markdown, no quotes around it.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 70
+     }
+    }
+   },
+   "temperature": 0.8,
+   "answer": {
+    "text": "Meet Our Happy Pack"
+   },
+   "tokensIn": 167,
+   "tokensOut": 10,
+   "promptChars": 667,
+   "ms": 771
+  },
+  {
+   "key": "s3n5.alignItems",
+   "stage": 3,
+   "section": 3,
+   "sectionKind": "gallery",
+   "node": "s3n5",
+   "type": "Group",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"gallery\". A Group node, role: puppy info card, look: card. Children: none.\nPort \"alignItems\" of Group. Which value: flex-start, flex-end, center, stretch?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "value"
+    ],
+    "properties": {
+     "value": {
+      "type": "string",
+      "enum": [
+       "flex-start",
+       "flex-end",
+       "center",
+       "stretch"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "value": "flex-start"
+   },
+   "tokensIn": 162,
+   "tokensOut": 9,
+   "promptChars": 601,
+   "ms": 734
+  },
+  {
+   "key": "s3n6.alignItems",
+   "stage": 3,
+   "section": 3,
+   "sectionKind": "gallery",
+   "node": "s3n6",
+   "type": "Group",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"gallery\". A Group node, role: adopter info card, look: card. Children: none.\nPort \"alignItems\" of Group. Which value: flex-start, flex-end, center, stretch?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "value"
+    ],
+    "properties": {
+     "value": {
+      "type": "string",
+      "enum": [
+       "flex-start",
+       "flex-end",
+       "center",
+       "stretch"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "value": "flex-start"
+   },
+   "tokensIn": 162,
+   "tokensOut": 9,
+   "promptChars": 603,
+   "ms": 713
+  },
+  {
+   "key": "s4.tree",
+   "stage": 2,
+   "section": 4,
+   "sectionKind": "testimonials",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nBuild the \"testimonials\" section. Purpose: Provide social proof with heartwarming stories from past adopters.\nVisual node types you may use:\n- Group: The universal layout container\n- net.noodl.visual.columns: Responsive multi-column layout\n- Text: Renders a piece of text with typography controlled by a text style or…\n- Image: Displays an image from a project asset or URL, with fit control, srcS…\n- net.noodl.controls.button: The standard clickable button control, with label, optional icon, and…\n- net.noodl.visual.icon: Displays a glyph from a project icon font, or an image, at a given si…\n- net.noodl.controls.textinput: Single-line or multi-line text entry control with label, icon, placeh…\n- net.noodl.controls.checkbox: Checkbox control\n- Circle: An SVG circle or arc with fill, stroke and start/end angles\nGive the node tree as a flat list. Item 0 is the root (parent -1) and must be a Group. Every other item's parent is the index of an EARLIER item, and only Group or Columns can be a parent. Max depth 3 below the root, max 6 children per node, max 14 nodes. Each item: type, and a one-line role saying what it is FOR on this page (e.g. \"the headline\", \"a photo of a puppy\", \"card for one step\"), never the type name.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "nodes"
+    ],
+    "properties": {
+     "nodes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 14,
+      "items": {
+       "type": "object",
+       "required": [
+        "parent",
+        "role",
+        "type"
+       ],
+       "properties": {
+        "parent": {
+         "type": "integer",
+         "minimum": -1,
+         "maximum": 13
+        },
+        "role": {
+         "type": "string",
+         "maxLength": 80
+        },
+        "type": {
+         "type": "string",
+         "enum": [
+          "Group",
+          "net.noodl.visual.columns",
+          "Text",
+          "Image",
+          "net.noodl.controls.button",
+          "net.noodl.visual.icon",
+          "net.noodl.controls.textinput",
+          "net.noodl.controls.checkbox",
+          "Circle"
+         ]
+        }
+       }
+      }
+     }
+    }
+   },
+   "temperature": 0.3,
+   "answer": {
+    "nodes": [
+     {
+      "parent": -1,
+      "role": "section container for testimonials",
+      "type": "Group"
+     },
+     {
+      "parent": 0,
+      "role": "testimonial card container",
+      "type": "Group"
+     },
+     {
+      "parent": 1,
+      "role": "testimonial text content",
+      "type": "Text"
+     },
+     {
+      "parent": 1,
+      "role": "adopter's name",
+      "type": "Text"
+     },
+     {
+      "parent": 1,
+      "role": "adopter's story snippet",
+      "type": "Text"
+     },
+     {
+      "parent": 0,
+      "role": "testimonial image",
+      "type": "Image"
+     },
+     {
+      "parent": 0,
+      "role": "testimonial button",
+      "type": "net.noodl.controls.button"
+     }
+    ]
+   },
+   "tokensIn": 448,
+   "tokensOut": 173,
+   "promptChars": 1668,
+   "ms": 6582
+  },
+  {
+   "key": "s4n0.look",
+   "stage": 3,
+   "section": 4,
+   "sectionKind": "testimonials",
+   "node": "s4n0",
+   "type": "Group",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"testimonials\" (Provide social proof with heartwarming stories from past adopters.). A Group node whose role is: section container for testimonials.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band\n- ctaBand: The closing call-to-action band\n- footerBand: The band a page ends in\n- heroGround: The band a landing page opens with\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "band",
+       "bandSurface",
+       "ctaBand",
+       "footerBand",
+       "heroGround",
+       "imageGround",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "band"
+   },
+   "tokensIn": 239,
+   "tokensOut": 7,
+   "promptChars": 966,
+   "ms": 859
+  },
+  {
+   "key": "s4n1.look",
+   "stage": 3,
+   "section": 4,
+   "sectionKind": "testimonials",
+   "node": "s4n1",
+   "type": "Group",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"testimonials\" (Provide social proof with heartwarming stories from past adopters.). A Group node whose role is: testimonial card container. It sits inside a \"band\".\nWhich look should it take?\n- shell: The one centred container inside a band\n- sectionHead: Wrapper for eyebrow + sectionHeading + lead, with the air before the content built in.\n- card: The card shell\n- raised: A band that sits above the surface it is on\n- ruled: One row in a list, separated from the next by a hairline instead of being boxed\n- cardBody: The padded half of a card, below the media\n- emptyState: The empty half of a list\n- statTile: A tile whose only large thing is the number\n- testimonialCard: A quote card that sits ABOVE its band rather than in it\n- badge: A pill\n- glassPanel: A translucent, frosted panel for sitting ON a gradient or image ground\n- featureItem: One item of a feature or trust strip\n- actionRow: The button pair under a headline\n- field: One labelled form field\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "shell",
+       "sectionHead",
+       "card",
+       "raised",
+       "ruled",
+       "cardBody",
+       "emptyState",
+       "statTile",
+       "testimonialCard",
+       "badge",
+       "glassPanel",
+       "featureItem",
+       "actionRow",
+       "field",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "testimonialCard"
+   },
+   "tokensIn": 352,
+   "tokensOut": 8,
+   "promptChars": 1435,
+   "ms": 1211
+  },
+  {
+   "key": "s4n2.look",
+   "stage": 3,
+   "section": 4,
+   "sectionKind": "testimonials",
+   "node": "s4n2",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"testimonials\" (Provide social proof with heartwarming stories from past adopters.). A Text node whose role is: testimonial text content. It sits inside a \"testimonialCard\".\nWhich look should it take?\n- displayHeadline: Exactly ONE per page\n- sectionHeading: The heading of a section head\n- cardTitle: The title inside a card or tile.\n- eyebrow: The small uppercase line that announces a section\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text\n- fieldLabel: The label above a form control\n- fieldError: The validation message under a form control\n- fieldHint: The quiet helper line under a form control\n- meta: Secondary text\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "displayHeadline",
+       "sectionHeading",
+       "cardTitle",
+       "eyebrow",
+       "lead",
+       "body",
+       "fieldLabel",
+       "fieldError",
+       "fieldHint",
+       "meta",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "none"
+   },
+   "tokensIn": 283,
+   "tokensOut": 7,
+   "promptChars": 1175,
+   "ms": 952
+  },
+  {
+   "key": "s4n3.look",
+   "stage": 3,
+   "section": 4,
+   "sectionKind": "testimonials",
+   "node": "s4n3",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"testimonials\" (Provide social proof with heartwarming stories from past adopters.). A Text node whose role is: adopter's name. It sits inside a \"testimonialCard\".\nWhich look should it take?\n- displayHeadline: Exactly ONE per page\n- sectionHeading: The heading of a section head\n- cardTitle: The title inside a card or tile.\n- eyebrow: The small uppercase line that announces a section\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text\n- fieldLabel: The label above a form control\n- fieldError: The validation message under a form control\n- fieldHint: The quiet helper line under a form control\n- meta: Secondary text\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "displayHeadline",
+       "sectionHeading",
+       "cardTitle",
+       "eyebrow",
+       "lead",
+       "body",
+       "fieldLabel",
+       "fieldError",
+       "fieldHint",
+       "meta",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "none"
+   },
+   "tokensIn": 284,
+   "tokensOut": 7,
+   "promptChars": 1165,
+   "ms": 959
+  },
+  {
+   "key": "s4n4.look",
+   "stage": 3,
+   "section": 4,
+   "sectionKind": "testimonials",
+   "node": "s4n4",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"testimonials\" (Provide social proof with heartwarming stories from past adopters.). A Text node whose role is: adopter's story snippet. It sits inside a \"testimonialCard\".\nWhich look should it take?\n- displayHeadline: Exactly ONE per page\n- sectionHeading: The heading of a section head\n- cardTitle: The title inside a card or tile.\n- eyebrow: The small uppercase line that announces a section\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text\n- fieldLabel: The label above a form control\n- fieldError: The validation message under a form control\n- fieldHint: The quiet helper line under a form control\n- meta: Secondary text\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "displayHeadline",
+       "sectionHeading",
+       "cardTitle",
+       "eyebrow",
+       "lead",
+       "body",
+       "fieldLabel",
+       "fieldError",
+       "fieldHint",
+       "meta",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "none"
+   },
+   "tokensIn": 285,
+   "tokensOut": 7,
+   "promptChars": 1174,
+   "ms": 973
+  },
+  {
+   "key": "s4n6.look",
+   "stage": 3,
+   "section": 4,
+   "sectionKind": "testimonials",
+   "node": "s4n6",
+   "type": "net.noodl.controls.button",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"testimonials\" (Provide social proof with heartwarming stories from past adopters.). A net.noodl.controls.button node whose role is: testimonial button. It sits inside a \"band\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "primaryButton",
+       "outlineButton",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "tokensIn": 187,
+   "tokensOut": 8,
+   "promptChars": 750,
+   "ms": 718
+  },
+  {
+   "key": "s4n1.alignItems",
+   "stage": 3,
+   "section": 4,
+   "sectionKind": "testimonials",
+   "node": "s4n1",
+   "type": "Group",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"testimonials\". A Group node, role: testimonial card container, look: testimonialCard. Children: Text, Text, Text.\nPort \"alignItems\" of Group. Which value: flex-start, flex-end, center, stretch?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "value"
+    ],
+    "properties": {
+     "value": {
+      "type": "string",
+      "enum": [
+       "flex-start",
+       "flex-end",
+       "center",
+       "stretch"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "value": "flex-start"
+   },
+   "tokensIn": 167,
+   "tokensOut": 9,
+   "promptChars": 640,
+   "ms": 754
+  },
+  {
+   "key": "s4n2.textAlignX",
+   "stage": 3,
+   "section": 4,
+   "sectionKind": "testimonials",
+   "node": "s4n2",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"testimonials\". A Text node, role: testimonial text content. Children: none.\nPort \"textAlignX\" of Text. Which value: left, center, right?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "value"
+    ],
+    "properties": {
+     "value": {
+      "type": "string",
+      "enum": [
+       "left",
+       "center",
+       "right"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "value": "left"
+   },
+   "tokensIn": 152,
+   "tokensOut": 7,
+   "promptChars": 583,
+   "ms": 647
+  },
+  {
+   "key": "s4n2.text",
+   "stage": 3,
+   "section": 4,
+   "sectionKind": "testimonials",
+   "node": "s4n2",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"testimonials\" (Provide social proof with heartwarming stories from past adopters.). Write the words for a Text whose role is: testimonial text content. It is item 1 of 3 Text nodes side by side in the same parent: write only this one's words, not the others'. Max 200 characters. Plain words, no markdown, no quotes around it.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 200
+     }
+    }
+   },
+   "temperature": 0.8,
+   "answer": {
+    "text": "My life changed with Sunny! She's pure joy and the best best friend a person could ask for. Highly recommend Pawsitive Pals!"
+   },
+   "tokensIn": 193,
+   "tokensOut": 35,
+   "promptChars": 773,
+   "ms": 1616
+  },
+  {
+   "key": "s4n3.textAlignX",
+   "stage": 3,
+   "section": 4,
+   "sectionKind": "testimonials",
+   "node": "s4n3",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"testimonials\". A Text node, role: adopter's name. Children: none.\nPort \"textAlignX\" of Text. Which value: left, center, right?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "value"
+    ],
+    "properties": {
+     "value": {
+      "type": "string",
+      "enum": [
+       "left",
+       "center",
+       "right"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "value": "left"
+   },
+   "tokensIn": 153,
+   "tokensOut": 7,
+   "promptChars": 573,
+   "ms": 628
+  },
+  {
+   "key": "s4n3.text",
+   "stage": 3,
+   "section": 4,
+   "sectionKind": "testimonials",
+   "node": "s4n3",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"testimonials\" (Provide social proof with heartwarming stories from past adopters.). Write the words for a Text whose role is: adopter's name. It is item 2 of 3 Text nodes side by side in the same parent: write only this one's words, not the others'. Max 200 characters. Plain words, no markdown, no quotes around it.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 200
+     }
+    }
+   },
+   "temperature": 0.8,
+   "answer": {
+    "text": "Sarah K."
+   },
+   "tokensIn": 194,
+   "tokensOut": 13,
+   "promptChars": 763,
+   "ms": 916
+  },
+  {
+   "key": "s4n4.textAlignX",
+   "stage": 3,
+   "section": 4,
+   "sectionKind": "testimonials",
+   "node": "s4n4",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"testimonials\". A Text node, role: adopter's story snippet. Children: none.\nPort \"textAlignX\" of Text. Which value: left, center, right?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "value"
+    ],
+    "properties": {
+     "value": {
+      "type": "string",
+      "enum": [
+       "left",
+       "center",
+       "right"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "value": "left"
+   },
+   "tokensIn": 154,
+   "tokensOut": 7,
+   "promptChars": 582,
+   "ms": 631
+  },
+  {
+   "key": "s4n4.text",
+   "stage": 3,
+   "section": 4,
+   "sectionKind": "testimonials",
+   "node": "s4n4",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"testimonials\" (Provide social proof with heartwarming stories from past adopters.). Write the words for a Text whose role is: adopter's story snippet. It is item 3 of 3 Text nodes side by side in the same parent: write only this one's words, not the others'. Max 200 characters. Plain words, no markdown, no quotes around it.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 200
+     }
+    }
+   },
+   "temperature": 0.8,
+   "answer": {
+    "text": "Bringing Sparky home was the best decision! He filled our house with so much joy and unconditional love. Our family is purr-fect!"
+   },
+   "tokensIn": 195,
+   "tokensOut": 39,
+   "promptChars": 772,
+   "ms": 1798
+  },
+  {
+   "key": "s4n6.label",
+   "stage": 3,
+   "section": 4,
+   "sectionKind": "testimonials",
+   "node": "s4n6",
+   "type": "net.noodl.controls.button",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"testimonials\" (Provide social proof with heartwarming stories from past adopters.). Write the button label for a net.noodl.controls.button whose role is: testimonial button (style: primaryButton). Max 28 characters. Plain words, no markdown, no quotes around it.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 28
+     }
+    }
+   },
+   "temperature": 0.8,
+   "answer": {
+    "text": "Read Happy Stories"
+   },
+   "tokensIn": 175,
+   "tokensOut": 8,
+   "promptChars": 709,
+   "ms": 862
+  },
+  {
+   "key": "s5.tree",
+   "stage": 2,
+   "section": 5,
+   "sectionKind": "faq",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nBuild the \"faq\" section. Purpose: Address common concerns quickly to reduce friction.\nVisual node types you may use:\n- Group: The universal layout container\n- net.noodl.visual.columns: Responsive multi-column layout\n- Text: Renders a piece of text with typography controlled by a text style or…\n- Image: Displays an image from a project asset or URL, with fit control, srcS…\n- net.noodl.controls.button: The standard clickable button control, with label, optional icon, and…\n- net.noodl.visual.icon: Displays a glyph from a project icon font, or an image, at a given si…\n- net.noodl.controls.textinput: Single-line or multi-line text entry control with label, icon, placeh…\n- net.noodl.controls.checkbox: Checkbox control\n- Circle: An SVG circle or arc with fill, stroke and start/end angles\nGive the node tree as a flat list. Item 0 is the root (parent -1) and must be a Group. Every other item's parent is the index of an EARLIER item, and only Group or Columns can be a parent. Max depth 3 below the root, max 6 children per node, max 14 nodes. Each item: type, and a one-line role saying what it is FOR on this page (e.g. \"the headline\", \"a photo of a puppy\", \"card for one step\"), never the type name.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "nodes"
+    ],
+    "properties": {
+     "nodes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 14,
+      "items": {
+       "type": "object",
+       "required": [
+        "parent",
+        "role",
+        "type"
+       ],
+       "properties": {
+        "parent": {
+         "type": "integer",
+         "minimum": -1,
+         "maximum": 13
+        },
+        "role": {
+         "type": "string",
+         "maxLength": 80
+        },
+        "type": {
+         "type": "string",
+         "enum": [
+          "Group",
+          "net.noodl.visual.columns",
+          "Text",
+          "Image",
+          "net.noodl.controls.button",
+          "net.noodl.visual.icon",
+          "net.noodl.controls.textinput",
+          "net.noodl.controls.checkbox",
+          "Circle"
+         ]
+        }
+       }
+      }
+     }
+    }
+   },
+   "temperature": 0.3,
+   "answer": {
+    "nodes": [
+     {
+      "parent": -1,
+      "role": "FAQ Section Header",
+      "type": "Group"
+     },
+     {
+      "parent": 0,
+      "role": "FAQ Question 1",
+      "type": "Text"
+     },
+     {
+      "parent": 0,
+      "role": "FAQ Answer 1",
+      "type": "Text"
+     },
+     {
+      "parent": 0,
+      "role": "FAQ Question 2",
+      "type": "Text"
+     },
+     {
+      "parent": 0,
+      "role": "FAQ Answer 2",
+      "type": "Text"
+     },
+     {
+      "parent": 0,
+      "role": "FAQ Question 3",
+      "type": "Text"
+     },
+     {
+      "parent": 0,
+      "role": "FAQ Answer 3",
+      "type": "Text"
+     }
+    ]
+   },
+   "tokensIn": 446,
+   "tokensOut": 151,
+   "promptChars": 1644,
+   "ms": 6521
+  },
+  {
+   "key": "s5n0.look",
+   "stage": 3,
+   "section": 5,
+   "sectionKind": "faq",
+   "node": "s5n0",
+   "type": "Group",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"faq\" (Address common concerns quickly to reduce friction.). A Group node whose role is: FAQ Section Header.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band\n- ctaBand: The closing call-to-action band\n- footerBand: The band a page ends in\n- heroGround: The band a landing page opens with\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "band",
+       "bandSurface",
+       "ctaBand",
+       "footerBand",
+       "heroGround",
+       "imageGround",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "none"
+   },
+   "tokensIn": 236,
+   "tokensOut": 7,
+   "promptChars": 926,
+   "ms": 927
+  },
+  {
+   "key": "s5n1.look",
+   "stage": 3,
+   "section": 5,
+   "sectionKind": "faq",
+   "node": "s5n1",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"faq\" (Address common concerns quickly to reduce friction.). A Text node whose role is: FAQ Question 1. It sits inside a \"none\".\nWhich look should it take?\n- displayHeadline: Exactly ONE per page\n- sectionHeading: The heading of a section head\n- cardTitle: The title inside a card or tile.\n- eyebrow: The small uppercase line that announces a section\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text\n- fieldLabel: The label above a form control\n- fieldError: The validation message under a form control\n- fieldHint: The quiet helper line under a form control\n- meta: Secondary text\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "displayHeadline",
+       "sectionHeading",
+       "cardTitle",
+       "eyebrow",
+       "lead",
+       "body",
+       "fieldLabel",
+       "fieldError",
+       "fieldHint",
+       "meta",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "body"
+   },
+   "tokensIn": 281,
+   "tokensOut": 7,
+   "promptChars": 1130,
+   "ms": 1125
+  },
+  {
+   "key": "s5n2.look",
+   "stage": 3,
+   "section": 5,
+   "sectionKind": "faq",
+   "node": "s5n2",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"faq\" (Address common concerns quickly to reduce friction.). A Text node whose role is: FAQ Answer 1. It sits inside a \"none\".\nWhich look should it take?\n- displayHeadline: Exactly ONE per page\n- sectionHeading: The heading of a section head\n- cardTitle: The title inside a card or tile.\n- eyebrow: The small uppercase line that announces a section\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text\n- fieldLabel: The label above a form control\n- fieldError: The validation message under a form control\n- fieldHint: The quiet helper line under a form control\n- meta: Secondary text\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "displayHeadline",
+       "sectionHeading",
+       "cardTitle",
+       "eyebrow",
+       "lead",
+       "body",
+       "fieldLabel",
+       "fieldError",
+       "fieldHint",
+       "meta",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "body"
+   },
+   "tokensIn": 281,
+   "tokensOut": 7,
+   "promptChars": 1128,
+   "ms": 970
+  },
+  {
+   "key": "s5n3.look",
+   "stage": 3,
+   "section": 5,
+   "sectionKind": "faq",
+   "node": "s5n3",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"faq\" (Address common concerns quickly to reduce friction.). A Text node whose role is: FAQ Question 2. It sits inside a \"none\".\nWhich look should it take?\n- displayHeadline: Exactly ONE per page\n- sectionHeading: The heading of a section head\n- cardTitle: The title inside a card or tile.\n- eyebrow: The small uppercase line that announces a section\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text\n- fieldLabel: The label above a form control\n- fieldError: The validation message under a form control\n- fieldHint: The quiet helper line under a form control\n- meta: Secondary text\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "displayHeadline",
+       "sectionHeading",
+       "cardTitle",
+       "eyebrow",
+       "lead",
+       "body",
+       "fieldLabel",
+       "fieldError",
+       "fieldHint",
+       "meta",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "body"
+   },
+   "tokensIn": 281,
+   "tokensOut": 7,
+   "promptChars": 1130,
+   "ms": 966
+  },
+  {
+   "key": "s5n4.look",
+   "stage": 3,
+   "section": 5,
+   "sectionKind": "faq",
+   "node": "s5n4",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"faq\" (Address common concerns quickly to reduce friction.). A Text node whose role is: FAQ Answer 2. It sits inside a \"none\".\nWhich look should it take?\n- displayHeadline: Exactly ONE per page\n- sectionHeading: The heading of a section head\n- cardTitle: The title inside a card or tile.\n- eyebrow: The small uppercase line that announces a section\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text\n- fieldLabel: The label above a form control\n- fieldError: The validation message under a form control\n- fieldHint: The quiet helper line under a form control\n- meta: Secondary text\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "displayHeadline",
+       "sectionHeading",
+       "cardTitle",
+       "eyebrow",
+       "lead",
+       "body",
+       "fieldLabel",
+       "fieldError",
+       "fieldHint",
+       "meta",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "body"
+   },
+   "tokensIn": 281,
+   "tokensOut": 7,
+   "promptChars": 1128,
+   "ms": 955
+  },
+  {
+   "key": "s5n5.look",
+   "stage": 3,
+   "section": 5,
+   "sectionKind": "faq",
+   "node": "s5n5",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"faq\" (Address common concerns quickly to reduce friction.). A Text node whose role is: FAQ Question 3. It sits inside a \"none\".\nWhich look should it take?\n- displayHeadline: Exactly ONE per page\n- sectionHeading: The heading of a section head\n- cardTitle: The title inside a card or tile.\n- eyebrow: The small uppercase line that announces a section\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text\n- fieldLabel: The label above a form control\n- fieldError: The validation message under a form control\n- fieldHint: The quiet helper line under a form control\n- meta: Secondary text\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "displayHeadline",
+       "sectionHeading",
+       "cardTitle",
+       "eyebrow",
+       "lead",
+       "body",
+       "fieldLabel",
+       "fieldError",
+       "fieldHint",
+       "meta",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "none"
+   },
+   "tokensIn": 281,
+   "tokensOut": 7,
+   "promptChars": 1130,
+   "ms": 946
+  },
+  {
+   "key": "s5n6.look",
+   "stage": 3,
+   "section": 5,
+   "sectionKind": "faq",
+   "node": "s5n6",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"faq\" (Address common concerns quickly to reduce friction.). A Text node whose role is: FAQ Answer 3. It sits inside a \"none\".\nWhich look should it take?\n- displayHeadline: Exactly ONE per page\n- sectionHeading: The heading of a section head\n- cardTitle: The title inside a card or tile.\n- eyebrow: The small uppercase line that announces a section\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text\n- fieldLabel: The label above a form control\n- fieldError: The validation message under a form control\n- fieldHint: The quiet helper line under a form control\n- meta: Secondary text\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "displayHeadline",
+       "sectionHeading",
+       "cardTitle",
+       "eyebrow",
+       "lead",
+       "body",
+       "fieldLabel",
+       "fieldError",
+       "fieldHint",
+       "meta",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "body"
+   },
+   "tokensIn": 281,
+   "tokensOut": 7,
+   "promptChars": 1128,
+   "ms": 952
+  },
+  {
+   "key": "s5n0.flexDirection",
+   "stage": 3,
+   "section": 5,
+   "sectionKind": "faq",
+   "node": "s5n0",
+   "type": "Group",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"faq\". A Group node, role: FAQ Section Header. Children: Text, Text, Text, Text, Text, Text.\nPort \"flexDirection\" of Group. Which value: none, column, row?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "value"
+    ],
+    "properties": {
+     "value": {
+      "type": "string",
+      "enum": [
+       "none",
+       "column",
+       "row"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "value": "column"
+   },
+   "tokensIn": 162,
+   "tokensOut": 7,
+   "promptChars": 601,
+   "ms": 657
+  },
+  {
+   "key": "s5n0.alignItems",
+   "stage": 3,
+   "section": 5,
+   "sectionKind": "faq",
+   "node": "s5n0",
+   "type": "Group",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"faq\". A Group node, role: FAQ Section Header. Children: Text, Text, Text, Text, Text, Text.\nPort \"alignItems\" of Group. Which value: flex-start, flex-end, center, stretch?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "value"
+    ],
+    "properties": {
+     "value": {
+      "type": "string",
+      "enum": [
+       "flex-start",
+       "flex-end",
+       "center",
+       "stretch"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "value": "center"
+   },
+   "tokensIn": 168,
+   "tokensOut": 7,
+   "promptChars": 618,
+   "ms": 698
+  },
+  {
+   "key": "s5n1.textAlignX",
+   "stage": 3,
+   "section": 5,
+   "sectionKind": "faq",
+   "node": "s5n1",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"faq\". A Text node, role: FAQ Question 1, look: body. Children: none.\nPort \"textAlignX\" of Text. Which value: left, center, right?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "value"
+    ],
+    "properties": {
+     "value": {
+      "type": "string",
+      "enum": [
+       "left",
+       "center",
+       "right"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "value": "left"
+   },
+   "tokensIn": 157,
+   "tokensOut": 7,
+   "promptChars": 576,
+   "ms": 658
+  },
+  {
+   "key": "s5n1.text",
+   "stage": 3,
+   "section": 5,
+   "sectionKind": "faq",
+   "node": "s5n1",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"faq\" (Address common concerns quickly to reduce friction.). Write the words for a Text whose role is: FAQ Question 1 (style: body). It is item 1 of 6 Text nodes side by side in the same parent: write only this one's words, not the others'. Max 200 characters. Plain words, no markdown, no quotes around it.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 200
+     }
+    }
+   },
+   "temperature": 0.8,
+   "answer": {
+    "text": "What are the most important things I need to know before bringing a puppy home?"
+   },
+   "tokensIn": 196,
+   "tokensOut": 26,
+   "promptChars": 753,
+   "ms": 1473
+  },
+  {
+   "key": "s5n2.textAlignX",
+   "stage": 3,
+   "section": 5,
+   "sectionKind": "faq",
+   "node": "s5n2",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"faq\". A Text node, role: FAQ Answer 1, look: body. Children: none.\nPort \"textAlignX\" of Text. Which value: left, center, right?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "value"
+    ],
+    "properties": {
+     "value": {
+      "type": "string",
+      "enum": [
+       "left",
+       "center",
+       "right"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "value": "left"
+   },
+   "tokensIn": 157,
+   "tokensOut": 7,
+   "promptChars": 574,
+   "ms": 686
+  },
+  {
+   "key": "s5n2.text",
+   "stage": 3,
+   "section": 5,
+   "sectionKind": "faq",
+   "node": "s5n2",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"faq\" (Address common concerns quickly to reduce friction.). Write the words for a Text whose role is: FAQ Answer 1 (style: body). It is item 2 of 6 Text nodes side by side in the same parent: write only this one's words, not the others'. Max 200 characters. Plain words, no markdown, no quotes around it.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 200
+     }
+    }
+   },
+   "temperature": 0.8,
+   "answer": {
+    "text": "What is the application process? It's super easy! Fill out our form online, and we'll get you ready for puppy cuddles in no time. We make it fun!"
+   },
+   "tokensIn": 196,
+   "tokensOut": 44,
+   "promptChars": 751,
+   "ms": 1860
+  },
+  {
+   "key": "s5n3.textAlignX",
+   "stage": 3,
+   "section": 5,
+   "sectionKind": "faq",
+   "node": "s5n3",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"faq\". A Text node, role: FAQ Question 2, look: body. Children: none.\nPort \"textAlignX\" of Text. Which value: left, center, right?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "value"
+    ],
+    "properties": {
+     "value": {
+      "type": "string",
+      "enum": [
+       "left",
+       "center",
+       "right"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "value": "left"
+   },
+   "tokensIn": 157,
+   "tokensOut": 7,
+   "promptChars": 576,
+   "ms": 656
+  },
+  {
+   "key": "s5n3.text",
+   "stage": 3,
+   "section": 5,
+   "sectionKind": "faq",
+   "node": "s5n3",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"faq\" (Address common concerns quickly to reduce friction.). Write the words for a Text whose role is: FAQ Question 2 (style: body). It is item 3 of 6 Text nodes side by side in the same parent: write only this one's words, not the others'. Max 200 characters. Plain words, no markdown, no quotes around it.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 200
+     }
+    }
+   },
+   "temperature": 0.8,
+   "answer": {
+    "text": "Is there a dog that is right for me? Our team is here to help match you with the perfect furry friend!"
+   },
+   "tokensIn": 196,
+   "tokensOut": 30,
+   "promptChars": 753,
+   "ms": 1416
+  },
+  {
+   "key": "s5n4.textAlignX",
+   "stage": 3,
+   "section": 5,
+   "sectionKind": "faq",
+   "node": "s5n4",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"faq\". A Text node, role: FAQ Answer 2, look: body. Children: none.\nPort \"textAlignX\" of Text. Which value: left, center, right?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "value"
+    ],
+    "properties": {
+     "value": {
+      "type": "string",
+      "enum": [
+       "left",
+       "center",
+       "right"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "value": "left"
+   },
+   "tokensIn": 157,
+   "tokensOut": 7,
+   "promptChars": 574,
+   "ms": 677
+  },
+  {
+   "key": "s5n4.text",
+   "stage": 3,
+   "section": 5,
+   "sectionKind": "faq",
+   "node": "s5n4",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"faq\" (Address common concerns quickly to reduce friction.). Write the words for a Text whose role is: FAQ Answer 2 (style: body). It is item 4 of 6 Text nodes side by side in the same parent: write only this one's words, not the others'. Max 200 characters. Plain words, no markdown, no quotes around it.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 200
+     }
+    }
+   },
+   "temperature": 0.8,
+   "answer": {
+    "text": "Can I adopt if I'm a first-time dog owner? We have wonderful resources and training sessions to help you get started on your puppy journey!"
+   },
+   "tokensIn": 196,
+   "tokensOut": 37,
+   "promptChars": 751,
+   "ms": 1658
+  },
+  {
+   "key": "s5n5.textAlignX",
+   "stage": 3,
+   "section": 5,
+   "sectionKind": "faq",
+   "node": "s5n5",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"faq\". A Text node, role: FAQ Question 3. Children: none.\nPort \"textAlignX\" of Text. Which value: left, center, right?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "value"
+    ],
+    "properties": {
+     "value": {
+      "type": "string",
+      "enum": [
+       "left",
+       "center",
+       "right"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "value": "left"
+   },
+   "tokensIn": 153,
+   "tokensOut": 7,
+   "promptChars": 564,
+   "ms": 670
+  },
+  {
+   "key": "s5n5.text",
+   "stage": 3,
+   "section": 5,
+   "sectionKind": "faq",
+   "node": "s5n5",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"faq\" (Address common concerns quickly to reduce friction.). Write the words for a Text whose role is: FAQ Question 3. It is item 5 of 6 Text nodes side by side in the same parent: write only this one's words, not the others'. Max 200 characters. Plain words, no markdown, no quotes around it.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 200
+     }
+    }
+   },
+   "temperature": 0.8,
+   "answer": {
+    "text": "Do I need experience with dogs? Not at all! We offer support and guidance for all levels of dog owners. We'll help you find the perfect match for your amazing new best friend."
+   },
+   "tokensIn": 192,
+   "tokensOut": 45,
+   "promptChars": 739,
+   "ms": 2168
+  },
+  {
+   "key": "s5n6.textAlignX",
+   "stage": 3,
+   "section": 5,
+   "sectionKind": "faq",
+   "node": "s5n6",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"faq\". A Text node, role: FAQ Answer 3, look: body. Children: none.\nPort \"textAlignX\" of Text. Which value: left, center, right?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "value"
+    ],
+    "properties": {
+     "value": {
+      "type": "string",
+      "enum": [
+       "left",
+       "center",
+       "right"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "value": "left"
+   },
+   "tokensIn": 157,
+   "tokensOut": 7,
+   "promptChars": 574,
+   "ms": 655
+  },
+  {
+   "key": "s5n6.text",
+   "stage": 3,
+   "section": 5,
+   "sectionKind": "faq",
+   "node": "s5n6",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"faq\" (Address common concerns quickly to reduce friction.). Write the words for a Text whose role is: FAQ Answer 3 (style: body). It is item 6 of 6 Text nodes side by side in the same parent: write only this one's words, not the others'. Max 200 characters. Plain words, no markdown, no quotes around it.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 200
+     }
+    }
+   },
+   "temperature": 0.8,
+   "answer": {
+    "text": "Can I afford the puppy care? We offer flexible plans and resources to help every adopter find the perfect fit for their furry family member."
+   },
+   "tokensIn": 196,
+   "tokensOut": 33,
+   "promptChars": 751,
+   "ms": 1581
+  },
+  {
+   "key": "s6.tree",
+   "stage": 2,
+   "section": 6,
+   "sectionKind": "call to action",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nBuild the \"call to action\" section. Purpose: Direct users clearly to the main goal: filling out the application form.\nVisual node types you may use:\n- Group: The universal layout container\n- net.noodl.visual.columns: Responsive multi-column layout\n- Text: Renders a piece of text with typography controlled by a text style or…\n- Image: Displays an image from a project asset or URL, with fit control, srcS…\n- net.noodl.controls.button: The standard clickable button control, with label, optional icon, and…\n- net.noodl.visual.icon: Displays a glyph from a project icon font, or an image, at a given si…\n- net.noodl.controls.textinput: Single-line or multi-line text entry control with label, icon, placeh…\n- net.noodl.controls.checkbox: Checkbox control\n- Circle: An SVG circle or arc with fill, stroke and start/end angles\nGive the node tree as a flat list. Item 0 is the root (parent -1) and must be a Group. Every other item's parent is the index of an EARLIER item, and only Group or Columns can be a parent. Max depth 3 below the root, max 6 children per node, max 14 nodes. Each item: type, and a one-line role saying what it is FOR on this page (e.g. \"the headline\", \"a photo of a puppy\", \"card for one step\"), never the type name.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "nodes"
+    ],
+    "properties": {
+     "nodes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 14,
+      "items": {
+       "type": "object",
+       "required": [
+        "parent",
+        "role",
+        "type"
+       ],
+       "properties": {
+        "parent": {
+         "type": "integer",
+         "minimum": -1,
+         "maximum": 13
+        },
+        "role": {
+         "type": "string",
+         "maxLength": 80
+        },
+        "type": {
+         "type": "string",
+         "enum": [
+          "Group",
+          "net.noodl.visual.columns",
+          "Text",
+          "Image",
+          "net.noodl.controls.button",
+          "net.noodl.visual.icon",
+          "net.noodl.controls.textinput",
+          "net.noodl.controls.checkbox",
+          "Circle"
+         ]
+        }
+       }
+      }
+     }
+    }
+   },
+   "temperature": 0.3,
+   "answer": {
+    "nodes": [
+     {
+      "parent": -1,
+      "role": "main call to action container",
+      "type": "Group"
+     },
+     {
+      "parent": 0,
+      "role": "a playful headline",
+      "type": "Text"
+     },
+     {
+      "parent": 0,
+      "role": "a brief instruction",
+      "type": "Text"
+     },
+     {
+      "parent": 0,
+      "role": "a photo of a happy puppy",
+      "type": "Image"
+     },
+     {
+      "parent": 0,
+      "role": "a form submission button",
+      "type": "net.noodl.controls.button"
+     }
+    ]
+   },
+   "tokensIn": 454,
+   "tokensOut": 131,
+   "promptChars": 1676,
+   "ms": 5682
+  },
+  {
+   "key": "s6n0.look",
+   "stage": 3,
+   "section": 6,
+   "sectionKind": "call to action",
+   "node": "s6n0",
+   "type": "Group",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"call to action\" (Direct users clearly to the main goal: filling out the application form.). A Group node whose role is: main call to action container.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band\n- ctaBand: The closing call-to-action band\n- footerBand: The band a page ends in\n- heroGround: The band a landing page opens with\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "band",
+       "bandSurface",
+       "ctaBand",
+       "footerBand",
+       "heroGround",
+       "imageGround",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "ctaBand"
+   },
+   "tokensIn": 246,
+   "tokensOut": 8,
+   "promptChars": 969,
+   "ms": 919
+  },
+  {
+   "key": "s6n1.look",
+   "stage": 3,
+   "section": 6,
+   "sectionKind": "call to action",
+   "node": "s6n1",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"call to action\" (Direct users clearly to the main goal: filling out the application form.). A Text node whose role is: a playful headline. It sits inside a \"ctaBand\".\nWhich look should it take?\n- displayHeadline: Exactly ONE per page\n- sectionHeading: The heading of a section head\n- cardTitle: The title inside a card or tile.\n- eyebrow: The small uppercase line that announces a section\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text\n- fieldLabel: The label above a form control\n- fieldError: The validation message under a form control\n- fieldHint: The quiet helper line under a form control\n- meta: Secondary text\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "displayHeadline",
+       "sectionHeading",
+       "cardTitle",
+       "eyebrow",
+       "lead",
+       "body",
+       "fieldLabel",
+       "fieldError",
+       "fieldHint",
+       "meta",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "displayHeadline"
+   },
+   "tokensIn": 289,
+   "tokensOut": 8,
+   "promptChars": 1169,
+   "ms": 1027
+  },
+  {
+   "key": "s6n2.look",
+   "stage": 3,
+   "section": 6,
+   "sectionKind": "call to action",
+   "node": "s6n2",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"call to action\" (Direct users clearly to the main goal: filling out the application form.). A Text node whose role is: a brief instruction. It sits inside a \"ctaBand\".\nWhich look should it take?\n- displayHeadline: Exactly ONE per page\n- sectionHeading: The heading of a section head\n- cardTitle: The title inside a card or tile.\n- eyebrow: The small uppercase line that announces a section\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text\n- fieldLabel: The label above a form control\n- fieldError: The validation message under a form control\n- fieldHint: The quiet helper line under a form control\n- meta: Secondary text\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "displayHeadline",
+       "sectionHeading",
+       "cardTitle",
+       "eyebrow",
+       "lead",
+       "body",
+       "fieldLabel",
+       "fieldError",
+       "fieldHint",
+       "meta",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "displayHeadline"
+   },
+   "tokensIn": 289,
+   "tokensOut": 8,
+   "promptChars": 1170,
+   "ms": 1029
+  },
+  {
+   "key": "s6n4.look",
+   "stage": 3,
+   "section": 6,
+   "sectionKind": "call to action",
+   "node": "s6n4",
+   "type": "net.noodl.controls.button",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"call to action\" (Direct users clearly to the main goal: filling out the application form.). A net.noodl.controls.button node whose role is: a form submission button. It sits inside a \"ctaBand\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action\n- none: no preset look",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "primaryButton",
+       "outlineButton",
+       "none"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "tokensIn": 196,
+   "tokensOut": 8,
+   "promptChars": 767,
+   "ms": 740
+  },
+  {
+   "key": "s6n1.textAlignX",
+   "stage": 3,
+   "section": 6,
+   "sectionKind": "call to action",
+   "node": "s6n1",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"call to action\". A Text node, role: a playful headline, look: displayHeadline. Children: none.\nPort \"textAlignX\" of Text. Which value: left, center, right?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "value"
+    ],
+    "properties": {
+     "value": {
+      "type": "string",
+      "enum": [
+       "left",
+       "center",
+       "right"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "value": "center"
+   },
+   "tokensIn": 159,
+   "tokensOut": 7,
+   "promptChars": 602,
+   "ms": 674
+  },
+  {
+   "key": "s6n1.text",
+   "stage": 3,
+   "section": 6,
+   "sectionKind": "call to action",
+   "node": "s6n1",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"call to action\" (Direct users clearly to the main goal: filling out the application form.). Write the words for a Text whose role is: a playful headline (style: displayHeadline). It is item 1 of 2 Text nodes side by side in the same parent: write only this one's words, not the others'. Max 70 characters. Plain words, no markdown, no quotes around it.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 70
+     }
+    }
+   },
+   "temperature": 0.8,
+   "answer": {
+    "text": "Ready for Snuggles? Apply Now for Your Best Friend!"
+   },
+   "tokensIn": 203,
+   "tokensOut": 23,
+   "promptChars": 799,
+   "ms": 1450
+  },
+  {
+   "key": "s6n2.textAlignX",
+   "stage": 3,
+   "section": 6,
+   "sectionKind": "call to action",
+   "node": "s6n2",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"call to action\". A Text node, role: a brief instruction, look: displayHeadline. Children: none.\nPort \"textAlignX\" of Text. Which value: left, center, right?",
+   "schema": {
+    "type": "object",
+    "required": [
+     "value"
+    ],
+    "properties": {
+     "value": {
+      "type": "string",
+      "enum": [
+       "left",
+       "center",
+       "right"
+      ]
+     }
+    }
+   },
+   "temperature": 0.2,
+   "answer": {
+    "value": "center"
+   },
+   "tokensIn": 159,
+   "tokensOut": 7,
+   "promptChars": 603,
+   "ms": 685
+  },
+  {
+   "key": "s6n2.text",
+   "stage": 3,
+   "section": 6,
+   "sectionKind": "call to action",
+   "node": "s6n2",
+   "type": "Text",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"call to action\" (Direct users clearly to the main goal: filling out the application form.). Write the words for a Text whose role is: a brief instruction (style: displayHeadline). It is item 2 of 2 Text nodes side by side in the same parent: write only this one's words, not the others'. Max 70 characters. Plain words, no markdown, no quotes around it.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 70
+     }
+    }
+   },
+   "temperature": 0.8,
+   "answer": {
+    "text": "Adopt a puppy today fill out our application form"
+   },
+   "tokensIn": 203,
+   "tokensOut": 15,
+   "promptChars": 800,
+   "ms": 1045
+  },
+  {
+   "key": "s6n4.label",
+   "stage": 3,
+   "section": 6,
+   "sectionKind": "call to action",
+   "node": "s6n4",
+   "type": "net.noodl.controls.button",
+   "user": "BRIEF CARD: {\"kind\":\"landing page\",\"tone\":\"playful\",\"action\":\"Adopt a puppy today by filling out our application form.\",\"audience\":\"Potential puppy adopters looking for a loving new companion.\",\"name\":\"Pawsitive Pals\",\"hue\":\"blue\",\"preset\":\"modern\",\"density\":\"compact\",\"pairing\":\"sans-sans\",\"radius\":\"sharp\",\"photo\":\"animal-dog.webp\"}\nSection \"call to action\" (Direct users clearly to the main goal: filling out the application form.). Write the button label for a net.noodl.controls.button whose role is: a form submission button (style: primaryButton). Max 28 characters. Plain words, no markdown, no quotes around it.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 28
+     }
+    }
+   },
+   "temperature": 0.8,
+   "answer": {
+    "text": "Adopt Me Now"
+   },
+   "tokensIn": 183,
+   "tokensOut": 8,
+   "promptChars": 723,
+   "ms": 789
+  }
+ ],
+ "skipped": [
+  {
+   "key": "s0n2.look",
+   "why": "R3: Image has one composition (cardImage)"
+  },
+  {
+   "key": "s0n0.flexDirection",
+   "why": "R5: look heroGround sets it"
+  },
+  {
+   "key": "s0n0.alignItems",
+   "why": "R5: look heroGround sets it"
+  },
+  {
+   "key": "s1n3.look",
+   "why": "R3: Image has one composition (cardImage)"
+  },
+  {
+   "key": "s1n0.flexDirection",
+   "why": "R5: look band sets it"
+  },
+  {
+   "key": "s1n0.alignItems",
+   "why": "R5: look band sets it"
+  },
+  {
+   "key": "s2n3.look",
+   "why": "R3: Image has one composition (cardImage)"
+  },
+  {
+   "key": "s2n0.flexDirection",
+   "why": "R5: look band sets it"
+  },
+  {
+   "key": "s2n0.alignItems",
+   "why": "R5: look band sets it"
+  },
+  {
+   "key": "s3n3.look",
+   "why": "R3: Image has one composition (cardImage)"
+  },
+  {
+   "key": "s3n4.look",
+   "why": "R3: Image has one composition (cardImage)"
+  },
+  {
+   "key": "s3n0.flexDirection",
+   "why": "R5: look imageGround sets it"
+  },
+  {
+   "key": "s3n0.alignItems",
+   "why": "R5: look imageGround sets it"
+  },
+  {
+   "key": "s3n5.flexDirection",
+   "why": "R5: look card sets it"
+  },
+  {
+   "key": "s3n6.flexDirection",
+   "why": "R5: look card sets it"
+  },
+  {
+   "key": "s4n5.look",
+   "why": "R3: Image has one composition (cardImage)"
+  },
+  {
+   "key": "s4n0.flexDirection",
+   "why": "R5: look band sets it"
+  },
+  {
+   "key": "s4n0.alignItems",
+   "why": "R5: look band sets it"
+  },
+  {
+   "key": "s4n1.flexDirection",
+   "why": "R5: look testimonialCard sets it"
+  },
+  {
+   "key": "s6n3.look",
+   "why": "R3: Image has one composition (cardImage)"
+  },
+  {
+   "key": "s6n0.flexDirection",
+   "why": "R5: look ctaBand sets it"
+  },
+  {
+   "key": "s6n0.alignItems",
+   "why": "R5: look ctaBand sets it"
+  }
+ ],
+ "defaults": [
+  {
+   "key": "s2.tree",
+   "what": "repaired by script (offending items dropped)",
+   "errs": [
+    "item 0 has more than 6 children"
+   ],
+   "kept": 7
+  }
+ ],
+ "mcp": [
+  {
+   "tool": "create_project",
+   "isError": false,
+   "ms": 301,
+   "chars": 6496
+  },
+  {
+   "tool": "get_style_vocabulary",
+   "isError": false,
+   "ms": 5,
+   "chars": 39716
+  },
+  {
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 3,
+   "chars": 1703
+  },
+  {
+   "tool": "set_style_preset",
+   "isError": false,
+   "ms": 2,
+   "chars": 94
+  },
+  {
+   "tool": "set_project_tokens",
+   "isError": false,
+   "ms": 2,
+   "chars": 155
+  },
+  {
+   "tool": "list_node_types",
+   "isError": false,
+   "ms": 3,
+   "chars": 6667
+  },
+  {
+   "tool": "get_node_type",
+   "isError": false,
+   "ms": 24,
+   "chars": 17325
+  },
+  {
+   "tool": "get_node_type",
+   "isError": false,
+   "ms": 2,
+   "chars": 18148
+  },
+  {
+   "tool": "get_node_type",
+   "isError": false,
+   "ms": 1,
+   "chars": 3345
+  },
+  {
+   "tool": "get_component",
+   "isError": false,
+   "ms": 17,
+   "chars": 673
+  },
+  {
+   "tool": "create_plan",
+   "isError": false,
+   "ms": 5,
+   "chars": 5109
+  },
+  {
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 87,
+   "chars": 158
+  },
+  {
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 41,
+   "chars": 159
+  },
+  {
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 35,
+   "chars": 150
+  },
+  {
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 56,
+   "chars": 140
+  },
+  {
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 30,
+   "chars": 138
+  },
+  {
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 28,
+   "chars": 122
+  },
+  {
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 29,
+   "chars": 124
+  },
+  {
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 30,
+   "chars": 105
+  },
+  {
+   "tool": "apply_plan",
+   "isError": false,
+   "ms": 10714,
+   "chars": 4762
+  },
+  {
+   "tool": "render_report",
+   "isError": false,
+   "ms": 2005,
+   "chars": 16768
+  }
+ ],
+ "rejections": [
+  {
+   "by": "harness tree check",
+   "section": 1,
+   "errs": [
+    "the tree has no Text, Image or Button — nothing to see"
+   ]
+  },
+  {
+   "by": "harness tree check",
+   "section": 2,
+   "errs": [
+    "item 5: parent 3 is a Image, which cannot hold children",
+    "item 6: parent 3 is a Image, which cannot hold children",
+    "item 7: parent 3 is a Image, which cannot hold children",
+    "item 8: parent 3 is a Image, which cannot hold children",
+    "item 9: parent 3 is a Image, which cannot hold children",
+    "item 10: parent 3 is a Image, which cannot hold children"
+   ]
+  },
+  {
+   "by": "harness tree check",
+   "section": 2,
+   "errs": [
+    "item 0 has more than 6 children"
+   ],
+   "retry": 1
+  },
+  {
+   "by": "harness tree check",
+   "section": 3,
+   "errs": [
+    "item 0 has more than 6 children"
+   ]
+  }
+ ],
+ "result": {
+  "minutes": 2.9,
+  "modelCalls": 99,
+  "retries": 3,
+  "questionsSkippedByRule": 22,
+  "defaults": 1,
+  "validatorErrors": 0,
+  "validatorWarnings": 0,
+  "treeRejections": 4,
+  "tokensIn": 23374,
+  "tokensOut": 3162,
+  "maxPromptTokens": 555,
+  "overBudgetCalls": 0,
+  "unparsed": 0,
+  "nodes": 42,
+  "sections": 7,
+  "applied": true
+ },
+ "tokensSet": {
+  "preset": {
+   "ok": true,
+   "preset": "modern",
+   "customTokenCount": 0,
+   "fonts": {
+    "added": [],
+    "removed": [],
+    "kept": []
+   }
+  },
+  "tokens": [
+   {
+    "name": "--primary",
+    "value": "var(--blue-600)"
+   },
+   {
+    "name": "--primary-hover",
+    "value": "var(--blue-700)"
+   },
+   {
+    "name": "--ring",
+    "value": "var(--blue-500)"
+   },
+   {
+    "name": "--radius-md",
+    "value": "2px"
+   },
+   {
+    "name": "--radius-lg",
+    "value": "4px"
+   },
+   {
+    "name": "--radius-xl",
+    "value": "4px"
+   },
+   {
+    "name": "--radius-2xl",
+    "value": "6px"
+   },
+   {
+    "name": "--radius-3xl",
+    "value": "8px"
+   }
+  ],
+  "result": {
+   "ok": true,
+   "updated": [
+    "--primary",
+    "--primary-hover",
+    "--ring",
+    "--radius-md",
+    "--radius-lg",
+    "--radius-xl",
+    "--radius-2xl",
+    "--radius-3xl"
+   ],
+   "customTokenCount": 8
+  }
+ },
+ "pageStage": {
+  "staged": "op-8",
+  "target": "Pages/Home",
+  "warnings": 0,
+  "progress": "8 of 8 operations staged",
+  "remaining": []
+ },
+ "apply": {
+  "applied": [
+   {
+    "operation": "op-1",
+    "target": "Sections/S1Hero",
+    "revision": "1d797e34988ddc"
+   },
+   {
+    "operation": "op-2",
+    "target": "Sections/S2FeatureCards",
+    "revision": "1579acc929be39"
+   },
+   {
+    "operation": "op-3",
+    "target": "Sections/S3HowItWorks",
+    "revision": "0440b28fbf5987"
+   },
+   {
+    "operation": "op-4",
+    "target": "Sections/S4Gallery",
+    "revision": "019f0b125d91eb"
+   },
+   {
+    "operation": "op-5",
+    "target": "Sections/S5Testimonials",
+    "revision": "0a1261399f6d5b"
+   },
+   {
+    "operation": "op-6",
+    "target": "Sections/S6Faq",
+    "revision": "028f41f4b83e49"
+   },
+   {
+    "operation": "op-7",
+    "target": "Sections/S7CallToAction",
+    "revision": "0808144b893be6"
+   },
+   {
+    "operation": "op-8",
+    "target": "Pages/Home",
+    "revision": "0dabc1b8c8ed81"
+   }
+  ],
+  "docs": [],
+  "skipped": [],
+  "render": {
+   "summary": "0 errors, 3 warnings, 1 observation (elements-overflowing, alignment-drift). desktop 1280×3855px, 24 texts, 4 on screen, 7 images; phone 390×4029px, 24 texts, 4 on screen, 7 images.",
+   "findings": [
+    {
+     "code": "elements-overflowing",
+     "severity": "warning",
+     "viewport": "desktop",
+     "message": "1 element is wider than the 1280px viewport, while the page itself does not scroll sideways — so each is clipped by an ancestor rather than reachable; the widest is div.columns-container at 1328px.",
+     "evidence": [
+      {
+       "tag": "DIV",
+       "cls": "columns-container  ndl-d-9n80m449bx",
+       "width": 1328
+      }
+     ]
+    },
+    {
+     "code": "alignment-drift",
+     "severity": "warning",
+     "viewport": "desktop",
+     "message": "This section centres \"Read Happy Stories\", but \"My life changed with Sunny! She's pure joy and the\" sits 130px left of that centre. One section, one alignment: centre the rest too, or align everything to the same left edge. Look at this width's screenshot.",
+     "evidence": {
+      "cls": "ndl-d-fh8w99eoqj",
+      "offBy": -130,
+      "sectionWidth": 1280,
+      "text": "My life changed with Sunny! She's pure joy and the",
+      "centredText": "Read Happy Stories"
+     }
+    },
+    {
+     "code": "elements-overflowing",
+     "severity": "warning",
+     "viewport": "phone",
+     "message": "5 elements are wider than the 390px viewport, while the page itself does not scroll sideways — so each is clipped by an ancestor rather than reachable; the widest is div.columns-container at 438px.",
+     "evidence": [
+      {
+       "tag": "DIV",
+       "cls": "columns-container  ndl-d-9n80m449bx",
+       "width": 438
+      },
+      {
+       "tag": "DIV",
+       "cls": "column-item",
+       "width": 438
+      },
+      {
+       "tag": "DIV",
+       "cls": "column-item",
+       "width": 438
+      },
+      {
+       "tag": "DIV",
+       "cls": "column-item",
+       "width": 438
+      },
+      {
+       "tag": "DIV",
+       "cls": "column-item",
+       "width": 438
+      }
+     ]
+    },
+    {
+     "code": "single-column-grid",
+     "severity": "info",
+     "viewport": "desktop",
+     "message": "3 repeated items are stacked in one column at 1280px, each 1280×685px inside a 1280px parent. If they are meant to be a grid, a Columns node is the only node that lays items out in one and collapses it on small screens; if they are meant to be full-width bands, this is right.",
+     "evidence": {
+      "kind": "siblings",
+      "count": 3,
+      "columns": 1,
+      "rows": 3,
+      "itemWidth": 1280,
+      "itemHeight": 685,
+      "parentWidth": 1280,
+      "tag": "SECTION",
+      "cls": "ndl-d-fh8w99eoqj"
+     }
+    }
+   ],
+   "viewports": {
+    "desktop": {
+     "layoutWidth": 1280,
+     "pageHeight": 3855,
+     "texts": 24,
+     "images": 7,
+     "brokenImages": 0,
+     "placeholderTexts": 0
+    },
+    "phone": {
+     "layoutWidth": 390,
+     "pageHeight": 4029,
+     "texts": 24,
+     "images": 7,
+     "brokenImages": 0,
+     "placeholderTexts": 0
+    }
+   },
+   "note": "Numbers only. Call render_report for the screenshots — a picture that loads is not a picture of the right thing."
+  },
+  "done": true,
+  "doneBecause": "Rendered, and nothing is broken — but it warns: elements-overflowing, alignment-drift. Nothing here blocks; read the warnings before calling it finished.",
+  "handover": {
+   "note": "Every page the scope agreed (docs/decisions/000-initial-scope.md) is built: the plan is done, so hand over now, in one message and no questions: what they own, what they can change in Studio themselves, that an editor can be built for them if Studio is too much, and how to come back. Say it from `theyOwn` and `comeBack`, the canon's words.",
+   "theyOwn": "When it's finished, the app is yours in a way code from an agency never is. The project is a folder of files on your computer. NodeGX Studio is installed beside it: an open-source editor for pages, elements, workflows and data. Change a heading, a font, a button colour or a translation yourself. It works without the AI. Nobody charges you for it or can take it away. If Studio itself is more than you want, ask your AI coder for an editor that matches how you think about your app, with only the things you change in it.",
+   "comeBack": "When you want more, come back. Ask for a contact form, or a members' area with payments. The files are a blueprint the AI reads, and the build was written down as it went, so it picks up where it left off.",
+   "rule": "When the plan is done, hand over: say what they own, what they can change in Studio themselves, that an editor can be built for them if Studio is too much, and how to come back."
+  },
+  "note": "Plan applied and discarded. Re-read components with get_component for fresh revisions."
+ },
+ "render": {
+  "summary": "0 errors, 3 warnings, 1 observation (elements-overflowing, alignment-drift). desktop 1280×3855px, 24 texts, 4 on screen, 7 images; phone 390×4029px, 24 texts, 4 on screen, 7 images.",
+  "findings": [
+   {
+    "code": "elements-overflowing",
+    "severity": "warning",
+    "viewport": "desktop",
+    "message": "1 element is wider than the 1280px viewport, while the page itself does not scroll sideways — so each is clipped by an ancestor rather than reachable; the widest is div.columns-container at 1328px.",
+    "evidence": [
+     {
+      "tag": "DIV",
+      "cls": "columns-container  ndl-d-9n80m449bx",
+      "width": 1328
+     }
+    ]
+   },
+   {
+    "code": "alignment-drift",
+    "severity": "warning",
+    "viewport": "desktop",
+    "message": "This section centres \"Read Happy Stories\", but \"My life changed with Sunny! She's pure joy and the\" sits 130px left of that centre. One section, one alignment: centre the rest too, or align everything to the same left edge. Look at this width's screenshot.",
+    "evidence": {
+     "cls": "ndl-d-fh8w99eoqj",
+     "offBy": -130,
+     "sectionWidth": 1280,
+     "text": "My life changed with Sunny! She's pure joy and the",
+     "centredText": "Read Happy Stories"
+    }
+   },
+   {
+    "code": "elements-overflowing",
+    "severity": "warning",
+    "viewport": "phone",
+    "message": "5 elements are wider than the 390px viewport, while the page itself does not scroll sideways — so each is clipped by an ancestor rather than reachable; the widest is div.columns-container at 438px.",
+    "evidence": [
+     {
+      "tag": "DIV",
+      "cls": "columns-container  ndl-d-9n80m449bx",
+      "width": 438
+     },
+     {
+      "tag": "DIV",
+      "cls": "column-item",
+      "width": 438
+     },
+     {
+      "tag": "DIV",
+      "cls": "column-item",
+      "width": 438
+     },
+     {
+      "tag": "DIV",
+      "cls": "column-item",
+      "width": 438
+     },
+     {
+      "tag": "DIV",
+      "cls": "column-item",
+      "width": 438
+     }
+    ]
+   },
+   {
+    "code": "single-column-grid",
+    "severity": "info",
+    "viewport": "desktop",
+    "message": "3 repeated items are stacked in one column at 1280px, each 1280×685px inside a 1280px parent. If they are meant to be a grid, a Columns node is the only node that lays items out in one and collapses it on small screens; if they are meant to be full-width bands, this is right.",
+    "evidence": {
+     "kind": "siblings",
+     "count": 3,
+     "columns": 1,
+     "rows": 3,
+     "itemWidth": 1280,
+     "itemHeight": 685,
+     "parentWidth": 1280,
+     "tag": "SECTION",
+     "cls": "ndl-d-fh8w99eoqj"
+    }
+   }
+  ],
+  "phone": {
+   "overflowing": 5,
+   "scrollWidth": 390,
+   "consoleErrors": [],
+   "lowContrast": 0
+  },
+  "desktop": {
+   "overflowing": 1,
+   "consoleErrors": [],
+   "lowContrast": 0
+  }
+ }
+}

@@ -1,0 +1,15 @@
+{
+ "tuning": 2,
+ "date": "2026-10-28",
+ "after": "r2",
+ "rules": [
+  "R19"
+ ],
+ "stage2": "From the style vocabulary, verbatim — band: \"A full-width section on the page background. It is HALF a section: a band always holds exactly one shell, and a band whose content is not inside one runs edge to edge.\" shell: \"The one centred container inside a band.\" So item 1 is the shell Group, and the rest of the section goes inside it.",
+ "changes": [
+  "(a) stage 2 carries the vocabulary's own band/shell sentences (get_style_vocabulary compositions band + shell, verbatim) and says item 1 is the shell: in r1 and r2 no section of 13 had a shell, so every photo was a full-bleed strip and every text touched the window edge.",
+  "(b) R19: displayHeadline is offered only until one node takes it (the composition's own \"Exactly ONE per page\"): r1 had 2, r2 had 5.",
+  "Tuning 1 stays in (prompts.mjs as of r2)."
+ ],
+ "not_from": "read off r1/r2 ledgers and screenshots of arm T only; arm C not consulted."
+}

@@ -1,0 +1,254 @@
+{
+ "minutes": 1.4,
+ "bestRound": 0,
+ "bestScore": 50.53,
+ "scores": [
+  50.53
+ ],
+ "builderCalls": 29,
+ "judgements": 15,
+ "replays": 46,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-P1-running-r0",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-P1-running-r0",
+   "score": 50.53,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.56
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "form"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.356,
+     "pFit": 0.99
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place",
+      "form"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.496
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "date and place"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.52
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "form",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.067
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.071
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|location and hours#0|copy|the main action of the location and hours section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Join Running Club\" repeats \"Join Running Club\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|sign-up or contact form#0|copy|the button that sends the form|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Join the Club\" repeats \"Join the Club\"",
+     "op": "reword"
+    },
+    {
+     "id": "S8|about#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|schedule or line-up#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|location and hours#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|sign-up or contact form#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S10|form|schedule or line-up#0",
+     "weight": 4,
+     "say": "a second form (already in \"about\")",
+     "op": "reask"
+    },
+    {
+     "id": "S10|form|sign-up or contact form#0",
+     "weight": 4,
+     "say": "a second form (already in \"about\")",
+     "op": "reask"
+    },
+    {
+     "id": "S11|about#0|list.rows|3|title,sentence,button",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|schedule or line-up#0|copy|when and where, in one line|Text",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|copy|one sentence under the headline|Text",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|copy|when and where, in one line|Text",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|copy|one sentence under the headline|Text",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|copy|a quotation from a happy customer or visitor|Text",
+     "weight": 1.5,
+     "say": "\"in the park\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|copy|who said it: a name and a role|Text",
+     "weight": 1.5,
+     "say": "\"sign up now\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|copy|the call to action headline|Text",
+     "weight": 1.5,
+     "say": "\"join the park\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|copy|one sentence under the headline|Text",
+     "weight": 1.5,
+     "say": "\"join the park\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S12|location and hours#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "four \"imageGround\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S12|sign-up or contact form#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "four \"imageGround\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "R|single-column-grid|page",
+     "weight": 4,
+     "say": "render: single-column-grid"
+    },
+    {
+     "id": "J1|about#0|copy|one sentence under the headline|Text",
+     "weight": 1.93,
+     "say": "reviewer (p=0.356): weakest line sub-line \"Join the elite Saturday morning crew for runs righ\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|schedule or line-up#0|copy|when and where, in one line|Text",
+     "weight": 1.51,
+     "say": "reviewer (p=0.496): weakest line date and place \"Join the Park Runners! Sign up to run every Saturd\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|sign-up or contact form#0|copy|a short paragraph|Text",
+     "weight": 2.8,
+     "say": "reviewer (p=0.067): weakest line paragraph \"JOIN THE PACK. Sign up now for our Saturday mornin\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|call to action#0|copy|one sentence under the headline|Text",
+     "weight": 2.79,
+     "say": "reviewer (p=0.071): weakest line sub-line \"Don't wait! Join the Park Runners and conquer the \"",
+     "op": "reword"
+    }
+   ],
+   "findings": [
+    "single-column-grid"
+   ],
+   "modelCalls": 29,
+   "judgements": 15,
+   "minutes": 1.4,
+   "kept": true
+  }
+ ]
+}

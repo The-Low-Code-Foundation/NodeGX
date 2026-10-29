@@ -1,0 +1,831 @@
+{
+ "minutes": 10.2,
+ "bestRound": 4,
+ "bestScore": 11.24,
+ "scores": [
+  30.01,
+  21.9,
+  16.58,
+  22.38,
+  11.24
+ ],
+ "builderCalls": 133,
+ "judgements": 136,
+ "replays": 250,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-Q-bakery-r4",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-Q-bakery-r0",
+   "score": 30.01,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "list of items"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.984,
+     "pFit": 0.993
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "photo",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.974
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.993,
+     "pFit": 0.997
+    },
+    {
+     "kind": "menu or prices",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "button",
+      "date and place"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.992,
+     "pFit": 0.997
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.987
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.99
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|feature cards#0",
+     "weight": 3,
+     "say": "the list in \"feature cards\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1list|menu or prices#0",
+     "weight": 3,
+     "say": "the list in \"menu or prices\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|call to action#0",
+     "weight": 2,
+     "say": "\"food-bakery.webp\" appears 7 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1list|hero#0",
+     "weight": 3,
+     "say": "the list in \"hero\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|about#0",
+     "weight": 2,
+     "say": "\"food-bread.webp\" appears 7 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|feature cards#0",
+     "weight": 2,
+     "say": "\"food-bread.webp\" appears 7 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|feature cards#0|list.rows|3|title,sentence,button",
+     "weight": 2,
+     "say": "\"Signature Cakes\" repeats \"Signature Cakes\"",
+     "op": "reword"
+    },
+    {
+     "id": "S8|about#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|feature cards#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S11|feature cards#0|deck|headline,sub-line",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|menu or prices#0|deck|headline,sub-line,button,date and place",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|headline,sub-line,button",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "C|schedule or line-up#0|deck|headline,sub-line,date and place",
+     "weight": 2.66,
+     "say": "reviewer (p=0.666): \"Open daily in the heart of Lyon.\" contradicts the request or invents a detail",
+     "op": "reword"
+    },
+    {
+     "id": "Q|org",
+     "weight": 1.38,
+     "say": "reviewer: organised p=0.828"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.47,
+     "say": "reviewer: type and parts suit p=0.882"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 62,
+   "judgements": 51,
+   "minutes": 3.6,
+   "kept": true,
+   "fixesForNext": [
+    "S1list|feature cards#0",
+    "S1list|menu or prices#0",
+    "S1list|hero#0",
+    "C|schedule or line-up#0|deck|headline,sub-line,date and place",
+    "S1page|call to action#0",
+    "S1page|about#0",
+    "S5|feature cards#0|list.rows|3|title,sentence,button",
+    "S11|feature cards#0|deck|headline,sub-line",
+    "S11|menu or prices#0|deck|headline,sub-line,button,date and place",
+    "S11|call to action#0|deck|headline,sub-line,button"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-Q-bakery-r1",
+   "score": 21.9,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "list of items"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.983,
+     "pFit": 0.992
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.973
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.991,
+     "pFit": 0.998
+    },
+    {
+     "kind": "menu or prices",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "button",
+      "date and place"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.992,
+     "pFit": 0.997
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.987
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button",
+      "list of items",
+      "date and place"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.987,
+     "pFit": 0.995
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|call to action#0",
+     "weight": 3,
+     "say": "the list in \"call to action\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S5|feature cards#0|list.rows|3|title,sentence,button",
+     "weight": 2,
+     "say": "\"Artisan Sourdough\" repeats \"Artisan Sourdough\"",
+     "op": "reword"
+    },
+    {
+     "id": "S9|menu or prices#0|deck|headline,sub-line,button,date and place",
+     "weight": 3,
+     "say": "\"Baked daily in the heart of Lyon, since [Year].\" talks about the page instead of to the visitor",
+     "op": "reword"
+    },
+    {
+     "id": "S8|about#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|feature cards#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S11|feature cards#0|deck|headline,sub-line",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|schedule or line-up#0|deck|headline,sub-line,date and place",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "P1|location and hours",
+     "weight": 2.06,
+     "say": "reviewer (p=0.688): add a \"location and hours\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "Q|org",
+     "weight": 4.03,
+     "say": "reviewer: organised p=0.496",
+     "op": "reask"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.8,
+     "say": "reviewer: type and parts suit p=0.799"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 26,
+   "judgements": 20,
+   "minutes": 2.1,
+   "kept": true,
+   "fixesForNext": [
+    "Q|org",
+    "S1list|call to action#0",
+    "S9|menu or prices#0|deck|headline,sub-line,button,date and place",
+    "S5|feature cards#0|list.rows|3|title,sentence,button",
+    "S8|about#0|look.band|band,bandSurface,imageGround",
+    "S8|feature cards#0|look.band|band,bandSurface,imageGround",
+    "S11|feature cards#0|deck|headline,sub-line",
+    "S11|schedule or line-up#0|deck|headline,sub-line,date and place"
+   ]
+  },
+  {
+   "round": 2,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-Q-bakery-r2",
+   "score": 16.58,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "list of items"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.983,
+     "pFit": 0.992
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.98
+    },
+    {
+     "kind": "menu or prices",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "button",
+      "date and place"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.992,
+     "pFit": 0.998
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.984
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.992,
+     "pFit": 0.997
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button",
+      "list of items",
+      "date and place"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.987,
+     "pFit": 0.995
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|gallery#0",
+     "weight": 3,
+     "say": "the list in \"gallery\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S9|menu or prices#0|deck|headline,sub-line,button,date and place",
+     "weight": 3,
+     "say": "\"Daily baked fresh. Serving Lyon since [Year].\" talks about the page instead of to the visitor",
+     "op": "reword"
+    },
+    {
+     "id": "S5|gallery#0|list.rows|4|title,sentence,price",
+     "weight": 2,
+     "say": "\"Artisan Sourdough\" repeats \"Artisan Sourdough\"",
+     "op": "reword"
+    },
+    {
+     "id": "C|menu or prices#0|deck|headline,sub-line,button,date and place",
+     "weight": 2.14,
+     "say": "reviewer (p=0.536): \"Daily baked fresh. Serving Lyon since [Year].\" contradicts the request or invents a detail",
+     "op": "reword"
+    },
+    {
+     "id": "P1|location and hours",
+     "weight": 2.18,
+     "say": "reviewer (p=0.726): add a \"location and hours\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "Q|org",
+     "weight": 3.65,
+     "say": "reviewer: organised p=0.544"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.61,
+     "say": "reviewer: type and parts suit p=0.847"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 20,
+   "judgements": 21,
+   "minutes": 1.9,
+   "kept": true,
+   "fixesForNext": [
+    "S1list|gallery#0",
+    "S9|menu or prices#0|deck|headline,sub-line,button,date and place",
+    "P1|location and hours",
+    "C|menu or prices#0|deck|headline,sub-line,button,date and place",
+    "S5|gallery#0|list.rows|4|title,sentence,price"
+   ]
+  },
+  {
+   "round": 3,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-Q-bakery-r3",
+   "score": 22.38,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "list of items"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.983,
+     "pFit": 0.992
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.98
+    },
+    {
+     "kind": "menu or prices",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "button",
+      "date and place"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.993,
+     "pFit": 0.997
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.984
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.99,
+     "pFit": 0.996
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "date and place"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.981
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button",
+      "list of items",
+      "date and place"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.987,
+     "pFit": 0.995
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|gallery#0|list.rows|4|title,sentence,price",
+     "weight": 2,
+     "say": "\"Flaky Butter Croissant\" repeats \"Flaky Butter Croissant\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|location and hours#0|deck|eyebrow,headline,sub-line,date and place",
+     "weight": 2,
+     "say": "\"Classic Family Bakery in Lyon\" repeats \"Classic Family Bakery in Lyon\"",
+     "op": "reword"
+    },
+    {
+     "id": "S8|location and hours#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S11|menu or prices#0|deck|headline,sub-line,button,date and place",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|deck|eyebrow,headline,sub-line,date and place",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "C|hero#0|list.rows|3|title,sentence,button",
+     "weight": 2.18,
+     "say": "reviewer (p=0.544): \"Butter-rich croissants, laminated daily for that perfect, ai\" contradicts the request or invents a detail",
+     "op": "reword"
+    },
+    {
+     "id": "P1|sign-up or contact form",
+     "weight": 2.04,
+     "say": "reviewer (p=0.68): add a \"sign-up or contact form\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "P2|about#0",
+     "weight": 2.61,
+     "say": "reviewer (p=0.871): drop section 2. about",
+     "op": "dropSection"
+    },
+    {
+     "id": "Q|org",
+     "weight": 6.06,
+     "say": "reviewer: organised p=0.243",
+     "op": "reask"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.49,
+     "say": "reviewer: type and parts suit p=0.877"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 13,
+   "judgements": 23,
+   "minutes": 1.3,
+   "reverted": true,
+   "kept": false,
+   "fixesForNext": [
+    "S1list|gallery#0",
+    "P1|location and hours",
+    "C|menu or prices#0|deck|headline,sub-line,button,date and place",
+    "S5|gallery#0|list.rows|4|title,sentence,price"
+   ]
+  },
+  {
+   "round": 4,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-Q-bakery-r4",
+   "score": 11.24,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "list of items"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.983,
+     "pFit": 0.992
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.98
+    },
+    {
+     "kind": "menu or prices",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "button",
+      "date and place"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.992,
+     "pFit": 0.997
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.984
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.991,
+     "pFit": 0.995
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.982
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button",
+      "list of items",
+      "date and place"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.987,
+     "pFit": 0.995
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|gallery#0|list.rows|4|title,sentence,price",
+     "weight": 2,
+     "say": "\"Flaky Butter Croissant\" repeats \"Flaky Butter Croissant\"",
+     "op": "reword"
+    },
+    {
+     "id": "C|hero#0|list.rows|3|title,sentence,button",
+     "weight": 3.61,
+     "say": "reviewer (p=0.903): \"Butter-rich croissants, laminated daily for that perfect, ai\" contradicts the request or invents a detail",
+     "op": "reword"
+    },
+    {
+     "id": "Q|org",
+     "weight": 5.15,
+     "say": "reviewer: organised p=0.356",
+     "op": "reask"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.48,
+     "say": "reviewer: type and parts suit p=0.881"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 13,
+   "judgements": 21,
+   "minutes": 1.2,
+   "kept": true
+  }
+ ]
+}

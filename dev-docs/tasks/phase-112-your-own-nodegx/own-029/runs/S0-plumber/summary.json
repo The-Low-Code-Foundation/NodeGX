@@ -1,0 +1,173 @@
+{
+ "minutes": 3.2,
+ "accept": "constraint",
+ "bestRound": 0,
+ "bestScore": 0.432,
+ "scores": [
+  0.432
+ ],
+ "r0": {
+  "perLine": 0.432,
+  "org": 0.92,
+  "suits": 0.956,
+  "sum": 16.82
+ },
+ "kept": {
+  "perLine": 0.432,
+  "org": 0.92,
+  "suits": 0.956,
+  "sum": 16.82,
+  "lines": 37
+ },
+ "builderCalls": 54,
+ "judgements": 48,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-S0-plumber-r0",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-S0-plumber-r0",
+   "score": 0.432,
+   "sum": 16.82,
+   "defects": 16,
+   "lines": 37,
+   "perLine": 0.432,
+   "org": 0.92,
+   "suits": 0.956,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.989
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.98
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.987,
+     "pFit": 0.989
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "headline",
+      "sub-line",
+      "quote",
+      "name line",
+      "badge"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.985
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.982
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "form",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.968
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|feature cards#0|deck|headline,sub-line,button",
+     "weight": 2,
+     "say": "\"Request Call-Back\" repeats \"Request Call-Back\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|sign-up or contact form#0|deck|headline,sub-line,form button,button",
+     "weight": 2,
+     "say": "\"Request Call-Back\" repeats \"Request Call-Back\"",
+     "op": "reword"
+    },
+    {
+     "id": "S10|form|location and hours#0",
+     "weight": 4,
+     "say": "a second form (already in \"sign-up or contact form\")",
+     "op": "reask"
+    },
+    {
+     "id": "S12|testimonials#0|look.band|band,bandSurface",
+     "weight": 2,
+     "say": "four \"band\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S12|sign-up or contact form#0|look.band|band,bandSurface",
+     "weight": 2,
+     "say": "four \"band\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "R|single-ground|page",
+     "weight": 4,
+     "say": "render: single-ground"
+    },
+    {
+     "id": "Q|org",
+     "weight": 0.64,
+     "say": "reviewer: organised p=0.92"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.18,
+     "say": "reviewer: type and parts suit p=0.956"
+    }
+   ],
+   "findings": [
+    "single-ground"
+   ],
+   "modelCalls": 54,
+   "judgements": 48,
+   "minutes": 3.2,
+   "kept": true
+  }
+ ]
+}

@@ -1,0 +1,566 @@
+{
+ "minutes": 4,
+ "bestRound": 2,
+ "bestScore": 12,
+ "scores": [
+  37.98,
+  23,
+  12
+ ],
+ "builderCalls": 127,
+ "judgements": 48,
+ "replays": 177,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-dbg3-puppy-r2",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-dbg3-puppy-r0",
+   "score": 37.98,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "form"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.603
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.968,
+     "pFit": 0.986
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "photo",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.872
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.983,
+     "pFit": 0.994
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "body text",
+      "button",
+      "quote"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.962
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "body text",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.952
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.951
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1page|gallery#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 5 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|testimonials#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 5 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|how it works#0",
+     "weight": 2,
+     "say": "\"animal-cat.webp\" appears 5 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|sign-up or contact form#0",
+     "weight": 2,
+     "say": "\"animal-cat.webp\" appears 5 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|hero#0|copy|the button that sends the form|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Adopt a Puppy\" repeats \"Adopt a Puppy\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|feature cards#0|copy|the main action of the feature cards section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Adopt a Puppy\" repeats \"Adopt a Puppy\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|gallery#0|copy|the main action of the gallery section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Adopt a Puppy\" repeats \"Adopt a Puppy\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|how it works#0|copy|the main action of the how it works section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Adopt a puppy\" repeats \"Adopt a Puppy\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|testimonials#0|copy|the main action of the testimonials section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Adopt a Puppy\" repeats \"Adopt a Puppy\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|sign-up or contact form#0|copy|the small uppercase line above the headline|Text",
+     "weight": 2,
+     "say": "\"Find your perfect companion.\" repeats \"Find Your Perfect Companion\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|copy|the footer headline|Text",
+     "weight": 2,
+     "say": "\"Find Your Perfect Puppy Today\" repeats \"Join our community and find your perfect puppy today.\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|copy|a short paragraph|Text",
+     "weight": 2,
+     "say": "\"Join Puppy Haven. Find your perfect companion today.\" repeats \"Find Your Perfect Companion\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|copy|the main action of the footer section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Adopt a Puppy\" repeats \"Adopt a Puppy\"",
+     "op": "reword"
+    },
+    {
+     "id": "R|single-column-grid|page",
+     "weight": 4,
+     "say": "render: single-column-grid"
+    },
+    {
+     "id": "M|blue colour theme",
+     "weight": 4,
+     "say": "reviewer (p=0): the page does not say \"blue colour theme\"",
+     "op": "reword"
+    },
+    {
+     "id": "M|modern style",
+     "weight": 3.98,
+     "say": "reviewer (p=0.006): the page does not say \"modern style\"",
+     "op": "reword"
+    }
+   ],
+   "findings": [
+    "single-column-grid"
+   ],
+   "modelCalls": 96,
+   "judgements": 16,
+   "minutes": 2.4,
+   "kept": true,
+   "fixesForNext": [
+    "M|blue colour theme",
+    "M|modern style",
+    "S1page|gallery#0",
+    "S1page|testimonials#0",
+    "S1page|how it works#0",
+    "S1page|sign-up or contact form#0",
+    "S5|hero#0|copy|the button that sends the form|net.noodl.controls.button",
+    "S5|feature cards#0|copy|the main action of the feature cards section|net.noodl.controls.button",
+    "S5|gallery#0|copy|the main action of the gallery section|net.noodl.controls.button",
+    "S5|how it works#0|copy|the main action of the how it works section|net.noodl.controls.button"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-dbg3-puppy-r1",
+   "score": 23,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "form"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.861
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.967,
+     "pFit": 0.987
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.959,
+     "pFit": 0.998
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "list of items"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.979,
+     "pFit": 0.992
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "quote"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.929
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.934
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.951
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|gallery#0",
+     "weight": 3,
+     "say": "the list in \"gallery\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S6|hero#0|copy|the button that sends the form|net.noodl.controls.button",
+     "weight": 2,
+     "say": "button \"Meet Your New Best Friend\" is too long for a button",
+     "op": "reword"
+    },
+    {
+     "id": "S5|how it works#0|copy|the main action of the how it works section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Start Your Journey\" repeats \"Start Your Journey\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|how it works#0|list.rows|3|title",
+     "weight": 2,
+     "say": "\"Meet your new best friend\" repeats \"Meet Your New Best Friend\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|testimonials#0|copy|the main action of the testimonials section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Adopt a Puppy\" repeats \"Adopt a Puppy\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|sign-up or contact form#0|copy|the small uppercase line above the headline|Text",
+     "weight": 2,
+     "say": "\"Find your perfect companion.\" repeats \"Find Your Perfect Companion\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|copy|the footer headline|Text",
+     "weight": 2,
+     "say": "\"Find Your Perfect Puppy Today\" repeats \"Join our community and find your perfect puppy today.\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|copy|a short paragraph|Text",
+     "weight": 2,
+     "say": "\"Join Puppy Haven. Find your perfect companion today.\" repeats \"Find Your Perfect Companion\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|copy|the main action of the footer section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Adopt a Puppy\" repeats \"Adopt a Puppy\"",
+     "op": "reword"
+    },
+    {
+     "id": "M|blue colour theme",
+     "weight": 4,
+     "say": "reviewer (p=0.001): the page does not say \"blue colour theme\"",
+     "op": "reword"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 19,
+   "judgements": 16,
+   "minutes": 1,
+   "kept": true,
+   "fixesForNext": [
+    "S1list|gallery#0",
+    "S6|hero#0|copy|the button that sends the form|net.noodl.controls.button",
+    "S5|how it works#0|list.rows|3|title",
+    "S5|testimonials#0|copy|the main action of the testimonials section|net.noodl.controls.button",
+    "S5|sign-up or contact form#0|copy|the small uppercase line above the headline|Text",
+    "S5|footer#0|copy|the footer headline|Text",
+    "S5|footer#0|copy|a short paragraph|Text",
+    "S5|footer#0|copy|the main action of the footer section|net.noodl.controls.button"
+   ]
+  },
+  {
+   "round": 2,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-dbg3-puppy-r2",
+   "score": 12,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "form"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.774
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.967,
+     "pFit": 0.987
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.955,
+     "pFit": 0.998
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "list of items"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.982,
+     "pFit": 0.992
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "quote"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.919
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.936
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.964
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|how it works#0|copy|the main action of the how it works section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Start Your Journey\" repeats \"Start Your Journey\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|sign-up or contact form#0|copy|the small uppercase line above the headline|Text",
+     "weight": 2,
+     "say": "\"Find your forever friend.\" repeats \"Find Your Forever Friend\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|copy|the footer headline|Text",
+     "weight": 2,
+     "say": "\"Find Your Forever Friend\" repeats \"Find Your Forever Friend\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|copy|the main action of the footer section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Start Your Journey\" repeats \"Start Your Journey\"",
+     "op": "reword"
+    },
+    {
+     "id": "M|blue colour theme",
+     "weight": 4,
+     "say": "reviewer (p=0.001): the page does not say \"blue colour theme\"",
+     "op": "reword"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 12,
+   "judgements": 16,
+   "minutes": 0.7,
+   "kept": true
+  }
+ ]
+}

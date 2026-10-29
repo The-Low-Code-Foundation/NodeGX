@@ -1,0 +1,167 @@
+{
+ "minutes": 2.5,
+ "bestRound": 0,
+ "bestScore": 28.21,
+ "scores": [
+  28.21
+ ],
+ "builderCalls": 53,
+ "judgements": 47,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R4-plumber-r0",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R4-plumber-r0",
+   "score": 28.21,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "sub-line"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.988
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "quote",
+      "name line",
+      "date and place",
+      "sub-line",
+      "list of items",
+      "second button",
+      "badge"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.972
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "price"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.977
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "list of items",
+      "badge",
+      "date and place",
+      "name line"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.95
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "body text",
+      "eyebrow",
+      "price",
+      "button",
+      "badge",
+      "second button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.931
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "small print",
+      "sub-line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.903
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "body text",
+      "small print",
+      "button",
+      "headline"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.24
+    }
+   ],
+   "issues": [
+    {
+     "id": "S7|feature cards#0",
+     "weight": 2,
+     "say": "\"feature cards\" is only a price",
+     "op": "reask"
+    },
+    {
+     "id": "S5|footer#0|deck|paragraph,small print,button,headline",
+     "weight": 2,
+     "say": "\"Serving the community with integrity and skill.\" repeats \"Serving the community with integrity.\"",
+     "op": "reword"
+    },
+    {
+     "id": "R|no-imagery|page",
+     "weight": 4,
+     "say": "render: no-imagery"
+    },
+    {
+     "id": "R|single-ground|page",
+     "weight": 4,
+     "say": "render: single-ground"
+    },
+    {
+     "id": "R|alignment-drift|testimonials#0",
+     "weight": 4,
+     "say": "render: alignment-drift at \"Reliable Service, Great Fix\"",
+     "op": "flip"
+    },
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    },
+    {
+     "id": "J1|footer#0|deck|paragraph,small print,button,headline",
+     "weight": 2.28,
+     "say": "reviewer (p=0.24): weakest line paragraph \"Reliable plumbing services for all your home needs\"",
+     "op": "reword"
+    },
+    {
+     "id": "Q|org",
+     "weight": 5.58,
+     "say": "reviewer: organised p=0.302",
+     "op": "reask"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.35,
+     "say": "reviewer: type and parts suit p=0.913"
+    }
+   ],
+   "findings": [
+    "no-imagery",
+    "single-ground",
+    "alignment-drift",
+    "minimum-layout-width",
+    "no-imagery",
+    "single-ground"
+   ],
+   "modelCalls": 53,
+   "judgements": 47,
+   "minutes": 2.5,
+   "kept": true
+  }
+ ]
+}

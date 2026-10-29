@@ -1,0 +1,153 @@
+{
+ "minutes": 2.3,
+ "bestRound": 0,
+ "bestScore": 15.57,
+ "scores": [
+  15.57
+ ],
+ "builderCalls": 50,
+ "judgements": 50,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R4-bakery-r0",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R4-bakery-r0",
+   "score": 15.57,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "form",
+      "list of items"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.377
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "badge",
+      "price",
+      "quote",
+      "name line"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.987
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "name line",
+      "eyebrow",
+      "price",
+      "button",
+      "small print"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.982
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "small print",
+      "body text",
+      "eyebrow",
+      "date and place",
+      "button",
+      "badge"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.86
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "photo",
+      "second button",
+      "headline",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.946
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "price",
+      "body text",
+      "sub-line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.988
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "second button"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.99
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|gallery#0|deck|small print,paragraph,eyebrow,date and place,button,badge",
+     "weight": 2,
+     "say": "\"View Our Treats\" repeats \"View Our Treats\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|deck|headline,second button",
+     "weight": 2,
+     "say": "\"Lyon's Finest Family Bakery\" repeats \"Experience the tradition of Lyon's finest family bakery, crafting perfect sourdough, buttery croissants, and exquisite cakes for your table.\"",
+     "op": "reword"
+    },
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    },
+    {
+     "id": "J1|hero#0|copy|the button that sends the form|net.noodl.controls.button",
+     "weight": 1.87,
+     "say": "reviewer (p=0.377): weakest line button \"Order Now\"",
+     "op": "reword"
+    },
+    {
+     "id": "P1|location and hours",
+     "weight": 2.38,
+     "say": "reviewer (p=0.793): add a \"location and hours\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "Q|org",
+     "weight": 2.71,
+     "say": "reviewer: organised p=0.661"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.61,
+     "say": "reviewer: type and parts suit p=0.848"
+    }
+   ],
+   "findings": [
+    "minimum-layout-width"
+   ],
+   "modelCalls": 50,
+   "judgements": 50,
+   "minutes": 2.3,
+   "kept": true
+  }
+ ]
+}

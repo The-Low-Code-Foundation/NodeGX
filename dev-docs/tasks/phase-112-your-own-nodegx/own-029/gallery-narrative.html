@@ -1,0 +1,51 @@
+<header class="stack">
+  <p class="eyebrow">OWN-029 · small local models · <a href="https://nodegx.io" target="_blank" rel="noopener" style="color:var(--signal)">nodegx.io ↗</a></p>
+  <h1>A 2B model that checks its own work</h1>
+  <p class="lede">Gemma 4 E2B (2.3B effective parameters, on a laptop) builds a NodeGX page by answering small typed questions. Then the agent looks at what it built, says what is wrong, repairs only that, and keeps the repair only if the page got better. It ran on six briefs it had never seen, not only the puppy page it was tuned on.</p>
+  <p class="small">Session 1 ran on 28 October 2026. <a href="#s2" style="color:var(--signal)">Session 2</a> (29 October) changed what counts as "better" and tested the change on 24 paired runs.</p>
+</header>
+
+<section id="loop">
+  <h2>The loop</h2>
+  <div class="loop">
+    <div><b>Build</b><span>Every answer goes through one door. A cached answer replays for free, so a repair round re-asks only what was flagged.</span></div>
+    <div><b>Render</b><span>render_report screenshots the page and lists what it measures (contrast, overflow, overlaps).</span></div>
+    <div><b>Describe</b><span>The script writes each section out in words, top to bottom, the way a reader meets it.</span></div>
+    <div><b>Critique</b><span>Script rules over the graph, render findings mapped to their node, and a reviewer model answering yes/no in one token.</span></div>
+    <div><b>Repair</b><span>Re-word one line with the reason, re-ask a section's parts, flip a decision to the model's own second choice, add or drop a section.</span></div>
+    <div><b>Accept</b><span>Session 1: the round's score had to beat the best so far. Session 2: fewer defects per line, and organisation may not fall by more than 0.1. If not, the agent restores the best round's answers and marks the fix as tried.</span></div>
+  </div>
+</section>
+
+<section id="probes">
+  <h2>What a small model can judge</h2>
+  <p>Before building the loop, each kind of judgement was measured against pairs where the right answer is known. P(yes) comes from the reviewer's token probabilities, with no sampling.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Question</th><th>Bad case</th><th>Good case</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td>Two page screenshots: which is better? (E2B and E4B)</td><td colspan="2">picks the second picture every time, in both orders</td><td>unusable</td></tr>
+      <tr><td>Score a section crop 1–5 (E2B)</td><td class="num">2.92 (man's face hero)</td><td class="num">2.01 (dog hero)</td><td>noise</td></tr>
+      <tr><td>Section in words: does the headline cover the whole section? (E4B)</td><td class="num">0.31</td><td class="num">1.00</td><td>sharp</td></tr>
+      <tr><td>Section in words: does every line read like a real business wrote it? (E4B)</td><td class="num">0.09 (cut-off button)</td><td class="num">0.96</td><td>sharp</td></tr>
+      <tr><td>Same, testimonial about pizza on a puppy page (E4B)</td><td class="num">0.01</td><td class="num">0.99</td><td>sharp</td></tr>
+      <tr><td>One photo: does it fit this page? (E4B, puppy page)</td><td class="num">0.01 (cat)</td><td class="num">0.98 (dog)</td><td>sharp</td></tr>
+      <tr><td>Same question (E2B)</td><td class="num">0.79 (cat)</td><td class="num">0.99 (dog)</td><td>says yes to everything</td></tr>
+    </tbody>
+  </table></div>
+  <p>So the reviewer reads <b>words</b>, and looks at <b>one photo at a time</b>, never a whole page. The 2B model builds; a 4B model reviews, answering one token per question.</p>
+</section>
+
+<section id="findings">
+  <h2>What we found</h2>
+  <ol class="findings">
+    <li><b>Every first build improved under review.</b> <span>Defects per line of copy fell from 0.60 to 0.17 across six briefs. When a repair round made the page worse, the agent saw it and reverted.</span></li>
+    <li><b>Group the words by what has to agree; split everything else.</b> <span>On identical page structures, one copy call per section beat one call per line: 26% fewer word issues, the reviewer's "sounds real" up from 0.82 to 0.89, and 72% fewer copy calls. "As small as possible" is the right target for decisions, not for words.</span></li>
+    <li><b>The model's decisions are worth a lot, and a defect count cannot see it.</b> <span>With every structural choice made at random, pages had fewer parts and so fewer defects, and won on the raw score six times out of six. A reviewer reading the page outline prefers the model's pages (well organised 0.66 against 0.50). So quality has to be judged on its own, and kept as a condition for accepting a round.</span></li>
+    <li><b>The harness can learn its own rules.</b> <span>From its ledgers it found ten questions the model always answers the same way with p ≥ 0.9 (the hero headline is the display headline, every main button is the filled one), and stopped asking them. More useful is the list of questions it never settles: alignment, the band behind a section, where the photo goes. Those are where design rules belong.</span></li>
+    <li><b>The model's confidence is free, and it says which questions to stop asking.</b> <span>Ollama returns token probabilities even under a JSON schema. A button's look comes back at p ≈ 0.99 every time, while "photo beside, above or below?" averages 0.48. The first is a rule the harness can learn; the second is where to explore.</span></li>
+    <li><b>Upstream words poison downstream words.</b> <span>A section's one-line purpose ("introduce the Puppy Haven concept") turned into labels like "Puppy Haven Landing Page Concept: Blue, Modern Style". Without it, 8 of 8 labels were clean. Small calls need the smallest context, not just a short one.</span></li>
+    <li><b>A schema length cap cuts the model off mid-word.</b> <span>OWN-027's truncated button ("Step 1: Apply Online. Fill a") was the harness, not the model. The limit belongs in the prompt's words; the critic catches what runs long.</span></li>
+    <li><b>Repair fixes slips, not bad questions.</b> <span>When a prompt itself induced a defect, re-asking with a hint returned the same defect. That is worth knowing: the loop finds what to fix in the harness, too.</span></li>
+    <li><b>The score is only as good as the critics' reach.</b> <span>A page that scored 4 still had two contact forms and "Find your perfect…" ten times. Each blind spot became a cheap script critic.</span></li>
+  </ol>
+</section>

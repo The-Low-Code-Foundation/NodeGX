@@ -1,0 +1,959 @@
+{
+ "minutes": 6.9,
+ "accept": "sum",
+ "bestRound": 3,
+ "bestScore": 18.45,
+ "scores": [
+  36.66,
+  29.77,
+  18.87,
+  18.45,
+  19.8
+ ],
+ "r0": {
+  "perLine": 0.576,
+  "org": 0.079,
+  "suits": 0.882,
+  "sum": 36.66
+ },
+ "kept": {
+  "perLine": 0.208,
+  "org": 0.109,
+  "suits": 0.823,
+  "sum": 18.45,
+  "lines": 51
+ },
+ "builderCalls": 53,
+ "judgements": 97,
+ "replays": 260,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-W1-jazz-r3",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-W1-jazz-r0",
+   "score": 36.66,
+   "sum": 36.66,
+   "defects": 28.82,
+   "lines": 50,
+   "perLine": 0.576,
+   "org": 0.079,
+   "suits": 0.882,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "date and place",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.983
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "price"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.98,
+     "pFit": 0.994
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.963
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.988,
+     "pFit": 0.871
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place",
+      "body text",
+      "price"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.805
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button",
+      "price"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.917
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "date and place",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.967
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|about#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role,small print",
+     "weight": 2,
+     "say": "\"An Elegant Jazz Evening Awaits\" repeats \"An Elegant Jazz Evening Awaits\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|how it works#0|deck|eyebrow,headline,sub-line,paragraph,button",
+     "weight": 2,
+     "say": "\"The Blue Room: A Jazz Evening\" repeats \"The Blue Room: A Jazz Evening\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|location and hours#0|deck|headline,sub-line,date and place,paragraph,price",
+     "weight": 2,
+     "say": "\"An exquisite night of jazz awaits you on November 14th. Prepare for an enchanting musical journey.\" repeats \"An exquisite night of jazz awaits you on November 14th.\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|call to action#0|deck|headline,sub-line,button,price",
+     "weight": 2,
+     "say": "\"Jazz Evening at The Blue Room\" repeats \"Event: Jazz Evening at The Blue Room | Date: November 14th\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|deck|headline,paragraph,button,date and place,small print",
+     "weight": 2,
+     "say": "\"Purchase Tickets Now\" repeats \"Purchase Tickets Now\"",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role,small print",
+     "weight": 1.5,
+     "say": "\"at the blue\" is said 7 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|how it works#0|deck|eyebrow,headline,sub-line,paragraph,button",
+     "weight": 1.5,
+     "say": "\"at the blue\" is said 7 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|deck|headline,sub-line,date and place,paragraph,price",
+     "weight": 1.5,
+     "say": "\"at the blue\" is said 7 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|headline,sub-line,button,price",
+     "weight": 1.5,
+     "say": "\"at the blue\" is said 7 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|footer#0|deck|headline,paragraph,button,date and place,small print",
+     "weight": 1.5,
+     "say": "\"at the blue\" is said 7 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S12|how it works#0|look.band|band,bandSurface",
+     "weight": 2,
+     "say": "four \"band\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "R|single-column-grid|page",
+     "weight": 4,
+     "say": "render: single-column-grid"
+    },
+    {
+     "id": "P1|menu or prices",
+     "weight": 2.59,
+     "say": "reviewer (p=0.863): add a \"menu or prices\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "P2|about#0",
+     "weight": 2.73,
+     "say": "reviewer (p=0.91): drop section 3. about",
+     "op": "dropSection"
+    },
+    {
+     "id": "Q|org",
+     "weight": 7.37,
+     "say": "reviewer: organised p=0.079",
+     "op": "reask"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.47,
+     "say": "reviewer: type and parts suit p=0.882"
+    }
+   ],
+   "findings": [
+    "single-column-grid"
+   ],
+   "modelCalls": 9,
+   "judgements": 20,
+   "minutes": 1.5,
+   "kept": true,
+   "fixesForNext": [
+    "Q|org",
+    "S5|about#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role,small print",
+    "S5|how it works#0|deck|eyebrow,headline,sub-line,paragraph,button",
+    "S5|location and hours#0|deck|headline,sub-line,date and place,paragraph,price",
+    "S5|call to action#0|deck|headline,sub-line,button,price",
+    "S5|footer#0|deck|headline,paragraph,button,date and place,small print",
+    "S12|how it works#0|look.band|band,bandSurface",
+    "S11|about#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role,small print",
+    "S11|how it works#0|deck|eyebrow,headline,sub-line,paragraph,button",
+    "S11|location and hours#0|deck|headline,sub-line,date and place,paragraph,price"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-W1-jazz-r1",
+   "score": 29.77,
+   "sum": 29.77,
+   "defects": 22.26,
+   "lines": 56,
+   "perLine": 0.398,
+   "org": 0.141,
+   "suits": 0.84,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "date and place",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.983
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "price"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.98,
+     "pFit": 0.994
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place",
+      "body text",
+      "price"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.927
+    },
+    {
+     "kind": "menu or prices",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "price",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.985,
+     "pFit": 0.997
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.986,
+     "pFit": 0.947
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button",
+      "price"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.96
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "date and place",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.981
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|menu or prices#0|deck|headline,sub-line,price,button",
+     "weight": 2,
+     "say": "\"Tickets available now.\" repeats \"Tickets available now.\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|deck|headline,paragraph,button,date and place,small print",
+     "weight": 2,
+     "say": "\"Jazz Evening: November 14th at The Blue Room.\" repeats \"Jazz Evening: November 14th at The Blue Room\"",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|deck|headline,sub-line,date and place,paragraph,price",
+     "weight": 1.5,
+     "say": "\"at the blue\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|menu or prices#0|deck|headline,sub-line,price,button",
+     "weight": 1.5,
+     "say": "\"at the blue\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|how it works#0|deck|eyebrow,headline,sub-line,paragraph,button",
+     "weight": 1.5,
+     "say": "\"at the blue\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|headline,sub-line,button,price",
+     "weight": 1.5,
+     "say": "\"at the blue\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|footer#0|deck|headline,paragraph,button,date and place,small print",
+     "weight": 1.5,
+     "say": "\"at the blue\" is said 8 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|menu or prices#0|list.rows|3|title,sentence,price",
+     "weight": 1.5,
+     "say": "\"an evening of\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "R|single-column-grid|page",
+     "weight": 4,
+     "say": "render: single-column-grid"
+    },
+    {
+     "id": "P1|sign-up or contact form",
+     "weight": 2.6,
+     "say": "reviewer (p=0.867): add a \"sign-up or contact form\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "P2|how it works#0",
+     "weight": 2.66,
+     "say": "reviewer (p=0.887): drop section 5. how it works",
+     "op": "dropSection"
+    },
+    {
+     "id": "Q|org",
+     "weight": 6.87,
+     "say": "reviewer: organised p=0.141",
+     "op": "reask"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.64,
+     "say": "reviewer: type and parts suit p=0.84"
+    }
+   ],
+   "findings": [
+    "single-column-grid"
+   ],
+   "modelCalls": 20,
+   "judgements": 21,
+   "minutes": 1.7,
+   "kept": true,
+   "fixesForNext": [
+    "Q|org",
+    "S5|menu or prices#0|deck|headline,sub-line,price,button",
+    "S5|footer#0|deck|headline,paragraph,button,date and place,small print",
+    "S11|location and hours#0|deck|headline,sub-line,date and place,paragraph,price",
+    "S11|menu or prices#0|deck|headline,sub-line,price,button",
+    "S11|how it works#0|deck|eyebrow,headline,sub-line,paragraph,button",
+    "S11|call to action#0|deck|headline,sub-line,button,price",
+    "S11|footer#0|deck|headline,paragraph,button,date and place,small print",
+    "S11|menu or prices#0|list.rows|3|title,sentence,price"
+   ]
+  },
+  {
+   "round": 2,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-W1-jazz-r2",
+   "score": 18.87,
+   "sum": 18.87,
+   "defects": 12.23,
+   "lines": 47,
+   "perLine": 0.26,
+   "org": 0.221,
+   "suits": 0.898,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "date and place",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.983
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "price"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.98,
+     "pFit": 0.994
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.958
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place",
+      "body text",
+      "price"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.94
+    },
+    {
+     "kind": "menu or prices",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "price",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.976,
+     "pFit": 0.987
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button",
+      "price"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.979
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|call to action#0|deck|headline,sub-line,button,price",
+     "weight": 2,
+     "say": "\"Jazz Evening at The Blue Room\" repeats \"An Elegant Jazz Evening at The Blue Room\"",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role,small print",
+     "weight": 1.5,
+     "say": "\"at the blue\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|deck|headline,sub-line,date and place,paragraph,price",
+     "weight": 1.5,
+     "say": "\"at the blue\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|menu or prices#0|list.rows|3|title,sentence,price",
+     "weight": 1.5,
+     "say": "\"at the blue\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|headline,sub-line,button,price",
+     "weight": 1.5,
+     "say": "\"at the blue\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S12|location and hours#0|look.band|band,bandSurface",
+     "weight": 2,
+     "say": "four \"band\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "P1|sign-up or contact form",
+     "weight": 2.23,
+     "say": "reviewer (p=0.742): add a \"sign-up or contact form\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "Q|org",
+     "weight": 6.23,
+     "say": "reviewer: organised p=0.221",
+     "op": "reask"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.41,
+     "say": "reviewer: type and parts suit p=0.898"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 6,
+   "judgements": 18,
+   "minutes": 1.3,
+   "kept": true,
+   "fixesForNext": [
+    "P1|sign-up or contact form",
+    "S5|call to action#0|deck|headline,sub-line,button,price",
+    "S12|location and hours#0|look.band|band,bandSurface",
+    "S11|about#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role,small print",
+    "S11|menu or prices#0|list.rows|3|title,sentence,price",
+    "S11|call to action#0|deck|headline,sub-line,button,price"
+   ]
+  },
+  {
+   "round": 3,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-W1-jazz-r3",
+   "score": 18.45,
+   "sum": 18.45,
+   "defects": 10.61,
+   "lines": 51,
+   "perLine": 0.208,
+   "org": 0.109,
+   "suits": 0.823,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "date and place",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.983
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "price"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.98,
+     "pFit": 0.994
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.947
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place",
+      "body text",
+      "price"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.94
+    },
+    {
+     "kind": "menu or prices",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "price",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.966,
+     "pFit": 0.986
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.971
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button",
+      "price"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.975
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|location and hours#0|deck|headline,sub-line,date and place,paragraph,price",
+     "weight": 2,
+     "say": "\"An Evening of Refined Jazz\" repeats \"An Evening of Refined Jazz\"",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|deck|headline,sub-line,date and place,paragraph,price",
+     "weight": 1.5,
+     "say": "\"at the blue\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|headline,sub-line,button,price",
+     "weight": 1.5,
+     "say": "\"at the blue\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role,small print",
+     "weight": 1.5,
+     "say": "\"join us for\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|deck|headline,sub-line,form button,button",
+     "weight": 1.5,
+     "say": "\"join us for\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "P1|faq",
+     "weight": 2.61,
+     "say": "reviewer (p=0.871): add a \"faq\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "Q|org",
+     "weight": 7.13,
+     "say": "reviewer: organised p=0.109",
+     "op": "reask"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.71,
+     "say": "reviewer: type and parts suit p=0.823"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 11,
+   "judgements": 19,
+   "minutes": 1.2,
+   "kept": true,
+   "fixesForNext": [
+    "P1|faq",
+    "S5|location and hours#0|deck|headline,sub-line,date and place,paragraph,price",
+    "S11|sign-up or contact form#0|deck|headline,sub-line,form button,button"
+   ]
+  },
+  {
+   "round": 4,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-W1-jazz-r4",
+   "score": 19.8,
+   "sum": 19.8,
+   "defects": 12.52,
+   "lines": 53,
+   "perLine": 0.236,
+   "org": 0.151,
+   "suits": 0.879,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "date and place",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.983
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "price"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.98,
+     "pFit": 0.994
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.947
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place",
+      "body text",
+      "price"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.739
+    },
+    {
+     "kind": "menu or prices",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "price",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.966,
+     "pFit": 0.986
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.948
+    },
+    {
+     "kind": "faq",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "date and place",
+      "price",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.834
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|location and hours#0|deck|headline,sub-line,date and place,paragraph,price",
+     "weight": 2,
+     "say": "\"An exquisite night of jazz awaits you on November 14th. Discover the finest musical experience.\" repeats \"An exquisite night of jazz awaits you on November 14th.\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|faq#0|deck|headline,sub-line,paragraph,date and place,price,small print",
+     "weight": 2,
+     "say": "\"The Blue Room: A Jazz Evening\" repeats \"The Blue Room: A Jazz Evening\"",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|deck|headline,sub-line,form button,button",
+     "weight": 1.5,
+     "say": "\"at the blue\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|faq#0|deck|headline,sub-line,paragraph,date and place,price,small print",
+     "weight": 1.5,
+     "say": "\"at the blue\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role,small print",
+     "weight": 1.5,
+     "say": "\"join us for\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|deck|headline,sub-line,date and place,paragraph,price",
+     "weight": 1.5,
+     "say": "\"join us for\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "P1|call to action",
+     "weight": 2.52,
+     "say": "reviewer (p=0.841): add a \"call to action\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "Q|org",
+     "weight": 6.79,
+     "say": "reviewer: organised p=0.151",
+     "op": "reask"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.48,
+     "say": "reviewer: type and parts suit p=0.879"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 8,
+   "judgements": 19,
+   "minutes": 1,
+   "reverted": true,
+   "kept": false
+  }
+ ]
+}

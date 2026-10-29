@@ -1,0 +1,124 @@
+{
+ "learnedAt": "2026-10-28T20:38:42.510Z",
+ "MIN_RUNS": 3,
+ "MIN_P": 0.9,
+ "MIN_BRIEFS": 2,
+ "rules": {
+  "hero|look.the hero headline|displayHeadline,sectionHeading": {
+   "answer": "displayHeadline",
+   "times": 14,
+   "runs": 14,
+   "briefs": [
+    "bakery",
+    "jazz",
+    "pottery",
+    "puppy",
+    "running",
+    "plumber"
+   ],
+   "minP": 1
+  },
+  "hero|look.the main action of the hero section|primaryButton,outlineButton": {
+   "answer": "primaryButton",
+   "times": 15,
+   "runs": 15,
+   "briefs": [
+    "bakery",
+    "jazz",
+    "plumber",
+    "pottery",
+    "puppy",
+    "running"
+   ],
+   "minP": 0.916
+  },
+  "feature cards|look.itemButton|primaryButton,outlineButton": {
+   "answer": "primaryButton",
+   "times": 8,
+   "runs": 8,
+   "briefs": [
+    "bakery",
+    "plumber",
+    "puppy"
+   ],
+   "minP": 0.994
+  },
+  "menu or prices|look.the main action of the menu or prices section|primaryButton,outlineButton": {
+   "answer": "primaryButton",
+   "times": 3,
+   "runs": 3,
+   "briefs": [
+    "bakery",
+    "jazz"
+   ],
+   "minP": 0.955
+  },
+  "sign-up or contact form|look.the main action of the sign-up or contact form section|primaryButton,outlineButton": {
+   "answer": "primaryButton",
+   "times": 11,
+   "runs": 9,
+   "briefs": [
+    "bakery",
+    "jazz",
+    "running",
+    "plumber",
+    "pottery",
+    "puppy"
+   ],
+   "minP": 0.937
+  },
+  "gallery|items.layout": {
+   "answer": "grid",
+   "times": 9,
+   "runs": 9,
+   "briefs": [
+    "bakery",
+    "pottery",
+    "puppy"
+   ],
+   "minP": 0.922
+  },
+  "gallery|look.item|card,statTile,testimonialCard,featureItem": {
+   "answer": "card",
+   "times": 9,
+   "runs": 9,
+   "briefs": [
+    "bakery",
+    "pottery",
+    "puppy"
+   ],
+   "minP": 0.935
+  },
+  "about|look.band|band,bandSurface": {
+   "answer": "band",
+   "times": 4,
+   "runs": 4,
+   "briefs": [
+    "jazz",
+    "plumber",
+    "puppy"
+   ],
+   "minP": 0.978
+  },
+  "how it works|look.the main action of the how it works section|primaryButton,outlineButton": {
+   "answer": "primaryButton",
+   "times": 5,
+   "runs": 5,
+   "briefs": [
+    "jazz",
+    "puppy"
+   ],
+   "minP": 0.96
+  },
+  "location and hours|look.band|band,bandSurface": {
+   "answer": "band",
+   "times": 3,
+   "runs": 3,
+   "briefs": [
+    "jazz",
+    "plumber"
+   ],
+   "minP": 0.99
+  }
+ }
+}

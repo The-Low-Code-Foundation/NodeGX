@@ -1,0 +1,610 @@
+{
+ "minutes": 4.3,
+ "accept": "constraint",
+ "bestRound": 3,
+ "bestScore": 0,
+ "scores": [
+  0.281,
+  0.052,
+  0.034,
+  0
+ ],
+ "r0": {
+  "perLine": 0.281,
+  "org": 0.961,
+  "suits": 0.978,
+  "sum": 16.4
+ },
+ "kept": {
+  "perLine": 0,
+  "org": 0.97,
+  "suits": 0.975,
+  "sum": 0.34,
+  "lines": 58
+ },
+ "builderCalls": 19,
+ "judgements": 64,
+ "replays": 222,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-K2-pottery-r3",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-K2-pottery-r0",
+   "score": 0.281,
+   "sum": 16.4,
+   "defects": 16,
+   "lines": 57,
+   "perLine": 0.281,
+   "org": 0.961,
+   "suits": 0.978,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.958
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.992,
+     "pFit": 0.996
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.984,
+     "pFit": 0.996
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place",
+      "price",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.976
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.955
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.972
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.985
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|gallery#0",
+     "weight": 3,
+     "say": "the list in \"gallery\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|about#0",
+     "weight": 2,
+     "say": "\"work-hands-clay.webp\" appears 3 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S2|gallery#0|list.rows|6|title,sentence,button",
+     "weight": 2,
+     "say": "\"Rich, deep indigo bowl, showcasing the complexity of the clay's natural color.\" talks about the page's styling (\"color\")",
+     "op": "reword"
+    },
+    {
+     "id": "S5|schedule or line-up#0|deck|headline,sub-line,date and place,price,button",
+     "weight": 2,
+     "say": "\"View Portfolio & Book\" repeats \"View Portfolio & Book\"",
+     "op": "reword"
+    },
+    {
+     "id": "S6|sign-up or contact form#0|deck|eyebrow,headline,sub-line,form button,button",
+     "weight": 2,
+     "say": "button \"View Portfolio & Book Class\" is too long for a button",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|deck|headline,paragraph,button,small print",
+     "weight": 2,
+     "say": "\"View Portfolio & Book\" repeats \"View Portfolio & Book\"",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|deck|eyebrow,headline,sub-line,form button,button",
+     "weight": 1.5,
+     "say": "\"view portfolio book\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|footer#0|deck|headline,paragraph,button,small print",
+     "weight": 1.5,
+     "say": "\"view portfolio book\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "Q|org",
+     "weight": 0.31,
+     "say": "reviewer: organised p=0.961"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.09,
+     "say": "reviewer: type and parts suit p=0.978"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 9,
+   "judgements": 16,
+   "minutes": 1.4,
+   "kept": true,
+   "fixesForNext": [
+    "S1list|gallery#0",
+    "S1page|about#0",
+    "S2|gallery#0|list.rows|6|title,sentence,button",
+    "S5|schedule or line-up#0|deck|headline,sub-line,date and place,price,button",
+    "S6|sign-up or contact form#0|deck|eyebrow,headline,sub-line,form button,button",
+    "S5|footer#0|deck|headline,paragraph,button,small print",
+    "S11|sign-up or contact form#0|deck|eyebrow,headline,sub-line,form button,button",
+    "S11|footer#0|deck|headline,paragraph,button,small print"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-K2-pottery-r1",
+   "score": 0.052,
+   "sum": 3.44,
+   "defects": 3,
+   "lines": 58,
+   "perLine": 0.052,
+   "org": 0.958,
+   "suits": 0.975,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.958
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.992,
+     "pFit": 0.996
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.984,
+     "pFit": 0.996
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place",
+      "price",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.976
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.973
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.978
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.974
+    }
+   ],
+   "issues": [
+    {
+     "id": "S11|about#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role,small print",
+     "weight": 1.5,
+     "say": "\"handcrafted bowls and\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|deck|eyebrow,headline,sub-line,form button,button",
+     "weight": 1.5,
+     "say": "\"handcrafted bowls and\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "Q|org",
+     "weight": 0.34,
+     "say": "reviewer: organised p=0.958"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.1,
+     "say": "reviewer: type and parts suit p=0.975"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 7,
+   "judgements": 16,
+   "minutes": 1.3,
+   "kept": true,
+   "fixesForNext": [
+    "S11|about#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role,small print",
+    "S11|sign-up or contact form#0|deck|eyebrow,headline,sub-line,form button,button"
+   ]
+  },
+  {
+   "round": 2,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-K2-pottery-r2",
+   "score": 0.034,
+   "sum": 2.31,
+   "defects": 2,
+   "lines": 58,
+   "perLine": 0.034,
+   "org": 0.973,
+   "suits": 0.976,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.958
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.992,
+     "pFit": 0.996
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.984,
+     "pFit": 0.996
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place",
+      "price",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.976
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.974
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.964
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.974
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|sign-up or contact form#0|deck|eyebrow,headline,sub-line,form button,button",
+     "weight": 2,
+     "say": "\"View Portfolio\" repeats \"View Portfolio\"",
+     "op": "reword"
+    },
+    {
+     "id": "Q|org",
+     "weight": 0.22,
+     "say": "reviewer: organised p=0.973"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.1,
+     "say": "reviewer: type and parts suit p=0.976"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 2,
+   "judgements": 16,
+   "minutes": 0.9,
+   "kept": true,
+   "fixesForNext": [
+    "S5|sign-up or contact form#0|deck|eyebrow,headline,sub-line,form button,button"
+   ]
+  },
+  {
+   "round": 3,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-K2-pottery-r3",
+   "score": 0,
+   "sum": 0.34,
+   "defects": 0,
+   "lines": 58,
+   "perLine": 0,
+   "org": 0.97,
+   "suits": 0.975,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.958
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.992,
+     "pFit": 0.996
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.984,
+     "pFit": 0.996
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place",
+      "price",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.976
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.974
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.981
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.974
+    }
+   ],
+   "issues": [
+    {
+     "id": "Q|org",
+     "weight": 0.24,
+     "say": "reviewer: organised p=0.97"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.1,
+     "say": "reviewer: type and parts suit p=0.975"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 1,
+   "judgements": 16,
+   "minutes": 0.7,
+   "kept": true
+  }
+ ]
+}

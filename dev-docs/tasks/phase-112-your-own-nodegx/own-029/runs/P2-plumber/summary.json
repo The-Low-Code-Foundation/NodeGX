@@ -1,0 +1,192 @@
+{
+ "minutes": 1.2,
+ "bestRound": 0,
+ "bestScore": 23.7,
+ "scores": [
+  23.7
+ ],
+ "builderCalls": 8,
+ "judgements": 14,
+ "replays": 48,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-P2-plumber-r0",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-P2-plumber-r0",
+   "score": 23.7,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.99
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.98
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.994,
+     "pFit": 0.995
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.899
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "form"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.947
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.973
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "date and place",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.991
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|about#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role",
+     "weight": 2,
+     "say": "\"Trusted Local Plumbing\" repeats \"Trusted Local Plumbing\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|testimonials#0|deck|eyebrow,headline,sub-line,quote,who said it: a name and a role",
+     "weight": 2,
+     "say": "\"Dependable Plumbing Services You Can Trust. We provide expert plumbing solutions for all your home repairs. Trusted Plumbing Services Near You.\" repeats \"Dependable Plumbing Services You Can Trust\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|call to action#0|deck|eyebrow,headline,sub-line,button,form button",
+     "weight": 2,
+     "say": "\"Expert Plumbing Services You Can Trust\" repeats \"Expert Plumbing Services You Can Trust\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|location and hours#0|deck|eyebrow,headline,sub-line,paragraph,date and place",
+     "weight": 2,
+     "say": "\"Trusted Local Plumbing\" repeats \"Trusted Local Plumbing\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|deck|headline,paragraph,button,date and place,small print",
+     "weight": 2,
+     "say": "\"Request a Call-Back\" repeats \"Request a Call-Back\"",
+     "op": "reword"
+    },
+    {
+     "id": "S9|footer#0|deck|headline,paragraph,button,date and place,small print",
+     "weight": 3,
+     "say": "\"Serving the community since 1995, based in [City, State].\" talks about the page instead of to the visitor",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|eyebrow,headline,sub-line,button,form button",
+     "weight": 1.5,
+     "say": "\"contact us today\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|deck|eyebrow,headline,sub-line,paragraph,date and place",
+     "weight": 1.5,
+     "say": "\"contact us today\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|testimonials#0|deck|eyebrow,headline,sub-line,quote,who said it: a name and a role",
+     "weight": 1.5,
+     "say": "\"plumbing services you\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|footer#0|deck|headline,paragraph,button,date and place,small print",
+     "weight": 1.5,
+     "say": "\"plumbing solutions for\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "P1|sign-up or contact form",
+     "weight": 2.15,
+     "say": "reviewer (p=0.718): add a \"sign-up or contact form\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "P2|feature cards#0",
+     "weight": 2.55,
+     "say": "reviewer (p=0.849): drop section 3. feature cards",
+     "op": "dropSection"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 8,
+   "judgements": 14,
+   "minutes": 1.2,
+   "kept": true
+  }
+ ]
+}

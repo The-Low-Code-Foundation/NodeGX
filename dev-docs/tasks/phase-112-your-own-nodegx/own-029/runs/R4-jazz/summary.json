@@ -1,0 +1,152 @@
+{
+ "minutes": 2.5,
+ "bestRound": 0,
+ "bestScore": 29.28,
+ "scores": [
+  29.28
+ ],
+ "builderCalls": 62,
+ "judgements": 49,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R4-jazz-r0",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R4-jazz-r0",
+   "score": 29.28,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "date and place",
+      "list of items"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.959
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "list of items",
+      "body text",
+      "small print",
+      "sub-line",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.847
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "body text",
+      "small print",
+      "name line",
+      "list of items",
+      "quote",
+      "price"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.919
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "list of items",
+      "second button"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.924
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "button",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.754
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "sub-line",
+      "price",
+      "quote",
+      "name line"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.963
+    }
+   ],
+   "issues": [
+    {
+     "id": "S11|about#0|deck|paragraph,small print,who said it: a name and a role,quote,price",
+     "weight": 1.5,
+     "say": "\"at the blue\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|sub-line,price,quote,who said it: a name and a role",
+     "weight": 1.5,
+     "say": "\"at the blue\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "R|no-display-type|page",
+     "weight": 4,
+     "say": "render: no-display-type"
+    },
+    {
+     "id": "R|single-ground|page",
+     "weight": 4,
+     "say": "render: single-ground"
+    },
+    {
+     "id": "R|single-column-grid|page",
+     "weight": 4,
+     "say": "render: single-column-grid"
+    },
+    {
+     "id": "P1|menu or prices",
+     "weight": 2.68,
+     "say": "reviewer (p=0.893): add a \"menu or prices\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "P2|about#0",
+     "weight": 2.73,
+     "say": "reviewer (p=0.91): drop section 3. about",
+     "op": "dropSection"
+    },
+    {
+     "id": "Q|org",
+     "weight": 7.62,
+     "say": "reviewer: organised p=0.048",
+     "op": "reask"
+    },
+    {
+     "id": "Q|type",
+     "weight": 1.25,
+     "say": "reviewer: type and parts suit p=0.687"
+    }
+   ],
+   "findings": [
+    "no-display-type",
+    "single-ground",
+    "single-ground",
+    "single-column-grid"
+   ],
+   "modelCalls": 62,
+   "judgements": 49,
+   "minutes": 2.5,
+   "kept": true
+  }
+ ]
+}

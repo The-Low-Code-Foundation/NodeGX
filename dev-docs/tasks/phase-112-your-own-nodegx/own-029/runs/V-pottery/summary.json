@@ -1,0 +1,349 @@
+{
+ "minutes": 5.3,
+ "bestRound": 2,
+ "bestScore": 0,
+ "scores": [
+  11,
+  2,
+  0
+ ],
+ "builderCalls": 64,
+ "judgements": 69,
+ "replays": 93,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-V-pottery-r2",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-V-pottery-r0",
+   "score": 11,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "second button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.953
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.989,
+     "pFit": 0.998
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "list of items"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.99,
+     "pFit": 0.996
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.967
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.955
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.987
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|gallery#0",
+     "weight": 3,
+     "say": "the list in \"gallery\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|feature cards#0",
+     "weight": 2,
+     "say": "\"work-potter.webp\" appears 5 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|sign-up or contact form#0",
+     "weight": 2,
+     "say": "\"people-market.webp\" appears 5 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|gallery#0|deck|headline,sub-line,button",
+     "weight": 2,
+     "say": "\"View Portfolio & Book\" repeats \"View Portfolio & Book\"",
+     "op": "reword"
+    },
+    {
+     "id": "S6|sign-up or contact form#0|deck|headline,sub-line,button,form button",
+     "weight": 2,
+     "say": "button \"Browse Portfolio & Enroll\" is too long for a button",
+     "op": "reword"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 57,
+   "judgements": 45,
+   "minutes": 3.6,
+   "kept": true,
+   "fixesForNext": [
+    "S1list|gallery#0",
+    "S1page|feature cards#0",
+    "S1page|sign-up or contact form#0",
+    "S5|gallery#0|deck|headline,sub-line,button",
+    "S6|sign-up or contact form#0|deck|headline,sub-line,button,form button"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-V-pottery-r1",
+   "score": 2,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "second button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.953
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.991,
+     "pFit": 0.998
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.988
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.967
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.924
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.987
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|footer#0|deck|headline,button,small print",
+     "weight": 2,
+     "say": "\"View Portfolio & Class\" repeats \"View Portfolio & Class\"",
+     "op": "reword"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 6,
+   "judgements": 12,
+   "minutes": 1,
+   "kept": true,
+   "fixesForNext": [
+    "S5|footer#0|deck|headline,button,small print"
+   ]
+  },
+  {
+   "round": 2,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-V-pottery-r2",
+   "score": 0,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "second button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.953
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.991,
+     "pFit": 0.998
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.988
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.967
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.924
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.985
+    }
+   ],
+   "issues": [],
+   "findings": [],
+   "modelCalls": 1,
+   "judgements": 12,
+   "minutes": 0.7,
+   "kept": true
+  }
+ ]
+}

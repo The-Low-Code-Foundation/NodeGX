@@ -1,0 +1,1482 @@
+{
+ "run": "R4-pottery",
+ "brief": "pottery",
+ "request": "A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.",
+ "model": "gemma4:e2b-it-qat",
+ "judge": "gemma4:e4b-it-qat",
+ "copyN": 1,
+ "rounds": 0,
+ "build": {
+  "distMtime": "2026-10-28T15:27:11.116Z",
+  "head": "1f31ab2f8"
+ },
+ "harness": "0b5bf273",
+ "startedAt": "2026-10-28T21:11:23.953Z",
+ "calls": [
+  {
+   "round": 0,
+   "key": "card.audience+action+name",
+   "sig": "card|audience",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nWho is the page for (one line, max 20 words)? What is the ONE action the page wants a visitor to take (max 20 words)? What is the business, event or person called (max 4 words; use the name in the request, or invent a short one)?",
+   "temperature": 0.4,
+   "answer": {
+    "action": "Visit the portfolio to view work or sign up for a class.",
+    "audience": "Potential customers interested in handmade pottery and classes.",
+    "name": "Potter Portfolio"
+   },
+   "tokensIn": 124,
+   "tokensOut": 49,
+   "ms": 2167
+  },
+  {
+   "round": 0,
+   "key": "card.preset+hue",
+   "sig": "card|preset",
+   "random": true,
+   "answer": {
+    "preset": "modern",
+    "hue": "warm"
+   }
+  },
+  {
+   "round": 0,
+   "key": "card.pairing+density+radius",
+   "sig": "card|type",
+   "random": true,
+   "answer": {
+    "density": "compact",
+    "pairing": "sans-sans",
+    "radius": "round"
+   }
+  },
+  {
+   "round": 0,
+   "key": "card.mustShow",
+   "sig": "card|mustShow",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nWhat must a visitor be able to find on this page? List 1 to 4 short facts taken from the request about the business, event or person (a date, a place, what is sold, opening days, what to do). Only what the request says, and nothing about how the page should look.",
+   "temperature": 0.2,
+   "answer": {
+    "texts": [
+     "sells handmade bowls",
+     "teaches weekend classes"
+    ]
+   },
+   "tokensIn": 126,
+   "tokensOut": 30,
+   "ms": 1479
+  },
+  {
+   "round": 0,
+   "key": "sections",
+   "sig": "sections",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Visit the portfolio to view work or sign up for a class. Tone: minimal.\nThe page must show: sells handmade bowls; teaches weekend classes.\nWhich sections should the page have, top to bottom? Give 3 to 7. For each, one line saying what a VISITOR finds there (not what the section does for the page). Choose what THIS page needs; not every page needs every kind.\nSection kinds: hero, about, feature cards, how it works, gallery, menu or prices, schedule or line-up, testimonials, team, faq, location and hours, sign-up or contact form, call to action, footer",
+   "temperature": 0.3,
+   "answer": {
+    "sections": [
+     {
+      "kind": "hero",
+      "purpose": "Immediate visual impact and primary call to action."
+     },
+     {
+      "kind": "gallery",
+      "purpose": "Showcase the handmade bowls."
+     },
+     {
+      "kind": "feature cards",
+      "purpose": "Highlight the weekend classes."
+     },
+     {
+      "kind": "about",
+      "purpose": "Establish the potter's craft and philosophy."
+     },
+     {
+      "kind": "call to action",
+      "purpose": "Final prompt for viewing work or signing up."
+     },
+     {
+      "kind": "footer",
+      "purpose": "Provide essential contact and navigation links."
+     }
+    ]
+   },
+   "tokensIn": 221,
+   "tokensOut": 181,
+   "ms": 7052
+  },
+  {
+   "round": 0,
+   "key": "s0.bits",
+   "sig": "hero#0|bits",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "bits": [
+     "sub-line"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.align",
+   "sig": "hero#0|align",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "answer": "left-aligned"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.look.band",
+   "sig": "hero#0|look.band|band,bandSurface,heroGround,imageGround",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "look": "heroGround"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.look.one sentence under the headline",
+   "sig": "hero#0|look.one sentence under the headline|lead,body",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "look": "lead"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.copy.one sentence under the headline",
+   "sig": "hero#0|copy|one sentence under the headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nFacts the page must give: sells handmade bowls; teaches weekend classes.\nWrite one sentence under the headline in the \"hero\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Discover handcrafted pottery and learn to mold your own pieces in weekend classes."
+   },
+   "tokensIn": 113,
+   "tokensOut": 20,
+   "ms": 1543
+  },
+  {
+   "round": 0,
+   "key": "s1.bits",
+   "sig": "gallery#0|bits",
+   "section": 1,
+   "sectionKind": "gallery",
+   "random": true,
+   "answer": {
+    "bits": [
+     "quote",
+     "date and place",
+     "body text",
+     "list of items",
+     "second button",
+     "badge"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.align",
+   "sig": "gallery#0|align",
+   "section": 1,
+   "sectionKind": "gallery",
+   "random": true,
+   "answer": {
+    "answer": "left-aligned"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.items.count",
+   "sig": "gallery#0|items.count",
+   "section": 1,
+   "sectionKind": "gallery",
+   "random": true,
+   "answer": {
+    "answer": "6"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.items.bits",
+   "sig": "gallery#0|items.bits",
+   "section": 1,
+   "sectionKind": "gallery",
+   "random": true,
+   "answer": {
+    "bits": [
+     "text",
+     "number",
+     "name line"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.items.layout",
+   "sig": "gallery#0|items.layout",
+   "section": 1,
+   "sectionKind": "gallery",
+   "random": true,
+   "answer": {
+    "answer": "grid"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.look.band",
+   "sig": "gallery#0|look.band|band,bandSurface,imageGround",
+   "section": 1,
+   "sectionKind": "gallery",
+   "random": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.look.a quotation from a happy customer or visitor",
+   "sig": "gallery#0|look.a quotation from a happy customer or visitor|lead,body",
+   "section": 1,
+   "sectionKind": "gallery",
+   "random": true,
+   "answer": {
+    "look": "lead"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.look.item",
+   "sig": "gallery#0|look.item|card,statTile,testimonialCard,featureItem",
+   "section": 1,
+   "sectionKind": "gallery",
+   "random": true,
+   "answer": {
+    "look": "statTile"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.look.a quieter second action",
+   "sig": "gallery#0|look.a quieter second action|primaryButton,outlineButton",
+   "section": 1,
+   "sectionKind": "gallery",
+   "random": true,
+   "answer": {
+    "look": "outlineButton"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.deck",
+   "sig": "gallery#0|deck|quote,who said it: a name and a role,date and place,paragraph,second button,badge",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "gallery",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nFacts the page must give: sells handmade bowls; teaches weekend classes.\nWrite the words of the \"gallery\" section, top to bottom:\n01_quote: quote, at most 160 characters\n02_who_said_it_a_name_and_a_role: who said it: a name and a role, at most 60 characters\n03_date_and_place: date and place, at most 160 characters\n04_paragraph: paragraph, at most 200 characters\n05_second_button: second button, two to four words, a verb first; pressing it lets a visitor do something else useful\n06_badge: badge, at most 200 characters\nAlready on the page: \"Discover handcrafted pottery and learn to mold your own piec\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_quote": "Form takes shape, finding quiet beauty in the earth's embrace.",
+    "02_who_said_it_a_name_and_a_role": "Elara Vance, Potter",
+    "03_date_and_place": "Spring 2024, Studio North",
+    "04_paragraph": "Each piece is crafted by hand, imbued with intention and earth's spirit. Discover functional art made uniquely for your home.",
+    "05_second_button": "Book a Class",
+    "06_badge": "Begin your pottery journey today."
+   },
+   "tokensIn": 269,
+   "tokensOut": 143,
+   "ms": 6634
+  },
+  {
+   "round": 0,
+   "key": "s1.list.rows",
+   "sig": "gallery#0|list.rows|6|sentence,name",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "gallery",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Visit the portfolio to view work or sign up for a class. Tone: minimal.\nThe \"gallery\" section (Showcase the handmade bowls.) has a list of 6 items. For EACH item, in order, write: sentence (max 160 characters), name (max 60 characters). Each item different from the others; an item's sentence and name must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "sentence": "A delicate, matte glaze bowl perfect for everyday use, handcrafted on the wheel.",
+      "name": "Matte Drift Bowl"
+     },
+     {
+      "sentence": "Deep indigo rim bowl with subtle texture, showcasing the potter's skill.",
+      "name": "Indigo Depth Bowl"
+     },
+     {
+      "sentence": "Small, speckled ceramic cup with an organic, earthy feel.",
+      "name": "Speckled Cup"
+     },
+     {
+      "sentence": "Large, wide serving platter with a smooth, pale cream finish.",
+      "name": "Cream Platter"
+     },
+     {
+      "sentence": "Hand-thrown vessel with vibrant turquoise accents and unique form.",
+      "name": "Turquoise Vessel"
+     },
+     {
+      "sentence": "Simple, minimalist mug with a clean silhouette and functional design.",
+      "name": "Minimal Mug"
+     }
+    ]
+   },
+   "tokensIn": 174,
+   "tokensOut": 227,
+   "ms": 10312
+  },
+  {
+   "round": 0,
+   "key": "s2.bits",
+   "sig": "feature cards#0|bits",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "random": true,
+   "answer": {
+    "bits": [
+     "badge"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s2.align",
+   "sig": "feature cards#0|align",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "random": true,
+   "answer": {
+    "answer": "left-aligned"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s2.look.band",
+   "sig": "feature cards#0|look.band|band,bandSurface,imageGround",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "random": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s2.copy.the few words in the pill",
+   "sig": "feature cards#0|copy|the few words in the pill|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nWrite the few words in the pill in the \"feature cards\" section. At most 200 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Handcrafted pieces. Learn pottery techniques. Bespoke classes offered."
+   },
+   "tokensIn": 100,
+   "tokensOut": 19,
+   "ms": 1295
+  },
+  {
+   "round": 0,
+   "key": "s3.bits",
+   "sig": "about#0|bits",
+   "section": 3,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "bits": [
+     "list of items",
+     "photo",
+     "badge"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.align",
+   "sig": "about#0|align",
+   "section": 3,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "answer": "left-aligned"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.photoPlace",
+   "sig": "about#0|photoPlace",
+   "section": 3,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "answer": "below"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.items.count",
+   "sig": "about#0|items.count",
+   "section": 3,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "answer": "2"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.items.bits",
+   "sig": "about#0|items.bits",
+   "section": 3,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "bits": [
+     "title",
+     "name line",
+     "time",
+     "text"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.items.layout",
+   "sig": "about#0|items.layout",
+   "section": 3,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "answer": "one column"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.look.band",
+   "sig": "about#0|look.band|band,bandSurface,imageGround",
+   "section": 3,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "look": "imageGround"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.look.item",
+   "sig": "about#0|look.item|card,statTile,testimonialCard,featureItem",
+   "section": 3,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "look": "featureItem"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.copy.the few words in the pill",
+   "sig": "about#0|copy|the few words in the pill|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "about",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nWrite the few words in the pill in the \"about\" section. At most 200 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Crafted by hand. Discover unique pottery and hands-on classes."
+   },
+   "tokensIn": 99,
+   "tokensOut": 24,
+   "ms": 1383
+  },
+  {
+   "round": 0,
+   "key": "s3.list.rows",
+   "sig": "about#0|list.rows|2|title,name,time,sentence",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "about",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Visit the portfolio to view work or sign up for a class. Tone: minimal.\nThe \"about\" section (Establish the potter's craft and philosophy.) has a list of 2 items. For EACH item, in order, write: title (max 40 characters), name (max 60 characters), time (max 30 characters), sentence (max 160 characters). Each item different from the others; an item's title and name and time and sentence must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "title": "Form & Function",
+      "name": "Ceramic Mastery",
+      "time": "Focus: Clay & Fire",
+      "sentence": "Exploring the balance between practical, beautiful forms and the inherent qualities of the clay through mindful creation."
+     },
+     {
+      "title": "Artistic Vision",
+      "name": "Studio Philosophy",
+      "time": "Mindful Practice",
+      "sentence": "A commitment to minimalist aesthetics, emphasizing the raw beauty of handcrafted objects and simple, intentional design."
+     }
+    ]
+   },
+   "tokensIn": 197,
+   "tokensOut": 137,
+   "ms": 5875
+  },
+  {
+   "round": 0,
+   "key": "s4.bits",
+   "sig": "call to action#0|bits",
+   "section": 4,
+   "sectionKind": "call to action",
+   "random": true,
+   "answer": {
+    "bits": [
+     "eyebrow",
+     "price"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.align",
+   "sig": "call to action#0|align",
+   "section": 4,
+   "sectionKind": "call to action",
+   "random": true,
+   "answer": {
+    "answer": "centred"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.look.band",
+   "sig": "call to action#0|look.band|bandSurface,ctaBand,imageGround",
+   "section": 4,
+   "sectionKind": "call to action",
+   "random": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.deck",
+   "sig": "call to action#0|deck|eyebrow,price",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "call to action",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nFacts the page must give: sells handmade bowls; teaches weekend classes.\nWrite the words of the \"call to action\" section, top to bottom:\n01_eyebrow: eyebrow, at most 30 characters\n02_price: price, at most 60 characters\nAlready on the page: \"Discover handcrafted pottery and learn to mold your own piec\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_eyebrow": "Pottery & Classes",
+    "02_price": "Bowls $XXX | Classes $XXX"
+   },
+   "tokensIn": 170,
+   "tokensOut": 31,
+   "ms": 2140
+  },
+  {
+   "round": 0,
+   "key": "s5.bits",
+   "sig": "footer#0|bits",
+   "section": 5,
+   "sectionKind": "footer",
+   "random": true,
+   "answer": {
+    "bits": [
+     "small print",
+     "body text"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s5.align",
+   "sig": "footer#0|align",
+   "section": 5,
+   "sectionKind": "footer",
+   "random": true,
+   "answer": {
+    "answer": "left-aligned"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s5.deck",
+   "sig": "footer#0|deck|small print,paragraph",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "footer",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nFacts the page must give: sells handmade bowls; teaches weekend classes.\nWrite the words of the \"footer\" section, top to bottom:\n01_small_print: small print, at most 60 characters\n02_paragraph: paragraph, at most 200 characters\nAlready on the page: \"Discover handcrafted pottery and learn to mold your own piec\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_small_print": "Shop handmade bowls. Weekend classes available.",
+    "02_paragraph": "Find unique, handcrafted pottery. Enroll in our weekend workshops for a creative escape."
+   },
+   "tokensIn": 170,
+   "tokensOut": 42,
+   "ms": 2440
+  }
+ ],
+ "judgements": [
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-city-dusk.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.064,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 136,
+   "ms": 1905
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-forest-fog.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.559,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 136,
+   "ms": 2260
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-canyon.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.788,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 136,
+   "ms": 1928
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-dune.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.19,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 136,
+   "ms": 1750
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-coast.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.824,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 136,
+   "ms": 1655
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-shore.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.476,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 136,
+   "ms": 1603
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-red-rock.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.244,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 136,
+   "ms": 1602
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-skyline.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.047,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 136,
+   "ms": 1612
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-welder.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.037,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1662
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-potter.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.985,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1671
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-baker.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.114,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1658
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-chef.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.252,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1636
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-carpenter.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.088,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1603
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-leather-bench.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.843,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1592
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-machine-shop.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.759,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1617
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-hands-clay.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.985,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1579
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-cafe.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.744,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1638
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-coffee-shop.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.878,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1631
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-meeting.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.244,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1621
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-market.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.891,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1622
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-desk.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.503,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1609
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-market.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.142,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1614
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-bread.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.55,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1615
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-board.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.32,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1605
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-plate.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.031,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1583
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-grocer.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.287,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1611
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-carrots.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.729,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1598
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-bakery.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.173,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1610
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-cat.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.252,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1631
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-horse.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.153,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1606
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-sheep.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.129,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1605
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-dog.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.13,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1591
+  },
+  {
+   "round": 0,
+   "key": "s0.sound",
+   "section": 0,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"hero\" (dark band). Top to bottom:\n- sub-line: \"Discover handcrafted pottery and learn to mold your own pieces in weekend classes.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.979,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 116,
+   "ms": 734
+  },
+  {
+   "round": 0,
+   "key": "s1.sound",
+   "section": 1,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"gallery\" (light band). Top to bottom:\n- quote: \"Form takes shape, finding quiet beauty in the earth's embrace.\"\n- who said it: a name and a role: \"Elara Vance, Potter\"\n- date and place: \"Spring 2024, Studio North\"\n- paragraph: \"Each piece is crafted by hand, imbued with intention and earth's spirit. Discover functional art made uniquely for your home.\"\n- button: \"Book a Class\"\n- badge: \"Begin your pottery journey today.\"\n- 6 statTiles in a grid, each: sentence or two, step number, a name and a role:\n  1. \"A delicate, matte glaze bowl perfect for everyday use, handcrafted on the wheel.\" — \"1\" — \"Matte Drift Bowl\"\n  2. \"Deep indigo rim bowl with subtle texture, showcasing the potter's skill.\" — \"2\" — \"Indigo Depth Bowl\"\n  3. \"Small, speckled ceramic cup with an organic, earthy feel.\" — \"3\" — \"Speckled Cup\"\n  4. \"Large, wide serving platter with a smooth, pale cream finish.\" — \"4\" — \"Cream Platter\"\n  5. \"Hand-thrown vessel with vibrant turquoise accents and unique form.\" — \"5\" — \"Turquoise Vessel\"\n  6. \"Simple, minimalist mug with a clean silhouette and functional design.\" — \"6\" — \"Minimal Mug\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.934,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 396,
+   "ms": 2714
+  },
+  {
+   "round": 0,
+   "key": "s2.sound",
+   "section": 2,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"feature cards\" (light band). Top to bottom:\n- badge: \"Handcrafted pieces. Learn pottery techniques. Bespoke classes offered.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.947,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 114,
+   "ms": 1131
+  },
+  {
+   "round": 0,
+   "key": "s3.sound",
+   "section": 3,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"about\" (dark band). Top to bottom:\n- 2 featureItems in a single column, each: title, a name and a role, time or date, sentence or two:\n  1. \"Form & Function\" — \"Ceramic Mastery\" — \"Focus: Clay & Fire\" — \"Exploring the balance between practical, beautiful forms and the inherent qualities of the clay through mindful creation.\"\n  2. \"Artistic Vision\" — \"Studio Philosophy\" — \"Mindful Practice\" — \"A commitment to minimalist aesthetics, emphasizing the raw beauty of handcrafted objects and simple, intentional design.\"\n- a photo (work-hands-clay.webp)\n- badge: \"Crafted by hand. Discover unique pottery and hands-on classes.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.925,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 241,
+   "ms": 2101
+  },
+  {
+   "round": 0,
+   "key": "s4.sound",
+   "section": 4,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"call to action\" (light band). Top to bottom:\n- eyebrow: \"Pottery & Classes\"\n- price: \"Bowls $XXX | Classes $XXX\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.92,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 121,
+   "ms": 1059
+  },
+  {
+   "round": 0,
+   "key": "s5.sound",
+   "section": 5,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"footer\" (light band). Top to bottom:\n- small print: \"Shop handmade bowls. Weekend classes available.\"\n- paragraph: \"Find unique, handcrafted pottery. Enroll in our weekend workshops for a creative escape.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.973,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 130,
+   "ms": 1011
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "sells handmade bowls",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\nEvery line of words on the page, by section:\n[hero] Discover handcrafted pottery and learn to mold your own pieces in weekend classes.\n[gallery] Form takes shape, finding quiet beauty in the earth's embrace. / Elara Vance, Potter / Spring 2024, Studio North / Each piece is crafted by hand, imbued with intention and earth's spirit. Discover function / Book a Class / Begin your pottery journey today. / A delicate, matte glaze bowl perfect for everyday use, handcrafted on the wheel. / Matte Drift Bowl / Deep indigo rim bowl with subtle texture, showcasing the potter's skill. / Indigo Depth Bowl / Small, speckled ceramic cup with an organic, earthy feel. / Speckled Cup / Large, wide serving platter with a smooth, pale cream finish. / Cream Platter / Hand-thrown vessel with vibrant turquoise accents and unique form. / Turquoise Vessel / Simple, minimalist mug with a clean silhouette and functional design. / Minimal Mug\n[feature cards] Handcrafted pieces. Learn pottery techniques. Bespoke classes offered.\n[about] Form & Function / Ceramic Mastery / Focus: Clay & Fire / Exploring the balance between practical, beautiful forms and the inherent qualities of the / Artistic Vision / Studio Philosophy / Mindful Practice / A commitment to minimalist aesthetics, emphasizing the raw beauty of handcrafted objects a / Crafted by hand. Discover unique pottery and hands-on classes.\n[call to action] Pottery & Classes / Bowls $XXX | Classes $XXX\n[footer] Shop handmade bowls. Weekend classes available. / Find unique, handcrafted pottery. Enroll in our weekend workshops for a creative escape.\n\nDoes the page tell a visitor: sells handmade bowls?",
+   "pYes": 0.999,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 397,
+   "ms": 2875
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "teaches weekend classes",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\nEvery line of words on the page, by section:\n[hero] Discover handcrafted pottery and learn to mold your own pieces in weekend classes.\n[gallery] Form takes shape, finding quiet beauty in the earth's embrace. / Elara Vance, Potter / Spring 2024, Studio North / Each piece is crafted by hand, imbued with intention and earth's spirit. Discover function / Book a Class / Begin your pottery journey today. / A delicate, matte glaze bowl perfect for everyday use, handcrafted on the wheel. / Matte Drift Bowl / Deep indigo rim bowl with subtle texture, showcasing the potter's skill. / Indigo Depth Bowl / Small, speckled ceramic cup with an organic, earthy feel. / Speckled Cup / Large, wide serving platter with a smooth, pale cream finish. / Cream Platter / Hand-thrown vessel with vibrant turquoise accents and unique form. / Turquoise Vessel / Simple, minimalist mug with a clean silhouette and functional design. / Minimal Mug\n[feature cards] Handcrafted pieces. Learn pottery techniques. Bespoke classes offered.\n[about] Form & Function / Ceramic Mastery / Focus: Clay & Fire / Exploring the balance between practical, beautiful forms and the inherent qualities of the / Artistic Vision / Studio Philosophy / Mindful Practice / A commitment to minimalist aesthetics, emphasizing the raw beauty of handcrafted objects a / Crafted by hand. Discover unique pottery and hands-on classes.\n[call to action] Pottery & Classes / Bowls $XXX | Classes $XXX\n[footer] Shop handmade bowls. Weekend classes available. / Find unique, handcrafted pottery. Enroll in our weekend workshops for a creative escape.\n\nDoes the page tell a visitor: teaches weekend classes?",
+   "pYes": 0.999,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 397,
+   "ms": 2885
+  },
+  {
+   "round": 0,
+   "key": "page.contradicts",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nEvery line of words on the page, by section:\n[hero] Discover handcrafted pottery and learn to mold your own pieces in weekend classes.\n[gallery] Form takes shape, finding quiet beauty in the earth's embrace. / Elara Vance, Potter / Spring 2024, Studio North / Each piece is crafted by hand, imbued with intention and earth's spirit. Discover function / Book a Class / Begin your pottery journey today. / A delicate, matte glaze bowl perfect for everyday use, handcrafted on the wheel. / Matte Drift Bowl / Deep indigo rim bowl with subtle texture, showcasing the potter's skill. / Indigo Depth Bowl / Small, speckled ceramic cup with an organic, earthy feel. / Speckled Cup / Large, wide serving platter with a smooth, pale cream finish. / Cream Platter / Hand-thrown vessel with vibrant turquoise accents and unique form. / Turquoise Vessel / Simple, minimalist mug with a clean silhouette and functional design. / Minimal Mug\n[feature cards] Handcrafted pieces. Learn pottery techniques. Bespoke classes offered.\n[about] Form & Function / Ceramic Mastery / Focus: Clay & Fire / Exploring the balance between practical, beautiful forms and the inherent qualities of the / Artistic Vision / Studio Philosophy / Mindful Practice / A commitment to minimalist aesthetics, emphasizing the raw beauty of handcrafted objects a / Crafted by hand. Discover unique pottery and hands-on classes.\n[call to action] Pottery & Classes / Bowls $XXX | Classes $XXX\n[footer] Shop handmade bowls. Weekend classes available. / Find unique, handcrafted pottery. Enroll in our weekend workshops for a creative escape.\n\nDoes any line say something the request contradicts, or invent a detail it would need to know (a different day, date, time, place, price, currency or name)?",
+   "pYes": 0.108,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 428,
+   "ms": 3167
+  },
+  {
+   "round": 0,
+   "key": "page.missing",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nA portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\nThe page's sections, top to bottom:\n1. hero: \"Discover handcrafted pottery and learn to mold your own pieces in weekend classes.\"\n2. gallery: \"Form takes shape, finding quiet beauty in the earth's embrace.\"\n3. feature cards: \"Handcrafted pieces. Learn pottery techniques. Bespoke classes offered.\"\n4. about: \"Form & Function\"\n5. call to action: \"Pottery & Classes\"\n6. footer: \"Shop handmade bowls. Weekend classes available.\"\n\nIs something a visitor would clearly expect on this page missing?",
+   "pYes": 0.266,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 196,
+   "ms": 1411
+  },
+  {
+   "round": 0,
+   "key": "page.extra",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nA portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\nThe page's sections, top to bottom:\n1. hero: \"Discover handcrafted pottery and learn to mold your own pieces in weekend classes.\"\n2. gallery: \"Form takes shape, finding quiet beauty in the earth's embrace.\"\n3. feature cards: \"Handcrafted pieces. Learn pottery techniques. Bespoke classes offered.\"\n4. about: \"Form & Function\"\n5. call to action: \"Pottery & Classes\"\n6. footer: \"Shop handmade bowls. Weekend classes available.\"\n\nDoes any section repeat another one, or not belong on this page?",
+   "pYes": 0.041,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 198,
+   "ms": 1608
+  },
+  {
+   "round": 0,
+   "key": "page.organised",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): sub-line — Discover handcrafted pottery and learn to mold your own pieces in week\n2. gallery (bandSurface): quote, name line, date and place, body text, list of items, second button, badge — Form takes shape, finding quiet beauty in the earth's embrace.\n3. feature cards (bandSurface): badge — Handcrafted pieces. Learn pottery techniques. Bespoke classes offered.\n4. about (imageGround): list of items, photo, badge — Form & Function\n5. call to action (bandSurface): eyebrow, price — Pottery & Classes\n6. footer (footerBand): small print, body text — Shop handmade bowls. Weekend classes available.\n\nIs this page well organised: it opens by saying what it is and what to do, the sections come in a sensible order, and no part is repeated?",
+   "pYes": 0.629,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 251,
+   "ms": 1821
+  },
+  {
+   "round": 0,
+   "key": "page.suits",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nType: sans-sans. Sections, top to bottom:\n1. hero (heroGround): sub-line — Discover handcrafted pottery and learn to mold your own pieces in week\n2. gallery (bandSurface): quote, name line, date and place, body text, list of items, second button, badge — Form takes shape, finding quiet beauty in the earth's embrace.\n3. feature cards (bandSurface): badge — Handcrafted pieces. Learn pottery techniques. Bespoke classes offered.\n4. about (imageGround): list of items, photo, badge — Form & Function\n5. call to action (bandSurface): eyebrow, price — Pottery & Classes\n6. footer (footerBand): small print, body text — Shop handmade bowls. Weekend classes available.\n\nDo the type and the parts suit this kind of page?",
+   "pYes": 0.915,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 231,
+   "ms": 1780
+  }
+ ],
+ "skipped": [
+  {
+   "key": "card.tone",
+   "why": "S0: the request says it (minimal)"
+  },
+  {
+   "key": "card.kind",
+   "why": "S0: the request says it (portfolio)"
+  },
+  {
+   "key": "card.photos",
+   "why": "photo scout (reviewer vision): kept work-potter.webp, work-hands-clay.webp, people-market.webp of 32"
+  },
+  {
+   "key": "s1.bits",
+   "why": "rule: a quote gets a name line"
+  }
+ ],
+ "mcp": [
+  {
+   "round": 0,
+   "tool": "create_project",
+   "isError": false,
+   "ms": 261
+  },
+  {
+   "round": 0,
+   "tool": "get_style_vocabulary",
+   "isError": false,
+   "ms": 10
+  },
+  {
+   "round": 0,
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 10
+  },
+  {
+   "round": 0,
+   "tool": "set_style_preset",
+   "isError": false,
+   "ms": 5
+  },
+  {
+   "round": 0,
+   "tool": "set_project_tokens",
+   "isError": false,
+   "ms": 4
+  },
+  {
+   "round": 0,
+   "tool": "list_node_types",
+   "isError": false,
+   "ms": 3
+  },
+  {
+   "round": 0,
+   "tool": "get_component",
+   "isError": false,
+   "ms": 16
+  },
+  {
+   "round": 0,
+   "tool": "create_plan",
+   "isError": false,
+   "ms": 6
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 63
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 22
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 29
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 20
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 17
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 25
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 17
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "apply_plan",
+   "isError": false,
+   "ms": 2529
+  },
+  {
+   "round": 0,
+   "tool": "render_report",
+   "isError": false,
+   "ms": 1590
+  }
+ ],
+ "roundsLog": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R4-pottery-r0",
+   "score": 13.31,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "sub-line"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.979
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "quote",
+      "name line",
+      "date and place",
+      "body text",
+      "list of items",
+      "second button",
+      "badge"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.934
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "badge"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.947
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "list of items",
+      "photo",
+      "badge"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.925
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "eyebrow",
+      "price"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.92
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "small print",
+      "body text"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.973
+    }
+   ],
+   "issues": [
+    {
+     "id": "S7|feature cards#0",
+     "weight": 2,
+     "say": "\"feature cards\" is only a badge",
+     "op": "reask"
+    },
+    {
+     "id": "R|no-display-type|page",
+     "weight": 4,
+     "say": "render: no-display-type"
+    },
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    },
+    {
+     "id": "Q|org",
+     "weight": 2.97,
+     "say": "reviewer: organised p=0.629"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.34,
+     "say": "reviewer: type and parts suit p=0.915"
+    }
+   ],
+   "findings": [
+    "no-display-type",
+    "minimum-layout-width"
+   ],
+   "modelCalls": 42,
+   "judgements": 45,
+   "words": [
+    "Section \"hero\" (dark band). Top to bottom:\n- sub-line: \"Discover handcrafted pottery and learn to mold your own pieces in weekend classes.\"",
+    "Section \"gallery\" (light band). Top to bottom:\n- quote: \"Form takes shape, finding quiet beauty in the earth's embrace.\"\n- who said it: a name and a role: \"Elara Vance, Potter\"\n- date and place: \"Spring 2024, Studio North\"\n- paragraph: \"Each piece is crafted by hand, imbued with intention and earth's spirit. Discover functional art made uniquely for your home.\"\n- button: \"Book a Class\"\n- badge: \"Begin your pottery journey today.\"\n- 6 statTiles in a grid, each: sentence or two, step number, a name and a role:\n  1. \"A delicate, matte glaze bowl perfect for everyday use, handcrafted on the wheel.\" — \"1\" — \"Matte Drift Bowl\"\n  2. \"Deep indigo rim bowl with subtle texture, showcasing the potter's skill.\" — \"2\" — \"Indigo Depth Bowl\"\n  3. \"Small, speckled ceramic cup with an organic, earthy feel.\" — \"3\" — \"Speckled Cup\"\n  4. \"Large, wide serving platter with a smooth, pale cream finish.\" — \"4\" — \"Cream Platter\"\n  5. \"Hand-thrown vessel with vibrant turquoise accents and unique form.\" — \"5\" — \"Turquoise Vessel\"\n  6. \"Simple, minimalist mug with a clean silhouette and functional design.\" — \"6\" — \"Minimal Mug\"",
+    "Section \"feature cards\" (light band). Top to bottom:\n- badge: \"Handcrafted pieces. Learn pottery techniques. Bespoke classes offered.\"",
+    "Section \"about\" (dark band). Top to bottom:\n- 2 featureItems in a single column, each: title, a name and a role, time or date, sentence or two:\n  1. \"Form & Function\" — \"Ceramic Mastery\" — \"Focus: Clay & Fire\" — \"Exploring the balance between practical, beautiful forms and the inherent qualities of the clay through mindful creation.\"\n  2. \"Artistic Vision\" — \"Studio Philosophy\" — \"Mindful Practice\" — \"A commitment to minimalist aesthetics, emphasizing the raw beauty of handcrafted objects and simple, intentional design.\"\n- a photo (work-hands-clay.webp)\n- badge: \"Crafted by hand. Discover unique pottery and hands-on classes.\"",
+    "Section \"call to action\" (light band). Top to bottom:\n- eyebrow: \"Pottery & Classes\"\n- price: \"Bowls $XXX | Classes $XXX\"",
+    "Section \"footer\" (light band). Top to bottom:\n- small print: \"Shop handmade bowls. Weekend classes available.\"\n- paragraph: \"Find unique, handcrafted pottery. Enroll in our weekend workshops for a creative escape.\""
+   ],
+   "minutes": 2.1,
+   "kept": true
+  }
+ ],
+ "randomDecisions": true,
+ "flags": [
+  "--brief",
+  "--run",
+  "--no-review",
+  "--random-decisions",
+  "--section-copy",
+  "--contradict",
+  "--v4"
+ ],
+ "photoScout": [
+  [
+   "work-potter.webp",
+   0.985
+  ],
+  [
+   "work-hands-clay.webp",
+   0.985
+  ],
+  [
+   "people-market.webp",
+   0.891
+  ],
+  [
+   "people-coffee-shop.webp",
+   0.878
+  ],
+  [
+   "work-leather-bench.webp",
+   0.843
+  ],
+  [
+   "ground-coast.webp",
+   0.824
+  ],
+  [
+   "ground-canyon.webp",
+   0.788
+  ],
+  [
+   "work-machine-shop.webp",
+   0.759
+  ],
+  [
+   "people-cafe.webp",
+   0.744
+  ],
+  [
+   "food-carrots.webp",
+   0.729
+  ],
+  [
+   "ground-forest-fog.webp",
+   0.559
+  ],
+  [
+   "food-bread.webp",
+   0.55
+  ],
+  [
+   "people-desk.webp",
+   0.503
+  ],
+  [
+   "ground-shore.webp",
+   0.476
+  ],
+  [
+   "food-board.webp",
+   0.32
+  ],
+  [
+   "food-grocer.webp",
+   0.287
+  ],
+  [
+   "work-chef.webp",
+   0.252
+  ],
+  [
+   "animal-cat.webp",
+   0.252
+  ],
+  [
+   "ground-red-rock.webp",
+   0.244
+  ],
+  [
+   "people-meeting.webp",
+   0.244
+  ],
+  [
+   "ground-dune.webp",
+   0.19
+  ],
+  [
+   "food-bakery.webp",
+   0.173
+  ],
+  [
+   "animal-horse.webp",
+   0.153
+  ],
+  [
+   "food-market.webp",
+   0.142
+  ],
+  [
+   "animal-dog.webp",
+   0.13
+  ],
+  [
+   "animal-sheep.webp",
+   0.129
+  ],
+  [
+   "work-baker.webp",
+   0.114
+  ],
+  [
+   "work-carpenter.webp",
+   0.088
+  ],
+  [
+   "ground-city-dusk.webp",
+   0.064
+  ],
+  [
+   "ground-skyline.webp",
+   0.047
+  ],
+  [
+   "work-welder.webp",
+   0.037
+  ],
+  [
+   "food-plate.webp",
+   0.031
+  ]
+ ],
+ "result": {
+  "minutes": 2.1,
+  "bestRound": 0,
+  "bestScore": 13.31,
+  "scores": [
+   13.31
+  ],
+  "builderCalls": 42,
+  "judgements": 45,
+  "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R4-pottery-r0"
+ }
+}

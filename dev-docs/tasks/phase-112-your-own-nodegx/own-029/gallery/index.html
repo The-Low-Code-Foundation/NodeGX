@@ -1,0 +1,1087 @@
+<title>The Small Agent</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Layout: a lab notebook. One reading column; each brief is an entry with its before/after pair side by side. */
+:root {
+  --paper: #f3f6f5; --ink: #15201c; --muted: #5a6964; --rule: #d3dcd8; --panel: #ffffff;
+  --signal: #0d7a69; --warn: #a86a12; --good: #2e7a3a;
+  --display: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --paper: #0e1412; --ink: #e2eae6; --muted: #92a29c; --rule: #25302c; --panel: #141c19; --signal: #3cc0a6; --warn: #e0a64a; --good: #6cc27a; color-scheme: dark } }
+:root[data-theme="dark"] { --paper: #0e1412; --ink: #e2eae6; --muted: #92a29c; --rule: #25302c; --panel: #141c19; --signal: #3cc0a6; --warn: #e0a64a; --good: #6cc27a; color-scheme: dark }
+body { background: var(--paper); color: var(--ink); font: 16px/1.55 var(--body); }
+.wrap { max-width: 1080px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 80px; display: grid; gap: 56px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; line-height: 1.15; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); letter-spacing: -0.01em; }
+h2 { font-size: 1.7rem; }
+h3 { font-size: 1.25rem; font-weight: 500; }
+p { margin: 0; max-width: 68ch; }
+.lede { font-size: 1.15rem; color: var(--ink); }
+.eyebrow { font: 500 0.75rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--signal); }
+.small { font-size: 0.9rem; color: var(--muted); }
+.mono, .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+section { display: grid; gap: 20px; }
+/* a grid item's min-width is its content's by default: a wide table would push the column past a phone's width */
+.wrap > *, section > * { min-width: 0; }
+.stack { display: grid; gap: 14px; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 6px; background: var(--panel); }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font: 500 0.74rem/1.3 var(--mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+td.num, th.num { text-align: right; }
+tr:last-child td { border-bottom: 0; }
+.run { display: grid; gap: 18px; padding-top: 28px; border-top: 1px solid var(--rule); }
+.run-head { display: grid; gap: 10px; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 28px; margin: 4px 0 0; }
+.facts div { display: grid; gap: 2px; }
+.facts dt { font: 500 0.7rem/1 var(--mono); text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
+.facts dd { margin: 0; display: flex; align-items: center; gap: 8px; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.pair figure { margin: 0; display: grid; gap: 6px; min-width: 0; }
+figcaption { font-size: 0.85rem; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+.frame { height: 560px; overflow-y: auto; border: 1px solid var(--rule); border-radius: 4px; background: var(--panel); }
+.frame img { display: block; width: 100%; height: auto; }
+details { border: 1px solid var(--rule); border-radius: 4px; background: var(--panel); }
+summary { cursor: pointer; padding: 10px 14px; font-weight: 600; font-size: 0.95rem; }
+summary:focus-visible, a:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+details > :not(summary) { padding: 0 14px 14px; }
+.issues { list-style: none; margin: 0; display: grid; gap: 6px; font-size: 0.9rem; }
+.chip { font: 500 0.68rem/1 var(--mono); text-transform: uppercase; letter-spacing: 0.05em; padding: 3px 6px; border-radius: 3px; border: 1px solid currentColor; margin-right: 6px; }
+.fixed .chip { color: var(--good); }
+.open .chip { color: var(--warn); }
+.op { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); }
+pre { white-space: pre-wrap; font: 0.8rem/1.5 var(--mono); color: var(--ink); margin: 0; max-height: 420px; overflow-y: auto; }
+.loop { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+.loop div { border: 1px solid var(--rule); background: var(--panel); border-radius: 4px; padding: 10px; display: grid; gap: 4px; align-content: start; }
+.loop b { font: 600 0.95rem/1.2 var(--display); }
+.loop span { font-size: 0.82rem; color: var(--muted); }
+.findings { display: grid; gap: 12px; counter-reset: f; padding: 0; margin: 0; list-style: none; }
+.findings li { display: grid; gap: 4px; padding-left: 0; }
+.findings b { font-family: var(--display); font-weight: 600; font-size: 1.05rem; }
+@media (max-width: 760px) { .pair { grid-template-columns: 1fr; } .frame { height: 420px; } .loop { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+</style>
+<div class="wrap">
+<header class="stack">
+  <p class="eyebrow">OWN-029 · small local models · <a href="https://nodegx.io" target="_blank" rel="noopener" style="color:var(--signal)">nodegx.io ↗</a></p>
+  <h1>A 2B model that checks its own work</h1>
+  <p class="lede">Gemma 4 E2B (2.3B effective parameters, on a laptop) builds a NodeGX page by answering small typed questions. Then the agent looks at what it built, says what is wrong, repairs only that, and keeps the repair only if the page got better. It ran on six briefs it had never seen, not only the puppy page it was tuned on.</p>
+  <p class="small">Session 1 ran on 28 October 2026. <a href="#s2" style="color:var(--signal)">Session 2</a> (29 October) changed what counts as "better" and tested the change on 24 paired runs.</p>
+</header>
+
+<section id="loop">
+  <h2>The loop</h2>
+  <div class="loop">
+    <div><b>Build</b><span>Every answer goes through one door. A cached answer replays for free, so a repair round re-asks only what was flagged.</span></div>
+    <div><b>Render</b><span>render_report screenshots the page and lists what it measures (contrast, overflow, overlaps).</span></div>
+    <div><b>Describe</b><span>The script writes each section out in words, top to bottom, the way a reader meets it.</span></div>
+    <div><b>Critique</b><span>Script rules over the graph, render findings mapped to their node, and a reviewer model answering yes/no in one token.</span></div>
+    <div><b>Repair</b><span>Re-word one line with the reason, re-ask a section's parts, flip a decision to the model's own second choice, add or drop a section.</span></div>
+    <div><b>Accept</b><span>Session 1: the round's score had to beat the best so far. Session 2: fewer defects per line, and organisation may not fall by more than 0.1. If not, the agent restores the best round's answers and marks the fix as tried.</span></div>
+  </div>
+</section>
+
+<section id="probes">
+  <h2>What a small model can judge</h2>
+  <p>Before building the loop, each kind of judgement was measured against pairs where the right answer is known. P(yes) comes from the reviewer's token probabilities, with no sampling.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Question</th><th>Bad case</th><th>Good case</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td>Two page screenshots: which is better? (E2B and E4B)</td><td colspan="2">picks the second picture every time, in both orders</td><td>unusable</td></tr>
+      <tr><td>Score a section crop 1–5 (E2B)</td><td class="num">2.92 (man's face hero)</td><td class="num">2.01 (dog hero)</td><td>noise</td></tr>
+      <tr><td>Section in words: does the headline cover the whole section? (E4B)</td><td class="num">0.31</td><td class="num">1.00</td><td>sharp</td></tr>
+      <tr><td>Section in words: does every line read like a real business wrote it? (E4B)</td><td class="num">0.09 (cut-off button)</td><td class="num">0.96</td><td>sharp</td></tr>
+      <tr><td>Same, testimonial about pizza on a puppy page (E4B)</td><td class="num">0.01</td><td class="num">0.99</td><td>sharp</td></tr>
+      <tr><td>One photo: does it fit this page? (E4B, puppy page)</td><td class="num">0.01 (cat)</td><td class="num">0.98 (dog)</td><td>sharp</td></tr>
+      <tr><td>Same question (E2B)</td><td class="num">0.79 (cat)</td><td class="num">0.99 (dog)</td><td>says yes to everything</td></tr>
+    </tbody>
+  </table></div>
+  <p>So the reviewer reads <b>words</b>, and looks at <b>one photo at a time</b>, never a whole page. The 2B model builds; a 4B model reviews, answering one token per question.</p>
+</section>
+
+<section id="findings">
+  <h2>What we found</h2>
+  <ol class="findings">
+    <li><b>Every first build improved under review.</b> <span>Defects per line of copy fell from 0.60 to 0.17 across six briefs. When a repair round made the page worse, the agent saw it and reverted.</span></li>
+    <li><b>Group the words by what has to agree; split everything else.</b> <span>On identical page structures, one copy call per section beat one call per line: 26% fewer word issues, the reviewer's "sounds real" up from 0.82 to 0.89, and 72% fewer copy calls. "As small as possible" is the right target for decisions, not for words.</span></li>
+    <li><b>The model's decisions are worth a lot, and a defect count cannot see it.</b> <span>With every structural choice made at random, pages had fewer parts and so fewer defects, and won on the raw score six times out of six. A reviewer reading the page outline prefers the model's pages (well organised 0.66 against 0.50). So quality has to be judged on its own, and kept as a condition for accepting a round.</span></li>
+    <li><b>The harness can learn its own rules.</b> <span>From its ledgers it found ten questions the model always answers the same way with p ≥ 0.9 (the hero headline is the display headline, every main button is the filled one), and stopped asking them. More useful is the list of questions it never settles: alignment, the band behind a section, where the photo goes. Those are where design rules belong.</span></li>
+    <li><b>The model's confidence is free, and it says which questions to stop asking.</b> <span>Ollama returns token probabilities even under a JSON schema. A button's look comes back at p ≈ 0.99 every time, while "photo beside, above or below?" averages 0.48. The first is a rule the harness can learn; the second is where to explore.</span></li>
+    <li><b>Upstream words poison downstream words.</b> <span>A section's one-line purpose ("introduce the Puppy Haven concept") turned into labels like "Puppy Haven Landing Page Concept: Blue, Modern Style". Without it, 8 of 8 labels were clean. Small calls need the smallest context, not just a short one.</span></li>
+    <li><b>A schema length cap cuts the model off mid-word.</b> <span>OWN-027's truncated button ("Step 1: Apply Online. Fill a") was the harness, not the model. The limit belongs in the prompt's words; the critic catches what runs long.</span></li>
+    <li><b>Repair fixes slips, not bad questions.</b> <span>When a prompt itself induced a defect, re-asking with a hint returned the same defect. That is worth knowing: the loop finds what to fix in the harness, too.</span></li>
+    <li><b>The score is only as good as the critics' reach.</b> <span>A page that scored 4 still had two contact forms and "Find your perfect…" ten times. Each blind spot became a cheap script critic.</span></li>
+  </ol>
+</section>
+
+<section id="s2">
+  <p class="eyebrow">Session 2 · 29 October 2026</p>
+  <h2>What counts as better</h2>
+  <p>In session 1 a round was kept when its weighted defect score went down. The random-decisions control showed the problem with that: fewer defects can pay for a page that is worse organised. Session 2 made the session-1 winners the defaults (one copy call per section, the contradiction check, the outline judges) and put a new rule in front of the old one.</p>
+  <div class="loop" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+    <div><b>Kept, way 1</b><span>Defects per line fall, and "well organised" drops by no more than 0.1.</span></div>
+    <div><b>Kept, way 2</b><span>"Well organised" rises by at least 0.1, and defects per line stay within 110% of the best.</span></div>
+  </div>
+  <h3>24 paired runs</h3>
+  <p>For each brief, one build with no review made the decisions. Four runs then started from exactly those decisions, so they built the same sections, parts and bands and only their words differed. Two kept rounds by the new rule, two by the old sum. Each cell is the kept page: <span class="mono">defects per line · well organised</span> (lower is better, then higher is better).</p>
+  <div class="tablewrap"><table><thead><tr><th>brief</th><th class="num">new rule, run 1</th><th class="num">new rule, run 2</th><th class="num">old sum, run 1</th><th class="num">old sum, run 2</th></tr></thead><tbody><tr><td>puppy</td><td class="num">0.28 · 0.85</td><td class="num">0.03 · 0.94</td><td class="num">0.24 · 0.93</td><td class="num">0.15 · 0.80</td></tr><tr><td>bakery</td><td class="num">0.26 · 0.87</td><td class="num">0.38 · 0.77</td><td class="num">0.17 · 0.58</td><td class="num">0.23 · 0.77</td></tr><tr><td>running</td><td class="num">0.32 · 0.74</td><td class="num">0.40 · 0.39</td><td class="num">0.46 · 0.26</td><td class="num">0.24 · 0.23</td></tr><tr><td>jazz</td><td class="num">0.24 · 0.14</td><td class="num">0.23 · 0.11</td><td class="num">0.21 · 0.11</td><td class="num">0.08 · 0.18</td></tr><tr><td>pottery</td><td class="num">0.04 · 0.93</td><td class="num">0.00 · 0.97</td><td class="num">0.03 · 0.97</td><td class="num">0.00 · 0.94</td></tr><tr><td>plumber</td><td class="num">0.22 · 0.87</td><td class="num">0.10 · 0.93</td><td class="num">0.10 · 0.78</td><td class="num">0.11 · 0.87</td></tr>
+<tr><td><b>mean, 12 runs</b></td><td class="num" colspan="2"><b>0.21 · 0.71</b> <span class="small">(round 0: 0.53 · 0.58)</span></td><td class="num" colspan="2"><b>0.17 · 0.62</b> <span class="small">(round 0: 0.56 · 0.47)</span></td></tr></tbody></table></div>
+  <ol class="findings">
+    <li><b>Both rules repair.</b> <span>Defects per line fall by more than half under either rule, and "well organised" rises under both.</span></li>
+    <li><b>The trade is the expected one, and small.</b> <span>The old sum ends with fewer defects per line; the new rule ends better organised. Both differences are smaller than the spread between two runs of the same rule, so this is a decision about which pages to refuse, not a measured win.</span></li>
+    <li><b>The new rule stays the default.</b> <span>It refuses the page you would refuse (below).</span></li>
+    <li><b>It has a ratchet.</b> <span>It compares each round with the last kept round, so a page can lose a little organisation at every step: the bakery's second run went 0.90 → 0.80 → 0.77, each step inside the limit. The fix is to compare with the best organisation any kept round reached.</span></li>
+  </ol>
+  <h3>The page the new rule refuses</h3>
+  <div class="pair">
+  <figure><figcaption>bakery, old sum: kept round 3 <span class="mono">0.17 /line · organised 0.58</span></figcaption><div class="frame"><img src="shots/W1-bakery-r3-desktop.jpg" alt="bakery page kept by the old rule" loading="lazy"></div></figure>
+  <figure><figcaption>bakery, new rule: kept round 2 <span class="mono">0.26 /line · organised 0.87</span></figcaption><div class="frame"><img src="shots/K1-bakery-r2-desktop.jpg" alt="bakery page kept by the new rule" loading="lazy"></div></figure>
+</div>
+<p class="small">Both start from the same sections, parts and bands. The old sum kept a round where organisation had fallen from 0.92 to 0.58, because the defects per line kept falling; on that page the gallery became a full-bleed photo that runs across its own heading. The new rule refused the same kind of trade in its own run: round 3 had fewer defects (0.20 per line) but organisation fell to 0.69, so the agent went back to round 2.</p>
+  <h3>The organisation judge reads the words, not only the outline</h3>
+  <p>The five runs of each brief share one structure; only round 0's words were written afresh. The reviewer answers at temperature 0, so this is not sampling noise: new words on the same outline move its answer by up to 0.6.</p>
+  <div class="tablewrap"><table><thead><tr><th>brief</th><th>"well organised", five samples of words</th><th class="num">range</th></tr></thead><tbody><tr><td>puppy</td><td class="mono">0.13  0.74  0.21  0.36  0.60</td><td class="num">0.61</td></tr><tr><td>plumber</td><td class="mono">0.92  0.92  0.78  0.48  0.53</td><td class="num">0.44</td></tr><tr><td>running</td><td class="mono">0.39  0.05  0.39  0.05  0.04</td><td class="num">0.35</td></tr><tr><td>bakery</td><td class="mono">0.84  0.83  0.90  0.92  0.65</td><td class="num">0.27</td></tr><tr><td>pottery</td><td class="mono">0.87  0.92  0.96  0.93  0.92</td><td class="num">0.09</td></tr><tr><td>jazz</td><td class="mono">0.15  0.16  0.10  0.08  0.08</td><td class="num">0.08</td></tr></tbody></table></div>
+  <p class="small">On four briefs that is more than the 0.1 the rule guards, so the rule partly guards wording. Jazz is low whatever the words: the judge dislikes that structure. Next: a second judge that sees the outline with the words taken out (section kinds, parts, bands), and the rule applied to that one.</p>
+  <h3>Two new checks</h3>
+  <ol class="findings">
+    <li><b>A list repeated across sections.</b> <span>It fired on all four bakery runs and one puppy run, and it is right: the call to action repeats the feature cards (sourdough, croissants, cakes). Rewording cannot clear it, because the brief names only three products, so the model writes the same three again. The repair has to be structural: take the list out of the later section.</span></li>
+    <li><b>Prices that disagree.</b> <span>It never fired: every kept page uses one currency. But the jazz page still says "Tickets from $45" above a $35 ticket, which this check does not compare. Next: a "from $X" line must equal the cheapest item.</span></li>
+  </ol>
+  <h3>The photo scout asks two questions</h3>
+  <p>"Would this photo make sense on a page for …" invites yes: in session 1 the running page kept a dog and some sheep. A second question, "does this photo show what this page is about?", worded with the page's own name and what it must show, stops them. The library has no runner, band or plumber photo, so for those pages the right answer is no photo, and that is what the scout now gives.</p>
+  <div class="tablewrap"><table><thead><tr><th>brief</th><th>kept (makes sense · shows the subject)</th><th>passed the first question, stopped by the second</th></tr></thead><tbody><tr><td>puppy</td><td>dog <span class="mono">0.98 · 0.85</span></td><td>none</td></tr><tr><td>bakery</td><td>bakery <span class="mono">0.94 · 0.97</span>, bread <span class="mono">0.87 · 0.95</span></td><td>none</td></tr><tr><td>running</td><td>none</td><td>carpenter <span class="mono">0.72 · 0.004</span>, coast <span class="mono">0.98 · 0.003</span>, forest fog <span class="mono">0.94 · 0.003</span>, horse <span class="mono">0.90 · 0.003</span> <span class="small">and 4 more</span></td></tr><tr><td>jazz</td><td>none</td><td>none</td></tr><tr><td>pottery</td><td>potter <span class="mono">0.98 · 0.96</span>, hands clay <span class="mono">0.98 · 0.83</span>, market <span class="mono">0.89 · 0.38</span></td><td>leather bench <span class="mono">0.84 · 0.15</span>, coffee shop <span class="mono">0.88 · 0.02</span>, machine shop <span class="mono">0.76 · 0.02</span>, canyon <span class="mono">0.79 · 0.006</span> <span class="small">and 3 more</span></td></tr><tr><td>plumber</td><td>none</td><td>leather bench <span class="mono">0.60 · 0.01</span>, carpenter <span class="mono">0.61 · 0.006</span></td></tr></tbody></table></div>
+  <h3>Next</h3>
+  <ol class="findings">
+    <li><b>Fix the ratchet.</b> <span>Compare with the best organisation any kept round reached.</span></li>
+    <li><b>Judge organisation without the words.</b> <span>Section kinds, parts and bands only, with its spread measured the same way.</span></li>
+    <li><b>Repairs that work for the two new checks.</b> <span>Drop a repeated list from the later section; check "from $X" against the cheapest item.</span></li>
+    <li><b>Freeze the harness for OWN-030.</b> <span>The same 2B model and briefs, built through NodeGX, as plain HTML from the same answers, and by the model writing code. You rank the pages blind.</span></li>
+  </ol>
+</section>
+<section id="s2-runs"><h2>Session 2 pages, before and after review</h2><p class="small">The first run of the new rule on each brief. Each frame scrolls. Left: round 0. Right: the round the agent kept.</p><article class="run" id="K1-puppy">
+  <header class="run-head">
+    <p class="eyebrow">puppy</p>
+    <h3>“Make me a puppy adoption landing page please, blue colour theme, modern style.”</h3>
+    <dl class="facts">
+      <div><dt>defects per line by round</dt><dd><svg class="spark" viewBox="0 0 120 36" width="120" height="36" role="img" aria-label="issue score by round: 0.66, 0.309, 0.333, 0.383, 0.278"><polyline points="4.0,13.5 32.0,23.3 60.0,22.7 88.0,21.3 116.0,24.2" fill="none" stroke="var(--signal)" stroke-width="1.5"/><circle cx="4.0" cy="13.5" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="32.0" cy="23.3" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="60.0" cy="22.7" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="88.0" cy="21.3" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="116.0" cy="24.2" r="3.2" fill="var(--signal)" stroke="var(--signal)" stroke-width="1.2"/></svg> <span class="mono">0.66 → 0.309 → 0.333 → 0.383 → 0.278</span></dd></div>
+      <div><dt>kept</dt><dd class="mono">round 4</dd></div>
+      <div><dt>builder calls</dt><dd class="mono">48</dd></div>
+      <div><dt>reviewer tokens</dt><dd class="mono">70</dd></div>
+      <div><dt>free replays</dt><dd class="mono">315</dd></div>
+      <div><dt>minutes</dt><dd class="mono">7.2</dd></div>
+    </dl>
+    <p class="small"><b>Photos the reviewer kept:</b> —. <b>Facts it set itself to show:</b> —.</p>
+  </header>
+  <div class="pair">
+    <figure><figcaption>Round 0 <span class="mono">0.66 /line · organised 0.74</span></figcaption><div class="frame"><img src="shots/K1-puppy-r0-desktop.jpg" alt="puppy page, round 0" loading="lazy"></div></figure>
+    <figure><figcaption>Round 4, kept <span class="mono">0.28 /line · organised 0.85</span></figcaption><div class="frame"><img src="shots/K1-puppy-r4-desktop.jpg" alt="puppy page, round 4" loading="lazy"></div></figure>
+  </div>
+  <details><summary>What the agent found in round 0, and what it fixed (9 of 15)</summary>
+    <ul class="issues"><li class="fixed"><span class="chip">fixed</span> the list in &quot;gallery&quot; shows the same photo 4 times <span class="op">re-ask a decision</span></li><li class="open"><span class="chip">still open</span> &quot;animal-dog.webp&quot; appears 10 times on the page <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> &quot;animal-dog.webp&quot; appears 10 times on the page <span class="op">re-ask a decision</span></li><li class="open"><span class="chip">still open</span> &quot;animal-dog.webp&quot; appears 10 times on the page <span class="op">re-ask a decision</span></li><li class="open"><span class="chip">still open</span> &quot;animal-dog.webp&quot; appears 10 times on the page <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> &quot;Adopt a Puppy&quot; repeats &quot;Adopt a Puppy&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;Adopt a Puppy&quot; repeats &quot;Adopt a Puppy&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> a second form (already in &quot;hero&quot;) <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> a second form (already in &quot;hero&quot;) <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> a second form (already in &quot;hero&quot;) <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> a second form (already in &quot;hero&quot;) <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> a quote in a 3th section <span class="op">re-ask a decision</span></li><li class="open"><span class="chip">still open</span> a quote in a 4th section <span class="op">re-ask a decision</span></li><li class="open"><span class="chip">still open</span> reviewer: organised p=0.74</li><li class="open"><span class="chip">still open</span> reviewer: type and parts suit p=0.911</li></ul>
+  </details>
+  <details><summary>The page in words, as the reviewer read it (round 4)</summary><pre>Section &quot;hero&quot; (dark band). Top to bottom:
+- headline: &quot;Find Your Forever Puppy&quot;
+- sub-line: &quot;Open your heart and welcome a loving, playful companion into your life. Start your journey to puppy parenthood now.&quot;
+- button: &quot;Adopt a Puppy&quot;
+- a form field: &quot;Name&quot; / &quot;Your name&quot;
+- a form field: &quot;Email&quot; / &quot;you@example.com&quot;
+- a form field: &quot;Message&quot; / &quot;Your message&quot;
+- button: &quot;Start My Application&quot;
+- a photo (animal-dog.webp)
+
+Section &quot;about&quot; (light band). Top to bottom:
+- a photo (animal-dog.webp)
+- eyebrow: &quot;Welcome Home&quot;
+- headline: &quot;Your Next Adventure Awaits&quot;
+- sub-line: &quot;Discover a world of wagging tails, unconditional love, and heartwarming friendships with a puppy who's ready for their forever family.&quot;
+- paragraph: &quot;At Puppy Haven, we connect incredible pups with their perfect matches. We offer curated listings, personalized advice, and a community dedicated to making the adoption journey joyful and stress-free for everyone involved.&quot;
+- quote: &quot;Every puppy has a unique story waiting to unfold. Let's write the next happy chapter together.&quot;
+- who said it: a name and a role: &quot;Sarah, Founder&quot;
+
+Section &quot;feature cards&quot; (light band). Top to bottom:
+- eyebrow: &quot;Why Choose Us?&quot;
+- headline: &quot;Find Your Perfect Canine Match&quot;
+- sub-line: &quot;We match you with a happy, healthy puppy whose personality is a perfect fit for your lifestyle and home.&quot;
+- quote: &quot;The best part of adoption is knowing you're bringing a pure soul into your life. Get ready for endless cuddles and joy!&quot;
+- who said it: a name and a role: &quot;Sarah, Adoption Specialist&quot;
+- a photo (animal-dog.webp)
+- 3 featureItems in a grid, each: icon, title, sentence or two, button:
+  1. &quot;Personalized Matches&quot; — &quot;Find the perfect puppy tailored to your lifestyle and personality. Our experts help make the match seamless and happy.&quot; — &quot;View Puppies&quot;
+  2. &quot;Expert Guidance&quot; — &quot;Our experienced team supports you through every step of the adoption process, ensuring a loving and responsible placement.&quot; — &quot;Learn More&quot;
+  3. &quot;Trusted Care Support&quot; — &quot;Receive ongoing resources and support to ensure your new companion thrives with proper care and attention.&quot; — &quot;Adoption Guide&quot;
+
+Section &quot;gallery&quot; (dark band). Top to bottom:
+- a photo (animal-dog.webp)
+- eyebrow: &quot;Meet Our Sweet Friends&quot;
+- headline: &quot;Find Your Forever Puppy Today!&quot;
+- sub-line: &quot;Open your heart to wagging tails, playful antics, and the purest bond. Start your journey to puppy parenthood now.&quot;
+- 4 cards in a grid, each: icon, title, sentence or two, button:
+  1. &quot;Sweet Little Buddy&quot; — &quot;Meet a playful puppy ready to shower you with unconditional love. Perfect for first-time owners!&quot; — &quot;View Details&quot;
+  2. &quot;Playful Companion&quot; — &quot;Energetic and full of life, this puppy loves a good game. Bring endless joy to your home.&quot; — &quot;View Details&quot;
+  3. &quot;Calm Cuddler&quot; — &quot;A gentle soul seeking a cozy lap. Ideal for those who want a calm and loving presence.&quot; — &quot;View Details&quot;
+  4. &quot;Happy Explorer&quot; — &quot;This puppy is adventurous and eager to explore new things with you. Start an exciting journey together.&quot; — &quot;View Details&quot;
+
+Section &quot;testimonials&quot; (light band). Top to bottom:
+- eyebrow: &quot;Happy Tails&quot;
+- headline: &quot;Real Love, Real Puppies. Real Connections.&quot;
+- sub-line: &quot;Hear directly from happy families who have found their soulmate in a puppy. See the love in action.&quot;
+- paragraph: &quot;We believe every adoption is a journey built on trust and unconditional love. These stories showcase the incredible bonds formed when a loving home is found for a deserving pup.&quot;
+- quote: &quot;Bringing home [Puppy's Name] changed our lives. Their excitement is pure joy, and they are truly a member of our family now.&quot;
+- who said it: a name and a role: &quot;Sarah K., Adopter&quot;
+
+Section &quot;sign-up or contact form&quot; (light band). Top to bottom:
+- eyebrow: &quot;Ready to meet your best friend?&quot;
+- headline: &quot;Find Your Perfect Puppy Match&quot;
+- sub-line: &quot;Our curated list features loving, vetted pups waiting for their forever home. Start your application journey now and unlock endless possibilities.&quot;
+- paragraph: &quot;Let us guide you to the perfect companion who will bring joy and unconditional love into your life. Fill out the form and take the first step towards welcoming a furry member into your family.&quot;
+- button: &quot;Adopt a Puppy&quot;
+- a photo (animal-dog.webp)
+
+Section &quot;call to action&quot; (dark band). Top to bottom:
+- a photo (animal-dog.webp)
+- headline: &quot;Find Your Forever Friend Now&quot;
+- sub-line: &quot;Start your journey to finding your perfect, loving companion today.&quot;
+- button: &quot;Adopt a Puppy Today&quot;
+- small print: &quot;Ready to welcome a new family member?&quot;</pre></details>
+</article>
+<article class="run" id="K1-bakery">
+  <header class="run-head">
+    <p class="eyebrow">bakery</p>
+    <h3>“A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.”</h3>
+    <dl class="facts">
+      <div><dt>defects per line by round</dt><dd><svg class="spark" viewBox="0 0 120 36" width="120" height="36" role="img" aria-label="issue score by round: 0.83, 0.425, 0.257, 0.198, 0.267"><polyline points="4.0,8.8 32.0,20.1 60.0,24.8 88.0,26.5 116.0,24.5" fill="none" stroke="var(--signal)" stroke-width="1.5"/><circle cx="4.0" cy="8.8" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="32.0" cy="20.1" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="60.0" cy="24.8" r="3.2" fill="var(--signal)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="88.0" cy="26.5" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="116.0" cy="24.5" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/></svg> <span class="mono">0.83 → 0.425 → 0.257 → 0.198 → 0.267</span></dd></div>
+      <div><dt>kept</dt><dd class="mono">round 2</dd></div>
+      <div><dt>builder calls</dt><dd class="mono">50</dd></div>
+      <div><dt>reviewer tokens</dt><dd class="mono">97</dd></div>
+      <div><dt>free replays</dt><dd class="mono">315</dd></div>
+      <div><dt>minutes</dt><dd class="mono">7.3</dd></div>
+    </dl>
+    <p class="small"><b>Photos the reviewer kept:</b> —. <b>Facts it set itself to show:</b> —.</p>
+  </header>
+  <div class="pair">
+    <figure><figcaption>Round 0 <span class="mono">0.83 /line · organised 0.83</span></figcaption><div class="frame"><img src="shots/K1-bakery-r0-desktop.jpg" alt="bakery page, round 0" loading="lazy"></div></figure>
+    <figure><figcaption>Round 2, kept <span class="mono">0.26 /line · organised 0.87</span></figcaption><div class="frame"><img src="shots/K1-bakery-r2-desktop.jpg" alt="bakery page, round 2" loading="lazy"></div></figure>
+  </div>
+  <details><summary>What the agent found in round 0, and what it fixed (15 of 23)</summary>
+    <ul class="issues"><li class="fixed"><span class="chip">fixed</span> the list in &quot;gallery&quot; shows the same photo 3 times <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> the list in &quot;call to action&quot; shows the same photo 2 times <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> the list in &quot;feature cards&quot; shows the same photo 2 times <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> &quot;food-bread.webp&quot; appears 9 times on the page <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> &quot;food-bread.webp&quot; appears 9 times on the page <span class="op">re-ask a decision</span></li><li class="open"><span class="chip">still open</span> &quot;food-bread.webp&quot; appears 9 times on the page <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> &quot;Lyon Family Bakery&quot; repeats &quot;Lyon Family Bakery&quot; <span class="op">re-word a line</span></li><li class="open"><span class="chip">still open</span> &quot;Artisan Sourdough&quot; repeats &quot;Artisan Sourdough&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> three dark bands in a row <span class="op">flip to 2nd choice</span></li><li class="fixed"><span class="chip">fixed</span> three dark bands in a row <span class="op">flip to 2nd choice</span></li><li class="fixed"><span class="chip">fixed</span> three dark bands in a row <span class="op">flip to 2nd choice</span></li><li class="fixed"><span class="chip">fixed</span> three dark bands in a row <span class="op">flip to 2nd choice</span></li><li class="open"><span class="chip">still open</span> &quot;lyon family bakery&quot; is said 4 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;lyon family bakery&quot; is said 4 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;croissants and exquisite&quot; is said 6 times on the page <span class="op">re-word a line</span></li><li class="open"><span class="chip">still open</span> &quot;croissants and exquisite&quot; is said 6 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> four &quot;imageGround&quot; bands in a row <span class="op">flip to 2nd choice</span></li><li class="open"><span class="chip">still open</span> the &quot;gallery&quot; list repeats the items of &quot;feature cards&quot; (&quot;Artisan Sourdough Loaf&quot;, &quot;Butter Croissant&quot;, &quot;Chocolate Ganache Cake&quot;, &quot;Almond Croissant&quot;) <span class="op">re-word a line</span></li><li class="open"><span class="chip">still open</span> the &quot;call to action&quot; list repeats the items of &quot;feature cards&quot; (&quot;Artisan Sourdough&quot;, &quot;Flaky Croissants&quot;, &quot;Signature Cakes&quot;) <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> reviewer (p=0.821): &quot;Open Daily at Lyon's historic heart.&quot; contradicts the request or invents a detail <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> reviewer (p=0.73): add a &quot;location and hours&quot; section <span class="op">add a section</span></li><li class="open"><span class="chip">still open</span> reviewer: organised p=0.828</li><li class="open"><span class="chip">still open</span> reviewer: type and parts suit p=0.878</li></ul>
+  </details>
+  <details><summary>The page in words, as the reviewer read it (round 2)</summary><pre>Section &quot;hero&quot; (dark band). Top to bottom:
+- eyebrow: &quot;Lyon Family Bakery&quot;
+- headline: &quot;Artisan Baking in the Heart of Lyon&quot;
+- sub-line: &quot;Experience the tradition of fresh sourdough, flaky croissants, and exquisite cakes, made with love in our family kitchen.&quot;
+- button: &quot;View Our Offerings&quot;
+- a photo (food-bakery.webp)
+
+Section &quot;feature cards&quot; (light band). Top to bottom:
+- a photo (food-bread.webp)
+- headline: &quot;Lyon's Finest Family Bakery&quot;
+- sub-line: &quot;Handcrafted sourdough, delicate croissants, and exquisite cakes made with timeless family recipes.&quot;
+- 3 featureItems in a grid, each: icon, title, sentence or two, button:
+  1. &quot;Artisan Sourdough&quot; — &quot;Handcrafted with a slow, natural fermentation process for unparalleled depth of flavor. Perfect for your morning meal.&quot; — &quot;View Sourdough&quot;
+  2. &quot;Flaky Croissants&quot; — &quot;Butter-rich layers, perfectly golden and crisp, baked fresh daily to bring you pure French comfort.&quot; — &quot;View Croissants&quot;
+  3. &quot;Signature Cakes&quot; — &quot;Moist, decadent creations for every occasion, featuring seasonal fruits and rich, velvety textures.&quot; — &quot;View Cakes&quot;
+
+Section &quot;about&quot; (light band). Top to bottom:
+- eyebrow: &quot;Lyon's Family Bakery&quot;
+- headline: &quot;Timeless Baking, Warm Hearts.&quot;
+- sub-line: &quot;Generations of passion baked into every loaf, serving the soul of Lyon with authentic sourdough and exquisite treats.&quot;
+- paragraph: &quot;At our bakery, we honor the slow, careful craft. From the first rise of our sourdough to the delicate layers of a perfect croissant, we bring the comforting warmth of a true family kitchen to your table.&quot;
+- quote: &quot;Taste the difference tradition makes; a moment of pure, handcrafted joy in every bite.&quot;
+- who said it: a name and a role: &quot;Chef Antoine, Head Baker&quot;
+
+Section &quot;gallery&quot; (light band). Top to bottom:
+- headline: &quot;Artisan Breads &amp; Sweet Delights in Lyon&quot;
+- sub-line: &quot;Experience authentic family baking, featuring slow-fermented sourdough, flaky croissants, and exquisite cakes.&quot;
+- a photo (food-bakery.webp)
+- 6 cards in a grid, each: icon, title, sentence or two, price:
+  1. &quot;Classic Sourdough Loaf&quot; — &quot;Our slow-fermented sourdough, perfect for dipping or spreading. Made with family recipes and the finest local flour.&quot; — &quot;€5.50&quot;
+  2. &quot;Butter Croissant Trio&quot; — &quot;Light, airy, and perfectly laminated. Experience the true taste of a Lyon morning with our buttery delights.&quot; — &quot;€3.90&quot;
+  3. &quot;Rich Chocolate Cake&quot; — &quot;Decadent dark chocolate cake layered with rich ganache. A perfect indulgence for any occasion.&quot; — &quot;€7.50&quot;
+  4. &quot;Seasonal Fruit Tart&quot; — &quot;Delicate pastry filled with fresh, seasonal fruit. A sweet, vibrant treat perfect for afternoon tea.&quot; — &quot;€6.20&quot;
+  5. &quot;Pain de Campagne&quot; — &quot;Our rustic, hearty country bread. Naturally leavened and baked daily for authentic flavor.&quot; — &quot;€4.00&quot;
+  6. &quot;Velvet Éclair&quot; — &quot;Creamy pastry filled with vanilla bean cream. A timeless, elegant dessert for sweet moments.&quot; — &quot;€4.50&quot;
+
+Section &quot;schedule or line-up&quot; (dark band). Top to bottom:
+- headline: &quot;Your Daily Bread Awaits in Lyon&quot;
+- sub-line: &quot;Handcrafted sourdough, flaky croissants, and exquisite cakes daily.&quot;
+- date and place: &quot;Open Tuesday through Sunday at our Lyon home.&quot;
+
+Section &quot;location and hours&quot; (light band). Top to bottom:
+- eyebrow: &quot;Lyon Local Bakery&quot;
+- headline: &quot;Your Family's Lyon Bakery&quot;
+- sub-line: &quot;Dedicated to traditional sourdough, buttery croissants, and beautiful cakes.&quot;
+- date and place: &quot;Open daily, serving you the best of Lyon's artisan ovens.&quot;
+
+Section &quot;call to action&quot; (dark band). Top to bottom:
+- a photo (food-bakery.webp)
+- headline: &quot;Taste the Heart of Lyon Baking&quot;
+- sub-line: &quot;Authentic sourdough, delicate croissants, and cherished cakes, crafted for your family.&quot;
+- button: &quot;See Our Treats&quot;
+- 3 cards in a grid, each: icon, title, sentence or two, button:
+  1. &quot;Artisan Sourdough Loaves&quot; — &quot;Our slow-fermented sourdough, crafted with love in Lyon, is the perfect accompaniment to your morning coffee or evening meal. Experience the authentic, tangy flavor.&quot; — &quot;See Sourdough&quot;
+  2. &quot;Flaky Butter Croissants&quot; — &quot;Golden, buttery croissants, laminated daily for unparalleled crispness. The ultimate French indulgence awaits you this weekend.&quot; — &quot;View Croissants&quot;
+  3. &quot;Signature Decadent Cakes&quot; — &quot;From rich chocolate ganache to delicate fruit tarts, discover our handcrafted cakes. Perfect for any celebration or quiet treat.&quot; — &quot;Explore Cakes&quot;</pre></details>
+</article>
+<article class="run" id="K1-running">
+  <header class="run-head">
+    <p class="eyebrow">running</p>
+    <h3>“A sign-up page for a Saturday morning running club in the park. Energetic, green.”</h3>
+    <dl class="facts">
+      <div><dt>defects per line by round</dt><dd><svg class="spark" viewBox="0 0 120 36" width="120" height="36" role="img" aria-label="issue score by round: 0.618, 0.449, 0.321, 0.296, 0.318"><polyline points="4.0,14.7 32.0,19.4 60.0,23.0 88.0,23.7 116.0,23.1" fill="none" stroke="var(--signal)" stroke-width="1.5"/><circle cx="4.0" cy="14.7" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="32.0" cy="19.4" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="60.0" cy="23.0" r="3.2" fill="var(--signal)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="88.0" cy="23.7" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="116.0" cy="23.1" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/></svg> <span class="mono">0.618 → 0.449 → 0.321 → 0.296 → 0.318</span></dd></div>
+      <div><dt>kept</dt><dd class="mono">round 2</dd></div>
+      <div><dt>builder calls</dt><dd class="mono">34</dd></div>
+      <div><dt>reviewer tokens</dt><dd class="mono">84</dd></div>
+      <div><dt>free replays</dt><dd class="mono">218</dd></div>
+      <div><dt>minutes</dt><dd class="mono">6.1</dd></div>
+    </dl>
+    <p class="small"><b>Photos the reviewer kept:</b> —. <b>Facts it set itself to show:</b> —.</p>
+  </header>
+  <div class="pair">
+    <figure><figcaption>Round 0 <span class="mono">0.62 /line · organised 0.05</span></figcaption><div class="frame"><img src="shots/K1-running-r0-desktop.jpg" alt="running page, round 0" loading="lazy"></div></figure>
+    <figure><figcaption>Round 2, kept <span class="mono">0.32 /line · organised 0.74</span></figcaption><div class="frame"><img src="shots/K1-running-r2-desktop.jpg" alt="running page, round 2" loading="lazy"></div></figure>
+  </div>
+  <details><summary>What the agent found in round 0, and what it fixed (9 of 15)</summary>
+    <ul class="issues"><li class="fixed"><span class="chip">fixed</span> &quot;A relaxed but powerful session at 1:00 PM near the central green. Finish your weekend strong with us!&quot; talks about the page's styling (&quot;green&quot;) <span class="op">re-word a line</span></li><li class="open"><span class="chip">still open</span> button &quot;Sign up for the Saturday morning running club&quot; is too long for a button <span class="op">re-word a line</span></li><li class="open"><span class="chip">still open</span> &quot;Park Runners: Saturday Morning Speed&quot; repeats &quot;Park Runners: Saturday Morning Speed&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;join the fastest&quot; is said 5 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;join the fastest&quot; is said 5 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;join the fastest&quot; is said 5 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;every saturday morning&quot; is said 6 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;every saturday morning&quot; is said 6 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> four &quot;band&quot; bands in a row <span class="op">flip to 2nd choice</span></li><li class="fixed"><span class="chip">fixed</span> reviewer (p=0.117): weakest line sub-line &quot;Running club meets you in the park. Join the faste&quot; <span class="op">re-word a line</span></li><li class="open"><span class="chip">still open</span> reviewer (p=0.14): weakest line sub-line &quot;Your Saturday morning cardio starts here. Lace up &quot; <span class="op">re-word a line</span></li><li class="open"><span class="chip">still open</span> reviewer (p=0.275): weakest line paragraph &quot;Forget the snooze button. This is where commitment&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> reviewer (p=0.813): drop section 2. about <span class="op">drop a section</span></li><li class="open"><span class="chip">still open</span> reviewer: organised p=0.054 <span class="op">re-ask a decision</span></li><li class="open"><span class="chip">still open</span> reviewer: type and parts suit p=0.774</li></ul>
+  </details>
+  <details><summary>The page in words, as the reviewer read it (round 2)</summary><pre>Section &quot;hero&quot; (dark band). Top to bottom:
+- eyebrow: &quot;RUN. SPARK. REPEAT.&quot;
+- headline: &quot;Unleash Your Saturday Morning Run.&quot;
+- sub-line: &quot;Join the fastest, freshest running club in the city. Conquer the park, beat the morning.&quot;
+- paragraph: &quot;Tired of the snooze button? We meet every Saturday morning, powered by pure energy and open trails. No excuses, just movement. Come feel the rush!&quot;
+- button: &quot;Sign Up Now&quot;
+- date and place: &quot;Every Saturday Morning | Your Local Park&quot;
+
+Section &quot;about&quot; (light band). Top to bottom:
+- eyebrow: &quot;Run Harder&quot;
+- headline: &quot;Park Runners: Saturday Morning Power&quot;
+- sub-line: &quot;Dominate the streets this weekend. This is where the city's fittest runners assemble for epic Saturday morning sprints through the park.&quot;
+- paragraph: &quot;We are the elite crew hitting the pavement every Saturday. Lace up and join the movement. Sweat, conquer, and become part of the force that moves through the park.&quot;
+- button: &quot;Sign Up Now&quot;
+- date and place: &quot;Every Saturday. Meet at the park gates.&quot;
+
+Section &quot;location and hours&quot; (light band). Top to bottom:
+- eyebrow: &quot;Saturday Runs&quot;
+- headline: &quot;Park Runners: Saturday Morning Grind&quot;
+- sub-line: &quot;Hit the pavement with the local crew. We meet every Saturday at the park for an intense, high-energy workout. Fitness is our fuel.&quot;
+- button: &quot;Join the Team&quot;
+- date and place: &quot;Every Saturday. Meet us at the City Park entrance sharp at 7:00 AM.&quot;
+
+Section &quot;schedule or line-up&quot; (light band). Top to bottom:
+- eyebrow: &quot;Park Run Sign-Up&quot;
+- headline: &quot;Park Runners: Conquer Saturday Mornings.&quot;
+- sub-line: &quot;Join the fastest, freshest running club in the city. Conquer your goals with us.&quot;
+- date and place: &quot;Every Saturday morning, meet us at the city park.&quot;
+- 3 cards in a grid, each: icon, title, time or date, sentence or two:
+  1. &quot;Morning Warm-up Run&quot; — &quot;8:00 AM&quot; — &quot;A relaxed start to the day to get everyone moving and stretch before the main run.&quot;
+  2. &quot;Main Park Circuit&quot; — &quot;9:00 AM&quot; — &quot;Our signature route through the park offering a challenging but fun interval workout.&quot;
+  3. &quot;Cool Down &amp; Social&quot; — &quot;10:00 AM&quot; — &quot;A slower pace to recover, followed by a chance to socialize and chat with fellow runners.&quot;
+
+Section &quot;sign-up or contact form&quot; (light band). Top to bottom:
+- eyebrow: &quot;Ready to Run?&quot;
+- headline: &quot;Park Runners: Your Saturday Sweat Starts Now&quot;
+- sub-line: &quot;Lace up for the epic Saturday morning grind in the park. Join the relentless crew. No excuses, just pure speed.&quot;
+- paragraph: &quot;Forget the slow pace. We are a high-energy, no-nonsense running collective meeting at dawn in the park. Push your limits with us.&quot;
+- a form field: &quot;Name&quot; / &quot;Your name&quot;
+- a form field: &quot;Email&quot; / &quot;you@example.com&quot;
+- a form field: &quot;Message&quot; / &quot;Your message&quot;
+- button: &quot;Join the Pack&quot;
+- button: &quot;Sign up for the Saturday morning running club&quot;
+
+Section &quot;call to action&quot; (dark band). Top to bottom:
+- headline: &quot;Run. Park. Repeat. Saturdays.&quot;
+- sub-line: &quot;Join the relentless crew dominating the early morning miles in the local green space.&quot;
+- button: &quot;Sign Up Now!&quot;
+- date and place: &quot;Every Saturday. Meet at the park gates.&quot;
+- paragraph: &quot;Stop watching. Start moving. Sweat with the pack and claim your spot on the pavement. This is where the real energy begins.&quot;</pre></details>
+</article>
+<article class="run" id="K1-jazz">
+  <header class="run-head">
+    <p class="eyebrow">jazz</p>
+    <h3>“A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.”</h3>
+    <dl class="facts">
+      <div><dt>defects per line by round</dt><dd><svg class="spark" viewBox="0 0 120 36" width="120" height="36" role="img" aria-label="issue score by round: 0.407, 0.371, 0.401, 0.237, 0.265"><polyline points="4.0,20.6 32.0,21.6 60.0,20.8 88.0,25.4 116.0,24.6" fill="none" stroke="var(--signal)" stroke-width="1.5"/><circle cx="4.0" cy="20.6" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="32.0" cy="21.6" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="60.0" cy="20.8" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="88.0" cy="25.4" r="3.2" fill="var(--signal)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="116.0" cy="24.6" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/></svg> <span class="mono">0.407 → 0.371 → 0.401 → 0.237 → 0.265</span></dd></div>
+      <div><dt>kept</dt><dd class="mono">round 3</dd></div>
+      <div><dt>builder calls</dt><dd class="mono">61</dd></div>
+      <div><dt>reviewer tokens</dt><dd class="mono">99</dd></div>
+      <div><dt>free replays</dt><dd class="mono">269</dd></div>
+      <div><dt>minutes</dt><dd class="mono">6.7</dd></div>
+    </dl>
+    <p class="small"><b>Photos the reviewer kept:</b> —. <b>Facts it set itself to show:</b> —.</p>
+  </header>
+  <div class="pair">
+    <figure><figcaption>Round 0 <span class="mono">0.41 /line · organised 0.16</span></figcaption><div class="frame"><img src="shots/K1-jazz-r0-desktop.jpg" alt="jazz page, round 0" loading="lazy"></div></figure>
+    <figure><figcaption>Round 3, kept <span class="mono">0.24 /line · organised 0.14</span></figcaption><div class="frame"><img src="shots/K1-jazz-r3-desktop.jpg" alt="jazz page, round 3" loading="lazy"></div></figure>
+  </div>
+  <details><summary>What the agent found in round 0, and what it fixed (6 of 12)</summary>
+    <ul class="issues"><li class="open"><span class="chip">still open</span> &quot;The Blue Room: An Elegant Jazz Evening&quot; repeats &quot;The Blue Room: An Elegant Jazz Evening&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;An elegant evening of sophisticated melodies awaits you on November 14th. Discover the unforgettable sound.&quot; repeats &quot;An elegant evening of sophisticated melodies awaits you on November 14th.&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;Purchase Tickets Now&quot; repeats &quot;Purchase Tickets Now&quot; <span class="op">re-word a line</span></li><li class="open"><span class="chip">still open</span> &quot;elegant jazz evening&quot; is said 4 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;elegant jazz evening&quot; is said 4 times on the page <span class="op">re-word a line</span></li><li class="open"><span class="chip">still open</span> &quot;at the blue&quot; is said 6 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;evening of sophisticated&quot; is said 4 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> four &quot;band&quot; bands in a row <span class="op">flip to 2nd choice</span></li><li class="open"><span class="chip">still open</span> render: single-column-grid</li><li class="fixed"><span class="chip">fixed</span> reviewer (p=0.779): add a &quot;menu or prices&quot; section <span class="op">add a section</span></li><li class="open"><span class="chip">still open</span> reviewer: organised p=0.161 <span class="op">re-ask a decision</span></li><li class="open"><span class="chip">still open</span> reviewer: type and parts suit p=0.921</li></ul>
+  </details>
+  <details><summary>The page in words, as the reviewer read it (round 3)</summary><pre>Section &quot;hero&quot; (dark band). Top to bottom:
+- eyebrow: &quot;Elegant Jazz Evening&quot;
+- headline: &quot;An Elegant Evening of Jazz at The Blue Room&quot;
+- sub-line: &quot;Join us for an unforgettable night immersed in the finest sounds of jazz. A sophisticated affair awaits you.&quot;
+- date and place: &quot;Mark your calendar: November 14th at The Blue Room.&quot;
+- button: &quot;Purchase Tickets Now&quot;
+
+Section &quot;schedule or line-up&quot; (light band). Top to bottom:
+- headline: &quot;A Classic Jazz Soirée&quot;
+- sub-line: &quot;An evening of sophisticated melodies awaits you.&quot;
+- paragraph: &quot;Experience timeless rhythms and exquisite ambiance this November. Prepare for an evening of unparalleled musical artistry.&quot;
+- price: &quot;Tickets available now.&quot;
+- 3 cards in a grid, each: icon, title, sentence or two, time or date:
+  1. &quot;Opening Set: Miles Davis Tribute&quot; — &quot;An intimate evening featuring the timeless sounds of Miles Davis's most evocative period, setting a sophisticated and soulful tone for the night.&quot; — &quot;7:00 PM&quot;
+  2. &quot;Improvisation Hour with Sarah Jenkins&quot; — &quot;Featuring an evening dedicated to spontaneous and brilliant improvisation, showcasing the incredible talent and deep musical knowledge of Sarah Jenkins.&quot; — &quot;9:30 PM&quot;
+  3. &quot;Late Night Quartet: The Blue Notes&quot; — &quot;A relaxed conclusion with a classic quartet exploring the deeper, more melancholic facets of modern jazz, perfect for late-night contemplation.&quot; — &quot;11:00 PM&quot;
+
+Section &quot;location and hours&quot; (light band). Top to bottom:
+- headline: &quot;A Classic Jazz Soirée&quot;
+- sub-line: &quot;Experience the pinnacle of smooth, sophisticated jazz in an intimate setting.&quot;
+- date and place: &quot;14 November at The Blue Room&quot;
+- paragraph: &quot;An evening of refined musical artistry and timeless ambiance awaits. Prepare for an atmosphere steeped in cool, soulful sounds.&quot;
+- price: &quot;Tickets available online.&quot;
+
+Section &quot;how it works&quot; (light band). Top to bottom:
+- eyebrow: &quot;Jazz Evening&quot;
+- headline: &quot;The Blue Room: A Jazz Soirée&quot;
+- sub-line: &quot;An elegant night dedicated to the finest sounds of jazz on November 14th.&quot;
+- paragraph: &quot;Join us for an unforgettable musical journey. Discover curated performances and an atmosphere of refined elegance.&quot;
+- button: &quot;Purchase Tickets&quot;
+- 3 cards in a single column, each: icon, step number, title, sentence or two:
+  1. &quot;1&quot; — &quot;View Event Details&quot; — &quot;Review the full schedule, venue information, and artist profiles for this special jazz evening.&quot;
+  2. &quot;2&quot; — &quot;Select Your Seats&quot; — &quot;Choose your preferred seating area and ticket type to secure your spot for the night.&quot;
+  3. &quot;3&quot; — &quot;Complete Purchase&quot; — &quot;Finalize your order by entering your payment information and confirming the ticket purchase.&quot;
+
+Section &quot;gallery&quot; (light band). Top to bottom:
+- eyebrow: &quot;Evening Plans&quot;
+- headline: &quot;An Elegant Night for the Soul&quot;
+- sub-line: &quot;An exquisite musical journey awaits you on November 14th.&quot;
+- quote: &quot;Let the melodies guide you into an atmosphere of timeless grace and sophisticated rhythm.&quot;
+- who said it: a name and a role: &quot; curator: This evening is crafted for the discerning ear.&quot;
+
+Section &quot;menu or prices&quot; (light band). Top to bottom:
+- eyebrow: &quot;Jazz Evening&quot;
+- headline: &quot;The Blue Room: An Elegant Night for the Soul&quot;
+- sub-line: &quot;An exquisite musical journey awaits you on November 14th. Experience the pinnacle of live jazz in an intimate setting.&quot;
+- price: &quot;Tickets from $45&quot;
+- button: &quot;Book Your Tickets&quot;
+- 3 cards in a grid, each: icon, title, sentence or two, price:
+  1. &quot;General Admission&quot; — &quot;Entry to the elegant jazz evening. Enjoy a refined atmosphere and live music.&quot; — &quot;$35&quot;
+  2. &quot;VIP Lounge Access&quot; — &quot;Exclusive access to the private lounge for an enhanced listening experience and complimentary refreshments.&quot; — &quot;$65&quot;
+  3. &quot;Dinner &amp; Show Package&quot; — &quot;Includes a seated dinner and a premium view of the performance. The ultimate night out.&quot; — &quot;$120&quot;
+
+Section &quot;call to action&quot; (dark band). Top to bottom:
+- headline: &quot;Experience Jazz at The Blue Room&quot;
+- sub-line: &quot;An exquisite evening featuring world-class musicians. Secure your place for this sophisticated musical event.&quot;
+- button: &quot;Book Now&quot;
+- price: &quot;Tickets Available&quot;</pre></details>
+</article>
+<article class="run" id="K1-pottery">
+  <header class="run-head">
+    <p class="eyebrow">pottery</p>
+    <h3>“A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.”</h3>
+    <dl class="facts">
+      <div><dt>defects per line by round</dt><dd><svg class="spark" viewBox="0 0 120 36" width="120" height="36" role="img" aria-label="issue score by round: 0.307, 0.149, 0.07, 0.035"><polyline points="4.0,23.4 41.3,27.8 78.7,30.0 116.0,31.0" fill="none" stroke="var(--signal)" stroke-width="1.5"/><circle cx="4.0" cy="23.4" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="41.3" cy="27.8" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="78.7" cy="30.0" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="116.0" cy="31.0" r="3.2" fill="var(--signal)" stroke="var(--signal)" stroke-width="1.2"/></svg> <span class="mono">0.307 → 0.149 → 0.07 → 0.035</span></dd></div>
+      <div><dt>kept</dt><dd class="mono">round 3</dd></div>
+      <div><dt>builder calls</dt><dd class="mono">20</dd></div>
+      <div><dt>reviewer tokens</dt><dd class="mono">64</dd></div>
+      <div><dt>free replays</dt><dd class="mono">221</dd></div>
+      <div><dt>minutes</dt><dd class="mono">4.2</dd></div>
+    </dl>
+    <p class="small"><b>Photos the reviewer kept:</b> —. <b>Facts it set itself to show:</b> —.</p>
+  </header>
+  <div class="pair">
+    <figure><figcaption>Round 0 <span class="mono">0.31 /line · organised 0.92</span></figcaption><div class="frame"><img src="shots/K1-pottery-r0-desktop.jpg" alt="pottery page, round 0" loading="lazy"></div></figure>
+    <figure><figcaption>Round 3, kept <span class="mono">0.04 /line · organised 0.93</span></figcaption><div class="frame"><img src="shots/K1-pottery-r3-desktop.jpg" alt="pottery page, round 3" loading="lazy"></div></figure>
+  </div>
+  <details><summary>What the agent found in round 0, and what it fixed (8 of 11)</summary>
+    <ul class="issues"><li class="fixed"><span class="chip">fixed</span> the list in &quot;gallery&quot; shows the same photo 2 times <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> &quot;work-hands-clay.webp&quot; appears 3 times on the page <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> &quot;View Portfolio &amp; Book&quot; repeats &quot;View Portfolio &amp; Book&quot; <span class="op">re-word a line</span></li><li class="open"><span class="chip">still open</span> &quot;View Portfolio &amp; Book&quot; repeats &quot;View Portfolio &amp; Book&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;Handmade Pottery &amp; Classes&quot; repeats &quot;Handmade Pottery &amp; Classes&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;View Portfolio &amp; Book&quot; repeats &quot;View Portfolio &amp; Book&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;unique handcrafted bowls&quot; is said 4 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;unique handcrafted bowls&quot; is said 4 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;view portfolio book&quot; is said 4 times on the page <span class="op">re-word a line</span></li><li class="open"><span class="chip">still open</span> reviewer: organised p=0.924</li><li class="open"><span class="chip">still open</span> reviewer: type and parts suit p=0.97</li></ul>
+  </details>
+  <details><summary>The page in words, as the reviewer read it (round 3)</summary><pre>Section &quot;hero&quot; (dark band). Top to bottom:
+- eyebrow: &quot;Pottery &amp; Classes&quot;
+- headline: &quot;Handmade Pottery. Weekend Classes.&quot;
+- sub-line: &quot;Discover unique, handcrafted bowls and learn traditional pottery techniques in intimate weekend sessions.&quot;
+- button: &quot;View Portfolio &amp; Book&quot;
+- a photo (work-potter.webp)
+
+Section &quot;gallery&quot; (dark band). Top to bottom:
+- a photo (people-market.webp)
+- headline: &quot;Artisan Pottery. Studio Lessons.&quot;
+- sub-line: &quot;Explore our collection of unique, handcrafted bowls and enroll in hands-on weekend workshops.&quot;
+- 6 cards in a grid, each: title, sentence or two, button:
+  1. &quot;Ocean Glaze Bowl Set&quot; — &quot;Hand-thrown ceramic bowls featuring a unique, shimmering ocean glaze. Perfect for everyday use and stunning display.&quot; — &quot;View Details&quot;
+  2. &quot;Rustic Earth Mug&quot; — &quot;Sturdy, matte finish mug with an earthy, unglazed texture. Ideal for morning coffee or tea.&quot; — &quot;View Details&quot;
+  3. &quot;Minimalist Serving Platter&quot; — &quot;Wide, shallow platter with clean lines, perfect for showcasing fresh ingredients.&quot; — &quot;View Details&quot;
+  4. &quot;Deep Indigo Vase&quot; — &quot;Tall, elegant vase with a deep, textured indigo wash. Adds sculptural appeal to any space.&quot; — &quot;View Details&quot;
+  5. &quot;Sunrise Speckled Bowl&quot; — &quot;A delicate bowl with subtle, warm speckles mimicking a sunrise. Beautiful for special occasions.&quot; — &quot;View Details&quot;
+  6. &quot;Studio Collection Set&quot; — &quot;A curated set of six complementary bowls, showcasing the range of my current firing techniques.&quot; — &quot;View Details&quot;
+
+Section &quot;how it works&quot; (light band). Top to bottom:
+- headline: &quot;Crafted Pieces &amp; Lessons.&quot;
+- sub-line: &quot;Shop unique, handcrafted pottery or join our weekend studio sessions.&quot;
+- paragraph: &quot;See the collection of handmade bowls or sign up for a hands-on class experience.&quot;
+- button: &quot;Explore &amp; Enroll&quot;
+- 3 cards in a grid, each: step number, title, sentence or two, button:
+  1. &quot;1&quot; — &quot;View Handmade Bowls&quot; — &quot;Browse my collection of unique, handcrafted ceramic bowls. Each piece is individually made with care and artistry.&quot; — &quot;Shop Portfolio&quot;
+  2. &quot;2&quot; — &quot;Enroll in a Class&quot; — &quot;Discover weekend workshops to learn pottery skills from me. Limited spots available for personalized instruction.&quot; — &quot;Book a Class&quot;
+  3. &quot;3&quot; — &quot;How to Order &amp; Book&quot; — &quot;Follow these simple steps to purchase pottery or secure your spot in a class. Easy process guaranteed.&quot; — &quot;Learn More&quot;
+
+Section &quot;schedule or line-up&quot; (light band). Top to bottom:
+- headline: &quot;Pottery &amp; Classes&quot;
+- sub-line: &quot;Discover handmade bowls and weekend workshops.&quot;
+- date and place: &quot;Weekends at The Clay Studio.&quot;
+- price: &quot;$50/class&quot;
+- button: &quot;View Portfolio &amp; Enroll&quot;
+
+Section &quot;about&quot; (dark band). Top to bottom:
+- eyebrow: &quot;Pottery Portfolio&quot;
+- headline: &quot;Handmade Pottery &amp; Workshops&quot;
+- sub-line: &quot;Curated ceramics and weekend instruction for all skill levels.&quot;
+- paragraph: &quot;Explore unique, handcrafted bowls made with care. Learn the art of pottery in intimate weekend classes designed for beginners.&quot;
+- quote: &quot;Every piece carries a touch of the maker's intention and a promise of creative escape.&quot;
+- who said it: a name and a role: &quot;Studio Owner&quot;
+
+Section &quot;sign-up or contact form&quot; (light band). Top to bottom:
+- eyebrow: &quot;Get Started&quot;
+- headline: &quot;Pottery Portfolio &amp; Classes&quot;
+- sub-line: &quot;Browse handcrafted bowls or schedule a weekend class. Start your creative journey today.&quot;
+- a form field: &quot;Name&quot; / &quot;Your name&quot;
+- a form field: &quot;Email&quot; / &quot;you@example.com&quot;
+- a form field: &quot;Message&quot; / &quot;Your message&quot;
+- button: &quot;Inquire Now&quot;
+- button: &quot;View Portfolio&quot;
+
+Section &quot;footer&quot; (light band). Top to bottom:
+- headline: &quot;Artisan Pottery &amp; Studio Access&quot;
+- paragraph: &quot;Discover unique handcrafted ceramics or enroll in hands-on weekend workshops.&quot;
+- button: &quot;View Work &amp; Book&quot;
+- small print: &quot;Explore collections and class schedules.&quot;</pre></details>
+</article>
+<article class="run" id="K1-plumber">
+  <header class="run-head">
+    <p class="eyebrow">plumber</p>
+    <h3>“A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.”</h3>
+    <dl class="facts">
+      <div><dt>defects per line by round</dt><dd><svg class="spark" viewBox="0 0 120 36" width="120" height="36" role="img" aria-label="issue score by round: 0.595, 0.278, 0.278, 0.222"><polyline points="4.0,15.3 41.3,24.2 78.7,24.2 116.0,25.8" fill="none" stroke="var(--signal)" stroke-width="1.5"/><circle cx="4.0" cy="15.3" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="41.3" cy="24.2" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="78.7" cy="24.2" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="116.0" cy="25.8" r="3.2" fill="var(--signal)" stroke="var(--signal)" stroke-width="1.2"/></svg> <span class="mono">0.595 → 0.278 → 0.278 → 0.222</span></dd></div>
+      <div><dt>kept</dt><dd class="mono">round 3</dd></div>
+      <div><dt>builder calls</dt><dd class="mono">13</dd></div>
+      <div><dt>reviewer tokens</dt><dd class="mono">56</dd></div>
+      <div><dt>free replays</dt><dd class="mono">194</dd></div>
+      <div><dt>minutes</dt><dd class="mono">3.5</dd></div>
+    </dl>
+    <p class="small"><b>Photos the reviewer kept:</b> —. <b>Facts it set itself to show:</b> —.</p>
+  </header>
+  <div class="pair">
+    <figure><figcaption>Round 0 <span class="mono">0.59 /line · organised 0.92</span></figcaption><div class="frame"><img src="shots/K1-plumber-r0-desktop.jpg" alt="plumber page, round 0" loading="lazy"></div></figure>
+    <figure><figcaption>Round 3, kept <span class="mono">0.22 /line · organised 0.87</span></figcaption><div class="frame"><img src="shots/K1-plumber-r3-desktop.jpg" alt="plumber page, round 3" loading="lazy"></div></figure>
+  </div>
+  <details><summary>What the agent found in round 0, and what it fixed (7 of 10)</summary>
+    <ul class="issues"><li class="fixed"><span class="chip">fixed</span> &quot;Request Call-Back&quot; repeats &quot;Request Callback&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;Request Call-Back&quot; repeats &quot;Request Callback&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;Request Call-Back&quot; repeats &quot;Request Callback&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> a second form (already in &quot;sign-up or contact form&quot;) <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> four &quot;band&quot; bands in a row <span class="op">flip to 2nd choice</span></li><li class="fixed"><span class="chip">fixed</span> four &quot;band&quot; bands in a row <span class="op">flip to 2nd choice</span></li><li class="fixed"><span class="chip">fixed</span> render: single-ground</li><li class="open"><span class="chip">still open</span> render: minimum-layout-width</li><li class="open"><span class="chip">still open</span> reviewer: organised p=0.918</li><li class="open"><span class="chip">still open</span> reviewer: type and parts suit p=0.95</li></ul>
+  </details>
+  <details><summary>The page in words, as the reviewer read it (round 3)</summary><pre>Section &quot;hero&quot; (dark band). Top to bottom:
+- eyebrow: &quot;Trusted Local Experts&quot;
+- headline: &quot;Reliable Plumbing Services When You Need Them Most&quot;
+- sub-line: &quot;For dependable, professional plumbing solutions in your home or business. Contact us for a callback.&quot;
+- button: &quot;Request Callback&quot;
+
+Section &quot;about&quot; (light band). Top to bottom:
+- headline: &quot;Your Trusted Local Plumbing Experts&quot;
+- sub-line: &quot;Experience the comfort of professional, reliable plumbing service delivered with integrity and care.&quot;
+- paragraph: &quot;We understand that plumbing issues are urgent. Our experienced team is dedicated to providing prompt, high-quality solutions to keep your home running smoothly and safely.&quot;
+- quote: &quot;Our commitment is simple: quality workmanship and honest service, every single time.&quot;
+- who said it: a name and a role: &quot;John Doe, Master Plumber&quot;
+- small print: &quot;Call us today to request a callback.&quot;
+
+Section &quot;feature cards&quot; (light band). Top to bottom:
+- headline: &quot;Expert Plumbing Services You Can Trust&quot;
+- sub-line: &quot;We handle all your plumbing needs with classic, dependable service.&quot;
+- button: &quot;Request a Call-Back&quot;
+- 3 featureItems in a grid, each: icon, title, sentence or two, button:
+  1. &quot;Emergency Repairs&quot; — &quot;Fast response for urgent plumbing issues. We fix leaks, clogs, and burst pipes quickly.&quot; — &quot;Call Now&quot;
+  2. &quot;Drain Cleaning&quot; — &quot;Professional services for slow drains and tough clogs. Restore your flow with our expert team.&quot; — &quot;Get Quote&quot;
+  3. &quot;Water Heater Install&quot; — &quot;Reliable installation and maintenance for all water heaters. Quality service you can trust.&quot; — &quot;Schedule Service&quot;
+
+Section &quot;testimonials&quot; (light band). Top to bottom:
+- headline: &quot;Quality Plumbing. Peace of Mind.&quot;
+- sub-line: &quot;For dependable plumbing services you can trust, we offer expert solutions for every home and business.&quot;
+- quote: &quot;This team arrived promptly and fixed our issue efficiently. A truly professional service!&quot;
+- who said it: a name and a role: &quot;John D., Homeowner&quot;
+- badge: &quot;Serving the community with generations of trusted plumbing expertise. Call us today for assistance.&quot;
+
+Section &quot;sign-up or contact form&quot; (light band). Top to bottom:
+- headline: &quot;Reliable Plumbing Solutions, Always Here&quot;
+- sub-line: &quot;Experience the trusted name for all your home plumbing requirements.&quot;
+- a form field: &quot;Name&quot; / &quot;Your name&quot;
+- a form field: &quot;Phone&quot; / &quot;Your phone number&quot;
+- a form field: &quot;Message&quot; / &quot;Your message&quot;
+- button: &quot;Schedule Your Visit&quot;
+- button: &quot;Arrange Call-Back&quot;
+
+Section &quot;location and hours&quot; (light band). Top to bottom:
+- headline: &quot;Expert Plumbing. Trusted Service.&quot;
+- sub-line: &quot;Your trusted local source for reliable home plumbing solutions.&quot;
+- paragraph: &quot;We provide professional plumbing services you can count on, addressing all your needs with integrity and skill.&quot;
+- button: &quot;Schedule Your Call&quot;
+- date and place: &quot;Serving the community daily from 8 AM to 5 PM, Monday through Saturday.&quot;</pre></details>
+</article></section>
+<section id="table"><p class="eyebrow">Session 1 · 28 October 2026</p><h2>Every brief</h2><p class="small">Score is the weighted count of what the critics found (lower is better); the agent keeps a round only when it beats the best so far.</p><div class="tablewrap"><table><thead><tr><th>brief</th><th>round 0</th><th>kept</th><th>rounds</th><th>builder calls</th><th>reviewer</th><th>min</th><th>random decisions, round 0</th><th>organised: random / model r0</th></tr></thead><tbody><tr><td>puppy</td><td class="num">27.7</td><td class="num"><b>9.44</b></td><td class="num">5</td><td class="num">111</td><td class="num">105</td><td class="num">8.9</td><td class="num">20.95</td><td class="num">0.582 / 0.865</td></tr><tr><td>bakery</td><td class="num">30.01</td><td class="num"><b>11.24</b></td><td class="num">5</td><td class="num">133</td><td class="num">136</td><td class="num">10.2</td><td class="num">15.57</td><td class="num">0.661 / 0.828</td></tr><tr><td>running</td><td class="num">28.9</td><td class="num"><b>7.77</b></td><td class="num">5</td><td class="num">68</td><td class="num">112</td><td class="num">6.9</td><td class="num">24.05</td><td class="num">0.771 / 0.866</td></tr><tr><td>jazz</td><td class="num">32.9</td><td class="num"><b>23.15</b></td><td class="num">5</td><td class="num">118</td><td class="num">134</td><td class="num">8.4</td><td class="num">29.28</td><td class="num">0.048 / 0.264</td></tr><tr><td>pottery</td><td class="num">17.59</td><td class="num"><b>2.64</b></td><td class="num">5</td><td class="num">64</td><td class="num">102</td><td class="num">5.4</td><td class="num">13.31</td><td class="num">0.629 / 0.938</td></tr><tr><td>plumber</td><td class="num">34.77</td><td class="num"><b>5.61</b></td><td class="num">4</td><td class="num">113</td><td class="num">100</td><td class="num">8.9</td><td class="num">28.21</td><td class="num">0.302 / 0.175</td></tr></tbody></table></div></section>
+<section id="control"><h2>The control: random decisions</h2><p>The same harness, the same words from the model, the same reviewer, but every structural choice (which parts, which grounds, how many items, the type pairing) drawn at random. On the defect score the random pages do as well or better, because they have 30–40% fewer parts to find fault with. To the eye it is not close.</p><div class="pair"><figure><figcaption>jazz: random decisions <span class="mono">score 8.01</span></figcaption><div class="frame"><img src="shots/R-jazz-r0-desktop.jpg" alt="jazz page built from random decisions" loading="lazy"></div></figure><figure><figcaption>jazz: the model's decisions, round 0 <span class="mono">score 27.84</span></figcaption><div class="frame"><img src="shots/A-jazz-r0-desktop.jpg" alt="jazz page built from the model's decisions" loading="lazy"></div></figure></div><div class="pair"><figure><figcaption>puppy: random decisions <span class="mono">score 25.93</span></figcaption><div class="frame"><img src="shots/R-puppy-r0-desktop.jpg" alt="puppy page built from random decisions" loading="lazy"></div></figure><figure><figcaption>puppy: the model's decisions, round 0 <span class="mono">score 21.5</span></figcaption><div class="frame"><img src="shots/A2-puppy-r0-desktop.jpg" alt="puppy page built from the model's decisions" loading="lazy"></div></figure></div><p class="small">So the defect score is used only to compare rounds of one page. An outline judge (the reviewer reading the page's section list) points the right way, if weakly: well organised, P(yes) 0.52 random, 0.63 the model's first build, 0.67 the kept round.</p></section>
+<section id="runs"><h2>Session 1 pages, before and after review</h2><p class="small">Each frame scrolls. Left: the first build, what a one-pass harness (OWN-027) would hand over. Right: the round the agent kept.</p><article class="run" id="Q-puppy">
+  <header class="run-head">
+    <p class="eyebrow">puppy</p>
+    <h3>“Make me a puppy adoption landing page please, blue colour theme, modern style.”</h3>
+    <dl class="facts">
+      <div><dt>score by round</dt><dd><svg class="spark" viewBox="0 0 120 36" width="120" height="36" role="img" aria-label="issue score by round: 27.7, 11.16, 9.44, 11.42, 10.54"><polyline points="4.0,4.0 32.0,20.7 60.0,22.5 88.0,20.5 116.0,21.3" fill="none" stroke="var(--signal)" stroke-width="1.5"/><circle cx="4.0" cy="4.0" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="32.0" cy="20.7" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="60.0" cy="22.5" r="3.2" fill="var(--signal)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="88.0" cy="20.5" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="116.0" cy="21.3" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/></svg> <span class="mono">27.7 → 11.16 → 9.44 → 11.42 → 10.54</span></dd></div>
+      <div><dt>kept</dt><dd class="mono">round 2</dd></div>
+      <div><dt>builder calls</dt><dd class="mono">111</dd></div>
+      <div><dt>reviewer tokens</dt><dd class="mono">105</dd></div>
+      <div><dt>free replays</dt><dd class="mono">259</dd></div>
+      <div><dt>minutes</dt><dd class="mono">8.9</dd></div>
+    </dl>
+    <p class="small"><b>Photos the reviewer kept:</b> kept animal-dog.webp of 32. <b>Facts it set itself to show:</b> “puppy adoption landing page”, “blue colour theme”, “modern style”.</p>
+  </header>
+  <div class="pair">
+    <figure><figcaption>Round 0 <span class="mono">score 27.7</span></figcaption><div class="frame"><img src="shots/Q-puppy-r0-desktop.jpg" alt="puppy page, round 0" loading="lazy"></div></figure>
+    <figure><figcaption>Round 2, kept <span class="mono">score 9.44</span></figcaption><div class="frame"><img src="shots/Q-puppy-r2-desktop.jpg" alt="puppy page, round 2" loading="lazy"></div></figure>
+  </div>
+  <details><summary>What the agent found in round 0, and what it fixed (12 of 15)</summary>
+    <ul class="issues"><li class="fixed"><span class="chip">fixed</span> the list in &quot;feature cards&quot; shows the same photo 3 times <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> the list in &quot;gallery&quot; shows the same photo 6 times <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> &quot;animal-dog.webp&quot; appears 15 times on the page <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> &quot;animal-dog.webp&quot; appears 15 times on the page <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> &quot;animal-dog.webp&quot; appears 15 times on the page <span class="op">re-ask a decision</span></li><li class="open"><span class="chip">still open</span> &quot;animal-dog.webp&quot; appears 15 times on the page <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> &quot;Apply to Adopt&quot; repeats &quot;Apply to Adopt&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;Apply to Adopt&quot; repeats &quot;Apply to Adopt&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;Start your journey home with a loving companion. Ready to open your heart to unconditional joy?&quot; repeats &quot;Open Your Heart to Unconditional Joy.&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;Find Your Forever Friend&quot; repeats &quot;Find Your Forever Friend&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;apply to adopt&quot; is said 10 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;apply to adopt&quot; is said 10 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;apply to adopt&quot; is said 10 times on the page <span class="op">re-word a line</span></li><li class="open"><span class="chip">still open</span> reviewer: organised p=0.865</li><li class="open"><span class="chip">still open</span> reviewer: type and parts suit p=0.97</li></ul>
+  </details>
+  <details><summary>The page in words, as the reviewer read it (round 2)</summary><pre>Section &quot;hero&quot; (dark band). Top to bottom:
+- eyebrow: &quot;Find Your Best Friend&quot;
+- headline: &quot;Open Your Heart to Unconditional Joy.&quot;
+- sub-line: &quot;Discover adorable, loving puppies ready to bring endless happiness into your life. Your perfect match is waiting.&quot;
+- button: &quot;Adopt Now&quot;
+- a photo (animal-dog.webp)
+
+Section &quot;about&quot; (light band). Top to bottom:
+- a photo (animal-dog.webp)
+- headline: &quot;Find Your Furry Family Today&quot;
+- sub-line: &quot;We connect loving homes with adorable, rescue puppies ready to fill your life with wagging tails and endless cuddles.&quot;
+- paragraph: &quot;At Puppy Haven, we believe every dog deserves a second chance at a happy life. We carefully match promising companions with prospective families, ensuring a perfect, heartwarming match for your journey.&quot;
+- quote: &quot;Every puppy has a unique story, and we help you find the perfect chapter for your forever adventure.&quot;
+- who said it: a name and a role: &quot;Sarah, Founder&quot;
+
+Section &quot;feature cards&quot; (light band). Top to bottom:
+- headline: &quot;Find Your Perfect Companion Now&quot;
+- sub-line: &quot;Meet the happy, loving puppies waiting for their forever homes. Every pup has a unique story and personality to share.&quot;
+- paragraph: &quot;Our curated selection features healthy, well-socialized puppies from reputable rescues. We guide you through the process to find the perfect match where love and adventure begin.&quot;
+- 3 featureItems in a grid, each: icon, title, sentence or two, button:
+  1. &quot;Happy Companions Await&quot; — &quot;Find your perfect furry friend from a curated selection of loving puppies ready to bring joy to your home.&quot; — &quot;View Puppies&quot;
+  2. &quot;Expert Guidance Provided&quot; — &quot;Our dedicated team offers personalized advice throughout the adoption process to ensure a smooth transition.&quot; — &quot;Learn More&quot;
+  3. &quot;Build Your Connection&quot; — &quot;We facilitate meaningful introductions between prospective adopters and wonderful dogs for the best match.&quot; — &quot;Start Adoption&quot;
+
+Section &quot;gallery&quot; (dark band). Top to bottom:
+- headline: &quot;Meet Your New Best Friend Awaits&quot;
+- sub-line: &quot;Swipe through heartwarming moments of our adoptable pups finding their perfect match.&quot;
+- paragraph: &quot;These are just a few faces bursting with joy and love, ready to fill your home with endless happiness and unconditional affection.&quot;
+- quote: &quot;Every pup has a story waiting to be told, and we can't wait for yours to begin.&quot;
+- who said it: a name and a role: &quot;Sarah, Adoption Coordinator&quot;
+- 6 cards in a grid, each: icon, title, sentence or two, button:
+  1. &quot;Sweet Luna&quot; — &quot;Meet Luna, a playful golden retriever ready to bring endless joy and cuddles to your home. Perfect for active families!&quot; — &quot;View Details&quot;
+  2. &quot;Tiny Sparky&quot; — &quot;Sparky is a tiny terrier full of boundless energy. He loves to play fetch and make wonderful company with your family.&quot; — &quot;View Details&quot;
+  3. &quot;Calm Bella&quot; — &quot;Bella is a gentle lap dog seeking a quiet home. Ideal for those who enjoy a calm, loving companion.&quot; — &quot;View Details&quot;
+  4. &quot;Happy Max&quot; — &quot;Max is a cheerful mixed breed who loves outdoor adventures. He's looking for a family to explore the world with.&quot; — &quot;View Details&quot;
+  5. &quot;Energetic Rex&quot; — &quot;Rex is a spirited puppy packed with enthusiasm. He needs an active household ready for lots of fun.&quot; — &quot;View Details&quot;
+  6. &quot;Velvet Lucy&quot; — &quot;Lucy is a sweet companion with a soft coat. She promises unconditional love and devotion.&quot; — &quot;View Details&quot;
+
+Section &quot;testimonials&quot; (light band). Top to bottom:
+- headline: &quot;Real Love. Real Puppies. Real Stories.&quot;
+- quote: &quot;Bringing a loyal, joyful companion into our home was the best decision we ever made. Puppy Haven exceeded every expectation!&quot;
+- who said it: a name and a role: &quot;Sarah, Local Adopter&quot;
+- 3 testimonialCards in a grid, each: photo, title, sentence or two, a name and a role:
+  1. &quot;Pure Joy Found Here&quot; — &quot;My experience with Puppy Haven was incredible. The puppy found the perfect home, and the whole process was seamless and heartwarming.&quot; — &quot;Sarah K.&quot;
+  2. &quot;Best Decision Ever&quot; — &quot;Bringing home a rescue puppy from Puppy Haven changed my life. They are loving, playful, and have been an amazing addition to our family.&quot; — &quot;Michael D.&quot;
+  3. &quot;Happy New Family&quot; — &quot;The staff at Puppy Haven were so helpful throughout the adoption process. We are so grateful for the wonderful companion our family has gained.&quot; — &quot;Jessica L.&quot;
+
+Section &quot;call to action&quot; (dark band). Top to bottom:
+- headline: &quot;Find Your Perfect Puppy Match&quot;
+- sub-line: &quot;Every paw has a story, and we have a companion waiting to share it with you.&quot;
+- paragraph: &quot;From playful zoomies to cuddle sessions, discover the joy of opening your heart to a deserving puppy who's ready for forever.&quot;
+- button: &quot;Start Your Adoption Journey&quot;
+- a form field: &quot;Name&quot; / &quot;Your name&quot;
+- a form field: &quot;Email&quot; / &quot;you@example.com&quot;
+- a form field: &quot;Phone&quot; / &quot;Your phone number&quot;
+- a form field: &quot;Message&quot; / &quot;Your message&quot;
+- button: &quot;Submit Your Inquiry Now&quot;
+- small print: &quot;Commit to a loving, lifelong friendship.&quot;
+
+Section &quot;sign-up or contact form&quot; (light band). Top to bottom:
+- eyebrow: &quot;Get a Puppy&quot;
+- headline: &quot;Find Your Furry Soulmate Today&quot;
+- sub-line: &quot;Ready to open your heart to the next adventure? Join our community and start your adoption journey with us.&quot;
+- paragraph: &quot;We make the process simple and joyful. Tell us a little about yourself and what kind of companion you're looking for, and we'll connect you with the perfect puppy.&quot;
+- button: &quot;Apply to Adopt&quot;
+- a photo (animal-dog.webp)</pre></details>
+</article>
+<article class="run" id="Q-bakery">
+  <header class="run-head">
+    <p class="eyebrow">bakery</p>
+    <h3>“A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.”</h3>
+    <dl class="facts">
+      <div><dt>score by round</dt><dd><svg class="spark" viewBox="0 0 120 36" width="120" height="36" role="img" aria-label="issue score by round: 30.01, 21.9, 16.58, 22.38, 11.24"><polyline points="4.0,4.0 32.0,11.6 60.0,16.5 88.0,11.1 116.0,21.5" fill="none" stroke="var(--signal)" stroke-width="1.5"/><circle cx="4.0" cy="4.0" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="32.0" cy="11.6" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="60.0" cy="16.5" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="88.0" cy="11.1" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="116.0" cy="21.5" r="3.2" fill="var(--signal)" stroke="var(--signal)" stroke-width="1.2"/></svg> <span class="mono">30.01 → 21.9 → 16.58 → 22.38 → 11.24</span></dd></div>
+      <div><dt>kept</dt><dd class="mono">round 4</dd></div>
+      <div><dt>builder calls</dt><dd class="mono">133</dd></div>
+      <div><dt>reviewer tokens</dt><dd class="mono">136</dd></div>
+      <div><dt>free replays</dt><dd class="mono">250</dd></div>
+      <div><dt>minutes</dt><dd class="mono">10.2</dd></div>
+    </dl>
+    <p class="small"><b>Photos the reviewer kept:</b> kept food-bakery.webp, food-bread.webp of 32. <b>Facts it set itself to show:</b> “family bakery”, “Lyon”, “sourdough”, “croissants and cakes”.</p>
+  </header>
+  <div class="pair">
+    <figure><figcaption>Round 0 <span class="mono">score 30.01</span></figcaption><div class="frame"><img src="shots/Q-bakery-r0-desktop.jpg" alt="bakery page, round 0" loading="lazy"></div></figure>
+    <figure><figcaption>Round 4, kept <span class="mono">score 11.24</span></figcaption><div class="frame"><img src="shots/Q-bakery-r4-desktop.jpg" alt="bakery page, round 4" loading="lazy"></div></figure>
+  </div>
+  <details><summary>What the agent found in round 0, and what it fixed (13 of 15)</summary>
+    <ul class="issues"><li class="fixed"><span class="chip">fixed</span> the list in &quot;feature cards&quot; shows the same photo 2 times <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> the list in &quot;menu or prices&quot; shows the same photo 2 times <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> &quot;food-bakery.webp&quot; appears 7 times on the page <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> the list in &quot;hero&quot; shows the same photo 2 times <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> &quot;food-bread.webp&quot; appears 7 times on the page <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> &quot;food-bread.webp&quot; appears 7 times on the page <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> &quot;Signature Cakes&quot; repeats &quot;Signature Cakes&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> three dark bands in a row <span class="op">flip to 2nd choice</span></li><li class="fixed"><span class="chip">fixed</span> three dark bands in a row <span class="op">flip to 2nd choice</span></li><li class="fixed"><span class="chip">fixed</span> &quot;croissants and exquisite&quot; is said 5 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;croissants and exquisite&quot; is said 5 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;croissants and exquisite&quot; is said 5 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> reviewer (p=0.666): &quot;Open daily in the heart of Lyon.&quot; contradicts the request or invents a detail <span class="op">re-word a line</span></li><li class="open"><span class="chip">still open</span> reviewer: organised p=0.828</li><li class="open"><span class="chip">still open</span> reviewer: type and parts suit p=0.882</li></ul>
+  </details>
+  <details><summary>The page in words, as the reviewer read it (round 4)</summary><pre>Section &quot;hero&quot; (dark band). Top to bottom:
+- eyebrow: &quot;Lyon's Finest&quot;
+- headline: &quot;Classic Family Bakery in Lyon&quot;
+- sub-line: &quot;Experience the warmth of our traditional sourdough, flaky croissants, and exquisite cakes, baked with love in Lyon.&quot;
+- button: &quot;Order Now&quot;
+- a photo (food-bakery.webp)
+- 3 cards in a grid, each: icon, title, sentence or two, button:
+  1. &quot;Artisan Sourdough&quot; — &quot;Our signature sourdough is slow-fermented for unparalleled depth of flavour. Perfect for dipping or pairing.&quot; — &quot;Order Now&quot;
+  2. &quot;Flaky Croissants&quot; — &quot;Butter-rich croissants, laminated daily for that perfect, airy, golden crunch. Fresh from the oven.&quot; — &quot;Order Now&quot;
+  3. &quot;Signature Cakes&quot; — &quot;From rich chocolate to delicate fruit tarts, indulge in our handcrafted sweet creations.&quot; — &quot;Visit Shop&quot;
+
+Section &quot;about&quot; (light band). Top to bottom:
+- eyebrow: &quot;Artisan Bakery&quot;
+- headline: &quot;Lyon's Heartfelt Family Bakery&quot;
+- sub-line: &quot;For generations, we have baked the finest sourdough, delicate croissants, and exquisite cakes, right here in Lyon.&quot;
+- paragraph: &quot;From our family kitchen to your table, we bring you the authentic taste of tradition. Each loaf and pastry is crafted with patience, love, and the finest local ingredients, promising a truly warm experience.&quot;
+- quote: &quot;Our bread is the very soul of our bakery, steeped in time and the rich heritage of Lyon. Come taste the difference that dedication makes.&quot;
+- who said it: a name and a role: &quot;Elodie Dubois, Head Baker&quot;
+
+Section &quot;menu or prices&quot; (dark band). Top to bottom:
+- headline: &quot;Lyon's Classic Family Bakery&quot;
+- sub-line: &quot;Warm, traditional sourdough, flaky croissants, and exquisite cakes crafted with love.&quot;
+- button: &quot;Order Now&quot;
+- date and place: &quot;Open Tuesday to Sunday in Lyon.&quot;
+- 4 cards in a grid, each: icon, title, sentence or two, price:
+  1. &quot;Artisan Sourdough Loaf&quot; — &quot;Naturally leavened, slow-fermented for unparalleled depth and tangy flavour. Baked fresh daily in our traditional stone oven.&quot; — &quot;€7.50&quot;
+  2. &quot;Flaky Butter Croissant&quot; — &quot;Golden, buttery, and perfectly layered. Made with high-quality European butter for the ultimate morning treat.&quot; — &quot;€4.25&quot;
+  3. &quot;Signature Chocolate Cake&quot; — &quot;Rich, moist dark chocolate sponge layered with velvety ganache. The perfect decadent indulgence for any occasion.&quot; — &quot;€6.00&quot;
+  4. &quot;Seasonal Fruit Tart&quot; — &quot;Delicate pastry crust filled with seasonal fresh fruit and a light, sweet cream filling. A charming afternoon delight.&quot; — &quot;€5.50&quot;
+
+Section &quot;schedule or line-up&quot; (light band). Top to bottom:
+- headline: &quot;Warm Treats from Our Family Oven&quot;
+- sub-line: &quot;Enjoy authentic Lyon sourdough, flaky croissants, and rich cakes made with love.&quot;
+- date and place: &quot;Freshly baked daily in the heart of Lyon.&quot;
+
+Section &quot;gallery&quot; (dark band). Top to bottom:
+- a photo (food-bread.webp)
+- headline: &quot;Lyon Bake Co: Handcrafted Comfort&quot;
+- sub-line: &quot;A family bakery in Lyon, dedicated to timeless, fresh baked goods.&quot;
+- quote: &quot;From our kitchen to your table, savor the tradition of authentic Lyon baking.&quot;
+- who said it: a name and a role: &quot;Marie, Master Baker&quot;
+- 4 cards in a grid, each: icon, title, sentence or two, price:
+  1. &quot;Classic Sourdough Loaf&quot; — &quot;Slow fermented for unparalleled crust and tangy flavour. Perfect for dipping.&quot; — &quot;€8.50&quot;
+  2. &quot;Flaky Butter Croissant&quot; — &quot;Golden, layered pastry made daily with the finest French butter. A morning delight.&quot; — &quot;€3.50&quot;
+  3. &quot;Rich Chocolate Gateau&quot; — &quot;Decadent dark chocolate sponge layered with velvety ganache. A true indulgence.&quot; — &quot;€6.00&quot;
+  4. &quot;Seasonal Fruit Tart&quot; — &quot;Light pastry filled with seasonal, fresh fruit and a sweet crème pâtissière.&quot; — &quot;€4.50&quot;
+
+Section &quot;location and hours&quot; (light band). Top to bottom:
+- headline: &quot;Your Daily Dose of Lyon Warmth&quot;
+- sub-line: &quot;Visit us in the heart of Lyon for tradition, made fresh every morning.&quot;
+- date and place: &quot;Open daily from 7 AM to 4 PM. Find us in Lyon.&quot;
+
+Section &quot;call to action&quot; (dark band). Top to bottom:
+- headline: &quot;Lyon's Classic Bakery&quot;
+- sub-line: &quot;Handcrafted family recipes, from sourdough to exquisite cakes. Taste Lyon's tradition.&quot;
+- button: &quot;Order Now&quot;
+- date and place: &quot;Open daily in the heart of Lyon.&quot;
+- 3 featureItems in a grid, each: icon, title, sentence or two, button:
+  1. &quot;Order Sourdough&quot; — &quot;Experience our signature slow-fermented sourdough. Fresh, tangy, and perfect for any meal.&quot; — &quot;Order Now&quot;
+  2. &quot;Croissants Delight&quot; — &quot;Flaky, buttery, and perfectly laminated. Your morning indulgence awaits at Lyon Bake Co.&quot; — &quot;Order Now&quot;
+  3. &quot;Custom Cakes&quot; — &quot;Beautifully crafted cakes for all occasions. Let us create a warm, sweet memory for you.&quot; — &quot;Visit Shop&quot;</pre></details>
+</article>
+<article class="run" id="Q-running">
+  <header class="run-head">
+    <p class="eyebrow">running</p>
+    <h3>“A sign-up page for a Saturday morning running club in the park. Energetic, green.”</h3>
+    <dl class="facts">
+      <div><dt>score by round</dt><dd><svg class="spark" viewBox="0 0 120 36" width="120" height="36" role="img" aria-label="issue score by round: 28.9, 17.39, 10.23, 7.77, 11.37"><polyline points="4.0,4.0 32.0,15.2 60.0,22.1 88.0,24.5 116.0,21.0" fill="none" stroke="var(--signal)" stroke-width="1.5"/><circle cx="4.0" cy="4.0" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="32.0" cy="15.2" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="60.0" cy="22.1" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="88.0" cy="24.5" r="3.2" fill="var(--signal)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="116.0" cy="21.0" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/></svg> <span class="mono">28.9 → 17.39 → 10.23 → 7.77 → 11.37</span></dd></div>
+      <div><dt>kept</dt><dd class="mono">round 3</dd></div>
+      <div><dt>builder calls</dt><dd class="mono">68</dd></div>
+      <div><dt>reviewer tokens</dt><dd class="mono">112</dd></div>
+      <div><dt>free replays</dt><dd class="mono">206</dd></div>
+      <div><dt>minutes</dt><dd class="mono">6.9</dd></div>
+    </dl>
+    <p class="small"><b>Photos the reviewer kept:</b> kept ground-coast.webp, animal-dog.webp, animal-sheep.webp of 32. <b>Facts it set itself to show:</b> “Saturday morning running club”, “in the park”.</p>
+  </header>
+  <div class="pair">
+    <figure><figcaption>Round 0 <span class="mono">score 28.9</span></figcaption><div class="frame"><img src="shots/Q-running-r0-desktop.jpg" alt="running page, round 0" loading="lazy"></div></figure>
+    <figure><figcaption>Round 3, kept <span class="mono">score 7.77</span></figcaption><div class="frame"><img src="shots/Q-running-r3-desktop.jpg" alt="running page, round 3" loading="lazy"></div></figure>
+  </div>
+  <details><summary>What the agent found in round 0, and what it fixed (11 of 16)</summary>
+    <ul class="issues"><li class="fixed"><span class="chip">fixed</span> three dark bands in a row <span class="op">flip to 2nd choice</span></li><li class="fixed"><span class="chip">fixed</span> three dark bands in a row <span class="op">flip to 2nd choice</span></li><li class="fixed"><span class="chip">fixed</span> three dark bands in a row <span class="op">flip to 2nd choice</span></li><li class="fixed"><span class="chip">fixed</span> three dark bands in a row <span class="op">flip to 2nd choice</span></li><li class="fixed"><span class="chip">fixed</span> &quot;in the park&quot; is said 4 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;in the park&quot; is said 4 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;no excuses just&quot; is said 4 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;sign up now&quot; is said 7 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;sign up now&quot; is said 7 times on the page <span class="op">re-word a line</span></li><li class="open"><span class="chip">still open</span> four &quot;imageGround&quot; bands in a row <span class="op">flip to 2nd choice</span></li><li class="fixed"><span class="chip">fixed</span> reviewer (p=0.157): weakest line paragraph &quot;We're not just running; we're building a community&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> reviewer (p=0.308): weakest line sub-line &quot;Join the fastest, most dynamic running crew in the&quot; <span class="op">re-word a line</span></li><li class="open"><span class="chip">still open</span> reviewer (p=0.086): weakest line sub-line &quot;Join the relentless energy of our park runs. Lace &quot; <span class="op">re-word a line</span></li><li class="open"><span class="chip">still open</span> reviewer (p=0.126): weakest line sub-line &quot;Join the fastest, most dynamic running crew in the&quot; <span class="op">re-word a line</span></li><li class="open"><span class="chip">still open</span> reviewer: organised p=0.866</li><li class="open"><span class="chip">still open</span> reviewer: type and parts suit p=0.91</li></ul>
+  </details>
+  <details><summary>The page in words, as the reviewer read it (round 3)</summary><pre>Section &quot;hero&quot; (dark band). Top to bottom:
+- eyebrow: &quot;Run Fast. Feel Free.&quot;
+- headline: &quot;Park Runners: Conquer Your Saturdays!&quot;
+- sub-line: &quot;Join our bold, energetic Saturday morning running club right in the park. No excuses, just sweat and smiles.&quot;
+- button: &quot;Sign Up Now&quot;
+- a photo (ground-coast.webp)
+
+Section &quot;about&quot; (light band). Top to bottom:
+- eyebrow: &quot;Run Free&quot;
+- headline: &quot;Park Runners: Ignite Your Saturday Mornings&quot;
+- sub-line: &quot;Join the fastest, freshest, and most spirited running crew in the park. Lace up and let's move!&quot;
+- paragraph: &quot;Forget the mundane. We meet every Saturday morning, powered by adrenaline and sunshine. This isn't just a run; it's a movement. Come find your rhythm with us.&quot;
+- button: &quot;Sign Up Now&quot;
+- a photo (animal-dog.webp)
+
+Section &quot;feature cards&quot; (light band). Top to bottom:
+- eyebrow: &quot;Run. Sweat. Conquer.&quot;
+- headline: &quot;Saturday Morning Park Run Crew&quot;
+- sub-line: &quot;Join the most intense, spirited, and fun Saturday morning running squad meeting in the park. Lace up and let's go!&quot;
+- button: &quot;Join the Rush&quot;
+- a photo (animal-sheep.webp)
+- 3 featureItems in a single column, each: icon, title, sentence or two, button:
+  1. &quot;Sunrise Miles&quot; — &quot;Join our vibrant community and conquer your morning miles with inspiring runs through the park!&quot; — &quot;Run With Us&quot;
+  2. &quot;Fresh Energy Boost&quot; — &quot;Feel revitalized and energized by a supportive group. Sweat, smile, and power through the run!&quot; — &quot;Join the Vibe&quot;
+  3. &quot;Park Fun &amp; Friends&quot; — &quot;Connect with like-minded runners and enjoy the beautiful park scenery. Making fitness a social celebration.&quot; — &quot;Sign Up Today&quot;
+
+Section &quot;location and hours&quot; (light band). Top to bottom:
+- a photo (ground-coast.webp)
+- eyebrow: &quot;RUN. PARK. REPEAT.&quot;
+- headline: &quot;Saturday Morning Park Power: Sign Up!&quot;
+- sub-line: &quot;Lace up for epic Saturday runs through the park. Sweat, speed, and community await you.&quot;
+- date and place: &quot;Every Saturday. Meet at the park. Sunrise starts the adventure.&quot;
+- button: &quot;Join the Run&quot;
+
+Section &quot;sign-up or contact form&quot; (light band). Top to bottom:
+- eyebrow: &quot;Join the Pack!&quot;
+- headline: &quot;Lace Up for Saturday Glory!&quot;
+- sub-line: &quot;We conquer the park every Saturday morning. No excuses, just speed and smiles.&quot;
+- paragraph: &quot;Trade your couch for the pavement. Join the elite Saturday morning running crew. Expect high energy, great company, and legendary park miles. Ready to push your limits?&quot;
+- a form field: &quot;Name&quot; / &quot;Your name&quot;
+- a form field: &quot;Email&quot; / &quot;you@example.com&quot;
+- a form field: &quot;Message&quot; / &quot;Your message&quot;
+- button: &quot;Submit Your Details&quot;
+- button: &quot;Sign Up Now&quot;
+
+Section &quot;call to action&quot; (dark band). Top to bottom:
+- headline: &quot;Own Your Saturday Morning Run!&quot;
+- sub-line: &quot;Join the elite group conquering the park. Pure energy. Real community.&quot;
+- button: &quot;Run Now&quot;
+- small print: &quot;No gear? We'll show you how. Start here.&quot;
+- a photo (animal-dog.webp)</pre></details>
+</article>
+<article class="run" id="Q-jazz">
+  <header class="run-head">
+    <p class="eyebrow">jazz</p>
+    <h3>“A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.”</h3>
+    <dl class="facts">
+      <div><dt>score by round</dt><dd><svg class="spark" viewBox="0 0 120 36" width="120" height="36" role="img" aria-label="issue score by round: 32.9, 39.25, 28.79, 23.15, 28.92"><polyline points="4.0,8.5 32.0,4.0 60.0,11.5 88.0,15.5 116.0,11.4" fill="none" stroke="var(--signal)" stroke-width="1.5"/><circle cx="4.0" cy="8.5" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="32.0" cy="4.0" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="60.0" cy="11.5" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="88.0" cy="15.5" r="3.2" fill="var(--signal)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="116.0" cy="11.4" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/></svg> <span class="mono">32.9 → 39.25 → 28.79 → 23.15 → 28.92</span></dd></div>
+      <div><dt>kept</dt><dd class="mono">round 3</dd></div>
+      <div><dt>builder calls</dt><dd class="mono">118</dd></div>
+      <div><dt>reviewer tokens</dt><dd class="mono">134</dd></div>
+      <div><dt>free replays</dt><dd class="mono">225</dd></div>
+      <div><dt>minutes</dt><dd class="mono">8.4</dd></div>
+    </dl>
+    <p class="small"><b>Photos the reviewer kept:</b> kept none of 32. <b>Facts it set itself to show:</b> “jazz evening”, “14 November”, “The Blue Room”, “line-up, tickets and how to get there”.</p>
+  </header>
+  <div class="pair">
+    <figure><figcaption>Round 0 <span class="mono">score 32.9</span></figcaption><div class="frame"><img src="shots/Q-jazz-r0-desktop.jpg" alt="jazz page, round 0" loading="lazy"></div></figure>
+    <figure><figcaption>Round 3, kept <span class="mono">score 23.15</span></figcaption><div class="frame"><img src="shots/Q-jazz-r3-desktop.jpg" alt="jazz page, round 3" loading="lazy"></div></figure>
+  </div>
+  <details><summary>What the agent found in round 0, and what it fixed (7 of 15)</summary>
+    <ul class="issues"><li class="fixed"><span class="chip">fixed</span> &quot;An Evening of Sophisticated Jazz&quot; repeats &quot;An Evening of Sophisticated Jazz&quot; <span class="op">re-word a line</span></li><li class="open"><span class="chip">still open</span> &quot;Jazz Evening at The Blue Room&quot; repeats &quot;Jazz Evening at The Blue Room&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> button &quot;Purchase Tickets &amp; Directions&quot; is too long for a button <span class="op">re-word a line</span></li><li class="open"><span class="chip">still open</span> &quot;Join us for an unforgettable night of smooth, classic jazz. An exquisite presentation of timeless melodies awaits you.&quot; repeats &quot;An exquisite presentation of timeless melodies awaits you.&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;an unforgettable night&quot; is said 4 times on the page <span class="op">re-word a line</span></li><li class="open"><span class="chip">still open</span> &quot;an unforgettable night&quot; is said 4 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;at the blue&quot; is said 6 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;at the blue&quot; is said 6 times on the page <span class="op">re-word a line</span></li><li class="open"><span class="chip">still open</span> &quot;at the blue&quot; is said 6 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> four &quot;band&quot; bands in a row <span class="op">flip to 2nd choice</span></li><li class="open"><span class="chip">still open</span> render: single-column-grid</li><li class="open"><span class="chip">still open</span> reviewer (p=0.838): add a &quot;sign-up or contact form&quot; section <span class="op">add a section</span></li><li class="fixed"><span class="chip">fixed</span> reviewer (p=0.803): drop section 3. about <span class="op">drop a section</span></li><li class="open"><span class="chip">still open</span> reviewer: organised p=0.264 <span class="op">re-ask a decision</span></li><li class="open"><span class="chip">still open</span> reviewer: type and parts suit p=0.854</li></ul>
+  </details>
+  <details><summary>The page in words, as the reviewer read it (round 3)</summary><pre>Section &quot;hero&quot; (dark band). Top to bottom:
+- eyebrow: &quot;Elegant Jazz&quot;
+- headline: &quot;An Evening of Sophisticated Jazz&quot;
+- sub-line: &quot;Join us for an unforgettable night of smooth, classic jazz in the intimate setting of The Blue Room.&quot;
+- date and place: &quot;14 November | The Blue Room&quot;
+- button: &quot;Book Tickets Now&quot;
+- 3 cards in a grid, each: icon, title, sentence or two, time or date:
+  1. &quot;The Event&quot; — &quot;An elegant evening of timeless jazz awaits you at The Blue Room on November 14th.&quot; — &quot;19:00&quot;
+  2. &quot;The Venue&quot; — &quot;Experience world-class jazz in the sophisticated ambiance of The Blue Room.&quot; — &quot;Nov 14&quot;
+  3. &quot;Tickets &amp; Info&quot; — &quot;Secure your place. Purchase tickets now and find our directions to the venue.&quot; — &quot;Book Now&quot;
+
+Section &quot;schedule or line-up&quot; (light band). Top to bottom:
+- headline: &quot;Jazz Evening at The Blue Room&quot;
+- sub-line: &quot;An elegant evening dedicated to the finest sounds of classic jazz.&quot;
+- price: &quot;Tickets available now.&quot;
+- 3 cards in a grid, each: icon, title, sentence or two, time or date:
+  1. &quot;The Blue Notes Trio&quot; — &quot;A sophisticated trio offering smooth, intimate performances perfect for a late evening in The Blue Room.&quot; — &quot;7:00 PM&quot;
+  2. &quot;Miles Davis Tribute&quot; — &quot;Experience the iconic sound with a special tribute set, evoking timeless cool and elegance.&quot; — &quot;8:30 PM&quot;
+  3. &quot;Ella &amp; Louis Quartet&quot; — &quot;A classic vocal pairing bringing the warmth and charm of traditional jazz to the stage.&quot; — &quot;9:30 PM&quot;
+
+Section &quot;menu or prices&quot; (light band). Top to bottom:
+- headline: &quot;An Evening of Sophisticated Jazz&quot;
+- sub-line: &quot;Experience the exquisite artistry of a quintessential jazz presentation.&quot;
+- price: &quot;Tickets Available&quot;
+- button: &quot;Secure Your Seat Now&quot;
+- small print: &quot;Date: November 14th&quot;
+- 3 cards in a single column, each: icon, title, sentence or two, price:
+  1. &quot;General Admission&quot; — &quot;Enjoy the evening with entry to the venue. A classic experience.&quot; — &quot;$45&quot;
+  2. &quot;VIP Experience&quot; — &quot;Elevated seating and complimentary drinks for a premium atmosphere.&quot; — &quot;$75&quot;
+  3. &quot;Table Reservation&quot; — &quot;Secure a private spot for an intimate and exclusive musical journey.&quot; — &quot;$120&quot;
+
+Section &quot;location and hours&quot; (light band). Top to bottom:
+- eyebrow: &quot;Jazz Evening&quot;
+- headline: &quot;An Elegant Jazz Evening&quot;
+- sub-line: &quot;An Evening of Sophisticated Jazz awaits at The Blue Room. Join us for an unforgettable night of timeless melodies and refined ambiance.&quot;
+- date and place: &quot;November 14th at The Blue Room&quot;
+- paragraph: &quot;Join us for an exquisite evening dedicated to the finest sounds of classic jazz. An intimate setting perfect for music lovers seeking elegance and soul.&quot;
+- button: &quot;Book Tickets Now&quot;
+
+Section &quot;call to action&quot; (dark band). Top to bottom:
+- eyebrow: &quot;Jazz Night: November 14th&quot;
+- headline: &quot;An Elegant Jazz Evening at The Blue Room&quot;
+- sub-line: &quot;Join us for a sophisticated musical journey. Featuring an intimate lineup and exquisite ambiance.&quot;
+- button: &quot;Secure Your Tickets Now&quot;
+- date and place: &quot;Jazz Evening: November 14th at The Blue Room. See line-up, tickets, and directions here.&quot;</pre></details>
+</article>
+<article class="run" id="Q-pottery">
+  <header class="run-head">
+    <p class="eyebrow">pottery</p>
+    <h3>“A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.”</h3>
+    <dl class="facts">
+      <div><dt>score by round</dt><dd><svg class="spark" viewBox="0 0 120 36" width="120" height="36" role="img" aria-label="issue score by round: 17.59, 7.52, 2.64, 3.02, 2.94"><polyline points="4.0,4.0 32.0,20.0 60.0,27.8 88.0,27.2 116.0,27.3" fill="none" stroke="var(--signal)" stroke-width="1.5"/><circle cx="4.0" cy="4.0" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="32.0" cy="20.0" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="60.0" cy="27.8" r="3.2" fill="var(--signal)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="88.0" cy="27.2" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="116.0" cy="27.3" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/></svg> <span class="mono">17.59 → 7.52 → 2.64 → 3.02 → 2.94</span></dd></div>
+      <div><dt>kept</dt><dd class="mono">round 2</dd></div>
+      <div><dt>builder calls</dt><dd class="mono">64</dd></div>
+      <div><dt>reviewer tokens</dt><dd class="mono">102</dd></div>
+      <div><dt>free replays</dt><dd class="mono">182</dd></div>
+      <div><dt>minutes</dt><dd class="mono">5.4</dd></div>
+    </dl>
+    <p class="small"><b>Photos the reviewer kept:</b> kept work-potter.webp, work-hands-clay.webp, people-market.webp of 32. <b>Facts it set itself to show:</b> “sells handmade bowls”, “teaches weekend classes”.</p>
+  </header>
+  <div class="pair">
+    <figure><figcaption>Round 0 <span class="mono">score 17.59</span></figcaption><div class="frame"><img src="shots/Q-pottery-r0-desktop.jpg" alt="pottery page, round 0" loading="lazy"></div></figure>
+    <figure><figcaption>Round 2, kept <span class="mono">score 2.64</span></figcaption><div class="frame"><img src="shots/Q-pottery-r2-desktop.jpg" alt="pottery page, round 2" loading="lazy"></div></figure>
+  </div>
+  <details><summary>What the agent found in round 0, and what it fixed (8 of 10)</summary>
+    <ul class="issues"><li class="fixed"><span class="chip">fixed</span> the list in &quot;gallery&quot; shows the same photo 2 times <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> &quot;work-potter.webp&quot; appears 4 times on the page <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> &quot;people-market.webp&quot; appears 4 times on the page <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> &quot;View Portfolio&quot; repeats &quot;View Portfolio&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;Artisan Pottery &amp; Workshops&quot; repeats &quot;Artisan Pottery &amp; Workshops&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;Handmade Pottery &amp; Workshops&quot; repeats &quot;Handmade Pottery &amp; Workshops&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> button &quot;View Portfolio &amp; Class Info&quot; is too long for a button <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;View Portfolio&quot; repeats &quot;View Portfolio&quot; <span class="op">re-word a line</span></li><li class="open"><span class="chip">still open</span> reviewer: organised p=0.938</li><li class="open"><span class="chip">still open</span> reviewer: type and parts suit p=0.977</li></ul>
+  </details>
+  <details><summary>The page in words, as the reviewer read it (round 2)</summary><pre>Section &quot;hero&quot; (dark band). Top to bottom:
+- eyebrow: &quot;Handmade Pottery&quot;
+- headline: &quot;Artisan Pottery &amp; Workshops&quot;
+- sub-line: &quot;Discover unique, handcrafted bowls and learn pottery skills in relaxing weekend classes.&quot;
+- button: &quot;View Portfolio&quot;
+- a photo (work-potter.webp)
+
+Section &quot;gallery&quot; (dark band). Top to bottom:
+- a photo (people-market.webp)
+- headline: &quot;Handmade Pottery &amp; Classes&quot;
+- sub-line: &quot;Unique bowls. Weekend skills. Crafted by hand.&quot;
+- button: &quot;Explore Work &amp; Book&quot;
+- 6 cards in a grid, each: title, sentence or two, button:
+  1. &quot;Ocean Glaze Bowl&quot; — &quot;Hand-thrown ceramic bowl with a deep, glossy ocean glaze, perfect for everyday use or a stunning display piece.&quot; — &quot;View Details&quot;
+  2. &quot;Terracotta Mug Set&quot; — &quot;Set of four rustic terracotta mugs, ideal for cozy morning coffee or tea. Earthy and durable.&quot; — &quot;View Details&quot;
+  3. &quot;Minimalist Serving Platter&quot; — &quot;A wide, shallow platter crafted from fine stoneware, perfect for presenting curated meals.&quot; — &quot;View Details&quot;
+  4. &quot;Botanical Speckle Bowl&quot; — &quot;Unique speckled glaze featuring subtle botanical patterns, adding an artistic touch to your collection.&quot; — &quot;View Details&quot;
+  5. &quot;Ceramic Water Vessel&quot; — &quot;Simple, elegant water vessel with a matte finish. Perfect for modern bathroom decor.&quot; — &quot;View Details&quot;
+  6. &quot;Sunrise Rim Bowl&quot; — &quot;Warm, earthy tones capturing the soft glow of dawn. A beautiful piece for mindful moments.&quot; — &quot;View Details&quot;
+
+Section &quot;feature cards&quot; (light band). Top to bottom:
+- eyebrow: &quot;Crafted Pottery&quot;
+- headline: &quot;Handmade Bowls &amp; Weekend Classes&quot;
+- sub-line: &quot;Experience unique, earthy ceramics and learn practical pottery techniques in relaxing weekend sessions.&quot;
+- paragraph: &quot;Each bowl is uniquely shaped and fired by hand, bringing a tangible piece of artistry to your home. Join our intimate workshops to transform clay into your own creations.&quot;
+- button: &quot;View Work &amp; Sign Up&quot;
+- button: &quot;See Class Schedule&quot;
+
+Section &quot;about&quot; (dark band). Top to bottom:
+- eyebrow: &quot;Potter Portfolio&quot;
+- headline: &quot;Handmade Pottery. Weekend Workshops.&quot;
+- sub-line: &quot;Discover unique, handcrafted bowls and hands-on pottery classes designed for creative exploration.&quot;
+- paragraph: &quot;Crafted pieces and guided learning sessions await. Explore our collection of unique, earthy ceramics and join our weekend workshops to learn practical pottery skills.&quot;
+- quote: &quot;Where earth meets hands, transforming simple clay into lasting, functional art.&quot;
+- who said it: a name and a role: &quot;Elara, Potter&quot;
+- small print: &quot;Limited pieces available. Book your session today.&quot;
+
+Section &quot;call to action&quot; (dark band). Top to bottom:
+- headline: &quot;Crafted Pottery &amp; Workshops&quot;
+- sub-line: &quot;Handmade bowls and weekend classes. A curated experience.&quot;
+- button: &quot;View Portfolio &amp; Learn&quot;
+
+Section &quot;footer&quot; (light band). Top to bottom:
+- headline: &quot;Potter Portfolio: Handmade &amp; Workshops&quot;
+- button: &quot;View Portfolio &amp; Book&quot;
+- small print: &quot;Explore unique pieces and learn to throw.&quot;</pre></details>
+</article>
+<article class="run" id="Q-plumber">
+  <header class="run-head">
+    <p class="eyebrow">plumber</p>
+    <h3>“A simple page for my plumbing business so customers can ask for a call-back. Trustworthy, blue.”</h3>
+    <dl class="facts">
+      <div><dt>score by round</dt><dd><svg class="spark" viewBox="0 0 120 36" width="120" height="36" role="img" aria-label="issue score by round: 34.77, 19.23, 16.82, 5.61"><polyline points="4.0,4.0 41.3,16.5 78.7,18.5 116.0,27.5" fill="none" stroke="var(--signal)" stroke-width="1.5"/><circle cx="4.0" cy="4.0" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="41.3" cy="16.5" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="78.7" cy="18.5" r="2" fill="var(--paper)" stroke="var(--signal)" stroke-width="1.2"/><circle cx="116.0" cy="27.5" r="3.2" fill="var(--signal)" stroke="var(--signal)" stroke-width="1.2"/></svg> <span class="mono">34.77 → 19.23 → 16.82 → 5.61</span></dd></div>
+      <div><dt>kept</dt><dd class="mono">round 3</dd></div>
+      <div><dt>builder calls</dt><dd class="mono">113</dd></div>
+      <div><dt>reviewer tokens</dt><dd class="mono">100</dd></div>
+      <div><dt>free replays</dt><dd class="mono">151</dd></div>
+      <div><dt>minutes</dt><dd class="mono">8.9</dd></div>
+    </dl>
+    <p class="small"><b>Photos the reviewer kept:</b> kept none of 32. <b>Facts it set itself to show:</b> “plumbing business”, “customers can ask for a call-back”, “Trustworthy”, “blue”.</p>
+  </header>
+  <div class="pair">
+    <figure><figcaption>Round 0 <span class="mono">score 34.77</span></figcaption><div class="frame"><img src="shots/Q-plumber-r0-desktop.jpg" alt="plumber page, round 0" loading="lazy"></div></figure>
+    <figure><figcaption>Round 3, kept <span class="mono">score 5.61</span></figcaption><div class="frame"><img src="shots/Q-plumber-r3-desktop.jpg" alt="plumber page, round 3" loading="lazy"></div></figure>
+  </div>
+  <details><summary>What the agent found in round 0, and what it fixed (10 of 13)</summary>
+    <ul class="issues"><li class="fixed"><span class="chip">fixed</span> &quot;Trusted, Experienced Plumbing Solutions Since [Year]&quot; talks about the page instead of to the visitor <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;Trusted Plumbing Solutions Near You&quot; repeats &quot;Trusted Plumbing Solutions&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;We provide expert, honest, and reliable plumbing services tailored to your needs.&quot; repeats &quot;We provide expert, honest, and reliable plumbing services tailored to your needs. Simply request a call-back today.&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;Request Call-Back&quot; repeats &quot;Request Callback&quot; <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;Serving the community since 1995 in [City Name]&quot; talks about the page instead of to the visitor <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> a second form (already in &quot;testimonials&quot;) <span class="op">re-ask a decision</span></li><li class="fixed"><span class="chip">fixed</span> &quot;reliable plumbing services&quot; is said 4 times on the page <span class="op">re-word a line</span></li><li class="fixed"><span class="chip">fixed</span> &quot;reliable plumbing services&quot; is said 4 times on the page <span class="op">re-word a line</span></li><li class="open"><span class="chip">still open</span> render: minimum-layout-width</li><li class="fixed"><span class="chip">fixed</span> reviewer (p=0.736): add a &quot;sign-up or contact form&quot; section <span class="op">add a section</span></li><li class="fixed"><span class="chip">fixed</span> reviewer (p=0.846): drop section 3. feature cards <span class="op">drop a section</span></li><li class="open"><span class="chip">still open</span> reviewer: organised p=0.175 <span class="op">re-ask a decision</span></li><li class="open"><span class="chip">still open</span> reviewer: type and parts suit p=0.893</li></ul>
+  </details>
+  <details><summary>The page in words, as the reviewer read it (round 3)</summary><pre>Section &quot;hero&quot; (dark band). Top to bottom:
+- eyebrow: &quot;Trusted Plumbing Solutions&quot;
+- headline: &quot;Reliable Plumbing Services for Your Home&quot;
+- sub-line: &quot;For expert plumbing solutions you can depend on. Contact us today to schedule your service.&quot;
+- button: &quot;Request a Call-Back&quot;
+
+Section &quot;about&quot; (light band). Top to bottom:
+- badge: &quot;Trusted local experts for all your plumbing needs.&quot;
+- headline: &quot;Experienced Plumbing Solutions for Your Home&quot;
+- sub-line: &quot;We offer dependable plumbing services with a commitment to quality and lasting results.&quot;
+- paragraph: &quot;At Plumbing Solutions, we understand that plumbing issues can be urgent. Our dedicated team provides professional, timely service for every home, ensuring peace of mind and complete satisfaction with our craftsmanship.&quot;
+- quote: &quot;Quality workmanship and honest service are the cornerstones of everything we do.&quot;
+- who said it: a name and a role: &quot;John Doe, Owner&quot;
+
+Section &quot;feature cards&quot; (light band). Top to bottom:
+- headline: &quot;Trusted Home Plumbing Experts&quot;
+- sub-line: &quot;For dependable pipe and drain services you can trust. Speak with a technician today.&quot;
+- button: &quot;Schedule a Call&quot;
+- 3 featureItems in a grid, each: icon, title, sentence or two, button:
+  1. &quot;Emergency Plumbing Repair&quot; — &quot;Fast, reliable service for urgent plumbing issues. We respond quickly to minimize disruption to your day.&quot; — &quot;Request Urgent Call&quot;
+  2. &quot;Drain Cleaning Services&quot; — &quot;Clearing stubborn clogs and maintaining healthy pipes for smooth water flow. Professional and effective results.&quot; — &quot;Schedule Drain Service&quot;
+  3. &quot;Fixture Installation&quot; — &quot;Expert installation of faucets, toilets, and water heaters. Quality workmanship guaranteed by our trusted team.&quot; — &quot;Book Installation Now&quot;
+
+Section &quot;how it works&quot; (light band). Top to bottom:
+- headline: &quot;Quality Plumbing, Simply Done.&quot;
+- sub-line: &quot;Our proven process ensures swift, reliable service for all your plumbing needs.&quot;
+- paragraph: &quot;From minor leaks to major installations, we handle every plumbing challenge with professional care and integrity.&quot;
+- button: &quot;Arrange a Call&quot;
+- 3 featureItems in a single column, each: icon, step number, title, sentence or two:
+  1. &quot;1&quot; — &quot;Fill Out Your Request Form&quot; — &quot;Simply provide your contact details and a brief description of your plumbing issue. We will use this information to connect you with a service professional.&quot;
+  2. &quot;2&quot; — &quot;Submit Your Information&quot; — &quot;Review your details and submit the form. Our team will promptly receive your request and contact you as soon as possible.&quot;
+  3. &quot;3&quot; — &quot;Receive a Call Back&quot; — &quot;A member of our team will call you within a few hours to discuss your needs and schedule a suitable time for service.&quot;
+
+Section &quot;sign-up or contact form&quot; (light band). Top to bottom:
+- headline: &quot;Expert Plumbing Solutions Near You&quot;
+- sub-line: &quot;For immediate assistance with all your plumbing needs. Contact us today for a callback.&quot;
+- paragraph: &quot;We provide reliable pipe and drain services with a classic, professional touch. Our dedicated team is ready to address your concerns and schedule a consultation at your convenience.&quot;
+- button: &quot;Request Callback&quot;
+
+Section &quot;location and hours&quot; (light band). Top to bottom:
+- headline: &quot;Trusted Local Plumbing Experts&quot;
+- sub-line: &quot;Your reliable partner for all home and commercial plumbing needs.&quot;
+- paragraph: &quot;We bring seasoned expertise and dependable craftsmanship to every repair and installation. Experience the difference true professionals make.&quot;
+- date and place: &quot;Serving the community since 1985. Open Monday - Friday, 8 AM to 5 PM.&quot;
+- 3 featureItems in a single column, each: icon, title, sentence or two:
+  1. &quot;Service Area Coverage&quot; — &quot;We proudly serve the entire downtown area and surrounding neighborhoods with reliable plumbing solutions.&quot;
+  2. &quot;Operating Hours&quot; — &quot;Our office is open Monday through Friday from 8 AM to 5 PM. We are available for urgent calls.&quot;
+  3. &quot;Emergency Repairs&quot; — &quot;For plumbing emergencies outside standard hours, please call our dedicated emergency line for immediate assistance.&quot;
+
+Section &quot;footer&quot; (light band). Top to bottom:
+- headline: &quot;Reliable Plumbing Services You Can Trust&quot;
+- paragraph: &quot;We provide dependable plumbing services for your home or business. Let us bring clarity and comfort to your plumbing concerns.&quot;
+- button: &quot;Schedule a Call-Back&quot;
+- date and place: &quot;Serving the community since 1995. Licensed and insured.&quot;
+- small print: &quot;We respect your privacy and call you promptly.&quot;</pre></details>
+</article></section>
+<p class="small">Made with NodeGX · OWN-029 · <a href="https://nodegx.io" target="_blank" rel="noopener" style="color:var(--signal)">nodegx.io ↗</a></p>
+</div>

@@ -1,0 +1,430 @@
+{
+ "minutes": 2.8,
+ "accept": "sum",
+ "bestRound": 2,
+ "bestScore": 5.17,
+ "scores": [
+  24.13,
+  6.78,
+  5.17
+ ],
+ "r0": {
+  "perLine": 0.541,
+  "org": 0.531,
+  "suits": 0.906,
+  "sum": 24.13
+ },
+ "kept": {
+  "perLine": 0.108,
+  "org": 0.873,
+  "suits": 0.961,
+  "sum": 5.17,
+  "lines": 37
+ },
+ "builderCalls": 11,
+ "judgements": 42,
+ "replays": 145,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-W2-plumber-r2",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-W2-plumber-r0",
+   "score": 24.13,
+   "sum": 24.13,
+   "defects": 20,
+   "lines": 37,
+   "perLine": 0.541,
+   "org": 0.531,
+   "suits": 0.906,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.984
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.984
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.992,
+     "pFit": 0.995
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "headline",
+      "sub-line",
+      "quote",
+      "name line",
+      "badge"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.978
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.831
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "form",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.79
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|sign-up or contact form#0|deck|headline,sub-line,form button,button",
+     "weight": 2,
+     "say": "\"Request a Call-Back\" repeats \"Request a Call-Back\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|location and hours#0|deck|eyebrow,headline,sub-line,button,form button,date and place",
+     "weight": 2,
+     "say": "\"Reliable Plumbing Solutions for Your Home\" repeats \"Reliable Plumbing Solutions for Your Home\"",
+     "op": "reword"
+    },
+    {
+     "id": "S10|form|location and hours#0",
+     "weight": 4,
+     "say": "a second form (already in \"sign-up or contact form\")",
+     "op": "reask"
+    },
+    {
+     "id": "S12|testimonials#0|look.band|band,bandSurface",
+     "weight": 2,
+     "say": "four \"band\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S12|sign-up or contact form#0|look.band|band,bandSurface",
+     "weight": 2,
+     "say": "four \"band\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "R|single-ground|page",
+     "weight": 4,
+     "say": "render: single-ground"
+    },
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    },
+    {
+     "id": "Q|org",
+     "weight": 3.75,
+     "say": "reviewer: organised p=0.531"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.38,
+     "say": "reviewer: type and parts suit p=0.906"
+    }
+   ],
+   "findings": [
+    "single-ground",
+    "minimum-layout-width"
+   ],
+   "modelCalls": 7,
+   "judgements": 14,
+   "minutes": 1.3,
+   "kept": true,
+   "fixesForNext": [
+    "S10|form|location and hours#0",
+    "S5|sign-up or contact form#0|deck|headline,sub-line,form button,button",
+    "S5|location and hours#0|deck|eyebrow,headline,sub-line,button,form button,date and place",
+    "S12|testimonials#0|look.band|band,bandSurface",
+    "S12|sign-up or contact form#0|look.band|band,bandSurface"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-W2-plumber-r1",
+   "score": 6.78,
+   "sum": 6.78,
+   "defects": 6,
+   "lines": 37,
+   "perLine": 0.162,
+   "org": 0.92,
+   "suits": 0.965,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.984
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.984
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.992,
+     "pFit": 0.995
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "headline",
+      "sub-line",
+      "quote",
+      "name line",
+      "badge"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.978
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "form",
+      "button"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.984
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "date and place",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.982
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|location and hours#0|deck|eyebrow,headline,sub-line,button,date and place,small print",
+     "weight": 2,
+     "say": "\"Request a Call-Back\" repeats \"Request a Call-Back\"",
+     "op": "reword"
+    },
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    },
+    {
+     "id": "Q|org",
+     "weight": 0.64,
+     "say": "reviewer: organised p=0.92"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.14,
+     "say": "reviewer: type and parts suit p=0.965"
+    }
+   ],
+   "findings": [
+    "minimum-layout-width"
+   ],
+   "modelCalls": 5,
+   "judgements": 14,
+   "minutes": 0.8,
+   "kept": true,
+   "fixesForNext": [
+    "S5|location and hours#0|deck|eyebrow,headline,sub-line,button,date and place,small print"
+   ]
+  },
+  {
+   "round": 2,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-W2-plumber-r2",
+   "score": 5.17,
+   "sum": 5.17,
+   "defects": 4,
+   "lines": 37,
+   "perLine": 0.108,
+   "org": 0.873,
+   "suits": 0.961,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.984
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.984
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.992,
+     "pFit": 0.995
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "headline",
+      "sub-line",
+      "quote",
+      "name line",
+      "badge"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.978
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "form",
+      "button"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.984
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "date and place",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.987
+    }
+   ],
+   "issues": [
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    },
+    {
+     "id": "Q|org",
+     "weight": 1.02,
+     "say": "reviewer: organised p=0.873"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.16,
+     "say": "reviewer: type and parts suit p=0.961"
+    }
+   ],
+   "findings": [
+    "minimum-layout-width"
+   ],
+   "modelCalls": 3,
+   "judgements": 14,
+   "minutes": 0.8,
+   "kept": true
+  }
+ ]
+}

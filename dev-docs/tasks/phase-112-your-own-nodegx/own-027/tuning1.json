@@ -1,0 +1,7 @@
+{ "tuning": 1, "date": "2026-10-28", "after": "r1",
+  "changes": [
+    "(a) every enum's options are written into the question's words (photo files, section kinds, port values, glyphs, kind/tone, hue). In r1 they were in the Ollama format schema only, which constrains the output but is never shown to the model: it picked avatar-1.webp (a man's face) as the puppy page's photo from a list it never read. A harness defect, counted as a tuning because it changes what the model sees.",
+    "(b) stage 2 asks for a role saying what the node is FOR, never the type name: in r1 every role was the type name ('Group', 'Text'), so every later question had no context.",
+    "(c) a copy question for a node with same-type siblings says 'item k of n … write only this one': in r1 the three how-it-works texts each wrote all three steps. Structure only; no sibling answer is shown."
+  ],
+  "not_from": "arm C's screenshot was not consulted for any of these; each is read off r1's ledger." }

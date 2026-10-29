@@ -1,0 +1,171 @@
+{
+ "minutes": 2.3,
+ "bestRound": 0,
+ "bestScore": 25.93,
+ "scores": [
+  25.93
+ ],
+ "builderCalls": 68,
+ "judgements": 44,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R-puppy-r0",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R-puppy-r0",
+   "score": 25.93,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "badge",
+      "body text",
+      "date and place",
+      "list of items",
+      "button",
+      "price"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.291
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "body text",
+      "small print",
+      "button",
+      "second button"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.724
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "date and place"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.073
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "photo",
+      "badge",
+      "date and place",
+      "name line"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.536
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "name line",
+      "list of items",
+      "quote",
+      "price",
+      "small print",
+      "sub-line"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.327
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "small print",
+      "sub-line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.741
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "quote",
+      "name line",
+      "headline"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.699
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|call to action#0",
+     "weight": 3,
+     "say": "the list in \"call to action\" shows the same photo 6 times",
+     "op": "reask"
+    },
+    {
+     "id": "S7|gallery#0",
+     "weight": 2,
+     "say": "\"gallery\" is only a date and place",
+     "op": "reask"
+    },
+    {
+     "id": "S5|call to action#0|list.rows|6|title",
+     "weight": 2,
+     "say": "\"Start Your Adoption Journey\" repeats \"Find your perfect furry friend. Browse adorable puppies and start your adoption journey today.\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|sign-up or contact form#0|copy|who said it: a name and a role|Text",
+     "weight": 2,
+     "say": "\"Sarah, Adoption Coordinator\" repeats \"Sarah, Adoption Coordinator\"",
+     "op": "reword"
+    },
+    {
+     "id": "S12|how it works#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "four \"bandSurface\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    },
+    {
+     "id": "R|single-column-grid|page",
+     "weight": 4,
+     "say": "render: single-column-grid"
+    },
+    {
+     "id": "J1|hero#0|copy|a short paragraph|Text",
+     "weight": 2.13,
+     "say": "reviewer (p=0.291): weakest line paragraph \"Find your perfect match. Open your heart to uncond\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|gallery#0|copy|when and where, in one line|Text",
+     "weight": 2.78,
+     "say": "reviewer (p=0.073): weakest line date and place \"Cozy afternoons and playful adventures in your for\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|call to action#0|copy|a quotation from a happy customer or visitor|Text",
+     "weight": 2.02,
+     "say": "reviewer (p=0.327): weakest line quote \"My new best friend is the perfect addition to our \"",
+     "op": "reword"
+    }
+   ],
+   "findings": [
+    "minimum-layout-width",
+    "single-column-grid"
+   ],
+   "modelCalls": 68,
+   "judgements": 44,
+   "minutes": 2.3,
+   "kept": true
+  }
+ ]
+}

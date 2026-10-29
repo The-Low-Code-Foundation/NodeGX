@@ -1,0 +1,1672 @@
+{
+ "run": "R4-bakery",
+ "brief": "bakery",
+ "request": "A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.",
+ "model": "gemma4:e2b-it-qat",
+ "judge": "gemma4:e4b-it-qat",
+ "copyN": 1,
+ "rounds": 0,
+ "build": {
+  "distMtime": "2026-10-28T15:27:11.116Z",
+  "head": "1f31ab2f8"
+ },
+ "harness": "0b5bf273",
+ "startedAt": "2026-10-28T21:04:26.704Z",
+ "calls": [
+  {
+   "round": 0,
+   "key": "card.kind+tone",
+   "sig": "card|kind+tone",
+   "random": true,
+   "answer": {
+    "kind": "landing page",
+    "tone": "classic"
+   }
+  },
+  {
+   "round": 0,
+   "key": "card.audience+action+name",
+   "sig": "card|audience",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nWho is the page for (one line, max 20 words)? What is the ONE action the page wants a visitor to take (max 20 words)? What is the business, event or person called (max 4 words; use the name in the request, or invent a short one)?",
+   "temperature": 0.4,
+   "answer": {
+    "action": "Visit the site to see our delicious sourdough, croissants, and cakes.",
+    "audience": "Local customers in Lyon looking for fresh baked goods.",
+    "name": "Lyon Bakehouse"
+   },
+   "tokensIn": 130,
+   "tokensOut": 50,
+   "ms": 1862
+  },
+  {
+   "round": 0,
+   "key": "card.preset+hue",
+   "sig": "card|preset",
+   "random": true,
+   "answer": {
+    "preset": "soft"
+   }
+  },
+  {
+   "round": 0,
+   "key": "card.pairing+density+radius",
+   "sig": "card|type",
+   "random": true,
+   "answer": {
+    "density": "airy",
+    "pairing": "mono-sans",
+    "radius": "sharp"
+   }
+  },
+  {
+   "round": 0,
+   "key": "card.mustShow",
+   "sig": "card|mustShow",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nWhat must a visitor be able to find on this page? List 1 to 4 short facts taken from the request about the business, event or person (a date, a place, what is sold, opening days, what to do). Only what the request says, and nothing about how the page should look.",
+   "temperature": 0.2,
+   "answer": {
+    "texts": [
+     "family bakery",
+     "Lyon",
+     "sourdough",
+     "croissants and cakes"
+    ]
+   },
+   "tokensIn": 132,
+   "tokensOut": 40,
+   "ms": 1456
+  },
+  {
+   "round": 0,
+   "key": "sections",
+   "sig": "sections",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Bakehouse\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to see our delicious sourdough, croissants, and cakes. Tone: classic.\nThe page must show: family bakery; Lyon; sourdough; croissants and cakes.\nWhich sections should the page have, top to bottom? Give 3 to 7. For each, one line saying what a VISITOR finds there (not what the section does for the page). Choose what THIS page needs; not every page needs every kind.\nSection kinds: hero, about, feature cards, how it works, gallery, menu or prices, schedule or line-up, testimonials, team, faq, location and hours, sign-up or contact form, call to action, footer",
+   "temperature": 0.3,
+   "answer": {
+    "sections": [
+     {
+      "kind": "hero",
+      "purpose": "Immediate visual appeal and brand introduction."
+     },
+     {
+      "kind": "about",
+      "purpose": "To convey the family, classic bakery story."
+     },
+     {
+      "kind": "feature cards",
+      "purpose": "To showcase the main products (sourdough, croissants, cakes)."
+     },
+     {
+      "kind": "gallery",
+      "purpose": "To visually entice visitors with high-quality product photos."
+     },
+     {
+      "kind": "schedule or line-up",
+      "purpose": "To clearly state the opening days (Tuesday to Sunday)."
+     },
+     {
+      "kind": "call to action",
+      "purpose": "To prompt the main action: visiting the site to see goods."
+     },
+     {
+      "kind": "footer",
+      "purpose": "To provide essential contact and location details."
+     }
+    ]
+   },
+   "tokensIn": 233,
+   "tokensOut": 233,
+   "ms": 9452
+  },
+  {
+   "round": 0,
+   "key": "s0.bits",
+   "sig": "hero#0|bits",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "bits": [
+     "form",
+     "list of items"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.align",
+   "sig": "hero#0|align",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "answer": "centred"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.form.fields",
+   "sig": "hero#0|form.fields",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "fields": [
+     "message",
+     "number of people",
+     "email",
+     "phone",
+     "date"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.items.count",
+   "sig": "hero#0|items.count",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "answer": "2"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.items.bits",
+   "sig": "hero#0|items.bits",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "bits": [
+     "name line",
+     "price",
+     "title",
+     "icon"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.items.layout",
+   "sig": "hero#0|items.layout",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "answer": "one column"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.look.band",
+   "sig": "hero#0|look.band|band,bandSurface,heroGround,imageGround",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.look.item",
+   "sig": "hero#0|look.item|card,statTile,testimonialCard,featureItem",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "look": "statTile"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.copy.the button that sends the form",
+   "sig": "hero#0|copy|the button that sends the form|net.noodl.controls.button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods. Tone: classic.\nWrite the label of the main button in the \"hero\" section. Pressing it lets a visitor: send the form. Two to four words, a verb first.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Order Now"
+   },
+   "tokensIn": 97,
+   "tokensOut": 8,
+   "ms": 1002
+  },
+  {
+   "round": 0,
+   "key": "s0.list.rows",
+   "sig": "hero#0|list.rows|2|name,price,title",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Bakehouse\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to see our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"hero\" section (Immediate visual appeal and brand introduction.) has a list of 2 items. For EACH item, in order, write: name (max 60 characters), price (max 20 characters), title (max 40 characters). Each item different from the others; an item's name and price and title must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "name": "Artisan Sourdough Loaf",
+      "price": "€5.50",
+      "title": "Naturally Leavened Country Sourdough"
+     },
+     {
+      "name": "Classic Croissant",
+      "price": "€2.80",
+      "title": "Flaky, Butter-Rich Parisian Croissant"
+     }
+    ]
+   },
+   "tokensIn": 193,
+   "tokensOut": 73,
+   "ms": 3724
+  },
+  {
+   "round": 0,
+   "key": "s0.glyph.item 1 of 2: its icon",
+   "sig": "hero#0|glyph|item 1 of 2: its icon",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "glyph": "icon-chevron-right"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.glyph.item 2 of 2: its icon",
+   "sig": "hero#0|glyph|item 2 of 2: its icon",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "glyph": "icon-plus"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.bits",
+   "sig": "about#0|bits",
+   "section": 1,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "bits": [
+     "headline",
+     "badge",
+     "price",
+     "quote"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.align",
+   "sig": "about#0|align",
+   "section": 1,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "answer": "centred"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.look.band",
+   "sig": "about#0|look.band|band,bandSurface,imageGround",
+   "section": 1,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.look.the about headline",
+   "sig": "about#0|look.the about headline|displayHeadline,sectionHeading",
+   "section": 1,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "look": "sectionHeading"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.look.a quotation from a happy customer or visitor",
+   "sig": "about#0|look.a quotation from a happy customer or visitor|lead,body",
+   "section": 1,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "look": "lead"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.deck",
+   "sig": "about#0|deck|headline,badge,price,quote,who said it: a name and a role",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "about",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods. Tone: classic.\nFacts the page must give: family bakery; Lyon; sourdough; croissants and cakes.\nWrite the words of the \"about\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_badge: badge, at most 200 characters\n03_price: price, at most 60 characters\n04_quote: quote, at most 160 characters\n05_who_said_it_a_name_and_a_role: who said it: a name and a role, at most 60 characters\nEach line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Lyon Bakehouse: Artisan Bread & Sweets",
+    "02_badge": "A family tradition in Lyon, crafting authentic sourdough, croissants, and cakes daily.",
+    "03_price": "Fresh daily selection",
+    "04_quote": "Come experience the warmth and taste of generations of baking, right here in Lyon.",
+    "05_who_said_it_a_name_and_a_role": "Elodie, Owner"
+   },
+   "tokensIn": 215,
+   "tokensOut": 101,
+   "ms": 4476
+  },
+  {
+   "round": 0,
+   "key": "s2.bits",
+   "sig": "feature cards#0|bits",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "random": true,
+   "answer": {
+    "bits": [
+     "name line",
+     "eyebrow",
+     "price",
+     "button",
+     "small print"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s2.align",
+   "sig": "feature cards#0|align",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "random": true,
+   "answer": {
+    "answer": "left-aligned"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s2.look.band",
+   "sig": "feature cards#0|look.band|band,bandSurface,imageGround",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "random": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s2.look.the main action of the feature cards section",
+   "sig": "feature cards#0|look.the main action of the feature cards section|primaryButton,outlineButton",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "random": true,
+   "answer": {
+    "look": "outlineButton"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s2.deck",
+   "sig": "feature cards#0|deck|who said it: a name and a role,eyebrow,price,button,small print",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods. Tone: classic.\nFacts the page must give: family bakery; Lyon; sourdough; croissants and cakes.\nWrite the words of the \"feature cards\" section, top to bottom:\n01_who_said_it_a_name_and_a_role: who said it: a name and a role, at most 60 characters\n02_eyebrow: eyebrow, at most 30 characters\n03_price: price, at most 60 characters\n04_button: button, two to four words, a verb first; pressing it lets a visitor Visit the site to see our delicious sourdough, croissants, and cakes\n05_small_print: small print, at most 60 characters\nAlready on the page: \"Lyon Bakehouse: Artisan Bread & Sweets\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_who_said_it_a_name_and_a_role": "Master Baker",
+    "02_eyebrow": "Authentic Lyon Goods",
+    "03_price": "From €2.50",
+    "04_button": "View Our Treats",
+    "05_small_print": "Family tradition, daily baked."
+   },
+   "tokensIn": 260,
+   "tokensOut": 80,
+   "ms": 4049
+  },
+  {
+   "round": 0,
+   "key": "s3.bits",
+   "sig": "gallery#0|bits",
+   "section": 3,
+   "sectionKind": "gallery",
+   "random": true,
+   "answer": {
+    "bits": [
+     "small print",
+     "body text",
+     "eyebrow",
+     "date and place",
+     "button",
+     "badge"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.align",
+   "sig": "gallery#0|align",
+   "section": 3,
+   "sectionKind": "gallery",
+   "random": true,
+   "answer": {
+    "answer": "centred"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.look.band",
+   "sig": "gallery#0|look.band|band,bandSurface,imageGround",
+   "section": 3,
+   "sectionKind": "gallery",
+   "random": true,
+   "answer": {
+    "look": "imageGround"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.look.the main action of the gallery section",
+   "sig": "gallery#0|look.the main action of the gallery section|primaryButton,outlineButton",
+   "section": 3,
+   "sectionKind": "gallery",
+   "random": true,
+   "answer": {
+    "look": "primaryButton"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.deck",
+   "sig": "gallery#0|deck|small print,paragraph,eyebrow,date and place,button,badge",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods. Tone: classic.\nFacts the page must give: family bakery; Lyon; sourdough; croissants and cakes.\nWrite the words of the \"gallery\" section, top to bottom:\n01_small_print: small print, at most 60 characters\n02_paragraph: paragraph, at most 200 characters\n03_eyebrow: eyebrow, at most 30 characters\n04_date_and_place: date and place, at most 160 characters\n05_button: button, two to four words, a verb first; pressing it lets a visitor Visit the site to see our delicious sourdough, croissants, and cakes\n06_badge: badge, at most 200 characters\nAlready on the page: \"Lyon Bakehouse: Artisan Bread & Sweets\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_small_print": "Handcrafted with love in Lyon.",
+    "02_paragraph": "A family-run tradition in the heart of Lyon, serving you the finest sourdough, flaky croissants, and exquisite cakes daily.",
+    "03_eyebrow": "Our Offerings",
+    "04_date_and_place": "Freshly baked every morning at our charming bakery in Lyon.",
+    "05_button": "View Our Treats",
+    "06_badge": "Authentic Lyonnaise family recipes."
+   },
+   "tokensIn": 260,
+   "tokensOut": 125,
+   "ms": 5685
+  },
+  {
+   "round": 0,
+   "key": "s4.bits",
+   "sig": "schedule or line-up#0|bits",
+   "section": 4,
+   "sectionKind": "schedule or line-up",
+   "random": true,
+   "answer": {
+    "bits": [
+     "photo",
+     "second button",
+     "headline",
+     "small print"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.align",
+   "sig": "schedule or line-up#0|align",
+   "section": 4,
+   "sectionKind": "schedule or line-up",
+   "random": true,
+   "answer": {
+    "answer": "centred"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.photoPlace",
+   "sig": "schedule or line-up#0|photoPlace",
+   "section": 4,
+   "sectionKind": "schedule or line-up",
+   "random": true,
+   "answer": {
+    "answer": "beside"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.look.band",
+   "sig": "schedule or line-up#0|look.band|band,bandSurface,imageGround",
+   "section": 4,
+   "sectionKind": "schedule or line-up",
+   "random": true,
+   "answer": {
+    "look": "band"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.look.a quieter second action",
+   "sig": "schedule or line-up#0|look.a quieter second action|primaryButton,outlineButton",
+   "section": 4,
+   "sectionKind": "schedule or line-up",
+   "random": true,
+   "answer": {
+    "look": "outlineButton"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.look.the schedule or line-up headline",
+   "sig": "schedule or line-up#0|look.the schedule or line-up headline|displayHeadline,sectionHeading",
+   "section": 4,
+   "sectionKind": "schedule or line-up",
+   "random": true,
+   "answer": {
+    "look": "displayHeadline"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.deck",
+   "sig": "schedule or line-up#0|deck|second button,headline,small print",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "schedule or line-up",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods. Tone: classic.\nFacts the page must give: family bakery; Lyon; sourdough; croissants and cakes.\nWrite the words of the \"schedule or line-up\" section, top to bottom:\n01_second_button: second button, two to four words, a verb first; pressing it lets a visitor do something else useful\n02_headline: headline, at most 70 characters\n03_small_print: small print, at most 60 characters\nAlready on the page: \"Lyon Bakehouse: Artisan Bread & Sweets\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_second_button": "View Daily Specials",
+    "02_headline": "Artisan Sourdough & Sweet Delights in Lyon",
+    "03_small_print": "Handmade with love, family tradition."
+   },
+   "tokensIn": 205,
+   "tokensOut": 51,
+   "ms": 2856
+  },
+  {
+   "round": 0,
+   "key": "s5.bits",
+   "sig": "call to action#0|bits",
+   "section": 5,
+   "sectionKind": "call to action",
+   "random": true,
+   "answer": {
+    "bits": [
+     "headline",
+     "price",
+     "body text",
+     "sub-line"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s5.align",
+   "sig": "call to action#0|align",
+   "section": 5,
+   "sectionKind": "call to action",
+   "random": true,
+   "answer": {
+    "answer": "centred"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s5.look.band",
+   "sig": "call to action#0|look.band|bandSurface,ctaBand,imageGround",
+   "section": 5,
+   "sectionKind": "call to action",
+   "random": true,
+   "answer": {
+    "look": "imageGround"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s5.look.one sentence under the headline",
+   "sig": "call to action#0|look.one sentence under the headline|lead,body",
+   "section": 5,
+   "sectionKind": "call to action",
+   "random": true,
+   "answer": {
+    "look": "lead"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s5.deck",
+   "sig": "call to action#0|deck|headline,price,paragraph,sub-line",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods. Tone: classic.\nFacts the page must give: family bakery; Lyon; sourdough; croissants and cakes.\nWrite the words of the \"call to action\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_price: price, at most 60 characters\n03_paragraph: paragraph, at most 200 characters\n04_sub_line: sub-line, at most 160 characters\nAlready on the page: \"Lyon Bakehouse: Artisan Bread & Sweets\", \"Artisan Sourdough & Sweet Delights in Lyon\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Authentic Family Bakery in Lyon",
+    "02_price": "Freshly Baked Daily",
+    "03_paragraph": "Experience the tradition of Lyon's finest family bakery, crafting perfect sourdough, buttery croissants, and exquisite cakes for your table.",
+    "04_sub_line": "Your neighborhood source for time-honored French baking, made with love in Lyon."
+   },
+   "tokensIn": 218,
+   "tokensOut": 96,
+   "ms": 4510
+  },
+  {
+   "round": 0,
+   "key": "s6.bits",
+   "sig": "footer#0|bits",
+   "section": 6,
+   "sectionKind": "footer",
+   "random": true,
+   "answer": {
+    "bits": [
+     "headline",
+     "second button"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s6.align",
+   "sig": "footer#0|align",
+   "section": 6,
+   "sectionKind": "footer",
+   "random": true,
+   "answer": {
+    "answer": "centred"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s6.look.a quieter second action",
+   "sig": "footer#0|look.a quieter second action|primaryButton,outlineButton",
+   "section": 6,
+   "sectionKind": "footer",
+   "random": true,
+   "answer": {
+    "look": "outlineButton"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s6.deck",
+   "sig": "footer#0|deck|headline,second button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "footer",
+   "user": "BRIEF: \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods. Tone: classic.\nFacts the page must give: family bakery; Lyon; sourdough; croissants and cakes.\nWrite the words of the \"footer\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_second_button: second button, two to four words, a verb first; pressing it lets a visitor do something else useful\nAlready on the page: \"Lyon Bakehouse: Artisan Bread & Sweets\", \"Artisan Sourdough & Sweet Delights in Lyon\", \"Authentic Family Bakery in Lyon\", \"Your neighborhood source for time-honored French baking, mad\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Lyon's Finest Family Bakery",
+    "02_second_button": "View Our Menu"
+   },
+   "tokensIn": 219,
+   "tokensOut": 35,
+   "ms": 2269
+  }
+ ],
+ "judgements": [
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-city-dusk.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.048,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1733
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-forest-fog.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.063,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 2402
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-canyon.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.07,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 2062
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-dune.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.034,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1797
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-coast.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.038,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1636
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-shore.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.041,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1591
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-red-rock.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.041,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1576
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-skyline.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.041,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1564
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-welder.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.016,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1614
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-potter.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.361,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1631
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-baker.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.234,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1633
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-chef.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.214,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1650
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-carpenter.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.052,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1618
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-leather-bench.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.198,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1625
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-machine-shop.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.107,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1653
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-hands-clay.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.413,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1683
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-cafe.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.29,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1658
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-coffee-shop.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.178,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1646
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-meeting.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.12,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1623
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-market.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.053,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1614
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-desk.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.137,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1650
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-market.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.059,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1650
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-bread.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.886,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1667
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-board.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.135,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1661
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-plate.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.011,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1658
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-grocer.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.072,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1681
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-carrots.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.083,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1669
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-bakery.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.934,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1653
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-cat.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.032,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1621
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-horse.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.033,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1600
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-sheep.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.024,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1599
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-dog.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Bakehouse\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.033,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1605
+  },
+  {
+   "round": 0,
+   "key": "s0.sound",
+   "section": 0,
+   "user": "A landing page called \"Lyon Bakehouse\", for Local customers in Lyon looking for fresh baked goods.\n\nSection \"hero\" (light band). Top to bottom:\n- a form field: \"Message\" / \"Your message\"\n- a form field: \"Number of people\" / \"2\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Date\" / \"DD/MM/YYYY\"\n- button: \"Order Now\"\n- 2 statTiles in a single column, each: a name and a role, price, title, icon:\n  1. \"Artisan Sourdough Loaf\" — \"€5.50\" — \"Naturally Leavened Country Sourdough\"\n  2. \"Classic Croissant\" — \"€2.80\" — \"Flaky, Butter-Rich Parisian Croissant\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.377,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 269,
+   "ms": 1635
+  },
+  {
+   "round": 0,
+   "key": "s0.weakest",
+   "section": 0,
+   "user": "A landing page called \"Lyon Bakehouse\", for Local customers in Lyon looking for fresh baked goods.\n\nSection \"hero\" (light band). Top to bottom:\n- a form field: \"Message\" / \"Your message\"\n- a form field: \"Number of people\" / \"2\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Date\" / \"DD/MM/YYYY\"\n- button: \"Order Now\"\n- 2 statTiles in a single column, each: a name and a role, price, title, icon:\n  1. \"Artisan Sourdough Loaf\" — \"€5.50\" — \"Naturally Leavened Country Sourdough\"\n  2. \"Classic Croissant\" — \"€2.80\" — \"Flaky, Butter-Rich Parisian Croissant\"\n\nWhich line is the weakest: odd, cut off, repeated or off-topic?",
+   "pick": "button: \"Order Now\"",
+   "dist": {
+    "button: \"Order Now\"": 0.8144124705189868,
+    "item 1 a name and a role: \"Artisan Sourdough Loaf\"": 0.1280563372715853,
+    "item 1 price: \"€5.50\"": 0.030130637648156766,
+    "item 1 title: \"Naturally Leavened Country Sourdough\"": 0.026125371552051347,
+    "item 2 price: \"€2.80\"": 0.0002559606511702289,
+    "item 2 a name and a role: \"Classic Croissant\"": 0.00017777249361540195,
+    "item 2 title: \"Flaky, Butter-Rich Parisian Croissant\"": 0.00012021372049775102
+   },
+   "model": "gemma4:e4b-it-qat"
+  },
+  {
+   "round": 0,
+   "key": "s1.sound",
+   "section": 1,
+   "user": "A landing page called \"Lyon Bakehouse\", for Local customers in Lyon looking for fresh baked goods.\n\nSection \"about\" (light band). Top to bottom:\n- headline: \"Lyon Bakehouse: Artisan Bread & Sweets\"\n- badge: \"A family tradition in Lyon, crafting authentic sourdough, croissants, and cakes daily.\"\n- price: \"Fresh daily selection\"\n- quote: \"Come experience the warmth and taste of generations of baking, right here in Lyon.\"\n- who said it: a name and a role: \"Elodie, Owner\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.987,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 181,
+   "ms": 1814
+  },
+  {
+   "round": 0,
+   "key": "s2.sound",
+   "section": 2,
+   "user": "A landing page called \"Lyon Bakehouse\", for Local customers in Lyon looking for fresh baked goods.\n\nSection \"feature cards\" (light band). Top to bottom:\n- who said it: a name and a role: \"Master Baker\"\n- eyebrow: \"Authentic Lyon Goods\"\n- price: \"From €2.50\"\n- button: \"View Our Treats\"\n- small print: \"Family tradition, daily baked.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.982,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 157,
+   "ms": 1384
+  },
+  {
+   "round": 0,
+   "key": "s3.sound",
+   "section": 3,
+   "user": "A landing page called \"Lyon Bakehouse\", for Local customers in Lyon looking for fresh baked goods.\n\nSection \"gallery\" (dark band). Top to bottom:\n- small print: \"Handcrafted with love in Lyon.\"\n- paragraph: \"A family-run tradition in the heart of Lyon, serving you the finest sourdough, flaky croissants, and exquisite cakes daily.\"\n- eyebrow: \"Our Offerings\"\n- date and place: \"Freshly baked every morning at our charming bakery in Lyon.\"\n- button: \"View Our Treats\"\n- badge: \"Authentic Lyonnaise family recipes.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.86,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 189,
+   "ms": 1520
+  },
+  {
+   "round": 0,
+   "key": "s4.sound",
+   "section": 4,
+   "user": "A landing page called \"Lyon Bakehouse\", for Local customers in Lyon looking for fresh baked goods.\n\nSection \"schedule or line-up\" (light band). Top to bottom:\n- button: \"View Daily Specials\"\n- headline: \"Artisan Sourdough & Sweet Delights in Lyon\"\n- small print: \"Handmade with love, family tradition.\"\n- a photo (food-bread.webp)\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.946,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 152,
+   "ms": 1202
+  },
+  {
+   "round": 0,
+   "key": "s5.sound",
+   "section": 5,
+   "user": "A landing page called \"Lyon Bakehouse\", for Local customers in Lyon looking for fresh baked goods.\n\nSection \"call to action\" (dark band). Top to bottom:\n- headline: \"Authentic Family Bakery in Lyon\"\n- price: \"Freshly Baked Daily\"\n- paragraph: \"Experience the tradition of Lyon's finest family bakery, crafting perfect sourdough, buttery croissants, and exquisite cakes for your table.\"\n- sub-line: \"Your neighborhood source for time-honored French baking, made with love in Lyon.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.988,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 175,
+   "ms": 1380
+  },
+  {
+   "round": 0,
+   "key": "s6.sound",
+   "section": 6,
+   "user": "A landing page called \"Lyon Bakehouse\", for Local customers in Lyon looking for fresh baked goods.\n\nSection \"footer\" (light band). Top to bottom:\n- headline: \"Lyon's Finest Family Bakery\"\n- button: \"View Our Menu\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.99,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 118,
+   "ms": 945
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "family bakery",
+   "user": "A landing page called \"Lyon Bakehouse\", for Local customers in Lyon looking for fresh baked goods.\nEvery line of words on the page, by section:\n[hero] Order Now / Artisan Sourdough Loaf / €5.50 / Naturally Leavened Country Sourdough / Classic Croissant / €2.80 / Flaky, Butter-Rich Parisian Croissant\n[about] Lyon Bakehouse: Artisan Bread & Sweets / A family tradition in Lyon, crafting authentic sourdough, croissants, and cakes daily. / Fresh daily selection / Come experience the warmth and taste of generations of baking, right here in Lyon. / Elodie, Owner\n[feature cards] Master Baker / Authentic Lyon Goods / From €2.50 / View Our Treats / Family tradition, daily baked.\n[gallery] Handcrafted with love in Lyon. / A family-run tradition in the heart of Lyon, serving you the finest sourdough, flaky crois / Our Offerings / Freshly baked every morning at our charming bakery in Lyon. / View Our Treats / Authentic Lyonnaise family recipes.\n[schedule or line-up] View Daily Specials / Artisan Sourdough & Sweet Delights in Lyon / Handmade with love, family tradition.\n[call to action] Authentic Family Bakery in Lyon / Freshly Baked Daily / Experience the tradition of Lyon's finest family bakery, crafting perfect sourdough, butte / Your neighborhood source for time-honored French baking, made with love in Lyon.\n[footer] Lyon's Finest Family Bakery / View Our Menu\n\nDoes the page tell a visitor: family bakery?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 362,
+   "ms": 2604
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "Lyon",
+   "user": "A landing page called \"Lyon Bakehouse\", for Local customers in Lyon looking for fresh baked goods.\nEvery line of words on the page, by section:\n[hero] Order Now / Artisan Sourdough Loaf / €5.50 / Naturally Leavened Country Sourdough / Classic Croissant / €2.80 / Flaky, Butter-Rich Parisian Croissant\n[about] Lyon Bakehouse: Artisan Bread & Sweets / A family tradition in Lyon, crafting authentic sourdough, croissants, and cakes daily. / Fresh daily selection / Come experience the warmth and taste of generations of baking, right here in Lyon. / Elodie, Owner\n[feature cards] Master Baker / Authentic Lyon Goods / From €2.50 / View Our Treats / Family tradition, daily baked.\n[gallery] Handcrafted with love in Lyon. / A family-run tradition in the heart of Lyon, serving you the finest sourdough, flaky crois / Our Offerings / Freshly baked every morning at our charming bakery in Lyon. / View Our Treats / Authentic Lyonnaise family recipes.\n[schedule or line-up] View Daily Specials / Artisan Sourdough & Sweet Delights in Lyon / Handmade with love, family tradition.\n[call to action] Authentic Family Bakery in Lyon / Freshly Baked Daily / Experience the tradition of Lyon's finest family bakery, crafting perfect sourdough, butte / Your neighborhood source for time-honored French baking, made with love in Lyon.\n[footer] Lyon's Finest Family Bakery / View Our Menu\n\nDoes the page tell a visitor: Lyon?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 361,
+   "ms": 2689
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "sourdough",
+   "user": "A landing page called \"Lyon Bakehouse\", for Local customers in Lyon looking for fresh baked goods.\nEvery line of words on the page, by section:\n[hero] Order Now / Artisan Sourdough Loaf / €5.50 / Naturally Leavened Country Sourdough / Classic Croissant / €2.80 / Flaky, Butter-Rich Parisian Croissant\n[about] Lyon Bakehouse: Artisan Bread & Sweets / A family tradition in Lyon, crafting authentic sourdough, croissants, and cakes daily. / Fresh daily selection / Come experience the warmth and taste of generations of baking, right here in Lyon. / Elodie, Owner\n[feature cards] Master Baker / Authentic Lyon Goods / From €2.50 / View Our Treats / Family tradition, daily baked.\n[gallery] Handcrafted with love in Lyon. / A family-run tradition in the heart of Lyon, serving you the finest sourdough, flaky crois / Our Offerings / Freshly baked every morning at our charming bakery in Lyon. / View Our Treats / Authentic Lyonnaise family recipes.\n[schedule or line-up] View Daily Specials / Artisan Sourdough & Sweet Delights in Lyon / Handmade with love, family tradition.\n[call to action] Authentic Family Bakery in Lyon / Freshly Baked Daily / Experience the tradition of Lyon's finest family bakery, crafting perfect sourdough, butte / Your neighborhood source for time-honored French baking, made with love in Lyon.\n[footer] Lyon's Finest Family Bakery / View Our Menu\n\nDoes the page tell a visitor: sourdough?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 361,
+   "ms": 2759
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "croissants and cakes",
+   "user": "A landing page called \"Lyon Bakehouse\", for Local customers in Lyon looking for fresh baked goods.\nEvery line of words on the page, by section:\n[hero] Order Now / Artisan Sourdough Loaf / €5.50 / Naturally Leavened Country Sourdough / Classic Croissant / €2.80 / Flaky, Butter-Rich Parisian Croissant\n[about] Lyon Bakehouse: Artisan Bread & Sweets / A family tradition in Lyon, crafting authentic sourdough, croissants, and cakes daily. / Fresh daily selection / Come experience the warmth and taste of generations of baking, right here in Lyon. / Elodie, Owner\n[feature cards] Master Baker / Authentic Lyon Goods / From €2.50 / View Our Treats / Family tradition, daily baked.\n[gallery] Handcrafted with love in Lyon. / A family-run tradition in the heart of Lyon, serving you the finest sourdough, flaky crois / Our Offerings / Freshly baked every morning at our charming bakery in Lyon. / View Our Treats / Authentic Lyonnaise family recipes.\n[schedule or line-up] View Daily Specials / Artisan Sourdough & Sweet Delights in Lyon / Handmade with love, family tradition.\n[call to action] Authentic Family Bakery in Lyon / Freshly Baked Daily / Experience the tradition of Lyon's finest family bakery, crafting perfect sourdough, butte / Your neighborhood source for time-honored French baking, made with love in Lyon.\n[footer] Lyon's Finest Family Bakery / View Our Menu\n\nDoes the page tell a visitor: croissants and cakes?",
+   "pYes": 0.998,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 363,
+   "ms": 2777
+  },
+  {
+   "round": 0,
+   "key": "page.contradicts",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nEvery line of words on the page, by section:\n[hero] Order Now / Artisan Sourdough Loaf / €5.50 / Naturally Leavened Country Sourdough / Classic Croissant / €2.80 / Flaky, Butter-Rich Parisian Croissant\n[about] Lyon Bakehouse: Artisan Bread & Sweets / A family tradition in Lyon, crafting authentic sourdough, croissants, and cakes daily. / Fresh daily selection / Come experience the warmth and taste of generations of baking, right here in Lyon. / Elodie, Owner\n[feature cards] Master Baker / Authentic Lyon Goods / From €2.50 / View Our Treats / Family tradition, daily baked.\n[gallery] Handcrafted with love in Lyon. / A family-run tradition in the heart of Lyon, serving you the finest sourdough, flaky crois / Our Offerings / Freshly baked every morning at our charming bakery in Lyon. / View Our Treats / Authentic Lyonnaise family recipes.\n[schedule or line-up] View Daily Specials / Artisan Sourdough & Sweet Delights in Lyon / Handmade with love, family tradition.\n[call to action] Authentic Family Bakery in Lyon / Freshly Baked Daily / Experience the tradition of Lyon's finest family bakery, crafting perfect sourdough, butte / Your neighborhood source for time-honored French baking, made with love in Lyon.\n[footer] Lyon's Finest Family Bakery / View Our Menu\n\nDoes any line say something the request contradicts, or invent a detail it would need to know (a different day, date, time, place, price, currency or name)?",
+   "pYes": 0.07,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 398,
+   "ms": 3002
+  },
+  {
+   "round": 0,
+   "key": "page.missing",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nA landing page called \"Lyon Bakehouse\", for Local customers in Lyon looking for fresh baked goods.\nThe page's sections, top to bottom:\n1. hero: \"Order Now\"\n2. about: \"Lyon Bakehouse: Artisan Bread & Sweets\"\n3. feature cards: \"Master Baker\"\n4. gallery: \"Handcrafted with love in Lyon.\"\n5. schedule or line-up: \"Artisan Sourdough & Sweet Delights in Lyon\"\n6. call to action: \"Authentic Family Bakery in Lyon\"\n7. footer: \"Lyon's Finest Family Bakery\"\n\nIs something a visitor would clearly expect on this page missing?",
+   "pYes": 0.793,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 205,
+   "ms": 1665
+  },
+  {
+   "round": 0,
+   "key": "page.missingWhich",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nA landing page called \"Lyon Bakehouse\", for Local customers in Lyon looking for fresh baked goods.\nThe page's sections, top to bottom:\n1. hero: \"Order Now\"\n2. about: \"Lyon Bakehouse: Artisan Bread & Sweets\"\n3. feature cards: \"Master Baker\"\n4. gallery: \"Handcrafted with love in Lyon.\"\n5. schedule or line-up: \"Artisan Sourdough & Sweet Delights in Lyon\"\n6. call to action: \"Authentic Family Bakery in Lyon\"\n7. footer: \"Lyon's Finest Family Bakery\"\n\nWhich section should be added?",
+   "pick": "location and hours",
+   "dist": {
+    "location and hours": 0.9051220430897782,
+    "menu or prices": 0.08355055502236697,
+    "testimonials": 0.004951732663032624,
+    "how it works": 0.002456101188615233,
+    "team": 0.002162740217818295,
+    "sign-up or contact form": 0.000989287848177722,
+    "faq": 0.0003378120063813739
+   },
+   "model": "gemma4:e4b-it-qat"
+  },
+  {
+   "round": 0,
+   "key": "page.extra",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nA landing page called \"Lyon Bakehouse\", for Local customers in Lyon looking for fresh baked goods.\nThe page's sections, top to bottom:\n1. hero: \"Order Now\"\n2. about: \"Lyon Bakehouse: Artisan Bread & Sweets\"\n3. feature cards: \"Master Baker\"\n4. gallery: \"Handcrafted with love in Lyon.\"\n5. schedule or line-up: \"Artisan Sourdough & Sweet Delights in Lyon\"\n6. call to action: \"Authentic Family Bakery in Lyon\"\n7. footer: \"Lyon's Finest Family Bakery\"\n\nDoes any section repeat another one, or not belong on this page?",
+   "pYes": 0.219,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 207,
+   "ms": 1671
+  },
+  {
+   "round": 0,
+   "key": "page.organised",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nType: mono-sans. Sections, top to bottom:\n1. hero (bandSurface): form, list of items — Order Now\n2. about (bandSurface): headline, badge, price, quote, name line — Lyon Bakehouse: Artisan Bread & Sweets\n3. feature cards (bandSurface): name line, eyebrow, price, button, small print — Master Baker\n4. gallery (imageGround): small print, body text, eyebrow, date and place, button, badge — Handcrafted with love in Lyon.\n5. schedule or line-up (band): photo, second button, headline, small print — Artisan Sourdough & Sweet Delights in Lyon\n6. call to action (imageGround): headline, price, body text, sub-line — Authentic Family Bakery in Lyon\n7. footer (footerBand): headline, second button — Lyon's Finest Family Bakery\n\nIs this page well organised: it opens by saying what it is and what to do, the sections come in a sensible order, and no part is repeated?",
+   "pYes": 0.661,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 282,
+   "ms": 2099
+  },
+  {
+   "round": 0,
+   "key": "page.suits",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nType: mono-sans. Sections, top to bottom:\n1. hero (bandSurface): form, list of items — Order Now\n2. about (bandSurface): headline, badge, price, quote, name line — Lyon Bakehouse: Artisan Bread & Sweets\n3. feature cards (bandSurface): name line, eyebrow, price, button, small print — Master Baker\n4. gallery (imageGround): small print, body text, eyebrow, date and place, button, badge — Handcrafted with love in Lyon.\n5. schedule or line-up (band): photo, second button, headline, small print — Artisan Sourdough & Sweet Delights in Lyon\n6. call to action (imageGround): headline, price, body text, sub-line — Authentic Family Bakery in Lyon\n7. footer (footerBand): headline, second button — Lyon's Finest Family Bakery\n\nDo the type and the parts suit this kind of page?",
+   "pYes": 0.848,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 262,
+   "ms": 2054
+  }
+ ],
+ "skipped": [
+  {
+   "key": "card.hue",
+   "why": "S0: the request says it (warm)"
+  },
+  {
+   "key": "card.photos",
+   "why": "photo scout (reviewer vision): kept food-bakery.webp, food-bread.webp of 32"
+  },
+  {
+   "key": "s1.bits",
+   "why": "rule: a quote gets a name line"
+  }
+ ],
+ "mcp": [
+  {
+   "round": 0,
+   "tool": "create_project",
+   "isError": false,
+   "ms": 245
+  },
+  {
+   "round": 0,
+   "tool": "get_style_vocabulary",
+   "isError": false,
+   "ms": 5
+  },
+  {
+   "round": 0,
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 27
+  },
+  {
+   "round": 0,
+   "tool": "set_style_preset",
+   "isError": false,
+   "ms": 12
+  },
+  {
+   "round": 0,
+   "tool": "set_project_tokens",
+   "isError": false,
+   "ms": 174
+  },
+  {
+   "round": 0,
+   "tool": "list_node_types",
+   "isError": false,
+   "ms": 2
+  },
+  {
+   "round": 0,
+   "tool": "get_component",
+   "isError": false,
+   "ms": 12
+  },
+  {
+   "round": 0,
+   "tool": "create_plan",
+   "isError": false,
+   "ms": 5
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 65
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 21
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 27
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 21
+  },
+  {
+   "round": 0,
+   "tool": "apply_plan",
+   "isError": false,
+   "ms": 3760
+  },
+  {
+   "round": 0,
+   "tool": "render_report",
+   "isError": false,
+   "ms": 1635
+  }
+ ],
+ "roundsLog": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R4-bakery-r0",
+   "score": 15.57,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "form",
+      "list of items"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.377
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "badge",
+      "price",
+      "quote",
+      "name line"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.987
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "name line",
+      "eyebrow",
+      "price",
+      "button",
+      "small print"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.982
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "small print",
+      "body text",
+      "eyebrow",
+      "date and place",
+      "button",
+      "badge"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.86
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "photo",
+      "second button",
+      "headline",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.946
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "price",
+      "body text",
+      "sub-line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.988
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "second button"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.99
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|gallery#0|deck|small print,paragraph,eyebrow,date and place,button,badge",
+     "weight": 2,
+     "say": "\"View Our Treats\" repeats \"View Our Treats\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|deck|headline,second button",
+     "weight": 2,
+     "say": "\"Lyon's Finest Family Bakery\" repeats \"Experience the tradition of Lyon's finest family bakery, crafting perfect sourdough, buttery croissants, and exquisite cakes for your table.\"",
+     "op": "reword"
+    },
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    },
+    {
+     "id": "J1|hero#0|copy|the button that sends the form|net.noodl.controls.button",
+     "weight": 1.87,
+     "say": "reviewer (p=0.377): weakest line button \"Order Now\"",
+     "op": "reword"
+    },
+    {
+     "id": "P1|location and hours",
+     "weight": 2.38,
+     "say": "reviewer (p=0.793): add a \"location and hours\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "Q|org",
+     "weight": 2.71,
+     "say": "reviewer: organised p=0.661"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.61,
+     "say": "reviewer: type and parts suit p=0.848"
+    }
+   ],
+   "findings": [
+    "minimum-layout-width"
+   ],
+   "modelCalls": 50,
+   "judgements": 50,
+   "words": [
+    "Section \"hero\" (light band). Top to bottom:\n- a form field: \"Message\" / \"Your message\"\n- a form field: \"Number of people\" / \"2\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Date\" / \"DD/MM/YYYY\"\n- button: \"Order Now\"\n- 2 statTiles in a single column, each: a name and a role, price, title, icon:\n  1. \"Artisan Sourdough Loaf\" — \"€5.50\" — \"Naturally Leavened Country Sourdough\"\n  2. \"Classic Croissant\" — \"€2.80\" — \"Flaky, Butter-Rich Parisian Croissant\"",
+    "Section \"about\" (light band). Top to bottom:\n- headline: \"Lyon Bakehouse: Artisan Bread & Sweets\"\n- badge: \"A family tradition in Lyon, crafting authentic sourdough, croissants, and cakes daily.\"\n- price: \"Fresh daily selection\"\n- quote: \"Come experience the warmth and taste of generations of baking, right here in Lyon.\"\n- who said it: a name and a role: \"Elodie, Owner\"",
+    "Section \"feature cards\" (light band). Top to bottom:\n- who said it: a name and a role: \"Master Baker\"\n- eyebrow: \"Authentic Lyon Goods\"\n- price: \"From €2.50\"\n- button: \"View Our Treats\"\n- small print: \"Family tradition, daily baked.\"",
+    "Section \"gallery\" (dark band). Top to bottom:\n- small print: \"Handcrafted with love in Lyon.\"\n- paragraph: \"A family-run tradition in the heart of Lyon, serving you the finest sourdough, flaky croissants, and exquisite cakes daily.\"\n- eyebrow: \"Our Offerings\"\n- date and place: \"Freshly baked every morning at our charming bakery in Lyon.\"\n- button: \"View Our Treats\"\n- badge: \"Authentic Lyonnaise family recipes.\"",
+    "Section \"schedule or line-up\" (light band). Top to bottom:\n- button: \"View Daily Specials\"\n- headline: \"Artisan Sourdough & Sweet Delights in Lyon\"\n- small print: \"Handmade with love, family tradition.\"\n- a photo (food-bread.webp)",
+    "Section \"call to action\" (dark band). Top to bottom:\n- headline: \"Authentic Family Bakery in Lyon\"\n- price: \"Freshly Baked Daily\"\n- paragraph: \"Experience the tradition of Lyon's finest family bakery, crafting perfect sourdough, buttery croissants, and exquisite cakes for your table.\"\n- sub-line: \"Your neighborhood source for time-honored French baking, made with love in Lyon.\"",
+    "Section \"footer\" (light band). Top to bottom:\n- headline: \"Lyon's Finest Family Bakery\"\n- button: \"View Our Menu\""
+   ],
+   "minutes": 2.3,
+   "kept": true
+  }
+ ],
+ "randomDecisions": true,
+ "flags": [
+  "--brief",
+  "--run",
+  "--no-review",
+  "--random-decisions",
+  "--section-copy",
+  "--contradict",
+  "--v4"
+ ],
+ "photoScout": [
+  [
+   "food-bakery.webp",
+   0.934
+  ],
+  [
+   "food-bread.webp",
+   0.886
+  ],
+  [
+   "work-hands-clay.webp",
+   0.413
+  ],
+  [
+   "work-potter.webp",
+   0.361
+  ],
+  [
+   "people-cafe.webp",
+   0.29
+  ],
+  [
+   "work-baker.webp",
+   0.234
+  ],
+  [
+   "work-chef.webp",
+   0.214
+  ],
+  [
+   "work-leather-bench.webp",
+   0.198
+  ],
+  [
+   "people-coffee-shop.webp",
+   0.178
+  ],
+  [
+   "people-desk.webp",
+   0.137
+  ],
+  [
+   "food-board.webp",
+   0.135
+  ],
+  [
+   "people-meeting.webp",
+   0.12
+  ],
+  [
+   "work-machine-shop.webp",
+   0.107
+  ],
+  [
+   "food-carrots.webp",
+   0.083
+  ],
+  [
+   "food-grocer.webp",
+   0.072
+  ],
+  [
+   "ground-canyon.webp",
+   0.07
+  ],
+  [
+   "ground-forest-fog.webp",
+   0.063
+  ],
+  [
+   "food-market.webp",
+   0.059
+  ],
+  [
+   "people-market.webp",
+   0.053
+  ],
+  [
+   "work-carpenter.webp",
+   0.052
+  ],
+  [
+   "ground-city-dusk.webp",
+   0.048
+  ],
+  [
+   "ground-shore.webp",
+   0.041
+  ],
+  [
+   "ground-red-rock.webp",
+   0.041
+  ],
+  [
+   "ground-skyline.webp",
+   0.041
+  ],
+  [
+   "ground-coast.webp",
+   0.038
+  ],
+  [
+   "ground-dune.webp",
+   0.034
+  ],
+  [
+   "animal-horse.webp",
+   0.033
+  ],
+  [
+   "animal-dog.webp",
+   0.033
+  ],
+  [
+   "animal-cat.webp",
+   0.032
+  ],
+  [
+   "animal-sheep.webp",
+   0.024
+  ],
+  [
+   "work-welder.webp",
+   0.016
+  ],
+  [
+   "food-plate.webp",
+   0.011
+  ]
+ ],
+ "result": {
+  "minutes": 2.3,
+  "bestRound": 0,
+  "bestScore": 15.57,
+  "scores": [
+   15.57
+  ],
+  "builderCalls": 50,
+  "judgements": 50,
+  "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R4-bakery-r0"
+ }
+}

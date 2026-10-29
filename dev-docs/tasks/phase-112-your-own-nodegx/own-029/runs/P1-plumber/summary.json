@@ -1,0 +1,174 @@
+{
+ "minutes": 1.3,
+ "bestRound": 0,
+ "bestScore": 18.5,
+ "scores": [
+  18.5
+ ],
+ "builderCalls": 34,
+ "judgements": 12,
+ "replays": 48,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-P1-plumber-r0",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-P1-plumber-r0",
+   "score": 18.5,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.97
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.841
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.995,
+     "pFit": 0.926
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.884
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "form"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.95
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.622
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "date and place",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.958
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|hero#0|copy|the hero headline|Text",
+     "weight": 2,
+     "say": "\"Reliable Plumbing Services for Your Home\" repeats \"Reliable Plumbing Services\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|feature cards#0|copy|one sentence under the headline|Text",
+     "weight": 2,
+     "say": "\"Reliable plumbing services for your home and business, available to schedule your consultation.\" repeats \"Reliable Plumbing Services\"",
+     "op": "reword"
+    },
+    {
+     "id": "S9|location and hours#0|copy|the location and hours headline|Text",
+     "weight": 3,
+     "say": "\"Serving [City/Area] - Open 7am-7pm\" talks about the page instead of to the visitor",
+     "op": "reword"
+    },
+    {
+     "id": "S9|location and hours#0|copy|one sentence under the headline|Text",
+     "weight": 3,
+     "say": "\"Reliable plumbing services for your home and business in the\" talks about the page instead of to the visitor",
+     "op": "reword"
+    },
+    {
+     "id": "S5|location and hours#0|copy|one sentence under the headline|Text",
+     "weight": 2,
+     "say": "\"Reliable plumbing services for your home and business in the [City/Area] area.\" repeats \"Reliable Plumbing Services\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|location and hours#0|copy|a short paragraph|Text",
+     "weight": 2,
+     "say": "\"Serving your community with reliable plumbing services. We are available to assist you; please ask for a call-back.\" repeats \"Reliable Plumbing Services\"",
+     "op": "reword"
+    },
+    {
+     "id": "S11|feature cards#0|copy|one sentence under the headline|Text",
+     "weight": 1.5,
+     "say": "\"reliable plumbing services\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|copy|one sentence under the headline|Text",
+     "weight": 1.5,
+     "say": "\"reliable plumbing services\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|copy|a short paragraph|Text",
+     "weight": 1.5,
+     "say": "\"reliable plumbing services\" is said 5 times on the page",
+     "op": "reword"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 34,
+   "judgements": 12,
+   "minutes": 1.3,
+   "kept": true
+  }
+ ]
+}

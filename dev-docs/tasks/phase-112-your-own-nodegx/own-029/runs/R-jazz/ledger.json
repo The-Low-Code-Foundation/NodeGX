@@ -1,0 +1,1904 @@
+{
+ "run": "R-jazz",
+ "brief": "jazz",
+ "request": "A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.",
+ "model": "gemma4:e2b-it-qat",
+ "judge": "gemma4:e4b-it-qat",
+ "copyN": 1,
+ "rounds": 0,
+ "build": {
+  "distMtime": "2026-10-28T15:27:11.116Z",
+  "head": "1f31ab2f8"
+ },
+ "harness": "02df955c",
+ "startedAt": "2026-10-28T19:44:22.735Z",
+ "calls": [
+  {
+   "round": 0,
+   "key": "card.kind+tone",
+   "sig": "card|kind+tone",
+   "random": true,
+   "answer": {
+    "kind": "landing page"
+   }
+  },
+  {
+   "round": 0,
+   "key": "card.audience+action+name",
+   "sig": "card|audience",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nWho is the page for (one line, max 20 words)? What is the ONE action the page wants a visitor to take (max 20 words)? What is the business, event or person called (max 4 words; use the name in the request, or invent a short one)?",
+   "temperature": 0.4,
+   "answer": {
+    "action": "Purchase tickets for the jazz evening at The Blue Room.",
+    "audience": "Music lovers interested in a dark and elegant jazz night.",
+    "name": "The Blue Room Jazz"
+   },
+   "tokensIn": 134,
+   "tokensOut": 50,
+   "ms": 2284
+  },
+  {
+   "round": 0,
+   "key": "card.preset+hue",
+   "sig": "card|preset",
+   "random": true,
+   "answer": {
+    "preset": "playful",
+    "hue": "neutral"
+   }
+  },
+  {
+   "round": 0,
+   "key": "card.pairing+density+radius",
+   "sig": "card|type",
+   "random": true,
+   "answer": {
+    "density": "airy",
+    "pairing": "mono-sans",
+    "radius": "sharp"
+   }
+  },
+  {
+   "round": 0,
+   "key": "card.mustShow",
+   "sig": "card|mustShow",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nWhat must a visitor be able to find on this page? List 1 to 4 short facts taken from the request about the business, event or person (a date, a place, what is sold, opening days, what to do). Only what the request says, and nothing about how the page should look.",
+   "temperature": 0.2,
+   "answer": {
+    "texts": [
+     "jazz evening",
+     "14 November",
+     "The Blue Room",
+     "line-up, tickets and how to get there"
+    ]
+   },
+   "tokensIn": 136,
+   "tokensOut": 48,
+   "ms": 2170
+  },
+  {
+   "round": 0,
+   "key": "sections",
+   "sig": "sections",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a landing page called \"The Blue Room Jazz\", for Music lovers interested in a dark and elegant jazz night. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe page must show: jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there.\nWhich sections should the page have, top to bottom? Give 3 to 7. For each, one line saying what a VISITOR finds there (not what the section does for the page). Choose what THIS page needs; not every page needs every kind.\nSection kinds: hero, about, feature cards, how it works, gallery, menu or prices, schedule or line-up, testimonials, team, faq, location and hours, sign-up or contact form, call to action, footer",
+   "temperature": 0.3,
+   "answer": {
+    "sections": [
+     {
+      "kind": "hero",
+      "purpose": "Immediate visual impact and core event details."
+     },
+     {
+      "kind": "schedule or line-up",
+      "purpose": "Show the featured musicians."
+     },
+     {
+      "kind": "about",
+      "purpose": "Set the dark, elegant tone and venue atmosphere."
+     },
+     {
+      "kind": "how it works",
+      "purpose": "Explain the simple ticket purchase process."
+     },
+     {
+      "kind": "location and hours",
+      "purpose": "Provide essential logistical details for attendance."
+     },
+     {
+      "kind": "call to action",
+      "purpose": "Drive the primary goal: ticket purchase."
+     },
+     {
+      "kind": "footer",
+      "purpose": "Provide necessary secondary links and final branding."
+     }
+    ]
+   },
+   "tokensIn": 248,
+   "tokensOut": 216,
+   "ms": 8906
+  },
+  {
+   "round": 0,
+   "key": "s0.bits",
+   "sig": "hero#0|bits",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "bits": [
+     "form",
+     "list of items"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.align",
+   "sig": "hero#0|align",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "answer": "centred"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.form.fields",
+   "sig": "hero#0|form.fields",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "fields": [
+     "message",
+     "number of people",
+     "email",
+     "phone",
+     "date"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.items.count",
+   "sig": "hero#0|items.count",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "answer": "2"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.items.bits",
+   "sig": "hero#0|items.bits",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "bits": [
+     "name line",
+     "price",
+     "title",
+     "icon"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.items.layout",
+   "sig": "hero#0|items.layout",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "answer": "one column"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.look.band",
+   "sig": "hero#0|look.band|band,bandSurface,heroGround,imageGround",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.look.item",
+   "sig": "hero#0|look.item|card,statTile,testimonialCard,featureItem",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "look": "statTile"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.copy.the button that sends the form",
+   "sig": "hero#0|copy|the button that sends the form|net.noodl.controls.button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nWrite the label of the main button in the \"hero\" section. Pressing it lets a visitor: send the form. Two to four words, a verb first.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Reserve Your Seat"
+   },
+   "tokensIn": 99,
+   "tokensOut": 14,
+   "ms": 1248
+  },
+  {
+   "round": 0,
+   "key": "s0.list.rows",
+   "sig": "hero#0|list.rows|2|name,price,title",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nBRIEF: a landing page called \"The Blue Room Jazz\", for Music lovers interested in a dark and elegant jazz night. The one action: Purchase tickets for the jazz evening at The Blue Room. Tone: classic.\nThe \"hero\" section (Immediate visual impact and core event details.) has a list of 2 items. For EACH item, in order, write: name (max 60 characters), price (max 20 characters), title (max 40 characters). Each item different from the others; an item's name and price and title must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "name": "Evening Jazz Ensemble",
+      "price": "$35.00",
+      "title": "Intimate trio performance"
+     },
+     {
+      "name": "Late Night Improvisation",
+      "price": "$25.00",
+      "title": "Sophisticated late set"
+     }
+    ]
+   },
+   "tokensIn": 197,
+   "tokensOut": 94,
+   "ms": 4503
+  },
+  {
+   "round": 0,
+   "key": "s0.glyph.item 1 of 2: its icon",
+   "sig": "hero#0|glyph|item 1 of 2: its icon",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "glyph": "icon-chevron-right"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s0.glyph.item 2 of 2: its icon",
+   "sig": "hero#0|glyph|item 2 of 2: its icon",
+   "section": 0,
+   "sectionKind": "hero",
+   "random": true,
+   "answer": {
+    "glyph": "icon-plus"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.bits",
+   "sig": "schedule or line-up#0|bits",
+   "section": 1,
+   "sectionKind": "schedule or line-up",
+   "random": true,
+   "answer": {
+    "bits": [
+     "headline",
+     "badge",
+     "price",
+     "quote"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.align",
+   "sig": "schedule or line-up#0|align",
+   "section": 1,
+   "sectionKind": "schedule or line-up",
+   "random": true,
+   "answer": {
+    "answer": "centred"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.look.band",
+   "sig": "schedule or line-up#0|look.band|band,bandSurface,imageGround",
+   "section": 1,
+   "sectionKind": "schedule or line-up",
+   "random": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.look.the schedule or line-up headline",
+   "sig": "schedule or line-up#0|look.the schedule or line-up headline|displayHeadline,sectionHeading",
+   "section": 1,
+   "sectionKind": "schedule or line-up",
+   "random": true,
+   "answer": {
+    "look": "sectionHeading"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.look.a quotation from a happy customer or visitor",
+   "sig": "schedule or line-up#0|look.a quotation from a happy customer or visitor|lead,body",
+   "section": 1,
+   "sectionKind": "schedule or line-up",
+   "random": true,
+   "answer": {
+    "look": "lead"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s1.copy.the schedule or line-up headline",
+   "sig": "schedule or line-up#0|copy|the schedule or line-up headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "schedule or line-up",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nWrite the schedule or line-up headline in the \"schedule or line-up\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Moonlight Melodies & Velvet Tones"
+   },
+   "tokensIn": 107,
+   "tokensOut": 19,
+   "ms": 1208
+  },
+  {
+   "round": 0,
+   "key": "s1.copy.the few words in the pill",
+   "sig": "schedule or line-up#0|copy|the few words in the pill|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "schedule or line-up",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nWrite the few words in the pill in the \"schedule or line-up\" section. At most 200 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Tuesday, 8 PM: The Blue Room Jazz. Featuring Miles Davis tribute, Chet Baker, and local legends."
+   },
+   "tokensIn": 107,
+   "tokensOut": 29,
+   "ms": 1561
+  },
+  {
+   "round": 0,
+   "key": "s1.copy.the price",
+   "sig": "schedule or line-up#0|copy|the price|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "schedule or line-up",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nWrite the price in the \"schedule or line-up\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Tickets: $35"
+   },
+   "tokensIn": 102,
+   "tokensOut": 16,
+   "ms": 1121
+  },
+  {
+   "round": 0,
+   "key": "s1.copy.a quotation from a happy customer or visitor",
+   "sig": "schedule or line-up#0|copy|a quotation from a happy customer or visitor|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "schedule or line-up",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nFacts the page must give: jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there.\nWrite a quotation from a happy customer or visitor in the \"schedule or line-up\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Experience the sophistication of The Blue Room's Jazz Evening on 14 November. Featuring an exquisite line-up. Secure your tickets now and find directions. 'An unforgettable night of pure musical elegance!'"
+   },
+   "tokensIn": 139,
+   "tokensOut": 52,
+   "ms": 2500
+  },
+  {
+   "round": 0,
+   "key": "s1.copy.who said it: a name and a role",
+   "sig": "schedule or line-up#0|copy|who said it: a name and a role|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "schedule or line-up",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nWrite who said it: a name and a role in the \"schedule or line-up\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Julian Vance, Resident Musician"
+   },
+   "tokensIn": 109,
+   "tokensOut": 17,
+   "ms": 1162
+  },
+  {
+   "round": 0,
+   "key": "s2.bits",
+   "sig": "about#0|bits",
+   "section": 2,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "bits": [
+     "name line",
+     "eyebrow",
+     "price",
+     "button",
+     "small print"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s2.align",
+   "sig": "about#0|align",
+   "section": 2,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "answer": "left-aligned"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s2.look.band",
+   "sig": "about#0|look.band|band,bandSurface,imageGround",
+   "section": 2,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "look": "bandSurface"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s2.look.the main action of the about section",
+   "sig": "about#0|look.the main action of the about section|primaryButton,outlineButton",
+   "section": 2,
+   "sectionKind": "about",
+   "random": true,
+   "answer": {
+    "look": "outlineButton"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s2.copy.who said it: a name and a role",
+   "sig": "about#0|copy|who said it: a name and a role|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "about",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nWrite who said it: a name and a role in the \"about\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Julian Vance, Curator"
+   },
+   "tokensIn": 105,
+   "tokensOut": 15,
+   "ms": 1080
+  },
+  {
+   "round": 0,
+   "key": "s2.copy.the small uppercase line above the headline",
+   "sig": "about#0|copy|the small uppercase line above the headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "about",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nWrite the small uppercase line above the headline in the \"about\" section. At most 30 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Moonlight Melodies & Velvet Tones\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "An intimate evening awaits."
+   },
+   "tokensIn": 122,
+   "tokensOut": 11,
+   "ms": 971
+  },
+  {
+   "round": 0,
+   "key": "s2.copy.the price",
+   "sig": "about#0|copy|the price|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "about",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nWrite the price in the \"about\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Our event ticket price is $30."
+   },
+   "tokensIn": 98,
+   "tokensOut": 19,
+   "ms": 1113
+  },
+  {
+   "round": 0,
+   "key": "s2.copy.the main action of the about section",
+   "sig": "about#0|copy|the main action of the about section|net.noodl.controls.button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "about",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nWrite the label of the main button in the \"about\" section. Pressing it lets a visitor: Purchase tickets for the jazz evening at The Blue Room. Two to four words, a verb first.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Buy Tickets"
+   },
+   "tokensIn": 106,
+   "tokensOut": 8,
+   "ms": 838
+  },
+  {
+   "round": 0,
+   "key": "s2.copy.a line of fine print",
+   "sig": "about#0|copy|a line of fine print|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "about",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nWrite a line of fine print in the \"about\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "All performances are subject to availability and change."
+   },
+   "tokensIn": 101,
+   "tokensOut": 15,
+   "ms": 1063
+  },
+  {
+   "round": 0,
+   "key": "s3.bits",
+   "sig": "how it works#0|bits",
+   "section": 3,
+   "sectionKind": "how it works",
+   "random": true,
+   "answer": {
+    "bits": [
+     "small print",
+     "body text",
+     "eyebrow",
+     "date and place",
+     "button",
+     "badge"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.align",
+   "sig": "how it works#0|align",
+   "section": 3,
+   "sectionKind": "how it works",
+   "random": true,
+   "answer": {
+    "answer": "centred"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.look.band",
+   "sig": "how it works#0|look.band|band,bandSurface,imageGround",
+   "section": 3,
+   "sectionKind": "how it works",
+   "random": true,
+   "answer": {
+    "look": "imageGround"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.look.the main action of the how it works section",
+   "sig": "how it works#0|look.the main action of the how it works section|primaryButton,outlineButton",
+   "section": 3,
+   "sectionKind": "how it works",
+   "random": true,
+   "answer": {
+    "look": "primaryButton"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s3.copy.a line of fine print",
+   "sig": "how it works#0|copy|a line of fine print|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "how it works",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nWrite a line of fine print in the \"how it works\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Reservations are limited. Book your spot now."
+   },
+   "tokensIn": 103,
+   "tokensOut": 20,
+   "ms": 1231
+  },
+  {
+   "round": 0,
+   "key": "s3.copy.a short paragraph",
+   "sig": "how it works#0|copy|a short paragraph|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "how it works",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nFacts the page must give: jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there.\nWrite a short paragraph in the \"how it works\" section. At most 200 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Join us for an evening of classic jazz at The Blue Room on November 14th. Featuring a curated line-up, tickets are available now. Find directions and book your spot today."
+   },
+   "tokensIn": 132,
+   "tokensOut": 49,
+   "ms": 2240
+  },
+  {
+   "round": 0,
+   "key": "s3.copy.the small uppercase line above the headline",
+   "sig": "how it works#0|copy|the small uppercase line above the headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "how it works",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nWrite the small uppercase line above the headline in the \"how it works\" section. At most 30 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Moonlight Melodies & Velvet Tones\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Experience the ambiance."
+   },
+   "tokensIn": 124,
+   "tokensOut": 14,
+   "ms": 1041
+  },
+  {
+   "round": 0,
+   "key": "s3.copy.when and where, in one line",
+   "sig": "how it works#0|copy|when and where, in one line|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "how it works",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nFacts the page must give: jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there.\nWrite when and where, in one line in the \"how it works\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Event Details: The Blue Room Jazz. Date: 14 November. Line-up, Tickets, & Directions provided."
+   },
+   "tokensIn": 136,
+   "tokensOut": 35,
+   "ms": 1905
+  },
+  {
+   "round": 0,
+   "key": "s3.copy.the main action of the how it works section",
+   "sig": "how it works#0|copy|the main action of the how it works section|net.noodl.controls.button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "how it works",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nWrite the label of the main button in the \"how it works\" section. Pressing it lets a visitor: Purchase tickets for the jazz evening at The Blue Room. Two to four words, a verb first.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Book Tickets"
+   },
+   "tokensIn": 108,
+   "tokensOut": 8,
+   "ms": 861
+  },
+  {
+   "round": 0,
+   "key": "s3.copy.the few words in the pill",
+   "sig": "how it works#0|copy|the few words in the pill|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "how it works",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nWrite the few words in the pill in the \"how it works\" section. At most 200 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Immerse yourself in sophisticated, late-night jazz. Discover curated sessions and an exclusive atmosphere."
+   },
+   "tokensIn": 105,
+   "tokensOut": 26,
+   "ms": 1503
+  },
+  {
+   "round": 0,
+   "key": "s4.bits",
+   "sig": "location and hours#0|bits",
+   "section": 4,
+   "sectionKind": "location and hours",
+   "random": true,
+   "answer": {
+    "bits": [
+     "photo",
+     "second button",
+     "headline",
+     "small print"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.align",
+   "sig": "location and hours#0|align",
+   "section": 4,
+   "sectionKind": "location and hours",
+   "random": true,
+   "answer": {
+    "answer": "centred"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.photoPlace",
+   "sig": "location and hours#0|photoPlace",
+   "section": 4,
+   "sectionKind": "location and hours",
+   "random": true,
+   "answer": {
+    "answer": "beside"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.look.band",
+   "sig": "location and hours#0|look.band|band,bandSurface,imageGround",
+   "section": 4,
+   "sectionKind": "location and hours",
+   "random": true,
+   "answer": {
+    "look": "band"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.look.a quieter second action",
+   "sig": "location and hours#0|look.a quieter second action|primaryButton,outlineButton",
+   "section": 4,
+   "sectionKind": "location and hours",
+   "random": true,
+   "answer": {
+    "look": "outlineButton"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.look.the location and hours headline",
+   "sig": "location and hours#0|look.the location and hours headline|displayHeadline,sectionHeading",
+   "section": 4,
+   "sectionKind": "location and hours",
+   "random": true,
+   "answer": {
+    "look": "displayHeadline"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s4.copy.a quieter second action",
+   "sig": "location and hours#0|copy|a quieter second action|net.noodl.controls.button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "location and hours",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nWrite the label of a quieter second button in the \"location and hours\" section. Pressing it lets a visitor: do something else useful here. Two to four words, a verb first.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Find venues"
+   },
+   "tokensIn": 104,
+   "tokensOut": 13,
+   "ms": 1056
+  },
+  {
+   "round": 0,
+   "key": "s4.copy.the location and hours headline",
+   "sig": "location and hours#0|copy|the location and hours headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "location and hours",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nWrite the location and hours headline in the \"location and hours\" section. At most 70 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Moonlight Melodies & Velvet Tones\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "The Blue Room: Every Thursday, 8 PM - Late"
+   },
+   "tokensIn": 122,
+   "tokensOut": 18,
+   "ms": 1182
+  },
+  {
+   "round": 0,
+   "key": "s4.copy.a line of fine print",
+   "sig": "location and hours#0|copy|a line of fine print|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "location and hours",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nWrite a line of fine print in the \"location and hours\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Reservations required. Minimum age 21. Doors at 8 PM."
+   },
+   "tokensIn": 103,
+   "tokensOut": 26,
+   "ms": 1506
+  },
+  {
+   "round": 0,
+   "key": "s5.bits",
+   "sig": "call to action#0|bits",
+   "section": 5,
+   "sectionKind": "call to action",
+   "random": true,
+   "answer": {
+    "bits": [
+     "headline",
+     "price",
+     "body text",
+     "sub-line"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s5.align",
+   "sig": "call to action#0|align",
+   "section": 5,
+   "sectionKind": "call to action",
+   "random": true,
+   "answer": {
+    "answer": "centred"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s5.look.band",
+   "sig": "call to action#0|look.band|bandSurface,ctaBand,imageGround",
+   "section": 5,
+   "sectionKind": "call to action",
+   "random": true,
+   "answer": {
+    "look": "imageGround"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s5.look.one sentence under the headline",
+   "sig": "call to action#0|look.one sentence under the headline|lead,body",
+   "section": 5,
+   "sectionKind": "call to action",
+   "random": true,
+   "answer": {
+    "look": "lead"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s5.copy.the call to action headline",
+   "sig": "call to action#0|copy|the call to action headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nWrite the call to action headline in the \"call to action\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Moonlight Melodies & Velvet Tones\", \"The Blue Room: Every Thursday, 8 PM - Late\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Reserve Your Seat for an Evening of Sophistication"
+   },
+   "tokensIn": 136,
+   "tokensOut": 21,
+   "ms": 1393
+  },
+  {
+   "round": 0,
+   "key": "s5.copy.the price",
+   "sig": "call to action#0|copy|the price|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nWrite the price in the \"call to action\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Reserve Your Spot: $35"
+   },
+   "tokensIn": 100,
+   "tokensOut": 13,
+   "ms": 912
+  },
+  {
+   "round": 0,
+   "key": "s5.copy.a short paragraph",
+   "sig": "call to action#0|copy|a short paragraph|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nFacts the page must give: jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there.\nWrite a short paragraph in the \"call to action\" section. At most 200 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Experience an unforgettable evening of classic jazz. Secure your spot for November 14th at The Blue Room. View the lineup, grab tickets, and find directions now."
+   },
+   "tokensIn": 132,
+   "tokensOut": 44,
+   "ms": 2133
+  },
+  {
+   "round": 0,
+   "key": "s5.copy.one sentence under the headline",
+   "sig": "call to action#0|copy|one sentence under the headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nFacts the page must give: jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there.\nWrite one sentence under the headline in the \"call to action\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Moonlight Melodies & Velvet Tones\", \"The Blue Room: Every Thursday, 8 PM - Late\", \"Reserve Your Seat for an Evening of Sophistication\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Experience the night of sophisticated, late-night jazz on November 14th at The Blue Room. Book your spot now."
+   },
+   "tokensIn": 179,
+   "tokensOut": 32,
+   "ms": 1929
+  },
+  {
+   "round": 0,
+   "key": "s6.bits",
+   "sig": "footer#0|bits",
+   "section": 6,
+   "sectionKind": "footer",
+   "random": true,
+   "answer": {
+    "bits": [
+     "headline",
+     "second button"
+    ]
+   }
+  },
+  {
+   "round": 0,
+   "key": "s6.align",
+   "sig": "footer#0|align",
+   "section": 6,
+   "sectionKind": "footer",
+   "random": true,
+   "answer": {
+    "answer": "centred"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s6.look.a quieter second action",
+   "sig": "footer#0|look.a quieter second action|primaryButton,outlineButton",
+   "section": 6,
+   "sectionKind": "footer",
+   "random": true,
+   "answer": {
+    "look": "outlineButton"
+   }
+  },
+  {
+   "round": 0,
+   "key": "s6.copy.the footer headline",
+   "sig": "footer#0|copy|the footer headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "footer",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nWrite the footer headline in the \"footer\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Moonlight Melodies & Velvet Tones\", \"The Blue Room: Every Thursday, 8 PM - Late\", \"Reserve Your Seat for an Evening of Sophistication\", \"Experience the night of sophisticated, late-night jazz on No\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Endless Jazz, Pure Elegance."
+   },
+   "tokensIn": 158,
+   "tokensOut": 18,
+   "ms": 1362
+  },
+  {
+   "round": 0,
+   "key": "s6.copy.a quieter second action",
+   "sig": "footer#0|copy|a quieter second action|net.noodl.controls.button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 6,
+   "sectionKind": "footer",
+   "user": "BRIEF: \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night. Tone: classic.\nWrite the label of a quieter second button in the \"footer\" section. Pressing it lets a visitor: do something else useful here. Two to four words, a verb first.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Explore Events"
+   },
+   "tokensIn": 102,
+   "tokensOut": 8,
+   "ms": 879
+  }
+ ],
+ "judgements": [
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-city-dusk.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.085,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1989
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-forest-fog.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.299,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 2387
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-canyon.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.13,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1924
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-dune.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.037,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1687
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-coast.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.041,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1579
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-shore.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.028,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1567
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-red-rock.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.025,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1563
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-skyline.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.046,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1575
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-welder.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.03,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 1640
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-potter.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.074,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 1629
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-baker.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.043,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 1626
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-chef.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.114,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 1612
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-carpenter.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.086,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 1615
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-leather-bench.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.288,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 1614
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-machine-shop.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.861,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 1632
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-hands-clay.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.673,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 1626
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-cafe.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.351,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 1617
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-coffee-shop.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.184,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 1639
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-meeting.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.192,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 1610
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-market.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.01,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 1630
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-desk.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.188,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 1751
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-market.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.02,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 1894
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-bread.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.089,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 1846
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-board.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.03,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 1773
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-plate.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.052,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 1697
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-grocer.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.027,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 1728
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-carrots.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.017,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 1731
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-bakery.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.015,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 1718
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-cat.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.684,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 1801
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-horse.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.058,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 1824
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-sheep.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.013,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 1785
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-dog.webp",
+   "user": "Would this photo make sense on a web page for \"The Blue Room Jazz\", a landing page for Music lovers interested in a dark and elegant jazz night (jazz evening; 14 November; The Blue Room; line-up, tickets and how to get there)? Answer yes or no.",
+   "pYes": 0.039,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 158,
+   "ms": 1732
+  },
+  {
+   "round": 0,
+   "key": "s0.sound",
+   "section": 0,
+   "user": "A landing page called \"The Blue Room Jazz\", for Music lovers interested in a dark and elegant jazz night.\n\nSection \"hero\" (light band). Top to bottom:\n- a form field: \"Message\" / \"Your message\"\n- a form field: \"Number of people\" / \"2\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Date\" / \"DD/MM/YYYY\"\n- button: \"Reserve Your Seat\"\n- 2 statTiles in a single column, each: a name and a role, price, title, icon:\n  1. \"Evening Jazz Ensemble\" — \"$35.00\" — \"Intimate trio performance\"\n  2. \"Late Night Improvisation\" — \"$25.00\" — \"Sophisticated late set\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.299,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 261,
+   "ms": 1599
+  },
+  {
+   "round": 0,
+   "key": "s0.weakest",
+   "section": 0,
+   "user": "A landing page called \"The Blue Room Jazz\", for Music lovers interested in a dark and elegant jazz night.\n\nSection \"hero\" (light band). Top to bottom:\n- a form field: \"Message\" / \"Your message\"\n- a form field: \"Number of people\" / \"2\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Date\" / \"DD/MM/YYYY\"\n- button: \"Reserve Your Seat\"\n- 2 statTiles in a single column, each: a name and a role, price, title, icon:\n  1. \"Evening Jazz Ensemble\" — \"$35.00\" — \"Intimate trio performance\"\n  2. \"Late Night Improvisation\" — \"$25.00\" — \"Sophisticated late set\"\n\nWhich line is the weakest: odd, cut off, repeated or off-topic?",
+   "pick": "button: \"Reserve Your Seat\"",
+   "dist": {
+    "button: \"Reserve Your Seat\"": 0.8740118746423007,
+    "item 1 a name and a role: \"Evening Jazz Ensemble\"": 0.0934855957870444,
+    "item 1 price: \"$35.00\"": 0.019553680093829615,
+    "item 1 title: \"Intimate trio performance\"": 0.011879081939184742,
+    "item 2 price: \"$25.00\"": 0.00021182053892111852,
+    "item 2 a name and a role: \"Late Night Improvisation\"": 0.00016507490561006887
+   },
+   "model": "gemma4:e4b-it-qat"
+  },
+  {
+   "round": 0,
+   "key": "s1.sound",
+   "section": 1,
+   "user": "A landing page called \"The Blue Room Jazz\", for Music lovers interested in a dark and elegant jazz night.\n\nSection \"schedule or line-up\" (light band). Top to bottom:\n- headline: \"Moonlight Melodies & Velvet Tones\"\n- badge: \"Tuesday, 8 PM: The Blue Room Jazz. Featuring Miles Davis tribute, Chet Baker, and local legends.\"\n- price: \"Tickets: $35\"\n- quote: \"Experience the sophistication of The Blue Room's Jazz Evening on 14 November. Featuring an exquisite line-up. Secure your tickets now and find directions. 'An unforgettable night of pure musical elegance!'\"\n- who said it: a name and a role: \"Julian Vance, Resident Musician\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.872,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 223,
+   "ms": 1970
+  },
+  {
+   "round": 0,
+   "key": "s2.sound",
+   "section": 2,
+   "user": "A landing page called \"The Blue Room Jazz\", for Music lovers interested in a dark and elegant jazz night.\n\nSection \"about\" (light band). Top to bottom:\n- who said it: a name and a role: \"Julian Vance, Curator\"\n- eyebrow: \"An intimate evening awaits.\"\n- price: \"Our event ticket price is $30.\"\n- button: \"Buy Tickets\"\n- small print: \"All performances are subject to availability and change.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.91,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 164,
+   "ms": 1323
+  },
+  {
+   "round": 0,
+   "key": "s3.sound",
+   "section": 3,
+   "user": "A landing page called \"The Blue Room Jazz\", for Music lovers interested in a dark and elegant jazz night.\n\nSection \"how it works\" (dark band). Top to bottom:\n- small print: \"Reservations are limited. Book your spot now.\"\n- paragraph: \"Join us for an evening of classic jazz at The Blue Room on November 14th. Featuring a curated line-up, tickets are available now. Find directions and book your spot today.\"\n- eyebrow: \"Experience the ambiance.\"\n- date and place: \"Event Details: The Blue Room Jazz. Date: 14 November. Line-up, Tickets, & Directions provided.\"\n- button: \"Book Tickets\"\n- badge: \"Immerse yourself in sophisticated, late-night jazz. Discover curated sessions and an exclusive atmosphere.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.546,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 235,
+   "ms": 1889
+  },
+  {
+   "round": 0,
+   "key": "s4.sound",
+   "section": 4,
+   "user": "A landing page called \"The Blue Room Jazz\", for Music lovers interested in a dark and elegant jazz night.\n\nSection \"location and hours\" (light band). Top to bottom:\n- button: \"Find venues\"\n- headline: \"The Blue Room: Every Thursday, 8 PM - Late\"\n- small print: \"Reservations required. Minimum age 21. Doors at 8 PM.\"\n- a photo (animal-cat.webp)\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.615,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 160,
+   "ms": 1177
+  },
+  {
+   "round": 0,
+   "key": "s5.sound",
+   "section": 5,
+   "user": "A landing page called \"The Blue Room Jazz\", for Music lovers interested in a dark and elegant jazz night.\n\nSection \"call to action\" (dark band). Top to bottom:\n- headline: \"Reserve Your Seat for an Evening of Sophistication\"\n- price: \"Reserve Your Spot: $35\"\n- paragraph: \"Experience an unforgettable evening of classic jazz. Secure your spot for November 14th at The Blue Room. View the lineup, grab tickets, and find directions now.\"\n- sub-line: \"Experience the night of sophisticated, late-night jazz on November 14th at The Blue Room. Book your spot now.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.957,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 202,
+   "ms": 1543
+  },
+  {
+   "round": 0,
+   "key": "s6.sound",
+   "section": 6,
+   "user": "A landing page called \"The Blue Room Jazz\", for Music lovers interested in a dark and elegant jazz night.\n\nSection \"footer\" (light band). Top to bottom:\n- headline: \"Endless Jazz, Pure Elegance.\"\n- button: \"Explore Events\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.988,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 120,
+   "ms": 955
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "jazz evening",
+   "user": "A landing page called \"The Blue Room Jazz\", for Music lovers interested in a dark and elegant jazz night.\nEvery line of words on the page, by section:\n[hero] Reserve Your Seat / Evening Jazz Ensemble / $35.00 / Intimate trio performance / Late Night Improvisation / $25.00 / Sophisticated late set\n[schedule or line-up] Moonlight Melodies & Velvet Tones / Tuesday, 8 PM: The Blue Room Jazz. Featuring Miles Davis tribute, Chet Baker, and local le / Tickets: $35 / Experience the sophistication of The Blue Room's Jazz Evening on 14 November. Featuring an / Julian Vance, Resident Musician\n[about] Julian Vance, Curator / An intimate evening awaits. / Our event ticket price is $30. / Buy Tickets / All performances are subject to availability and change.\n[how it works] Reservations are limited. Book your spot now. / Join us for an evening of classic jazz at The Blue Room on November 14th. Featuring a cura / Experience the ambiance. / Event Details: The Blue Room Jazz. Date: 14 November. Line-up, Tickets, & Directions provi / Book Tickets / Immerse yourself in sophisticated, late-night jazz. Discover curated sessions and an exclu\n[location and hours] Find venues / The Blue Room: Every Thursday, 8 PM - Late / Reservations required. Minimum age 21. Doors at 8 PM.\n[call to action] Reserve Your Seat for an Evening of Sophistication / Reserve Your Spot: $35 / Experience an unforgettable evening of classic jazz. Secure your spot for November 14th at / Experience the night of sophisticated, late-night jazz on November 14th at The Blue Room. \n[footer] Endless Jazz, Pure Elegance. / Explore Events\n\nDoes the page tell a visitor: jazz evening?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 432,
+   "ms": 3050
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "14 November",
+   "user": "A landing page called \"The Blue Room Jazz\", for Music lovers interested in a dark and elegant jazz night.\nEvery line of words on the page, by section:\n[hero] Reserve Your Seat / Evening Jazz Ensemble / $35.00 / Intimate trio performance / Late Night Improvisation / $25.00 / Sophisticated late set\n[schedule or line-up] Moonlight Melodies & Velvet Tones / Tuesday, 8 PM: The Blue Room Jazz. Featuring Miles Davis tribute, Chet Baker, and local le / Tickets: $35 / Experience the sophistication of The Blue Room's Jazz Evening on 14 November. Featuring an / Julian Vance, Resident Musician\n[about] Julian Vance, Curator / An intimate evening awaits. / Our event ticket price is $30. / Buy Tickets / All performances are subject to availability and change.\n[how it works] Reservations are limited. Book your spot now. / Join us for an evening of classic jazz at The Blue Room on November 14th. Featuring a cura / Experience the ambiance. / Event Details: The Blue Room Jazz. Date: 14 November. Line-up, Tickets, & Directions provi / Book Tickets / Immerse yourself in sophisticated, late-night jazz. Discover curated sessions and an exclu\n[location and hours] Find venues / The Blue Room: Every Thursday, 8 PM - Late / Reservations required. Minimum age 21. Doors at 8 PM.\n[call to action] Reserve Your Seat for an Evening of Sophistication / Reserve Your Spot: $35 / Experience an unforgettable evening of classic jazz. Secure your spot for November 14th at / Experience the night of sophisticated, late-night jazz on November 14th at The Blue Room. \n[footer] Endless Jazz, Pure Elegance. / Explore Events\n\nDoes the page tell a visitor: 14 November?",
+   "pYes": 0.999,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 434,
+   "ms": 3192
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "The Blue Room",
+   "user": "A landing page called \"The Blue Room Jazz\", for Music lovers interested in a dark and elegant jazz night.\nEvery line of words on the page, by section:\n[hero] Reserve Your Seat / Evening Jazz Ensemble / $35.00 / Intimate trio performance / Late Night Improvisation / $25.00 / Sophisticated late set\n[schedule or line-up] Moonlight Melodies & Velvet Tones / Tuesday, 8 PM: The Blue Room Jazz. Featuring Miles Davis tribute, Chet Baker, and local le / Tickets: $35 / Experience the sophistication of The Blue Room's Jazz Evening on 14 November. Featuring an / Julian Vance, Resident Musician\n[about] Julian Vance, Curator / An intimate evening awaits. / Our event ticket price is $30. / Buy Tickets / All performances are subject to availability and change.\n[how it works] Reservations are limited. Book your spot now. / Join us for an evening of classic jazz at The Blue Room on November 14th. Featuring a cura / Experience the ambiance. / Event Details: The Blue Room Jazz. Date: 14 November. Line-up, Tickets, & Directions provi / Book Tickets / Immerse yourself in sophisticated, late-night jazz. Discover curated sessions and an exclu\n[location and hours] Find venues / The Blue Room: Every Thursday, 8 PM - Late / Reservations required. Minimum age 21. Doors at 8 PM.\n[call to action] Reserve Your Seat for an Evening of Sophistication / Reserve Your Spot: $35 / Experience an unforgettable evening of classic jazz. Secure your spot for November 14th at / Experience the night of sophisticated, late-night jazz on November 14th at The Blue Room. \n[footer] Endless Jazz, Pure Elegance. / Explore Events\n\nDoes the page tell a visitor: The Blue Room?",
+   "pYes": 0.998,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 433,
+   "ms": 3243
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "line-up, tickets and how to get there",
+   "user": "A landing page called \"The Blue Room Jazz\", for Music lovers interested in a dark and elegant jazz night.\nEvery line of words on the page, by section:\n[hero] Reserve Your Seat / Evening Jazz Ensemble / $35.00 / Intimate trio performance / Late Night Improvisation / $25.00 / Sophisticated late set\n[schedule or line-up] Moonlight Melodies & Velvet Tones / Tuesday, 8 PM: The Blue Room Jazz. Featuring Miles Davis tribute, Chet Baker, and local le / Tickets: $35 / Experience the sophistication of The Blue Room's Jazz Evening on 14 November. Featuring an / Julian Vance, Resident Musician\n[about] Julian Vance, Curator / An intimate evening awaits. / Our event ticket price is $30. / Buy Tickets / All performances are subject to availability and change.\n[how it works] Reservations are limited. Book your spot now. / Join us for an evening of classic jazz at The Blue Room on November 14th. Featuring a cura / Experience the ambiance. / Event Details: The Blue Room Jazz. Date: 14 November. Line-up, Tickets, & Directions provi / Book Tickets / Immerse yourself in sophisticated, late-night jazz. Discover curated sessions and an exclu\n[location and hours] Find venues / The Blue Room: Every Thursday, 8 PM - Late / Reservations required. Minimum age 21. Doors at 8 PM.\n[call to action] Reserve Your Seat for an Evening of Sophistication / Reserve Your Spot: $35 / Experience an unforgettable evening of classic jazz. Secure your spot for November 14th at / Experience the night of sophisticated, late-night jazz on November 14th at The Blue Room. \n[footer] Endless Jazz, Pure Elegance. / Explore Events\n\nDoes the page tell a visitor: line-up, tickets and how to get there?",
+   "pYes": 0.929,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 440,
+   "ms": 3282
+  },
+  {
+   "round": 0,
+   "key": "page.missing",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nA landing page called \"The Blue Room Jazz\", for Music lovers interested in a dark and elegant jazz night.\nThe page's sections, top to bottom:\n1. hero: \"Reserve Your Seat\"\n2. schedule or line-up: \"Moonlight Melodies & Velvet Tones\"\n3. about: \"Julian Vance, Curator\"\n4. how it works: \"Reservations are limited. Book your spot now.\"\n5. location and hours: \"The Blue Room: Every Thursday, 8 PM - Late\"\n6. call to action: \"Reserve Your Seat for an Evening of Sophistication\"\n7. footer: \"Endless Jazz, Pure Elegance.\"\n\nIs something a visitor would clearly expect on this page missing?",
+   "pYes": 0.636,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 225,
+   "ms": 1687
+  },
+  {
+   "round": 0,
+   "key": "page.missingWhich",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nA landing page called \"The Blue Room Jazz\", for Music lovers interested in a dark and elegant jazz night.\nThe page's sections, top to bottom:\n1. hero: \"Reserve Your Seat\"\n2. schedule or line-up: \"Moonlight Melodies & Velvet Tones\"\n3. about: \"Julian Vance, Curator\"\n4. how it works: \"Reservations are limited. Book your spot now.\"\n5. location and hours: \"The Blue Room: Every Thursday, 8 PM - Late\"\n6. call to action: \"Reserve Your Seat for an Evening of Sophistication\"\n7. footer: \"Endless Jazz, Pure Elegance.\"\n\nWhich section should be added?",
+   "pick": "menu or prices",
+   "dist": {
+    "menu or prices": 0.9537861349412695,
+    "gallery": 0.023417877953599057,
+    "feature cards": 0.01090416992901533,
+    "testimonials": 0.005798168184477477,
+    "sign-up or contact form": 0.004848541970808532,
+    "faq": 0.000767212563823662,
+    "team": 0.000053728867294124855
+   },
+   "model": "gemma4:e4b-it-qat"
+  },
+  {
+   "round": 0,
+   "key": "page.extra",
+   "user": "Request: \"A page for a jazz evening on 14 November at The Blue Room: the line-up, tickets and how to get there. Dark and elegant.\"\nA landing page called \"The Blue Room Jazz\", for Music lovers interested in a dark and elegant jazz night.\nThe page's sections, top to bottom:\n1. hero: \"Reserve Your Seat\"\n2. schedule or line-up: \"Moonlight Melodies & Velvet Tones\"\n3. about: \"Julian Vance, Curator\"\n4. how it works: \"Reservations are limited. Book your spot now.\"\n5. location and hours: \"The Blue Room: Every Thursday, 8 PM - Late\"\n6. call to action: \"Reserve Your Seat for an Evening of Sophistication\"\n7. footer: \"Endless Jazz, Pure Elegance.\"\n\nDoes any section repeat another one, or not belong on this page?",
+   "pYes": 0.218,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 227,
+   "ms": 1639
+  }
+ ],
+ "skipped": [
+  {
+   "key": "card.tone",
+   "why": "S0: the request says it (classic)"
+  },
+  {
+   "key": "card.photos",
+   "why": "photo scout (reviewer vision): kept work-machine-shop.webp, animal-cat.webp, work-hands-clay.webp of 32"
+  },
+  {
+   "key": "s1.bits",
+   "why": "rule: a quote gets a name line"
+  }
+ ],
+ "mcp": [
+  {
+   "round": 0,
+   "tool": "create_project",
+   "isError": false,
+   "ms": 254
+  },
+  {
+   "round": 0,
+   "tool": "get_style_vocabulary",
+   "isError": false,
+   "ms": 8
+  },
+  {
+   "round": 0,
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 16
+  },
+  {
+   "round": 0,
+   "tool": "set_style_preset",
+   "isError": false,
+   "ms": 9
+  },
+  {
+   "round": 0,
+   "tool": "set_project_tokens",
+   "isError": false,
+   "ms": 161
+  },
+  {
+   "round": 0,
+   "tool": "list_node_types",
+   "isError": false,
+   "ms": 2
+  },
+  {
+   "round": 0,
+   "tool": "get_component",
+   "isError": false,
+   "ms": 16
+  },
+  {
+   "round": 0,
+   "tool": "create_plan",
+   "isError": false,
+   "ms": 9
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 66
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 21
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 26
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 20
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 17
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "apply_plan",
+   "isError": false,
+   "ms": 2995
+  },
+  {
+   "round": 0,
+   "tool": "render_report",
+   "isError": false,
+   "ms": 1652
+  }
+ ],
+ "roundsLog": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R-jazz-r0",
+   "score": 8.01,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "form",
+      "list of items"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.299
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "badge",
+      "price",
+      "quote",
+      "name line"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.872
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "name line",
+      "eyebrow",
+      "price",
+      "button",
+      "small print"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.91
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "small print",
+      "body text",
+      "eyebrow",
+      "date and place",
+      "button",
+      "badge"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.546
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "photo",
+      "second button",
+      "headline",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.615
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "price",
+      "body text",
+      "sub-line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.957
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "second button"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.988
+    }
+   ],
+   "issues": [
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    },
+    {
+     "id": "J1|hero#0|copy|the button that sends the form|net.noodl.controls.button",
+     "weight": 2.1,
+     "say": "reviewer (p=0.299): weakest line button \"Reserve Your Seat\"",
+     "op": "reword"
+    },
+    {
+     "id": "P1|menu or prices",
+     "weight": 1.91,
+     "say": "reviewer (p=0.636): add a \"menu or prices\" section",
+     "op": "addSection"
+    }
+   ],
+   "findings": [
+    "minimum-layout-width"
+   ],
+   "modelCalls": 69,
+   "judgements": 47,
+   "words": [
+    "Section \"hero\" (light band). Top to bottom:\n- a form field: \"Message\" / \"Your message\"\n- a form field: \"Number of people\" / \"2\"\n- a form field: \"Email\" / \"you@example.com\"\n- a form field: \"Phone\" / \"Your phone number\"\n- a form field: \"Date\" / \"DD/MM/YYYY\"\n- button: \"Reserve Your Seat\"\n- 2 statTiles in a single column, each: a name and a role, price, title, icon:\n  1. \"Evening Jazz Ensemble\" — \"$35.00\" — \"Intimate trio performance\"\n  2. \"Late Night Improvisation\" — \"$25.00\" — \"Sophisticated late set\"",
+    "Section \"schedule or line-up\" (light band). Top to bottom:\n- headline: \"Moonlight Melodies & Velvet Tones\"\n- badge: \"Tuesday, 8 PM: The Blue Room Jazz. Featuring Miles Davis tribute, Chet Baker, and local legends.\"\n- price: \"Tickets: $35\"\n- quote: \"Experience the sophistication of The Blue Room's Jazz Evening on 14 November. Featuring an exquisite line-up. Secure your tickets now and find directions. 'An unforgettable night of pure musical elegance!'\"\n- who said it: a name and a role: \"Julian Vance, Resident Musician\"",
+    "Section \"about\" (light band). Top to bottom:\n- who said it: a name and a role: \"Julian Vance, Curator\"\n- eyebrow: \"An intimate evening awaits.\"\n- price: \"Our event ticket price is $30.\"\n- button: \"Buy Tickets\"\n- small print: \"All performances are subject to availability and change.\"",
+    "Section \"how it works\" (dark band). Top to bottom:\n- small print: \"Reservations are limited. Book your spot now.\"\n- paragraph: \"Join us for an evening of classic jazz at The Blue Room on November 14th. Featuring a curated line-up, tickets are available now. Find directions and book your spot today.\"\n- eyebrow: \"Experience the ambiance.\"\n- date and place: \"Event Details: The Blue Room Jazz. Date: 14 November. Line-up, Tickets, & Directions provided.\"\n- button: \"Book Tickets\"\n- badge: \"Immerse yourself in sophisticated, late-night jazz. Discover curated sessions and an exclusive atmosphere.\"",
+    "Section \"location and hours\" (light band). Top to bottom:\n- button: \"Find venues\"\n- headline: \"The Blue Room: Every Thursday, 8 PM - Late\"\n- small print: \"Reservations required. Minimum age 21. Doors at 8 PM.\"\n- a photo (animal-cat.webp)",
+    "Section \"call to action\" (dark band). Top to bottom:\n- headline: \"Reserve Your Seat for an Evening of Sophistication\"\n- price: \"Reserve Your Spot: $35\"\n- paragraph: \"Experience an unforgettable evening of classic jazz. Secure your spot for November 14th at The Blue Room. View the lineup, grab tickets, and find directions now.\"\n- sub-line: \"Experience the night of sophisticated, late-night jazz on November 14th at The Blue Room. Book your spot now.\"",
+    "Section \"footer\" (light band). Top to bottom:\n- headline: \"Endless Jazz, Pure Elegance.\"\n- button: \"Explore Events\""
+   ],
+   "minutes": 2.4,
+   "kept": true
+  }
+ ],
+ "randomDecisions": true,
+ "flags": [
+  "--brief",
+  "--run",
+  "--no-review",
+  "--random-decisions"
+ ],
+ "photoScout": [
+  [
+   "work-machine-shop.webp",
+   0.861
+  ],
+  [
+   "animal-cat.webp",
+   0.684
+  ],
+  [
+   "work-hands-clay.webp",
+   0.673
+  ],
+  [
+   "people-cafe.webp",
+   0.351
+  ],
+  [
+   "ground-forest-fog.webp",
+   0.299
+  ],
+  [
+   "work-leather-bench.webp",
+   0.288
+  ],
+  [
+   "people-meeting.webp",
+   0.192
+  ],
+  [
+   "people-desk.webp",
+   0.188
+  ],
+  [
+   "people-coffee-shop.webp",
+   0.184
+  ],
+  [
+   "ground-canyon.webp",
+   0.13
+  ],
+  [
+   "work-chef.webp",
+   0.114
+  ],
+  [
+   "food-bread.webp",
+   0.089
+  ],
+  [
+   "work-carpenter.webp",
+   0.086
+  ],
+  [
+   "ground-city-dusk.webp",
+   0.085
+  ],
+  [
+   "work-potter.webp",
+   0.074
+  ],
+  [
+   "animal-horse.webp",
+   0.058
+  ],
+  [
+   "food-plate.webp",
+   0.052
+  ],
+  [
+   "ground-skyline.webp",
+   0.046
+  ],
+  [
+   "work-baker.webp",
+   0.043
+  ],
+  [
+   "ground-coast.webp",
+   0.041
+  ],
+  [
+   "animal-dog.webp",
+   0.039
+  ],
+  [
+   "ground-dune.webp",
+   0.037
+  ],
+  [
+   "work-welder.webp",
+   0.03
+  ],
+  [
+   "food-board.webp",
+   0.03
+  ],
+  [
+   "ground-shore.webp",
+   0.028
+  ],
+  [
+   "food-grocer.webp",
+   0.027
+  ],
+  [
+   "ground-red-rock.webp",
+   0.025
+  ],
+  [
+   "food-market.webp",
+   0.02
+  ],
+  [
+   "food-carrots.webp",
+   0.017
+  ],
+  [
+   "food-bakery.webp",
+   0.015
+  ],
+  [
+   "animal-sheep.webp",
+   0.013
+  ],
+  [
+   "people-market.webp",
+   0.01
+  ]
+ ],
+ "result": {
+  "minutes": 2.4,
+  "bestRound": 0,
+  "bestScore": 8.01,
+  "scores": [
+   8.01
+  ],
+  "builderCalls": 69,
+  "judgements": 47,
+  "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R-jazz-r0"
+ }
+}

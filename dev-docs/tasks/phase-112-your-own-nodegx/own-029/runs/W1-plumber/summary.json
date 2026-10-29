@@ -1,0 +1,511 @@
+{
+ "minutes": 3.9,
+ "accept": "sum",
+ "bestRound": 2,
+ "bestScore": 5.96,
+ "scores": [
+  35.49,
+  11.82,
+  5.96
+ ],
+ "r0": {
+  "perLine": 0.839,
+  "org": 0.484,
+  "suits": 0.922,
+  "sum": 35.49
+ },
+ "kept": {
+  "perLine": 0.105,
+  "org": 0.776,
+  "suits": 0.958,
+  "sum": 5.96,
+  "lines": 38
+ },
+ "builderCalls": 36,
+ "judgements": 46,
+ "replays": 126,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-W1-plumber-r2",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-W1-plumber-r0",
+   "score": 35.49,
+   "sum": 35.49,
+   "defects": 31.05,
+   "lines": 37,
+   "perLine": 0.839,
+   "org": 0.484,
+   "suits": 0.922,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.986
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.962
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.992,
+     "pFit": 0.996
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "headline",
+      "sub-line",
+      "quote",
+      "name line",
+      "badge"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.985
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.984
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "form",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.973
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|feature cards#0|list.rows|3|title,sentence,button",
+     "weight": 2,
+     "say": "\"Request Call-Back\" repeats \"Request Call-Back\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|sign-up or contact form#0|deck|headline,sub-line,form button,button",
+     "weight": 2,
+     "say": "\"Request a Call-Back\" repeats \"Request a Call-Back\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|location and hours#0|deck|eyebrow,headline,sub-line,button,form button,date and place",
+     "weight": 2,
+     "say": "\"Reliable Plumbing Solutions for Your Home\" repeats \"Reliable Plumbing Solutions for Your Home\"",
+     "op": "reword"
+    },
+    {
+     "id": "S10|form|location and hours#0",
+     "weight": 4,
+     "say": "a second form (already in \"sign-up or contact form\")",
+     "op": "reask"
+    },
+    {
+     "id": "S11|testimonials#0|deck|headline,sub-line,quote,who said it: a name and a role,badge",
+     "weight": 1.5,
+     "say": "\"plumbing needs from\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|deck|eyebrow,headline,sub-line,button,form button,date and place",
+     "weight": 1.5,
+     "say": "\"plumbing needs from\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|deck|headline,sub-line,form button,button",
+     "weight": 1.5,
+     "say": "\"request a callback\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S12|testimonials#0|look.band|band,bandSurface",
+     "weight": 2,
+     "say": "four \"band\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S12|sign-up or contact form#0|look.band|band,bandSurface",
+     "weight": 2,
+     "say": "four \"band\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "R|single-ground|page",
+     "weight": 4,
+     "say": "render: single-ground"
+    },
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    },
+    {
+     "id": "P1|call to action",
+     "weight": 1.94,
+     "say": "reviewer (p=0.646): add a \"call to action\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "P2|feature cards#0",
+     "weight": 2.61,
+     "say": "reviewer (p=0.871): drop section 3. feature cards",
+     "op": "dropSection"
+    },
+    {
+     "id": "Q|org",
+     "weight": 4.13,
+     "say": "reviewer: organised p=0.484",
+     "op": "reask"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.31,
+     "say": "reviewer: type and parts suit p=0.922"
+    }
+   ],
+   "findings": [
+    "single-ground",
+    "minimum-layout-width"
+   ],
+   "modelCalls": 7,
+   "judgements": 16,
+   "minutes": 1.3,
+   "kept": true,
+   "fixesForNext": [
+    "Q|org",
+    "S10|form|location and hours#0",
+    "S5|feature cards#0|list.rows|3|title,sentence,button",
+    "S5|sign-up or contact form#0|deck|headline,sub-line,form button,button",
+    "S5|location and hours#0|deck|eyebrow,headline,sub-line,button,form button,date and place",
+    "S12|testimonials#0|look.band|band,bandSurface",
+    "S12|sign-up or contact form#0|look.band|band,bandSurface",
+    "S11|testimonials#0|deck|headline,sub-line,quote,who said it: a name and a role,badge",
+    "S11|location and hours#0|deck|eyebrow,headline,sub-line,button,form button,date and place",
+    "S11|sign-up or contact form#0|deck|headline,sub-line,form button,button"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-W1-plumber-r1",
+   "score": 11.82,
+   "sum": 11.82,
+   "defects": 10.3,
+   "lines": 33,
+   "perLine": 0.312,
+   "org": 0.827,
+   "suits": 0.968,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.986
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.991
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.962
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.991,
+     "pFit": 0.903
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.987
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "form",
+      "button"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.987
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|call to action#0|deck|headline,sub-line,paragraph,button",
+     "weight": 2,
+     "say": "\"Request a Call-Back\" repeats \"Request a Call-Back\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|how it works#0|deck|headline,sub-line,paragraph,button",
+     "weight": 2,
+     "say": "\"Request a Call-Back\" repeats \"Request a Call-Back\"",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|headline,sub-line,paragraph,button",
+     "weight": 1.5,
+     "say": "\"request a callback\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|deck|headline,sub-line,paragraph,quote,who said it: a name and a role,small print",
+     "weight": 1.5,
+     "say": "\"request a callback\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|how it works#0|deck|headline,sub-line,paragraph,button",
+     "weight": 1.5,
+     "say": "\"request a callback\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "P1|testimonials",
+     "weight": 1.8,
+     "say": "reviewer (p=0.601): add a \"testimonials\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "Q|org",
+     "weight": 1.38,
+     "say": "reviewer: organised p=0.827"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.13,
+     "say": "reviewer: type and parts suit p=0.968"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 25,
+   "judgements": 15,
+   "minutes": 1.6,
+   "kept": true,
+   "fixesForNext": [
+    "S5|call to action#0|deck|headline,sub-line,paragraph,button",
+    "S5|how it works#0|deck|headline,sub-line,paragraph,button",
+    "P1|testimonials",
+    "S11|call to action#0|deck|headline,sub-line,paragraph,button",
+    "S11|about#0|deck|headline,sub-line,paragraph,quote,who said it: a name and a role,small print",
+    "S11|how it works#0|deck|headline,sub-line,paragraph,button"
+   ]
+  },
+  {
+   "round": 2,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-W1-plumber-r2",
+   "score": 5.96,
+   "sum": 5.96,
+   "defects": 4,
+   "lines": 38,
+   "perLine": 0.105,
+   "org": 0.776,
+   "suits": 0.958,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.986
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "headline",
+      "sub-line",
+      "quote",
+      "name line",
+      "badge"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.985
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.988
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.984
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.992,
+     "pFit": 0.964
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.987
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "form",
+      "button"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.987
+    }
+   ],
+   "issues": [
+    {
+     "id": "R|single-column-grid|page",
+     "weight": 4,
+     "say": "render: single-column-grid"
+    },
+    {
+     "id": "Q|org",
+     "weight": 1.79,
+     "say": "reviewer: organised p=0.776"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.17,
+     "say": "reviewer: type and parts suit p=0.958"
+    }
+   ],
+   "findings": [
+    "single-column-grid"
+   ],
+   "modelCalls": 6,
+   "judgements": 15,
+   "minutes": 0.9,
+   "kept": true
+  }
+ ]
+}

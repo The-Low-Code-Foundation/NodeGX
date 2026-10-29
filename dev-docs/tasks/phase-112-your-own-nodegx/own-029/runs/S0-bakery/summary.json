@@ -1,0 +1,245 @@
+{
+ "minutes": 3.9,
+ "accept": "constraint",
+ "bestRound": 0,
+ "bestScore": 0.787,
+ "scores": [
+  0.787
+ ],
+ "r0": {
+  "perLine": 0.787,
+  "org": 0.837,
+  "suits": 0.894,
+  "sum": 45.77
+ },
+ "kept": {
+  "perLine": 0.787,
+  "org": 0.837,
+  "suits": 0.894,
+  "sum": 45.77,
+  "lines": 56
+ },
+ "builderCalls": 62,
+ "judgements": 54,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-S0-bakery-r0",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-S0-bakery-r0",
+   "score": 0.787,
+   "sum": 45.77,
+   "defects": 44.05,
+   "lines": 56,
+   "perLine": 0.787,
+   "org": 0.837,
+   "suits": 0.894,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.987
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.995,
+     "pFit": 0.985
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.976
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.994,
+     "pFit": 0.997
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.985
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.991,
+     "pFit": 0.98
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|gallery#0",
+     "weight": 3,
+     "say": "the list in \"gallery\" shows the same photo 3 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1list|call to action#0",
+     "weight": 3,
+     "say": "the list in \"call to action\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1list|feature cards#0",
+     "weight": 3,
+     "say": "the list in \"feature cards\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|about#0",
+     "weight": 2,
+     "say": "\"food-bread.webp\" appears 9 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|gallery#0",
+     "weight": 2,
+     "say": "\"food-bread.webp\" appears 9 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|call to action#0",
+     "weight": 2,
+     "say": "\"food-bread.webp\" appears 9 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|about#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role",
+     "weight": 2,
+     "say": "\"Votre boulangerie familiale lyonnaise. Découvrez nos créations faites avec amour.\" repeats \"Votre boulangerie familiale lyonnaise.\"",
+     "op": "reword"
+    },
+    {
+     "id": "S9|schedule or line-up#0|deck|headline,sub-line,date and place",
+     "weight": 3,
+     "say": "\"Open daily. Find us at [Insert Address Here] for your daily \" talks about the page instead of to the visitor",
+     "op": "reword"
+    },
+    {
+     "id": "S5|call to action#0|list.rows|3|title,sentence,button",
+     "weight": 2,
+     "say": "\"View Sourdough\" repeats \"View Sourdough\"",
+     "op": "reword"
+    },
+    {
+     "id": "S8|feature cards#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|about#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|gallery#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|schedule or line-up#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S12|gallery#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "four \"imageGround\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S13|gallery#0",
+     "weight": 3,
+     "say": "the \"gallery\" list repeats the items of \"feature cards\" (\"Classic Sourdough Loaf\", \"Butter Croissant\", \"Chocolate Ganache Cake\", \"Almond Croissant\")",
+     "op": "reword"
+    },
+    {
+     "id": "S13|call to action#0",
+     "weight": 3,
+     "say": "the \"call to action\" list repeats the items of \"feature cards\" (\"Artisan Sourdough\", \"Flaky Croissants\", \"Decadent Cakes\")",
+     "op": "reword"
+    },
+    {
+     "id": "C|schedule or line-up#0|deck|headline,sub-line,date and place",
+     "weight": 3.82,
+     "say": "reviewer (p=0.954): \"Open daily. Find us at [Insert Address Here] for your daily \" contradicts the request or invents a detail",
+     "op": "reword"
+    },
+    {
+     "id": "P1|location and hours",
+     "weight": 2.23,
+     "say": "reviewer (p=0.743): add a \"location and hours\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "Q|org",
+     "weight": 1.3,
+     "say": "reviewer: organised p=0.837"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.42,
+     "say": "reviewer: type and parts suit p=0.894"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 62,
+   "judgements": 54,
+   "minutes": 3.9,
+   "kept": true
+  }
+ ]
+}

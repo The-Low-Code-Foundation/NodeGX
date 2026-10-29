@@ -1,0 +1,107 @@
+# OWN-031 — The server asks
+
+**Opened 2026-10-28** (OWN-029 s2, Opus, from `own-029/NEXT-SESSION-PROMPT.md` step 5: *"move the loop into the MCP …
+so a person with Gemma in Cline gets the harness without running it. Scope it as its own task file first."*).
+**Status: ⬜ scoped 2026-10-28, not started.** Three rulings wait on Richard (§7).
+**Model:** Opus. The client model in every test is a local Gemma, the same one OWN-029 used as builder.
+
+## 1. The person sentence
+
+> **Someone with Gemma 4 E2B in Cline says "make me a page for my bakery". The NodeGX server asks the model one small
+> question at a time, builds the page from the answers, looks at it, and asks again about only what is wrong. The
+> person never runs a script, and the page is as good as OWN-029's.**
+
+## 2. Why
+
+- **OWN-027 and OWN-029 showed that the taste lives in the system.** A 2B model makes good decisions when it is asked
+  small questions with the options in the words. It fails when it has to draw a tree or write a page.
+- **Today that system is a script** (`own-029/agent.mjs`) that only we can run. A person with a small model in Cline
+  meets the ordinary MCP surface, which is a big-model surface: `create_plan`, staged node graphs, ports.
+- **OWN-027 arm B** gave the small model that surface. **This task is arm B turned around:** the server holds the
+  questions, the state and the assembly, and the client's model only answers.
+
+## 3. What is known (measured or read, 2026-10-28)
+
+| Fact | Where |
+|---|---|
+| A stateful multi-call tool already exists: `create_plan` keeps a `Map<id, ServerPlan>` per server process, with no TTL and nothing on disk. It ends at apply, at discard, or when the process exits. | `noodl-mcp/src/tools/planTools.ts:153-188`, `:753`, `:1151` |
+| A server-side builder can drive the REAL tools in-process, with their validation, through `disclosure.handleFor(name).handler(args, extra)`. This is how `call_tool` works. | `src/tools/disclosure.ts:136`, `:687` |
+| `render_report` exports `runRenderReport(projectDir, opts)`. | `src/render.ts:442` |
+| The resident tool surface is at 8,273 of 8,280 tokens. A new tool **must** join a deferred group, which costs 0 resident tokens. | `tests/toolDisclosure.test.ts:83`; `src/toolGroups.ts:442` |
+| Nothing in the server uses MCP sampling (`createMessage`) or elicitation. The SDK is 1.29.0. | `src/` grep; `package.json` |
+| `create_project` is a single call: the client holds the scoping conversation and passes the result. No back-and-forth happens inside the server today. | `src/tools/createProject.ts:659` |
+| OWN-029 round 0 takes **60–130 builder answers** a page. Each repair round re-asks 5–20. | `own-029/RESULTS.md` §2 |
+| Ollama logprobs give each answer a confidence. **A client model through MCP gives none.** The flips (to "the model's second choice") and the one-token reviewer depend on them. | `own-029/lm.mjs` |
+
+## 4. The shape (a proposal for the rulings in §7)
+
+**One tool, `guided_build`, in a deferred group** (say `build`, revealed by `find_tools({group:"build"})` or named in
+the bootstrap instructions):
+
+```
+guided_build({ request })                       → { session, question }
+guided_build({ session, answer })               → { question } | { done, project, render, issuesLeft }
+guided_build({ session, answers: [...] })       → batch form (below)
+```
+
+- **A question is self-contained:** the options are in its words (OWN-027's rule: the schema is invisible to the
+  model), there is a short brief line, and it asks for an answer format of one word or one short JSON object. It
+  never carries the history.
+- **The server holds everything else:** the card, the answers cache, the replay and invalidation (`lm.mjs`'s door),
+  the assembly into a node tree, staging, applying, rendering, the script critics S1–S14, and the render findings.
+- **Batching is the main risk control.** If 100 round trips each append about 300 tokens, a small model's context
+  fills up (Cline keeps every tool call). The server therefore sends every question that does not depend on another
+  in one batch: all of a section's looks, or every section's words once its bits are known. The target is ≤ 25
+  round trips for round 0. **Measure this first (AC2).**
+- **Without logprobs:**
+  - the reviewer's yes/no questions go to the same client model, as plain answers;
+  - flips are dropped, and a defect re-asks with a hint instead;
+  - the accept rule stays as it is (OWN-029 s2: per line, with organisation as a constraint).
+- **Sampling is a later, optional fast path.** If a client advertises `sampling`, the server asks through
+  `createMessage` and the whole build is one tool call. Which clients advertise it (Cline, Claude Desktop, Claude
+  Code) is a probe, not an assumption.
+
+## 5. Build order
+
+1. **Probe (no product code):** OWN-027's `mcp.mjs` client acts as "Cline". Ollama answers each question the server
+   would ask, with the conversation history growing the way Cline's does. Measure round trips and context tokens for
+   round 0 at batch sizes 1, a section, and a stage. This decides AC2 before any TypeScript is written.
+2. **Port round 0 into `noodl-mcp/src/guided/`:**
+   - the vocabulary of questions (section kinds, bits, item bits, looks offered by section kind, fields), from
+     `agent.mjs`;
+   - assembly into node trees, plus a list's items as one component;
+   - staging through the in-process tool handles.
+   **Paired gate:** replay one OWN-029 run's answers through the port. The staged graphs must equal `agent.mjs`'s for
+   the same answers.
+3. **The review loop:** describe, the script critics, render findings, the client model as reviewer, repair by
+   re-ask, and accept.
+4. **A stranger round:** Gemma E2B in Cline, a real client, on the six briefs. Richard looks at the pages.
+
+## 6. Acceptance criteria
+
+- [ ] **AC1 — the door exists without cost:** `guided_build` is in a deferred group, and `toolDisclosure.test.ts`
+  stays green at ≤ 8,280 resident tokens.
+- [ ] **AC2 — it fits a small model's context:** round 0 of the six briefs takes ≤ 25 round trips, and the client
+  conversation stays ≤ 16K tokens (Gemma E2B in Cline, measured in step 1 and again in step 4).
+- [ ] **AC3 — paired equivalence:** the same answers give the same staged graphs as `own-029/agent.mjs` (step 2's
+  gate).
+- [ ] **AC4 — quality holds without logprobs:** over six briefs, the kept pages' defects per line are no worse than
+  OWN-029 s2's kept pages + 25%, and "organised" is no lower by more than 0.1.
+- [ ] **AC5 — a real client:** Gemma E2B in Cline builds the bakery page end to end, and Richard calls it a credible
+  first draft.
+
+## 7. Rulings that wait on Richard
+
+1. **Turn by turn first, or sampling first?** The proposal is turn by turn, because every client can do it. Sampling
+   is a fast path once we know who supports it.
+2. **The reviewer in guided mode:** the client's own model (no confidence, possibly lenient: E2B said yes to nearly
+   everything in OWN-029's probes), the script critics only, or a reviewer model the server runs itself (needs Ollama
+   on the server's machine, which breaks "nothing to run").
+3. **Whose questions are they?** Is the vocabulary of questions (bits, looks offered by section kind) product
+   surface that ships, or experiment code to be rewritten? Porting it makes it product.
+
+## 8. Links
+
+- OWN-027 (arm B: the small model on the plain surface), OWN-029 (the loop this ports), OWN-030 (code or NodeGX;
+  its graph lane freezes OWN-029's harness).
+- `[[the-graph-as-text-is-the-reading-surface]]`: what the critics' "describe" step already does, in words.

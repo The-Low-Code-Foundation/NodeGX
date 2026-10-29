@@ -1,0 +1,241 @@
+{
+ "minutes": 3.9,
+ "accept": "constraint",
+ "bestRound": 0,
+ "bestScore": 0.679,
+ "scores": [
+  0.679
+ ],
+ "r0": {
+  "perLine": 0.679,
+  "org": 0.129,
+  "suits": 0.918,
+  "sum": 43.3
+ },
+ "kept": {
+  "perLine": 0.679,
+  "org": 0.129,
+  "suits": 0.918,
+  "sum": 43.3,
+  "lines": 53
+ },
+ "builderCalls": 73,
+ "judgements": 47,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-S0-puppy-r0",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-S0-puppy-r0",
+   "score": 0.679,
+   "sum": 43.3,
+   "defects": 36,
+   "lines": 53,
+   "perLine": 0.679,
+   "org": 0.129,
+   "suits": 0.918,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "form"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.924
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.935
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "quote",
+      "name line",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.936,
+     "pFit": 0.736
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.979,
+     "pFit": 0.998
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "headline",
+      "quote",
+      "name line",
+      "photo"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.978
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "photo",
+      "button",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.95
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "form",
+      "small print"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.926
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|gallery#0",
+     "weight": 3,
+     "say": "the list in \"gallery\" shows the same photo 4 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|gallery#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 10 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|testimonials#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 10 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|sign-up or contact form#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 10 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|call to action#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 10 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|call to action#0|deck|headline,sub-line,button,form button,small print",
+     "weight": 2,
+     "say": "\"Find Your Perfect Puppy Companion\" repeats \"Find Your Perfect Puppy Companion\"",
+     "op": "reword"
+    },
+    {
+     "id": "S10|form|about#0",
+     "weight": 4,
+     "say": "a second form (already in \"hero\")",
+     "op": "reask"
+    },
+    {
+     "id": "S10|form|feature cards#0",
+     "weight": 4,
+     "say": "a second form (already in \"hero\")",
+     "op": "reask"
+    },
+    {
+     "id": "S10|form|sign-up or contact form#0",
+     "weight": 4,
+     "say": "a second form (already in \"hero\")",
+     "op": "reask"
+    },
+    {
+     "id": "S10|form|call to action#0",
+     "weight": 4,
+     "say": "a second form (already in \"hero\")",
+     "op": "reask"
+    },
+    {
+     "id": "S10|quote|gallery#0",
+     "weight": 2,
+     "say": "a quote in a 3th section",
+     "op": "reask"
+    },
+    {
+     "id": "S10|quote|testimonials#0",
+     "weight": 2,
+     "say": "a quote in a 4th section",
+     "op": "reask"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|deck|headline,sub-line,paragraph,button,form button",
+     "weight": 1.5,
+     "say": "\"find your perfect\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|headline,sub-line,button,form button,small print",
+     "weight": 1.5,
+     "say": "\"find your perfect\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "Q|org",
+     "weight": 6.97,
+     "say": "reviewer: organised p=0.129",
+     "op": "reask"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.33,
+     "say": "reviewer: type and parts suit p=0.918"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 73,
+   "judgements": 47,
+   "minutes": 3.9,
+   "kept": true
+  }
+ ]
+}

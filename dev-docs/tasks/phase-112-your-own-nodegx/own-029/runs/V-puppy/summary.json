@@ -1,0 +1,755 @@
+{
+ "minutes": 10.8,
+ "bestRound": 1,
+ "bestScore": 14,
+ "scores": [
+  41,
+  14,
+  23.09,
+  14.5
+ ],
+ "builderCalls": 118,
+ "judgements": 86,
+ "replays": 206,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-V-puppy-r1",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-V-puppy-r0",
+   "score": 41,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "form"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.864
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "body text",
+      "photo",
+      "quote",
+      "name line",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.934
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "quote",
+      "name line",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.947,
+     "pFit": 0.967
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "body text",
+      "button",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.9,
+     "pFit": 0.997
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.989,
+     "pFit": 0.994
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.793
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "form",
+      "small print"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.894
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|gallery#0",
+     "weight": 3,
+     "say": "the list in \"gallery\" shows the same photo 4 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1list|how it works#0",
+     "weight": 3,
+     "say": "the list in \"how it works\" shows the same photo 3 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|feature cards#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 13 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|gallery#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 13 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|sign-up or contact form#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 13 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|call to action#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 13 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|feature cards#0|list.rows|3|title,sentence,button",
+     "weight": 2,
+     "say": "\"Find Your Puppy\" repeats \"Find Your Puppy\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|how it works#0|deck|headline,sub-line,paragraph,button",
+     "weight": 2,
+     "say": "\"Adopt a Puppy\" repeats \"Adopt a Puppy\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|how it works#0|list.rows|3|title",
+     "weight": 2,
+     "say": "\"Meet your new best friend\" repeats \"Meet Your New Best Friend\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|sign-up or contact form#0|deck|headline,sub-line,form button,button",
+     "weight": 2,
+     "say": "\"Meet Your New Best Friend\" repeats \"Meet Your New Best Friend\"",
+     "op": "reword"
+    },
+    {
+     "id": "S10|form|about#0",
+     "weight": 4,
+     "say": "a second form (already in \"hero\")",
+     "op": "reask"
+    },
+    {
+     "id": "S10|form|feature cards#0",
+     "weight": 4,
+     "say": "a second form (already in \"hero\")",
+     "op": "reask"
+    },
+    {
+     "id": "S10|form|sign-up or contact form#0",
+     "weight": 4,
+     "say": "a second form (already in \"hero\")",
+     "op": "reask"
+    },
+    {
+     "id": "S10|form|call to action#0",
+     "weight": 4,
+     "say": "a second form (already in \"hero\")",
+     "op": "reask"
+    },
+    {
+     "id": "S11|how it works#0|list.rows|3|title",
+     "weight": 1.5,
+     "say": "\"new best friend\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|deck|headline,sub-line,form button,button",
+     "weight": 1.5,
+     "say": "\"new best friend\" is said 4 times on the page",
+     "op": "reword"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 81,
+   "judgements": 45,
+   "minutes": 6.1,
+   "kept": true,
+   "fixesForNext": [
+    "S10|form|about#0",
+    "S10|form|feature cards#0",
+    "S10|form|sign-up or contact form#0",
+    "S10|form|call to action#0",
+    "S1list|gallery#0",
+    "S1list|how it works#0",
+    "S5|feature cards#0|list.rows|3|title,sentence,button",
+    "S5|how it works#0|deck|headline,sub-line,paragraph,button",
+    "S5|how it works#0|list.rows|3|title",
+    "S5|sign-up or contact form#0|deck|headline,sub-line,form button,button"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-V-puppy-r1",
+   "score": 14,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "form"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.864
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.946
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.966,
+     "pFit": 0.992
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "body text",
+      "button",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.892,
+     "pFit": 0.997
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.993,
+     "pFit": 0.994
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "photo",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.979
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "quote",
+      "name line"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.967
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1page|feature cards#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 6 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|gallery#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 6 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|sign-up or contact form#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 6 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|call to action#0",
+     "weight": 2,
+     "say": "\"animal-dog.webp\" appears 6 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|sign-up or contact form#0|deck|headline,sub-line,paragraph,button,who said it: a name and a role",
+     "weight": 2,
+     "say": "\"Adopt a Puppy\" repeats \"Adopt a Puppy\"",
+     "op": "reword"
+    },
+    {
+     "id": "R|single-column-grid|page",
+     "weight": 4,
+     "say": "render: single-column-grid"
+    }
+   ],
+   "findings": [
+    "single-column-grid"
+   ],
+   "modelCalls": 19,
+   "judgements": 13,
+   "minutes": 1.8,
+   "kept": true,
+   "fixesForNext": [
+    "S1page|feature cards#0",
+    "S1page|gallery#0",
+    "S1page|sign-up or contact form#0",
+    "S1page|call to action#0",
+    "S5|sign-up or contact form#0|deck|headline,sub-line,paragraph,button,who said it: a name and a role"
+   ]
+  },
+  {
+   "round": 2,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-V-puppy-r2",
+   "score": 23.09,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "form"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.864
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.946
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.946,
+     "pFit": 0.986
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.957,
+     "pFit": 0.996
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.993,
+     "pFit": 0.994
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.136
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "form"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.912
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+     "weight": 2,
+     "say": "\"Start your journey to puppy happiness with a few simple steps. Meet our adorable, vetted companions waiting for their forever homes.\" repeats \"Your Journey to Puppy Happiness\"",
+     "op": "reword"
+    },
+    {
+     "id": "S10|form|sign-up or contact form#0",
+     "weight": 4,
+     "say": "a second form (already in \"hero\")",
+     "op": "reask"
+    },
+    {
+     "id": "S10|form|call to action#0",
+     "weight": 4,
+     "say": "a second form (already in \"hero\")",
+     "op": "reask"
+    },
+    {
+     "id": "S11|feature cards#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role",
+     "weight": 1.5,
+     "say": "\"start your journey\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|feature cards#0|list.rows|3|title,sentence,button",
+     "weight": 1.5,
+     "say": "\"start your journey\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|gallery#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role",
+     "weight": 1.5,
+     "say": "\"start your journey\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+     "weight": 1.5,
+     "say": "\"start your journey\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|how it works#0|deck|headline,sub-line,paragraph,button",
+     "weight": 1.5,
+     "say": "\"journey to puppy\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|gallery#0|list.rows|4|title,sentence,button",
+     "weight": 1.5,
+     "say": "\"ready to bring\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|eyebrow,headline,sub-line,paragraph,button,form button",
+     "weight": 1.5,
+     "say": "\"ready to bring\" is said 6 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "J1|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+     "weight": 2.59,
+     "say": "reviewer (p=0.136): weakest line sub-line \"Start your journey to puppy happiness with a few s\"",
+     "op": "reword"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 9,
+   "judgements": 14,
+   "minutes": 1.4,
+   "reverted": true,
+   "kept": false,
+   "fixesForNext": [
+    "S1page|feature cards#0",
+    "S1page|gallery#0",
+    "S1page|sign-up or contact form#0",
+    "S1page|call to action#0",
+    "S5|sign-up or contact form#0|deck|headline,sub-line,paragraph,button,who said it: a name and a role"
+   ]
+  },
+  {
+   "round": 3,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-V-puppy-r3",
+   "score": 14.5,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "form"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.864
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.946
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.972,
+     "pFit": 0.987
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.936,
+     "pFit": 0.995
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.993,
+     "pFit": 0.994
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.334
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "quote",
+      "name line"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.917
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|feature cards#0|list.rows|3|title,sentence,button",
+     "weight": 2,
+     "say": "\"Meet Your New Best Friend\" repeats \"Meet Your New Best Friend\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|call to action#0|deck|eyebrow,headline,sub-line,paragraph,button,quote,who said it: a name and a role",
+     "weight": 2,
+     "say": "\"Find Your Perfect Puppy Match\" repeats \"Find Your Perfect Puppy Match\"",
+     "op": "reword"
+    },
+    {
+     "id": "S10|form|sign-up or contact form#0",
+     "weight": 4,
+     "say": "a second form (already in \"hero\")",
+     "op": "reask"
+    },
+    {
+     "id": "S11|feature cards#0|list.rows|3|title,sentence,button",
+     "weight": 1.5,
+     "say": "\"start your journey\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|gallery#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role",
+     "weight": 1.5,
+     "say": "\"start your journey\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|eyebrow,headline,sub-line,paragraph,button,quote,who said it: a name and a role",
+     "weight": 1.5,
+     "say": "\"best part of\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "J1|sign-up or contact form#0|deck|eyebrow,headline,sub-line,paragraph,form button,button",
+     "weight": 2,
+     "say": "reviewer (p=0.334): weakest line button \"Apply Now\"",
+     "op": "reword"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 9,
+   "judgements": 14,
+   "minutes": 1.5,
+   "reverted": true,
+   "kept": false
+  }
+ ]
+}

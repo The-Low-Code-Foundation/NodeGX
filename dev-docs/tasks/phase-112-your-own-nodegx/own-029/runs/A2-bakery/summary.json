@@ -1,0 +1,655 @@
+{
+ "minutes": 6.6,
+ "bestRound": 3,
+ "bestScore": 8.5,
+ "scores": [
+  29.5,
+  15.5,
+  10.5,
+  8.5
+ ],
+ "builderCalls": 106,
+ "judgements": 95,
+ "replays": 229,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A2-bakery-r3",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A2-bakery-r0",
+   "score": 29.5,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "date and place"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.885
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "photo",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.945
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "price"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.99,
+     "pFit": 0.991
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "small print"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.994,
+     "pFit": 0.995
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.979
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.986
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "date and place",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.97
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|gallery#0",
+     "weight": 3,
+     "say": "the list in \"gallery\" shows the same photo 3 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|feature cards#0",
+     "weight": 2,
+     "say": "\"food-bakery.webp\" appears 8 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|call to action#0",
+     "weight": 2,
+     "say": "\"food-bakery.webp\" appears 8 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1list|feature cards#0",
+     "weight": 3,
+     "say": "the list in \"feature cards\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|gallery#0",
+     "weight": 2,
+     "say": "\"food-bread.webp\" appears 6 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|gallery#0|copy|the gallery headline|Text",
+     "weight": 2,
+     "say": "\"Artisanal delights from Lyon\" repeats \"Artisanal delights from Lyon\"",
+     "op": "reword"
+    },
+    {
+     "id": "S8|about#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|feature cards#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S11|about#0|copy|a short paragraph|Text",
+     "weight": 1.5,
+     "say": "\"flaky croissants and\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|footer#0|copy|a short paragraph|Text",
+     "weight": 1.5,
+     "say": "\"flaky croissants and\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|copy|a quotation from a happy customer or visitor|Text",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|schedule or line-up#0|copy|when and where, in one line|Text",
+     "weight": 1.5,
+     "say": "\"sourdough croissants and\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|footer#0|copy|when and where, in one line|Text",
+     "weight": 1.5,
+     "say": "\"sourdough croissants and\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "R|low-contrast-text|footer#0",
+     "weight": 4,
+     "say": "render: low-contrast-text at \"Lyon Bakehouse: Family bakery offering a\"",
+     "op": "flip"
+    }
+   ],
+   "findings": [
+    "low-contrast-text"
+   ],
+   "modelCalls": 78,
+   "judgements": 47,
+   "minutes": 3.8,
+   "kept": true,
+   "fixesForNext": [
+    "R|low-contrast-text|footer#0",
+    "S1list|gallery#0",
+    "S1list|feature cards#0",
+    "S1page|call to action#0",
+    "S5|gallery#0|copy|the gallery headline|Text",
+    "S8|about#0|look.band|band,bandSurface,imageGround",
+    "S11|about#0|copy|a short paragraph|Text",
+    "S11|footer#0|copy|a short paragraph|Text",
+    "S11|about#0|copy|a quotation from a happy customer or visitor|Text",
+    "S11|schedule or line-up#0|copy|when and where, in one line|Text"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A2-bakery-r1",
+   "score": 15.5,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "date and place"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.885
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "photo",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.962
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "price"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.991,
+     "pFit": 0.99
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "small print"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.993,
+     "pFit": 0.995
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.985
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button",
+      "list of items",
+      "price"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.988,
+     "pFit": 0.991
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "date and place",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.981
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|call to action#0",
+     "weight": 3,
+     "say": "the list in \"call to action\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|gallery#0",
+     "weight": 2,
+     "say": "\"food-bread.webp\" appears 4 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|call to action#0|list.rows|3|title,sentence,button",
+     "weight": 2,
+     "say": "\"Artisanal Sourdough\" repeats \"Artisanal Sourdough\"",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|copy|a short paragraph|Text",
+     "weight": 1.5,
+     "say": "\"flaky croissants and\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|footer#0|copy|a short paragraph|Text",
+     "weight": 1.5,
+     "say": "\"flaky croissants and\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|copy|a quotation from a happy customer or visitor|Text",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "R|low-contrast-text|footer#0",
+     "weight": 4,
+     "say": "render: low-contrast-text at \"Lyon Bakehouse: Family bakery offering a\"",
+     "op": "flip"
+    }
+   ],
+   "findings": [
+    "low-contrast-text"
+   ],
+   "modelCalls": 20,
+   "judgements": 16,
+   "minutes": 1.3,
+   "kept": true,
+   "fixesForNext": [
+    "R|low-contrast-text|footer#0",
+    "S1list|call to action#0",
+    "S1page|gallery#0",
+    "S5|call to action#0|list.rows|3|title,sentence,button",
+    "S11|about#0|copy|a short paragraph|Text",
+    "S11|footer#0|copy|a short paragraph|Text",
+    "S11|about#0|copy|a quotation from a happy customer or visitor|Text"
+   ]
+  },
+  {
+   "round": 2,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A2-bakery-r2",
+   "score": 10.5,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "date and place"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.885
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "photo",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.967
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "price"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.991,
+     "pFit": 0.99
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.995,
+     "pFit": 0.997
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.985
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button",
+      "list of items",
+      "price"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.989,
+     "pFit": 0.99
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "date and place",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.986
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|call to action#0|list.rows|3|title,sentence,button",
+     "weight": 2,
+     "say": "\"View Sourdough\" repeats \"View Sourdough\"",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|copy|a short paragraph|Text",
+     "weight": 1.5,
+     "say": "\"flaky croissants and\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|copy|a quotation from a happy customer or visitor|Text",
+     "weight": 1.5,
+     "say": "\"flaky croissants and\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|footer#0|copy|a short paragraph|Text",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "R|low-contrast-text|footer#0",
+     "weight": 4,
+     "say": "render: low-contrast-text at \"Lyon Bakehouse: Family bakery offering a\"",
+     "op": "flip"
+    }
+   ],
+   "findings": [
+    "low-contrast-text"
+   ],
+   "modelCalls": 11,
+   "judgements": 16,
+   "minutes": 0.9,
+   "kept": true,
+   "fixesForNext": [
+    "S5|call to action#0|list.rows|3|title,sentence,button"
+   ]
+  },
+  {
+   "round": 3,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A2-bakery-r3",
+   "score": 8.5,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button",
+      "date and place"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.885
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "photo",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.967
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "price"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.991,
+     "pFit": 0.99
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.995,
+     "pFit": 0.997
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.985
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button",
+      "list of items",
+      "price"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.983,
+     "pFit": 0.984
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "date and place",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.986
+    }
+   ],
+   "issues": [
+    {
+     "id": "S11|about#0|copy|a short paragraph|Text",
+     "weight": 1.5,
+     "say": "\"flaky croissants and\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|about#0|copy|a quotation from a happy customer or visitor|Text",
+     "weight": 1.5,
+     "say": "\"flaky croissants and\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|footer#0|copy|a short paragraph|Text",
+     "weight": 1.5,
+     "say": "\"croissants and exquisite\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "R|low-contrast-text|footer#0",
+     "weight": 4,
+     "say": "render: low-contrast-text at \"Lyon Bakehouse: Family bakery offering a\"",
+     "op": "flip"
+    }
+   ],
+   "findings": [
+    "low-contrast-text"
+   ],
+   "modelCalls": 3,
+   "judgements": 16,
+   "minutes": 0.6,
+   "kept": true
+  }
+ ]
+}

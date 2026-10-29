@@ -1,0 +1,117 @@
+{
+ "minutes": 2,
+ "bestRound": 0,
+ "bestScore": 13,
+ "scores": [
+  13
+ ],
+ "builderCalls": 49,
+ "judgements": 42,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R-pottery-r0",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R-pottery-r0",
+   "score": 13,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "sub-line"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.984
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "quote",
+      "name line",
+      "date and place",
+      "body text",
+      "list of items",
+      "second button",
+      "badge"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.927
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "badge"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.933
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "list of items",
+      "photo",
+      "badge"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.941
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "eyebrow",
+      "price"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.899
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "small print",
+      "body text"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.974
+    }
+   ],
+   "issues": [
+    {
+     "id": "S9|gallery#0|copy|when and where, in one line|Text",
+     "weight": 3,
+     "say": "\"Crafted handmade bowls and weekend pottery workshops in [Loc\" talks about the page instead of to the visitor",
+     "op": "reword"
+    },
+    {
+     "id": "S7|feature cards#0",
+     "weight": 2,
+     "say": "\"feature cards\" is only a badge",
+     "op": "reask"
+    },
+    {
+     "id": "R|no-display-type|page",
+     "weight": 4,
+     "say": "render: no-display-type"
+    },
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    }
+   ],
+   "findings": [
+    "no-display-type",
+    "minimum-layout-width"
+   ],
+   "modelCalls": 49,
+   "judgements": 42,
+   "minutes": 2,
+   "kept": true
+  }
+ ]
+}

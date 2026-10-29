@@ -1,0 +1,3048 @@
+{
+ "run": "A-pottery",
+ "brief": "pottery",
+ "request": "A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.",
+ "model": "gemma4:e2b-it-qat",
+ "judge": "gemma4:e4b-it-qat",
+ "copyN": 1,
+ "rounds": 4,
+ "build": {
+  "distMtime": "2026-10-28T15:27:11.116Z",
+  "head": "1f31ab2f8"
+ },
+ "harness": "abdc5409",
+ "startedAt": "2026-10-28T19:15:02.814Z",
+ "calls": [
+  {
+   "round": 0,
+   "key": "card.audience+action+name",
+   "sig": "card|audience",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nWho is the page for (one line, max 20 words)? What is the ONE action the page wants a visitor to take (max 20 words)? What is the business, event or person called (max 4 words; use the name in the request, or invent a short one)?",
+   "temperature": 0.4,
+   "answer": {
+    "action": "Browse the portfolio or sign up for a class.",
+    "audience": "Potential customers interested in handmade pottery and classes.",
+    "name": "Potter Portfolio"
+   },
+   "tokensIn": 124,
+   "tokensOut": 48,
+   "ms": 6793
+  },
+  {
+   "round": 0,
+   "key": "card.preset+hue",
+   "sig": "card|preset",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nTone: minimal. Pick the style preset and the main colour (blue, green, warm, neutral, purple).\nPresets:\n- modern: The balanced default\n- minimal: Restrained\n- playful: Vivid colors, rounded corners, generous spacing.\n- enterprise: Dense, conservative, high-contrast for data-heavy UIs.\n- soft: Gentle pastels, large radius, airy spacing.",
+   "temperature": 0.2,
+   "answer": {
+    "preset": "minimal",
+    "hue": "neutral"
+   },
+   "tokensIn": 146,
+   "tokensOut": 20,
+   "ms": 1101
+  },
+  {
+   "round": 0,
+   "key": "card.pairing+density+radius",
+   "sig": "card|type",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nTone: minimal. Pick the type pairing (headings / body), the density (airy, regular, compact) and the corner radius (sharp, soft, round).\nPairings:\n- sans-sans: Inter headings / Inter body\n- serif-sans: serif headings / Inter body\n- serif-serif: serif headings / serif body\n- mono-sans: monospace headings / Inter body",
+   "temperature": 0.2,
+   "answer": {
+    "density": "airy",
+    "pairing": "sans-sans",
+    "radius": "soft"
+   },
+   "tokensIn": 143,
+   "tokensOut": 30,
+   "ms": 1500
+  },
+  {
+   "round": 0,
+   "key": "card.mustShow",
+   "sig": "card|mustShow",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nWhat must a visitor be able to find on this page? List 1 to 4 short facts taken from the request about the business, event or person (a date, a place, what is sold, opening days, what to do). Only what the request says, and nothing about how the page should look.",
+   "temperature": 0.2,
+   "answer": {
+    "texts": [
+     "sells handmade bowls",
+     "teaches weekend classes"
+    ]
+   },
+   "tokensIn": 126,
+   "tokensOut": 30,
+   "ms": 1526
+  },
+  {
+   "round": 0,
+   "key": "sections",
+   "sig": "sections",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe page must show: sells handmade bowls; teaches weekend classes.\nWhich sections should the page have, top to bottom? Give 3 to 7. For each, one line saying what a VISITOR finds there (not what the section does for the page). Choose what THIS page needs; not every page needs every kind.\nSection kinds: hero, about, feature cards, how it works, gallery, menu or prices, schedule or line-up, testimonials, team, faq, location and hours, sign-up or contact form, call to action, footer",
+   "temperature": 0.3,
+   "answer": {
+    "sections": [
+     {
+      "kind": "hero",
+      "purpose": "Immediate visual impact and primary call to action."
+     },
+     {
+      "kind": "gallery",
+      "purpose": "Showcase the handmade bowls."
+     },
+     {
+      "kind": "feature cards",
+      "purpose": "Highlight the weekend classes."
+     },
+     {
+      "kind": "about",
+      "purpose": "Establish the potter's craft and philosophy."
+     },
+     {
+      "kind": "call to action",
+      "purpose": "Direct users to browse or sign up."
+     },
+     {
+      "kind": "footer",
+      "purpose": "Provide necessary contact and social links."
+     }
+    ]
+   },
+   "tokensIn": 218,
+   "tokensOut": 180,
+   "ms": 11012
+  },
+  {
+   "round": 0,
+   "key": "s0.bits",
+   "sig": "hero#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"hero\" section (Immediate visual impact and primary call to action.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- photo: one photograph\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "eyebrow",
+     "headline",
+     "sub-line",
+     "photo",
+     "button"
+    ]
+   },
+   "tokensIn": 300,
+   "tokensOut": 42,
+   "ms": 2826
+  },
+  {
+   "round": 0,
+   "key": "s0.align",
+   "sig": "hero#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"hero\" section (Immediate visual impact and primary call to action.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "centred"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.882,
+     "left-aligned": 0.118
+    },
+    "top": "centred",
+    "second": "left-aligned",
+    "margin": 0.764
+   },
+   "tokensIn": 136,
+   "tokensOut": 7,
+   "ms": 1329
+  },
+  {
+   "round": 0,
+   "key": "s0.photoPlace",
+   "sig": "hero#0|photoPlace",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"hero\" section (Immediate visual impact and primary call to action.). Should the photo sit beside the words, above them, or below them? Answer one of: beside, above, below.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "beside"
+   },
+   "conf": {
+    "dist": {
+     "beside": 0.614,
+     "above": 0.363,
+     "below": 0.023
+    },
+    "top": "beside",
+    "second": "above",
+    "margin": 0.251
+   },
+   "tokensIn": 142,
+   "tokensOut": 8,
+   "ms": 1271
+  },
+  {
+   "round": 0,
+   "key": "s0.look.band",
+   "sig": "hero#0|look.band|band,bandSurface,heroGround,imageGround",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"hero\" section (Immediate visual impact and primary call to action.). A Group whose role is: the hero section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band\n- heroGround: The band a landing page opens with\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…",
+   "temperature": 0.2,
+   "answer": {
+    "look": "heroGround"
+   },
+   "conf": {
+    "dist": {
+     "band": 0.028,
+     "bandSurface": 0.028,
+     "heroGround": 0.722,
+     "imageGround": 0.221
+    },
+    "top": "heroGround",
+    "second": "imageGround",
+    "margin": 0.501
+   },
+   "tokensIn": 192,
+   "tokensOut": 13,
+   "ms": 1399
+  },
+  {
+   "round": 0,
+   "key": "s0.look.the hero headline",
+   "sig": "hero#0|look.the hero headline|displayHeadline,sectionHeading",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"hero\" section (Immediate visual impact and primary call to action.). A Text whose role is: the hero headline.\nWhich look should it take?\n- displayHeadline: Exactly ONE per page\n- sectionHeading: The heading of a section head",
+   "temperature": 0.2,
+   "answer": {
+    "look": "displayHeadline"
+   },
+   "conf": {
+    "dist": {
+     "displayHeadline": 1,
+     "sectionHeading": 0
+    },
+    "top": "displayHeadline",
+    "second": "sectionHeading",
+    "margin": 1
+   },
+   "tokensIn": 154,
+   "tokensOut": 13,
+   "ms": 1195
+  },
+  {
+   "round": 0,
+   "key": "s0.look.one sentence under the headline",
+   "sig": "hero#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"hero\" section (Immediate visual impact and primary call to action.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.914,
+     "body": 0.086
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.828
+   },
+   "tokensIn": 168,
+   "tokensOut": 12,
+   "ms": 1119
+  },
+  {
+   "round": 0,
+   "key": "s0.look.the main action of the hero section",
+   "sig": "hero#0|look.the main action of the hero section|primaryButton,outlineButton",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"hero\" section (Immediate visual impact and primary call to action.). A Button whose role is: the main action of the hero section. It sits inside a \"actionRow\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action",
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "conf": {
+    "dist": {
+     "primaryButton": 0.927,
+     "outlineButton": 0.073
+    },
+    "top": "primaryButton",
+    "second": "outlineButton",
+    "margin": 0.854
+   },
+   "tokensIn": 163,
+   "tokensOut": 8,
+   "ms": 879
+  },
+  {
+   "round": 0,
+   "key": "s0.copy.the small uppercase line above the headline",
+   "sig": "hero#0|copy|the small uppercase line above the headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nWrite the small uppercase line above the headline in the \"hero\" section. At most 30 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "handmade pottery"
+   },
+   "tokensIn": 99,
+   "tokensOut": 13,
+   "ms": 835
+  },
+  {
+   "round": 0,
+   "key": "s0.copy.the hero headline",
+   "sig": "hero#0|copy|the hero headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nWrite the hero headline in the \"hero\" section. At most 70 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Crafted Pottery. Learn the Art."
+   },
+   "tokensIn": 95,
+   "tokensOut": 14,
+   "ms": 879
+  },
+  {
+   "round": 0,
+   "key": "s0.copy.one sentence under the headline",
+   "sig": "hero#0|copy|one sentence under the headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nFacts the page must give: sells handmade bowls; teaches weekend classes.\nWrite one sentence under the headline in the \"hero\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Crafted Pottery. Learn the Art.\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Handmade pottery and weekend classes for all skill levels. Discover unique pieces and learn to create your own."
+   },
+   "tokensIn": 131,
+   "tokensOut": 27,
+   "ms": 1389
+  },
+  {
+   "round": 0,
+   "key": "s0.copy.the main action of the hero section",
+   "sig": "hero#0|copy|the main action of the hero section|net.noodl.controls.button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nWrite the label of the main button in the \"hero\" section. Pressing it lets a visitor: Browse the portfolio or sign up for a class. Two to four words, a verb first.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Explore Work & Classes"
+   },
+   "tokensIn": 101,
+   "tokensOut": 15,
+   "ms": 1017
+  },
+  {
+   "round": 0,
+   "key": "s1.bits",
+   "sig": "gallery#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "gallery",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe sections above already have: hero: eyebrow, headline, sub-line, photo, button. Not every section needs a button or a photo; a section can be short.\nThe \"gallery\" section (Showcase the handmade bowls.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- photo: one photograph\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "headline",
+     "sub-line",
+     "photo",
+     "list of items"
+    ]
+   },
+   "tokensIn": 334,
+   "tokensOut": 37,
+   "ms": 2660
+  },
+  {
+   "round": 0,
+   "key": "s1.align",
+   "sig": "gallery#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "gallery",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"gallery\" section (Showcase the handmade bowls.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "centred"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.587,
+     "left-aligned": 0.413
+    },
+    "top": "centred",
+    "second": "left-aligned",
+    "margin": 0.174
+   },
+   "tokensIn": 133,
+   "tokensOut": 7,
+   "ms": 911
+  },
+  {
+   "round": 0,
+   "key": "s1.photoPlace",
+   "sig": "gallery#0|photoPlace",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "gallery",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"gallery\" section (Showcase the handmade bowls.). Should the photo sit beside the words, above them, or below them? Answer one of: beside, above, below.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "beside"
+   },
+   "conf": {
+    "dist": {
+     "beside": 0.763,
+     "above": 0.159,
+     "below": 0.079
+    },
+    "top": "beside",
+    "second": "above",
+    "margin": 0.604
+   },
+   "tokensIn": 139,
+   "tokensOut": 8,
+   "ms": 961
+  },
+  {
+   "round": 0,
+   "key": "s1.items.count",
+   "sig": "gallery#0|items.count",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "gallery",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"gallery\" section (Showcase the handmade bowls.). It has a list of similar items. How many items? Answer one of: 2, 3, 4, 6.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "6"
+   },
+   "tokensIn": 142,
+   "tokensOut": 8,
+   "ms": 1001
+  },
+  {
+   "round": 0,
+   "key": "s1.items.bits",
+   "sig": "gallery#0|items.bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "gallery",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"gallery\" section (Showcase the handmade bowls.). It has a list of 6 items. Which bits does EACH item have, top to bottom? Choose 1 to 4:\n- photo: a photograph\n- icon: a small icon\n- number: a step number\n- title: a short title\n- text: a sentence or two\n- price: a price\n- time: a time or a date\n- button: a button\n- name line: a name and a role\n(The page has only 3 photographs: a photo on each of 6 items would repeat them.)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "photo",
+     "title",
+     "text",
+     "button"
+    ]
+   },
+   "tokensIn": 229,
+   "tokensOut": 16,
+   "ms": 1555
+  },
+  {
+   "round": 0,
+   "key": "s1.items.layout",
+   "sig": "gallery#0|items.layout",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "gallery",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"gallery\" section (Showcase the handmade bowls.). Its 6 items: a grid, or one column? Answer one of: grid, one column.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "grid"
+   },
+   "conf": {
+    "dist": {
+     "grid": 0.941,
+     "one column": 0.059
+    },
+    "top": "grid",
+    "second": "one column",
+    "margin": 0.882
+   },
+   "tokensIn": 135,
+   "tokensOut": 7,
+   "ms": 880
+  },
+  {
+   "round": 0,
+   "key": "s1.look.band",
+   "sig": "gallery#0|look.band|band,bandSurface,imageGround",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "gallery",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"gallery\" section (Showcase the handmade bowls.). A Group whose role is: the gallery section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…",
+   "temperature": 0.2,
+   "answer": {
+    "look": "imageGround"
+   },
+   "conf": {
+    "dist": {
+     "band": 0.082,
+     "bandSurface": 0.082,
+     "imageGround": 0.836
+    },
+    "top": "imageGround",
+    "second": "band",
+    "margin": 0.754
+   },
+   "tokensIn": 177,
+   "tokensOut": 8,
+   "ms": 990
+  },
+  {
+   "round": 0,
+   "key": "s1.look.one sentence under the headline",
+   "sig": "gallery#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "gallery",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"gallery\" section (Showcase the handmade bowls.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.899,
+     "body": 0.101
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.798
+   },
+   "tokensIn": 165,
+   "tokensOut": 12,
+   "ms": 1114
+  },
+  {
+   "round": 0,
+   "key": "s1.look.item",
+   "sig": "gallery#0|look.item|card,statTile,testimonialCard,featureItem",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "gallery",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"gallery\" section (Showcase the handmade bowls.). A Group whose role is: item 1 of 6 in the list. It sits inside a \"gridAutoFit\".\nWhich look should it take?\n- card: The card shell\n- statTile: A tile whose only large thing is the number\n- testimonialCard: A quote card that sits ABOVE its band rather than in it\n- featureItem: One item of a feature or trust strip",
+   "temperature": 0.2,
+   "answer": {
+    "look": "card"
+   },
+   "conf": {
+    "dist": {
+     "card": 0.975,
+     "statTile": 0.006,
+     "testimonialCard": 0,
+     "featureItem": 0.019
+    },
+    "top": "card",
+    "second": "featureItem",
+    "margin": 0.956
+   },
+   "tokensIn": 197,
+   "tokensOut": 7,
+   "ms": 1061
+  },
+  {
+   "round": 0,
+   "key": "s1.look.itemButton",
+   "sig": "gallery#0|look.itemButton|primaryButton,outlineButton",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "gallery",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"gallery\" section (Showcase the handmade bowls.). A Button whose role is: item 1 of 6: its button. It sits inside a \"cardBody\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action",
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "conf": {
+    "dist": {
+     "primaryButton": 0.85,
+     "outlineButton": 0.15
+    },
+    "top": "primaryButton",
+    "second": "outlineButton",
+    "margin": 0.7
+   },
+   "tokensIn": 162,
+   "tokensOut": 13,
+   "ms": 1058
+  },
+  {
+   "round": 0,
+   "key": "s1.copy.the gallery headline",
+   "sig": "gallery#0|copy|the gallery headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "gallery",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nWrite the gallery headline in the \"gallery\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Crafted Pottery. Learn the Art.\", \"Handmade pottery and weekend classes for all skill levels. D\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Pottery Showcase"
+   },
+   "tokensIn": 127,
+   "tokensOut": 9,
+   "ms": 826
+  },
+  {
+   "round": 0,
+   "key": "s1.copy.one sentence under the headline",
+   "sig": "gallery#0|copy|one sentence under the headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "gallery",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nFacts the page must give: sells handmade bowls; teaches weekend classes.\nWrite one sentence under the headline in the \"gallery\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Crafted Pottery. Learn the Art.\", \"Handmade pottery and weekend classes for all skill levels. D\", \"Pottery Showcase\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Discover unique, handcrafted pieces and hands-on weekend pottery workshops."
+   },
+   "tokensIn": 150,
+   "tokensOut": 19,
+   "ms": 1256
+  },
+  {
+   "round": 0,
+   "key": "s1.list.rows",
+   "sig": "gallery#0|list.rows|6|title,sentence,button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "gallery",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"gallery\" section (Showcase the handmade bowls.) has a list of 6 items. For EACH item, in order, write: title (max 40 characters), sentence (max 160 characters), button (max 24 characters). Each item different from the others; an item's title and sentence and button must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "title": "Matte Speckle Bowl",
+      "sentence": "Hand-thrown stoneware bowl with a unique, organic matte finish. Perfect for everyday use.",
+      "button": "View Details"
+     },
+     {
+      "title": "Glazed Earth Mug",
+      "sentence": "Sturdy ceramic mug featuring a subtle, earthy glaze. Ideal for coffee or tea.",
+      "button": "View Details"
+     },
+     {
+      "title": "Minimalist Serving Plate",
+      "sentence": "Large, flat plate designed for elegant presentation of food or décor.",
+      "button": "View Details"
+     },
+     {
+      "title": "Textured Water Vessel",
+      "sentence": "Hand-carved piece with a beautiful, tactile texture. A perfect wash basin.",
+      "button": "View Details"
+     },
+     {
+      "title": "Small Tea Cup Set",
+      "sentence": "Set of two delicate, functional teacups crafted from fine clay.",
+      "button": "View Details"
+     },
+     {
+      "title": "Abstract Wall Planter",
+      "sentence": "Unique, asymmetrical planter perfect for adding artistic flair to any space.",
+      "button": "View Details"
+     }
+    ]
+   },
+   "tokensIn": 181,
+   "tokensOut": 293,
+   "ms": 11741
+  },
+  {
+   "round": 0,
+   "key": "s2.bits",
+   "sig": "feature cards#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe sections above already have: hero: eyebrow, headline, sub-line, photo, button; gallery: headline, sub-line, photo, list of items. Not every section needs a button or a photo; a section can be short.\nThe \"feature cards\" section (Highlight the weekend classes.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- photo: one photograph\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "eyebrow",
+     "headline",
+     "sub-line",
+     "photo",
+     "button"
+    ]
+   },
+   "tokensIn": 348,
+   "tokensOut": 42,
+   "ms": 3132
+  },
+  {
+   "round": 0,
+   "key": "s2.align",
+   "sig": "feature cards#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"feature cards\" section (Highlight the weekend classes.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "left-aligned"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.234,
+     "left-aligned": 0.766
+    },
+    "top": "left-aligned",
+    "second": "centred",
+    "margin": 0.532
+   },
+   "tokensIn": 133,
+   "tokensOut": 9,
+   "ms": 975
+  },
+  {
+   "round": 0,
+   "key": "s2.photoPlace",
+   "sig": "feature cards#0|photoPlace",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"feature cards\" section (Highlight the weekend classes.). Should the photo sit beside the words, above them, or below them? Answer one of: beside, above, below.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "beside"
+   },
+   "conf": {
+    "dist": {
+     "beside": 0.743,
+     "above": 0.138,
+     "below": 0.119
+    },
+    "top": "beside",
+    "second": "above",
+    "margin": 0.605
+   },
+   "tokensIn": 139,
+   "tokensOut": 13,
+   "ms": 1119
+  },
+  {
+   "round": 0,
+   "key": "s2.look.band",
+   "sig": "feature cards#0|look.band|band,bandSurface,imageGround",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"feature cards\" section (Highlight the weekend classes.). A Group whose role is: the feature cards section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…",
+   "temperature": 0.2,
+   "answer": {
+    "look": "imageGround"
+   },
+   "conf": {
+    "dist": {
+     "band": 0.298,
+     "bandSurface": 0.298,
+     "imageGround": 0.403
+    },
+    "top": "imageGround",
+    "second": "band",
+    "margin": 0.105
+   },
+   "tokensIn": 178,
+   "tokensOut": 13,
+   "ms": 1254
+  },
+  {
+   "round": 0,
+   "key": "s2.look.one sentence under the headline",
+   "sig": "feature cards#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"feature cards\" section (Highlight the weekend classes.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.915,
+     "body": 0.085
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.83
+   },
+   "tokensIn": 165,
+   "tokensOut": 12,
+   "ms": 1218
+  },
+  {
+   "round": 0,
+   "key": "s2.look.the main action of the feature cards section",
+   "sig": "feature cards#0|look.the main action of the feature cards section|primaryButton,outlineButton",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"feature cards\" section (Highlight the weekend classes.). A Button whose role is: the main action of the feature cards section. It sits inside a \"actionRow\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action",
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "conf": {
+    "dist": {
+     "primaryButton": 0.852,
+     "outlineButton": 0.148
+    },
+    "top": "primaryButton",
+    "second": "outlineButton",
+    "margin": 0.704
+   },
+   "tokensIn": 161,
+   "tokensOut": 13,
+   "ms": 1173
+  },
+  {
+   "round": 0,
+   "key": "s2.copy.the small uppercase line above the headline",
+   "sig": "feature cards#0|copy|the small uppercase line above the headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nWrite the small uppercase line above the headline in the \"feature cards\" section. At most 30 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Crafted Pottery. Learn the Art.\", \"Handmade pottery and weekend classes for all skill levels. D\", \"Pottery Showcase\", \"Discover unique, handcrafted pieces and hands-on weekend pot\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Your collection. Your journey."
+   },
+   "tokensIn": 150,
+   "tokensOut": 12,
+   "ms": 1071
+  },
+  {
+   "round": 0,
+   "key": "s2.copy.the feature cards headline",
+   "sig": "feature cards#0|copy|the feature cards headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nWrite the feature cards headline in the \"feature cards\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Crafted Pottery. Learn the Art.\", \"Handmade pottery and weekend classes for all skill levels. D\", \"Pottery Showcase\", \"Discover unique, handcrafted pieces and hands-on weekend pot\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Curated Collections. Expert Guidance. Your Pottery Journey."
+   },
+   "tokensIn": 147,
+   "tokensOut": 21,
+   "ms": 1367
+  },
+  {
+   "round": 0,
+   "key": "s2.copy.one sentence under the headline",
+   "sig": "feature cards#0|copy|one sentence under the headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nFacts the page must give: sells handmade bowls; teaches weekend classes.\nWrite one sentence under the headline in the \"feature cards\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Handmade pottery and weekend classes for all skill levels. D\", \"Pottery Showcase\", \"Discover unique, handcrafted pieces and hands-on weekend pot\", \"Curated Collections. Expert Guidance. Your Pottery Journey.\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Craft unique, handcrafted bowls and learn pottery skills in engaging weekend workshops."
+   },
+   "tokensIn": 167,
+   "tokensOut": 20,
+   "ms": 1443
+  },
+  {
+   "round": 0,
+   "key": "s2.copy.the main action of the feature cards section",
+   "sig": "feature cards#0|copy|the main action of the feature cards section|net.noodl.controls.button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nWrite the label of the main button in the \"feature cards\" section. Pressing it lets a visitor: Browse the portfolio or sign up for a class. Two to four words, a verb first.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Explore Portfolio & Classes"
+   },
+   "tokensIn": 102,
+   "tokensOut": 15,
+   "ms": 1055
+  },
+  {
+   "round": 0,
+   "key": "s3.bits",
+   "sig": "about#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "about",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe sections above already have: hero: eyebrow, headline, sub-line, photo, button; gallery: headline, sub-line, photo, list of items; feature cards: eyebrow, headline, sub-line, photo, button. Not every section needs a button or a photo; a section can be short.\nThe \"about\" section (Establish the potter's craft and philosophy.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- photo: one photograph\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "eyebrow",
+     "headline",
+     "body text",
+     "quote",
+     "name line",
+     "small print"
+    ]
+   },
+   "tokensIn": 366,
+   "tokensOut": 48,
+   "ms": 3158
+  },
+  {
+   "round": 0,
+   "key": "s3.align",
+   "sig": "about#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "about",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"about\" section (Establish the potter's craft and philosophy.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "centred"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.421,
+     "left-aligned": 0.579
+    },
+    "top": "left-aligned",
+    "second": "centred",
+    "margin": 0.158
+   },
+   "tokensIn": 136,
+   "tokensOut": 7,
+   "ms": 887
+  },
+  {
+   "round": 0,
+   "key": "s3.look.band",
+   "sig": "about#0|look.band|band,bandSurface,imageGround",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "about",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"about\" section (Establish the potter's craft and philosophy.). A Group whose role is: the about section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…",
+   "temperature": 0.2,
+   "answer": {
+    "look": "imageGround"
+   },
+   "conf": {
+    "dist": {
+     "band": 0.109,
+     "bandSurface": 0.109,
+     "imageGround": 0.782
+    },
+    "top": "imageGround",
+    "second": "band",
+    "margin": 0.673
+   },
+   "tokensIn": 180,
+   "tokensOut": 13,
+   "ms": 1213
+  },
+  {
+   "round": 0,
+   "key": "s3.look.a quotation from a happy customer or visitor",
+   "sig": "about#0|look.a quotation from a happy customer or visitor|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "about",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"about\" section (Establish the potter's craft and philosophy.). A Text whose role is: a quotation from a happy customer or visitor.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.629,
+     "body": 0.371
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.258
+   },
+   "tokensIn": 171,
+   "tokensOut": 12,
+   "ms": 1199
+  },
+  {
+   "round": 0,
+   "key": "s3.copy.the small uppercase line above the headline",
+   "sig": "about#0|copy|the small uppercase line above the headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "about",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nWrite the small uppercase line above the headline in the \"about\" section. At most 30 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Pottery Showcase\", \"Discover unique, handcrafted pieces and hands-on weekend pot\", \"Curated Collections. Expert Guidance. Your Pottery Journey.\", \"Craft unique, handcrafted bowls and learn pottery skills in \". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "pottery portfolio"
+   },
+   "tokensIn": 150,
+   "tokensOut": 14,
+   "ms": 1144
+  },
+  {
+   "round": 0,
+   "key": "s3.copy.the about headline",
+   "sig": "about#0|copy|the about headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "about",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nWrite the about headline in the \"about\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Pottery Showcase\", \"Discover unique, handcrafted pieces and hands-on weekend pot\", \"Curated Collections. Expert Guidance. Your Pottery Journey.\", \"Craft unique, handcrafted bowls and learn pottery skills in \". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Your studio for handmade pottery and classes."
+   },
+   "tokensIn": 146,
+   "tokensOut": 18,
+   "ms": 1265
+  },
+  {
+   "round": 0,
+   "key": "s3.copy.a short paragraph",
+   "sig": "about#0|copy|a short paragraph|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "about",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nFacts the page must give: sells handmade bowls; teaches weekend classes.\nWrite a short paragraph in the \"about\" section. At most 200 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Handcrafted pottery and weekend classes. Discover unique handmade bowls and learn the craft."
+   },
+   "tokensIn": 111,
+   "tokensOut": 26,
+   "ms": 1400
+  },
+  {
+   "round": 0,
+   "key": "s3.copy.a quotation from a happy customer or visitor",
+   "sig": "about#0|copy|a quotation from a happy customer or visitor|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "about",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nFacts the page must give: sells handmade bowls; teaches weekend classes.\nWrite a quotation from a happy customer or visitor in the \"about\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "I absolutely love the bowls! The classes were a wonderful, relaxing escape."
+   },
+   "tokensIn": 116,
+   "tokensOut": 25,
+   "ms": 1362
+  },
+  {
+   "round": 0,
+   "key": "s3.copy.who said it: a name and a role",
+   "sig": "about#0|copy|who said it: a name and a role|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "about",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nWrite who said it: a name and a role in the \"about\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Anya, Ceramic Artist"
+   },
+   "tokensIn": 101,
+   "tokensOut": 11,
+   "ms": 904
+  },
+  {
+   "round": 0,
+   "key": "s3.copy.a line of fine print",
+   "sig": "about#0|copy|a line of fine print|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "about",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nWrite a line of fine print in the \"about\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Handmade pottery. Classes available. Limited availability."
+   },
+   "tokensIn": 97,
+   "tokensOut": 20,
+   "ms": 1123
+  },
+  {
+   "round": 0,
+   "key": "s4.bits",
+   "sig": "call to action#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "call to action",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe sections above already have: hero: eyebrow, headline, sub-line, photo, button; gallery: headline, sub-line, photo, list of items; feature cards: eyebrow, headline, sub-line, photo, button; about: eyebrow, headline, body text, quote, name line, small print. Not every section needs a button or a photo; a section can be short.\nThe \"call to action\" section (Direct users to browse or sign up.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- photo: one photograph\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "headline",
+     "sub-line",
+     "button"
+    ]
+   },
+   "tokensIn": 384,
+   "tokensOut": 30,
+   "ms": 2807
+  },
+  {
+   "round": 0,
+   "key": "s4.align",
+   "sig": "call to action#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "call to action",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"call to action\" section (Direct users to browse or sign up.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "centred"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.883,
+     "left-aligned": 0.117
+    },
+    "top": "centred",
+    "second": "left-aligned",
+    "margin": 0.766
+   },
+   "tokensIn": 137,
+   "tokensOut": 7,
+   "ms": 961
+  },
+  {
+   "round": 0,
+   "key": "s4.look.band",
+   "sig": "call to action#0|look.band|bandSurface,ctaBand,imageGround",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "call to action",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"call to action\" section (Direct users to browse or sign up.). A Group whose role is: the call to action section band.\nWhich look should it take?\n- bandSurface: The alternate band\n- ctaBand: The closing call-to-action band\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…",
+   "temperature": 0.2,
+   "answer": {
+    "look": "ctaBand"
+   },
+   "conf": {
+    "dist": {
+     "bandSurface": 0.069,
+     "ctaBand": 0.742,
+     "imageGround": 0.19
+    },
+    "top": "ctaBand",
+    "second": "imageGround",
+    "margin": 0.552
+   },
+   "tokensIn": 184,
+   "tokensOut": 13,
+   "ms": 1313
+  },
+  {
+   "round": 0,
+   "key": "s4.look.one sentence under the headline",
+   "sig": "call to action#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "call to action",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"call to action\" section (Direct users to browse or sign up.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.91,
+     "body": 0.09
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.82
+   },
+   "tokensIn": 169,
+   "tokensOut": 7,
+   "ms": 1081
+  },
+  {
+   "round": 0,
+   "key": "s4.look.the main action of the call to action section",
+   "sig": "call to action#0|look.the main action of the call to action section|primaryButton,outlineButton",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "call to action",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"call to action\" section (Direct users to browse or sign up.). A Button whose role is: the main action of the call to action section. It sits inside a \"actionRow\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action",
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "conf": {
+    "dist": {
+     "primaryButton": 0.897,
+     "outlineButton": 0.103
+    },
+    "top": "primaryButton",
+    "second": "outlineButton",
+    "margin": 0.794
+   },
+   "tokensIn": 166,
+   "tokensOut": 8,
+   "ms": 1095
+  },
+  {
+   "round": 0,
+   "key": "s4.copy.the call to action headline",
+   "sig": "call to action#0|copy|the call to action headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "call to action",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nWrite the call to action headline in the \"call to action\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Discover unique, handcrafted pieces and hands-on weekend pot\", \"Curated Collections. Expert Guidance. Your Pottery Journey.\", \"Craft unique, handcrafted bowls and learn pottery skills in \", \"Your studio for handmade pottery and classes.\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Start your pottery journey today."
+   },
+   "tokensIn": 154,
+   "tokensOut": 12,
+   "ms": 1098
+  },
+  {
+   "round": 0,
+   "key": "s4.copy.one sentence under the headline",
+   "sig": "call to action#0|copy|one sentence under the headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "call to action",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nFacts the page must give: sells handmade bowls; teaches weekend classes.\nWrite one sentence under the headline in the \"call to action\" section. At most 160 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Curated Collections. Expert Guidance. Your Pottery Journey.\", \"Craft unique, handcrafted bowls and learn pottery skills in \", \"Your studio for handmade pottery and classes.\", \"Start your pottery journey today.\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Discover handcrafted pottery and weekend classes to create your own unique pieces."
+   },
+   "tokensIn": 164,
+   "tokensOut": 19,
+   "ms": 1306
+  },
+  {
+   "round": 0,
+   "key": "s4.copy.the main action of the call to action section",
+   "sig": "call to action#0|copy|the main action of the call to action section|net.noodl.controls.button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "call to action",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nWrite the label of the main button in the \"call to action\" section. Pressing it lets a visitor: Browse the portfolio or sign up for a class. Two to four words, a verb first.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Explore Portfolio"
+   },
+   "tokensIn": 103,
+   "tokensOut": 8,
+   "ms": 785
+  },
+  {
+   "round": 0,
+   "key": "s5.bits",
+   "sig": "footer#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "footer",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe sections above already have: hero: eyebrow, headline, sub-line, photo, button; gallery: headline, sub-line, photo, list of items; feature cards: eyebrow, headline, sub-line, photo, button; about: eyebrow, headline, body text, quote, name line, small print; call to action: headline, sub-line, button. Not every section needs a button or a photo; a section can be short.\nThe \"footer\" section (Provide necessary contact and social links.). Which bits does it need, top to bottom? Choose 1 to 6:\n- headline: the main heading\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- date and place: when and where, in one line\n- small print: a line of fine print (copyright, terms)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "headline",
+     "body text",
+     "button",
+     "small print"
+    ]
+   },
+   "tokensIn": 287,
+   "tokensOut": 18,
+   "ms": 1678
+  },
+  {
+   "round": 0,
+   "key": "s5.align",
+   "sig": "footer#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "footer",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"footer\" section (Provide necessary contact and social links.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "centred"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.451,
+     "left-aligned": 0.549
+    },
+    "top": "left-aligned",
+    "second": "centred",
+    "margin": 0.098
+   },
+   "tokensIn": 134,
+   "tokensOut": 7,
+   "ms": 872
+  },
+  {
+   "round": 0,
+   "key": "s5.look.the main action of the footer section",
+   "sig": "footer#0|look.the main action of the footer section|primaryButton,outlineButton",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "footer",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"footer\" section (Provide necessary contact and social links.). A Button whose role is: the main action of the footer section. It sits inside a \"actionRow\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action",
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "conf": {
+    "dist": {
+     "primaryButton": 0.88,
+     "outlineButton": 0.12
+    },
+    "top": "primaryButton",
+    "second": "outlineButton",
+    "margin": 0.76
+   },
+   "tokensIn": 161,
+   "tokensOut": 13,
+   "ms": 1062
+  },
+  {
+   "round": 0,
+   "key": "s5.copy.the footer headline",
+   "sig": "footer#0|copy|the footer headline|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "footer",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nWrite the footer headline in the \"footer\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design. Already on the page: \"Craft unique, handcrafted bowls and learn pottery skills in \", \"Your studio for handmade pottery and classes.\", \"Start your pottery journey today.\", \"Discover handcrafted pottery and weekend classes to create y\". Say something different.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Pottery. Craft. Learn. Your hands, your art."
+   },
+   "tokensIn": 143,
+   "tokensOut": 19,
+   "ms": 1275
+  },
+  {
+   "round": 0,
+   "key": "s5.copy.a short paragraph",
+   "sig": "footer#0|copy|a short paragraph|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "footer",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nFacts the page must give: sells handmade bowls; teaches weekend classes.\nWrite a short paragraph in the \"footer\" section. At most 200 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Shop handcrafted bowls and discover pottery classes for the weekend."
+   },
+   "tokensIn": 111,
+   "tokensOut": 17,
+   "ms": 1083
+  },
+  {
+   "round": 0,
+   "key": "s5.copy.the main action of the footer section",
+   "sig": "footer#0|copy|the main action of the footer section|net.noodl.controls.button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "footer",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nWrite the label of the main button in the \"footer\" section. Pressing it lets a visitor: Browse the portfolio or sign up for a class. Two to four words, a verb first.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Explore Portfolio & Classes"
+   },
+   "tokensIn": 101,
+   "tokensOut": 10,
+   "ms": 862
+  },
+  {
+   "round": 0,
+   "key": "s5.copy.a line of fine print",
+   "sig": "footer#0|copy|a line of fine print|Text",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "footer",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nWrite a line of fine print in the \"footer\" section. At most 60 characters. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Handmade pottery and classes. Explore our work."
+   },
+   "tokensIn": 97,
+   "tokensOut": 16,
+   "ms": 972
+  },
+  {
+   "round": 1,
+   "key": "s1.items.bits",
+   "sig": "gallery#0|items.bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "gallery",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe \"gallery\" section (Showcase the handmade bowls.). It has a list of 6 items. Which bits does EACH item have, top to bottom? Choose 1 to 4:\n- photo: a photograph\n- icon: a small icon\n- number: a step number\n- title: a short title\n- text: a sentence or two\n- price: a price\n- time: a time or a date\n- button: a button\n- name line: a name and a role\n(The page has only 3 photographs: a photo on each of 6 items would repeat them.)\nA reviewer looked at the built page and said: the page has only 3 photo(s), so 2 items would repeat one picture. Choose an icon or a number instead of a photo.",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "title",
+     "text",
+     "button"
+    ]
+   },
+   "tokensIn": 270,
+   "tokensOut": 28,
+   "ms": 6157,
+   "hinted": true
+  },
+  {
+   "round": 1,
+   "key": "s2.bits",
+   "sig": "feature cards#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nBRIEF: a portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes. The one action: Browse the portfolio or sign up for a class. Tone: minimal.\nThe sections above already have: hero: eyebrow, headline, sub-line, photo, button; gallery: headline, sub-line, photo, list of items. Not every section needs a button or a photo; a section can be short.\nThe \"feature cards\" section (Highlight the weekend classes.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- photo: one photograph\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)\nA reviewer looked at the built page and said: the page already shows the photo \"work-hands-clay.webp\" 2 other times. Choose bits WITHOUT a photo for this section.",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "eyebrow",
+     "headline",
+     "sub-line",
+     "button"
+    ]
+   },
+   "tokensIn": 388,
+   "tokensOut": 20,
+   "ms": 1633,
+   "hinted": true
+  },
+  {
+   "round": 1,
+   "key": "s2.copy.the main action of the feature cards section",
+   "sig": "feature cards#0|copy|the main action of the feature cards section|net.noodl.controls.button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nWrite the label of the main button in the \"feature cards\" section. Pressing it lets a visitor: Browse the portfolio or sign up for a class. Two to four words, a verb first.\nA reviewer looked at the built page and said: \"Explore Portfolio & Classes\" is too long for a button. Two to four words.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Explore Work & Classes"
+   },
+   "tokensIn": 131,
+   "tokensOut": 15,
+   "ms": 902,
+   "hinted": true
+  },
+  {
+   "round": 1,
+   "key": "s3.look.band",
+   "sig": "about#0|look.band|band,bandSurface,imageGround",
+   "section": 3,
+   "sectionKind": "about",
+   "forced": true,
+   "answer": {
+    "look": "band"
+   }
+  },
+  {
+   "round": 1,
+   "key": "s5.copy.the main action of the footer section",
+   "sig": "footer#0|copy|the main action of the footer section|net.noodl.controls.button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "footer",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nWrite the label of the main button in the \"footer\" section. Pressing it lets a visitor: Browse the portfolio or sign up for a class. Two to four words, a verb first.\nA reviewer looked at the built page and said: it repeats words used elsewhere on the page (\"Explore Portfolio & Classes\"). Say something new.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "Discover Pottery & Workshops"
+   },
+   "tokensIn": 130,
+   "tokensOut": 15,
+   "ms": 935,
+   "hinted": true
+  },
+  {
+   "round": 2,
+   "key": "s1.look.band",
+   "sig": "gallery#0|look.band|band,bandSurface,imageGround",
+   "section": 1,
+   "sectionKind": "gallery",
+   "forced": true,
+   "answer": {
+    "look": "band"
+   }
+  },
+  {
+   "round": 2,
+   "key": "s2.copy.the main action of the feature cards section",
+   "sig": "feature cards#0|copy|the main action of the feature cards section|net.noodl.controls.button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "feature cards",
+   "user": "BRIEF: \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes. Tone: minimal.\nWrite the label of the main button in the \"feature cards\" section. Pressing it lets a visitor: Browse the portfolio or sign up for a class. Two to four words, a verb first.\nA reviewer looked at the built page and said: it repeats words used elsewhere on the page (\"Explore Work & Classes\"). Say something new.",
+   "temperature": 0.8,
+   "answer": {
+    "text": "View Gallery & Book"
+   },
+   "tokensIn": 131,
+   "tokensOut": 10,
+   "ms": 5450,
+   "hinted": true
+  },
+  {
+   "round": 2,
+   "key": "s3.look.band",
+   "sig": "about#0|look.band|band,bandSurface,imageGround",
+   "section": 3,
+   "sectionKind": "about",
+   "forced": true,
+   "answer": {
+    "look": "band"
+   }
+  }
+ ],
+ "judgements": [
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-city-dusk.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.064,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 136,
+   "ms": 6178
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-forest-fog.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.559,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 136,
+   "ms": 1489
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-canyon.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.788,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 136,
+   "ms": 1824
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-dune.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.19,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 136,
+   "ms": 1956
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-coast.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.824,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 136,
+   "ms": 1964
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-shore.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.476,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 136,
+   "ms": 1874
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-red-rock.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.244,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 136,
+   "ms": 1897
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-skyline.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.047,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 136,
+   "ms": 1831
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-welder.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.037,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1725
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-potter.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.985,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1651
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-baker.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.114,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1637
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-chef.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.252,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1692
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-carpenter.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.088,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1781
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-leather-bench.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.843,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1746
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-machine-shop.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.759,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1702
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-hands-clay.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.985,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1656
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-cafe.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.744,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1697
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-coffee-shop.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.878,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1797
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-meeting.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.244,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1884
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-market.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.891,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1963
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-desk.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.503,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1932
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-market.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.142,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1838
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-bread.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.55,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1727
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-board.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.32,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1661
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-plate.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.031,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1634
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-grocer.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.287,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1656
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-carrots.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.729,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1676
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-bakery.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.173,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1679
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-cat.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.252,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1659
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-horse.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.153,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1653
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-sheep.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.129,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1623
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-dog.webp",
+   "user": "Would this photo make sense on a web page for \"Potter Portfolio\", a portfolio for Potential customers interested in handmade pottery and classes (sells handmade bowls; teaches weekend classes)? Answer yes or no.",
+   "pYes": 0.13,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1605
+  },
+  {
+   "round": 0,
+   "key": "s0.sound",
+   "section": 0,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"hero\" (dark band). Top to bottom:\n- eyebrow: \"handmade pottery\"\n- headline: \"Crafted Pottery. Learn the Art.\"\n- sub-line: \"Handmade pottery and weekend classes for all skill levels. Discover unique pieces and learn to create your own.\"\n- button: \"Explore Work & Classes\"\n- a photo (work-potter.webp)\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.96,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 166,
+   "ms": 6509
+  },
+  {
+   "round": 0,
+   "key": "s1.sound",
+   "section": 1,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"gallery\" (dark band). Top to bottom:\n- a photo (people-market.webp)\n- headline: \"Pottery Showcase\"\n- sub-line: \"Discover unique, handcrafted pieces and hands-on weekend pottery workshops.\"\n- 6 cards in a grid, each: photo, title, sentence or two, button:\n  1. \"Matte Speckle Bowl\" — \"Hand-thrown stoneware bowl with a unique, organic matte finish. Perfect for everyday use.\" — \"View Details\"\n  2. \"Glazed Earth Mug\" — \"Sturdy ceramic mug featuring a subtle, earthy glaze. Ideal for coffee or tea.\" — \"View Details\"\n  3. \"Minimalist Serving Plate\" — \"Large, flat plate designed for elegant presentation of food or décor.\" — \"View Details\"\n  4. \"Textured Water Vessel\" — \"Hand-carved piece with a beautiful, tactile texture. A perfect wash basin.\" — \"View Details\"\n  5. \"Small Tea Cup Set\" — \"Set of two delicate, functional teacups crafted from fine clay.\" — \"View Details\"\n  6. \"Abstract Wall Planter\" — \"Unique, asymmetrical planter perfect for adding artistic flair to any space.\" — \"View Details\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.995,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 351,
+   "ms": 1913
+  },
+  {
+   "round": 0,
+   "key": "s1.fits",
+   "section": 1,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"gallery\" (dark band). Top to bottom:\n- a photo (people-market.webp)\n- headline: \"Pottery Showcase\"\n- sub-line: \"Discover unique, handcrafted pieces and hands-on weekend pottery workshops.\"\n- 6 cards in a grid, each: photo, title, sentence or two, button:\n  1. \"Matte Speckle Bowl\" — \"Hand-thrown stoneware bowl with a unique, organic matte finish. Perfect for everyday use.\" — \"View Details\"\n  2. \"Glazed Earth Mug\" — \"Sturdy ceramic mug featuring a subtle, earthy glaze. Ideal for coffee or tea.\" — \"View Details\"\n  3. \"Minimalist Serving Plate\" — \"Large, flat plate designed for elegant presentation of food or décor.\" — \"View Details\"\n  4. \"Textured Water Vessel\" — \"Hand-carved piece with a beautiful, tactile texture. A perfect wash basin.\" — \"View Details\"\n  5. \"Small Tea Cup Set\" — \"Set of two delicate, functional teacups crafted from fine clay.\" — \"View Details\"\n  6. \"Abstract Wall Planter\" — \"Unique, asymmetrical planter perfect for adding artistic flair to any space.\" — \"View Details\"\n\nDoes the headline describe the WHOLE section, not just one item in it?",
+   "pYes": 0.997,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 335,
+   "ms": 2249
+  },
+  {
+   "round": 0,
+   "key": "s2.sound",
+   "section": 2,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"feature cards\" (dark band). Top to bottom:\n- eyebrow: \"Your collection. Your journey.\"\n- headline: \"Curated Collections. Expert Guidance. Your Pottery Journey.\"\n- sub-line: \"Craft unique, handcrafted bowls and learn pottery skills in engaging weekend workshops.\"\n- button: \"Explore Portfolio & Classes\"\n- a photo (work-hands-clay.webp)\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.961,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 167,
+   "ms": 1428
+  },
+  {
+   "round": 0,
+   "key": "s3.sound",
+   "section": 3,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"about\" (dark band). Top to bottom:\n- eyebrow: \"pottery portfolio\"\n- headline: \"Your studio for handmade pottery and classes.\"\n- paragraph: \"Handcrafted pottery and weekend classes. Discover unique handmade bowls and learn the craft.\"\n- quote: \"I absolutely love the bowls! The classes were a wonderful, relaxing escape.\"\n- who said it: a name and a role: \"Anya, Ceramic Artist\"\n- small print: \"Handmade pottery. Classes available. Limited availability.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.946,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 193,
+   "ms": 1503
+  },
+  {
+   "round": 0,
+   "key": "s4.sound",
+   "section": 4,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"call to action\" (dark band). Top to bottom:\n- headline: \"Start your pottery journey today.\"\n- sub-line: \"Discover handcrafted pottery and weekend classes to create your own unique pieces.\"\n- button: \"Explore Portfolio\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.984,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 136,
+   "ms": 1284
+  },
+  {
+   "round": 0,
+   "key": "s5.sound",
+   "section": 5,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"footer\" (light band). Top to bottom:\n- headline: \"Pottery. Craft. Learn. Your hands, your art.\"\n- paragraph: \"Shop handcrafted bowls and discover pottery classes for the weekend.\"\n- button: \"Explore Portfolio & Classes\"\n- small print: \"Handmade pottery and classes. Explore our work.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.971,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 155,
+   "ms": 1282
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "sells handmade bowls",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\nEvery line of words on the page, by section:\n[hero] handmade pottery / Crafted Pottery. Learn the Art. / Handmade pottery and weekend classes for all skill levels. Discover unique pieces and lear / Explore Work & Classes\n[gallery] Pottery Showcase / Discover unique, handcrafted pieces and hands-on weekend pottery workshops. / Matte Speckle Bowl / Hand-thrown stoneware bowl with a unique, organic matte finish. Perfect for everyday use. / View Details / Glazed Earth Mug / Sturdy ceramic mug featuring a subtle, earthy glaze. Ideal for coffee or tea. / View Details / Minimalist Serving Plate / Large, flat plate designed for elegant presentation of food or décor. / View Details / Textured Water Vessel / Hand-carved piece with a beautiful, tactile texture. A perfect wash basin. / View Details / Small Tea Cup Set / Set of two delicate, functional teacups crafted from fine clay. / View Details / Abstract Wall Planter / Unique, asymmetrical planter perfect for adding artistic flair to any space. / View Details\n[feature cards] Your collection. Your journey. / Curated Collections. Expert Guidance. Your Pottery Journey. / Craft unique, handcrafted bowls and learn pottery skills in engaging weekend workshops. / Explore Portfolio & Classes\n[about] pottery portfolio / Your studio for handmade pottery and classes. / Handcrafted pottery and weekend classes. Discover unique handmade bowls and learn the craf / I absolutely love the bowls! The classes were a wonderful, relaxing escape. / Anya, Ceramic Artist / Handmade pottery. Classes available. Limited availability.\n[call to action] Start your pottery journey today. / Discover handcrafted pottery and weekend classes to create your own unique pieces. / Explore Portfolio\n[footer] Pottery. Craft. Learn. Your hands, your art. / Shop handcrafted bowls and discover pottery classes for the weekend. / Explore Portfolio & Classes / Handmade pottery and classes. Explore our work.\n\nDoes the page tell a visitor: sells handmade bowls?",
+   "pYes": 0.999,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 451,
+   "ms": 3409
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "teaches weekend classes",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\nEvery line of words on the page, by section:\n[hero] handmade pottery / Crafted Pottery. Learn the Art. / Handmade pottery and weekend classes for all skill levels. Discover unique pieces and lear / Explore Work & Classes\n[gallery] Pottery Showcase / Discover unique, handcrafted pieces and hands-on weekend pottery workshops. / Matte Speckle Bowl / Hand-thrown stoneware bowl with a unique, organic matte finish. Perfect for everyday use. / View Details / Glazed Earth Mug / Sturdy ceramic mug featuring a subtle, earthy glaze. Ideal for coffee or tea. / View Details / Minimalist Serving Plate / Large, flat plate designed for elegant presentation of food or décor. / View Details / Textured Water Vessel / Hand-carved piece with a beautiful, tactile texture. A perfect wash basin. / View Details / Small Tea Cup Set / Set of two delicate, functional teacups crafted from fine clay. / View Details / Abstract Wall Planter / Unique, asymmetrical planter perfect for adding artistic flair to any space. / View Details\n[feature cards] Your collection. Your journey. / Curated Collections. Expert Guidance. Your Pottery Journey. / Craft unique, handcrafted bowls and learn pottery skills in engaging weekend workshops. / Explore Portfolio & Classes\n[about] pottery portfolio / Your studio for handmade pottery and classes. / Handcrafted pottery and weekend classes. Discover unique handmade bowls and learn the craf / I absolutely love the bowls! The classes were a wonderful, relaxing escape. / Anya, Ceramic Artist / Handmade pottery. Classes available. Limited availability.\n[call to action] Start your pottery journey today. / Discover handcrafted pottery and weekend classes to create your own unique pieces. / Explore Portfolio\n[footer] Pottery. Craft. Learn. Your hands, your art. / Shop handcrafted bowls and discover pottery classes for the weekend. / Explore Portfolio & Classes / Handmade pottery and classes. Explore our work.\n\nDoes the page tell a visitor: teaches weekend classes?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 451,
+   "ms": 3302
+  },
+  {
+   "round": 0,
+   "key": "page.missing",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nA portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\nThe page's sections, top to bottom:\n1. hero: \"Crafted Pottery. Learn the Art.\"\n2. gallery: \"Pottery Showcase\"\n3. feature cards: \"Curated Collections. Expert Guidance. Your Pottery Journey.\"\n4. about: \"Your studio for handmade pottery and classes.\"\n5. call to action: \"Start your pottery journey today.\"\n6. footer: \"Pottery. Craft. Learn. Your hands, your art.\"\n\nIs something a visitor would clearly expect on this page missing?",
+   "pYes": 0.242,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 188,
+   "ms": 1446
+  },
+  {
+   "round": 0,
+   "key": "page.extra",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nA portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\nThe page's sections, top to bottom:\n1. hero: \"Crafted Pottery. Learn the Art.\"\n2. gallery: \"Pottery Showcase\"\n3. feature cards: \"Curated Collections. Expert Guidance. Your Pottery Journey.\"\n4. about: \"Your studio for handmade pottery and classes.\"\n5. call to action: \"Start your pottery journey today.\"\n6. footer: \"Pottery. Craft. Learn. Your hands, your art.\"\n\nDoes any section repeat another one, or not belong on this page?",
+   "pYes": 0.025,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 190,
+   "ms": 1427
+  },
+  {
+   "round": 1,
+   "key": "s0.sound",
+   "section": 0,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"hero\" (dark band). Top to bottom:\n- eyebrow: \"handmade pottery\"\n- headline: \"Crafted Pottery. Learn the Art.\"\n- sub-line: \"Handmade pottery and weekend classes for all skill levels. Discover unique pieces and learn to create your own.\"\n- button: \"Explore Work & Classes\"\n- a photo (work-potter.webp)\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.96,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 166,
+   "ms": 6713
+  },
+  {
+   "round": 1,
+   "key": "s1.sound",
+   "section": 1,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"gallery\" (dark band). Top to bottom:\n- a photo (people-market.webp)\n- headline: \"Pottery Showcase\"\n- sub-line: \"Discover unique, handcrafted pieces and hands-on weekend pottery workshops.\"\n- 6 cards in a grid, each: title, sentence or two, button:\n  1. \"Matte Speckle Bowl\" — \"Hand-thrown stoneware bowl with a unique, organic matte finish. Perfect for everyday use.\" — \"View Details\"\n  2. \"Glazed Earth Mug\" — \"Sturdy ceramic mug featuring a subtle, earthy glaze. Ideal for coffee or tea.\" — \"View Details\"\n  3. \"Minimalist Serving Plate\" — \"Large, flat plate designed for elegant presentation of food or décor.\" — \"View Details\"\n  4. \"Textured Water Vessel\" — \"Hand-carved piece with a beautiful, tactile texture. A perfect wash basin.\" — \"View Details\"\n  5. \"Small Tea Cup Set\" — \"Set of two delicate, functional teacups crafted from fine clay.\" — \"View Details\"\n  6. \"Abstract Wall Planter\" — \"Unique, asymmetrical planter perfect for adding artistic flair to any space.\" — \"View Details\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.993,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 349,
+   "ms": 1830
+  },
+  {
+   "round": 1,
+   "key": "s1.fits",
+   "section": 1,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"gallery\" (dark band). Top to bottom:\n- a photo (people-market.webp)\n- headline: \"Pottery Showcase\"\n- sub-line: \"Discover unique, handcrafted pieces and hands-on weekend pottery workshops.\"\n- 6 cards in a grid, each: title, sentence or two, button:\n  1. \"Matte Speckle Bowl\" — \"Hand-thrown stoneware bowl with a unique, organic matte finish. Perfect for everyday use.\" — \"View Details\"\n  2. \"Glazed Earth Mug\" — \"Sturdy ceramic mug featuring a subtle, earthy glaze. Ideal for coffee or tea.\" — \"View Details\"\n  3. \"Minimalist Serving Plate\" — \"Large, flat plate designed for elegant presentation of food or décor.\" — \"View Details\"\n  4. \"Textured Water Vessel\" — \"Hand-carved piece with a beautiful, tactile texture. A perfect wash basin.\" — \"View Details\"\n  5. \"Small Tea Cup Set\" — \"Set of two delicate, functional teacups crafted from fine clay.\" — \"View Details\"\n  6. \"Abstract Wall Planter\" — \"Unique, asymmetrical planter perfect for adding artistic flair to any space.\" — \"View Details\"\n\nDoes the headline describe the WHOLE section, not just one item in it?",
+   "pYes": 0.997,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 333,
+   "ms": 2013
+  },
+  {
+   "round": 1,
+   "key": "s2.sound",
+   "section": 2,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"feature cards\" (dark band). Top to bottom:\n- eyebrow: \"Your collection. Your journey.\"\n- headline: \"Curated Collections. Expert Guidance. Your Pottery Journey.\"\n- sub-line: \"Craft unique, handcrafted bowls and learn pottery skills in engaging weekend workshops.\"\n- button: \"Explore Work & Classes\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.975,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1100
+  },
+  {
+   "round": 1,
+   "key": "s3.sound",
+   "section": 3,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"about\" (light band). Top to bottom:\n- eyebrow: \"pottery portfolio\"\n- headline: \"Your studio for handmade pottery and classes.\"\n- paragraph: \"Handcrafted pottery and weekend classes. Discover unique handmade bowls and learn the craft.\"\n- quote: \"I absolutely love the bowls! The classes were a wonderful, relaxing escape.\"\n- who said it: a name and a role: \"Anya, Ceramic Artist\"\n- small print: \"Handmade pottery. Classes available. Limited availability.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.964,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 193,
+   "ms": 1406
+  },
+  {
+   "round": 1,
+   "key": "s4.sound",
+   "section": 4,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"call to action\" (dark band). Top to bottom:\n- headline: \"Start your pottery journey today.\"\n- sub-line: \"Discover handcrafted pottery and weekend classes to create your own unique pieces.\"\n- button: \"Explore Portfolio\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.984,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 136,
+   "ms": 1234
+  },
+  {
+   "round": 1,
+   "key": "s5.sound",
+   "section": 5,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"footer\" (light band). Top to bottom:\n- headline: \"Pottery. Craft. Learn. Your hands, your art.\"\n- paragraph: \"Shop handcrafted bowls and discover pottery classes for the weekend.\"\n- button: \"Discover Pottery & Workshops\"\n- small print: \"Handmade pottery and classes. Explore our work.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.976,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 155,
+   "ms": 1256
+  },
+  {
+   "round": 1,
+   "key": "page.mustShow",
+   "fact": "sells handmade bowls",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\nEvery line of words on the page, by section:\n[hero] handmade pottery / Crafted Pottery. Learn the Art. / Handmade pottery and weekend classes for all skill levels. Discover unique pieces and lear / Explore Work & Classes\n[gallery] Pottery Showcase / Discover unique, handcrafted pieces and hands-on weekend pottery workshops. / Matte Speckle Bowl / Hand-thrown stoneware bowl with a unique, organic matte finish. Perfect for everyday use. / View Details / Glazed Earth Mug / Sturdy ceramic mug featuring a subtle, earthy glaze. Ideal for coffee or tea. / View Details / Minimalist Serving Plate / Large, flat plate designed for elegant presentation of food or décor. / View Details / Textured Water Vessel / Hand-carved piece with a beautiful, tactile texture. A perfect wash basin. / View Details / Small Tea Cup Set / Set of two delicate, functional teacups crafted from fine clay. / View Details / Abstract Wall Planter / Unique, asymmetrical planter perfect for adding artistic flair to any space. / View Details\n[feature cards] Your collection. Your journey. / Curated Collections. Expert Guidance. Your Pottery Journey. / Craft unique, handcrafted bowls and learn pottery skills in engaging weekend workshops. / Explore Work & Classes\n[about] pottery portfolio / Your studio for handmade pottery and classes. / Handcrafted pottery and weekend classes. Discover unique handmade bowls and learn the craf / I absolutely love the bowls! The classes were a wonderful, relaxing escape. / Anya, Ceramic Artist / Handmade pottery. Classes available. Limited availability.\n[call to action] Start your pottery journey today. / Discover handcrafted pottery and weekend classes to create your own unique pieces. / Explore Portfolio\n[footer] Pottery. Craft. Learn. Your hands, your art. / Shop handcrafted bowls and discover pottery classes for the weekend. / Discover Pottery & Workshops / Handmade pottery and classes. Explore our work.\n\nDoes the page tell a visitor: sells handmade bowls?",
+   "pYes": 0.999,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 451,
+   "ms": 3250
+  },
+  {
+   "round": 1,
+   "key": "page.mustShow",
+   "fact": "teaches weekend classes",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\nEvery line of words on the page, by section:\n[hero] handmade pottery / Crafted Pottery. Learn the Art. / Handmade pottery and weekend classes for all skill levels. Discover unique pieces and lear / Explore Work & Classes\n[gallery] Pottery Showcase / Discover unique, handcrafted pieces and hands-on weekend pottery workshops. / Matte Speckle Bowl / Hand-thrown stoneware bowl with a unique, organic matte finish. Perfect for everyday use. / View Details / Glazed Earth Mug / Sturdy ceramic mug featuring a subtle, earthy glaze. Ideal for coffee or tea. / View Details / Minimalist Serving Plate / Large, flat plate designed for elegant presentation of food or décor. / View Details / Textured Water Vessel / Hand-carved piece with a beautiful, tactile texture. A perfect wash basin. / View Details / Small Tea Cup Set / Set of two delicate, functional teacups crafted from fine clay. / View Details / Abstract Wall Planter / Unique, asymmetrical planter perfect for adding artistic flair to any space. / View Details\n[feature cards] Your collection. Your journey. / Curated Collections. Expert Guidance. Your Pottery Journey. / Craft unique, handcrafted bowls and learn pottery skills in engaging weekend workshops. / Explore Work & Classes\n[about] pottery portfolio / Your studio for handmade pottery and classes. / Handcrafted pottery and weekend classes. Discover unique handmade bowls and learn the craf / I absolutely love the bowls! The classes were a wonderful, relaxing escape. / Anya, Ceramic Artist / Handmade pottery. Classes available. Limited availability.\n[call to action] Start your pottery journey today. / Discover handcrafted pottery and weekend classes to create your own unique pieces. / Explore Portfolio\n[footer] Pottery. Craft. Learn. Your hands, your art. / Shop handcrafted bowls and discover pottery classes for the weekend. / Discover Pottery & Workshops / Handmade pottery and classes. Explore our work.\n\nDoes the page tell a visitor: teaches weekend classes?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 451,
+   "ms": 3247
+  },
+  {
+   "round": 1,
+   "key": "page.missing",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nA portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\nThe page's sections, top to bottom:\n1. hero: \"Crafted Pottery. Learn the Art.\"\n2. gallery: \"Pottery Showcase\"\n3. feature cards: \"Curated Collections. Expert Guidance. Your Pottery Journey.\"\n4. about: \"Your studio for handmade pottery and classes.\"\n5. call to action: \"Start your pottery journey today.\"\n6. footer: \"Pottery. Craft. Learn. Your hands, your art.\"\n\nIs something a visitor would clearly expect on this page missing?",
+   "pYes": 0.242,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 188,
+   "ms": 1469
+  },
+  {
+   "round": 1,
+   "key": "page.extra",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nA portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\nThe page's sections, top to bottom:\n1. hero: \"Crafted Pottery. Learn the Art.\"\n2. gallery: \"Pottery Showcase\"\n3. feature cards: \"Curated Collections. Expert Guidance. Your Pottery Journey.\"\n4. about: \"Your studio for handmade pottery and classes.\"\n5. call to action: \"Start your pottery journey today.\"\n6. footer: \"Pottery. Craft. Learn. Your hands, your art.\"\n\nDoes any section repeat another one, or not belong on this page?",
+   "pYes": 0.025,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 190,
+   "ms": 1466
+  },
+  {
+   "round": 2,
+   "key": "s0.sound",
+   "section": 0,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"hero\" (dark band). Top to bottom:\n- eyebrow: \"handmade pottery\"\n- headline: \"Crafted Pottery. Learn the Art.\"\n- sub-line: \"Handmade pottery and weekend classes for all skill levels. Discover unique pieces and learn to create your own.\"\n- button: \"Explore Work & Classes\"\n- a photo (work-potter.webp)\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.96,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 166,
+   "ms": 196
+  },
+  {
+   "round": 2,
+   "key": "s1.sound",
+   "section": 1,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"gallery\" (light band). Top to bottom:\n- a photo (work-hands-clay.webp)\n- headline: \"Pottery Showcase\"\n- sub-line: \"Discover unique, handcrafted pieces and hands-on weekend pottery workshops.\"\n- 6 cards in a grid, each: title, sentence or two, button:\n  1. \"Matte Speckle Bowl\" — \"Hand-thrown stoneware bowl with a unique, organic matte finish. Perfect for everyday use.\" — \"View Details\"\n  2. \"Glazed Earth Mug\" — \"Sturdy ceramic mug featuring a subtle, earthy glaze. Ideal for coffee or tea.\" — \"View Details\"\n  3. \"Minimalist Serving Plate\" — \"Large, flat plate designed for elegant presentation of food or décor.\" — \"View Details\"\n  4. \"Textured Water Vessel\" — \"Hand-carved piece with a beautiful, tactile texture. A perfect wash basin.\" — \"View Details\"\n  5. \"Small Tea Cup Set\" — \"Set of two delicate, functional teacups crafted from fine clay.\" — \"View Details\"\n  6. \"Abstract Wall Planter\" — \"Unique, asymmetrical planter perfect for adding artistic flair to any space.\" — \"View Details\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.996,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 351,
+   "ms": 1855
+  },
+  {
+   "round": 2,
+   "key": "s1.fits",
+   "section": 1,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"gallery\" (light band). Top to bottom:\n- a photo (work-hands-clay.webp)\n- headline: \"Pottery Showcase\"\n- sub-line: \"Discover unique, handcrafted pieces and hands-on weekend pottery workshops.\"\n- 6 cards in a grid, each: title, sentence or two, button:\n  1. \"Matte Speckle Bowl\" — \"Hand-thrown stoneware bowl with a unique, organic matte finish. Perfect for everyday use.\" — \"View Details\"\n  2. \"Glazed Earth Mug\" — \"Sturdy ceramic mug featuring a subtle, earthy glaze. Ideal for coffee or tea.\" — \"View Details\"\n  3. \"Minimalist Serving Plate\" — \"Large, flat plate designed for elegant presentation of food or décor.\" — \"View Details\"\n  4. \"Textured Water Vessel\" — \"Hand-carved piece with a beautiful, tactile texture. A perfect wash basin.\" — \"View Details\"\n  5. \"Small Tea Cup Set\" — \"Set of two delicate, functional teacups crafted from fine clay.\" — \"View Details\"\n  6. \"Abstract Wall Planter\" — \"Unique, asymmetrical planter perfect for adding artistic flair to any space.\" — \"View Details\"\n\nDoes the headline describe the WHOLE section, not just one item in it?",
+   "pYes": 0.998,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 335,
+   "ms": 2013
+  },
+  {
+   "round": 2,
+   "key": "s2.sound",
+   "section": 2,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"feature cards\" (dark band). Top to bottom:\n- eyebrow: \"Your collection. Your journey.\"\n- headline: \"Curated Collections. Expert Guidance. Your Pottery Journey.\"\n- sub-line: \"Craft unique, handcrafted bowls and learn pottery skills in engaging weekend workshops.\"\n- button: \"View Gallery & Book\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.969,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 154,
+   "ms": 1162
+  },
+  {
+   "round": 2,
+   "key": "s3.sound",
+   "section": 3,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"about\" (light band). Top to bottom:\n- eyebrow: \"pottery portfolio\"\n- headline: \"Your studio for handmade pottery and classes.\"\n- paragraph: \"Handcrafted pottery and weekend classes. Discover unique handmade bowls and learn the craft.\"\n- quote: \"I absolutely love the bowls! The classes were a wonderful, relaxing escape.\"\n- who said it: a name and a role: \"Anya, Ceramic Artist\"\n- small print: \"Handmade pottery. Classes available. Limited availability.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.964,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 193,
+   "ms": 186
+  },
+  {
+   "round": 2,
+   "key": "s4.sound",
+   "section": 4,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"call to action\" (dark band). Top to bottom:\n- headline: \"Start your pottery journey today.\"\n- sub-line: \"Discover handcrafted pottery and weekend classes to create your own unique pieces.\"\n- button: \"Explore Portfolio\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.984,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 136,
+   "ms": 178
+  },
+  {
+   "round": 2,
+   "key": "s5.sound",
+   "section": 5,
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\n\nSection \"footer\" (light band). Top to bottom:\n- headline: \"Pottery. Craft. Learn. Your hands, your art.\"\n- paragraph: \"Shop handcrafted bowls and discover pottery classes for the weekend.\"\n- button: \"Discover Pottery & Workshops\"\n- small print: \"Handmade pottery and classes. Explore our work.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.976,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 155,
+   "ms": 175
+  },
+  {
+   "round": 2,
+   "key": "page.mustShow",
+   "fact": "sells handmade bowls",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\nEvery line of words on the page, by section:\n[hero] handmade pottery / Crafted Pottery. Learn the Art. / Handmade pottery and weekend classes for all skill levels. Discover unique pieces and lear / Explore Work & Classes\n[gallery] Pottery Showcase / Discover unique, handcrafted pieces and hands-on weekend pottery workshops. / Matte Speckle Bowl / Hand-thrown stoneware bowl with a unique, organic matte finish. Perfect for everyday use. / View Details / Glazed Earth Mug / Sturdy ceramic mug featuring a subtle, earthy glaze. Ideal for coffee or tea. / View Details / Minimalist Serving Plate / Large, flat plate designed for elegant presentation of food or décor. / View Details / Textured Water Vessel / Hand-carved piece with a beautiful, tactile texture. A perfect wash basin. / View Details / Small Tea Cup Set / Set of two delicate, functional teacups crafted from fine clay. / View Details / Abstract Wall Planter / Unique, asymmetrical planter perfect for adding artistic flair to any space. / View Details\n[feature cards] Your collection. Your journey. / Curated Collections. Expert Guidance. Your Pottery Journey. / Craft unique, handcrafted bowls and learn pottery skills in engaging weekend workshops. / View Gallery & Book\n[about] pottery portfolio / Your studio for handmade pottery and classes. / Handcrafted pottery and weekend classes. Discover unique handmade bowls and learn the craf / I absolutely love the bowls! The classes were a wonderful, relaxing escape. / Anya, Ceramic Artist / Handmade pottery. Classes available. Limited availability.\n[call to action] Start your pottery journey today. / Discover handcrafted pottery and weekend classes to create your own unique pieces. / Explore Portfolio\n[footer] Pottery. Craft. Learn. Your hands, your art. / Shop handcrafted bowls and discover pottery classes for the weekend. / Discover Pottery & Workshops / Handmade pottery and classes. Explore our work.\n\nDoes the page tell a visitor: sells handmade bowls?",
+   "pYes": 0.999,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 451,
+   "ms": 3502
+  },
+  {
+   "round": 2,
+   "key": "page.mustShow",
+   "fact": "teaches weekend classes",
+   "user": "A portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\nEvery line of words on the page, by section:\n[hero] handmade pottery / Crafted Pottery. Learn the Art. / Handmade pottery and weekend classes for all skill levels. Discover unique pieces and lear / Explore Work & Classes\n[gallery] Pottery Showcase / Discover unique, handcrafted pieces and hands-on weekend pottery workshops. / Matte Speckle Bowl / Hand-thrown stoneware bowl with a unique, organic matte finish. Perfect for everyday use. / View Details / Glazed Earth Mug / Sturdy ceramic mug featuring a subtle, earthy glaze. Ideal for coffee or tea. / View Details / Minimalist Serving Plate / Large, flat plate designed for elegant presentation of food or décor. / View Details / Textured Water Vessel / Hand-carved piece with a beautiful, tactile texture. A perfect wash basin. / View Details / Small Tea Cup Set / Set of two delicate, functional teacups crafted from fine clay. / View Details / Abstract Wall Planter / Unique, asymmetrical planter perfect for adding artistic flair to any space. / View Details\n[feature cards] Your collection. Your journey. / Curated Collections. Expert Guidance. Your Pottery Journey. / Craft unique, handcrafted bowls and learn pottery skills in engaging weekend workshops. / View Gallery & Book\n[about] pottery portfolio / Your studio for handmade pottery and classes. / Handcrafted pottery and weekend classes. Discover unique handmade bowls and learn the craf / I absolutely love the bowls! The classes were a wonderful, relaxing escape. / Anya, Ceramic Artist / Handmade pottery. Classes available. Limited availability.\n[call to action] Start your pottery journey today. / Discover handcrafted pottery and weekend classes to create your own unique pieces. / Explore Portfolio\n[footer] Pottery. Craft. Learn. Your hands, your art. / Shop handcrafted bowls and discover pottery classes for the weekend. / Discover Pottery & Workshops / Handmade pottery and classes. Explore our work.\n\nDoes the page tell a visitor: teaches weekend classes?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 451,
+   "ms": 3442
+  },
+  {
+   "round": 2,
+   "key": "page.missing",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nA portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\nThe page's sections, top to bottom:\n1. hero: \"Crafted Pottery. Learn the Art.\"\n2. gallery: \"Pottery Showcase\"\n3. feature cards: \"Curated Collections. Expert Guidance. Your Pottery Journey.\"\n4. about: \"Your studio for handmade pottery and classes.\"\n5. call to action: \"Start your pottery journey today.\"\n6. footer: \"Pottery. Craft. Learn. Your hands, your art.\"\n\nIs something a visitor would clearly expect on this page missing?",
+   "pYes": 0.242,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 188,
+   "ms": 1469
+  },
+  {
+   "round": 2,
+   "key": "page.extra",
+   "user": "Request: \"A portfolio page for a potter who sells handmade bowls and teaches weekend classes. Minimal, lots of white space.\"\nA portfolio called \"Potter Portfolio\", for Potential customers interested in handmade pottery and classes.\nThe page's sections, top to bottom:\n1. hero: \"Crafted Pottery. Learn the Art.\"\n2. gallery: \"Pottery Showcase\"\n3. feature cards: \"Curated Collections. Expert Guidance. Your Pottery Journey.\"\n4. about: \"Your studio for handmade pottery and classes.\"\n5. call to action: \"Start your pottery journey today.\"\n6. footer: \"Pottery. Craft. Learn. Your hands, your art.\"\n\nDoes any section repeat another one, or not belong on this page?",
+   "pYes": 0.025,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 190,
+   "ms": 1446
+  }
+ ],
+ "skipped": [
+  {
+   "key": "card.tone",
+   "why": "S0: the request says it (minimal)"
+  },
+  {
+   "key": "card.kind",
+   "why": "S0: the request says it (portfolio)"
+  },
+  {
+   "key": "card.photos",
+   "why": "photo scout (reviewer vision): kept work-potter.webp, work-hands-clay.webp, people-market.webp of 32"
+  },
+  {
+   "key": "card.tone",
+   "why": "S0: the request says it (minimal)"
+  },
+  {
+   "key": "card.kind",
+   "why": "S0: the request says it (portfolio)"
+  },
+  {
+   "key": "card.tone",
+   "why": "S0: the request says it (minimal)"
+  },
+  {
+   "key": "card.kind",
+   "why": "S0: the request says it (portfolio)"
+  }
+ ],
+ "mcp": [
+  {
+   "round": 0,
+   "tool": "create_project",
+   "isError": false,
+   "ms": 220
+  },
+  {
+   "round": 0,
+   "tool": "get_style_vocabulary",
+   "isError": false,
+   "ms": 9
+  },
+  {
+   "round": 0,
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 12
+  },
+  {
+   "round": 0,
+   "tool": "set_style_preset",
+   "isError": false,
+   "ms": 5
+  },
+  {
+   "round": 0,
+   "tool": "set_project_tokens",
+   "isError": false,
+   "ms": 3
+  },
+  {
+   "round": 0,
+   "tool": "list_node_types",
+   "isError": false,
+   "ms": 4
+  },
+  {
+   "round": 0,
+   "tool": "get_component",
+   "isError": false,
+   "ms": 9
+  },
+  {
+   "round": 0,
+   "tool": "create_plan",
+   "isError": false,
+   "ms": 6
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 65
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 22
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 27
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 20
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "apply_plan",
+   "isError": false,
+   "ms": 3680
+  },
+  {
+   "round": 0,
+   "tool": "render_report",
+   "isError": false,
+   "ms": 1671
+  },
+  {
+   "round": 1,
+   "tool": "create_project",
+   "isError": false,
+   "ms": 266
+  },
+  {
+   "round": 1,
+   "tool": "get_style_vocabulary",
+   "isError": false,
+   "ms": 9
+  },
+  {
+   "round": 1,
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 1
+  },
+  {
+   "round": 1,
+   "tool": "set_style_preset",
+   "isError": false,
+   "ms": 2
+  },
+  {
+   "round": 1,
+   "tool": "set_project_tokens",
+   "isError": false,
+   "ms": 1
+  },
+  {
+   "round": 1,
+   "tool": "list_node_types",
+   "isError": false,
+   "ms": 1
+  },
+  {
+   "round": 1,
+   "tool": "get_component",
+   "isError": false,
+   "ms": 4
+  },
+  {
+   "round": 1,
+   "tool": "create_plan",
+   "isError": false,
+   "ms": 3
+  },
+  {
+   "round": 1,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 62
+  },
+  {
+   "round": 1,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 23
+  },
+  {
+   "round": 1,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 1,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 25
+  },
+  {
+   "round": 1,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 1,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 1,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 1,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 1,
+   "tool": "apply_plan",
+   "isError": false,
+   "ms": 2464
+  },
+  {
+   "round": 1,
+   "tool": "render_report",
+   "isError": false,
+   "ms": 1678
+  },
+  {
+   "round": 2,
+   "tool": "create_project",
+   "isError": false,
+   "ms": 219
+  },
+  {
+   "round": 2,
+   "tool": "get_style_vocabulary",
+   "isError": false,
+   "ms": 4
+  },
+  {
+   "round": 2,
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 2
+  },
+  {
+   "round": 2,
+   "tool": "set_style_preset",
+   "isError": false,
+   "ms": 4
+  },
+  {
+   "round": 2,
+   "tool": "set_project_tokens",
+   "isError": false,
+   "ms": 2
+  },
+  {
+   "round": 2,
+   "tool": "list_node_types",
+   "isError": false,
+   "ms": 1
+  },
+  {
+   "round": 2,
+   "tool": "get_component",
+   "isError": false,
+   "ms": 22
+  },
+  {
+   "round": 2,
+   "tool": "create_plan",
+   "isError": false,
+   "ms": 8
+  },
+  {
+   "round": 2,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 62
+  },
+  {
+   "round": 2,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 26
+  },
+  {
+   "round": 2,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 20
+  },
+  {
+   "round": 2,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 2,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 27
+  },
+  {
+   "round": 2,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 29
+  },
+  {
+   "round": 2,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 2,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 2,
+   "tool": "apply_plan",
+   "isError": false,
+   "ms": 3154
+  },
+  {
+   "round": 2,
+   "tool": "render_report",
+   "isError": false,
+   "ms": 1606
+  }
+ ],
+ "roundsLog": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-pottery-r0",
+   "score": 17,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.96
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.995,
+     "pFit": 0.997
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.961
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.946
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.984
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.971
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|gallery#0",
+     "weight": 3,
+     "say": "the list in \"gallery\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|feature cards#0",
+     "weight": 2,
+     "say": "\"work-hands-clay.webp\" appears 3 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S6|feature cards#0|copy|the main action of the feature cards section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "button \"Explore Portfolio & Classes\" is too long for a button",
+     "op": "reword"
+    },
+    {
+     "id": "S6|footer#0|copy|the main action of the footer section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "button \"Explore Portfolio & Classes\" is too long for a button",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|copy|the main action of the footer section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Explore Portfolio & Classes\" repeats \"Explore Portfolio & Classes\"",
+     "op": "reword"
+    },
+    {
+     "id": "S8|gallery#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|feature cards#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|about#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 64,
+   "judgements": 43,
+   "words": [
+    "Section \"hero\" (dark band). Top to bottom:\n- eyebrow: \"handmade pottery\"\n- headline: \"Crafted Pottery. Learn the Art.\"\n- sub-line: \"Handmade pottery and weekend classes for all skill levels. Discover unique pieces and learn to create your own.\"\n- button: \"Explore Work & Classes\"\n- a photo (work-potter.webp)",
+    "Section \"gallery\" (dark band). Top to bottom:\n- a photo (people-market.webp)\n- headline: \"Pottery Showcase\"\n- sub-line: \"Discover unique, handcrafted pieces and hands-on weekend pottery workshops.\"\n- 6 cards in a grid, each: photo, title, sentence or two, button:\n  1. \"Matte Speckle Bowl\" — \"Hand-thrown stoneware bowl with a unique, organic matte finish. Perfect for everyday use.\" — \"View Details\"\n  2. \"Glazed Earth Mug\" — \"Sturdy ceramic mug featuring a subtle, earthy glaze. Ideal for coffee or tea.\" — \"View Details\"\n  3. \"Minimalist Serving Plate\" — \"Large, flat plate designed for elegant presentation of food or décor.\" — \"View Details\"\n  4. \"Textured Water Vessel\" — \"Hand-carved piece with a beautiful, tactile texture. A perfect wash basin.\" — \"View Details\"\n  5. \"Small Tea Cup Set\" — \"Set of two delicate, functional teacups crafted from fine clay.\" — \"View Details\"\n  6. \"Abstract Wall Planter\" — \"Unique, asymmetrical planter perfect for adding artistic flair to any space.\" — \"View Details\"",
+    "Section \"feature cards\" (dark band). Top to bottom:\n- eyebrow: \"Your collection. Your journey.\"\n- headline: \"Curated Collections. Expert Guidance. Your Pottery Journey.\"\n- sub-line: \"Craft unique, handcrafted bowls and learn pottery skills in engaging weekend workshops.\"\n- button: \"Explore Portfolio & Classes\"\n- a photo (work-hands-clay.webp)",
+    "Section \"about\" (dark band). Top to bottom:\n- eyebrow: \"pottery portfolio\"\n- headline: \"Your studio for handmade pottery and classes.\"\n- paragraph: \"Handcrafted pottery and weekend classes. Discover unique handmade bowls and learn the craft.\"\n- quote: \"I absolutely love the bowls! The classes were a wonderful, relaxing escape.\"\n- who said it: a name and a role: \"Anya, Ceramic Artist\"\n- small print: \"Handmade pottery. Classes available. Limited availability.\"",
+    "Section \"call to action\" (dark band). Top to bottom:\n- headline: \"Start your pottery journey today.\"\n- sub-line: \"Discover handcrafted pottery and weekend classes to create your own unique pieces.\"\n- button: \"Explore Portfolio\"",
+    "Section \"footer\" (light band). Top to bottom:\n- headline: \"Pottery. Craft. Learn. Your hands, your art.\"\n- paragraph: \"Shop handcrafted bowls and discover pottery classes for the weekend.\"\n- button: \"Explore Portfolio & Classes\"\n- small print: \"Handmade pottery and classes. Explore our work.\""
+   ],
+   "minutes": 3.3,
+   "kept": true,
+   "fixesForNext": [
+    "S1list|gallery#0",
+    "S1page|feature cards#0",
+    "S6|feature cards#0|copy|the main action of the feature cards section|net.noodl.controls.button",
+    "S6|footer#0|copy|the main action of the footer section|net.noodl.controls.button",
+    "S5|footer#0|copy|the main action of the footer section|net.noodl.controls.button",
+    "S8|about#0|look.band|band,bandSurface,imageGround"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-pottery-r1",
+   "score": 6,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.96
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.993,
+     "pFit": 0.997
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.975
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.964
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.984
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.976
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|feature cards#0|copy|the main action of the feature cards section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Explore Work & Classes\" repeats \"Explore Work & Classes\"",
+     "op": "reword"
+    },
+    {
+     "id": "S6|footer#0|copy|the main action of the footer section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "button \"Discover Pottery & Workshops\" is too long for a button",
+     "op": "reword"
+    },
+    {
+     "id": "S8|gallery#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 5,
+   "judgements": 11,
+   "words": [
+    "Section \"hero\" (dark band). Top to bottom:\n- eyebrow: \"handmade pottery\"\n- headline: \"Crafted Pottery. Learn the Art.\"\n- sub-line: \"Handmade pottery and weekend classes for all skill levels. Discover unique pieces and learn to create your own.\"\n- button: \"Explore Work & Classes\"\n- a photo (work-potter.webp)",
+    "Section \"gallery\" (dark band). Top to bottom:\n- a photo (people-market.webp)\n- headline: \"Pottery Showcase\"\n- sub-line: \"Discover unique, handcrafted pieces and hands-on weekend pottery workshops.\"\n- 6 cards in a grid, each: title, sentence or two, button:\n  1. \"Matte Speckle Bowl\" — \"Hand-thrown stoneware bowl with a unique, organic matte finish. Perfect for everyday use.\" — \"View Details\"\n  2. \"Glazed Earth Mug\" — \"Sturdy ceramic mug featuring a subtle, earthy glaze. Ideal for coffee or tea.\" — \"View Details\"\n  3. \"Minimalist Serving Plate\" — \"Large, flat plate designed for elegant presentation of food or décor.\" — \"View Details\"\n  4. \"Textured Water Vessel\" — \"Hand-carved piece with a beautiful, tactile texture. A perfect wash basin.\" — \"View Details\"\n  5. \"Small Tea Cup Set\" — \"Set of two delicate, functional teacups crafted from fine clay.\" — \"View Details\"\n  6. \"Abstract Wall Planter\" — \"Unique, asymmetrical planter perfect for adding artistic flair to any space.\" — \"View Details\"",
+    "Section \"feature cards\" (dark band). Top to bottom:\n- eyebrow: \"Your collection. Your journey.\"\n- headline: \"Curated Collections. Expert Guidance. Your Pottery Journey.\"\n- sub-line: \"Craft unique, handcrafted bowls and learn pottery skills in engaging weekend workshops.\"\n- button: \"Explore Work & Classes\"",
+    "Section \"about\" (light band). Top to bottom:\n- eyebrow: \"pottery portfolio\"\n- headline: \"Your studio for handmade pottery and classes.\"\n- paragraph: \"Handcrafted pottery and weekend classes. Discover unique handmade bowls and learn the craft.\"\n- quote: \"I absolutely love the bowls! The classes were a wonderful, relaxing escape.\"\n- who said it: a name and a role: \"Anya, Ceramic Artist\"\n- small print: \"Handmade pottery. Classes available. Limited availability.\"",
+    "Section \"call to action\" (dark band). Top to bottom:\n- headline: \"Start your pottery journey today.\"\n- sub-line: \"Discover handcrafted pottery and weekend classes to create your own unique pieces.\"\n- button: \"Explore Portfolio\"",
+    "Section \"footer\" (light band). Top to bottom:\n- headline: \"Pottery. Craft. Learn. Your hands, your art.\"\n- paragraph: \"Shop handcrafted bowls and discover pottery classes for the weekend.\"\n- button: \"Discover Pottery & Workshops\"\n- small print: \"Handmade pottery and classes. Explore our work.\""
+   ],
+   "minutes": 0.7,
+   "kept": true,
+   "fixesForNext": [
+    "S5|feature cards#0|copy|the main action of the feature cards section|net.noodl.controls.button",
+    "S8|gallery#0|look.band|band,bandSurface,imageGround"
+   ]
+  },
+  {
+   "round": 2,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-pottery-r2",
+   "score": 2,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.96
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.996,
+     "pFit": 0.998
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.969
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.964
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.984
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.976
+    }
+   ],
+   "issues": [
+    {
+     "id": "S6|footer#0|copy|the main action of the footer section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "button \"Discover Pottery & Workshops\" is too long for a button",
+     "op": "reword"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 3,
+   "judgements": 11,
+   "words": [
+    "Section \"hero\" (dark band). Top to bottom:\n- eyebrow: \"handmade pottery\"\n- headline: \"Crafted Pottery. Learn the Art.\"\n- sub-line: \"Handmade pottery and weekend classes for all skill levels. Discover unique pieces and learn to create your own.\"\n- button: \"Explore Work & Classes\"\n- a photo (work-potter.webp)",
+    "Section \"gallery\" (light band). Top to bottom:\n- a photo (work-hands-clay.webp)\n- headline: \"Pottery Showcase\"\n- sub-line: \"Discover unique, handcrafted pieces and hands-on weekend pottery workshops.\"\n- 6 cards in a grid, each: title, sentence or two, button:\n  1. \"Matte Speckle Bowl\" — \"Hand-thrown stoneware bowl with a unique, organic matte finish. Perfect for everyday use.\" — \"View Details\"\n  2. \"Glazed Earth Mug\" — \"Sturdy ceramic mug featuring a subtle, earthy glaze. Ideal for coffee or tea.\" — \"View Details\"\n  3. \"Minimalist Serving Plate\" — \"Large, flat plate designed for elegant presentation of food or décor.\" — \"View Details\"\n  4. \"Textured Water Vessel\" — \"Hand-carved piece with a beautiful, tactile texture. A perfect wash basin.\" — \"View Details\"\n  5. \"Small Tea Cup Set\" — \"Set of two delicate, functional teacups crafted from fine clay.\" — \"View Details\"\n  6. \"Abstract Wall Planter\" — \"Unique, asymmetrical planter perfect for adding artistic flair to any space.\" — \"View Details\"",
+    "Section \"feature cards\" (dark band). Top to bottom:\n- eyebrow: \"Your collection. Your journey.\"\n- headline: \"Curated Collections. Expert Guidance. Your Pottery Journey.\"\n- sub-line: \"Craft unique, handcrafted bowls and learn pottery skills in engaging weekend workshops.\"\n- button: \"View Gallery & Book\"",
+    "Section \"about\" (light band). Top to bottom:\n- eyebrow: \"pottery portfolio\"\n- headline: \"Your studio for handmade pottery and classes.\"\n- paragraph: \"Handcrafted pottery and weekend classes. Discover unique handmade bowls and learn the craft.\"\n- quote: \"I absolutely love the bowls! The classes were a wonderful, relaxing escape.\"\n- who said it: a name and a role: \"Anya, Ceramic Artist\"\n- small print: \"Handmade pottery. Classes available. Limited availability.\"",
+    "Section \"call to action\" (dark band). Top to bottom:\n- headline: \"Start your pottery journey today.\"\n- sub-line: \"Discover handcrafted pottery and weekend classes to create your own unique pieces.\"\n- button: \"Explore Portfolio\"",
+    "Section \"footer\" (light band). Top to bottom:\n- headline: \"Pottery. Craft. Learn. Your hands, your art.\"\n- paragraph: \"Shop handcrafted bowls and discover pottery classes for the weekend.\"\n- button: \"Discover Pottery & Workshops\"\n- small print: \"Handmade pottery and classes. Explore our work.\""
+   ],
+   "minutes": 0.4,
+   "kept": true
+  }
+ ],
+ "randomDecisions": false,
+ "flags": [
+  "--brief",
+  "--run",
+  "--rounds"
+ ],
+ "photoScout": [
+  [
+   "work-potter.webp",
+   0.985
+  ],
+  [
+   "work-hands-clay.webp",
+   0.985
+  ],
+  [
+   "people-market.webp",
+   0.891
+  ],
+  [
+   "people-coffee-shop.webp",
+   0.878
+  ],
+  [
+   "work-leather-bench.webp",
+   0.843
+  ],
+  [
+   "ground-coast.webp",
+   0.824
+  ],
+  [
+   "ground-canyon.webp",
+   0.788
+  ],
+  [
+   "work-machine-shop.webp",
+   0.759
+  ],
+  [
+   "people-cafe.webp",
+   0.744
+  ],
+  [
+   "food-carrots.webp",
+   0.729
+  ],
+  [
+   "ground-forest-fog.webp",
+   0.559
+  ],
+  [
+   "food-bread.webp",
+   0.55
+  ],
+  [
+   "people-desk.webp",
+   0.503
+  ],
+  [
+   "ground-shore.webp",
+   0.476
+  ],
+  [
+   "food-board.webp",
+   0.32
+  ],
+  [
+   "food-grocer.webp",
+   0.287
+  ],
+  [
+   "work-chef.webp",
+   0.252
+  ],
+  [
+   "animal-cat.webp",
+   0.252
+  ],
+  [
+   "ground-red-rock.webp",
+   0.244
+  ],
+  [
+   "people-meeting.webp",
+   0.244
+  ],
+  [
+   "ground-dune.webp",
+   0.19
+  ],
+  [
+   "food-bakery.webp",
+   0.173
+  ],
+  [
+   "animal-horse.webp",
+   0.153
+  ],
+  [
+   "food-market.webp",
+   0.142
+  ],
+  [
+   "animal-dog.webp",
+   0.13
+  ],
+  [
+   "animal-sheep.webp",
+   0.129
+  ],
+  [
+   "work-baker.webp",
+   0.114
+  ],
+  [
+   "work-carpenter.webp",
+   0.088
+  ],
+  [
+   "ground-city-dusk.webp",
+   0.064
+  ],
+  [
+   "ground-skyline.webp",
+   0.047
+  ],
+  [
+   "work-welder.webp",
+   0.037
+  ],
+  [
+   "food-plate.webp",
+   0.031
+  ]
+ ],
+ "replays": 118,
+ "result": {
+  "minutes": 4.4,
+  "bestRound": 2,
+  "bestScore": 2,
+  "scores": [
+   17,
+   6,
+   2
+  ],
+  "builderCalls": 69,
+  "judgements": 65,
+  "replays": 118,
+  "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-pottery-r2"
+ }
+}

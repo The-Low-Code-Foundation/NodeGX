@@ -1,0 +1,215 @@
+{
+ "minutes": 3.7,
+ "accept": "constraint",
+ "bestRound": 0,
+ "bestScore": 0.41,
+ "scores": [
+  0.41
+ ],
+ "r0": {
+  "perLine": 0.41,
+  "org": 0.147,
+  "suits": 0.883,
+  "sum": 27.77
+ },
+ "kept": {
+  "perLine": 0.41,
+  "org": 0.147,
+  "suits": 0.883,
+  "sum": 27.77,
+  "lines": 50
+ },
+ "builderCalls": 61,
+ "judgements": 51,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-S0-jazz-r0",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-S0-jazz-r0",
+   "score": 0.41,
+   "sum": 27.77,
+   "defects": 20.48,
+   "lines": 50,
+   "perLine": 0.41,
+   "org": 0.147,
+   "suits": 0.883,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "date and place",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.984
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "price"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.97,
+     "pFit": 0.987
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line",
+      "small print"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.965
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.988,
+     "pFit": 0.916
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place",
+      "body text",
+      "price"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.822
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "button",
+      "price"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.966
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "date and place",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.962
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|how it works#0|deck|eyebrow,headline,sub-line,paragraph,button",
+     "weight": 2,
+     "say": "\"The Blue Room\" repeats \"The Blue Room\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|call to action#0|deck|headline,sub-line,button,price",
+     "weight": 2,
+     "say": "\"An Elegant Jazz Evening\" repeats \"An Elegant Jazz Evening\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|deck|headline,paragraph,button,date and place,small print",
+     "weight": 2,
+     "say": "\"14 November | The Blue Room\" repeats \"Jazz Evening | 14 November | The Blue Room\"",
+     "op": "reword"
+    },
+    {
+     "id": "S11|how it works#0|deck|eyebrow,headline,sub-line,paragraph,button",
+     "weight": 1.5,
+     "say": "\"an elegant jazz\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|deck|headline,sub-line,date and place,paragraph,price",
+     "weight": 1.5,
+     "say": "\"an elegant jazz\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|call to action#0|deck|headline,sub-line,button,price",
+     "weight": 1.5,
+     "say": "\"an elegant jazz\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|footer#0|deck|headline,paragraph,button,date and place,small print",
+     "weight": 1.5,
+     "say": "\"at the blue\" is said 5 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S12|how it works#0|look.band|band,bandSurface",
+     "weight": 2,
+     "say": "four \"band\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "R|single-column-grid|page",
+     "weight": 4,
+     "say": "render: single-column-grid"
+    },
+    {
+     "id": "P1|menu or prices",
+     "weight": 2.47,
+     "say": "reviewer (p=0.825): add a \"menu or prices\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "Q|org",
+     "weight": 6.82,
+     "say": "reviewer: organised p=0.147",
+     "op": "reask"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.47,
+     "say": "reviewer: type and parts suit p=0.883"
+    }
+   ],
+   "findings": [
+    "single-column-grid"
+   ],
+   "modelCalls": 61,
+   "judgements": 51,
+   "minutes": 3.7,
+   "kept": true
+  }
+ ]
+}

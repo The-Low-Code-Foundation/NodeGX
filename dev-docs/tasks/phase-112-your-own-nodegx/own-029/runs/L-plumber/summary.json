@@ -1,0 +1,706 @@
+{
+ "minutes": 6.2,
+ "bestRound": 4,
+ "bestScore": 2,
+ "scores": [
+  20,
+  8,
+  5,
+  5,
+  2
+ ],
+ "builderCalls": 71,
+ "judgements": 97,
+ "replays": 220,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-L-plumber-r4",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-L-plumber-r0",
+   "score": 20,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "photo"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.963
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "badge",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.977
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "button",
+      "photo"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.988,
+     "pFit": 0.986
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "quote",
+      "name line",
+      "photo"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.976
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "form",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.746
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.99
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "date and place",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.989
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1page|testimonials#0",
+     "weight": 2,
+     "say": "\"work-carpenter.webp\" appears 3 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|feature cards#0|deck|headline,sub-line,button",
+     "weight": 2,
+     "say": "\"Request Call-Back\" repeats \"Request Call-Back\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|sign-up or contact form#0|deck|headline,sub-line,form button,button",
+     "weight": 2,
+     "say": "\"Request Call-Back\" repeats \"Request Call-Back\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|location and hours#0|deck|headline,sub-line,paragraph,button,date and place",
+     "weight": 2,
+     "say": "\"Request Call-Back\" repeats \"Request Call-Back\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|deck|headline,paragraph,button,date and place,small print",
+     "weight": 2,
+     "say": "\"Request Call-Back\" repeats \"Request Call-Back\"",
+     "op": "reword"
+    },
+    {
+     "id": "S9|footer#0|deck|headline,paragraph,button,date and place,small print",
+     "weight": 3,
+     "say": "\"Serving [City Name] since 1995. Licensed and insured.\" talks about the page instead of to the visitor",
+     "op": "reword"
+    },
+    {
+     "id": "S11|feature cards#0|deck|headline,sub-line,button",
+     "weight": 1.5,
+     "say": "\"contact us today\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|footer#0|deck|headline,paragraph,button,date and place,small print",
+     "weight": 1.5,
+     "say": "\"contact us today\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S12|testimonials#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "four \"band\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S12|sign-up or contact form#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "four \"band\" bands in a row",
+     "op": "flip"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 59,
+   "judgements": 45,
+   "minutes": 3.4,
+   "kept": true,
+   "fixesForNext": [
+    "S9|footer#0|deck|headline,paragraph,button,date and place,small print",
+    "S1page|testimonials#0",
+    "S5|feature cards#0|deck|headline,sub-line,button",
+    "S5|sign-up or contact form#0|deck|headline,sub-line,form button,button",
+    "S5|location and hours#0|deck|headline,sub-line,paragraph,button,date and place",
+    "S5|footer#0|deck|headline,paragraph,button,date and place,small print",
+    "S12|sign-up or contact form#0|look.band|band,bandSurface,imageGround",
+    "S11|feature cards#0|deck|headline,sub-line,button",
+    "S11|footer#0|deck|headline,paragraph,button,date and place,small print"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-L-plumber-r1",
+   "score": 8,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "photo"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.963
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "badge",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.977
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "button",
+      "photo"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.986,
+     "pFit": 0.98
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.98
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "form",
+      "button"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.986
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.982
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "date and place",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.988
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|footer#0|deck|headline,paragraph,button,date and place,small print",
+     "weight": 2,
+     "say": "\"Request Call-Back\" repeats \"Request Call-Back\"",
+     "op": "reword"
+    },
+    {
+     "id": "S9|footer#0|deck|headline,paragraph,button,date and place,small print",
+     "weight": 3,
+     "say": "\"Serving the community since 1995, proudly based in [Your Cit\" talks about the page instead of to the visitor",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|deck|headline,sub-line,paragraph,button,date and place",
+     "weight": 1.5,
+     "say": "\"peace of mind\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|footer#0|deck|headline,paragraph,button,date and place,small print",
+     "weight": 1.5,
+     "say": "\"peace of mind\" is said 4 times on the page",
+     "op": "reword"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 8,
+   "judgements": 13,
+   "minutes": 1.1,
+   "kept": true,
+   "fixesForNext": [
+    "S9|footer#0|deck|headline,paragraph,button,date and place,small print",
+    "S5|footer#0|deck|headline,paragraph,button,date and place,small print",
+    "S11|location and hours#0|deck|headline,sub-line,paragraph,button,date and place",
+    "S11|footer#0|deck|headline,paragraph,button,date and place,small print"
+   ]
+  },
+  {
+   "round": 2,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-L-plumber-r2",
+   "score": 5,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "photo"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.963
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "badge",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.977
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "button",
+      "photo"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.986,
+     "pFit": 0.98
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.98
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "form",
+      "button"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.986
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.985
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "date and place",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.983
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|location and hours#0|deck|headline,sub-line,paragraph,button,date and place",
+     "weight": 2,
+     "say": "\"Trusted Local Plumbing Experts\" repeats \"Your Trusted Local Plumbing Experts\"",
+     "op": "reword"
+    },
+    {
+     "id": "S11|testimonials#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role",
+     "weight": 1.5,
+     "say": "\"contact us today\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|footer#0|deck|headline,paragraph,button,date and place,small print",
+     "weight": 1.5,
+     "say": "\"contact us today\" is said 4 times on the page",
+     "op": "reword"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 3,
+   "judgements": 13,
+   "minutes": 0.6,
+   "kept": true,
+   "fixesForNext": [
+    "S5|location and hours#0|deck|headline,sub-line,paragraph,button,date and place",
+    "S11|testimonials#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role"
+   ]
+  },
+  {
+   "round": 3,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-L-plumber-r3",
+   "score": 5,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "photo"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.963
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "badge",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.977
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "button",
+      "photo"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.986,
+     "pFit": 0.98
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.976
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "form",
+      "button"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.986
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.98
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "date and place",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.983
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|location and hours#0|deck|headline,sub-line,paragraph,button,date and place",
+     "weight": 2,
+     "say": "\"Request Call-Back\" repeats \"Request Call-Back\"",
+     "op": "reword"
+    },
+    {
+     "id": "S11|location and hours#0|deck|headline,sub-line,paragraph,button,date and place",
+     "weight": 1.5,
+     "say": "\"contact us today\" is said 4 times on the page",
+     "op": "reword"
+    },
+    {
+     "id": "S11|footer#0|deck|headline,paragraph,button,date and place,small print",
+     "weight": 1.5,
+     "say": "\"contact us today\" is said 4 times on the page",
+     "op": "reword"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 3,
+   "judgements": 13,
+   "minutes": 0.6,
+   "reverted": true,
+   "kept": false,
+   "fixesForNext": [
+    "S11|testimonials#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role"
+   ]
+  },
+  {
+   "round": 4,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-L-plumber-r4",
+   "score": 2,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "button",
+      "photo"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.963
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "badge",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.977
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "list of items",
+      "button",
+      "photo"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.986,
+     "pFit": 0.98
+    },
+    {
+     "kind": "testimonials",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.981
+    },
+    {
+     "kind": "sign-up or contact form",
+     "bits": [
+      "headline",
+      "sub-line",
+      "form",
+      "button"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.986
+    },
+    {
+     "kind": "location and hours",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "date and place"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.985
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "date and place",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.983
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|location and hours#0|deck|headline,sub-line,paragraph,button,date and place",
+     "weight": 2,
+     "say": "\"Trusted Local Plumbing Experts\" repeats \"Your Trusted Local Plumbing Experts\"",
+     "op": "reword"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 2,
+   "judgements": 13,
+   "minutes": 0.5,
+   "kept": true
+  }
+ ]
+}

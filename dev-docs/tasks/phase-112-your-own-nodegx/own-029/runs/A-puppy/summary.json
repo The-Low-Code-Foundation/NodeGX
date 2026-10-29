@@ -1,0 +1,314 @@
+{
+ "minutes": 5.2,
+ "bestRound": 1,
+ "bestScore": 4,
+ "scores": [
+  18,
+  4
+ ],
+ "builderCalls": 119,
+ "judgements": 58,
+ "replays": 101,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-puppy-r1",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-puppy-r0",
+   "score": 18,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "quote"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.703
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "list of items",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.912,
+     "pFit": 0.884
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "quote",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.92,
+     "pFit": 0.993
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.97,
+     "pFit": 0.998
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.988,
+     "pFit": 0.996
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.977
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.965
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|about#0|copy|the about headline|Text",
+     "weight": 2,
+     "say": "\"Find your perfect furry friend today.\" repeats \"Find your perfect furry friend today. Open your heart to unconditional love and start your puppy journey with a happy companion.\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|feature cards#0|list.rows|4|title,sentence,button",
+     "weight": 2,
+     "say": "\"Apply to Adopt\" repeats \"Apply to Adopt\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|gallery#0|copy|the gallery headline|Text",
+     "weight": 2,
+     "say": "\"Meet Your New Best Friend\" repeats \"Meet Your New Best Friend\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|gallery#0|copy|the main action of the gallery section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Apply to Adopt\" repeats \"Apply to Adopt\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|how it works#0|copy|a short paragraph|Text",
+     "weight": 2,
+     "say": "\"Browse our curated list of available pups, filter by breed and size, and connect with our dedicated adoption specialists to find your perfect furry friend today.\" repeats \"Find your perfect furry friend today.\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|how it works#0|list.rows|3|title,sentence",
+     "weight": 2,
+     "say": "\"Find Your Perfect Match\" repeats \"Find Your Perfect Match\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|call to action#0|copy|one sentence under the headline|Text",
+     "weight": 2,
+     "say": "\"Find your perfect furry friend today and start your adventure with unconditional love.\" repeats \"Find your perfect furry friend today.\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|call to action#0|copy|the main action of the call to action section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Adopt a Puppy\" repeats \"Adopt a Puppy\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|copy|the main action of the footer section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Apply to Adopt\" repeats \"Apply to Adopt\"",
+     "op": "reword"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 110,
+   "judgements": 45,
+   "minutes": 4.2,
+   "kept": true,
+   "fixesForNext": [
+    "S5|about#0|copy|the about headline|Text",
+    "S5|feature cards#0|list.rows|4|title,sentence,button",
+    "S5|gallery#0|copy|the gallery headline|Text",
+    "S5|gallery#0|copy|the main action of the gallery section|net.noodl.controls.button",
+    "S5|how it works#0|copy|a short paragraph|Text",
+    "S5|how it works#0|list.rows|3|title,sentence",
+    "S5|call to action#0|copy|one sentence under the headline|Text",
+    "S5|call to action#0|copy|the main action of the call to action section|net.noodl.controls.button",
+    "S5|footer#0|copy|the main action of the footer section|net.noodl.controls.button"
+   ]
+  },
+  {
+   "round": 1,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-A-puppy-r1",
+   "score": 4,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "body text",
+      "button",
+      "quote"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.703
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "quote",
+      "list of items",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.93,
+     "pFit": 0.798
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "quote",
+      "form"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.953,
+     "pFit": 0.98
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.97,
+     "pFit": 0.998
+    },
+    {
+     "kind": "how it works",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "list of items",
+      "button"
+     ],
+     "band": "band",
+     "staged": true,
+     "pSound": 0.992,
+     "pFit": 0.996
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "body text",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.976
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "headline",
+      "body text",
+      "button",
+      "small print"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.966
+    }
+   ],
+   "issues": [
+    {
+     "id": "S5|feature cards#0|list.rows|4|title,sentence,button",
+     "weight": 2,
+     "say": "\"Find Your Perfect Match\" repeats \"Find Your Perfect Match\"",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|copy|the main action of the footer section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"Start Your Journey\" repeats \"Start Your Journey\"",
+     "op": "reword"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 9,
+   "judgements": 13,
+   "minutes": 1,
+   "kept": true
+  }
+ ]
+}

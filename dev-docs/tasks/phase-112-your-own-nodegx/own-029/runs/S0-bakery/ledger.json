@@ -1,0 +1,2637 @@
+{
+ "run": "S0-bakery",
+ "brief": "bakery",
+ "request": "A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.",
+ "model": "gemma4:e2b-it-qat",
+ "judge": "gemma4:e4b-it-qat",
+ "copyN": 1,
+ "rounds": 0,
+ "build": {
+  "distMtime": "2026-10-28T15:27:11.116Z",
+  "head": "1f31ab2f8"
+ },
+ "harness": "854797c9",
+ "startedAt": "2026-10-28T23:19:45.344Z",
+ "calls": [
+  {
+   "round": 0,
+   "key": "card.kind+tone",
+   "sig": "card|kind+tone",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nWhat kind of page is this (landing page, event page, sign-up or contact page, portfolio, shop or menu page, other)? What tone should it have (modern, playful, classic, minimal, bold)?",
+   "temperature": 0.2,
+   "answer": {
+    "kind": "landing page",
+    "tone": "classic"
+   },
+   "tokensIn": 113,
+   "tokensOut": 21,
+   "ms": 5813
+  },
+  {
+   "round": 0,
+   "key": "card.audience+action+name",
+   "sig": "card|audience",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nWho is the page for (one line, max 20 words)? What is the ONE action the page wants a visitor to take (max 20 words)? What is the business, event or person called (max 4 words; use the name in the request, or invent a short one)?",
+   "temperature": 0.4,
+   "answer": {
+    "action": "Visit the site to view our delicious sourdough, croissants, and cakes.",
+    "audience": "Local customers in Lyon looking for fresh baked goods.",
+    "name": "Lyon Family Bakery"
+   },
+   "tokensIn": 130,
+   "tokensOut": 51,
+   "ms": 2018
+  },
+  {
+   "round": 0,
+   "key": "card.preset+hue",
+   "sig": "card|preset",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nTone: classic. Pick the style preset.\nPresets:\n- modern: The balanced default\n- minimal: Restrained\n- playful: Vivid colors, rounded corners, generous spacing.\n- enterprise: Dense, conservative, high-contrast for data-heavy UIs.\n- soft: Gentle pastels, large radius, airy spacing.",
+   "temperature": 0.2,
+   "answer": {
+    "preset": "soft"
+   },
+   "conf": {
+    "dist": {
+     "modern": 0.003,
+     "minimal": 0.004,
+     "playful": 0.001,
+     "enterprise": 0,
+     "soft": 0.991
+    },
+    "top": "soft",
+    "second": "minimal",
+    "margin": 0.987
+   },
+   "tokensIn": 138,
+   "tokensOut": 12,
+   "ms": 811
+  },
+  {
+   "round": 0,
+   "key": "card.pairing+density+radius",
+   "sig": "card|type",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nTone: classic. Pick the type pairing (headings / body), the density (airy, regular, compact) and the corner radius (sharp, soft, round).\nPairings:\n- sans-sans: Inter headings / Inter body\n- serif-sans: serif headings / Inter body\n- serif-serif: serif headings / serif body\n- mono-sans: monospace headings / Inter body",
+   "temperature": 0.2,
+   "answer": {
+    "density": "airy",
+    "pairing": "serif-sans",
+    "radius": "soft"
+   },
+   "tokensIn": 149,
+   "tokensOut": 30,
+   "ms": 1417
+  },
+  {
+   "round": 0,
+   "key": "card.mustShow",
+   "sig": "card|mustShow",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nWhat must a visitor be able to find on this page? List 1 to 4 short facts taken from the request about the business, event or person (a date, a place, what is sold, opening days, what to do). Only what the request says, and nothing about how the page should look.",
+   "temperature": 0.2,
+   "answer": {
+    "texts": [
+     "family bakery",
+     "Lyon",
+     "sourdough",
+     "croissants and cakes"
+    ]
+   },
+   "tokensIn": 132,
+   "tokensOut": 40,
+   "ms": 1765
+  },
+  {
+   "round": 0,
+   "key": "sections",
+   "sig": "sections",
+   "model": "gemma4:e2b-it-qat",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe page must show: family bakery; Lyon; sourdough; croissants and cakes.\nWhich sections should the page have, top to bottom? Give 3 to 7. For each, one line saying what a VISITOR finds there (not what the section does for the page). Choose what THIS page needs; not every page needs every kind.\nSection kinds: hero, about, feature cards, how it works, gallery, menu or prices, schedule or line-up, testimonials, team, faq, location and hours, sign-up or contact form, call to action, footer",
+   "temperature": 0.3,
+   "answer": {
+    "sections": [
+     {
+      "kind": "hero",
+      "purpose": "A warm, inviting introduction to the bakery."
+     },
+     {
+      "kind": "feature cards",
+      "purpose": "Highlights the main products: sourdough, croissants, and cakes."
+     },
+     {
+      "kind": "about",
+      "purpose": "Shares the family story and connection to Lyon."
+     },
+     {
+      "kind": "gallery",
+      "purpose": "Visually showcases the delicious baked goods."
+     },
+     {
+      "kind": "schedule or line-up",
+      "purpose": "Clearly displays the opening days (Tuesday to Sunday)."
+     },
+     {
+      "kind": "call to action",
+      "purpose": "Encourages the visitor to view the full offerings."
+     }
+    ]
+   },
+   "tokensIn": 233,
+   "tokensOut": 199,
+   "ms": 11193
+  },
+  {
+   "round": 0,
+   "key": "s0.bits",
+   "sig": "hero#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"hero\" section (A warm, inviting introduction to the bakery.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- photo: one photograph\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "eyebrow",
+     "headline",
+     "sub-line",
+     "photo",
+     "button"
+    ]
+   },
+   "tokensIn": 312,
+   "tokensOut": 42,
+   "ms": 2223
+  },
+  {
+   "round": 0,
+   "key": "s0.align",
+   "sig": "hero#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"hero\" section (A warm, inviting introduction to the bakery.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "centred"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.9,
+     "left-aligned": 0.1
+    },
+    "top": "centred",
+    "second": "left-aligned",
+    "margin": 0.8
+   },
+   "tokensIn": 148,
+   "tokensOut": 7,
+   "ms": 778
+  },
+  {
+   "round": 0,
+   "key": "s0.photoPlace",
+   "sig": "hero#0|photoPlace",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"hero\" section (A warm, inviting introduction to the bakery.). Should the photo sit beside the words, above them, or below them? Answer one of: beside, above, below.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "beside"
+   },
+   "conf": {
+    "dist": {
+     "beside": 0.853,
+     "above": 0.13,
+     "below": 0.017
+    },
+    "top": "beside",
+    "second": "above",
+    "margin": 0.723
+   },
+   "tokensIn": 154,
+   "tokensOut": 8,
+   "ms": 867
+  },
+  {
+   "round": 0,
+   "key": "s0.look.band",
+   "sig": "hero#0|look.band|band,bandSurface,heroGround,imageGround",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"hero\" section (A warm, inviting introduction to the bakery.). A Group whose role is: the hero section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band\n- heroGround: The band a landing page opens with\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…",
+   "temperature": 0.2,
+   "answer": {
+    "look": "heroGround"
+   },
+   "conf": {
+    "dist": {
+     "band": 0.019,
+     "bandSurface": 0.019,
+     "heroGround": 0.83,
+     "imageGround": 0.132
+    },
+    "top": "heroGround",
+    "second": "imageGround",
+    "margin": 0.698
+   },
+   "tokensIn": 204,
+   "tokensOut": 13,
+   "ms": 1334
+  },
+  {
+   "round": 0,
+   "key": "s0.look.the hero headline",
+   "sig": "hero#0|look.the hero headline|displayHeadline,sectionHeading",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"hero\" section (A warm, inviting introduction to the bakery.). A Text whose role is: the hero headline.\nWhich look should it take?\n- displayHeadline: Exactly ONE per page\n- sectionHeading: The heading of a section head",
+   "temperature": 0.2,
+   "answer": {
+    "look": "displayHeadline"
+   },
+   "conf": {
+    "dist": {
+     "displayHeadline": 1,
+     "sectionHeading": 0
+    },
+    "top": "displayHeadline",
+    "second": "sectionHeading",
+    "margin": 1
+   },
+   "tokensIn": 166,
+   "tokensOut": 13,
+   "ms": 1276
+  },
+  {
+   "round": 0,
+   "key": "s0.look.one sentence under the headline",
+   "sig": "hero#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"hero\" section (A warm, inviting introduction to the bakery.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.592,
+     "body": 0.408
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.184
+   },
+   "tokensIn": 180,
+   "tokensOut": 12,
+   "ms": 1111
+  },
+  {
+   "round": 0,
+   "key": "s0.look.the main action of the hero section",
+   "sig": "hero#0|look.the main action of the hero section|primaryButton,outlineButton",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"hero\" section (A warm, inviting introduction to the bakery.). A Button whose role is: the main action of the hero section. It sits inside a \"actionRow\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action",
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "conf": {
+    "dist": {
+     "primaryButton": 0.988,
+     "outlineButton": 0.012
+    },
+    "top": "primaryButton",
+    "second": "outlineButton",
+    "margin": 0.976
+   },
+   "tokensIn": 175,
+   "tokensOut": 13,
+   "ms": 1104
+  },
+  {
+   "round": 0,
+   "key": "s0.deck",
+   "sig": "hero#0|deck|eyebrow,headline,sub-line,button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 0,
+   "sectionKind": "hero",
+   "user": "BRIEF: \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods. Tone: classic.\nFacts the page must give: family bakery; Lyon; sourdough; croissants and cakes.\nWrite the words of the \"hero\" section, top to bottom:\n01_eyebrow: eyebrow, at most 30 characters\n02_headline: headline, at most 70 characters\n03_sub_line: sub-line, at most 160 characters\n04_button: button, two to four words, a verb first; pressing it lets a visitor Visit the site to view our delicious sourdough, croissants, and cakes\nEach line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_eyebrow": "Authentic Lyon Bakery",
+    "02_headline": "Lyon Family Bakery: Handcrafted Sourdough, Croissants & Cakes",
+    "03_sub_line": "Experience tradition in every bite. Freshly baked goods made with love, perfect for your local family.",
+    "04_button": "View Our Menu"
+   },
+   "tokensIn": 205,
+   "tokensOut": 88,
+   "ms": 3515
+  },
+  {
+   "round": 0,
+   "key": "s1.bits",
+   "sig": "feature cards#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "feature cards",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe sections above already have: hero: eyebrow, headline, sub-line, photo, button. Not every section needs a button or a photo; a section can be short.\nThe \"feature cards\" section (Highlights the main products: sourdough, croissants, and cakes.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- photo: one photograph\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "headline",
+     "sub-line",
+     "photo",
+     "list of items"
+    ]
+   },
+   "tokensIn": 353,
+   "tokensOut": 37,
+   "ms": 2361
+  },
+  {
+   "round": 0,
+   "key": "s1.align",
+   "sig": "feature cards#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "feature cards",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"feature cards\" section (Highlights the main products: sourdough, croissants, and cakes.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "centred"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.456,
+     "left-aligned": 0.544
+    },
+    "top": "left-aligned",
+    "second": "centred",
+    "margin": 0.088
+   },
+   "tokensIn": 152,
+   "tokensOut": 7,
+   "ms": 845
+  },
+  {
+   "round": 0,
+   "key": "s1.photoPlace",
+   "sig": "feature cards#0|photoPlace",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "feature cards",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"feature cards\" section (Highlights the main products: sourdough, croissants, and cakes.). Should the photo sit beside the words, above them, or below them? Answer one of: beside, above, below.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "beside"
+   },
+   "conf": {
+    "dist": {
+     "beside": 0.934,
+     "above": 0.044,
+     "below": 0.022
+    },
+    "top": "beside",
+    "second": "above",
+    "margin": 0.89
+   },
+   "tokensIn": 158,
+   "tokensOut": 13,
+   "ms": 1063
+  },
+  {
+   "round": 0,
+   "key": "s1.items.count",
+   "sig": "feature cards#0|items.count",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "feature cards",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"feature cards\" section (Highlights the main products: sourdough, croissants, and cakes.). It has a list of similar items. How many items? Answer one of: 2, 3, 4, 6.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "3"
+   },
+   "conf": {
+    "dist": {
+     "2": 0.001,
+     "3": 0.984,
+     "4": 0.007,
+     "6": 0.007
+    },
+    "top": "3",
+    "second": "4",
+    "margin": 0.977
+   },
+   "tokensIn": 161,
+   "tokensOut": 7,
+   "ms": 859
+  },
+  {
+   "round": 0,
+   "key": "s1.items.bits",
+   "sig": "feature cards#0|items.bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "feature cards",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"feature cards\" section (Highlights the main products: sourdough, croissants, and cakes.). It has a list of 3 items. Which bits does EACH item have, top to bottom? Choose 1 to 4:\n- photo: a photograph\n- icon: a small icon\n- number: a step number\n- title: a short title\n- text: a sentence or two\n- price: a price\n- time: a time or a date\n- button: a button\n- name line: a name and a role\n(The page has only 2 photographs: a photo on each of 3 items would repeat them.)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "photo",
+     "title",
+     "text",
+     "button"
+    ]
+   },
+   "tokensIn": 248,
+   "tokensOut": 35,
+   "ms": 2159
+  },
+  {
+   "round": 0,
+   "key": "s1.items.layout",
+   "sig": "feature cards#0|items.layout",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "feature cards",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"feature cards\" section (Highlights the main products: sourdough, croissants, and cakes.). Its 3 items: a grid, or one column? Answer one of: grid, one column.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "grid"
+   },
+   "conf": {
+    "dist": {
+     "grid": 0.887,
+     "one column": 0.113
+    },
+    "top": "grid",
+    "second": "one column",
+    "margin": 0.774
+   },
+   "tokensIn": 154,
+   "tokensOut": 12,
+   "ms": 954
+  },
+  {
+   "round": 0,
+   "key": "s1.look.band",
+   "sig": "feature cards#0|look.band|band,bandSurface,imageGround",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "feature cards",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"feature cards\" section (Highlights the main products: sourdough, croissants, and cakes.). A Group whose role is: the feature cards section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…",
+   "temperature": 0.2,
+   "answer": {
+    "look": "imageGround"
+   },
+   "conf": {
+    "dist": {
+     "band": 0.134,
+     "bandSurface": 0.134,
+     "imageGround": 0.733
+    },
+    "top": "imageGround",
+    "second": "band",
+    "margin": 0.599
+   },
+   "tokensIn": 197,
+   "tokensOut": 13,
+   "ms": 1141
+  },
+  {
+   "round": 0,
+   "key": "s1.look.one sentence under the headline",
+   "sig": "feature cards#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "feature cards",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"feature cards\" section (Highlights the main products: sourdough, croissants, and cakes.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.882,
+     "body": 0.118
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.764
+   },
+   "tokensIn": 184,
+   "tokensOut": 12,
+   "ms": 1051
+  },
+  {
+   "round": 0,
+   "key": "s1.look.item",
+   "sig": "feature cards#0|look.item|card,statTile,testimonialCard,featureItem",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "feature cards",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"feature cards\" section (Highlights the main products: sourdough, croissants, and cakes.). A Group whose role is: item 1 of 3 in the list. It sits inside a \"gridAutoFit\".\nWhich look should it take?\n- card: The card shell\n- statTile: A tile whose only large thing is the number\n- testimonialCard: A quote card that sits ABOVE its band rather than in it\n- featureItem: One item of a feature or trust strip",
+   "temperature": 0.2,
+   "answer": {
+    "look": "featureItem"
+   },
+   "conf": {
+    "dist": {
+     "card": 0.091,
+     "statTile": 0.001,
+     "testimonialCard": 0,
+     "featureItem": 0.907
+    },
+    "top": "featureItem",
+    "second": "card",
+    "margin": 0.816
+   },
+   "tokensIn": 216,
+   "tokensOut": 8,
+   "ms": 1018
+  },
+  {
+   "round": 0,
+   "key": "s1.look.itemButton",
+   "sig": "feature cards#0|look.itemButton|primaryButton,outlineButton",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "feature cards",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"feature cards\" section (Highlights the main products: sourdough, croissants, and cakes.). A Button whose role is: item 1 of 3: its button.\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action",
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "conf": {
+    "dist": {
+     "primaryButton": 0.996,
+     "outlineButton": 0.004
+    },
+    "top": "primaryButton",
+    "second": "outlineButton",
+    "margin": 0.992
+   },
+   "tokensIn": 173,
+   "tokensOut": 13,
+   "ms": 1120
+  },
+  {
+   "round": 0,
+   "key": "s1.deck",
+   "sig": "feature cards#0|deck|headline,sub-line",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "feature cards",
+   "user": "BRIEF: \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods. Tone: classic.\nFacts the page must give: family bakery; Lyon; sourdough; croissants and cakes.\nWrite the words of the \"feature cards\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\nAlready on the page: \"Lyon Family Bakery: Handcrafted Sourdough, Croissants & Cake\", \"Experience tradition in every bite. Freshly baked goods made\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Votre boulangerie familiale lyonnaise.",
+    "02_sub_line": "Pain au levain artisanal, croissants feuilletés et gâteaux faits maison avec amour."
+   },
+   "tokensIn": 193,
+   "tokensOut": 50,
+   "ms": 2214
+  },
+  {
+   "round": 0,
+   "key": "s1.list.rows",
+   "sig": "feature cards#0|list.rows|3|title,sentence,button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 1,
+   "sectionKind": "feature cards",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"feature cards\" section (Highlights the main products: sourdough, croissants, and cakes.) has a list of 3 items. For EACH item, in order, write: title (max 40 characters), sentence (max 160 characters), button (max 24 characters). Each item different from the others; an item's title and sentence and button must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "title": "Artisanal Sourdough",
+      "sentence": "Slow-fermented for the perfect tangy flavor and chewy crust. Handcrafted daily in our family ovens.",
+      "button": "View Sourdough"
+     },
+     {
+      "title": "Buttery Croissants",
+      "sentence": "Flaky, golden, and perfectly laminated. The ultimate French breakfast experience awaits you.",
+      "button": "View Croissants"
+     },
+     {
+      "title": "Signature Cakes",
+      "sentence": "Indulge in rich, decadent treats perfect for any occasion. Baked fresh with love and care.",
+      "button": "View Cakes"
+     }
+    ]
+   },
+   "tokensIn": 200,
+   "tokensOut": 171,
+   "ms": 6256
+  },
+  {
+   "round": 0,
+   "key": "s2.bits",
+   "sig": "about#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "about",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe sections above already have: hero: eyebrow, headline, sub-line, photo, button; feature cards: headline, sub-line, photo, list of items. Not every section needs a button or a photo; a section can be short.\nThe \"about\" section (Shares the family story and connection to Lyon.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- photo: one photograph\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "eyebrow",
+     "headline",
+     "sub-line",
+     "photo",
+     "body text",
+     "quote"
+    ]
+   },
+   "tokensIn": 364,
+   "tokensOut": 48,
+   "ms": 3247
+  },
+  {
+   "round": 0,
+   "key": "s2.align",
+   "sig": "about#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "about",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"about\" section (Shares the family story and connection to Lyon.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "centred"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.47,
+     "left-aligned": 0.53
+    },
+    "top": "left-aligned",
+    "second": "centred",
+    "margin": 0.06
+   },
+   "tokensIn": 148,
+   "tokensOut": 7,
+   "ms": 886
+  },
+  {
+   "round": 0,
+   "key": "s2.photoPlace",
+   "sig": "about#0|photoPlace",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "about",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"about\" section (Shares the family story and connection to Lyon.). Should the photo sit beside the words, above them, or below them? Answer one of: beside, above, below.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "beside"
+   },
+   "conf": {
+    "dist": {
+     "beside": 0.841,
+     "above": 0.085,
+     "below": 0.074
+    },
+    "top": "beside",
+    "second": "above",
+    "margin": 0.756
+   },
+   "tokensIn": 154,
+   "tokensOut": 13,
+   "ms": 1056
+  },
+  {
+   "round": 0,
+   "key": "s2.look.band",
+   "sig": "about#0|look.band|band,bandSurface,imageGround",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "about",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"about\" section (Shares the family story and connection to Lyon.). A Group whose role is: the about section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…",
+   "temperature": 0.2,
+   "answer": {
+    "look": "imageGround"
+   },
+   "conf": {
+    "dist": {
+     "band": 0.077,
+     "bandSurface": 0.077,
+     "imageGround": 0.847
+    },
+    "top": "imageGround",
+    "second": "band",
+    "margin": 0.77
+   },
+   "tokensIn": 192,
+   "tokensOut": 13,
+   "ms": 1127
+  },
+  {
+   "round": 0,
+   "key": "s2.look.one sentence under the headline",
+   "sig": "about#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "about",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"about\" section (Shares the family story and connection to Lyon.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "body"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.31,
+     "body": 0.69
+    },
+    "top": "body",
+    "second": "lead",
+    "margin": 0.38
+   },
+   "tokensIn": 180,
+   "tokensOut": 12,
+   "ms": 1053
+  },
+  {
+   "round": 0,
+   "key": "s2.look.a quotation from a happy customer or visitor",
+   "sig": "about#0|look.a quotation from a happy customer or visitor|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "about",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"about\" section (Shares the family story and connection to Lyon.). A Text whose role is: a quotation from a happy customer or visitor.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "body"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.195,
+     "body": 0.805
+    },
+    "top": "body",
+    "second": "lead",
+    "margin": 0.61
+   },
+   "tokensIn": 183,
+   "tokensOut": 12,
+   "ms": 1038
+  },
+  {
+   "round": 0,
+   "key": "s2.deck",
+   "sig": "about#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role",
+   "model": "gemma4:e2b-it-qat",
+   "section": 2,
+   "sectionKind": "about",
+   "user": "BRIEF: \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods. Tone: classic.\nFacts the page must give: family bakery; Lyon; sourdough; croissants and cakes.\nWrite the words of the \"about\" section, top to bottom:\n01_eyebrow: eyebrow, at most 30 characters\n02_headline: headline, at most 60 characters\n03_sub_line: sub-line, at most 200 characters\n04_paragraph: paragraph, at most 200 characters\n05_quote: quote, at most 200 characters\n06_who_said_it_a_name_and_a_role: who said it: a name and a role, at most 60 characters\nAlready on the page: \"Lyon Family Bakery: Handcrafted Sourdough, Croissants & Cake\", \"Experience tradition in every bite. Freshly baked goods made\", \"Votre boulangerie familiale lyonnaise.\", \"Pain au levain artisanal, croissants feuilletés et gâteaux f\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_eyebrow": "Lyon Family Bakery",
+    "02_headline": "Artisanal Sourdough & Croissants in Lyon",
+    "03_sub_line": "Votre boulangerie familiale lyonnaise. Découvrez nos créations faites avec amour.",
+    "04_paragraph": "Nous célébrons la tradition lyonnaise. Chaque pain au levain artisanal, chaque croissant feuilleté et chaque gâteau est une œuvre d'art préparée avec des ingrédients frais et passion.",
+    "05_quote": "La saveur authentique de Lyon réside dans nos fours. Venez savourer notre héritage.",
+    "06_who_said_it_a_name_and_a_role": "Pierre Dubois, Boulanger"
+   },
+   "tokensIn": 299,
+   "tokensOut": 174,
+   "ms": 6525
+  },
+  {
+   "round": 0,
+   "key": "s3.bits",
+   "sig": "gallery#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe sections above already have: hero: eyebrow, headline, sub-line, photo, button; feature cards: headline, sub-line, photo, list of items; about: eyebrow, headline, sub-line, photo, body text, quote, name line. Not every section needs a button or a photo; a section can be short.\nThe \"gallery\" section (Visually showcases the delicious baked goods.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- photo: one photograph\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "headline",
+     "sub-line",
+     "photo",
+     "list of items"
+    ]
+   },
+   "tokensIn": 383,
+   "tokensOut": 37,
+   "ms": 2863
+  },
+  {
+   "round": 0,
+   "key": "s3.align",
+   "sig": "gallery#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"gallery\" section (Visually showcases the delicious baked goods.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "centred"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.793,
+     "left-aligned": 0.207
+    },
+    "top": "centred",
+    "second": "left-aligned",
+    "margin": 0.586
+   },
+   "tokensIn": 147,
+   "tokensOut": 7,
+   "ms": 897
+  },
+  {
+   "round": 0,
+   "key": "s3.photoPlace",
+   "sig": "gallery#0|photoPlace",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"gallery\" section (Visually showcases the delicious baked goods.). Should the photo sit beside the words, above them, or below them? Answer one of: beside, above, below.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "beside"
+   },
+   "conf": {
+    "dist": {
+     "beside": 0.695,
+     "above": 0.204,
+     "below": 0.101
+    },
+    "top": "beside",
+    "second": "above",
+    "margin": 0.491
+   },
+   "tokensIn": 153,
+   "tokensOut": 8,
+   "ms": 907
+  },
+  {
+   "round": 0,
+   "key": "s3.items.count",
+   "sig": "gallery#0|items.count",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"gallery\" section (Visually showcases the delicious baked goods.). It has a list of similar items. How many items? Answer one of: 2, 3, 4, 6.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "6"
+   },
+   "conf": {
+    "dist": {
+     "2": 0.001,
+     "3": 0.069,
+     "4": 0.396,
+     "6": 0.534
+    },
+    "top": "6",
+    "second": "4",
+    "margin": 0.138
+   },
+   "tokensIn": 156,
+   "tokensOut": 7,
+   "ms": 890
+  },
+  {
+   "round": 0,
+   "key": "s3.items.bits",
+   "sig": "gallery#0|items.bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"gallery\" section (Visually showcases the delicious baked goods.). It has a list of 6 items. Which bits does EACH item have, top to bottom? Choose 1 to 4:\n- photo: a photograph\n- icon: a small icon\n- number: a step number\n- title: a short title\n- text: a sentence or two\n- price: a price\n- time: a time or a date\n- button: a button\n- name line: a name and a role\n(The page has only 2 photographs: a photo on each of 6 items would repeat them.)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "photo",
+     "title",
+     "text",
+     "price"
+    ]
+   },
+   "tokensIn": 243,
+   "tokensOut": 35,
+   "ms": 2108
+  },
+  {
+   "round": 0,
+   "key": "s3.items.layout",
+   "sig": "gallery#0|items.layout",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"gallery\" section (Visually showcases the delicious baked goods.). Its 6 items: a grid, or one column? Answer one of: grid, one column.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "grid"
+   },
+   "conf": {
+    "dist": {
+     "grid": 0.92,
+     "one column": 0.08
+    },
+    "top": "grid",
+    "second": "one column",
+    "margin": 0.84
+   },
+   "tokensIn": 149,
+   "tokensOut": 12,
+   "ms": 951
+  },
+  {
+   "round": 0,
+   "key": "s3.look.band",
+   "sig": "gallery#0|look.band|band,bandSurface,imageGround",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"gallery\" section (Visually showcases the delicious baked goods.). A Group whose role is: the gallery section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…",
+   "temperature": 0.2,
+   "answer": {
+    "look": "imageGround"
+   },
+   "conf": {
+    "dist": {
+     "band": 0.061,
+     "bandSurface": 0.061,
+     "imageGround": 0.879
+    },
+    "top": "imageGround",
+    "second": "band",
+    "margin": 0.818
+   },
+   "tokensIn": 191,
+   "tokensOut": 13,
+   "ms": 1060
+  },
+  {
+   "round": 0,
+   "key": "s3.look.one sentence under the headline",
+   "sig": "gallery#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"gallery\" section (Visually showcases the delicious baked goods.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.861,
+     "body": 0.139
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.722
+   },
+   "tokensIn": 179,
+   "tokensOut": 12,
+   "ms": 1028
+  },
+  {
+   "round": 0,
+   "key": "s3.look.item",
+   "sig": "gallery#0|look.item|card,statTile,testimonialCard,featureItem",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"gallery\" section (Visually showcases the delicious baked goods.). A Group whose role is: item 1 of 6 in the list. It sits inside a \"gridAutoFit\".\nWhich look should it take?\n- card: The card shell\n- statTile: A tile whose only large thing is the number\n- testimonialCard: A quote card that sits ABOVE its band rather than in it\n- featureItem: One item of a feature or trust strip",
+   "temperature": 0.2,
+   "answer": {
+    "look": "card"
+   },
+   "conf": {
+    "dist": {
+     "card": 0.955,
+     "statTile": 0.002,
+     "testimonialCard": 0.001,
+     "featureItem": 0.042
+    },
+    "top": "card",
+    "second": "featureItem",
+    "margin": 0.913
+   },
+   "tokensIn": 211,
+   "tokensOut": 12,
+   "ms": 1138
+  },
+  {
+   "round": 0,
+   "key": "s3.deck",
+   "sig": "gallery#0|deck|headline,sub-line",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "BRIEF: \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods. Tone: classic.\nFacts the page must give: family bakery; Lyon; sourdough; croissants and cakes.\nWrite the words of the \"gallery\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\nAlready on the page: \"Votre boulangerie familiale lyonnaise.\", \"Pain au levain artisanal, croissants feuilletés et gâteaux f\", \"Artisanal Sourdough & Croissants in Lyon\", \"Votre boulangerie familiale lyonnaise. Découvrez nos créatio\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Le Goût Traditionnel de Lyon",
+    "02_sub_line": "Des croissants fins, des gâteaux savoureux et notre pain au levain fait maison."
+   },
+   "tokensIn": 215,
+   "tokensOut": 50,
+   "ms": 2356
+  },
+  {
+   "round": 0,
+   "key": "s3.list.rows",
+   "sig": "gallery#0|list.rows|6|title,sentence,price",
+   "model": "gemma4:e2b-it-qat",
+   "section": 3,
+   "sectionKind": "gallery",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"gallery\" section (Visually showcases the delicious baked goods.) has a list of 6 items. For EACH item, in order, write: title (max 40 characters), sentence (max 160 characters), price (max 20 characters). Each item different from the others; an item's title and sentence and price must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "title": "Classic Sourdough Loaf",
+      "sentence": "Our signature slow-fermented sourdough, perfect for dipping in your morning coffee or enjoying with a meal.",
+      "price": "€5.50"
+     },
+     {
+      "title": "Butter Croissant",
+      "sentence": "Flaky, golden, and rich, made with the finest European butter for an unparalleled morning experience.",
+      "price": "€2.80"
+     },
+     {
+      "title": "Chocolate Ganache Cake",
+      "sentence": "A decadent, moist cake layered with smooth, dark chocolate ganache. A perfect indulgence.",
+      "price": "€7.00"
+     },
+     {
+      "title": "Almond Croissant",
+      "sentence": "Delicate layers filled with sweet almond cream, offering a delicate and flavorful twist on the classic.",
+      "price": "€3.50"
+     },
+     {
+      "title": "Seasonal Fruit Tart",
+      "sentence": "A beautiful pastry featuring seasonal fresh fruit topped with a crisp, buttery shortcrust pastry.",
+      "price": "€6.50"
+     },
+     {
+      "title": "Pain de Campagne",
+      "sentence": "Our rustic country bread, naturally leavened, ideal for dipping or serving alongside local cheeses.",
+      "price": "€4.00"
+     }
+    ]
+   },
+   "tokensIn": 195,
+   "tokensOut": 339,
+   "ms": 12134
+  },
+  {
+   "round": 0,
+   "key": "s4.bits",
+   "sig": "schedule or line-up#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe sections above already have: hero: eyebrow, headline, sub-line, photo, button; feature cards: headline, sub-line, photo, list of items; about: eyebrow, headline, sub-line, photo, body text, quote, name line; gallery: headline, sub-line, photo, list of items. Not every section needs a button or a photo; a section can be short.\nThe \"schedule or line-up\" section (Clearly displays the opening days (Tuesday to Sunday).). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- photo: one photograph\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "headline",
+     "sub-line",
+     "date and place"
+    ]
+   },
+   "tokensIn": 404,
+   "tokensOut": 32,
+   "ms": 2823
+  },
+  {
+   "round": 0,
+   "key": "s4.align",
+   "sig": "schedule or line-up#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"schedule or line-up\" section (Clearly displays the opening days (Tuesday to Sunday).). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "centred"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.863,
+     "left-aligned": 0.137
+    },
+    "top": "centred",
+    "second": "left-aligned",
+    "margin": 0.726
+   },
+   "tokensIn": 154,
+   "tokensOut": 7,
+   "ms": 865
+  },
+  {
+   "round": 0,
+   "key": "s4.look.band",
+   "sig": "schedule or line-up#0|look.band|band,bandSurface,imageGround",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"schedule or line-up\" section (Clearly displays the opening days (Tuesday to Sunday).). A Group whose role is: the schedule or line-up section band.\nWhich look should it take?\n- band: A full-width section on the page background\n- bandSurface: The alternate band\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…",
+   "temperature": 0.2,
+   "answer": {
+    "look": "imageGround"
+   },
+   "conf": {
+    "dist": {
+     "band": 0.217,
+     "bandSurface": 0.217,
+     "imageGround": 0.566
+    },
+    "top": "imageGround",
+    "second": "band",
+    "margin": 0.349
+   },
+   "tokensIn": 202,
+   "tokensOut": 13,
+   "ms": 1247
+  },
+  {
+   "round": 0,
+   "key": "s4.look.one sentence under the headline",
+   "sig": "schedule or line-up#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "schedule or line-up",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"schedule or line-up\" section (Clearly displays the opening days (Tuesday to Sunday).). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.768,
+     "body": 0.232
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.536
+   },
+   "tokensIn": 186,
+   "tokensOut": 12,
+   "ms": 1073
+  },
+  {
+   "round": 0,
+   "key": "s4.deck",
+   "sig": "schedule or line-up#0|deck|headline,sub-line,date and place",
+   "model": "gemma4:e2b-it-qat",
+   "section": 4,
+   "sectionKind": "schedule or line-up",
+   "user": "BRIEF: \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods. Tone: classic.\nFacts the page must give: family bakery; Lyon; sourdough; croissants and cakes.\nWrite the words of the \"schedule or line-up\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\n03_date_and_place: date and place, at most 160 characters\nAlready on the page: \"Artisanal Sourdough & Croissants in Lyon\", \"Votre boulangerie familiale lyonnaise. Découvrez nos créatio\", \"Le Goût Traditionnel de Lyon\", \"Des croissants fins, des gâteaux savoureux et notre pain au \". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Artisan Family Bakery: Lyon's Fresh Delights",
+    "02_sub_line": "Sourdough, croissants, and cakes made with time-honored tradition in the heart of Lyon.",
+    "03_date_and_place": "Open daily. Find us at [Insert Address Here] for your daily fresh bread and pastries."
+   },
+   "tokensIn": 239,
+   "tokensOut": 81,
+   "ms": 3379
+  },
+  {
+   "round": 0,
+   "key": "s5.bits",
+   "sig": "call to action#0|bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe sections above already have: hero: eyebrow, headline, sub-line, photo, button; feature cards: headline, sub-line, photo, list of items; about: eyebrow, headline, sub-line, photo, body text, quote, name line; gallery: headline, sub-line, photo, list of items; schedule or line-up: headline, sub-line, date and place. Not every section needs a button or a photo; a section can be short.\nThe \"call to action\" section (Encourages the visitor to view the full offerings.). Which bits does it need, top to bottom? Choose 1 to 6:\n- eyebrow: a small uppercase line above the headline\n- badge: a small pill holding a few words\n- headline: the main heading\n- sub-line: one sentence under the headline\n- body text: a short paragraph\n- button: the main action button\n- second button: a quieter second action\n- photo: one photograph\n- list of items: several similar items: cards, steps, features, dishes, people or questions\n- quote: a quotation from a person\n- name line: who said it: a name and a role\n- form: a form to fill in: a few fields and a send button\n- date and place: when and where, in one line\n- price: a price\n- small print: a line of fine print (copyright, terms)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "headline",
+     "sub-line",
+     "photo",
+     "list of items",
+     "button"
+    ]
+   },
+   "tokensIn": 418,
+   "tokensOut": 42,
+   "ms": 2773
+  },
+  {
+   "round": 0,
+   "key": "s5.align",
+   "sig": "call to action#0|align",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"call to action\" section (Encourages the visitor to view the full offerings.). Are its words centred or left-aligned? Answer one of: centred, left-aligned.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "centred"
+   },
+   "conf": {
+    "dist": {
+     "centred": 0.927,
+     "left-aligned": 0.073
+    },
+    "top": "centred",
+    "second": "left-aligned",
+    "margin": 0.854
+   },
+   "tokensIn": 152,
+   "tokensOut": 7,
+   "ms": 850
+  },
+  {
+   "round": 0,
+   "key": "s5.photoPlace",
+   "sig": "call to action#0|photoPlace",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"call to action\" section (Encourages the visitor to view the full offerings.). Should the photo sit beside the words, above them, or below them? Answer one of: beside, above, below.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "beside"
+   },
+   "conf": {
+    "dist": {
+     "beside": 0.765,
+     "above": 0.143,
+     "below": 0.092
+    },
+    "top": "beside",
+    "second": "above",
+    "margin": 0.622
+   },
+   "tokensIn": 158,
+   "tokensOut": 8,
+   "ms": 894
+  },
+  {
+   "round": 0,
+   "key": "s5.items.count",
+   "sig": "call to action#0|items.count",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"call to action\" section (Encourages the visitor to view the full offerings.). It has a list of similar items. How many items? Answer one of: 2, 3, 4, 6.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "3"
+   },
+   "tokensIn": 161,
+   "tokensOut": 8,
+   "ms": 932
+  },
+  {
+   "round": 0,
+   "key": "s5.items.bits",
+   "sig": "call to action#0|items.bits",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"call to action\" section (Encourages the visitor to view the full offerings.). It has a list of 3 items. Which bits does EACH item have, top to bottom? Choose 1 to 4:\n- photo: a photograph\n- icon: a small icon\n- number: a step number\n- title: a short title\n- text: a sentence or two\n- price: a price\n- time: a time or a date\n- button: a button\n- name line: a name and a role\n(The page has only 2 photographs: a photo on each of 3 items would repeat them.)",
+   "temperature": 0.3,
+   "answer": {
+    "bits": [
+     "photo",
+     "title",
+     "text",
+     "button"
+    ]
+   },
+   "tokensIn": 248,
+   "tokensOut": 35,
+   "ms": 2132
+  },
+  {
+   "round": 0,
+   "key": "s5.items.layout",
+   "sig": "call to action#0|items.layout",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"call to action\" section (Encourages the visitor to view the full offerings.). Its 3 items: a grid, or one column? Answer one of: grid, one column.",
+   "temperature": 0.2,
+   "answer": {
+    "answer": "grid"
+   },
+   "conf": {
+    "dist": {
+     "grid": 0.902,
+     "one column": 0.098
+    },
+    "top": "grid",
+    "second": "one column",
+    "margin": 0.804
+   },
+   "tokensIn": 154,
+   "tokensOut": 12,
+   "ms": 972
+  },
+  {
+   "round": 0,
+   "key": "s5.look.band",
+   "sig": "call to action#0|look.band|bandSurface,ctaBand,imageGround",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"call to action\" section (Encourages the visitor to view the full offerings.). A Group whose role is: the call to action section band.\nWhich look should it take?\n- bandSurface: The alternate band\n- ctaBand: The closing call-to-action band\n- imageGround: A photograph as a section ground with a scrim over it, so text stays readable whatever th…",
+   "temperature": 0.2,
+   "answer": {
+    "look": "ctaBand"
+   },
+   "conf": {
+    "dist": {
+     "bandSurface": 0.011,
+     "ctaBand": 0.854,
+     "imageGround": 0.135
+    },
+    "top": "ctaBand",
+    "second": "imageGround",
+    "margin": 0.719
+   },
+   "tokensIn": 199,
+   "tokensOut": 13,
+   "ms": 1160
+  },
+  {
+   "round": 0,
+   "key": "s5.look.one sentence under the headline",
+   "sig": "call to action#0|look.one sentence under the headline|lead,body",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"call to action\" section (Encourages the visitor to view the full offerings.). A Text whose role is: one sentence under the headline.\nWhich look should it take?\n- lead: One sub-line under a heading, capped so it wraps at a readable measure rather than the fu…\n- body: Ordinary running text",
+   "temperature": 0.2,
+   "answer": {
+    "look": "lead"
+   },
+   "conf": {
+    "dist": {
+     "lead": 0.827,
+     "body": 0.173
+    },
+    "top": "lead",
+    "second": "body",
+    "margin": 0.654
+   },
+   "tokensIn": 184,
+   "tokensOut": 12,
+   "ms": 1044
+  },
+  {
+   "round": 0,
+   "key": "s5.look.item",
+   "sig": "call to action#0|look.item|card,statTile,testimonialCard,featureItem",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"call to action\" section (Encourages the visitor to view the full offerings.). A Group whose role is: item 1 of 3 in the list. It sits inside a \"gridAutoFit\".\nWhich look should it take?\n- card: The card shell\n- statTile: A tile whose only large thing is the number\n- testimonialCard: A quote card that sits ABOVE its band rather than in it\n- featureItem: One item of a feature or trust strip",
+   "temperature": 0.2,
+   "answer": {
+    "look": "card"
+   },
+   "conf": {
+    "dist": {
+     "card": 0.84,
+     "statTile": 0.003,
+     "testimonialCard": 0.01,
+     "featureItem": 0.148
+    },
+    "top": "card",
+    "second": "featureItem",
+    "margin": 0.692
+   },
+   "tokensIn": 216,
+   "tokensOut": 12,
+   "ms": 1162
+  },
+  {
+   "round": 0,
+   "key": "s5.look.the main action of the call to action section",
+   "sig": "call to action#0|look.the main action of the call to action section|primaryButton,outlineButton",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"call to action\" section (Encourages the visitor to view the full offerings.). A Button whose role is: the main action of the call to action section. It sits inside a \"actionRow\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action",
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "conf": {
+    "dist": {
+     "primaryButton": 0.988,
+     "outlineButton": 0.012
+    },
+    "top": "primaryButton",
+    "second": "outlineButton",
+    "margin": 0.976
+   },
+   "tokensIn": 181,
+   "tokensOut": 13,
+   "ms": 1091
+  },
+  {
+   "round": 0,
+   "key": "s5.look.itemButton",
+   "sig": "call to action#0|look.itemButton|primaryButton,outlineButton",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"call to action\" section (Encourages the visitor to view the full offerings.). A Button whose role is: item 1 of 3: its button. It sits inside a \"cardBody\".\nWhich look should it take?\n- primaryButton: The one filled action\n- outlineButton: The secondary action",
+   "temperature": 0.2,
+   "answer": {
+    "look": "primaryButton"
+   },
+   "conf": {
+    "dist": {
+     "primaryButton": 0.984,
+     "outlineButton": 0.016
+    },
+    "top": "primaryButton",
+    "second": "outlineButton",
+    "margin": 0.968
+   },
+   "tokensIn": 181,
+   "tokensOut": 13,
+   "ms": 1104
+  },
+  {
+   "round": 0,
+   "key": "s5.deck",
+   "sig": "call to action#0|deck|headline,sub-line,button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "BRIEF: \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods. Tone: classic.\nFacts the page must give: family bakery; Lyon; sourdough; croissants and cakes.\nWrite the words of the \"call to action\" section, top to bottom:\n01_headline: headline, at most 60 characters\n02_sub_line: sub-line, at most 160 characters\n03_button: button, two to four words, a verb first; pressing it lets a visitor Visit the site to view our delicious sourdough, croissants, and cakes\nAlready on the page: \"Le Goût Traditionnel de Lyon\", \"Des croissants fins, des gâteaux savoureux et notre pain au \", \"Artisan Family Bakery: Lyon's Fresh Delights\", \"Sourdough, croissants, and cakes made with time-honored trad\". Say something new. Each line says something the others do not. Words a visitor reads: never describe the page, the section or its design.",
+   "temperature": 0.8,
+   "answer": {
+    "01_headline": "Lyon's Heart: Family Bakery",
+    "02_sub_line": "Experience authentic sourdough, flaky croissants, and exquisite cakes, crafted with tradition in Lyon.",
+    "03_button": "Taste Our Bakes"
+   },
+   "tokensIn": 254,
+   "tokensOut": 63,
+   "ms": 2831
+  },
+  {
+   "round": 0,
+   "key": "s5.list.rows",
+   "sig": "call to action#0|list.rows|3|title,sentence,button",
+   "model": "gemma4:e2b-it-qat",
+   "section": 5,
+   "sectionKind": "call to action",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nBRIEF: a landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods. The one action: Visit the site to view our delicious sourdough, croissants, and cakes. Tone: classic.\nThe \"call to action\" section (Encourages the visitor to view the full offerings.) has a list of 3 items. For EACH item, in order, write: title (max 40 characters), sentence (max 160 characters), button (max 24 characters). Each item different from the others; an item's title and sentence and button must agree. Plain words, no numbering.",
+   "temperature": 0.8,
+   "answer": {
+    "items": [
+     {
+      "title": "Artisan Sourdough",
+      "sentence": "Our signature sourdough, crafted with traditional methods and slow fermentation, is baked fresh daily. A perfect, tangy bite for your table.",
+      "button": "View Sourdough"
+     },
+     {
+      "title": "Flaky Croissants",
+      "sentence": "Experience the perfect buttery layers with our classic croissants. Light, airy, and baked to golden perfection every morning.",
+      "button": "View Croissants"
+     },
+     {
+      "title": "Decadent Cakes",
+      "sentence": "Indulge in our range of exquisite cakes for any occasion. From rich chocolate to light vanilla, pure sweet delight.",
+      "button": "View Cakes"
+     }
+    ]
+   },
+   "tokensIn": 200,
+   "tokensOut": 186,
+   "ms": 6872
+  }
+ ],
+ "judgements": [
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-city-dusk.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.039,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 6895
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-forest-fog.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.068,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1182
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-canyon.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.056,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1256
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-dune.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.037,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1359
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-coast.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.049,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1427
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-shore.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.053,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1494
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-red-rock.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.033,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1518
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "ground-skyline.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.037,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 140,
+   "ms": 1513
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-welder.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.02,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1515
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-potter.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.296,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1523
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-baker.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.239,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1509
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-chef.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.317,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1507
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-carpenter.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.065,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1503
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-leather-bench.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.232,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1486
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-machine-shop.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.169,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1491
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "work-hands-clay.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.261,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1475
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-cafe.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.266,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1477
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-coffee-shop.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.169,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1500
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-meeting.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.102,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1487
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-market.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.121,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1490
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "people-desk.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.122,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1492
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-market.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.149,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1527
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-bread.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.871,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1545
+  },
+  {
+   "round": 0,
+   "key": "photo.shows",
+   "file": "food-bread.webp",
+   "user": "This page is about \"Lyon Family Bakery\": family bakery; Lyon; sourdough; croissants and cakes. Does this photo show what this page is about? Answer yes or no.",
+   "pYes": 0.954,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 134,
+   "ms": 1523
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-board.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.147,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1519
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-plate.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.006,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1502
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-grocer.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.118,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1490
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-carrots.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.11,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1486
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "food-bakery.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.935,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1472
+  },
+  {
+   "round": 0,
+   "key": "photo.shows",
+   "file": "food-bakery.webp",
+   "user": "This page is about \"Lyon Family Bakery\": family bakery; Lyon; sourdough; croissants and cakes. Does this photo show what this page is about? Answer yes or no.",
+   "pYes": 0.968,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 134,
+   "ms": 1466
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-cat.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.054,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1489
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-horse.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.08,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1503
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-sheep.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.043,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1494
+  },
+  {
+   "round": 0,
+   "key": "photo.fit",
+   "file": "animal-dog.webp",
+   "user": "Would this photo make sense on a web page for \"Lyon Family Bakery\", a landing page for Local customers in Lyon looking for fresh baked goods (family bakery; Lyon; sourdough; croissants and cakes)? Answer yes or no.",
+   "pYes": 0.061,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 144,
+   "ms": 1497
+  },
+  {
+   "round": 0,
+   "key": "s0.sound",
+   "section": 0,
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.\n\nSection \"hero\" (dark band). Top to bottom:\n- eyebrow: \"Authentic Lyon Bakery\"\n- headline: \"Lyon Family Bakery: Handcrafted Sourdough, Croissants & Cakes\"\n- sub-line: \"Experience tradition in every bite. Freshly baked goods made with love, perfect for your local family.\"\n- button: \"View Our Menu\"\n- a photo (food-bakery.webp)\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.987,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 175,
+   "ms": 6749
+  },
+  {
+   "round": 0,
+   "key": "s1.sound",
+   "section": 1,
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.\n\nSection \"feature cards\" (dark band). Top to bottom:\n- a photo (food-bakery.webp)\n- headline: \"Votre boulangerie familiale lyonnaise.\"\n- sub-line: \"Pain au levain artisanal, croissants feuilletés et gâteaux faits maison avec amour.\"\n- 3 featureItems in a grid, each: photo, title, sentence or two, button:\n  1. \"Artisanal Sourdough\" — \"Slow-fermented for the perfect tangy flavor and chewy crust. Handcrafted daily in our family ovens.\" — \"View Sourdough\"\n  2. \"Buttery Croissants\" — \"Flaky, golden, and perfectly laminated. The ultimate French breakfast experience awaits you.\" — \"View Croissants\"\n  3. \"Signature Cakes\" — \"Indulge in rich, decadent treats perfect for any occasion. Baked fresh with love and care.\" — \"View Cakes\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.995,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 282,
+   "ms": 1451
+  },
+  {
+   "round": 0,
+   "key": "s1.fits",
+   "section": 1,
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.\n\nSection \"feature cards\" (dark band). Top to bottom:\n- a photo (food-bakery.webp)\n- headline: \"Votre boulangerie familiale lyonnaise.\"\n- sub-line: \"Pain au levain artisanal, croissants feuilletés et gâteaux faits maison avec amour.\"\n- 3 featureItems in a grid, each: photo, title, sentence or two, button:\n  1. \"Artisanal Sourdough\" — \"Slow-fermented for the perfect tangy flavor and chewy crust. Handcrafted daily in our family ovens.\" — \"View Sourdough\"\n  2. \"Buttery Croissants\" — \"Flaky, golden, and perfectly laminated. The ultimate French breakfast experience awaits you.\" — \"View Croissants\"\n  3. \"Signature Cakes\" — \"Indulge in rich, decadent treats perfect for any occasion. Baked fresh with love and care.\" — \"View Cakes\"\n\nDoes the headline describe the WHOLE section, not just one item in it?",
+   "pYes": 0.985,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 266,
+   "ms": 1469
+  },
+  {
+   "round": 0,
+   "key": "s2.sound",
+   "section": 2,
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.\n\nSection \"about\" (dark band). Top to bottom:\n- eyebrow: \"Lyon Family Bakery\"\n- headline: \"Artisanal Sourdough & Croissants in Lyon\"\n- sub-line: \"Votre boulangerie familiale lyonnaise. Découvrez nos créations faites avec amour.\"\n- paragraph: \"Nous célébrons la tradition lyonnaise. Chaque pain au levain artisanal, chaque croissant feuilleté et chaque gâteau est une œuvre d'art préparée avec des ingrédients frais et passion.\"\n- quote: \"La saveur authentique de Lyon réside dans nos fours. Venez savourer notre héritage.\"\n- who said it: a name and a role: \"Pierre Dubois, Boulanger\"\n- a photo (food-bread.webp)\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.976,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 246,
+   "ms": 1468
+  },
+  {
+   "round": 0,
+   "key": "s3.sound",
+   "section": 3,
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.\n\nSection \"gallery\" (dark band). Top to bottom:\n- a photo (food-bread.webp)\n- headline: \"Le Goût Traditionnel de Lyon\"\n- sub-line: \"Des croissants fins, des gâteaux savoureux et notre pain au levain fait maison.\"\n- 6 cards in a grid, each: photo, title, sentence or two, price:\n  1. \"Classic Sourdough Loaf\" — \"Our signature slow-fermented sourdough, perfect for dipping in your morning coffee or enjoying with a meal.\" — \"€5.50\"\n  2. \"Butter Croissant\" — \"Flaky, golden, and rich, made with the finest European butter for an unparalleled morning experience.\" — \"€2.80\"\n  3. \"Chocolate Ganache Cake\" — \"A decadent, moist cake layered with smooth, dark chocolate ganache. A perfect indulgence.\" — \"€7.00\"\n  4. \"Almond Croissant\" — \"Delicate layers filled with sweet almond cream, offering a delicate and flavorful twist on the classic.\" — \"€3.50\"\n  5. \"Seasonal Fruit Tart\" — \"A beautiful pastry featuring seasonal fresh fruit topped with a crisp, buttery shortcrust pastry.\" — \"€6.50\"\n  6. \"Pain de Campagne\" — \"Our rustic country bread, naturally leavened, ideal for dipping or serving alongside local cheeses.\" — \"€4.00\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.994,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 402,
+   "ms": 2584
+  },
+  {
+   "round": 0,
+   "key": "s3.fits",
+   "section": 3,
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.\n\nSection \"gallery\" (dark band). Top to bottom:\n- a photo (food-bread.webp)\n- headline: \"Le Goût Traditionnel de Lyon\"\n- sub-line: \"Des croissants fins, des gâteaux savoureux et notre pain au levain fait maison.\"\n- 6 cards in a grid, each: photo, title, sentence or two, price:\n  1. \"Classic Sourdough Loaf\" — \"Our signature slow-fermented sourdough, perfect for dipping in your morning coffee or enjoying with a meal.\" — \"€5.50\"\n  2. \"Butter Croissant\" — \"Flaky, golden, and rich, made with the finest European butter for an unparalleled morning experience.\" — \"€2.80\"\n  3. \"Chocolate Ganache Cake\" — \"A decadent, moist cake layered with smooth, dark chocolate ganache. A perfect indulgence.\" — \"€7.00\"\n  4. \"Almond Croissant\" — \"Delicate layers filled with sweet almond cream, offering a delicate and flavorful twist on the classic.\" — \"€3.50\"\n  5. \"Seasonal Fruit Tart\" — \"A beautiful pastry featuring seasonal fresh fruit topped with a crisp, buttery shortcrust pastry.\" — \"€6.50\"\n  6. \"Pain de Campagne\" — \"Our rustic country bread, naturally leavened, ideal for dipping or serving alongside local cheeses.\" — \"€4.00\"\n\nDoes the headline describe the WHOLE section, not just one item in it?",
+   "pYes": 0.997,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 386,
+   "ms": 2565
+  },
+  {
+   "round": 0,
+   "key": "s4.sound",
+   "section": 4,
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.\n\nSection \"schedule or line-up\" (dark band). Top to bottom:\n- headline: \"Artisan Family Bakery: Lyon's Fresh Delights\"\n- sub-line: \"Sourdough, croissants, and cakes made with time-honored tradition in the heart of Lyon.\"\n- date and place: \"Open daily. Find us at [Insert Address Here] for your daily fresh bread and pastries.\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.985,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 172,
+   "ms": 1307
+  },
+  {
+   "round": 0,
+   "key": "s5.sound",
+   "section": 5,
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.\n\nSection \"call to action\" (dark band). Top to bottom:\n- headline: \"Lyon's Heart: Family Bakery\"\n- sub-line: \"Experience authentic sourdough, flaky croissants, and exquisite cakes, crafted with tradition in Lyon.\"\n- button: \"Taste Our Bakes\"\n- a photo (food-bread.webp)\n- 3 cards in a grid, each: photo, title, sentence or two, button:\n  1. \"Artisan Sourdough\" — \"Our signature sourdough, crafted with traditional methods and slow fermentation, is baked fresh daily. A perfect, tangy bite for your table.\" — \"View Sourdough\"\n  2. \"Flaky Croissants\" — \"Experience the perfect buttery layers with our classic croissants. Light, airy, and baked to golden perfection every morning.\" — \"View Croissants\"\n  3. \"Decadent Cakes\" — \"Indulge in our range of exquisite cakes for any occasion. From rich chocolate to light vanilla, pure sweet delight.\" — \"View Cakes\"\n\nDoes every line read like something a real business or organisation would publish on this page, with nothing odd, cut off, repeated, off-topic or strange?",
+   "pYes": 0.991,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 305,
+   "ms": 2079
+  },
+  {
+   "round": 0,
+   "key": "s5.fits",
+   "section": 5,
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.\n\nSection \"call to action\" (dark band). Top to bottom:\n- headline: \"Lyon's Heart: Family Bakery\"\n- sub-line: \"Experience authentic sourdough, flaky croissants, and exquisite cakes, crafted with tradition in Lyon.\"\n- button: \"Taste Our Bakes\"\n- a photo (food-bread.webp)\n- 3 cards in a grid, each: photo, title, sentence or two, button:\n  1. \"Artisan Sourdough\" — \"Our signature sourdough, crafted with traditional methods and slow fermentation, is baked fresh daily. A perfect, tangy bite for your table.\" — \"View Sourdough\"\n  2. \"Flaky Croissants\" — \"Experience the perfect buttery layers with our classic croissants. Light, airy, and baked to golden perfection every morning.\" — \"View Croissants\"\n  3. \"Decadent Cakes\" — \"Indulge in our range of exquisite cakes for any occasion. From rich chocolate to light vanilla, pure sweet delight.\" — \"View Cakes\"\n\nDoes the headline describe the WHOLE section, not just one item in it?",
+   "pYes": 0.98,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 289,
+   "ms": 1867
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "family bakery",
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.\nEvery line of words on the page, by section:\n[hero] Authentic Lyon Bakery / Lyon Family Bakery: Handcrafted Sourdough, Croissants & Cakes / Experience tradition in every bite. Freshly baked goods made with love, perfect for your l / View Our Menu\n[feature cards] Votre boulangerie familiale lyonnaise. / Pain au levain artisanal, croissants feuilletés et gâteaux faits maison avec amour. / Artisanal Sourdough / Slow-fermented for the perfect tangy flavor and chewy crust. Handcrafted daily in our fami / View Sourdough / Buttery Croissants / Flaky, golden, and perfectly laminated. The ultimate French breakfast experience awaits yo / View Croissants / Signature Cakes / Indulge in rich, decadent treats perfect for any occasion. Baked fresh with love and care. / View Cakes\n[about] Lyon Family Bakery / Artisanal Sourdough & Croissants in Lyon / Votre boulangerie familiale lyonnaise. Découvrez nos créations faites avec amour. / Nous célébrons la tradition lyonnaise. Chaque pain au levain artisanal, chaque croissant f / La saveur authentique de Lyon réside dans nos fours. Venez savourer notre héritage. / Pierre Dubois, Boulanger\n[gallery] Le Goût Traditionnel de Lyon / Des croissants fins, des gâteaux savoureux et notre pain au levain fait maison. / Classic Sourdough Loaf / Our signature slow-fermented sourdough, perfect for dipping in your morning coffee or enjo / €5.50 / Butter Croissant / Flaky, golden, and rich, made with the finest European butter for an unparalleled morning  / €2.80 / Chocolate Ganache Cake / A decadent, moist cake layered with smooth, dark chocolate ganache. A perfect indulgence. / €7.00 / Almond Croissant / Delicate layers filled with sweet almond cream, offering a delicate and flavorful twist on / €3.50 / Seasonal Fruit Tart / A beautiful pastry featuring seasonal fresh fruit topped with a crisp, buttery shortcrust  / €6.50 / Pain de Campagne / Our rustic country bread, naturally leavened, ideal for dipping or serving alongside local / €4.00\n[schedule or line-up] Artisan Family Bakery: Lyon's Fresh Delights / Sourdough, croissants, and cakes made with time-honored tradition in the heart of Lyon. / Open daily. Find us at [Insert Address Here] for your daily fresh bread and pastries.\n[call to action] Lyon's Heart: Family Bakery / Experience authentic sourdough, flaky croissants, and exquisite cakes, crafted with tradit / Taste Our Bakes / Artisan Sourdough / Our signature sourdough, crafted with traditional methods and slow fermentation, is baked  / View Sourdough / Flaky Croissants / Experience the perfect buttery layers with our classic croissants. Light, airy, and baked  / View Croissants / Decadent Cakes / Indulge in our range of exquisite cakes for any occasion. From rich chocolate to light van / View Cakes\n\nDoes the page tell a visitor: family bakery?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 697,
+   "ms": 4571
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "Lyon",
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.\nEvery line of words on the page, by section:\n[hero] Authentic Lyon Bakery / Lyon Family Bakery: Handcrafted Sourdough, Croissants & Cakes / Experience tradition in every bite. Freshly baked goods made with love, perfect for your l / View Our Menu\n[feature cards] Votre boulangerie familiale lyonnaise. / Pain au levain artisanal, croissants feuilletés et gâteaux faits maison avec amour. / Artisanal Sourdough / Slow-fermented for the perfect tangy flavor and chewy crust. Handcrafted daily in our fami / View Sourdough / Buttery Croissants / Flaky, golden, and perfectly laminated. The ultimate French breakfast experience awaits yo / View Croissants / Signature Cakes / Indulge in rich, decadent treats perfect for any occasion. Baked fresh with love and care. / View Cakes\n[about] Lyon Family Bakery / Artisanal Sourdough & Croissants in Lyon / Votre boulangerie familiale lyonnaise. Découvrez nos créations faites avec amour. / Nous célébrons la tradition lyonnaise. Chaque pain au levain artisanal, chaque croissant f / La saveur authentique de Lyon réside dans nos fours. Venez savourer notre héritage. / Pierre Dubois, Boulanger\n[gallery] Le Goût Traditionnel de Lyon / Des croissants fins, des gâteaux savoureux et notre pain au levain fait maison. / Classic Sourdough Loaf / Our signature slow-fermented sourdough, perfect for dipping in your morning coffee or enjo / €5.50 / Butter Croissant / Flaky, golden, and rich, made with the finest European butter for an unparalleled morning  / €2.80 / Chocolate Ganache Cake / A decadent, moist cake layered with smooth, dark chocolate ganache. A perfect indulgence. / €7.00 / Almond Croissant / Delicate layers filled with sweet almond cream, offering a delicate and flavorful twist on / €3.50 / Seasonal Fruit Tart / A beautiful pastry featuring seasonal fresh fruit topped with a crisp, buttery shortcrust  / €6.50 / Pain de Campagne / Our rustic country bread, naturally leavened, ideal for dipping or serving alongside local / €4.00\n[schedule or line-up] Artisan Family Bakery: Lyon's Fresh Delights / Sourdough, croissants, and cakes made with time-honored tradition in the heart of Lyon. / Open daily. Find us at [Insert Address Here] for your daily fresh bread and pastries.\n[call to action] Lyon's Heart: Family Bakery / Experience authentic sourdough, flaky croissants, and exquisite cakes, crafted with tradit / Taste Our Bakes / Artisan Sourdough / Our signature sourdough, crafted with traditional methods and slow fermentation, is baked  / View Sourdough / Flaky Croissants / Experience the perfect buttery layers with our classic croissants. Light, airy, and baked  / View Croissants / Decadent Cakes / Indulge in our range of exquisite cakes for any occasion. From rich chocolate to light van / View Cakes\n\nDoes the page tell a visitor: Lyon?",
+   "pYes": 0.999,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 696,
+   "ms": 219
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "sourdough",
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.\nEvery line of words on the page, by section:\n[hero] Authentic Lyon Bakery / Lyon Family Bakery: Handcrafted Sourdough, Croissants & Cakes / Experience tradition in every bite. Freshly baked goods made with love, perfect for your l / View Our Menu\n[feature cards] Votre boulangerie familiale lyonnaise. / Pain au levain artisanal, croissants feuilletés et gâteaux faits maison avec amour. / Artisanal Sourdough / Slow-fermented for the perfect tangy flavor and chewy crust. Handcrafted daily in our fami / View Sourdough / Buttery Croissants / Flaky, golden, and perfectly laminated. The ultimate French breakfast experience awaits yo / View Croissants / Signature Cakes / Indulge in rich, decadent treats perfect for any occasion. Baked fresh with love and care. / View Cakes\n[about] Lyon Family Bakery / Artisanal Sourdough & Croissants in Lyon / Votre boulangerie familiale lyonnaise. Découvrez nos créations faites avec amour. / Nous célébrons la tradition lyonnaise. Chaque pain au levain artisanal, chaque croissant f / La saveur authentique de Lyon réside dans nos fours. Venez savourer notre héritage. / Pierre Dubois, Boulanger\n[gallery] Le Goût Traditionnel de Lyon / Des croissants fins, des gâteaux savoureux et notre pain au levain fait maison. / Classic Sourdough Loaf / Our signature slow-fermented sourdough, perfect for dipping in your morning coffee or enjo / €5.50 / Butter Croissant / Flaky, golden, and rich, made with the finest European butter for an unparalleled morning  / €2.80 / Chocolate Ganache Cake / A decadent, moist cake layered with smooth, dark chocolate ganache. A perfect indulgence. / €7.00 / Almond Croissant / Delicate layers filled with sweet almond cream, offering a delicate and flavorful twist on / €3.50 / Seasonal Fruit Tart / A beautiful pastry featuring seasonal fresh fruit topped with a crisp, buttery shortcrust  / €6.50 / Pain de Campagne / Our rustic country bread, naturally leavened, ideal for dipping or serving alongside local / €4.00\n[schedule or line-up] Artisan Family Bakery: Lyon's Fresh Delights / Sourdough, croissants, and cakes made with time-honored tradition in the heart of Lyon. / Open daily. Find us at [Insert Address Here] for your daily fresh bread and pastries.\n[call to action] Lyon's Heart: Family Bakery / Experience authentic sourdough, flaky croissants, and exquisite cakes, crafted with tradit / Taste Our Bakes / Artisan Sourdough / Our signature sourdough, crafted with traditional methods and slow fermentation, is baked  / View Sourdough / Flaky Croissants / Experience the perfect buttery layers with our classic croissants. Light, airy, and baked  / View Croissants / Decadent Cakes / Indulge in our range of exquisite cakes for any occasion. From rich chocolate to light van / View Cakes\n\nDoes the page tell a visitor: sourdough?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 696,
+   "ms": 200
+  },
+  {
+   "round": 0,
+   "key": "page.mustShow",
+   "fact": "croissants and cakes",
+   "user": "A landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.\nEvery line of words on the page, by section:\n[hero] Authentic Lyon Bakery / Lyon Family Bakery: Handcrafted Sourdough, Croissants & Cakes / Experience tradition in every bite. Freshly baked goods made with love, perfect for your l / View Our Menu\n[feature cards] Votre boulangerie familiale lyonnaise. / Pain au levain artisanal, croissants feuilletés et gâteaux faits maison avec amour. / Artisanal Sourdough / Slow-fermented for the perfect tangy flavor and chewy crust. Handcrafted daily in our fami / View Sourdough / Buttery Croissants / Flaky, golden, and perfectly laminated. The ultimate French breakfast experience awaits yo / View Croissants / Signature Cakes / Indulge in rich, decadent treats perfect for any occasion. Baked fresh with love and care. / View Cakes\n[about] Lyon Family Bakery / Artisanal Sourdough & Croissants in Lyon / Votre boulangerie familiale lyonnaise. Découvrez nos créations faites avec amour. / Nous célébrons la tradition lyonnaise. Chaque pain au levain artisanal, chaque croissant f / La saveur authentique de Lyon réside dans nos fours. Venez savourer notre héritage. / Pierre Dubois, Boulanger\n[gallery] Le Goût Traditionnel de Lyon / Des croissants fins, des gâteaux savoureux et notre pain au levain fait maison. / Classic Sourdough Loaf / Our signature slow-fermented sourdough, perfect for dipping in your morning coffee or enjo / €5.50 / Butter Croissant / Flaky, golden, and rich, made with the finest European butter for an unparalleled morning  / €2.80 / Chocolate Ganache Cake / A decadent, moist cake layered with smooth, dark chocolate ganache. A perfect indulgence. / €7.00 / Almond Croissant / Delicate layers filled with sweet almond cream, offering a delicate and flavorful twist on / €3.50 / Seasonal Fruit Tart / A beautiful pastry featuring seasonal fresh fruit topped with a crisp, buttery shortcrust  / €6.50 / Pain de Campagne / Our rustic country bread, naturally leavened, ideal for dipping or serving alongside local / €4.00\n[schedule or line-up] Artisan Family Bakery: Lyon's Fresh Delights / Sourdough, croissants, and cakes made with time-honored tradition in the heart of Lyon. / Open daily. Find us at [Insert Address Here] for your daily fresh bread and pastries.\n[call to action] Lyon's Heart: Family Bakery / Experience authentic sourdough, flaky croissants, and exquisite cakes, crafted with tradit / Taste Our Bakes / Artisan Sourdough / Our signature sourdough, crafted with traditional methods and slow fermentation, is baked  / View Sourdough / Flaky Croissants / Experience the perfect buttery layers with our classic croissants. Light, airy, and baked  / View Croissants / Decadent Cakes / Indulge in our range of exquisite cakes for any occasion. From rich chocolate to light van / View Cakes\n\nDoes the page tell a visitor: croissants and cakes?",
+   "pYes": 1,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 698,
+   "ms": 208
+  },
+  {
+   "round": 0,
+   "key": "page.contradicts",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nEvery line of words on the page, by section:\n[hero] Authentic Lyon Bakery / Lyon Family Bakery: Handcrafted Sourdough, Croissants & Cakes / Experience tradition in every bite. Freshly baked goods made with love, perfect for your l / View Our Menu\n[feature cards] Votre boulangerie familiale lyonnaise. / Pain au levain artisanal, croissants feuilletés et gâteaux faits maison avec amour. / Artisanal Sourdough / Slow-fermented for the perfect tangy flavor and chewy crust. Handcrafted daily in our fami / View Sourdough / Buttery Croissants / Flaky, golden, and perfectly laminated. The ultimate French breakfast experience awaits yo / View Croissants / Signature Cakes / Indulge in rich, decadent treats perfect for any occasion. Baked fresh with love and care. / View Cakes\n[about] Lyon Family Bakery / Artisanal Sourdough & Croissants in Lyon / Votre boulangerie familiale lyonnaise. Découvrez nos créations faites avec amour. / Nous célébrons la tradition lyonnaise. Chaque pain au levain artisanal, chaque croissant f / La saveur authentique de Lyon réside dans nos fours. Venez savourer notre héritage. / Pierre Dubois, Boulanger\n[gallery] Le Goût Traditionnel de Lyon / Des croissants fins, des gâteaux savoureux et notre pain au levain fait maison. / Classic Sourdough Loaf / Our signature slow-fermented sourdough, perfect for dipping in your morning coffee or enjo / €5.50 / Butter Croissant / Flaky, golden, and rich, made with the finest European butter for an unparalleled morning  / €2.80 / Chocolate Ganache Cake / A decadent, moist cake layered with smooth, dark chocolate ganache. A perfect indulgence. / €7.00 / Almond Croissant / Delicate layers filled with sweet almond cream, offering a delicate and flavorful twist on / €3.50 / Seasonal Fruit Tart / A beautiful pastry featuring seasonal fresh fruit topped with a crisp, buttery shortcrust  / €6.50 / Pain de Campagne / Our rustic country bread, naturally leavened, ideal for dipping or serving alongside local / €4.00\n[schedule or line-up] Artisan Family Bakery: Lyon's Fresh Delights / Sourdough, croissants, and cakes made with time-honored tradition in the heart of Lyon. / Open daily. Find us at [Insert Address Here] for your daily fresh bread and pastries.\n[call to action] Lyon's Heart: Family Bakery / Experience authentic sourdough, flaky croissants, and exquisite cakes, crafted with tradit / Taste Our Bakes / Artisan Sourdough / Our signature sourdough, crafted with traditional methods and slow fermentation, is baked  / View Sourdough / Flaky Croissants / Experience the perfect buttery layers with our classic croissants. Light, airy, and baked  / View Croissants / Decadent Cakes / Indulge in our range of exquisite cakes for any occasion. From rich chocolate to light van / View Cakes\n\nDoes any line say something the request contradicts, or invent a detail it would need to know (a different day, date, time, place, price, currency or name)?",
+   "pYes": 0.954,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 733,
+   "ms": 5039
+  },
+  {
+   "round": 0,
+   "key": "page.contradictsWhich",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nWhich line contradicts the request or invents a detail?",
+   "pick": "schedule or line-up date and place: \"Open daily. Find us at [Insert Address Here] for your daily fresh brea\"",
+   "dist": {
+    "schedule or line-up date and place: \"Open daily. Find us at [Insert Address Here] for your daily fresh brea\"": 0.9812949902440709,
+    "feature cards item 1 sentence or two: \"Slow-fermented for the perfect tangy flavor and chewy crust. Handcraft\"": 0.01404877374070923,
+    "gallery item 3 price: \"€7.00\"": 0.0011451254146026962,
+    "gallery item 1 price: \"€5.50\"": 0.0008405238147800762,
+    "call to action item 1 sentence or two: \"Our signature sourdough, crafted with traditional methods and slow fer\"": 0.000721623946216449,
+    "gallery item 2 price: \"€2.80\"": 0.00032619097524485587,
+    "gallery item 5 price: \"€6.50\"": 0.00016036423542145894
+   },
+   "model": "gemma4:e4b-it-qat"
+  },
+  {
+   "round": 0,
+   "key": "page.missing",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nA landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.\nThe page's sections, top to bottom:\n1. hero: \"Lyon Family Bakery: Handcrafted Sourdough, Croissants & Cakes\"\n2. feature cards: \"Votre boulangerie familiale lyonnaise.\"\n3. about: \"Artisanal Sourdough & Croissants in Lyon\"\n4. gallery: \"Le Goût Traditionnel de Lyon\"\n5. schedule or line-up: \"Artisan Family Bakery: Lyon's Fresh Delights\"\n6. call to action: \"Lyon's Heart: Family Bakery\"\n\nIs something a visitor would clearly expect on this page missing?",
+   "pYes": 0.743,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 213,
+   "ms": 1542
+  },
+  {
+   "round": 0,
+   "key": "page.missingWhich",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nA landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.\nThe page's sections, top to bottom:\n1. hero: \"Lyon Family Bakery: Handcrafted Sourdough, Croissants & Cakes\"\n2. feature cards: \"Votre boulangerie familiale lyonnaise.\"\n3. about: \"Artisanal Sourdough & Croissants in Lyon\"\n4. gallery: \"Le Goût Traditionnel de Lyon\"\n5. schedule or line-up: \"Artisan Family Bakery: Lyon's Fresh Delights\"\n6. call to action: \"Lyon's Heart: Family Bakery\"\n\nWhich section should be added?",
+   "pick": "location and hours",
+   "dist": {
+    "location and hours": 0.9649385207283308,
+    "menu or prices": 0.023469333868423845,
+    "testimonials": 0.004331432929492326,
+    "how it works": 0.003313476535209918,
+    "team": 0.0014482576774891781,
+    "sign-up or contact form": 0.0013385995737940474,
+    "faq": 0.0005701306440296685,
+    "footer": 0.0002496646260687409
+   },
+   "model": "gemma4:e4b-it-qat"
+  },
+  {
+   "round": 0,
+   "key": "page.extra",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nA landing page called \"Lyon Family Bakery\", for Local customers in Lyon looking for fresh baked goods.\nThe page's sections, top to bottom:\n1. hero: \"Lyon Family Bakery: Handcrafted Sourdough, Croissants & Cakes\"\n2. feature cards: \"Votre boulangerie familiale lyonnaise.\"\n3. about: \"Artisanal Sourdough & Croissants in Lyon\"\n4. gallery: \"Le Goût Traditionnel de Lyon\"\n5. schedule or line-up: \"Artisan Family Bakery: Lyon's Fresh Delights\"\n6. call to action: \"Lyon's Heart: Family Bakery\"\n\nDoes any section repeat another one, or not belong on this page?",
+   "pYes": 0.345,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 215,
+   "ms": 1530
+  },
+  {
+   "round": 0,
+   "key": "page.organised",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nType: serif-sans. Sections, top to bottom:\n1. hero (heroGround): eyebrow, headline, sub-line, photo, button — Lyon Family Bakery: Handcrafted Sourdough, Croissants & Cakes\n2. feature cards (imageGround): headline, sub-line, photo, list of items — Votre boulangerie familiale lyonnaise.\n3. about (imageGround): eyebrow, headline, sub-line, photo, body text, quote, name line — Artisanal Sourdough & Croissants in Lyon\n4. gallery (imageGround): headline, sub-line, photo, list of items — Le Goût Traditionnel de Lyon\n5. schedule or line-up (imageGround): headline, sub-line, date and place — Artisan Family Bakery: Lyon's Fresh Delights\n6. call to action (ctaBand): headline, sub-line, photo, list of items, button — Lyon's Heart: Family Bakery\n\nIs this page well organised: it opens by saying what it is and what to do, the sections come in a sensible order, and no part is repeated?",
+   "pYes": 0.837,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 297,
+   "ms": 2134
+  },
+  {
+   "round": 0,
+   "key": "page.suits",
+   "user": "Request: \"A one-page site for our family bakery in Lyon. Warm colours. We sell sourdough, croissants and cakes, open Tuesday to Sunday.\"\nType: serif-sans. Sections, top to bottom:\n1. hero (heroGround): eyebrow, headline, sub-line, photo, button — Lyon Family Bakery: Handcrafted Sourdough, Croissants & Cakes\n2. feature cards (imageGround): headline, sub-line, photo, list of items — Votre boulangerie familiale lyonnaise.\n3. about (imageGround): eyebrow, headline, sub-line, photo, body text, quote, name line — Artisanal Sourdough & Croissants in Lyon\n4. gallery (imageGround): headline, sub-line, photo, list of items — Le Goût Traditionnel de Lyon\n5. schedule or line-up (imageGround): headline, sub-line, date and place — Artisan Family Bakery: Lyon's Fresh Delights\n6. call to action (ctaBand): headline, sub-line, photo, list of items, button — Lyon's Heart: Family Bakery\n\nDo the type and the parts suit this kind of page?",
+   "pYes": 0.894,
+   "model": "gemma4:e4b-it-qat",
+   "tokensIn": 277,
+   "ms": 1911
+  }
+ ],
+ "skipped": [
+  {
+   "key": "card.hue",
+   "why": "S0: the request says it (warm)"
+  },
+  {
+   "key": "card.photos",
+   "why": "photo scout (reviewer vision): kept food-bakery.webp, food-bread.webp of 32"
+  },
+  {
+   "key": "s2.bits",
+   "why": "rule: a quote gets a name line"
+  }
+ ],
+ "mcp": [
+  {
+   "round": 0,
+   "tool": "create_project",
+   "isError": false,
+   "ms": 246
+  },
+  {
+   "round": 0,
+   "tool": "get_style_vocabulary",
+   "isError": false,
+   "ms": 7
+  },
+  {
+   "round": 0,
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 20
+  },
+  {
+   "round": 0,
+   "tool": "set_style_preset",
+   "isError": false,
+   "ms": 9
+  },
+  {
+   "round": 0,
+   "tool": "set_project_tokens",
+   "isError": false,
+   "ms": 189
+  },
+  {
+   "round": 0,
+   "tool": "list_node_types",
+   "isError": false,
+   "ms": 2
+  },
+  {
+   "round": 0,
+   "tool": "get_component",
+   "isError": false,
+   "ms": 12
+  },
+  {
+   "round": 0,
+   "tool": "create_plan",
+   "isError": false,
+   "ms": 7
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 63
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 21
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 26
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 21
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 17
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 19
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 18
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 20
+  },
+  {
+   "round": 0,
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 17
+  },
+  {
+   "round": 0,
+   "tool": "apply_plan",
+   "isError": false,
+   "ms": 2915
+  },
+  {
+   "round": 0,
+   "tool": "render_report",
+   "isError": false,
+   "ms": 1760
+  }
+ ],
+ "roundsLog": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-S0-bakery-r0",
+   "score": 0.787,
+   "sum": 45.77,
+   "defects": 44.05,
+   "lines": 56,
+   "perLine": 0.787,
+   "org": 0.837,
+   "suits": 0.894,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "button"
+     ],
+     "band": "heroGround",
+     "staged": true,
+     "pSound": 0.987
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.995,
+     "pFit": 0.985
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "eyebrow",
+      "headline",
+      "sub-line",
+      "photo",
+      "body text",
+      "quote",
+      "name line"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.976
+    },
+    {
+     "kind": "gallery",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.994,
+     "pFit": 0.997
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "headline",
+      "sub-line",
+      "date and place"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.985
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "headline",
+      "sub-line",
+      "photo",
+      "list of items",
+      "button"
+     ],
+     "band": "ctaBand",
+     "staged": true,
+     "pSound": 0.991,
+     "pFit": 0.98
+    }
+   ],
+   "issues": [
+    {
+     "id": "S1list|gallery#0",
+     "weight": 3,
+     "say": "the list in \"gallery\" shows the same photo 3 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1list|call to action#0",
+     "weight": 3,
+     "say": "the list in \"call to action\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1list|feature cards#0",
+     "weight": 3,
+     "say": "the list in \"feature cards\" shows the same photo 2 times",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|about#0",
+     "weight": 2,
+     "say": "\"food-bread.webp\" appears 9 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|gallery#0",
+     "weight": 2,
+     "say": "\"food-bread.webp\" appears 9 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S1page|call to action#0",
+     "weight": 2,
+     "say": "\"food-bread.webp\" appears 9 times on the page",
+     "op": "reask"
+    },
+    {
+     "id": "S5|about#0|deck|eyebrow,headline,sub-line,paragraph,quote,who said it: a name and a role",
+     "weight": 2,
+     "say": "\"Votre boulangerie familiale lyonnaise. Découvrez nos créations faites avec amour.\" repeats \"Votre boulangerie familiale lyonnaise.\"",
+     "op": "reword"
+    },
+    {
+     "id": "S9|schedule or line-up#0|deck|headline,sub-line,date and place",
+     "weight": 3,
+     "say": "\"Open daily. Find us at [Insert Address Here] for your daily \" talks about the page instead of to the visitor",
+     "op": "reword"
+    },
+    {
+     "id": "S5|call to action#0|list.rows|3|title,sentence,button",
+     "weight": 2,
+     "say": "\"View Sourdough\" repeats \"View Sourdough\"",
+     "op": "reword"
+    },
+    {
+     "id": "S8|feature cards#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|about#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|gallery#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S8|schedule or line-up#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "three dark bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S12|gallery#0|look.band|band,bandSurface,imageGround",
+     "weight": 2,
+     "say": "four \"imageGround\" bands in a row",
+     "op": "flip"
+    },
+    {
+     "id": "S13|gallery#0",
+     "weight": 3,
+     "say": "the \"gallery\" list repeats the items of \"feature cards\" (\"Classic Sourdough Loaf\", \"Butter Croissant\", \"Chocolate Ganache Cake\", \"Almond Croissant\")",
+     "op": "reword"
+    },
+    {
+     "id": "S13|call to action#0",
+     "weight": 3,
+     "say": "the \"call to action\" list repeats the items of \"feature cards\" (\"Artisan Sourdough\", \"Flaky Croissants\", \"Decadent Cakes\")",
+     "op": "reword"
+    },
+    {
+     "id": "C|schedule or line-up#0|deck|headline,sub-line,date and place",
+     "weight": 3.82,
+     "say": "reviewer (p=0.954): \"Open daily. Find us at [Insert Address Here] for your daily \" contradicts the request or invents a detail",
+     "op": "reword"
+    },
+    {
+     "id": "P1|location and hours",
+     "weight": 2.23,
+     "say": "reviewer (p=0.743): add a \"location and hours\" section",
+     "op": "addSection"
+    },
+    {
+     "id": "Q|org",
+     "weight": 1.3,
+     "say": "reviewer: organised p=0.837"
+    },
+    {
+     "id": "Q|type",
+     "weight": 0.42,
+     "say": "reviewer: type and parts suit p=0.894"
+    }
+   ],
+   "findings": [],
+   "modelCalls": 62,
+   "judgements": 54,
+   "words": [
+    "Section \"hero\" (dark band). Top to bottom:\n- eyebrow: \"Authentic Lyon Bakery\"\n- headline: \"Lyon Family Bakery: Handcrafted Sourdough, Croissants & Cakes\"\n- sub-line: \"Experience tradition in every bite. Freshly baked goods made with love, perfect for your local family.\"\n- button: \"View Our Menu\"\n- a photo (food-bakery.webp)",
+    "Section \"feature cards\" (dark band). Top to bottom:\n- a photo (food-bakery.webp)\n- headline: \"Votre boulangerie familiale lyonnaise.\"\n- sub-line: \"Pain au levain artisanal, croissants feuilletés et gâteaux faits maison avec amour.\"\n- 3 featureItems in a grid, each: photo, title, sentence or two, button:\n  1. \"Artisanal Sourdough\" — \"Slow-fermented for the perfect tangy flavor and chewy crust. Handcrafted daily in our family ovens.\" — \"View Sourdough\"\n  2. \"Buttery Croissants\" — \"Flaky, golden, and perfectly laminated. The ultimate French breakfast experience awaits you.\" — \"View Croissants\"\n  3. \"Signature Cakes\" — \"Indulge in rich, decadent treats perfect for any occasion. Baked fresh with love and care.\" — \"View Cakes\"",
+    "Section \"about\" (dark band). Top to bottom:\n- eyebrow: \"Lyon Family Bakery\"\n- headline: \"Artisanal Sourdough & Croissants in Lyon\"\n- sub-line: \"Votre boulangerie familiale lyonnaise. Découvrez nos créations faites avec amour.\"\n- paragraph: \"Nous célébrons la tradition lyonnaise. Chaque pain au levain artisanal, chaque croissant feuilleté et chaque gâteau est une œuvre d'art préparée avec des ingrédients frais et passion.\"\n- quote: \"La saveur authentique de Lyon réside dans nos fours. Venez savourer notre héritage.\"\n- who said it: a name and a role: \"Pierre Dubois, Boulanger\"\n- a photo (food-bread.webp)",
+    "Section \"gallery\" (dark band). Top to bottom:\n- a photo (food-bread.webp)\n- headline: \"Le Goût Traditionnel de Lyon\"\n- sub-line: \"Des croissants fins, des gâteaux savoureux et notre pain au levain fait maison.\"\n- 6 cards in a grid, each: photo, title, sentence or two, price:\n  1. \"Classic Sourdough Loaf\" — \"Our signature slow-fermented sourdough, perfect for dipping in your morning coffee or enjoying with a meal.\" — \"€5.50\"\n  2. \"Butter Croissant\" — \"Flaky, golden, and rich, made with the finest European butter for an unparalleled morning experience.\" — \"€2.80\"\n  3. \"Chocolate Ganache Cake\" — \"A decadent, moist cake layered with smooth, dark chocolate ganache. A perfect indulgence.\" — \"€7.00\"\n  4. \"Almond Croissant\" — \"Delicate layers filled with sweet almond cream, offering a delicate and flavorful twist on the classic.\" — \"€3.50\"\n  5. \"Seasonal Fruit Tart\" — \"A beautiful pastry featuring seasonal fresh fruit topped with a crisp, buttery shortcrust pastry.\" — \"€6.50\"\n  6. \"Pain de Campagne\" — \"Our rustic country bread, naturally leavened, ideal for dipping or serving alongside local cheeses.\" — \"€4.00\"",
+    "Section \"schedule or line-up\" (dark band). Top to bottom:\n- headline: \"Artisan Family Bakery: Lyon's Fresh Delights\"\n- sub-line: \"Sourdough, croissants, and cakes made with time-honored tradition in the heart of Lyon.\"\n- date and place: \"Open daily. Find us at [Insert Address Here] for your daily fresh bread and pastries.\"",
+    "Section \"call to action\" (dark band). Top to bottom:\n- headline: \"Lyon's Heart: Family Bakery\"\n- sub-line: \"Experience authentic sourdough, flaky croissants, and exquisite cakes, crafted with tradition in Lyon.\"\n- button: \"Taste Our Bakes\"\n- a photo (food-bread.webp)\n- 3 cards in a grid, each: photo, title, sentence or two, button:\n  1. \"Artisan Sourdough\" — \"Our signature sourdough, crafted with traditional methods and slow fermentation, is baked fresh daily. A perfect, tangy bite for your table.\" — \"View Sourdough\"\n  2. \"Flaky Croissants\" — \"Experience the perfect buttery layers with our classic croissants. Light, airy, and baked to golden perfection every morning.\" — \"View Croissants\"\n  3. \"Decadent Cakes\" — \"Indulge in our range of exquisite cakes for any occasion. From rich chocolate to light vanilla, pure sweet delight.\" — \"View Cakes\""
+   ],
+   "minutes": 3.9,
+   "kept": true
+  }
+ ],
+ "randomDecisions": false,
+ "flags": [
+  "--brief",
+  "--run",
+  "--no-review"
+ ],
+ "mode": {
+  "sectionCopy": true,
+  "contradict": true,
+  "v4": true,
+  "accept": "constraint"
+ },
+ "photoScout": [
+  [
+   "food-bakery.webp",
+   0.935,
+   0.968
+  ],
+  [
+   "food-bread.webp",
+   0.871,
+   0.954
+  ],
+  [
+   "work-chef.webp",
+   0.317,
+   null
+  ],
+  [
+   "work-potter.webp",
+   0.296,
+   null
+  ],
+  [
+   "people-cafe.webp",
+   0.266,
+   null
+  ],
+  [
+   "work-hands-clay.webp",
+   0.261,
+   null
+  ],
+  [
+   "work-baker.webp",
+   0.239,
+   null
+  ],
+  [
+   "work-leather-bench.webp",
+   0.232,
+   null
+  ],
+  [
+   "work-machine-shop.webp",
+   0.169,
+   null
+  ],
+  [
+   "people-coffee-shop.webp",
+   0.169,
+   null
+  ],
+  [
+   "food-market.webp",
+   0.149,
+   null
+  ],
+  [
+   "food-board.webp",
+   0.147,
+   null
+  ],
+  [
+   "people-desk.webp",
+   0.122,
+   null
+  ],
+  [
+   "people-market.webp",
+   0.121,
+   null
+  ],
+  [
+   "food-grocer.webp",
+   0.118,
+   null
+  ],
+  [
+   "food-carrots.webp",
+   0.11,
+   null
+  ],
+  [
+   "people-meeting.webp",
+   0.102,
+   null
+  ],
+  [
+   "animal-horse.webp",
+   0.08,
+   null
+  ],
+  [
+   "ground-forest-fog.webp",
+   0.068,
+   null
+  ],
+  [
+   "work-carpenter.webp",
+   0.065,
+   null
+  ],
+  [
+   "animal-dog.webp",
+   0.061,
+   null
+  ],
+  [
+   "ground-canyon.webp",
+   0.056,
+   null
+  ],
+  [
+   "animal-cat.webp",
+   0.054,
+   null
+  ],
+  [
+   "ground-shore.webp",
+   0.053,
+   null
+  ],
+  [
+   "ground-coast.webp",
+   0.049,
+   null
+  ],
+  [
+   "animal-sheep.webp",
+   0.043,
+   null
+  ],
+  [
+   "ground-city-dusk.webp",
+   0.039,
+   null
+  ],
+  [
+   "ground-dune.webp",
+   0.037,
+   null
+  ],
+  [
+   "ground-skyline.webp",
+   0.037,
+   null
+  ],
+  [
+   "ground-red-rock.webp",
+   0.033,
+   null
+  ],
+  [
+   "work-welder.webp",
+   0.02,
+   null
+  ],
+  [
+   "food-plate.webp",
+   0.006,
+   null
+  ]
+ ],
+ "result": {
+  "minutes": 3.9,
+  "accept": "constraint",
+  "bestRound": 0,
+  "bestScore": 0.787,
+  "scores": [
+   0.787
+  ],
+  "r0": {
+   "perLine": 0.787,
+   "org": 0.837,
+   "suits": 0.894,
+   "sum": 45.77
+  },
+  "kept": {
+   "perLine": 0.787,
+   "org": 0.837,
+   "suits": 0.894,
+   "sum": 45.77,
+   "lines": 56
+  },
+  "builderCalls": 62,
+  "judgements": 54,
+  "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-S0-bakery-r0"
+ }
+}

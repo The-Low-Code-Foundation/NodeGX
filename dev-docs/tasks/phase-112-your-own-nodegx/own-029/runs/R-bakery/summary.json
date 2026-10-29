@@ -1,0 +1,145 @@
+{
+ "minutes": 2.3,
+ "bestRound": 0,
+ "bestScore": 16.37,
+ "scores": [
+  16.37
+ ],
+ "builderCalls": 63,
+ "judgements": 48,
+ "bestProject": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R-bakery-r0",
+ "rounds": [
+  {
+   "round": 0,
+   "project": "/Users/richardosborne/vscode_projects/NodeGX test projects/own-029-R-bakery-r0",
+   "score": 16.37,
+   "applied": true,
+   "sections": [
+    {
+     "kind": "hero",
+     "bits": [
+      "form",
+      "list of items"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.396
+    },
+    {
+     "kind": "about",
+     "bits": [
+      "headline",
+      "badge",
+      "price",
+      "quote",
+      "name line"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.976
+    },
+    {
+     "kind": "feature cards",
+     "bits": [
+      "name line",
+      "eyebrow",
+      "price",
+      "button",
+      "small print"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.985
+    },
+    {
+     "kind": "schedule or line-up",
+     "bits": [
+      "small print",
+      "body text",
+      "eyebrow",
+      "date and place",
+      "button",
+      "badge"
+     ],
+     "band": "imageGround",
+     "staged": true,
+     "pSound": 0.483
+    },
+    {
+     "kind": "call to action",
+     "bits": [
+      "photo",
+      "second button",
+      "headline",
+      "small print"
+     ],
+     "band": "bandSurface",
+     "staged": true,
+     "pSound": 0.968
+    },
+    {
+     "kind": "footer",
+     "bits": [
+      "body text",
+      "small print",
+      "button",
+      "headline"
+     ],
+     "band": "footerBand",
+     "staged": true,
+     "pSound": 0.419
+    }
+   ],
+   "issues": [
+    {
+     "id": "S9|footer#0|copy|a line of fine print|Text",
+     "weight": 3,
+     "say": "\"Serving Lyon's finest, handcrafted delights since [Year].\" talks about the page instead of to the visitor",
+     "op": "reword"
+    },
+    {
+     "id": "S5|footer#0|copy|the main action of the footer section|net.noodl.controls.button",
+     "weight": 2,
+     "say": "\"View Menu & Hours\" repeats \"View Menu & Hours\"",
+     "op": "reword"
+    },
+    {
+     "id": "R|minimum-layout-width|page",
+     "weight": 4,
+     "say": "render: minimum-layout-width"
+    },
+    {
+     "id": "J1|hero#0|copy|the button that sends the form|net.noodl.controls.button",
+     "weight": 1.81,
+     "say": "reviewer (p=0.396): weakest line button \"Order Now\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|schedule or line-up#0|copy|when and where, in one line|Text",
+     "weight": 1.55,
+     "say": "reviewer (p=0.483): weakest line date and place \"When and where: Daily at the Lyon Bakehouse, savor\"",
+     "op": "reword"
+    },
+    {
+     "id": "J1|footer#0|copy|the footer headline|Text",
+     "weight": 1.74,
+     "say": "reviewer (p=0.419): weakest line headline \"Lyon Bakehouse: Your Local Artisan Bakery\"",
+     "op": "reword"
+    },
+    {
+     "id": "P1|location and hours",
+     "weight": 2.27,
+     "say": "reviewer (p=0.756): add a \"location and hours\" section",
+     "op": "addSection"
+    }
+   ],
+   "findings": [
+    "minimum-layout-width"
+   ],
+   "modelCalls": 63,
+   "judgements": 48,
+   "minutes": 2.3,
+   "kept": true
+  }
+ ]
+}
