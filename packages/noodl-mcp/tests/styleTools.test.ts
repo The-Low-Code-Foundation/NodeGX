@@ -200,6 +200,20 @@ describe('AIX-006 style MCP tools', () => {
   });
 
   /**
+   * P112-OWN029-IMAGEGROUNDNOTOP — a photo band taller than its floor keeps room above its copy.
+   *
+   * OWN-028 made `imageGround` a floor (`contentHeight` + `minHeight 520`) packed to its foot. Once its content was
+   * taller than 520 px the band was its content plus the bottom padding, and the first line touched the band above
+   * (OWN-029 A2-puppy r3). The floor and the foot stay; the band gets a top padding.
+   */
+  it('imageGround keeps room above its copy once it is taller than its floor', async () => {
+    const { data } = await call<StyleVocabulary>(session, 'get_style_vocabulary', {});
+    const band = data.compositions.find((c) => c.id === 'imageGround');
+    expect(band).toBeDefined();
+    expect(band!.parameters).toMatchObject({ sizeMode: 'contentHeight', justifyContent: 'flex-end', paddingTop: 'var(--space-16)' });
+  });
+
+  /**
    * DSG-005 — the wire size, measured where it is billed.
    *
    * MCP responses go out pretty-printed, so the cost of this tool is the cost of

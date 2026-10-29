@@ -562,6 +562,9 @@ export const STYLE_COMPOSITIONS: VocabComposition[] = [
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundColor: 'var(--foreground)',
+      // P112-OWN029-IMAGEGROUNDNOTOP: once the content is taller than the 520px floor the band is its content plus
+      // this padding, and without a top padding the first line touched the band above (A2-puppy r3)
+      paddingTop: 'var(--space-16)',
       paddingBottom: 'var(--space-12)'
     },
     recipe: 'ui-image-scrim-band'

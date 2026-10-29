@@ -44,6 +44,7 @@
             "backgroundSize": "cover",
             "backgroundPosition": "center",
             "backgroundColor": "var(--foreground)",
+            "paddingTop": "var(--space-16)",
             "paddingBottom": "var(--space-12)"
           },
           "parent": "page",

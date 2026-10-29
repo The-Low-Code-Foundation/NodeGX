@@ -391,7 +391,7 @@ export function renderStyleVocabulary(vocab: StyleVocabulary, options: RenderVoc
     // making one page at a time.
     lines.push(
       'COMPOSITIONS — named parameter sets lifted verbatim from the validated recipes; fix them ONCE and reuse ' +
-        'them rather than re-deciding a radius per card. Copy a set onto the node type in brackets exactly as ' +
+        'them. Copy a set onto the node type in brackets exactly as ' +
         'written: a dimension is {"value":N,"unit":"px"}, and a "Npx" string is dropped in silence. [recipe-id] ' +
         'is the same thing assembled — fetch it with get_example.'
     );

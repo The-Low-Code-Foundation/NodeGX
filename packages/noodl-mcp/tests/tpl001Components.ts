@@ -431,7 +431,8 @@ const HERO_HEAD = { ...composition('sectionHead'), paddingBottom: 'var(--space-6
  * 520px floor. Rebuilt key by key, not spread-and-override: the committed JSON carries `height` third.
  */
 function pinnedImageGround(image: string, height: number): Record<string, unknown> {
-  const { width, sizeMode: _sizeMode, minHeight: _minHeight, ...rest } = composition('imageGround') as Record<string, unknown>;
+  // P112-OWN029-IMAGEGROUNDNOTOP gave the composition a paddingTop; these bands are a fixed height and shipped without it
+  const { width, sizeMode: _sizeMode, minHeight: _minHeight, paddingTop: _paddingTop, ...rest } = composition('imageGround') as Record<string, unknown>;
   return {
     width,
     sizeMode: 'explicit',
