@@ -753,6 +753,27 @@ Whether a headline that is only the name is right is a words question, not the s
 
 **Kept:** `factsKept` joins the final harness, `runs/w17.edit.json`.
 
+### 9c. The minimal rhythm: pictures made, waiting on Richard's eye
+
+`rhythm.mjs w17m-jazz jazz` renders the final harness's minimal jazz hero as the arm left it, and with the same three
+candidates as 8c. I used w17m-jazz rather than the handoff's w12m-jazz because its words are the ones the harness gives
+now ("The Blue Room", and the line carries the date). A minimal hero has no small line, so `together` puts the headline
+and the line in a Group of their own. No arm code changes until Richard picks.
+
+| variant | headline → line | line → button |
+|---|---|---|
+| `before` (the arm's "huge" gap) | 48 px | 48 |
+| `together` (headline and line in a Group, gap small) | 8 | 48 |
+| `pairs` | 24 | 40 |
+| `medium` (Richard's pick for the stylish look) | 16 | 24 |
+
+Desktop and phone measure the same. Pictures: `runs/rhythm-w17m-jazz/<variant>/{desktop,phone}.png`.
+
+**For Richard (with 9b's "the name alone" question):** https://claude.ai/artifact/P7umD3HEoDJrTiv1Q3KQqh.
+
+**Seen in the pictures, not measured:** the words column is top-aligned beside a 320 px photo. The closer the spacing,
+the more empty space shows under the button. A candidate fix: centre the words column beside the photo. Not run.
+
 ### 9d. A third look? (`probe-look3.mjs`, probe only)
 
 **The method:** "minimal / stylish / warm and friendly" ("warm and friendly: a soft light colour ground, rounded
@@ -769,3 +790,26 @@ it. The probe is run in full, alone, below.
 - the bar for "E2B separates a third look": at least 7 of 8 right for each of the three looks;
 - my prediction: it does not clear the bar, and the confusions are between warm and minimal (both are light pages),
   not with stylish.
+
+**Result (`runs/probe-look3-gemma4_e2b-it-qat.json`):** ✅ **E2B separates all three: 24 of 24 right, 8 of 8 per look,
+with no confusion in any direction.** My prediction (warm and minimal would blur) was wrong.
+
+| look | right | the same pick in all 6 orders | its mean P, lowest to highest |
+|---|---|---|---|
+| minimal | 8 / 8 | 5 / 8 | 0.82–1.00; the rest goes to warm (≤ 0.18), never to stylish |
+| stylish | 8 / 8 | 7 / 8 | 0.68–0.99; the trampoline park ("punchy colours") gives warm 0.31 |
+| warm | 8 / 8 | 8 / 8 | 1.00 on all eight |
+
+The first-listed look draws a mean P of 0.32, against 0.33 for no order effect at all, so with three looks the order
+barely moves the answer. The nearest blurs are minimal → warm (the bakery 0.18, the pottery 0.16, the yoga studio 0.14)
+and stylish → warm (the festival 0.20, the trampoline park 0.31). Stylish and minimal never blur into each other.
+
+**What it does not show:**
+- **Most of the warm requests use the look's own words.** Seven of eight say "warm", "friendly" or "welcoming", and the
+  look is described as "warm and friendly … a welcoming headline". Only the food bank ("A gentle, kind page") shares
+  none of its words, and it still scores 1.00. A stricter test would be warm requests written without those words.
+- **Plain requests were not asked against three looks.** With two, 8d found they sit near a coin toss. With three, the
+  "ask" question would offer three choices.
+- **The arm cannot build a warm look yet.** What "warm and friendly" looks like (the ground, the corners, the headline)
+  is a design question for Richard before any arm code. The stylish look was read param by param from a hero he had
+  already seen (OWN-029 G-plumber r4); warm has no such hero.
