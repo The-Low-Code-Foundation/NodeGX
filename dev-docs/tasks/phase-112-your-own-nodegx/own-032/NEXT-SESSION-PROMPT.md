@@ -1,4 +1,66 @@
-# OWN-032 — next session (s4): the next experiments
+# OWN-032 — next session (s5)
+
+**Paste this to start the session:**
+
+> OWN-032 s5. Read `dev-docs/tasks/phase-112-your-own-nodegx/own-032/NEXT-SESSION-PROMPT.md` (this section), then
+> `RESULTS.md` §8. Run the experiments below in order: one at a time on Ollama, each against a control, each
+> pre-registered in RESULTS §9 before it runs. Commit after each one lands.
+
+## Where it stands (s4, `a4051a33c`)
+
+- **The final harness is `runs/w15.edit.json`.** It is w10's switches plus four from s4, each off by default:
+  - `addWhileMissing` (8a);
+  - `shortHeadline` (8b);
+  - `blankRetry` (the bench fix);
+  - `rhythm` (8g);
+  - plus `askBand [0.1, 0.9]`.
+- **Every brief ends clean in both looks**, except the kit's white on amber or green (P112-OWN030-PRIMARYCONTRAST),
+  including running and pottery, which were held out. Page, same URL, now with the final harness and the held-out
+  briefs: https://claude.ai/artifact/2M1WenHSVPsUE21P3N1NcB
+- **Richard's rulings (RESULTS §8f):**
+  - the stylish words column takes "medium": 16/16/24 px;
+  - **a request that names no look asks "clean or bold?"** E2B scores every request that names a look at ≤ 0.001
+    or ≥ 0.91, and plain ones at 0.11–0.70, flipping with the option order on 9 of 20.
+- **The control is exact:** at T 0, re-running w10s-jazz reproduced all 40 actions with no odds drift. A w-run that
+  parts from its control parts because of the switch.
+- `compare.mjs <control> <test>` prints turns, free moves, the turn where the runs part, the end findings, and the
+  headline. `zsh run-set.sh <prefix> <edit.json> m-bakery s-jazz …` runs the s3/s4 requests one at a time.
+
+## The experiments, in order
+
+1. **Only fixes once every part is there.** 8a's miss: with "add" gone, its odds moved onto the generic "set"
+   (w11m-bakery +3 turns: two hand-made size changes before the move fix). Under `endGate`, once `goalMet`, offer
+   only the fixes and undo while any fix is on the menu. Control: w15 and w12/w14 (all ten requests). Pre-register:
+   free moves after `goalMet` reach 0, and no run gains turns.
+2. **The request's facts stay in the hero.** 8b's jazz rewrite dropped "on 14 November", and s-running's hero
+   never says "Park Runners". Add a finding: a name or a date in the request that is nowhere in the hero's words
+   gets a write fix on the part that should carry it (the headline for the name; the line for a date). Control:
+   w12m-jazz, w15s-running.
+3. **The minimal rhythm.** Richard ruled for the bold look only. The minimal words column is "huge" too
+   (48/48/48). Run `rhythm.mjs` on a minimal hero (w12m-jazz) and show him the same four spacings before changing
+   anything.
+4. **A third look (s4's 8e, now unblocked).** Probe only: "minimal / stylish / warm and friendly", 8 requests per
+   look, all option orders. Stop there if E2B cannot separate it.
+
+## Not this session
+
+- **Folding the looks and the "ask" into OWN-031 `build_app`** is the other session's lane. Ask first, briefly.
+- **OWN-033 stitching** waits until the hero work settles.
+- **The kit's contrast** (P112-OWN030-PRIMARYCONTRAST) is the kit's, not the arm's.
+
+## Traps (s4)
+
+- **The bench can measure before the page draws** (P112-OWN032-BLANKSHOT, 11 of 1003 shots). Keep `blankRetry` on.
+  look.mjs's `blank` means fewer than 5 words, not "nothing drew": test `words === 0`.
+- **Over a gradient, the bench's contrast is the WORST stop.** A line over the dark end can read 3.30.
+- **A held-out brief needs a GOALS entry and a bench** (`node bench.mjs make <G round project> <bench>`, from the
+  KEPT round in `own-029/runs/G-<brief>/summary.json`).
+- Everything in s3's traps below still holds: one Ollama job, `nice -n 10`, commit through a temporary index, never
+  `*.png`.
+
+---
+
+# s4 plan (done: RESULTS §8)
 
 **Paste this to start the session:**
 
