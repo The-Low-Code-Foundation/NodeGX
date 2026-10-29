@@ -1,0 +1,3 @@
+# full-size shots stay local; ledgers, checks and the sites are committed, gallery JPEGs too
+runs/**/*.png
+runs/**/noodl_modules/

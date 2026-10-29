@@ -1,0 +1,76 @@
+{
+ "desktop": {
+  "url": "file:///Users/richardosborne/vscode_projects/OpenNoodl/dev-docs/tasks/phase-112-your-own-nodegx/own-030/runs/smoke/bare/site/index.html",
+  "blank": false,
+  "words": 235,
+  "overflowX": 0,
+  "smallText": [],
+  "lowContrast": [
+   {
+    "text": "The Blue Notes",
+    "ratio": 2.21
+   },
+   {
+    "text": "Miles & The Collective",
+    "ratio": 2.21
+   },
+   {
+    "text": "Ella's Legacy Trio",
+    "ratio": 2.21
+   },
+   {
+    "text": "The Blue Room",
+    "ratio": 2.42
+   },
+   {
+    "text": "Getting There",
+    "ratio": 2.42
+   },
+   {
+    "text": "© 2024 The Blue Room. All Rights Reserved. | Elega",
+    "ratio": 3.66
+   }
+  ],
+  "unknownGround": 2,
+  "clipped": [],
+  "brokenImages": [],
+  "sections": 7
+ },
+ "phone": {
+  "url": "file:///Users/richardosborne/vscode_projects/OpenNoodl/dev-docs/tasks/phase-112-your-own-nodegx/own-030/runs/smoke/bare/site/index.html",
+  "blank": false,
+  "words": 235,
+  "overflowX": 0,
+  "smallText": [],
+  "lowContrast": [
+   {
+    "text": "The Blue Notes",
+    "ratio": 2.21
+   },
+   {
+    "text": "Miles & The Collective",
+    "ratio": 2.21
+   },
+   {
+    "text": "Ella's Legacy Trio",
+    "ratio": 2.21
+   },
+   {
+    "text": "The Blue Room",
+    "ratio": 2.42
+   },
+   {
+    "text": "Getting There",
+    "ratio": 2.42
+   },
+   {
+    "text": "© 2024 The Blue Room. All Rights Reserved. | Elega",
+    "ratio": 3.66
+   }
+  ],
+  "unknownGround": 2,
+  "clipped": [],
+  "brokenImages": [],
+  "sections": 7
+ }
+}

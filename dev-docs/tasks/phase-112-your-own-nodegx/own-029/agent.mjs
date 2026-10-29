@@ -4,6 +4,7 @@
 //   node agent.mjs --brief puppy --run p1 [--rounds 4] [--model gemma4:e2b-it-qat] [--judge gemma4:e4b-it-qat]
 //                  [--copy-model …] [--copy-n 3] [--no-review] [--decisions-from <run>] [--accept constraint|sum]
 //                  [--line-copy] [--no-contradict] [--no-v4]   (the s1 paths, for paired runs)
+//                  [--org-on shape|words] [--ratchet last]       (the s3 accept rule; the s2 one)
 //
 // The loop, per round:
 //   build    every answer comes from the model door (lm.mjs). A cached answer replays, so round k re-asks only what the
@@ -15,8 +16,9 @@
 //            yes/no with ONE token about the words (P(yes) from logprobs, no sampling).
 //   repair   each issue names its own fix: re-word one line with the reason as a hint, re-ask a section's bits, flip a
 //            decision to the model's own second choice (logprobs), add or drop a section.
-//   accept   the round's score (weighted issues) must beat the best so far, or the agent restores the best round's
-//            answers and marks those fixes as tried.
+//   accept   s1: the round's score (weighted issues) must beat the best so far. s2/s3: defects per line must fall and
+//            organisation must hold (--accept, --org-on). If not, the agent restores the best round's answers and
+//            marks those fixes as tried.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -24,6 +26,7 @@ import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
 import { open } from '../own-027/mcp.mjs';
 import { makeLM } from './lm.mjs';
+import { SHAPE_Q } from './shape.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
@@ -54,7 +57,15 @@ const SECTION_COPY = !has('--line-copy'), CONTRADICT = !has('--no-contradict'), 
 // by more than 0.1 (or it rises by 0.1+ with defects per line no more than 10% worse). 'sum' (s1): the weighted sum
 // of every issue, the quality judges included, which kept a bakery round whose organisation fell 0.83 → 0.36.
 const ACCEPT = opt('--accept', 'constraint');
+// s3: --org-on, which organisation judge the constraint reads. 'shape' (default): the outline WITHOUT the words
+// (shape.mjs), which a reword cannot move. 'words' (s2): the outline with each section's first line, which moved by up
+// to 0.61 on one structure as the words changed. --ratchet: 'peak' (default) compares organisation with the highest any
+// kept round reached; 'last' (s2) with the last kept round, which let K2-bakery lose 0.13 in two allowed steps.
+const ORG_ON = opt('--org-on', 'shape');
+const RATCHET = opt('--ratchet', 'peak');
 const FIXES_PER_ROUND = Number(opt('--fixes', 10));
+// S13's repair (s3): bits the script took out of one section's choices, by section signature; restored with the best round
+const EXCLUDE = new Map();
 const OUT = path.join(HERE, 'runs', RUN);
 const PROJECT_ROOT = path.join(os.homedir(), 'vscode_projects/NodeGX test projects');
 fs.mkdirSync(OUT, { recursive: true });
@@ -63,7 +74,7 @@ const REPO_ROOT = path.resolve(HERE, '../../../..');
 const ledger = {
   run: RUN, brief: BRIEF_ID, request: REQUEST, model: MODEL, judge: JUDGE, copyModel: COPY_MODEL, copyN: COPY_N, rounds: ROUNDS,
   build: { distMtime: fs.statSync(path.join(REPO_ROOT, 'packages/noodl-mcp/dist/noodl-mcp.cjs')).mtime.toISOString(), head: execSync('git rev-parse --short HEAD', { cwd: REPO_ROOT }).toString().trim() },
-  harness: (await import('node:crypto')).createHash('sha1').update(fs.readFileSync(path.join(HERE, 'agent.mjs'))).update(fs.readFileSync(path.join(HERE, 'lm.mjs'))).digest('hex').slice(0, 8),
+  harness: (await import('node:crypto')).createHash('sha1').update(fs.readFileSync(path.join(HERE, 'agent.mjs'))).update(fs.readFileSync(path.join(HERE, 'lm.mjs'))).update(fs.readFileSync(path.join(HERE, 'shape.mjs'))).digest('hex').slice(0, 8),
   startedAt: new Date().toISOString(), calls: [], judgements: [], skipped: [], mcp: [], roundsLog: []
 };
 const writeLedger = () => fs.writeFileSync(path.join(OUT, 'ledger.json'), JSON.stringify(ledger, null, 1));
@@ -71,7 +82,7 @@ process.on('uncaughtException', (e) => { ledger.crashed = String(e?.stack || e);
 const RANDOM = has('--random-decisions');
 ledger.randomDecisions = RANDOM;
 ledger.flags = argv.filter((a) => a.startsWith('--'));
-ledger.mode = { sectionCopy: SECTION_COPY, contradict: CONTRADICT, v4: V4, accept: ACCEPT };
+ledger.mode = { sectionCopy: SECTION_COPY, contradict: CONTRADICT, v4: V4, accept: ACCEPT, orgOn: ORG_ON, ratchet: RATCHET };
 const RULES = has('--learned') ? JSON.parse(fs.readFileSync(path.join(HERE, 'rules.json'), 'utf8')).rules : null;
 ledger.learnedRules = RULES ? Object.keys(RULES).length : undefined;
 const lm = makeLM({ model: MODEL, copyModel: COPY_MODEL, judgeModel: JUDGE, ledger, randomDecisions: RANDOM, seed: Number(opt('--seed', 7)), rules: RULES });
@@ -228,7 +239,7 @@ async function buildSection(ctx, card, sections, si) {
   const secLine = `The "${sec.kind}" section (${sec.purpose}).`;
   // a footer is fine print and a way on, not a second page (dbg-puppy r0 grew a four-card photo list in it)
   const FOOTER_BITS = ['headline', 'body text', 'small print', 'button', 'second button', 'date and place'];
-  const bitList = Object.entries(BITS).filter(([k]) => (k !== 'photo' || card.photos.length) && (sec.kind !== 'footer' || FOOTER_BITS.includes(k)));
+  const bitList = Object.entries(BITS).filter(([k]) => (k !== 'photo' || card.photos.length) && (sec.kind !== 'footer' || FOOTER_BITS.includes(k)) && !EXCLUDE.get(S)?.has(k));
   const above = ctx.bitsSoFar.length ? `\nThe sections above already have: ${ctx.bitsSoFar.join('; ')}. Not every section needs a button or a photo; a section can be short.` : '';
   const a1 = await decide('bits', { user: `${cardText(card)}${above}\n${secLine} Which bits does it need, top to bottom? Choose 1 to 6:\n${bitList.map(([k, v]) => `- ${k}: ${v}`).join('\n')}${card.photos.length ? '' : '\n(This page has no photographs.)'}`,
     schema: { type: 'object', required: ['bits'], properties: { bits: { type: 'array', minItems: 1, maxItems: 6, items: { type: 'string', enum: bitList.map(([k]) => k) } } } } }, 0.3);
@@ -505,6 +516,10 @@ async function buildOnce(round) {
     labelOf: (t) => nt.find((x) => x.typeName === t)?.displayName || t };
   const built = [];
   for (let si = 0; si < sections.length; si++) built.push(await fillSection(ctx, card, await buildSection(ctx, card, sections, si), si));
+  // s3, for OWN-030's emit lane: the tree the script built, before items become components (one file per round)
+  fs.mkdirSync(path.join(OUT, `r${round}`), { recursive: true });
+  fs.writeFileSync(path.join(OUT, `r${round}`, 'tree.json'), JSON.stringify({ card, sections: built.map((b) => ({ kind: b.sec.kind, purpose: b.sec.purpose, bits: b.bits,
+    nodes: b.nodes.map((n) => ({ type: n.type, role: n.role, parent: n.parent, params: n.params, look: n.look, photoFile: n.photoFile, itemOf: n.itemOf, listIndex: n.listIndex })) })) }, null, 1));
 
   // assemble: a list's items become ONE item component (OWN-027 V9)
   const itemComps = [];
@@ -684,7 +699,9 @@ async function critique(res, round) {
     // the menu is where the products belong: when the later list IS the menu, the earlier one is the repeat
     const swap = built[lists[a].si].sec.kind === 'menu or prices' && built[lists[e].si].sec.kind !== 'menu or prices';
     const L = swap ? lists[e] : lists[a], E = swap ? lists[a] : lists[e], sig = L.items[0].l.sig;
-    issues.push({ id: `S13|${built[L.si].S}`, weight: 3, section: L.si, say: `the "${built[L.si].sec.kind}" list repeats the items of "${built[E.si].sec.kind}" (${hits.map((h) => `"${h.l.text}"`).join(', ')})`, fix: sig ? { op: 'reword', sig, hint: `the "${built[E.si].sec.kind}" section already lists ${E.items.map((o) => `"${o.l.text}"`).join(', ')}. These items must be different things: show another side of ${card.name}.` } : null });
+    // s2: a reword never cleared it (the bakery brief names three products, so the model writes the same three again).
+    // s3: take the list out of this section's choices and re-ask its bits.
+    issues.push({ id: `S13|${built[L.si].S}`, weight: 3, section: L.si, say: `the "${built[L.si].sec.kind}" list repeats the items of "${built[E.si].sec.kind}" (${hits.map((h) => `"${h.l.text}"`).join(', ')})`, fix: sig ? { op: 'exclude', S: built[L.si].S, bit: 'list of items', sig: `${built[L.si].S}|bits`, hint: `the "${built[E.si].sec.kind}" section already lists ${E.items.map((o) => `"${o.l.text}"`).join(', ')}. This section says something else, without a list.` } : null });
     break;
   }
   // S14 prices that disagree, checked by a script: two currencies on one page (A-bakery "$5–8" beside "€"), or two
@@ -704,6 +721,18 @@ async function critique(res, round) {
   const perLineN = new Map(); for (const x of money) perLineN.set(x.l, (perLineN.get(x.l) || 0) + 1);
   const flat = money.filter((x) => !x.item && x.cur === main && perLineN.get(x.l) === 1);
   for (const x of flat.slice(1)) if (x.amt !== flat[0].amt && x.l.sig !== flat[0].l.sig) issues.push({ id: `S14amt|${x.l.sig}`, weight: 3, section: x.si, say: `"${String(x.l.text).slice(0, 60)}" says ${main}${x.amt}, "${String(flat[0].l.text).slice(0, 40)}" says ${main}${flat[0].amt}`, fix: { op: 'reword', sig: x.l.sig, hint: `this line gives the price as ${main}${x.amt}, but the page already says ${main}${flat[0].amt} ("${flat[0].l.text}"). A page states one price: give ${main}${flat[0].amt}, or leave the price out.` } });
+  // S14from: a "from $X" line must equal the lowest item price on the page, and a single price above a list must be one
+  // of that list's prices (s2: K1-jazz "Tickets from $45" above a $35 item; W1-jazz "$50 Admission" above $75 and up).
+  const itemAmts = money.filter((x) => (x.item || /^item \d/.test(x.l.label)) && x.cur === main).map((x) => x.amt);
+  if (itemAmts.length) {
+    const low = Math.min(...itemAmts);
+    for (const x of money.filter((y) => !y.item && !/^item \d/.test(y.l.label) && y.cur === main && perLineN.get(y.l) === 1)) {
+      const from = /\b(from|starting at|starts at|as low as)\s*[$€£]?\s*\d/i.test(x.l.text);
+      const own = money.filter((y) => (y.item || /^item \d/.test(y.l.label)) && y.si === x.si && y.cur === main).map((y) => y.amt);
+      if (from && x.amt !== low) issues.push({ id: `S14from|${x.l.sig}`, weight: 3, section: x.si, say: `"${String(x.l.text).slice(0, 60)}" says from ${main}${x.amt}, the lowest price on the page is ${main}${low}`, fix: { op: 'reword', sig: x.l.sig, hint: `this line says "from ${main}${x.amt}", but the cheapest item on the page costs ${main}${low}. Say from ${main}${low}, or leave the price out.` } });
+      else if (!from && own.length && !own.includes(x.amt)) issues.push({ id: `S14list|${x.l.sig}`, weight: 3, section: x.si, say: `"${String(x.l.text).slice(0, 60)}" says ${main}${x.amt}, the list below says ${own.map((a) => main + a).join(', ')}`, fix: { op: 'reword', sig: x.l.sig, hint: `this line gives ${main}${x.amt}, but the prices listed below it are ${own.map((a) => main + a).join(', ')}. Do not state a different price: leave the price out of this line.` } });
+    }
+  }
   // V the validator refused a section: re-ask its bits with the refusal as the hint
   for (const st of res.staging) issues.push({ id: `V|${st.b.S}`, weight: 5, section: built.indexOf(st.b), say: `the MCP refused "${st.b.sec.kind}": ${st.text.slice(0, 160)}`, fix: { op: 'reask', sig: `${st.b.S}|bits`, hint: `the builder could not make that section: ${st.text.slice(0, 200)}. Choose simpler bits.` } });
   // R render findings, mapped back to the section whose words they quote
@@ -788,6 +817,8 @@ async function critique(res, round) {
     const outlineQ = `${reqLine}\nType: ${card.pairing}. Sections, top to bottom:\n${built.map((b, i) => `${i + 1}. ${b.sec.kind} (${b.nodes[0].look}): ${b.bits.join(', ')} — ${(descs[i].lines.find((l) => l.label === 'headline')?.text || descs[i].lines[0]?.text || '').slice(0, 70)}`).join('\n')}`;
     const pOrg = await lm.judge('page.organised', `${outlineQ}\n\nIs this page well organised: it opens by saying what it is and what to do, the sections come in a sensible order, and no part is repeated?`);
     const pType = await lm.judge('page.suits', `${outlineQ}\n\nDo the type and the parts suit this kind of page?`);
+    const shapeQ = `${reqLine}\nType: ${card.pairing}. Sections, top to bottom:\n${built.map((b, i) => `${i + 1}. ${b.sec.kind} (${b.nodes[0].look}): ${b.bits.join(', ')}`).join('\n')}`;
+    res.shape = await lm.judge('page.shape', `${shapeQ}\n\n${SHAPE_Q}`);
     issues.push({ id: 'Q|org', quality: true, weight: 8 * (1 - (pOrg ?? 0.5)), section: -1, say: `reviewer: organised p=${pOrg}`, fix: pOrg !== null && pOrg < 0.5 ? { op: 'reask', sig: 'sections', hint: 'a reviewer found the page badly organised. Open with a section that says what this is and what to do; put the sections in the order a visitor needs them; do not repeat a kind.' } : null });
     issues.push({ id: 'Q|type', quality: true, weight: 4 * (1 - (pType ?? 0.5)), section: -1, say: `reviewer: type and parts suit p=${pType}`, fix: null });
     res.org = pOrg; res.suits = pType;
@@ -799,24 +830,29 @@ async function critique(res, round) {
   const defects = +(issues.filter((x) => !x.quality).reduce((a, x) => a + x.weight, 0)).toFixed(2);
   const lines = descs.reduce((a, d) => a + d.lines.length, 0);
   const perLine = +(defects / Math.max(1, lines)).toFixed(3);
-  return { issues, score: ACCEPT === 'sum' ? sum : perLine, sum, defects, lines, perLine, org: res.org ?? null, suits: res.suits ?? null, descs };
+  return { issues, score: ACCEPT === 'sum' ? sum : perLine, sum, defects, lines, perLine, org: res.org ?? null, shape: res.shape ?? null, suits: res.suits ?? null, descs };
 }
 
 // Keep a round? 'sum' (s1): a lower weighted sum. 'constraint' (s2): organisation may not fall by more than 0.1, and
 // the defects per line must fall, unless organisation rose by 0.1+ and the defects per line are within 10%.
-function better(c, best) {
+// s3: organisation is read by --org-on, and the 0.1 is measured from the peak any kept round reached (--ratchet peak).
+const orgOf = (x) => (ORG_ON === 'shape' ? x.shape : x.org);
+function better(c, best, peak) {
   if (!best) return true;
   if (ACCEPT === 'sum') return c.sum < best.sum;
-  const known = c.org !== null && best.org !== null;
-  if (known && c.org < best.org - 0.1) return false;
+  const co = orgOf(c), bo = orgOf(best);
+  const known = co !== null && bo !== null;
+  const floor = RATCHET === 'peak' && peak !== null ? Math.max(bo, peak) : bo;
+  if (known && co < floor - 0.1) return false;
   if (c.perLine < best.perLine) return true;
-  return known && c.org >= best.org + 0.1 && c.perLine <= best.perLine * 1.1;
+  return known && co >= bo + 0.1 && c.perLine <= best.perLine * 1.1;
 }
 
 // ─── Repair: each fix touches only the answers it names ──────────────────────────────────────────────────────────
 async function repair(fix, res) {
   if (fix.op === 'reword' || fix.op === 'reask') { lm.invalidate(fix.sig, fix.hint); return true; }
   if (fix.op === 'flip') { const d = fix.decision; if (!d.conf?.second) return false; lm.force(fix.sig, d.conf.second); return true; }
+  if (fix.op === 'exclude') { EXCLUDE.set(fix.S, new Set([...(EXCLUDE.get(fix.S) || []), fix.bit])); lm.invalidate(fix.sig, fix.hint); return true; }
   const sc = lm.cache.get('sections');
   if (!sc?.answer?.sections) return false;
   const list = sc.answer.sections;
@@ -833,7 +869,7 @@ async function repair(fix, res) {
 
 // ─── The loop ─────────────────────────────────────────────────────────────────────────────────────────────────────
 console.log(`OWN-029 ${RUN}: "${REQUEST}" — builder ${MODEL}, reviewer ${JUDGE}, ${ROUNDS} repair rounds`);
-let best = null;
+let best = null, peak = null;
 // an issue may be tried twice: a re-word is a fresh sample, and the plumber's "[City/Area]" came back bracketed once
 const tried = new Map();
 const TRIES = Number(opt('--tries', 2));
@@ -842,16 +878,18 @@ for (let round = 0; round <= ROUNDS; round++) {
   const callsBefore = ledger.calls.length, judgeBefore = ledger.judgements.length;
   const res = await buildOnce(round);
   const crit = await critique(res, round);
-  const entry = { round, project: res.project, score: crit.score, sum: crit.sum, defects: crit.defects, lines: crit.lines, perLine: crit.perLine, org: crit.org, suits: crit.suits, applied: res.applied, sections: res.built.map((b) => ({ kind: b.sec.kind, bits: b.bits, band: b.nodes[0].look, staged: b.staged, pSound: b.pSound, pFit: b.pFit })),
+  const entry = { round, project: res.project, score: crit.score, sum: crit.sum, defects: crit.defects, lines: crit.lines, perLine: crit.perLine, org: crit.org, shape: crit.shape, suits: crit.suits, applied: res.applied, sections: res.built.map((b) => ({ kind: b.sec.kind, bits: b.bits, band: b.nodes[0].look, staged: b.staged, pSound: b.pSound, pFit: b.pFit })),
     issues: crit.issues.map((i) => ({ id: i.id, weight: +i.weight.toFixed(2), say: i.say, op: i.fix?.op })), findings: res.findings.map((f) => f.code), modelCalls: ledger.calls.length - callsBefore, judgements: ledger.judgements.length - judgeBefore,
     words: crit.descs.map((d) => d.text), minutes: +((Date.now() - tr) / 60000).toFixed(1) };
   ledger.roundsLog.push(entry);
-  const improved = better(crit, best);
-  const m = (c) => `per line ${c.perLine} (${c.defects}/${c.lines}), organised ${c.org}, sum ${c.sum}`;
+  const improved = better(crit, best, peak);
+  const m = (c) => `per line ${c.perLine} (${c.defects}/${c.lines}), organised ${c.org}, shape ${c.shape}, sum ${c.sum}`;
   console.log(`\n== round ${round}: ${m(crit)} (${crit.issues.length} issues) ${best ? (improved ? `KEPT over ${m(best)}` : `NOT better than ${m(best)} → revert`) : ''}`);
   for (const i of crit.issues) console.log(`   · [${i.weight.toFixed(1)}] ${i.say}${i.fix ? ` → ${i.fix.op}` : ''}`);
-  if (improved) best = { round, score: crit.score, sum: crit.sum, defects: crit.defects, lines: crit.lines, perLine: crit.perLine, org: crit.org, suits: crit.suits, snap: lm.snapshot(), sectionsAnswer: structuredClone(lm.cache.get('sections')), issues: crit.issues, res };
-  else { lm.restore(best.snap); lm.cache.set('sections', structuredClone(best.sectionsAnswer)); entry.reverted = true; }
+  if (improved) {
+    best = { round, score: crit.score, sum: crit.sum, defects: crit.defects, lines: crit.lines, perLine: crit.perLine, org: crit.org, shape: crit.shape, suits: crit.suits, snap: lm.snapshot(), sectionsAnswer: structuredClone(lm.cache.get('sections')), exclude: new Map([...EXCLUDE].map(([k, v]) => [k, new Set(v)])), issues: crit.issues, res };
+    if (orgOf(crit) !== null) peak = Math.max(peak ?? 0, orgOf(crit));
+  } else { lm.restore(best.snap); lm.cache.set('sections', structuredClone(best.sectionsAnswer)); EXCLUDE.clear(); for (const [k, v] of best.exclude) EXCLUDE.set(k, new Set(v)); entry.reverted = true; }
   entry.kept = improved;
   writeLedger();
   if (round === ROUNDS) break;
@@ -862,7 +900,7 @@ for (let round = 0; round <= ROUNDS; round++) {
   const applied = [];
   for (const i of queue) {
     if (n >= FIXES_PER_ROUND) break;
-    const isStruct = ['reask', 'flip', 'addSection', 'dropSection'].includes(i.fix.op);
+    const isStruct = ['reask', 'exclude', 'flip', 'addSection', 'dropSection'].includes(i.fix.op);
     if (['addSection', 'dropSection'].includes(i.fix.op)) { if (pageOp) continue; pageOp = true; }
     if (isStruct && structural.has(i.section)) continue;
     tried.set(i.id, (tried.get(i.id) || 0) + 1);
@@ -873,8 +911,8 @@ for (let round = 0; round <= ROUNDS; round++) {
   writeLedger();
 }
 ledger.result = { minutes: +((Date.now() - t0) / 60000).toFixed(1), accept: ACCEPT, bestRound: best.round, bestScore: best.score, scores: ledger.roundsLog.map((r) => r.score),
-  r0: { perLine: ledger.roundsLog[0].perLine, org: ledger.roundsLog[0].org, suits: ledger.roundsLog[0].suits, sum: ledger.roundsLog[0].sum },
-  kept: { perLine: best.perLine, org: best.org, suits: best.suits, sum: best.sum, lines: best.lines }, builderCalls: ledger.calls.filter((c) => !c.forced).length, judgements: ledger.judgements.length, replays: ledger.replays, bestProject: best.res.project };
+  r0: { perLine: ledger.roundsLog[0].perLine, org: ledger.roundsLog[0].org, shape: ledger.roundsLog[0].shape, suits: ledger.roundsLog[0].suits, sum: ledger.roundsLog[0].sum },
+  kept: { perLine: best.perLine, org: best.org, shape: best.shape, suits: best.suits, sum: best.sum, lines: best.lines }, builderCalls: ledger.calls.filter((c) => !c.forced).length, judgements: ledger.judgements.length, replays: ledger.replays, bestProject: best.res.project };
 fs.writeFileSync(path.join(OUT, 'summary.json'), JSON.stringify({ ...ledger.result, rounds: ledger.roundsLog.map(({ words, ...r }) => r) }, null, 1));
 writeLedger();
 console.log(JSON.stringify(ledger.result, null, 1));

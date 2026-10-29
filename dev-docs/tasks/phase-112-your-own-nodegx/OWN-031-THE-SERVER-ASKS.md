@@ -2,7 +2,7 @@
 
 **Opened 2026-10-28** (OWN-029 s2, Opus, from `own-029/NEXT-SESSION-PROMPT.md` step 5: *"move the loop into the MCP …
 so a person with Gemma in Cline gets the harness without running it. Scope it as its own task file first."*).
-**Status: ⬜ scoped 2026-10-28, not started.** Three rulings wait on Richard (§7).
+**Status: ⬜ scoped 2026-10-28, not started. The three rulings in §7 were decided 2026-10-29 (Richard handed them over); step 1, the probe, is next once OWN-030 has run.**
 **Model:** Opus. The client model in every test is a local Gemma, the same one OWN-029 used as builder.
 
 ## 1. The person sentence
@@ -99,6 +99,20 @@ guided_build({ session, answers: [...] })       → batch form (below)
    on the server's machine, which breaks "nothing to run").
 3. **Whose questions are they?** Is the vocabulary of questions (bits, looks offered by section kind) product
    surface that ships, or experiment code to be rewritten? Porting it makes it product.
+
+**Decided 2026-10-29** (Richard, after OWN-029 s2: *"you decide for the things to build questions"*; decided by Opus,
+OWN-029 s3):
+1. **Turn by turn first.** Every MCP client can do it. Sampling is a later fast path, after a probe of which clients
+   advertise it (Cline, Claude Desktop, Claude Code), never assumed.
+2. **The reviewer is the script critics plus the client's own model; no server-side model.** "Nothing to run" is the
+   point of the task. The script critics (S1–S14), the validator and the render findings always run on the server.
+   The reviewer's yes/no questions go to the client model as plain answers. Because they come without logprobs and
+   E2B said yes to nearly everything in OWN-029's probes, they may trigger a repair but never decide whether a round
+   is kept. The accept rule uses the script's defects per line only. AC4 measures whether that holds; if it does not,
+   the next step is to ask each yes/no question twice, in opposite polarity, and act only when the two answers agree.
+3. **The questions are product.** "The taste lives in the system" is the thesis, so the vocabulary of questions ports
+   into `noodl-mcp/src/guided/` as shipped surface. It sits in a deferred group and is labelled experimental in its
+   description, so it can change between releases without a migration.
 
 ## 8. Links
 

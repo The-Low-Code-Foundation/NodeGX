@@ -1,0 +1,26 @@
+{
+ "desktop": {
+  "url": "http://127.0.0.1:64794/",
+  "blank": false,
+  "words": 396,
+  "overflowX": 0,
+  "smallText": [],
+  "lowContrast": [],
+  "unknownGround": 7,
+  "clipped": [],
+  "brokenImages": [],
+  "sections": 6
+ },
+ "phone": {
+  "url": "http://127.0.0.1:64794/",
+  "blank": false,
+  "words": 396,
+  "overflowX": 0,
+  "smallText": [],
+  "lowContrast": [],
+  "unknownGround": 7,
+  "clipped": [],
+  "brokenImages": [],
+  "sections": 6
+ }
+}

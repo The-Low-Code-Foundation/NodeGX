@@ -272,3 +272,42 @@ sampled afresh. Their round-0 "organised" scores:
 - **`P112-OWN029-IMAGEGROUNDNOTOP` is still open.** The fix changes `imageGround`, and the tpl001 and tpl003
   fixtures spread that composition, so it needs a template regeneration and a suite run. That is a heavy job, so it
   was kept off the box while the Ollama series ran.
+
+## 8. Session 3 (2026-10-29, Opus): organisation without the words, the ratchet, two repairs
+
+### 8a. The organisation judge without the words (`shape.mjs`, measured by `shape-probe.mjs`)
+
+The s2 judge reads the outline WITH each section's first line, and new words on one structure moved it by up to 0.61
+(7c). The s3 judge, `page.shape`, reads the same outline with the words taken out: section kinds, grounds and parts.
+On one structure it is deterministic (temperature 0, identical prompt), so its spread across the paired runs is zero
+by construction. The question left is whether it still sees what the decisions are worth. `shape-probe.mjs` asked it
+of every round the ledgers hold (145 rounds; `runs/shape-probe.json`):
+
+| Round 0, mean over six briefs | organised, with words | shape, without |
+|---|---|---|
+| random decisions (R4) | 0.50 | 0.58 |
+| the model's decisions (Q) | 0.66 | **0.91** |
+| the model beats random on | 5 of 6 briefs | **6 of 6** |
+
+- **The shape judge separates the model from random about twice as widely** (0.33 against 0.16), and on every brief.
+- **It refuses the page Richard would refuse.** W1-bakery: shape 0.90 at round 0, then 0.75 at the kept round 3
+  (the full-bleed gallery). That is 0.15 below the peak, so a constraint on shape with the peak ratchet refuses it.
+  K1-bakery's refused round 3 reads 0.77 against a peak of 0.90, so it is refused too.
+- **Jazz was the words, not the structure.** The words judge scored every jazz page 0.08–0.26; the shape judge scores
+  the same outlines 0.83–0.94.
+- **It is compressed high** (SD 0.11, minimum 0.30; correlation with the words judge 0.28). The 0.1 tolerance is
+  therefore strict for it, which is the intent: it moves only when the structure moves.
+- **Decision:** the constraint reads `page.shape` (`--org-on shape`, the default). The words judge is still asked
+  and logged (`org`).
+
+### 8b. The ratchet
+
+`--ratchet peak` (the default) measures the 0.1 from the highest organisation any kept round reached, not from the
+last kept round. `--ratchet last` is the s2 rule.
+
+### 8c. The two repairs
+
+- **S13 (a list repeated across sections) repairs by structure:** the list is taken out of that section's choices
+  (`exclude`) and its bits are re-asked. A reverted round restores the exclusions with the answers.
+- **S14from:** a "from $X" line must equal the lowest item price on the page. **S14list:** a single price above a list
+  must be one of that list's prices. These are the two s2 jazz defects.
