@@ -43,3 +43,17 @@ run alone under HEAVY.lock at load average ~2, no jest/vitest on the box. The 36
 STU-090 tree at load 16–20. So far it has failed only under heavy load and passed every time it ran alone (10-24, 10-30),
 which fits a 120 s wait for `__ob.published` timing out on a starved box, but does not exclude anything: the cause was
 never read from the app's stdout. Next time it stops, keep `running.log()` and read why `studio:publish` did not answer.
+
+## Seen again, then passing at load 16.7, 2026-10-30 (the session after STU-090)
+
+- **09:16, failed (36/40):** `check:app` stopped at the same four rows. It ran in one chain straight after `check:data`
+  and `check:timeline` (both start backends and a Chrome), at moderate load (~3–4).
+- **The 3b detail:** `pub` was undefined while "the button is ready again" passed, so Publish finished without setting
+  `__ob.published`. `asking()` in `app/main.cjs` never rejects (a failure comes back as `{ error }`, which the gate
+  prints), so the result never reached this page. Either the invoke itself rejected, or the page was reloaded and `__ob`
+  replaced while Publish ran. The app's stdout said nothing.
+- **10:27, passed (67/67):** the same tree, alone, at load **16.7**. Load alone does not explain it. Running straight
+  after other gates in the same chain fits every run so far, but nothing excludes other causes.
+- **Instrumented (nodegx-studio a3a02fd):** when no answer comes, 3b now reports whether the page that pressed Publish
+  is still there (`samePage`), whether it ever showed "Publishing…" (`busy`), and the page's last errors (`problems`).
+  The next stop names which of the two it is.
