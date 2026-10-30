@@ -40,4 +40,30 @@ answer nothing for him.
   things, synthesised sound, and its own GPU crowd. A used the shelf's crowd as given. Day one looking different in
   scope, not in kind, is still OWN-023's expectation; the parting is meant to come on the heat.
 
-Waits on Richard: play both, answer A's three questions, write a numbered list per game (LOOK.md, verbatim).
+### Richard played both (2026-10-30), verbatim
+
+> "Jeez I've played both and there are stark differences. I think A is more of a realistic prototype, the game
+> mechanics are good. but B definitely looks more like a nearly finished game. You can zoom in and out freely, which you
+> can't in A. You see more 3D details in the buildings. The expedition has a much more realistic destroyed building. B
+> has kind of silly monsters, that's maybe the only criticism. But it does look like B managed to make a much more
+> visually polished game, and even managed multi-person expeditions"
+
+**Day one did not look the same (OWN-023's expectation, THE-TEST §2): the bare arm looks better.** What on our side
+explains part of it, read from the arms' own files:
+
+- **The fixed zoom came from our note, not the brief.** Both briefs say *"the cutaway readable at two zooms"*. A's
+  `CLAUDE.md` line 26 adds *"Nothing moves unless the person moves it: … a change of view is a cut"* (the castle's rule
+  against automatic camera motion). A wrote *"Changing zoom is a cut"* into `RECORD.md` and built two fixed zooms; B read
+  the same brief without that line and built a free zoom. The rule was meant for cameras that move **by themselves**; a
+  person's wheel is the person moving it. The note's wording over-reaches.
+- **Where the effort went.** Similar sittings (42 vs 52 min, 132 vs 131 tool calls): A wrote 2,634 lines plus 265 reasons
+  and five gate runs; B wrote 4,650 lines of game. The gates are not free, and on day one their price is paid in what is
+  on screen.
+- **The people:** A used the shelf's flat crowd as told; B wrote its own instanced 3D crowd. Richard did not name the
+  people either way.
+
+Not changed: the harness stays as it is for the rounds (changing A's note mid-test would make the arms
+incomparable); his list for A carries the zoom, and whether A then reads the note's line as forbidding it is a
+measure. The note's fix (rule 6 says *by itself* only) goes into P129 CANON draft 3 with the verdict.
+
+Waits on Richard: A's three questions; a list per game (his remarks above, split per arm, to be confirmed by him).
