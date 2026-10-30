@@ -288,8 +288,29 @@ function _toJSON(obj) {
  * @param {import('@noodl/types').ModelScopeLike} [modelScope] omit for the process-wide store
  * @returns {Record<string, unknown>}
  */
+/**
+ * P123-RT-COLUMNSSCHEMA — a declared collection's fields as a `schema`-shaped `{ properties }` map, whichever shape
+ * `dbCollections` holds it in: a Parse-era entry carries `schema.properties`; a NodeGX one (the built-in backend's
+ * cache, the MCP server's write-back, NodeGX Studio) carries a `columns` list. Reading only the first, every NodeGX
+ * project's File, Date and Pointer fields were untyped here: a photo reached an Image as `[object Object]`.
+ * `queryutils` and `schema-ports` read both the same way.
+ * @param {string} [collectionName]
+ * @returns {{ properties: Record<string, { type?: string, targetClass?: string }> } | undefined}
+ */
+function _schemaOf(collectionName) {
+  const collection = collectionName !== undefined ? CloudStore._collections[collectionName] : undefined;
+  if (!collection) return undefined;
+  if (collection.schema) return collection.schema;
+  if (!Array.isArray(collection.columns)) return undefined;
+  const properties = {};
+  for (const column of collection.columns) {
+    if (column && column.name) properties[column.name] = { type: column.type, targetClass: column.targetClass };
+  }
+  return { properties };
+}
+
 function _serializeObject(data, collectionName, modelScope) {
-  if (CloudStore._collections[collectionName]) var schema = CloudStore._collections[collectionName].schema;
+  var schema = _schemaOf(collectionName);
 
   for (var key in data) {
     var _type = schema && schema.properties && schema.properties[key] ? schema.properties[key].type : undefined;
@@ -410,8 +431,7 @@ function _fromJSON(item, collectionName, modelScope) {
   const m = (modelScope || Model).get(item.objectId);
   m._class = collectionName;
 
-  if (collectionName !== undefined && CloudStore._collections[collectionName] !== undefined)
-    var schema = CloudStore._collections[collectionName].schema;
+  var schema = _schemaOf(collectionName);
 
   for (var key in item) {
     if (key === 'objectId' || key === 'ACL') continue;
