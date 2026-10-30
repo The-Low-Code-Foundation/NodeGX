@@ -15,6 +15,12 @@ way"* and three asks; the same stranger built them in 19 minutes for $13.40: the
 pathway followed as one of them with the functions RUN as them, and one row's reach measured across all 12 (LOOK.md
 §s2: *"2 of 12 people can reach this row"*). Three bugs filed (`P124-S1-WRITESRECORDSJS`, `P124-S1-DOORREFUSALUNSEEN`,
 `P124-S2-ACTSASHTTP`). Waits on Richard: §7's three rulings and the live sitting (PLAYTEST.md).**
+**2026-10-30: folded into P127.** s3 made the map `@nodegx/backend-map`, the package Studio's Backend map tab mounts;
+P127 carried it to any app and into the conversation; §7 was answered on the way (§8). The unbuilt half of §3.4,
+the hands, is [BKO-007](../phase-127-the-backend-in-the-open/BKO-007-THE-HANDS.md). The map's library, published
+so anyone can build their own backend editor, is [BKO-008](../phase-127-the-backend-in-the-open/BKO-008-THE-BACKEND-KIT.md)
+→ [BKO-009](../phase-127-the-backend-in-the-open/BKO-009-A-STRANGERS-BACKEND-EDITOR.md). §5.1 (a run records what it
+touched) is still nobody's.
 
 > "I want the mystery of the backend / cloud functions and the database schema and management, privacy etc., to become
 > as cool as the star wars editor or the kids block editor we made in a recent session. … Having that DB view FUSED with

@@ -27,6 +27,12 @@
 
   <aside id="secure" class="card small mini"></aside>
   <div id="lensNote" class="card hidden"></div>
+  <!-- P127 BKO-007: the hands. Shown only when the map talks to a running backend (never on a recording). -->
+  <div id="hands" class="card" hidden>
+    <b>Change it by dragging.</b> A kind of person onto a table lets them in · a function onto a table runs it when a row changes ·
+    <button id="clock" class="clock" title="Drag me onto a function to run it on a schedule">🕘 this clock</button> onto a function runs it on a schedule · click a wire to cut it
+  </div>
+  <div id="hand" class="card hidden" role="dialog" aria-label="What this drag does"></div>
 
   <aside id="panel" class="card hidden"><button class="close" id="closePanel" aria-label="Close">×</button><div id="panelBody"></div></aside>
 

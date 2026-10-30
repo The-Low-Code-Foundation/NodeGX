@@ -56,6 +56,32 @@ See it without a backend: https://nodegx.io/backend-map/ (a recording).
 If someone else changed the rules since you opened the map, the change is refused and nothing is
 written; the map reloads so you can choose again.
 
+## Change it by dragging
+
+On a running backend the map has a **Who** column on the far left. It holds anyone at all, anyone signed in, each
+group the rules know and whoever made the row. A recording has no such column. The backend's rules are written for
+kinds of people, never for one named person. These kinds are what you drag.
+
+- **Let them in:** drag a kind of person onto a table. A card says what it will do before it does it ("Anyone
+  signed in may see the rows of Progress"). You choose **See its rows**, **Add, change, delete** or **Both**. The
+  card also says what the rule will read afterwards. Opening a table to anyone at all is asked twice. You can
+  drag a real person too. The card then says it means everyone in their group. For someone in no group it means
+  anyone signed in. It also offers only the rows they made.
+- **Take it away:** click a kind of person (or a table) and its wires to the tables it may open appear, labelled
+  *sees* or *changes*. Click a wire and press **Cut it** (or Delete). Each kind's panel lists its tables, each with
+  a ✂ cut. A cut that brings a table back to the app's standard rule removes its own entry altogether.
+- **Run a function when a row changes:** drag the function onto a table and tick *made*, *changed* or *deleted*.
+- **Run a function on a schedule:** drag the 🕘 clock from the hint bar onto a function. As you type, the backend
+  says in its own words when it would run. It lists the next three runs.
+- **Stop it running by itself:** a trigger's panel has **Stop it running by itself** (not for a webhook: its
+  secret can't be given back).
+
+Every change goes to the running backend **and** the project's file, or to neither. A rule is kept in
+`nodegx.security.json` and a trigger in `nodegx.automations.json`. If either place changed since the map looked,
+the change is refused. If the file can't be written, the backend is put back. Each change ends in a line with
+**Undo**. Undo puts both
+places back byte for byte. If someone else has written to them since, it refuses and changes nothing.
+
 ## Looking as a real person
 
 - **Pick a person**: click them in the People column, or choose them under "A real person" at the top.
@@ -114,5 +140,8 @@ server is never public: it holds the backend's admin credential.
 `npm test` runs everything on copies (a copy of the app's folder under `test/.work`, with a backend of its
 own from the kit): the NodeGX kit's editor suite and its control, the rule change end to end with
 restarts, the page driven in Chrome, and the real-person views on a copy holding the app's whole world.
+`test/hands.test.mjs` grades every drag through the page's own requests against the backend and the files (a row
+made in a watched table runs the function; undo byte for byte; a control writer that skips the file must fail), and
+`test/hands-ui.test.mjs` does them with a mouse in Chrome.
 The app's own `tools/setup-backend.mjs` and `tools/deploy-functions.mjs`, run from the copy, set up its
 people, rows and functions.

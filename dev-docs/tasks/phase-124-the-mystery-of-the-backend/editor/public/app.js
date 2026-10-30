@@ -47,8 +47,15 @@ const COLORS = {
   // P127 BKO-005: what the backend starts by itself, and its wires (to the functions it runs, to the table it watches)
   trigger: C.gold,
   fires: C.gold,
-  watches: C.gold
+  watches: C.gold,
+  // BKO-007: a kind of person the rules know, and its wire to each table it may open directly
+  who: C.purple,
+  may: C.purple
 };
+/** A who's colour: the same scale as a table's openness (anyone red, signed in blue, a group purple, a maker pink). */
+const whoColor = (who) => (who === 'public' ? COLORS.public : who === 'authenticated' ? COLORS.authenticated : who === W.MAKER ? COLORS.person : COLORS.role);
+/** BKO-007: the hands work on a running backend only; a recording (the public copy) refuses every change. */
+const hands = () => !!state.map && !state.map.backend.recordedAt;
 const OPEN_COLORS = [C.green, C.purple, C.amber, C.red];
 
 // BKO-003: the kinds of person "Look at it as" offers are the app's own: anyone signed in, and one per
@@ -150,6 +157,7 @@ async function load(keepView) {
     `${plural(live, 'table')}${notYet ? ` (and ${notYet} in the app, not on the backend yet)` : ''} · ${plural(m.functions.length, 'function')} · ${m.people == null ? 'people unknown' : plural(m.people, 'person', 'people')}` +
     ((m.problems ?? []).length ? ` · <span class="bad">couldn’t read its ${esc(m.problems.map((p) => p.what).join(', '))}</span>` : '');
   layout();
+  $('hands').hidden = !hands();
   if (!keepView) fit();
   renderSecure();
   renderLensNote();
@@ -224,6 +232,11 @@ function layout() {
   const edges = [];
   const add = (n) => (nodes.push(n), n);
 
+  // BKO-007: the kinds of person the rules know, further left still: drag one onto a table to let them in
+  if (hands()) {
+    const whos = ['public', 'authenticated', ...m.roles.map((r) => `role:${r.name}`), W.MAKER];
+    whos.forEach((w, i) => add({ id: `w:${w}`, kind: 'who', key: w, title: W.whoWords(w), x: -620, y: i * 66, w: 230, h: 46 }));
+  }
   // the people, the real ones from the database, on the far left
   state.people.forEach((p, i) => add({ id: `p:${p.id}`, kind: 'person', key: p.id, person: p, title: p.name, x: -300, y: i * 66, w: 200, h: 46 }));
   m.screens.forEach((s, i) => add({ id: `s:${s}`, kind: 'screen', key: s, title: screenWords(s), x: 0, y: i * 84, w: 200, h: 56 }));
@@ -275,7 +288,7 @@ function layout() {
   const GAP = { screen: 100, fn: 200, table: 180 };
   let cursor = null;
   const colOf = (n) => n.col ?? n.kind;
-  for (const kind of ['person', 'screen', 'fn', 'table']) {
+  for (const kind of ['who', 'person', 'screen', 'fn', 'table']) {
     const col = nodes.filter((n) => colOf(n) === kind);
     if (!col.length) continue;
     const left = Math.min(...col.map((n) => n.x));
@@ -284,7 +297,7 @@ function layout() {
   }
 
   // Centre each column on y = 0.
-  for (const kind of ['person', 'screen', 'fn', 'table']) {
+  for (const kind of ['who', 'person', 'screen', 'fn', 'table']) {
     const col = nodes.filter((n) => colOf(n) === kind);
     if (!col.length) continue;
     const top = Math.min(...col.map((n) => n.y));
@@ -326,6 +339,15 @@ function layout() {
     if (n.kind !== 'trigger') continue;
     for (const fn of n.trigger.fns) if (byId[`f:${fn}`]) edges.push({ id: `${n.id}>f:${fn}`, kind: 'fires', from: n.id, to: `f:${fn}` });
     if (n.trigger.table && byId[`t:${n.trigger.table}`]) edges.push({ id: `${n.id}>t:${n.trigger.table}`, kind: 'watches', from: n.id, to: `t:${n.trigger.table}` });
+  }
+  // BKO-007: who may open each table directly, as the backend's rule names them. Drawn only while a who or a table
+  // is in focus (a wire per table per kind of person would bury the map), and each one can be cut.
+  for (const t of m.tables) {
+    if (t.notOnBackend || !byId[`t:${t.name}`]) continue;
+    for (const w of W.namedWhos(W.tableRule(m.config, t.name))) {
+      if (!byId[`w:${w.who}`]) continue;
+      edges.push({ id: `w:${w.who}>t:${t.name}`, kind: 'may', from: `w:${w.who}`, to: `t:${t.name}`, who: w.who, table: t.name, see: w.see, change: w.change });
+    }
   }
   const seenLink = new Set();
   for (const l of m.links) {
@@ -540,6 +562,7 @@ function draw(now) {
   ctx.font = '600 13px Inter, system-ui, sans-serif';
   ctx.fillStyle = C.dim;
   const heads = [
+    ['who', 'WHO', 'drag one onto a table to let them in'],
     ['person', 'PEOPLE', 'the real ones, from the database'],
     ['screen', 'THE APP’S SCREENS', 'where people click'],
     ['trigger', 'ON ITS OWN', 'what the backend starts by itself'],
@@ -565,6 +588,8 @@ function draw(now) {
 
   // wires, under the blocks
   for (const e of state.edges) {
+    // BKO-007: who may open a table shows only with the who or the table in focus (or the wire about to be cut)
+    if (e.kind === 'may' && !(rel && rel.has(e.id)) && state.cut?.edge !== e.id) continue;
     const p = edgePoints(e);
     let alpha = e.kind === 'links' ? 0.16 : e.kind === 'mentions' ? 0.22 : 0.42;
     if (rel) alpha = rel.has(e.id) ? 0.95 : 0.05;
@@ -579,13 +604,24 @@ function draw(now) {
       if (!matchesSearch(a) && !matchesSearch(b)) alpha *= 0.2;
     }
     ctx.globalAlpha = alpha;
-    ctx.strokeStyle = COLORS[e.kind];
-    ctx.lineWidth = e.kind === 'writes' ? 2.4 : 1.6;
-    ctx.setLineDash(e.kind === 'mentions' ? [2, 5] : e.kind === 'links' || e.kind === 'watches' ? [6, 5] : []);
+    ctx.strokeStyle = e.kind === 'may' ? whoColor(e.who) : COLORS[e.kind];
+    ctx.lineWidth = e.kind === 'writes' ? 2.4 : e.kind === 'may' ? (state.cut?.edge === e.id ? 4 : 2.4) : 1.6;
+    ctx.setLineDash(e.kind === 'mentions' ? [2, 5] : e.kind === 'links' || e.kind === 'watches' || (e.kind === 'may' && state.cut?.edge === e.id) ? [6, 5] : []);
     ctx.beginPath();
     ctx.moveTo(p[0], p[1]);
     ctx.bezierCurveTo(p[2], p[3], p[4], p[5], p[6], p[7]);
     ctx.stroke();
+    if (e.kind === 'may') {
+      const [x, y] = bez(p, 0.5);
+      const label = e.see && e.change ? 'sees · changes' : e.see ? 'sees' : 'changes';
+      ctx.setLineDash([]);
+      ctx.font = '700 11px Inter, system-ui, sans-serif';
+      const w = ctx.measureText(label).width + 12;
+      ctx.fillStyle = C.labelBg;
+      ctx.fillRect(x - w / 2, y - 9, w, 18);
+      ctx.fillStyle = whoColor(e.who);
+      ctx.fillText(label, x - w / 2 + 6, y + 4);
+    }
     if (rel && rel.has(e.id) && e.kind !== 'links') {
       // a gentle flow along the lit wires
       ctx.setLineDash([]);
@@ -675,6 +711,39 @@ function draw(now) {
   ctx.globalAlpha = 1;
 
   for (const n of state.nodes) drawNode(n, now, rel);
+  drawHand(now);
+}
+
+/** BKO-007: the wire a drag pulls out of its block (or out of the clock), to the pointer or the block it would land on. */
+function drawHand(now) {
+  const h = state.hand;
+  if (!h) return;
+  const src = h.source.kind === 'clock' ? null : state.byId[h.source.id];
+  const [x1, y1] = src ? [src.x + src.w, src.y + src.h / 2] : h.from;
+  const t = h.target && state.byId[h.target];
+  const [x2, y2] = t ? [t.x, t.y + t.h / 2] : h.at;
+  const color = h.source.kind === 'who' ? whoColor(h.source.key) : h.source.kind === 'person' ? COLORS.person : COLORS.trigger;
+  const dx = Math.max(80, Math.abs(x2 - x1) * 0.45);
+  ctx.save();
+  ctx.globalAlpha = 0.95;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 3;
+  ctx.setLineDash([8, 6]);
+  ctx.lineDashOffset = -now / 40;
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 12;
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.bezierCurveTo(x1 + dx, y1, x2 - dx, y2, x2, y2);
+  ctx.stroke();
+  if (t) {
+    ctx.setLineDash([]);
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.roundRect(t.x - 6, t.y - 6, t.w + 12, t.h + 12, 14);
+    ctx.stroke();
+  }
+  ctx.restore();
 }
 
 function fnColor(f) {
@@ -693,7 +762,7 @@ function drawNode(n, now, rel) {
   ctx.globalAlpha = alpha;
 
   const color =
-    n.kind === 'person' ? COLORS.person : n.kind === 'screen' ? COLORS.screen : n.kind === 'fn' ? fnColor(n.fn) : n.kind === 'trigger' ? COLORS.trigger : COLORS.table;
+    n.kind === 'who' ? whoColor(n.key) : n.kind === 'person' ? COLORS.person : n.kind === 'screen' ? COLORS.screen : n.kind === 'fn' ? fnColor(n.fn) : n.kind === 'trigger' ? COLORS.trigger : COLORS.table;
   const sel = state.selected === n.id, hov = state.hover === n.id;
 
   // a run's flash
@@ -743,7 +812,18 @@ function drawNode(n, now, rel) {
   ctx.fillStyle = color;
   ctx.strokeStyle = color;
   ctx.lineWidth = 1.8;
-  if (n.kind === 'person') {
+  if (n.kind === 'who') {
+    // a key: what lets a kind of person through a table's door
+    ctx.beginPath();
+    ctx.arc(ix - 4, iy, 5, 0, Math.PI * 2);
+    ctx.moveTo(ix + 1, iy);
+    ctx.lineTo(ix + 11, iy);
+    ctx.moveTo(ix + 7, iy);
+    ctx.lineTo(ix + 7, iy + 5);
+    ctx.moveTo(ix + 10, iy);
+    ctx.lineTo(ix + 10, iy + 4);
+    ctx.stroke();
+  } else if (n.kind === 'person') {
     // a head and shoulders
     ctx.beginPath();
     ctx.arc(ix, iy - 5, 5, 0, Math.PI * 2);
@@ -793,7 +873,7 @@ function drawNode(n, now, rel) {
   const small = n.h < 50;
   ctx.fillStyle = C.text;
   ctx.font = '600 14px Inter, system-ui, sans-serif';
-  const room = n.w - (n.kind === 'person' || n.kind === 'trigger' ? 56 : 80);
+  const room = n.w - (n.kind === 'person' || n.kind === 'trigger' || n.kind === 'who' ? 56 : 80);
   ctx.fillText(clip(n.title, room), n.x + 44, n.y + (small ? 20 : 24));
   ctx.font = '12px Inter, system-ui, sans-serif';
   ctx.fillStyle = C.sub;
@@ -902,6 +982,10 @@ function profileWords(p) {
 
 function subtitle(n) {
   const m = state.map;
+  if (n.kind === 'who') {
+    const opens = state.edges.filter((e) => e.kind === 'may' && e.from === n.id).length;
+    return opens ? `opens ${opens} table${opens === 1 ? '' : 's'} directly` : 'opens no table directly';
+  }
   if (n.kind === 'person') {
     const p = n.person;
     const ev = state.everyone?.byId?.[p.id];
@@ -1087,7 +1171,9 @@ function renderPanel() {
   $('panel').classList.remove('hidden');
   $('panel').classList.toggle('wide', n.kind === 'table');
   const html =
-    n.kind === 'person'
+    n.kind === 'who'
+      ? whoPanel(n)
+      : n.kind === 'person'
       ? personPanel(n)
       : n.kind === 'table'
       ? state.record?.table === n.key
@@ -1131,6 +1217,8 @@ function renderPanel() {
     };
   }
   if (n.kind === 'table' && $('ruleEditor')) wireTableControls(n);
+  for (const b of $('panelBody').querySelectorAll('[data-cut]')) b.onclick = () => cutWire(state.edges.find((e) => e.id === b.dataset.cut));
+  if ($('removeTrigger')) $('removeTrigger').onclick = () => removeTrigger(n.trigger);
 }
 
 // ───────────────────────────── round 2: real people ─────────────────────────────
@@ -1950,7 +2038,262 @@ function triggerPanel(n) {
     <p style="font-size:12px;color:var(--dim)">${asWhom}</p>
     <h4>Its last run</h4>
     <p>${last ?? (t.notOnBackend ? 'None: it isn’t on the backend.' : 'It hasn’t run yet.')}</p>
+    ${hands() && t.type !== 'webhook' ? '<button class="ghost" id="removeTrigger">Stop it running by itself</button>' : ''}
   `;
+}
+
+// ───────────────────────────── BKO-007: the hands ─────────────────────────────
+
+function whoPanel(n) {
+  const opens = state.edges.filter((e) => e.kind === 'may' && e.from === n.id);
+  const what = (e) => (e.see && e.change ? 'see and change' : e.see ? 'see' : 'change');
+  const about =
+    n.key === 'public'
+      ? 'Anyone on the internet, signed in or not. A table open to them has no function checking who asks.'
+      : n.key === 'authenticated'
+      ? 'Everyone with an account who is signed in.'
+      : n.key === W.MAKER
+      ? 'The person who made a row, for that row only. Letting them in means each person always sees and changes what they made, and nobody else’s.'
+      : `Everyone in the “${n.key.slice(5)}” group.`;
+  return `
+    <div class="kind">A kind of person</div>
+    <h2>${esc(n.title)}</h2>
+    <p>${esc(about)}</p>
+    <p style="font-size:12px;color:var(--dim)">The backend’s rules are written for kinds of people, never for one named person. Drag this onto a table to let them in.</p>
+    <h4>The tables they may open directly</h4>
+    ${opens.length ? `<ul>${opens.map((e) => `<li>${go(e.to, W.tableWords(e.table))}: ${what(e)} <button class="cutbtn" data-cut="${esc(e.id)}" title="Take it away, in the backend and in the app’s folder">✂ cut</button></li>`).join('')}</ul>` : '<p>None. They reach rows only through the app’s functions, which choose in their own code.</p>'}
+  `;
+}
+
+/** What a block dragged out of `source` may be dropped on. */
+function dropsOn(source, n) {
+  if (!n) return false;
+  if (source.kind === 'who' || source.kind === 'person') return n.kind === 'table' && !n.table.notOnBackend;
+  if (source.kind === 'fn') return n.kind === 'table' && !n.table.notOnBackend;
+  if (source.kind === 'clock') return n.kind === 'fn';
+  return false;
+}
+
+function openHand(html, sx, sy) {
+  const el = $('hand');
+  el.innerHTML = `<button class="close" id="handClose" aria-label="Never mind" style="position:absolute;top:6px;right:10px;background:none;border:0;color:var(--dim);font-size:20px;cursor:pointer">×</button>${html}`;
+  el.classList.remove('hidden');
+  const r = el.getBoundingClientRect();
+  el.style.left = Math.max(12, Math.min(innerWidth - r.width - 12, sx + 14)) + 'px';
+  el.style.top = Math.max(80, Math.min(innerHeight - r.height - 140, sy - 20)) + 'px';
+  $('handClose').onclick = closeHand;
+  return el;
+}
+function closeHand() {
+  $('hand').classList.add('hidden');
+  state.hand = null;
+  state.cut = null;
+}
+
+/** After a gesture: read the map again, flash what changed, say it with an Undo, and re-measure a person on show. */
+async function afterGesture(r, flashId) {
+  closeHand();
+  await load(true);
+  if (flashId) state.flashes[flashId] = { at: performance.now(), ok: true };
+  if (state.selected && state.byId[state.selected]) renderPanel();
+  toast(r.words, r.enforced === false ? 'bad' : 'good', r.undo);
+  if (state.lens === 'person' && state.reach && !state.reach.loading) setPerson(state.reach.id);
+  // the ranking moves with a grant: that's the point of the demo, so it is measured again when it is on show
+  if (state.selected === 'everyone' && state.everyone && !state.everyone.loading) compareEveryone();
+}
+async function gesture(path, body, flashId, button) {
+  if (button) button.disabled = true;
+  try {
+    const r = await api(path, body);
+    if (r.unchanged) {
+      closeHand();
+      return toast(r.words);
+    }
+    await afterGesture(r, flashId);
+    return r;
+  } catch (err) {
+    if (button) button.disabled = false;
+    const out = $('handOut');
+    if (out && !$('hand').classList.contains('hidden')) out.innerHTML = `<p class="warn">${esc(err.message)}</p>`;
+    else toast(err.message, 'bad');
+    if (err.refused) await load(true);
+  }
+}
+
+/** A who (or a real person, as their kind) dropped on a table: see, change, or both, said before it is made. */
+function chooseGrant(source, table, sx, sy) {
+  const m = state.map;
+  let options;
+  let intro = '';
+  if (source.kind === 'person') {
+    const p = source.person;
+    const groups = p.roles.map((r) => `role:${r}`).filter((w) => m.roles.some((x) => `role:${x.name}` === w));
+    options = [...(groups.length ? groups : ['authenticated']), W.MAKER];
+    intro = `<p>${esc(firstName(p))} is ${p.roles.length ? `in the ${esc(p.roles.join(', '))} group` : 'in no group'}. The backend’s rules are for kinds of people, not one person, so this lets ${groups.length ? `everyone in ${groups.length === 1 ? 'that group' : 'the group you pick'}` : 'anyone signed in'} in, or only the rows ${esc(firstName(p))} made.</p>`;
+  } else options = [source.key];
+  let who = options[0];
+  let what = 'see';
+  let confirmed = false;
+  const draw = () => {
+    const isMaker = who === W.MAKER;
+    const after = W.handEntry(m.config, table.key, { who, what });
+    const r = after.rule;
+    const el = openHand(
+      `<h3>${esc(W.handWords(table.key, { who, what }))}</h3>${intro}
+      ${options.length > 1 ? `<div class="choices">${options.map((o) => `<button class="pill ${o === who ? 'on' : ''}" data-who="${esc(o)}">${esc(o === W.MAKER ? `Only the rows ${source.kind === 'person' ? firstName(source.person) : 'they'} made` : W.whoWords(o))}</button>`).join('')}</div>` : ''}
+      ${isMaker ? '' : `<div class="choices">${[['see', 'See its rows'], ['change', 'Add, change, delete'], ['both', 'Both']].map(([v, w]) => `<button class="pill ${v === what ? 'on' : ''}" data-what="${v}">${w}</button>`).join('')}</div>`}
+      <p class="after">After this: reading directly — <b>${esc(W.ruleWords(W.readRule(r.permissions)))}</b>; changing — <b>${esc(W.changeWords(r.permissions))}</b>${r.creatorOwns ? '; makers always see and change their own rows' : ''}.${after.same ? ' That is how it is already.' : ''}</p>
+      ${who === 'public' ? `<p class="warn">Anyone on the internet could ${what === 'change' ? 'change' : 'see'} every row of ${esc(W.tableWords(table.key))}, with no function checking.</p>` : ''}
+      <div id="handOut"></div>
+      <button class="go" id="handGo" ${after.same ? 'disabled' : ''}>${who === 'public' && !confirmed ? 'Yes, I mean anyone' : 'Make it so'}</button> <button class="ghost" id="handNo">Never mind</button>`,
+      sx,
+      sy
+    );
+    for (const b of el.querySelectorAll('[data-who]')) b.onclick = () => ((who = b.dataset.who), (confirmed = false), draw());
+    for (const b of el.querySelectorAll('[data-what]')) b.onclick = () => ((what = b.dataset.what), draw());
+    $('handNo').onclick = closeHand;
+    $('handGo').onclick = () => {
+      // anyone at all is asked twice: the first press only turns the button into "Make it so"
+      if (who === 'public' && !confirmed) {
+        confirmed = true;
+        $('handGo').textContent = 'Make it so';
+        return;
+      }
+      gesture('api/hand/rule', { table: table.key, who, what, confirmPublic: who === 'public', etag: m.etag, fileStamp: m.fileStamp }, table.id, $('handGo'));
+    };
+  };
+  draw();
+}
+
+/** A function dropped on a table: which change to a row starts it. */
+function chooseRowTrigger(fnNode, table, sx, sy) {
+  const f = fnNode.fn;
+  const acts = new Set(['create']);
+  const el = openHand(
+    `<h3>Run ${esc(f.name.split('/').pop())} by itself, whenever a row of ${esc(W.tableWords(table.key))} is…</h3>
+    ${[['create', 'made'], ['update', 'changed'], ['delete', 'deleted']].map(([v, w]) => `<label><input type="checkbox" data-act="${v}" ${acts.has(v) ? 'checked' : ''}> ${w}</label>`).join('')}
+    <p class="after">It counts as the app, so it may run even though only signed-in people may run it from outside.${f.deployed ? '' : ' <b>It isn’t live on the backend yet:</b> the trigger is kept, and fails until your agent deploys it.'}</p>
+    <div id="handOut"></div>
+    <button class="go" id="handGo">Make it so</button> <button class="ghost" id="handNo">Never mind</button>`,
+    sx,
+    sy
+  );
+  for (const b of el.querySelectorAll('[data-act]')) b.onchange = () => (b.checked ? acts.add(b.dataset.act) : acts.delete(b.dataset.act), ($('handGo').disabled = !acts.size));
+  $('handNo').onclick = closeHand;
+  $('handGo').onclick = () => gesture('api/hand/trigger', { fn: f.name, table: table.key, actions: [...acts], automationsStamp: state.map.automationsStamp }, fnNode.id, $('handGo'));
+}
+
+/** The clock dropped on a function: when, in the backend's own words as it is typed. */
+const SCHEDULES = [
+  ['0 9 * * *', 'Every day at 09:00'],
+  ['0 * * * *', 'Every hour'],
+  ['0 9 * * 1', 'Every Monday at 09:00'],
+  ['0 9 1 * *', 'On the 1st of every month']
+];
+function chooseSchedule(fnNode, sx, sy) {
+  const f = fnNode.fn;
+  let cron = SCHEDULES[0][0];
+  const el = openHand(
+    `<h3>Run ${esc(f.name.split('/').pop())} by itself, on a schedule</h3>
+    <div class="choices">${SCHEDULES.map(([c, w]) => `<button class="pill ${c === cron ? 'on' : ''}" data-cron="${esc(c)}">${esc(w)}</button>`).join('')}</div>
+    <input type="text" id="cronText" value="${esc(cron)}" aria-label="The schedule, as five fields: minute hour day month weekday" spellcheck="false">
+    <p class="after" id="cronWords">…</p>
+    <div id="handOut"></div>
+    <button class="go" id="handGo">Make it so</button> <button class="ghost" id="handNo">Never mind</button>`,
+    sx,
+    sy
+  );
+  let asked = 0;
+  const preview = async () => {
+    const mine = ++asked;
+    try {
+      const p = await api('api/hand/schedule', { cron });
+      if (mine !== asked) return;
+      $('cronWords').innerHTML = p.valid ? `<b>${esc(p.words ?? cron)}</b>. Next: ${p.next.map((d) => esc(new Date(d).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }))).join(', ')} (${esc(p.timezone)}).` : `<span class="warn">${esc(p.error)}</span>`;
+      $('handGo').disabled = !p.valid;
+    } catch (err) {
+      $('cronWords').textContent = err.message;
+    }
+  };
+  for (const b of el.querySelectorAll('[data-cron]')) {
+    b.onclick = () => {
+      cron = b.dataset.cron;
+      $('cronText').value = cron;
+      for (const o of el.querySelectorAll('[data-cron]')) o.classList.toggle('on', o === b);
+      preview();
+    };
+  }
+  $('cronText').oninput = (ev) => {
+    cron = ev.target.value;
+    for (const o of el.querySelectorAll('[data-cron]')) o.classList.toggle('on', o.dataset.cron === cron.trim());
+    preview();
+  };
+  $('handNo').onclick = closeHand;
+  $('handGo').onclick = () => gesture('api/hand/trigger', { fn: f.name, cron, automationsStamp: state.map.automationsStamp }, fnNode.id, $('handGo'));
+  preview();
+}
+
+function drop(h, sx, sy) {
+  const target = h.target && state.byId[h.target];
+  if (!target) return closeHand();
+  if (h.source.kind === 'clock') return chooseSchedule(target, sx, sy);
+  const source = state.byId[h.source.id];
+  if (source.kind === 'fn') return chooseRowTrigger(source, target, sx, sy);
+  return chooseGrant(source, target, sx, sy);
+}
+
+/** A who's wire to a table, cut: in both places, or neither. */
+function cutWire(e) {
+  if (!e) return;
+  gesture('api/hand/rule', { table: e.table, who: e.who, cut: true, etag: state.map.etag, fileStamp: state.map.fileStamp }, e.to);
+}
+function offerCut(e, sx, sy) {
+  state.cut = { edge: e.id };
+  const el = openHand(
+    `<h3>${esc(W.whoWords(e.who))} may ${e.see && e.change ? 'see and change' : e.see ? 'see' : 'change'} ${esc(W.tableWords(e.table))} directly</h3>
+    <p class="after">Cutting it: ${esc(W.handWords(e.table, { who: e.who, cut: true }))} The app’s functions still reach it as before.</p>
+    <div id="handOut"></div>
+    <button class="go" id="handGo">✂ Cut it</button> <button class="ghost" id="handNo">Keep it</button>`,
+    sx,
+    sy
+  );
+  $('handNo').onclick = closeHand;
+  $('handGo').onclick = () => cutWire(e);
+  el.querySelector('#handGo').focus();
+}
+
+function removeTrigger(t) {
+  gesture('api/hand/trigger-remove', { id: t.id, automationsStamp: state.map.automationsStamp }, null);
+}
+
+/** The visible who→table wire under a point on the screen, if any (only the ones drawn can be cut). */
+function wireAt(sx, sy) {
+  const focus = (state.byId[state.selected] ? state.selected : null) ?? state.hover;
+  const rel = focus ? related(focus) : null;
+  if (!rel) return null;
+  const [wx, wy] = toWorld(sx, sy);
+  const reach = 8 / state.cam.z;
+  for (const e of state.edges) {
+    if (e.kind !== 'may' || !rel.has(e.id)) continue;
+    const p = edgePoints(e);
+    for (let k = 0; k <= 40; k++) {
+      const [x, y] = bez(p, k / 40);
+      if (Math.hypot(x - wx, y - wy) < reach) return e;
+    }
+  }
+  return null;
+}
+
+async function undo(id) {
+  try {
+    const r = await api('api/hand/undo', { id });
+    await load(true);
+    if (state.selected && state.byId[state.selected]) renderPanel();
+    toast(r.words, 'good');
+    if (state.lens === 'person' && state.reach && !state.reach.loading) setPerson(state.reach.id);
+  } catch (err) {
+    toast(err.message, 'bad');
+  }
 }
 
 function screenPanel(n) {
@@ -2053,13 +2396,33 @@ function hit(sx, sy) {
 
 let drag = null;
 canvas.addEventListener('pointerdown', (e) => {
-  drag = { x: e.clientX, y: e.clientY, cx: state.cam.x, cy: state.cam.y, moved: false };
+  // BKO-007: a drag that starts on a kind of person, a real person or a function pulls a wire out of it; anywhere else
+  // it moves the map, as it always did
+  const n = hands() ? hit(e.clientX, e.clientY) : null;
+  const source = n && (n.kind === 'who' || n.kind === 'person' || n.kind === 'fn') ? n : null;
+  drag = { x: e.clientX, y: e.clientY, cx: state.cam.x, cy: state.cam.y, moved: false, source };
   canvas.setPointerCapture(e.pointerId);
 });
+/** The hand follows the pointer, and finds what it would land on. */
+function handMove(e) {
+  const at = toWorld(e.clientX, e.clientY);
+  const over = hit(e.clientX, e.clientY);
+  state.hand.at = at;
+  state.hand.target = dropsOn(state.hand.source, over) ? over.id : null;
+  canvas.classList.toggle('pointing', !!state.hand.target);
+  $('tip').classList.add('hidden');
+}
 canvas.addEventListener('pointermove', (e) => {
   if (drag) {
     const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
     if (Math.abs(dx) + Math.abs(dy) > 3) drag.moved = true;
+    if (drag.moved && drag.source) {
+      if (!state.hand) {
+        $('hand').classList.add('hidden');
+        state.hand = { source: { kind: drag.source.kind, id: drag.source.id, key: drag.source.key }, at: toWorld(e.clientX, e.clientY), target: null };
+      }
+      return handMove(e);
+    }
     if (drag.moved) {
       canvas.classList.add('dragging');
       state.cam.x = drag.cx + dx;
@@ -2081,8 +2444,19 @@ canvas.addEventListener('pointermove', (e) => {
 });
 canvas.addEventListener('pointerup', (e) => {
   canvas.classList.remove('dragging');
+  if (drag?.moved && state.hand) {
+    drag = null;
+    return drop(state.hand, e.clientX, e.clientY);
+  }
   if (drag && !drag.moved) {
     const n = hit(e.clientX, e.clientY);
+    // BKO-007: a click on a who's wire (only the drawn ones) offers to cut it, and keeps what is in focus
+    const wire = !n && hands() ? wireAt(e.clientX, e.clientY) : null;
+    if (wire) {
+      drag = null;
+      return offerCut(wire, e.clientX, e.clientY);
+    }
+    if (!$('hand').classList.contains('hidden')) closeHand();
     select(n?.id ?? null);
     // keep the chosen block clear of the side panel
     if (n) {
@@ -2112,11 +2486,12 @@ canvas.addEventListener(
 );
 
 function tipFor(n) {
+  if (n.kind === 'who') return `<b>${esc(n.title)}</b><br>Drag onto a table to let them in. Click to see the tables they may open, and cut a wire to take one away.`;
   if (n.kind === 'person') return `<b>${esc(n.title)}</b><br>Click to see what ${esc(firstName(n.person))} can reach: the backend’s functions run as them, for real, and every row that comes back.`;
   if (n.kind === 'screen' && state.lens === 'person' && state.person?.reach) return `<b>${esc(n.title)}</b><br>Click to see exactly what ${esc(state.person.name)} gets here: its functions, run as them, for real.`;
   if (n.kind === 'fn') {
     const f = n.fn;
-    return `<b>${esc(f.name)}</b><br>${esc(W.ruleWords(f.call))} may run it.<br>Touches ${f.touches.length} table${f.touches.length === 1 ? '' : 's'}. Click for the whole story.`;
+    return `<b>${esc(f.name)}</b><br>${esc(W.ruleWords(f.call))} may run it.<br>Touches ${f.touches.length} table${f.touches.length === 1 ? '' : 's'}. Click for the whole story${hands() ? '; drag it onto a table to run it whenever a row changes' : ''}.`;
   }
   if (n.kind === 'trigger') {
     const t = n.trigger;
@@ -2146,17 +2521,52 @@ $('search').addEventListener('keydown', (e) => {
 });
 $('closePanel').onclick = () => select(null);
 addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') select(null);
+  if (e.key === 'Escape') {
+    if (!$('hand').classList.contains('hidden')) return closeHand();
+    select(null);
+  }
+  // a wire offered for cutting is cut with Delete or Backspace, as in any editor
+  if ((e.key === 'Delete' || e.key === 'Backspace') && state.cut && document.activeElement?.tagName !== 'INPUT') {
+    e.preventDefault();
+    cutWire(state.edges.find((x) => x.id === state.cut.edge));
+  }
+});
+
+// BKO-007: the clock is dragged out of the hint bar onto a function
+$('clock').addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  closeHand();
+  state.hand = { source: { kind: 'clock' }, from: toWorld(e.clientX, e.clientY), at: toWorld(e.clientX, e.clientY), target: null };
+  const move = (ev) => handMove(ev);
+  const up = (ev) => {
+    removeEventListener('pointermove', move);
+    removeEventListener('pointerup', up);
+    drop(state.hand, ev.clientX, ev.clientY);
+  };
+  addEventListener('pointermove', move);
+  addEventListener('pointerup', up);
 });
 addEventListener('resize', resize);
 
 let toastTimer;
-function toast(text, kind) {
+/** A short line at the foot of the map; with an undo id it carries Undo and stays up longer (BKO-007). */
+function toast(text, kind, undoId) {
   const t = $('toast');
   t.textContent = text;
+  if (undoId) {
+    const b = document.createElement('button');
+    b.className = 'undo';
+    b.id = 'undoLast';
+    b.textContent = 'Undo';
+    b.onclick = () => {
+      t.classList.add('hidden');
+      undo(undoId);
+    };
+    t.appendChild(b);
+  }
   t.className = kind ?? '';
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.add('hidden'), 4200);
+  toastTimer = setTimeout(() => t.classList.add('hidden'), undoId ? 12000 : 4200);
 }
 
 // ───────────────────────────── go ─────────────────────────────
@@ -2177,3 +2587,8 @@ setInterval(() => load(true), 60000);
 window.__map = state;
 // for the drives: the words the canvas draws, which no DOM query can read
 window.__canvasWords = () => state.nodes.map((n) => `${n.title} — ${subtitle(n)}`);
+// BKO-007, for the drives: where on the screen a wire passes (t from 0 to 1 along it), so a click can land on it
+window.__wirePoint = (id, t = 0.5) => {
+  const e = state.edges.find((x) => x.id === id);
+  return e ? toScreen(...bez(edgePoints(e), t)) : null;
+};

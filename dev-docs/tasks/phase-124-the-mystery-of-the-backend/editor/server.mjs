@@ -22,6 +22,8 @@ import { triggerFlows, readAutomationsFile } from './lib/triggers.mjs';
 import { personColumns, personKeys, idOf } from './lib/people.mjs';
 import { projectBackend } from './lib/discover.mjs';
 import { loadWorld, personReach, anonymousReach } from './lib/reach.mjs';
+import { makeHands } from './lib/hands.mjs';
+import { AUTOMATIONS_FILE } from './lib/triggers.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
@@ -63,6 +65,17 @@ export function createEditor(opts) {
   const mine = new Map(); // request id → { person, fn, key }: the runs this map made, as whom
   const views = makeViews({ be, project, mine });
   const keyActors = new Map(); // request id → the key that made a run, from the audit
+  // BKO-007: what a drag on the map changes; a trigger names a function as the backend serves it (the map's own name).
+  // Every change forgets the world the reach measures from, so a person looked at again is measured on the new rules.
+  const madeBy = makeHands({ be, files: project.files, functions: () => analyseProject(project, []).functions.map((f) => f.name) });
+  const forgetting = (fn) => async (...args) => {
+    try {
+      return await fn(...args);
+    } finally {
+      worldCache = null;
+    }
+  };
+  const hands = { ...madeBy, rule: forgetting(madeBy.rule), addTrigger: forgetting(madeBy.addTrigger), removeTrigger: forgetting(madeBy.removeTrigger), undo: forgetting(madeBy.undo) };
 
   async function buildMap() {
     const health = await be.health();
@@ -130,6 +143,7 @@ export function createEditor(opts) {
       people: problems.some((p) => p.what === 'people') ? null : users.total ?? users.users.length,
       // BKO-005: what the backend starts by itself, from the backend and the project's automations file
       triggers: triggerFlows({ backend: triggers.triggers ?? [], workflows: workflows.workflows ?? [], file: readAutomationsFile(project.files), functions: app.functions.map((f) => f.name) }),
+      automationsStamp: project.files.stamp(AUTOMATIONS_FILE),
       audit: (audit.entries ?? []).map((e) => ({ at: e.at, action: e.action, outcome: e.outcome, target: e.target })),
       look: { colors: look.colors.dark, signal: wireColors('signal', 'dark'), data: wireColors('data', 'dark') }
     };
@@ -248,7 +262,7 @@ export function createEditor(opts) {
     return setTableRule(ctx, table, entry, { etag, fileStamp });
   }
 
-  return { buildMap, runs, rows, changeRule, check: (table) => dryRuns(be, table), views, project, be, reachOf, everyone };
+  return { buildMap, runs, rows, changeRule, hands, check: (table) => dryRuns(be, table), views, project, be, reachOf, everyone };
 }
 
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png' };
@@ -280,6 +294,12 @@ export function handler(editor) {
         return JSON.parse(raw || '{}');
       };
       if (url.pathname === '/api/table-rule' && req.method === 'POST') return send(res, 200, await editor.changeRule(await body()));
+      // BKO-007: the hands. Each answers what it did in words and an `undo` id; /api/hand/undo puts both places back.
+      if (url.pathname === '/api/hand/rule' && req.method === 'POST') return send(res, 200, await editor.hands.rule(await body()));
+      if (url.pathname === '/api/hand/trigger' && req.method === 'POST') return send(res, 200, await editor.hands.addTrigger(await body()));
+      if (url.pathname === '/api/hand/trigger-remove' && req.method === 'POST') return send(res, 200, await editor.hands.removeTrigger(await body()));
+      if (url.pathname === '/api/hand/schedule' && req.method === 'POST') return send(res, 200, await editor.hands.schedulePreview((await body()).cron));
+      if (url.pathname === '/api/hand/undo' && req.method === 'POST') return send(res, 200, await editor.hands.undo((await body()).id));
       if (url.pathname === '/api/people' && req.method === 'GET') return send(res, 200, { people: await editor.views.people() });
       if (url.pathname === '/api/rows' && req.method === 'GET') return send(res, 200, { rows: await editor.rows(url.searchParams.get('table')) });
       // The three that act as a real person. POST, because each one makes a key, and the screen and

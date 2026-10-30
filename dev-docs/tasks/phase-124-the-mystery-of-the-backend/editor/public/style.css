@@ -239,3 +239,19 @@ table.rowgrid tr.not-theirs td { opacity: 0.38; }
 table.rowgrid td.mark { width: 14px; padding-right: 0; color: var(--pink); }
 input.filter { width: 100%; background: rgba(var(--fg-rgb), 0.05); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 7px 10px; font: inherit; font-size: 13px; }
 .ask-who { margin-top: 10px; }
+
+/* P127 BKO-007: the hands — the hint bar, the chooser a drop opens, the toast's Undo */
+#hands { position: fixed; left: 16px; bottom: 136px; z-index: 4; padding: 9px 14px; font-size: 12.5px; color: var(--sub); max-width: 560px; line-height: 1.5; }
+#hands b { color: var(--text); }
+#hands .clock { font: inherit; font-weight: 600; color: var(--text); background: var(--solid); border: 1px dashed var(--gold); border-radius: 8px; padding: 1px 8px; cursor: grab; touch-action: none; }
+#hand { position: fixed; z-index: 11; width: 340px; padding: 14px 16px; font-size: 13.5px; line-height: 1.45; color: var(--sub); box-shadow: 0 14px 44px var(--shadow); }
+#hand h3 { margin: 0 0 6px; padding-right: 22px; font-size: 14.5px; color: var(--text); }
+#hand p { margin: 6px 0; }
+#hand .choices { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 2px; }
+#hand .after { font-size: 12.5px; color: var(--dim); margin-top: 8px; }
+#hand .warn { color: var(--red); font-weight: 600; }
+#hand label { display: block; margin: 4px 0; cursor: pointer; }
+#hand input[type='text'] { width: 100%; box-sizing: border-box; font: inherit; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--solid); color: var(--text); margin-top: 6px; }
+#hand .row { display: flex; gap: 6px; align-items: center; }
+#toast .undo { margin-left: 12px; font: inherit; font-weight: 700; background: none; border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 3px 10px; cursor: pointer; }
+.cutbtn { font: inherit; font-size: 12px; background: none; border: 1px solid var(--border); color: var(--sub); border-radius: 7px; padding: 1px 8px; cursor: pointer; margin-left: 6px; }

@@ -30,5 +30,9 @@ console.log('\n— any app, not only the training app: the todo template, a site
 if (run([path.join(here, 'any-app.test.mjs')]) !== 0) bad++;
 console.log('\n— what the backend starts by itself, drawn: its triggers wired to their functions and tables (a members-area copy, Chrome) —');
 if (run([path.join(here, 'triggers.test.mjs')]) !== 0) bad++;
+console.log('\n— the hands: grant, cut, a row-change trigger, a schedule, undo; both places or neither (a copy with its whole world) —');
+if (run([path.join(here, 'hands.test.mjs')]) !== 0) bad++;
+console.log('\n— the hands, driven in Chrome: drags, the chooser, a wire cut with Delete, the toast’s Undo —');
+if (run([path.join(here, 'hands-ui.test.mjs')]) !== 0) bad++;
 console.log(bad ? `\n${bad} part(s) FAILED` : '\nEverything passed.');
 process.exit(bad ? 1 : 0);

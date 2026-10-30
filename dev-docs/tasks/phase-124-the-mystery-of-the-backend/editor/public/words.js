@@ -149,3 +149,88 @@ export function runWords(run) {
   if (run.status === 'cancelled') return 'was stopped';
   return msg ? `went wrong: “${msg.slice(0, 120)}”` : 'went wrong';
 }
+
+// ───────────── P127 BKO-007: the hands — granting by a drag, cutting a wire ─────────────
+//
+// A "who" is an audience the backend's rules know: 'public', 'authenticated', 'role:<name>', or MAKER (whoever made
+// the row, the table's `creatorOwns`). There is no rule for one named person: dragging Marie means her group.
+
+export const MAKER = 'maker';
+export const SEE_OPS = ['find', 'get'];
+export const CHANGE_OPS = ['create', 'update', 'delete'];
+
+export function whoWords(who) {
+  if (who === MAKER) return 'Whoever made the row';
+  return ruleWords(who);
+}
+
+/** Whether `a` already lets in everyone `b` does: anyone at all ⊇ anyone signed in ⊇ a group, a row's maker, a link. */
+function covers(a, b) {
+  if (JSON.stringify(a) === JSON.stringify(b)) return true;
+  if (a === 'public') return true;
+  if (a === 'authenticated') return b !== 'public';
+  return false;
+}
+
+const asList = (rule) => (rule == null || rule === 'nobody' ? [] : Array.isArray(rule) ? rule : [rule]);
+const fromList = (list) => (list.length === 0 ? 'nobody' : list.length === 1 ? list[0] : list);
+
+/** One op's rule with `who` added. A who already covered changes nothing; one the new who covers goes. */
+export function grantRule(rule, who) {
+  const list = asList(rule);
+  if (list.some((r) => covers(r, who))) return fromList(list);
+  return fromList([...list.filter((r) => !covers(who, r)), who]);
+}
+
+/** One op's rule with `who` taken out. Only the who the rule names goes: cutting a group leaves "anyone signed in". */
+export function cutRule(rule, who) {
+  return fromList(asList(rule).filter((r) => JSON.stringify(r) !== JSON.stringify(who)));
+}
+
+/** The whos a table's rule names, each with what it may do directly: { who, see, change } (a maker: creatorOwns). */
+export function namedWhos(rule) {
+  const out = new Map();
+  const add = (who, op) => {
+    if (typeof who !== 'string' || who === 'nobody' || who === CREATOR_CHANGE) return;
+    const w = out.get(who) ?? { who, see: false, change: false };
+    if (SEE_OPS.includes(op)) w.see = true;
+    else w.change = true;
+    out.set(who, w);
+  };
+  for (const op of OPS) for (const r of asList(rule.permissions[op])) add(r, op);
+  if (rule.creatorOwns || OPS.some((op) => asList(rule.permissions[op]).includes(CREATOR_CHANGE))) out.set(MAKER, { who: MAKER, see: !!rule.creatorOwns, change: true });
+  return [...out.values()];
+}
+
+/**
+ * The table's entry after a grant or a cut, from its rule as the backend applies it (`tableRule`). `what` is 'see',
+ * 'change' or 'both'; a maker is always both (`creatorOwns`). Returns { entry, words } where entry is null when the
+ * result is the app's standard rule again, and `same` when nothing would change.
+ */
+export function handEntry(config, table, { who, what = 'both', cut = false }) {
+  const rule = tableRule(config, table);
+  const permissions = { ...rule.permissions };
+  let creatorOwns = rule.creatorOwns;
+  if (who === MAKER) {
+    creatorOwns = !cut;
+    if (cut) for (const op of OPS) permissions[op] = cutRule(permissions[op], CREATOR_CHANGE);
+  } else {
+    const ops = cut || what === 'both' ? OPS : what === 'see' ? SEE_OPS : CHANGE_OPS;
+    for (const op of ops) permissions[op] = cut ? cutRule(permissions[op], who) : grantRule(permissions[op], who);
+  }
+  const next = { permissions: Object.fromEntries(OPS.map((op) => [op, permissions[op]])), creatorOwns: !!creatorOwns };
+  const same = JSON.stringify(next) === JSON.stringify({ permissions: Object.fromEntries(OPS.map((op) => [op, rule.permissions[op]])), creatorOwns: !!rule.creatorOwns });
+  const def = config.defaults ?? { permissions: {}, creatorOwns: false };
+  const standard = JSON.stringify(next) === JSON.stringify({ permissions: Object.fromEntries(OPS.map((op) => [op, def.permissions?.[op]])), creatorOwns: !!def.creatorOwns });
+  return { entry: standard ? null : next, same, standard, rule: next, words: handWords(table, { who, what, cut }) };
+}
+
+/** The sentence a gesture says before it is made, and the one its toast says after. */
+export function handWords(table, { who, what = 'both', cut = false }) {
+  const t = tableWords(table);
+  const w = whoWords(who);
+  if (who === MAKER) return cut ? `Whoever made a row of ${t} no longer always sees and changes it.` : `Whoever made a row of ${t} may always see and change that row.`;
+  if (cut) return `${w} may no longer open ${t} directly.`;
+  const verb = what === 'see' ? 'see the rows of' : what === 'change' ? 'add, change and delete rows in' : 'see, add, change and delete rows in';
+  return `${w} may ${verb} ${t}${who === 'public' ? ': anyone on the internet, with no function checking' : ''}.`;
+}

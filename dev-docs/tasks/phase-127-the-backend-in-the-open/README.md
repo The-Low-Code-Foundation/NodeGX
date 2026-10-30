@@ -50,9 +50,14 @@ Where those facts come from:
 | [BKO-004](BKO-004-A-CLOUD-FUNCTION-OPENS-AS-ITS-GRAPH.md) | A cloud function opens as its graph | the server logic, drawn |
 | [BKO-005](BKO-005-WORKFLOWS-AND-TRIGGERS-DRAWN.md) | Backend workflows and triggers drawn, on the Workflow tab and the map | the automations, drawn |
 | [BKO-006](BKO-006-BRIEFS-NOT-TEMPLATES.md) | Three full-stack briefs no template covers, by a stranger agent; then Richard's Desktop run | the proof, and the Beta's real list |
+| [BKO-007](BKO-007-THE-HANDS.md) | The hands: grant by dragging, revoke by cutting, a trigger by dropping a function on a table, a schedule by dropping a clock; both places or neither, with Undo | P124's *"you can take control"* half, never built (added 2026-10-30). **Built s1 the same evening**, AC1–AC8 measured; AC9 (in Studio) waits on backend-map 0.1.5's publish |
+| [BKO-008](BKO-008-THE-BACKEND-KIT.md) | The backend kit: the map's facts, as-person runs and writers published, a backend suite that says PASS; the map rebuilt on it | build your own backend editor outside Studio (Richard, 2026-10-30) |
+| [BKO-009](BKO-009-A-STRANGERS-BACKEND-EDITOR.md) | The skill, and a stranger who builds a backend editor in a shape Studio doesn't have | the proof the kit is enough |
 
 BKO-002 and BKO-003 can run beside BKO-001 (different files: Studio's `hosted.js` / the map's package versus the
-backend and the MCP server). BKO-004 and BKO-005 wait for BKO-001's file shape. BKO-006 is last.
+backend and the MCP server). BKO-004 and BKO-005 wait for BKO-001's file shape. BKO-006 is last of the first six.
+BKO-007 → BKO-008 → BKO-009 came after, from P124's unbuilt design. They don't block Richard's fourth brief, and it
+doesn't block them.
 
 ## Rulings
 
