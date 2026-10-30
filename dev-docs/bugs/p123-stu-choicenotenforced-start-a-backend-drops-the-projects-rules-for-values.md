@@ -21,7 +21,5 @@ toasts (read, not driven). Measured on the same copy: the table
 carries `chk_Listing_oneof_category`; "Cars" is refused (400, `check-failed`), "Furniture" is created. Gate:
 `app/blank-check.mjs` 11/11 (two new rows; 9/11 with the call taken out).
 
-Not fixed, read and not measured: NodeGX's own `provision_backend` (MCP) seeds columns only too (`declaredCollections`
-in `packages/noodl-mcp/src/tools/provisionTools.ts` keeps name + type; `ProvisionCollection` has no `checks`), so a
-Choice declared in the project is likely not enforced on a backend an agent provisions either. That is a NodeGX change
-and a release.
+NodeGX's own `provision_backend` (MCP) had the same gap and also erased the declaration: P123-MCP-RULESERASED, fixed
+in NodeGX eea8566e3 (not yet in an npm release, so not in Studio's pins; Studio's own fix above does not need it).

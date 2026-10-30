@@ -27,7 +27,4 @@ Measured: both tests red before (`Received: undefined`), green after; with the n
 goes red again. `tsc --noEmit` is clean on the changed files (the 2 errors left are in `tests/p128OptionSet.test.ts`,
 from before this change).
 
-Open, and not this bug: `metadata.dbCollections[].checks` comes in two shapes, and Studio reads only the plain one
-(`studio.html` wraps each entry as `{ rule, declared: true }`). A project whose rules were last written by the editor's
-cache or by this write-back, opened in Studio with its backend stopped, would show its Choice as Text. That is read,
-not measured.
+Open, and not this bug: Studio reads only one of the two shapes (P123-STU-TWOSHAPES).
