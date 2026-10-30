@@ -34,3 +34,12 @@ trees; the cause was not identified. If 3b stops at Publish again, reopen this w
 {}", the next two, and "the gate ran to the end — ENOENT … user-data/published-sites.json". STU-090 does not touch
 Publish (its diff names publish only in package.json's script names). Load average 16–20 during the run (peers' work).
 Not re-measured at the base commit in a clean worktree, so whether it is load or a defect is still open.
+
+## Passes alone, 2026-10-30 08:19 (opennoodl, the session after STU-090)
+
+`check:app` **67/67** on nodegx-studio dfa84e7 + the P123-STU-CHOICENOTENFORCED fix (`lib/backend.mjs` provisionFor,
+which 3b does not call), every Publish row green ("clicking it publishes the open app to the folder chosen — {site: …}"),
+run alone under HEAVY.lock at load average ~2, no jest/vitest on the box. The 36/40 of the night before was on the same
+STU-090 tree at load 16–20. So far it has failed only under heavy load and passed every time it ran alone (10-24, 10-30),
+which fits a 120 s wait for `__ob.published` timing out on a starved box, but does not exclude anything: the cause was
+never read from the app's stdout. Next time it stops, keep `running.log()` and read why `studio:publish` did not answer.

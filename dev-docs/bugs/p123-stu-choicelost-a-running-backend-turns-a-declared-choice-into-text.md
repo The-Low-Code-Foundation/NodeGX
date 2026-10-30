@@ -10,6 +10,5 @@ evidence: Listing.category made as a Choice (Furniture, Books, Clothes, Electron
 ---
 
 The backend's own table came back with `checks: []`, and an empty array is truthy, so it replaced the project's
-declared rules. Fixed in both places that read it (`live.checks` only when it has rules). **Still open:** the
-provisioned table carries no `oneOf` rule, so the backend does not enforce the choice; the project's declaration is the
-only place it lives.
+declared rules. Fixed in both places that read it (`live.checks` only when it has rules). That the provisioned table
+carried no `oneOf` rule at all, so the backend did not enforce the choice, is its own bug: P123-STU-CHOICENOTENFORCED.
