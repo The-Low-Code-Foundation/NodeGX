@@ -1,7 +1,9 @@
 ---
 id: P125-GOOSE-NOEVAL
 title: In Goose Desktop the Studio panel draws inside the chat but its preview never starts, because Goose's MCP Apps sandbox forbids eval and the preview bundle needs it
-status: open
+regression: packages/noodl-mcp/tests/p125GooseNoEval.test.ts
+status: fixed
+commit: 48f81d89f (the framed panel for Goose, in @nodegx/mcp after 0.2.9); nodegx-studio be3a9c5 (the message)
 severity: medium
 area: mcp `open_studio` panel (`packages/noodl-mcp/src/tools/openStudio.ts`, resource `ui://nodegx/studio.html`) + Studio's preview bundle (`preview.js`, Ajv schema compile; the runtime's `new Function` for expressions and Function nodes)
 found: OWN-030 side test (Goose as a local-model chat host), 2026-10-29, Goose Desktop 1.57.0, `@nodegx/mcp` 0.2.9 from the Claude Desktop .mcpb, gemma4 E4B with a 32k window
@@ -44,3 +46,13 @@ Related, not ours (recorded in own-030/goose/FINDINGS.md): Ollama's 4096-token d
 Goose's 12–24k-token prompts, and Goose's Code Mode hides `open_studio` from the host the way `call_tool` did.
 
 **Fixed in source 2026-10-29 (uncommitted), verified in Goose 1.57.0:** for `goose-app` (or `NODEGX_PANEL_FRAME=1`), the resource is a wrapper that frames Studio's `/panel` from the proxy's origin, names it in `frameDomains`, and relays MCP Apps messages both ways (`framedPanelHtml`). Studio drew in the Goose chat with the app running, and the tea counter counted 0 → 3 and reset (own-030/goose/build-app-tea-counter-*.png). Regression: `tests/p125GooseNoEval.test.ts`. Not done: a Studio-side message when the preview throws at load.
+
+## 2026-10-30: the third part (the message), and the status
+
+The fix above was committed in 48f81d89f (2026-10-29); it reaches a stranger with the next `@nodegx/mcp` (0.2.9, the
+published one, predates it). The third part is built: when the preview's script stops at load, Studio's status says
+"The app can't run inside this chat. Its sandbox blocks code the preview needs." in red, and its title reads
+`failed: the preview did not start`, instead of "starting…" for ever. Inside a chat the preview's script is another
+origin's, so the browser hides why it stopped (a listener for its error event reads nothing): the tooltip names the one
+cause measured. check:hosted serves the panel a second time under its CSP without `'unsafe-eval'` and asserts the
+sentence; the same drive under Claude's CSP (eval allowed) shows the app as before.

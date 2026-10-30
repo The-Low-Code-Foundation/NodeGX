@@ -42,3 +42,18 @@ with `s3/drive-mcpb.mjs`: arm64 under `as-desktop.cjs` (initialize `nodegx` 0.2.
 here either, so that is this Mac's Rosetta, not the bundle; a real Intel Mac is still unmeasured).
 **Still open:** items 1 and 2 above. CI does not attach the `.mcpb`, and the next release built on another
 `@nodegx/mcp` changes the names /start links to.
+
+## 2026-10-30: items 1 and 2 built (nodegx-studio be3a9c5, not pushed)
+
+- `scripts/mcpb.mjs` writes the bundle twice: `nodegx-<mcp version>-darwin-<arch>.mcpb` and the same file as
+  `nodegx-darwin-<arch>.mcpb`. Packed here on the published 0.2.9 tarball: both files 62,192,234 bytes, the same sha1.
+- `.github/workflows/package.yml`: the macOS leg builds both bundles (`npm run mcpb`, `npm run mcpb -- --node
+  darwin-x64`) and uploads them with the installers; the release job requires `nodegx-darwin-arm64.mcpb` and
+  `nodegx-darwin-x64.mcpb` and attaches them, plus the versioned ones.
+- `scripts/mcpb.mjs` refuses a server older than 0.2.9 (P128-S3-HELPERNODE: its children never start in Desktop). Studio
+  pins `@nodegx/mcp` 0.2.8, so **the next tag's macOS leg fails** until the pin moves: on purpose, a bundle on 0.2.8
+  would install and do nothing.
+
+Still open: the workflow has not run (it runs on a pushed tag); v0.1.0 carries only the versioned names, so /start keeps
+its 0.2.9 links until a release (or a `gh release upload` of the two copies, Richard's yes) carries the version-free
+ones; then /start's two hrefs drop the version. Item 3 (the Intel bundle on a real Intel Mac) is unchanged.

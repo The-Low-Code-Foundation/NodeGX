@@ -1,7 +1,8 @@
 ---
 id: P125-CCN006-NODOWNLOAD
 title: "Get NodeGX Studio" goes to nodegx.io/studio/, which has no download for the desktop app
-status: open
+status: fixed
+commit: "nodegx-studio 75c8d63 (artifact names, the release job) + v0.1.0 (published 2026-10-27 22:14 UTC); nodegx-web 1439284 (/studio/#download)"
 severity: medium
 area: nodegx-web `site/studio/`; the app's signed build (notarisation waits on Richard's Apple credentials)
 found: P125 CCN-006, 2026-10-23
@@ -33,3 +34,12 @@ CSC_KEY_PASSWORD, APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID); (2) pus
 publish the draft the workflow makes; (3) deploy nodegx-web, after `curl -sIL` on the page's three links reads 200.
 Deploying before (2) puts three 404s on the page. Gaps the page says: no Intel Mac build, Windows unsigned. The
 canon's "Get the tools" names nodegx.io/start for Studio: P128 S8's download block there can link these same files.
+
+## 2026-10-30: measured fixed
+
+Richard's three steps are done (the release `v0.1.0`, the DMG notarised by its CI run, nodegx-web deployed). Measured
+from outside: nodegx.io/studio/ links the three `releases/latest/download/…` installers, and each downloads in full
+(`curl -L`: `NodeGX-Studio-mac-arm64.dmg` 200, 148,638,976 bytes; `…-win-x64.exe` 200, 121,655,334;
+`…-linux-x86_64.AppImage` 200, 154,024,002). The API's latest release is `v0.1.0`, not a draft. `STUDIO_DOWNLOAD_URL`
+(`packages/noodl-mcp/src/studio/studioApp.ts:19`) is `https://nodegx.io/studio/#download`. The gaps the page names
+(no Intel Mac build, Windows unsigned) stay as the page says them.

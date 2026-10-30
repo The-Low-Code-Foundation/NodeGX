@@ -69,3 +69,12 @@ told "not installed". The choices: create-nodegx registers `npx -y -p @nodegx/st
 noodl-mcp --allow-writes`, or `@nodegx/mcp` lists `@nodegx/studio` as a dependency (a cycle: Studio depends on
 `@nodegx/mcp`; and 35 packages for every install). Unowned; the release session that publishes both decides it.
 
+
+## 2026-10-30: item (1) is done; (2) and (3) stand
+
+`npm view @nodegx/studio`: **0.1.0 is published** (2026-10-27 21:59 UTC, bin `nodegx-studio`), depending on
+`@nodegx/mcp` 0.2.8, `@nodegx/preview` 0.2.8, `@nodegx/backend-map` 0.1.4. Still open: (2) the newest `@nodegx/mcp` is
+0.2.9, which predates e0801764e (the finder's `require.resolve` candidate, in HEAD), so no published server finds an
+installed `@nodegx/studio`; (3) create-nodegx (0.2.8 on npm) still registers `npx -y @nodegx/mcp@<v>` alone. Both are
+the next release's: publish `@nodegx/mcp` from HEAD, move Studio's pin to it (which also unblocks the `.mcpb` CI leg,
+P128-S3B-MCPBNORELEASE), publish `@nodegx/studio` 0.1.1, then choose (3)'s registration.
