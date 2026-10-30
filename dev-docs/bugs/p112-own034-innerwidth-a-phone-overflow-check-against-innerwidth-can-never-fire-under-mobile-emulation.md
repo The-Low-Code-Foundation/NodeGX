@@ -1,7 +1,8 @@
 ---
 id: P112-OWN034-INNERWIDTH
 title: A "does the phone scroll sideways" check that compares against innerWidth can never fire under mobile emulation, because Chrome grows innerWidth to the content; two lab graders do it
-status: open
+status: fixed
+commit: PENDING
 severity: medium
 area: lab graders — dev-docs/tasks/phase-112-your-own-nodegx/own-019/grade-launch.mjs (phone check), dev-docs/tasks/phase-78-the-templates/todo-digitalbricks/staging-e2e.js (phoneOverflowX)
 found: P112 OWN-034 s1, 2026-10-30 (the grader's own controls)
@@ -40,3 +41,13 @@ Fix: compare against the width the grader set itself, or against `document.docum
 **The kit is not affected.** `render_report`'s overflow check (`packages/nodegx-render-measure/src/index.js:165`)
 already measures against `document.documentElement.clientWidth`. Only its `viewportArea` (:434) uses `innerWidth`,
 which makes the coverage ratio of an overflowing phone page slightly low. No check fails or passes because of it.
+
+## Fixed (2026-10-30)
+
+- `own-019/grade-launch.mjs`: the `phone` check and its `past` list compare with
+  `document.documentElement.clientWidth` (the overflow record's `innerWidth` field is now `width`). `fullShot`'s
+  `w: innerWidth` (:272) only sizes the stitched screenshot and was left alone.
+- `todo-digitalbricks/staging-e2e.js`: `phoneOverflowX` compares with 390, the width it sets two lines above.
+
+Not re-run. Both need Chrome. The fix rests on the table above: on the page that overflows, `clientWidth` reads 390
+where `innerWidth` reads 486. OWN-019's past phone passes are still not re-graded.

@@ -1116,6 +1116,33 @@ describe('Subscribe to Store node', () => {
     expect(signals).toEqual([]);
   });
 
+  it('seeds a wire made before its own store and keys arrive with nothing, then sends the key (P112-OWN034-SUBSCRIBEFIRST)', () => {
+    // A loaded project connects wires at once and queues parameters (nodescope.ts), so the
+    // wire's seed (node.ts `connectInput`) reads Value before `storeName` and `keys` are set.
+    // That read once answered the whole of the default store `app`, so a reader of `items`
+    // got `{}` on every load.
+    const context = createContext();
+    const got: unknown[] = [];
+    context.nodeRegister.register(
+      NodeDefinition.defineNode({ name: 'test.Recorder', category: 'Data', inputs: { got: { type: '*', set: (value) => void got.push(value) } } })
+    );
+    store.setState('tracker', { items: [], ticks: {} });
+
+    const sub = createNode(context, 'net.noodl.GlobalStore.Subscribe').node;
+    const reader = createNode(context, 'test.Recorder').node;
+
+    (reader as unknown as { connectInput(input: string, source: unknown, port: string): void }).connectInput('got', sub, 'value');
+    reader.update();
+    expect(got).toEqual([]);
+
+    sub.setInputValue('storeName', 'tracker');
+    sub.setInputValue('keys', 'items');
+    sub.update();
+    reader.update();
+
+    expect(got).toEqual([[]]);
+  });
+
   it('carries a write from a Set node in one component to a Subscribe node in another', () => {
     // The whole point of the feature, end to end and with nothing wired between the two.
     const context = createContext();

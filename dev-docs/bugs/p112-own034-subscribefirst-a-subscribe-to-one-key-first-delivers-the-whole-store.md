@@ -1,13 +1,15 @@
 ---
 id: P112-OWN034-SUBSCRIBEFIRST
 title: A Subscribe to Store watching one key first delivers the whole store (of the default store name) down its wire
-status: open
+status: fixed
+commit: PENDING
 severity: medium
 area: runtime / Subscribe to Store (packages/noodl-runtime/src/nodes/std-library/agent/globalstoresubscribenode.ts, the `value` getter and `projectValue`)
 found: P112 OWN-034 s3, 2026-10-30 (G4·harness, B6 and B11)
 evidence: dev-docs/tasks/phase-112-your-own-nodegx/own-034/RESULTS.md §7; runs/g4-harness-unguarded/ (grade/grade.json B6, B11); probe-console.mjs
 phase: P112 OWN-034
-kit: runtime
+kit: node-spec
+regression: packages/noodl-runtime/test/globalstore.test.ts "seeds a wire made before its own store and keys arrive with nothing, then sends the key (P112-OWN034-SUBSCRIBEFIRST)"
 ---
 
 What happened: the OWN-034 harness builds a habit tracker on a Global Store (`tracker`, Persist on) with one
@@ -48,3 +50,23 @@ first input is the key's value (or nothing), never an object holding every key.
 Worked around in OWN-034, and stated there: every harness Function that reads a store key now takes it only if it
 has the key's shape (`Array.isArray(Inputs.items)`), which is what a careful author would write. The unguarded
 run's 9/13 is kept in `runs/g4-harness-unguarded/` as the evidence.
+
+## Fixed (2026-10-30)
+
+The `value` getter answers `undefined` until `setupSubscription` has run (`_internal.unsubscribe` is set), so
+`connectInput` seeds nothing. `setupSubscription` already flags `value`, which delivers the first real value.
+`previousValue` needed nothing: it is `undefined` until the first change.
+
+| test | before the fix | after |
+|---|---|---|
+| `globalstore.test.ts` "seeds a wire made before its own store and keys arrive…" (a wire, then the params) | the reader got `[{}]` | `[[]]` |
+| the other 75 Global Store tests | pass | pass |
+| node-spec graph scenarios (97, the store ones included) | pass | pass |
+
+The regression is a runtime test, not a node-spec scenario. The graph runner wires these nodes after their params, so
+a scenario cannot reach the seed: with the fix switched off, a Function fed by a one-key Subscribe never saw `{}`
+there. A scenario was added to `scenarios/graph/t01-global-store.json` ("a Function fed by Subscribes on two keys…")
+as the guard that the real value still arrives, first run and after a Set.
+
+**Not yet in the kit.** Apps get the fix when the viewer is next built into `@nodegx/preview`; 0.2.8 still has the
+seed. The OWN-034 harness keeps its `Array.isArray` guards.

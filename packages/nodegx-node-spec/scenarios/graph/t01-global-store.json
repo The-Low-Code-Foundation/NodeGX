@@ -1534,5 +1534,301 @@
         "subject": "ub"
       }
     ]
+  },
+  {
+    "name": "a Function fed by Subscribes on two keys of a named store sees the watched key's value from its first run, and again after a Set",
+    "clauses": [
+      "N"
+    ],
+    "because": "globalstoresubscribenode.ts `value`: \"one key gives that key\". P112-OWN034-SUBSCRIBEFIRST's fix makes Value answer nothing until the node has subscribed with its own Store Name and Keys; this is the guard that the real value still arrives once it has. The seed itself (a wire made before the params drain, read as the whole of the default store `app`) is not reachable here, because this runner wires these nodes after their params: it is pinned in noodl-runtime test/globalstore.test.ts",
+    "nodes": {
+      "store": {
+        "type": "net.noodl.GlobalStore",
+        "params": {
+          "storeName": "tracker",
+          "initialState": {
+            "items": [],
+            "ticks": {}
+          }
+        }
+      },
+      "ticks": {
+        "type": "net.noodl.GlobalStore.Subscribe",
+        "params": {
+          "storeName": "tracker",
+          "keys": "ticks"
+        }
+      },
+      "items": {
+        "type": "net.noodl.GlobalStore.Subscribe",
+        "params": {
+          "storeName": "tracker",
+          "keys": "items"
+        }
+      },
+      "fn": {
+        "type": "JavaScriptFunction",
+        "params": {
+          "functionScript": "this.kinds = (this.kinds || []).concat(Array.isArray(Inputs.items) ? 'array' : typeof Inputs.items);\nOutputs.kinds = this.kinds.join(',');\nconst ticks = Inputs.ticks;"
+        }
+      },
+      "set": {
+        "type": "net.noodl.GlobalStore.Set",
+        "params": {
+          "storeName": "tracker",
+          "key": "items",
+          "value": [
+            {
+              "id": "a",
+              "name": "Drink water"
+            }
+          ]
+        }
+      }
+    },
+    "wires": [
+      {
+        "from": "ticks.value",
+        "to": "fn.in-ticks"
+      },
+      {
+        "from": "items.value",
+        "to": "fn.in-items"
+      }
+    ],
+    "steps": [
+      "settle",
+      {
+        "node": "set",
+        "signal": "set"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "fn",
+        "port": "out-kinds",
+        "value": "array"
+      },
+      {
+        "at": 2,
+        "subject": "fn",
+        "port": "out-kinds",
+        "value": "array,array"
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "tracker",
+        "subject": "store"
+      },
+      {
+        "t": "set",
+        "port": "initialState",
+        "value": {
+          "items": [],
+          "ticks": {}
+        },
+        "subject": "store"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "tracker",
+        "subject": "ticks"
+      },
+      {
+        "t": "set",
+        "port": "keys",
+        "value": "ticks",
+        "subject": "ticks"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "tracker",
+        "subject": "items"
+      },
+      {
+        "t": "set",
+        "port": "keys",
+        "value": "items",
+        "subject": "items"
+      },
+      {
+        "t": "set",
+        "port": "functionScript",
+        "value": "this.kinds = (this.kinds || []).concat(Array.isArray(Inputs.items) ? 'array' : typeof Inputs.items);\nOutputs.kinds = this.kinds.join(',');\nconst ticks = Inputs.ticks;",
+        "subject": "fn"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "tracker",
+        "subject": "set"
+      },
+      {
+        "t": "set",
+        "port": "key",
+        "value": "items",
+        "subject": "set"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": [
+          {
+            "id": "a",
+            "name": "Drink water"
+          }
+        ],
+        "subject": "set"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "",
+        "subject": "store"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "items": [],
+          "ticks": {}
+        },
+        "subject": "store"
+      },
+      {
+        "t": "value",
+        "port": "storeId",
+        "value": "--ndl--global-store--tracker",
+        "subject": "store"
+      },
+      {
+        "t": "signal",
+        "port": "ready",
+        "subject": "store"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "",
+        "subject": "ticks"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": {},
+        "subject": "ticks"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "",
+        "subject": "items"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": [],
+        "subject": "items"
+      },
+      {
+        "t": "value",
+        "port": "out-kinds",
+        "value": "array",
+        "subject": "fn"
+      },
+      {
+        "t": "signal",
+        "port": "success",
+        "subject": "fn"
+      },
+      {
+        "t": "in",
+        "port": "set",
+        "subject": "set"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "items",
+        "subject": "store"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "items": [
+            {
+              "id": "a",
+              "name": "Drink water"
+            }
+          ],
+          "ticks": {}
+        },
+        "subject": "store"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "store"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "items",
+        "subject": "items"
+      },
+      {
+        "t": "value",
+        "port": "previousValue",
+        "value": [],
+        "subject": "items"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": [
+          {
+            "id": "a",
+            "name": "Drink water"
+          }
+        ],
+        "subject": "items"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "items"
+      },
+      {
+        "t": "value",
+        "port": "out-kinds",
+        "value": "array,array",
+        "subject": "fn"
+      },
+      {
+        "t": "signal",
+        "port": "success",
+        "subject": "fn"
+      },
+      {
+        "t": "outcome",
+        "port": "set",
+        "value": "done",
+        "subject": "set"
+      }
+    ]
   }
 ]

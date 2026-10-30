@@ -1,13 +1,15 @@
 ---
 id: P112-OWN034-INPUTHIT
 title: A Text Input's drawn box is taller than the part that takes a tap: a press on its padding focuses nothing
-status: open
+status: fixed
+commit: PENDING
 severity: medium
 area: runtime / Text Input (packages/noodl-viewer-react/src/components/controls/TextInput/TextInput.tsx, the `inputWrapper` div at :296–303)
 found: P112 OWN-034 s2, 2026-10-30 (D·kit round 1, B13 on a 390 px phone)
 evidence: dev-docs/tasks/phase-112-your-own-nodegx/own-034/RESULTS.md §3; runs/d-kit-1/ (grade/grade.json B13, grade/phone.png)
 phase: P112 OWN-034
 kit: node-spec
+regression: packages/noodl-viewer-react/tests/own034-inputhit-a-press-on-the-padding-takes-the-keyboard.test.tsx
 ---
 
 What happened: DeepSeek built a habit tracker with the NodeGX kit (0.2.8). The grader's phone check (B13) failed it
@@ -44,3 +46,23 @@ that scenario.
 
 Not fixed in OWN-034. It is a race lane, and this does not block any of its acceptance criteria. D·kit round 1's B13
 fail stands as measured.
+
+## Fixed (2026-10-30)
+
+The `inputWrapper` div has an `onMouseDown`. A primary-button press that lands in the box but not on the field (the
+padding, the border, an icon) cancels the mousedown's default action, which would move the keyboard to the body, and
+focuses the field. It also adds the same `preventGlobalFocusChange` listener the field's own mousedown adds. A
+disabled field takes nothing. The Text Area shares the code. A press on the field itself is left alone, so P107-C68's
+Pointer Down still runs there.
+
+| test (`own034-inputhit-…test.tsx`, a real node rendered into jsdom) | handler off | handler on |
+|---|---|---|
+| a press on the field (the known-firing control) | focused, Focused ×1 | focused, Focused ×1 |
+| a press on the wrapper | not focused | focused, Focused ×1 |
+| the same for a Text Area | not focused | focused |
+| a press on a disabled field's wrapper | nothing | nothing |
+
+No node-spec scenario. The spec's press acts land on the control and it has no geometry, so it cannot say "the
+padding". Not done: a press on the padding fires no Pointer Down or Pressed (those handlers stay on the field), and
+it was not driven on a phone. **Not yet in the kit:** apps get it when the viewer is next built into
+`@nodegx/preview`.

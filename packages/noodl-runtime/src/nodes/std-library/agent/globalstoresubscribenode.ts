@@ -111,6 +111,11 @@ const SubscribeToStoreNodeDefinition: NodeDefinitionOptions = {
         'The watched value: one key gives that key, several give an object of just those keys, none gives the whole store',
       group: 'Data',
       getter: function (this: SubscribeInstance) {
+        // P112-OWN034-SUBSCRIBEFIRST: a loaded project makes its wires before the queued
+        // `storeName` and `keys` drain, and the wire's seed reads this getter. Before setup it
+        // would project the default store with no keys, the whole of `app`, into a reader of
+        // one key. Undefined is never seeded; `setupSubscription` flags the real value.
+        if (!this._internal.unsubscribe) return undefined;
         return this.projectValue(globalStoreManager.getState(this._internal.storeName));
       }
     },

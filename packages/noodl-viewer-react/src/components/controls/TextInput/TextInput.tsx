@@ -296,7 +296,17 @@ export class TextInput extends React.Component<TextInputProps, State> {
       <div
         ref={props.useLabel ? undefined : noodlRootRef(this.props.noodlNode)}
         {...(props.useLabel ? undefined : dataAttributeProps(props.dom))}
-        style={props.useLabel ? { ...clearedRootStyles(style), ...inputWrapperStyle } : inputWrapperStyle} noodl-style-tag="inputWrapper">
+        style={props.useLabel ? { ...clearedRootStyles(style), ...inputWrapperStyle } : inputWrapperStyle} noodl-style-tag="inputWrapper"
+        onMouseDown={(e) => {
+          // P112-OWN034-INPUTHIT: the padding and border are drawn as the field, so a press there takes the
+          // keyboard as a native field's padding does. Without this the mousedown's default action moves focus
+          // to the body. A press on the field itself is the field's own.
+          const field = this.ref.current;
+          if (!field || !props.enabled || e.button !== 0 || field.contains(e.target as Node)) return;
+          e.preventDefault();
+          window.addEventListener('click', preventGlobalFocusChange, true);
+          this.focus();
+        }}>
         {props.useIcon && props.iconPlacement === 'left' ? _renderIcon() : null}
         {inputContent}
         {props.useIcon && props.iconPlacement === 'right' ? _renderIcon() : null}

@@ -390,8 +390,10 @@ try {
     const seenCols = [];
     for (const c of cols) if (!seenCols.some((h) => h.join() === c.join())) seenCols.push(c);
     const se = document.scrollingElement;
-    const past = leaves(/\\S/).filter((l) => l.getBoundingClientRect().right > innerWidth + 2).map((l) => own(l).slice(0, 40));
-    return { cols: seenCols, sizes: [...sizes].sort((a, b) => a - b), overflow: { scrollWidth: se.scrollWidth, innerWidth, past } };
+    // P112-OWN034-INNERWIDTH: the layout viewport, not innerWidth, which grows to the content under mobile: true.
+    const width = document.documentElement.clientWidth;
+    const past = leaves(/\\S/).filter((l) => l.getBoundingClientRect().right > width + 2).map((l) => own(l).slice(0, 40));
+    return { cols: seenCols, sizes: [...sizes].sort((a, b) => a - b), overflow: { scrollWidth: se.scrollWidth, width, past } };
   })()`);
   // Chosen = not the template's own colour tokens (q6's quiz showed exactly two colours, #64748b and #2563eb, both
   // defaults) and not a pure grey; tinted neutrals (a cream, a warm near-black) are a choice and count.
@@ -403,7 +405,7 @@ try {
   }
   check('palette', chosen.length >= 3, { chosen, defaultsSeen: look.cols.filter((c) => DEFAULT_COLOURS.some((d) => near(c, d, 12))) });
   check('scale', look.sizes.length >= 3, { sizes: look.sizes });
-  check('phone', look.overflow.scrollWidth <= look.overflow.innerWidth + 1 && look.overflow.past.length === 0, look.overflow);
+  check('phone', look.overflow.scrollWidth <= look.overflow.width + 1 && look.overflow.past.length === 0, look.overflow);
 
   // features (two sentences each, in the title's own section) and the font painted in them
   const feats = await page(`(() => FEATURES.map((t) => {

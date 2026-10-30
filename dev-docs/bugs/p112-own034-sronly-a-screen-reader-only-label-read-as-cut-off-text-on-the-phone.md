@@ -2,6 +2,7 @@
 id: P112-OWN034-SRONLY
 title: OWN-034's phone check (B13) failed a visually hidden screen-reader label as "cut off" text
 status: fixed
+commit: 41315bb95
 severity: medium
 area: lab grader — dev-docs/tasks/phase-112-your-own-nodegx/own-034/grade.mjs (B13)
 found: P112 OWN-034 s2, 2026-10-30 (the first app graded, D·code round 1)
