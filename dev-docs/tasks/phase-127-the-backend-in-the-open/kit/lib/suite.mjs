@@ -246,8 +246,9 @@ export async function runSuite({ adapter, project, backend, token, edits, people
       if (!t) await be.post('/admin/triggers', projectTrigger(s));
       else if ((t.enabled !== false) !== (s.enabled !== false)) await be.post(`/admin/triggers/${encodeURIComponent(s.id)}/enabled`, { enabled: s.enabled !== false });
     }
-    write(SECURITY_FILE, start.sec);
-    write(AUTOMATIONS_FILE, start.auto);
+    // only a file that moved: an editor that changed nothing leaves the folder untouched, its times included
+    if (read(SECURITY_FILE) !== start.sec) write(SECURITY_FILE, start.sec);
+    if (read(AUTOMATIONS_FILE) !== start.auto) write(AUTOMATIONS_FILE, start.auto);
     const after = { collections: (await be.get('/admin/permissions')).config.collections ?? {}, triggers: (await be.get('/admin/triggers')).triggers ?? [] };
     // table by table: a table whose entry was put back comes last in the backend's answer, which is no difference
     const tables = new Set([...Object.keys(after.collections), ...Object.keys(start.collections)]);

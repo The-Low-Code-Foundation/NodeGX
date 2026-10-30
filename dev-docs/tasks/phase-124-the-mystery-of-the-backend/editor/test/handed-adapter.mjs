@@ -24,6 +24,9 @@ export default function handedAdapter(mode = process.env.HANDED_MODE ?? 'honest'
         { table: 'Announcement', rows: { Announcement: shows ? await ids('Announcement') : [] } },
         { table: 'Meeting', rows: { Meeting: member ? await ids('Meeting') : [] } }
       ];
+      // the Announcement page opens one row by its id: the first notice (round 1's guess 14)
+      const first = (await ids('Announcement'))[0];
+      day.push({ table: 'Announcement', ids: [first], rows: { Announcement: member ? [first] : [] } });
       if (member) {
         const own = ((await be.get('/api/Member?limit=200')).results ?? []).filter((m) => m.userId === p.id).map((m) => m.objectId);
         day.push({ fn: 'myNotifySetting', args: {}, rows: mode === 'naming' ? { Member: own } : {} });

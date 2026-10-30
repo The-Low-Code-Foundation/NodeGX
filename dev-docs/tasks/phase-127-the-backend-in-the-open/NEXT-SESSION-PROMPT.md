@@ -356,3 +356,20 @@ runs the backend bundle. None was rebuilt. Ask before rebuilding the Desktop dis
 - **Next:** BKO-009 (the skill, and a stranger who builds a backend editor in a shape Studio lacks). R2 (the kit as its
   own package) should be ruled before that round, once `package-lock.json` is free. Workflows have no kit writer yet.
 
+
+## s12 (2026-10-30, late): BKO-009 — R2 and R3 ruled, the kit's own package, the read half, the skill, round 1 PASS
+
+- **R2** ("own package first"): `@nodegx/backend-kit` 0.1.0 is `kit/` in this folder (not `packages/`: the reason is
+  in BKO-009's log). The map 0.1.6 depends on it. **R3** ("A day in the life") needed the suite's read half
+  (`kit/lib/handed.mjs`): an adapter's `handed(person)` is graded by doing each step again as that person.
+- The skill `nodegx-your-own-backend-editor` is in create-nodegx (`profiles/core/skills/`), named by the agent notes.
+- Round 1 (`day/`, record in `day/round-1/`): Opus, 11.7 min, $4.24, a page that plays each person's day. PASS from
+  outside on a fresh club; app and backend left as they were; its guesses placed in BKO-009's table (three kit fixes,
+  five skill sentences, two open).
+- **For Richard:** his verdict on the screen (AC3): `cd /private/tmp/bko009/lab/day/day-in-the-life && npm start`
+  needs the lab's club backend, which the round's teardown stopped; easier: the two pictures in `day/round-1/`, or
+  start a club with `node day/lab.mjs <empty folder>` and run the stranger's `node server.mjs --app <folder>/riverside
+  --backend <url> --token-file <folder>/admin-token`. Then publish `@nodegx/backend-kit` (`kit/`), then the map 0.1.6.
+- **Next:** AC4 (the skill ships in the next create-nodegx cut; its pin test is red on 0.2.9 for other reasons).
+  Open: a step shape for a filtered list; a kit export that plays a page as a person (the stranger wrote its own
+  engine); Studio's `functionTouches` must import the kit when its pin moves past 0.1.4.

@@ -29,7 +29,7 @@ try {
   const run = (mode) => runSuite({ adapter: handedAdapter(mode), project: lab.app, backend: lab.base, token: lab.token, edits: [] });
 
   const honest = await run('honest');
-  ok(honest.pass && /steps shown to 3 people/.test(honest.line), honest.line, honest.differences);
+  ok(honest.pass && /19 steps shown to 3 people/.test(honest.line), honest.line, honest.differences);
   ok(honest.handed?.notGraded === 0, 'every step was graded (none changes data, no path rule)', honest.handed);
 
   const liar = await run('liar');

@@ -20,7 +20,7 @@ export { idOf, personColumns, personKeys, profileTables, profilesFrom, profilesO
 export { AUTOMATIONS_FILE, readAutomationsFile, functionNamed, triggerFlows } from './triggers.mjs';
 
 export { KEY_SUFFIX, asPerson, personName, runnable, argsFor } from './asperson.mjs';
-export { MAX_ASKS, loadWorld, personReach, anonymousReach, rowIndex } from './reach.mjs';
+export { MAX_ASKS, loadWorld, personReach, anonymousReach, rowIndex, rowsIn } from './reach.mjs';
 export { makeLens } from './lens.mjs';
 export { makeViews } from './views.mjs';
 

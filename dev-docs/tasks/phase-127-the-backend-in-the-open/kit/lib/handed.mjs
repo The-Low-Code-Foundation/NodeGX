@@ -5,6 +5,7 @@
 //
 //   { fn: 'myStanding', args: {}, rows: { Member: ['k3…'] } }   a function, run as them on the MCP door
 //   { table: 'Announcement', rows: { Announcement: ['a1…', …] } } a table read directly, row by row by the rules
+//   { table: 'Announcement', ids: ['a1…'], rows: { … } }         only the rows a page opened by id (BKO-009 round 1)
 //
 // A function that changes data is never run (lib/asperson.mjs `runnable`): its step is counted as not graded and
 // said in the PASS line. Someone not signed in isn't graded (no key can act as nobody).
@@ -127,7 +128,8 @@ export async function gradeHanded({ ed, be, project, people, name = ed?.name ?? 
             notGraded++;
             continue;
           }
-          real = { [step.table]: readable };
+          // a page that opens one row by its id is handed that row, if the rules let them read it
+          real = { [step.table]: Array.isArray(step.ids) ? new Set(step.ids.filter((id) => readable.has(id))) : readable };
           for (const t of Object.keys(claimed)) if (t !== step.table) say(`${at}: reading ${step.table} hands nobody rows of ${t}.`);
         } else {
           say(`${at}: a step is a function ({ fn, args }) or a table ({ table }); this one is neither.`);

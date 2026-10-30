@@ -11,7 +11,9 @@ page doesn't say what it should look like. It says what a NodeGX backend is, whi
 question, how you know you're done, and what the tools before yours got wrong. Read it once before you start. It's
 written for Claude Code. Any coding agent can follow it.
 
-For an editor of the app's screens and graph, read `nodegx-your-own-editor` instead. A tag in brackets at the end of
+Your tool is a program of your own: a small server and a page, or a command. It isn't a NodeGX app, even where the
+folder's notes ask for apps to be NodeGX apps. For an editor of the app's screens and graph, read
+`nodegx-your-own-editor` instead. A tag in brackets at the end of
 a line, such as (BKO-007), names the record in the NodeGX project where that lesson was learned. You don't need to
 read those records.
 
@@ -124,8 +126,10 @@ await views.recordReach('Meeting', rowId);       // everyone who can reach one r
 ```
 
 `asPerson` makes a short-lived key bound to the person, calls the backend's MCP door with it, and deletes the key
-when the work is done. The functions that key may call are the ones the person may call. Its `sweep()` deletes a key
-left behind by a crash. `reachOf` asks each function at most 16 ways (`MAX_ASKS`). Say "at least" when it's capped.
+when the work is done. The functions that key may call are the ones the person may call. A deleted key stops working,
+and the backend keeps a record of it. Its `sweep()` deletes a key left behind by a crash. The key calls functions
+only. To know which rows of a table a person may read themselves, ask the backend's rule check row by row, as the
+suite does (`POST /admin/permissions/check` with the row as `record`). `reachOf` asks each function at most 16 ways (`MAX_ASKS`). Say "at least" when it's capped.
 
 `asPerson` never runs a function that changes data. `runnable(fn, tool)` says why not: the graph or a script
 writes, or the function's own description says it changes something. A function that writes can only be shown from
@@ -200,9 +204,13 @@ that step handed them, by `objectId`:
 ```js
 [
   { fn: 'myStanding', args: {}, rows: {} },
-  { table: 'Announcement', rows: { Announcement: ['3ad48f3b-…', '771df659-…'] } }
+  { table: 'Announcement', rows: { Announcement: ['3ad48f3b-…', '771df659-…'] } },
+  { table: 'Announcement', ids: ['3ad48f3b-…'], rows: { Announcement: ['3ad48f3b-…'] } }
 ]
 ```
+
+The last step is a page that opens one row by its id: `ids` names the rows it asked for. A list that filters its
+rows has no step shape yet. Leave it out of `handed` and say so in your report.
 
 The suite runs each function step again as that person and finds the rows in the answer. It asks the backend's own
 rule check about each row of a table step. A row you show that they didn't get is a difference. So is a row they got
@@ -228,8 +236,11 @@ difference. Write it through `makeHands`. If you write it yourself, use `seriali
 
 ### The command
 
-Run the suite on a copy of the app with a backend of its own, never the person's live one. Every edit changes the backend,
-and the suite puts both places back at the end.
+Edits change the backend, so run a script with edits on a copy of the app with a backend of its own, never the
+person's live one. The person's agent can make one for the copy with the `nodegx` server. A script with no edits
+changes no rule, trigger or file. It runs the person's reading functions, which the backend writes in its run log and
+its audit, and leaves a stopped key's record per person. It may run on the live backend. Give it a copy of the app's
+folder all the same.
 
 ```
 npx -p @nodegx/backend-kit backend-suite my-adapter.mjs /path/to/the/copy edits.json --backend <url> --token-file <file>
@@ -308,4 +319,4 @@ Each line cost someone a wrong picture or a false claim.
 
 Write a short report for the people who made the kit. Say how long it took. List every question this page and the kit
 didn't answer, where you had to guess. Paste the suite's output. Open an issue on `The-Low-Code-Foundation/NodeGX`
-with it. Every guess becomes a sentence on this page or a fix in the kit.
+with it, if the person agrees: an issue is public. Every guess becomes a sentence on this page or a fix in the kit.

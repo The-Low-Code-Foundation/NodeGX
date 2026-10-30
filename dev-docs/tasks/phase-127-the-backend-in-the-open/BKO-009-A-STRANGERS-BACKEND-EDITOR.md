@@ -1,7 +1,9 @@
 # BKO-009 — A stranger builds their own backend editor
 
 **Phase:** [127](README.md). **Depends on:** BKO-008 (the kit and the suite). **State:** s1 (2026-10-30): R2 and R3
-ruled; the kit is its own package, the suite has a read half, the skill is written; the stranger round is next.
+ruled; the kit is its own package, the suite has a read half, the skill is written. Round 1: the stranger's editor
+says PASS from outside (AC1); its report, cost and guesses are below (AC2). AC3 (Richard's verdict) and AC4 (the cut
+and the publish) are open.
 
 ## What
 
@@ -93,3 +95,50 @@ PROFILEWRITE, BACKENDONLY, SCHEDULEAUTH and BKO-007/008's lessons. Run through t
 reads `allowed` and not `recordAllowed`, so a row whose access list shuts someone out would read as reachable;
 unmeasured on an app whose rule and row list disagree.
 
+
+### s1, round 1 (2026-10-30, 22:43–22:55): one Opus stranger, "A day in the life"
+
+**The lab** (`day/round.mjs`, kept in `day/round-1/`): `npm create nodegx@0.2.8`, plus the skill and the agent notes'
+line (what the next cut ships), the Riverside club (`day/lab.mjs`) with its backend running outside the lab, and the
+kit as `nodegx-backend-kit-0.1.0.tgz` (not on npm yet; the prompt said so in one sentence). The prompt is
+`round-1/prompt.txt`: the person's words and R3's brief verbatim. Claude Code 2.1.312 (the PATH one is older),
+`claude-opus-5-5`.
+
+**What it built**, in 11.7 minutes for **$4.24** (88 turns): `day-in-the-life/`, a small server holding the key and a
+page (`round-1/editor/`, 953 lines). Pick Dev, Chloé, Ben or Ada and it plays their day through the app's own pages:
+the front page, sign in, where signing in lands, then each button in the band they can see, opening the first item of
+each list. It plays the pages' own logic (it reads the graphs and runs their scripts), runs `myStanding` and
+`myNotifySetting` as them through the kit, and checks each list row by row with the rule check. Each step says why the
+page asked and what came back: rows, an answer with no row, or a refusal. Each step also lists the buttons that would
+change something, whether the backend would let them, and whether the button is on their screen. It never presses
+them. Its report is `round-1/REPORT.md`.
+
+**Graded from outside** (`day/grade.mjs`, `round-1/grade.json`):
+- AC1: **PASS — A day in the life on Members' Area, 0 edits; 40 steps shown to 3 people (5786 ms)**, on a FRESH
+  club it never saw (its adapter calls the same `playDay` its server calls). Its own broken adapter, from outside:
+  FAIL, Dev shown 2 notices.
+- It left the app and the backend as the person asked: `riverside/`'s 105 files hash as they did at the start; the
+  club's rules, triggers, people, groups and every row id are as they were (snapshot `club-before.json`).
+- The page, driven in headless Chrome on a fresh club: every person's day plays in 0.6 s (Ada's 7 s). The counts are
+  the club's rules: Dev only the association, the members the 3 notices and 2 meetings and never a Member row, Ada
+  everything. One console error: a 404 (no favicon). Pictures: `round-1/bko-009-dev.png`, `bko-009-chloe.png`.
+
+**Its guesses (OWN-010's rule), each one placed:**
+
+| # | the guess | now |
+|---|---|---|
+| 14 | a page that opens one row by its id has no step shape (a table step means "every row they may read") | **fixed**: `{ table, ids, rows }`; the honest adapter in `handed.test.mjs` uses it (19 steps) |
+| 15 | a list whose filter leaves rows out has no step shape | **open**: the skill says to leave it out and say so |
+| 16 | `rowsIn` isn't exported | **fixed**: exported |
+| 17 | "a backend of its own": the kit makes none, so it ran the read half on the live backend | **skill**: an empty script changes no rule, trigger or file and may run live; edits need a copy and its own backend, which the person's agent makes |
+| 17b | the suite "rewrites the rules files at the end even when nothing changed" | **fixed**: put back writes a file only when it moved |
+| — | 27 stopped key records it couldn't erase | **skill**: a deleted key stops working and the backend keeps its record |
+| 10 | a person's key can't read a table, so lists are checked by the rule check | **skill**: says so, and how |
+| 18 | CLAUDE.md asks for NodeGX apps; the tool isn't one | **skill**: the tool is a program of your own |
+| 19 | the guide asks for a public GitHub issue | **skill**: if the person agrees |
+| 1–6 | what a day is (the route, the first item of each list, a wide window, names from rows, nothing pressed) | the brief's to decide, not the kit's: for Richard |
+| 7–9, 11–13 | how a page runs (once per moment, a filtered list's first load, "today", the 200-row cap, rows inside a list, buttons found by label) | it re-implemented the page engine. No kit export plays a page as a person; that is a candidate row, not filed |
+
+After the fixes: `handed.test.mjs` 9/9, `backend-suite.test.mjs` 15/15, create-nodegx 33/35 (the same two red).
+
+**AC3 waits on Richard's verdict on the screen. AC4 waits on the next create-nodegx cut and the kit's publish.**
