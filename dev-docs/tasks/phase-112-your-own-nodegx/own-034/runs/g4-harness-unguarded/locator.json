@@ -1,0 +1,17 @@
+{
+  "app": "runs/g4-harness-unguarded (the blocks before the SUBSCRIBEFIRST guard; G4\u00b7harness: Gemma 4 E4B answers, the blocks build; @nodegx/mcp 0.2.8)",
+  "url": "http://127.0.0.1:48813/",
+  "start": "noodl-preview <scratch>/g4-harness-unguarded/tracker --port 48813 --no-watch (from the @nodegx/preview 0.2.8 tarball)",
+  "addInput": "input.add-input, .add-input input",
+  "addButton": ".add-button",
+  "rows": ".item-row",
+  "rowName": ".item-name",
+  "tick": ".item-tick",
+  "todayDone": "row => row.querySelector('.item-tick').style.backgroundColor === 'var(--primary)'",
+  "days": ".day-cell",
+  "daysOrder": "oldest-first",
+  "dayDone": "cell => cell.querySelector('.day-dot').style.backgroundColor === 'var(--primary)'",
+  "streak": ".item-streak",
+  "remove": ".item-delete",
+  "confirmRemove": null
+}

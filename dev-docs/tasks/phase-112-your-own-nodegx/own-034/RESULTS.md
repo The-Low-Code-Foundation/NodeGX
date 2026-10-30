@@ -283,13 +283,118 @@ name raises an `alert()`, which the grader accepts. Its streak loop also mutates
 **11**: persistence and the week are right, and the streak is wrong on **B9**, not B10. I predicted G2·code at 4–7. It
 scored **7**, with persistence as the whole failure.
 
-## 6. Where the race stands (s2, 2026-10-30)
+## 6. Where the race stands (s3, 2026-10-30)
 
 | lane | runs | B1–B13 |
 |---|---|---|
 | D·code | 2 | 13, 13 |
 | D·kit | 2 | 12, 12 (both: P112-OWN034-INPUTHIT) |
+| G4·harness | 1, and 1 under tuning T1 | 11; **12** under T1 (B13: INPUTHIT) |
+| G2·harness | 1, and 1 under tuning T1 | 11; **12** under T1 (B13: INPUTHIT) |
 | G4·code | 1 | 11 |
 | G2·code | 1 | 7 |
-| G4·harness | — | the lab is not built (§8 step 4) |
-| G2·harness | — | the same |
+
+All six lanes are built and graded (AC2). Next is §8 step 5, the blind gallery for Richard.
+
+## 7. The harness lab: G4·harness and G2·harness (s3, 2026-10-30)
+
+**The lab** (`harness.mjs`, `prompts.mjs`, `blocks.mjs`, `blocks/days.js`; every question verbatim in
+`questions.md`) is an MCP stdio client (`mcp.mjs`) against **the same `@nodegx/mcp` 0.2.8 the D·kit lane ran**,
+installed from the registry tarball. Every write goes through `create_project`, `write_script_file`,
+`create_plan`, `stage_plan_operation` and `apply_plan`, and meets their validation. The preview is the 0.2.8 tarball
+too, run on a scratch copy at a fixed port, as for D·kit.
+
+**What the model decides** (8 decisions and 4–5 words calls, each a closed question with every option in the words):
+the item's name, what a day records, the actions, whether delete asks first, the views, how many days back, the
+numbers, the look (clean, bold or warm: OWN-032 rule D), and the words, one call per section.
+
+**What the script supplies** (the blocks, `questions.md` §1):
+- one Global Store, Persist on, holding `{ items, ticks }`; this is the first app in the race that uses it;
+- an add row (the kit vocabulary's `textField` and `primaryButton`);
+- a For Each of an Item Row component;
+- a tick, a delete (with or without `confirm()`) and the last N days (a For Each of a Day Cell);
+- one Function per number, each a single call into `scripts/days.js`;
+- a Summary component that declares the same store by name and subscribes to it itself, with no wire from the list.
+
+The date logic is `blocks/days.js`, written once. It was tested by `test-days.mjs` against the grader's frozen days
+(B5, B7–B10, B12, the October clock change, a late evening) in Europe/Paris, America/Los_Angeles and Pacific/Auckland
+before any model ran: 10 checks, all passing in each zone.
+
+**The blocks' control** (`runs/blocks-control/`): the same build on answers written by hand (every block on), with
+no model. It scored **12/13**. Its one miss is **B13 `too small: the name field 248×22`**, which is
+P112-OWN034-INPUTHIT, as the handoff predicted. The block was not routed around it.
+
+### The runs (T 0, `think: false`, one call per question, no history; Ollama idle before, unloaded after)
+
+| run | model (digest) | tuning | calls | model time | tokens in / out | B1–B13 | failed |
+|---|---|---|---|---|---|---|---|
+| `g4-harness-unguarded` | E4B (`ee6656371218`) | — | 12 | 28 s | 2,144 / 216 | 9/13 | B6, B11 (a page error, below), B7, B13 |
+| `g4-harness` | E4B | — | 12 | 36 s | 2,144 / 216 | **11/13** | B7, B13 |
+| `g2-harness` | E2B (`07ea59a47401`) | — | 13 | 20 s | 2,423 / 203 | **11/13** | B7, B13 |
+| `g4-harness-t1` | E4B | T1 | 12 | 36 s | 2,134 / 216 | **12/13** | B13 |
+| `g2-harness-t1` | E2B | T1 | 13 | 17 s | 2,413 / 203 | **12/13** | B13 |
+
+Each build (the questions, then the MCP writes) took under a minute. All 62 model answers parsed. Every component
+staged with no errors and no warnings, and every app applied in one `apply_plan`.
+
+**What they chose.** At T 0, every untuned run and its T1 rerun gave the same answers.
+
+| | G4 (E4B) | G2 (E2B) |
+|---|---|---|
+| actions | add, delete, tick for today | add, tick for today, delete |
+| ask before delete | yes | yes |
+| views | the last days per item (7) | the last days per item (7) |
+| numbers | streak | streak, done this week, done today out of all |
+| look | clean (modern) | warm (soft) |
+| words | "Habit Tracker", "Mark as done" / "Done for today", "1 Streak" | "Habit Tracker", "mark done" / "done today", "1 streak count", and a summary that reads **"1 of 2 Habit Tracker"** |
+
+Neither chose rename or "a number per day", so nothing chosen went unbuilt. G2's summary label is the worst words in
+the six apps: it was asked for the words "shown after the count at the top, as in '3 of 5 …'" and gave the title.
+The grader does not read the summary, so this shows only in Richard's ranking.
+
+**The page error, and a kit defect: P112-OWN034-SUBSCRIBEFIRST (open, `kit: runtime`).** The first G4 build failed
+B6 and B11 on `The script threw: items.map is not a function`, from the Function that makes the rows. The screen was
+right. A logging copy (`probe-console.mjs`) showed what the Function receives on every load. Its first input is
+`{}`, an empty whole store, not the `items` key; its second is the key's array. The Subscribe node's `value` getter
+answers with no keys on the store `app` until its own setters run. `connectInput` copies that first value down the
+wire, because it is defined. The blocks now take a key only when it has the key's shape
+(`Array.isArray(Inputs.items)`), which is what a careful author would write. The control was rebuilt and still scored
+12/13, with no page errors. G4 was then run again from scratch: it gave the same answers and scored 11.
+`runs/g4-harness-unguarded/` keeps the 9.
+
+**B7, and tuning T1.** Both models answered the actions question with add, delete and tick for today. Neither
+chose untick, which the brief does not name, so a second press did nothing and B7 failed. In code, the undo comes
+free with a toggle, and every DeepSeek app has it unasked. Here the menu had made it a separate decision. **T1**
+(`prompts.mjs` TUNINGS, recorded in each run's ledger): a mark a person can make, they can take back. The tick
+always toggles, and untick leaves the menu. Both lanes were rerun under T1 with the same answers, and both scored
+12/13. This is the only tuning, and it was done on the habit brief.
+
+**Against §7.** I predicted the harness lanes at 12–13, "because the script owns the date logic".
+- **Untuned, both scored 11.** The date checks (B8–B10, B12) all passed, as predicted. The miss was a decision on
+  the menu (B7), which the prediction did not foresee.
+- **Under T1, both scored 12.** The one miss is the kit's (INPUTHIT), the same miss as D·kit's.
+- **E2B equals E4B.** With the script owning the logic, the 2B model's app passes the same checks as the 4B
+  model's. It also chose more of the menu (three numbers and the summary), and its words are worse.
+
+**Where the logic lives, for §2.3.** This is the first app in the race whose saved data is a NodeGX node, not
+JavaScript: the Global Store with Persist. Its summary is a second component that reads the same store by name, so
+no wire runs from the list to it. Both D·kit apps kept their store in a Function with `localStorage`. The kit itself
+points that way:
+- `create_project`'s `backend` field says that what one person keeps on their own device is "saved by a Function
+  with localStorage" (P112-OWN019-LOCALKEEP, 2026-10-13);
+- the Global Store's one-line summary in `list_node_types` does not mention Persist.
+
+D·kit 2 saw both lines. Whether that sentence should name the Global Store with Persist is a question for the kit
+(and for Richard), not a defect, so it is not filed. It does show that the harness's one decisive structural choice,
+the store, was made by the script, not by any model.
+
+**What the cost looks like next to D·kit.** One harness build is about 2.2 K tokens in and 0.2 K out, local, in under
+a minute. One D·kit round was 7.7–8.8 M in (97% cached) and 30–38 K out, in 17–23 minutes. The scores are the same
+(12/13), and the miss is the same kit defect.
+
+**The locator** (`runs/<run>/locator.json`) is the same for every harness app. The blocks put a fixed
+`cssClassName` on the row, its name, tick, delete, day cell, day dot and streak (`B-classes`). Done today is the
+tick's inline `var(--primary)`; a done day is the dot's. The class names change nothing a person sees.
+
+**Saved per run:** the ledger (every call verbatim), the build log, the app (the 4.1 MB unused `starter-imagery`
+left out), the render report's two shots, and `grade/`.

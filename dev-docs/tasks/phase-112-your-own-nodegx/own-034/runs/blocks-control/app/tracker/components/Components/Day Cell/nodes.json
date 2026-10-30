@@ -1,0 +1,112 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "17f5afb9-8159-5b6b-833d-bf19d29eb538",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "in",
+      "type": "Component Inputs",
+      "label": "One day",
+      "ports": [
+        {
+          "name": "letter",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "done",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "isToday",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "cell",
+      "type": "Group",
+      "label": "A day",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "rowGap": "var(--space-1)",
+        "cssClassName": "day-cell"
+      },
+      "children": [
+        "letter",
+        "dot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "letter",
+      "type": "Text",
+      "label": "Weekday letter",
+      "parent": "cell",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-medium)",
+        "color": "var(--muted-foreground)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "dot",
+      "type": "Group",
+      "label": "Done or not",
+      "parent": "cell",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 24,
+          "unit": "px"
+        },
+        "height": {
+          "value": 24,
+          "unit": "px"
+        },
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-2)",
+        "borderColor": "transparent",
+        "backgroundColor": "var(--muted)",
+        "cssClassName": "day-dot"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "fill",
+      "type": "Expression",
+      "label": "Done is filled",
+      "parameters": {
+        "expression": "done ? 'var(--primary)' : 'var(--muted)'"
+      },
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "ring",
+      "type": "Expression",
+      "label": "Today is ringed",
+      "parameters": {
+        "expression": "isToday ? 'var(--foreground)' : 'transparent'"
+      },
+      "x": 350,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "cell"
+  ]
+}

@@ -1,93 +1,81 @@
-# OWN-034 — next session (s3): the harness lab, for G4 and G2
+# OWN-034 — next session (s4): the blind gallery for Richard
 
 **Paste this to start the session:**
 
-> OWN-034 s3. Read `dev-docs/tasks/phase-112-your-own-nodegx/own-034/NEXT-SESSION-PROMPT.md`, then
-> `../OWN-034-THE-HABIT-TRACKER-RACE.md` §5 and `RESULTS.md` §4–§6. Four of the six lanes are run and graded. Next is
-> §8 step 4, the harness lab: Gemma answers closed questions, and the script builds the NodeGX app from fixed blocks.
+> OWN-034 s4. Read `dev-docs/tasks/phase-112-your-own-nodegx/own-034/NEXT-SESSION-PROMPT.md`, then
+> `../OWN-034-THE-HABIT-TRACKER-RACE.md` §5b–§6 and `RESULTS.md` §6–§7. All six lanes are built and graded. Next is
+> §8 step 5: the blind gallery, so Richard can use the six apps and rank them.
 
-## Where it stands (s2, 2026-10-30, Opus, `cline-dev`)
-
-**Done and committed** (`41315bb95`, `31959346a`, `9ddc65f8a`, and this file):
+## Where it stands (s3, 2026-10-30, Opus, `cline-dev`)
 
 | lane | runs | B1–B13 | where |
 |---|---|---|---|
-| D·code | 2 | **13, 13** | `runs/d-code-1/`, `runs/d-code-2/` |
-| D·kit | 2 | **12, 12** | `runs/d-kit-1/`, `runs/d-kit-2/` |
-| G4·code | 1 | **11** | `runs/g4-code/` |
-| G2·code | 1 | **7** | `runs/g2-code/` |
+| D·code | 2 | 13, 13 | `runs/d-code-1/`, `runs/d-code-2/` |
+| D·kit | 2 | 12, 12 | `runs/d-kit-1/`, `runs/d-kit-2/` |
+| G4·harness | untuned; T1 | 11; **12** | `runs/g4-harness/`, `runs/g4-harness-t1/` (+ `g4-harness-unguarded/`, 9: the SUBSCRIBEFIRST evidence) |
+| G2·harness | untuned; T1 | 11; **12** | `runs/g2-harness/`, `runs/g2-harness-t1/` |
+| G4·code | 1 | 11 | `runs/g4-code/` |
+| G2·code | 1 | 7 | `runs/g2-code/` |
 
-Each run folder holds its locator, `grade/` (grade.json and four screenshots) and the app. DeepSeek runs also hold
-the journal (gzipped from d-code-2 on), `run-result.json`, the tap log and the seal audit.
+Every 12 has the same single miss, B13 on a Text Input (P112-OWN034-INPUTHIT). `runs/blocks-control/` is the
+harness blocks on hand-written answers, with no model: 12/13.
 
-**Richard, 2026-10-30:** "Don't worry about ClinePass, just rock out". So no quota readings, and a standing go for
-the DeepSeek rounds; the cost is tokens and wall time.
+**Built in s3:**
+- the lab: `harness.mjs` (questions → blocks → the kit's MCP), `prompts.mjs`, `blocks.mjs`, `blocks/days.js` (the
+  date logic), `test-days.mjs` (10 checks × 3 time zones), `mcp.mjs` (the 0.2.8 server), `probe-console.mjs`;
+- `questions.md` is generated (`node harness.mjs --questions`). Do not edit it by hand.
 
-**Built in s2:**
-- `own-020/round-cline.mjs --bare` (an empty folder, no create-nodegx, `mcpServers: {}`, the same seal) and
-  `--dry-run`;
-- `round-d.sh` (one DeepSeek round through the retry tap, copied to `runs/<name>/`);
-- `brief.txt`;
-- `gemma-code.mjs` (one Ollama call, T 0).
+**Running the lab:** `OWN034_MCP_BIN=<install>/node_modules/@nodegx/mcp/bin/noodl-mcp.js node harness.mjs --run <name>
+--model gemma4:e4b-it-qat [--tuning T1] --project <empty dir>`. The install is `npm i <the 0.2.8 tarballs>` in a
+scratch folder (see "Known before starting"). `--answers control-answers.json` builds with no model.
 
-**The kit the D·kit lane ran:** create-nodegx, mcp and preview, all **0.2.8** from the registry. `@nodegx/mcp` 0.2.9
-is P128's `.mcpb` re-cut, and create-nodegx 0.2.8 pins mcp 0.2.8.
+**Filed:** **P112-OWN034-SUBSCRIBEFIRST** (open, `kit: runtime`). A Subscribe to Store's first value down a wire is
+the whole store of the default name (`{}`), not its key. This happens on every load. The blocks now guard against
+it; the evidence is in RESULTS §7 and the bug file.
 
-**Filed:**
-- **P112-OWN034-SRONLY** (fixed). B13 read an `sr-only` label as cut-off text. It now skips boxes of at most 1×1 px;
-  clean and scrolls-sideways were re-run unchanged.
-- **P112-OWN034-INPUTHIT** (open, `kit: node-spec`). A NodeGX Text Input is drawn 40 px tall, but only the 22 px
-  `<input>` takes a press. It is the only miss in both D·kit apps. It is not this lane's to fix: it touches the
-  runtime, the node-spec scenarios and P107-C68's onMouseDown. Tell Richard if a controls lane picks it up.
-
-**What the readings say so far (RESULTS §4):**
-- The kit costs about 5–6× the time and about 14× the input tokens of plain code. Most of that input is cache reads.
-- Both kit apps got the date logic right.
-- Neither used the Global Store with Persist. Both put the store and rules in JavaScript: one big Function in
-  d-kit-1; a `scripts/habits.js` file behind four Functions in d-kit-2.
-- C1 is already built, unasked, in three of four DeepSeek apps, and C2 in one.
+**Not filed, but worth Richard's eye:** the kit steers device-local data to "a Function with localStorage"
+(`create_project`'s `backend` description, from P112-OWN019-LOCALKEEP). The Global Store's summary never mentions
+Persist. Both D·kit apps followed that line. The harness is the only lane that used the Global Store (RESULTS §7).
 
 ## Next, in order
 
-1. **The harness lab (§5), in `own-034/`, not in `build_app`.**
-   - It is an MCP stdio client against `noodl-mcp`, as `own-027/harness.mjs` and `own-027/mcp.mjs` were. Read those
-     first, and OWN-027's rule: every option in the words.
-   - The model answers closed questions (§5's list).
-   - The script owns the blocks:
-     - the store: a Global Store with Persist on (`net.noodl.GlobalStore`);
-     - the add row;
-     - For Each with a row component;
-     - one Function per derived number, with the date logic written once and **tested against the grader's frozen
-       days before any model runs**;
-     - the summary band.
-   - Tune it on the habit brief only.
-   - The Text Input in the add row will hit P112-OWN034-INPUTHIT, so expect B13 to fail on it too. Do not route
-     around it in the block: that would hide the kit defect from the race.
-2. **Run G4·harness and G2·harness** at T 0. Check `ollama ps` first, and unload with `keep_alive: 0`.
-3. **Grade both,** with a locator per app as in D·kit (preview from the 0.2.8 tarball, fixed port, scratch copy).
-   - `dom-dump.mjs` / `tick-probe.mjs` were scratchpad probes. If you need them, rewrite them in `own-034/`.
-4. **Then §8 step 5:** the blind gallery for Richard (OWN-030's `gallery.mjs` pattern, the `db` capability, ranks under
-   `rankings/habit`). Each app is seeded with the same three habits and a week of ticks, at full size and on a phone.
+1. **Decide which run stands for each lane in the gallery.** The task says "six apps". My recommendation:
+   - D·code and D·kit: round 1 of each (`d-code-1`, `d-kit-1`), chosen before looking, so neither is the
+     prettier pick. Alternatively, show both rounds as eight apps.
+   - G4 and G2 harness: the **T1** runs, the tuned harness as it now stands, with the untuned scores in RESULTS.
+   - If Richard would rather choose, ask him on one screen, in plain words.
+2. **How the gallery shows a live app.** OWN-030's `gallery.mjs` showed screenshots only. This brief says Richard
+   *uses* each app, seeded with the same three habits and a week of ticks, at full size and on a phone. Options:
+   - **(a) Static builds as artifact files.** Each NodeGX app is the preview's bundle (`noodl.deploy.js` and the
+     project JSON). Check whether `noodl-preview` or the kit can write a static build first. The code apps are
+     single HTML files.
+   - **(b) Seeded screenshots,** plus a local link list for the use part.
+
+   Seeding goes through each app's own storage: D·code's `localStorage` keys, D·kit's keys, and the harness's
+   `noodl_store_nodegx.tracker`. Seed on a frozen Thursday, as the grader does.
+3. **The page:** letters A–F in a shuffled order from a recorded seed, with the key in `runs/blind-key.json` and
+   never on the page. Ranks are stored under `rankings/habit` (the `db` capability). Load `artifact-capabilities`
+   before writing it.
+4. **Then §6, the change round,** after Richard ranks. Run C1–C3 per lane, then grade again. The harness lane takes
+   each change as a re-run from the request with the change added, and the saved data must survive the change.
+   - C1 (done today out of all) and C2 (best streak) are on the harness menu.
+   - C3 (days of the week per habit) is not a block. §7 predicts it fails there.
 
 ## Needs Richard (do not do alone)
 
-- The blind ranking (§5b.2), once all six are built.
+- The blind ranking (§5b.2).
 - Porting the harness into `build_app` is the OWN-031 session's lane: ask that session first, and briefly.
-- Not this lane's: whether OWN-019's phone passes should be re-graded (P112-OWN034-INNERWIDTH), and who fixes
-  P112-OWN034-INPUTHIT.
+- Not this lane's: P112-OWN034-INPUTHIT, P112-OWN034-SUBSCRIBEFIRST and P112-OWN034-INNERWIDTH; the LOCALKEEP wording.
 
 ## Known before starting
 
-- **Kit pack:**
-  `npm pack create-nodegx@0.2.8 @nodegx/mcp@0.2.8 @nodegx/preview@0.2.8` into a scratch folder.
-- **Pinned Cline:**
-  `npm i cline@3.0.71` in the scratchpad. The binary is `node_modules/cline/bin/cline`; the `.bin` link is not
-  made.
-- **Locating a NodeGX app's DOM:** the runtime draws `div`s with generated `ndl-d-…` classes, no ids and no ARIA. Find
-  rows by shape (`:has`), done days by the inline `style.backgroundColor` token, and done today by text or an icon.
-  A class the model set itself (d-kit-2's `.habit-tick`) is the best anchor there is.
-- **Previews:** run the preview on the scratch copy, never the repo copy (it wrote nothing in s2, but do not rely on
-  that). Use a fixed port, so storage is one origin for the whole grade, and stop it before the next lane.
-- **Committing:** a peer has `dev-docs/parked/README.md` staged. s2 committed through a temporary index and then
-  `git reset -q HEAD -- <own paths>`, so the real index matches HEAD.
-- **Box:** one heavy job at a time; never run a lane beside the grader's Chrome; `nice -n 19`.
+- **Kit:** `npm pack create-nodegx@0.2.8 @nodegx/mcp@0.2.8 @nodegx/preview@0.2.8` into a scratch folder, then
+  `npm i ./nodegx-mcp-0.2.8.tgz ./nodegx-preview-0.2.8.tgz` there. The preview is `node_modules/.bin/noodl-preview
+  <app> --port <fixed> --no-watch`, run on a scratch copy and stopped by its port
+  (`kill $(lsof -nP -t -iTCP:<port> -sTCP:LISTEN)`).
+- **Grading** needs Chrome, so run it with the Bash sandbox off. Never run it beside a lane.
+- **Saved apps** leave out `noodl_modules/starter-imagery` (4.1 MB, unused). Copy it back from a fresh
+  `create_project` if a preview needs it. The harness apps do not.
+- **Ollama:** check `ollama ps` first (the OWN-031 session shares it). The harness unloads its model when it finishes.
+- **Committing:** a peer has `dev-docs/parked/README.md` staged. Commit through a temporary index with pathspecs,
+  then `git reset -q HEAD -- <own paths>`.

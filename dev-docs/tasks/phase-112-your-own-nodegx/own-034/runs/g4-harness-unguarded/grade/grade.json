@@ -1,0 +1,121 @@
+{
+  "app": "runs/g4-harness (G4·harness: Gemma 4 E4B answers, the blocks build; @nodegx/mcp 0.2.8)",
+  "locator": {
+    "app": "runs/g4-harness (G4·harness: Gemma 4 E4B answers, the blocks build; @nodegx/mcp 0.2.8)",
+    "url": "http://127.0.0.1:48813/",
+    "start": "noodl-preview <scratch>/g4-harness/tracker --port 48813 --no-watch (from the @nodegx/preview 0.2.8 tarball)",
+    "addInput": "input.add-input, .add-input input",
+    "addButton": ".add-button",
+    "rows": ".item-row",
+    "rowName": ".item-name",
+    "tick": ".item-tick",
+    "todayDone": "row => row.querySelector('.item-tick').style.backgroundColor === 'var(--primary)'",
+    "days": ".day-cell",
+    "daysOrder": "oldest-first",
+    "dayDone": "cell => cell.querySelector('.day-dot').style.backgroundColor === 'var(--primary)'",
+    "streak": ".item-streak",
+    "remove": ".item-delete",
+    "confirmRemove": null
+  },
+  "url": "http://127.0.0.1:48813/",
+  "timezone": "Europe/Paris",
+  "days": {
+    "mon": "2026-11-02T12:00:00+01:00",
+    "tue": "2026-11-03T12:00:00+01:00",
+    "thu": "2026-11-05T12:00:00+01:00"
+  },
+  "passed": 9,
+  "of": 13,
+  "checks": [
+    {
+      "id": "B1",
+      "what": "starts empty and says so, no placeholder text",
+      "pass": true,
+      "why": "{\"rows\":0,\"says\":true,\"asks\":true,\"junk\":null}"
+    },
+    {
+      "id": "B2",
+      "what": "adding \"Drink water\" shows it",
+      "pass": true,
+      "why": "rows: [\"Drink water\"]"
+    },
+    {
+      "id": "B3",
+      "what": "adding \"Read 10 pages\" shows both, in the order added",
+      "pass": true,
+      "why": "rows: [\"Drink water\",\"Read 10 pages\"]"
+    },
+    {
+      "id": "B4",
+      "what": "an empty name adds nothing",
+      "pass": true,
+      "why": "rows: [\"Drink water\",\"Read 10 pages\"]"
+    },
+    {
+      "id": "B5",
+      "what": "ticking \"Drink water\" shows it done",
+      "pass": true,
+      "why": "done today: true"
+    },
+    {
+      "id": "B6",
+      "what": "after a reload, both habits and the tick are still there",
+      "pass": false,
+      "why": "rows: [\"Drink water\",\"Read 10 pages\"], Drink water done today: true; page error: [noodl] JavaScriptFunction (/Pages/Home): The script threw: items.map is not a function [function/script-threw] Object"
+    },
+    {
+      "id": "B7",
+      "what": "unticking works, and ticking again works",
+      "pass": false,
+      "why": "after untick: true, after tick: true"
+    },
+    {
+      "id": "B8",
+      "what": "Tue: yesterday's tick shows as yesterday, today is empty",
+      "pass": true,
+      "why": "Drink water days: [false,false,false,false,false,true,false], done today: false"
+    },
+    {
+      "id": "B9",
+      "what": "Tue: after ticking today, Drink water's streak is 2",
+      "pass": true,
+      "why": "streak: 2"
+    },
+    {
+      "id": "B10",
+      "what": "Thu: the streak has broken (0 or none); after ticking, it is 1",
+      "pass": true,
+      "why": "before: 0, after: 1"
+    },
+    {
+      "id": "B11",
+      "what": "Thu: deleting \"Read 10 pages\" removes it, and it stays gone after a reload",
+      "pass": false,
+      "why": "after delete: [\"Drink water\"], after reload: [\"Drink water\"]; page error: [noodl] JavaScriptFunction (/Pages/Home): The script threw: items.map is not a function [function/script-threw] Object"
+    },
+    {
+      "id": "B12",
+      "what": "Thu: the last 7 days for each habit, done days marked",
+      "pass": true,
+      "why": "Drink water: [false,false,false,true,true,false,true] (want [false,false,false,true,true,false,true]), Read 10 pages: [false,false,false,false,false,false,false]"
+    },
+    {
+      "id": "B13",
+      "what": "phone (390 px): nothing cut off, no sideways scroll, every control tappable",
+      "pass": false,
+      "why": "too small: the name field 248×22"
+    }
+  ],
+  "dialogs": [
+    "confirm: Are you sure you want to delete this habit?"
+  ],
+  "errors": [
+    "[noodl] JavaScriptFunction (/Pages/Home): The script threw: items.map is not a function [function/script-threw] Object",
+    "[noodl] JavaScriptFunction (/Pages/Home): The script threw: items.map is not a function [function/script-threw] Object",
+    "[noodl] JavaScriptFunction (/Pages/Home): The script threw: items.map is not a function [function/script-threw] Object",
+    "[noodl] JavaScriptFunction (/Pages/Home): The script threw: items.map is not a function [function/script-threw] Object",
+    "[noodl] JavaScriptFunction (/Pages/Home): The script threw: items.map is not a function [function/script-threw] Object",
+    "[noodl] JavaScriptFunction (/Pages/Home): The script threw: items.map is not a function [function/script-threw] Object"
+  ],
+  "at": "2026-10-30T15:03:53.406Z"
+}

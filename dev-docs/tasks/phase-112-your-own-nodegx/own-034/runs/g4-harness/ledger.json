@@ -1,0 +1,659 @@
+{
+ "run": "g4-harness",
+ "model": "gemma4:e4b-it-qat",
+ "answers": null,
+ "request": "I want a habit tracker. I can add habits, tick each one off for today, and see the last 7 days for each one, with a streak count. It should remember everything when I come back. I can delete a habit.",
+ "project": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/a3c0738a-99ac-4ed0-9f97-110da4681b47/scratchpad/g4-harness/tracker",
+ "startedAt": "2026-10-30T15:07:17.670Z",
+ "mcpBin": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/a3c0738a-99ac-4ed0-9f97-110da4681b47/scratchpad/kit/srv/node_modules/@nodegx/mcp/bin/noodl-mcp.js",
+ "card": {
+  "noun": "habit",
+  "perDay": "done or not",
+  "actions": [
+   "add",
+   "delete",
+   "tick for today"
+  ],
+  "askBeforeDelete": "yes",
+  "views": [
+   "the last days per item"
+  ],
+  "dayCount": "7",
+  "numbers": [
+   "streak"
+  ],
+  "look": "clean",
+  "words": {
+   "header": {
+    "title": "Habit Tracker",
+    "subtitle": "Track your daily habits and build consistent streaks"
+   },
+   "add": {
+    "placeholder": "Enter new habit name",
+    "button": "Add"
+   },
+   "empty": {
+    "text": "No habits added yet"
+   },
+   "row": {
+    "tick": "Mark as done",
+    "ticked": "Done for today",
+    "delete": "Delete habit",
+    "confirm": "Are you sure you want to delete this habit?",
+    "streak": "Streak"
+   }
+  }
+ },
+ "calls": [
+  {
+   "key": "noun",
+   "user": "Request: \"I want a habit tracker. I can add habits, tick each one off for today, and see the last 7 days for each one, with a streak count. It should remember everything when I come back. I can delete a habit.\"\nDecided so far: {}\nThe app keeps a list. What is ONE item in that list called? One word, singular, lower case.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "noun"
+    ],
+    "properties": {
+     "noun": {
+      "type": "string",
+      "maxLength": 24
+     }
+    }
+   },
+   "answer": {
+    "noun": "habit"
+   },
+   "tokensIn": 118,
+   "tokensOut": 12,
+   "ms": 7117
+  },
+  {
+   "key": "perDay",
+   "user": "Request: \"I want a habit tracker. I can add habits, tick each one off for today, and see the last 7 days for each one, with a streak count. It should remember everything when I come back. I can delete a habit.\"\nDecided so far: {\"noun\":\"habit\"}\nWhat does each item record per day? Answer one of:\n- done or not: a day is either done or not done\n- a number: how many or how much, per day",
+   "schema": {
+    "type": "object",
+    "required": [
+     "perDay"
+    ],
+    "properties": {
+     "perDay": {
+      "type": "string",
+      "enum": [
+       "done or not",
+       "a number"
+      ]
+     }
+    }
+   },
+   "answer": {
+    "perDay": "done or not"
+   },
+   "tokensIn": 138,
+   "tokensOut": 10,
+   "ms": 1771
+  },
+  {
+   "key": "actions",
+   "user": "Request: \"I want a habit tracker. I can add habits, tick each one off for today, and see the last 7 days for each one, with a streak count. It should remember everything when I come back. I can delete a habit.\"\nDecided so far: {\"noun\":\"habit\",\"perDay\":\"done or not\"}\nWhich actions does the person need? Choose every one that the request needs:\n- add: add a new item by typing its name\n- delete: delete an item\n- tick for today: mark an item done for today\n- untick: undo today's mark\n- rename: change an item's name",
+   "schema": {
+    "type": "object",
+    "required": [
+     "actions"
+    ],
+    "properties": {
+     "actions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 5,
+      "uniqueItems": true,
+      "items": {
+       "type": "string",
+       "enum": [
+        "add",
+        "delete",
+        "tick for today",
+        "untick",
+        "rename"
+       ]
+      }
+     }
+    }
+   },
+   "answer": {
+    "actions": [
+     "add",
+     "delete",
+     "tick for today"
+    ]
+   },
+   "tokensIn": 172,
+   "tokensOut": 30,
+   "ms": 3506
+  },
+  {
+   "key": "askBeforeDelete",
+   "user": "Request: \"I want a habit tracker. I can add habits, tick each one off for today, and see the last 7 days for each one, with a streak count. It should remember everything when I come back. I can delete a habit.\"\nDecided so far: {\"noun\":\"habit\",\"perDay\":\"done or not\",\"actions\":[\"add\",\"delete\",\"tick for today\"]}\nWhen the person deletes an item, should the app ask \"are you sure?\" first? Answer yes or no.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "askBeforeDelete"
+    ],
+    "properties": {
+     "askBeforeDelete": {
+      "type": "string",
+      "enum": [
+       "yes",
+       "no"
+      ]
+     }
+    }
+   },
+   "answer": {
+    "askBeforeDelete": "yes"
+   },
+   "tokensIn": 139,
+   "tokensOut": 9,
+   "ms": 1685
+  },
+  {
+   "key": "views",
+   "user": "Request: \"I want a habit tracker. I can add habits, tick each one off for today, and see the last 7 days for each one, with a streak count. It should remember everything when I come back. I can delete a habit.\"\nDecided so far: {\"noun\":\"habit\",\"perDay\":\"done or not\",\"actions\":[\"add\",\"delete\",\"tick for today\"],\"askBeforeDelete\":\"yes\"}\nThe items are shown as a list, one row each. Which of these does the request also need? Choose none, one or both:\n- the last days per item: each item shows its last few days, done or not\n- a summary at the top: one line at the top about today",
+   "schema": {
+    "type": "object",
+    "required": [
+     "views"
+    ],
+    "properties": {
+     "views": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": {
+       "type": "string",
+       "enum": [
+        "the last days per item",
+        "a summary at the top"
+       ]
+      }
+     }
+    }
+   },
+   "answer": {
+    "views": [
+     "the last days per item"
+    ]
+   },
+   "tokensIn": 184,
+   "tokensOut": 12,
+   "ms": 2120
+  },
+  {
+   "key": "dayCount",
+   "user": "Request: \"I want a habit tracker. I can add habits, tick each one off for today, and see the last 7 days for each one, with a streak count. It should remember everything when I come back. I can delete a habit.\"\nDecided so far: {\"noun\":\"habit\",\"perDay\":\"done or not\",\"actions\":[\"add\",\"delete\",\"tick for today\"],\"askBeforeDelete\":\"yes\",\"views\":[\"the last days per item\"]}\nHow many days back should each item show? Answer one of: 5, 7, 14.",
+   "schema": {
+    "type": "object",
+    "required": [
+     "dayCount"
+    ],
+    "properties": {
+     "dayCount": {
+      "type": "string",
+      "enum": [
+       "5",
+       "7",
+       "14"
+      ]
+     }
+    }
+   },
+   "answer": {
+    "dayCount": "7"
+   },
+   "tokensIn": 153,
+   "tokensOut": 9,
+   "ms": 1796
+  },
+  {
+   "key": "numbers",
+   "user": "Request: \"I want a habit tracker. I can add habits, tick each one off for today, and see the last 7 days for each one, with a streak count. It should remember everything when I come back. I can delete a habit.\"\nDecided so far: {\"noun\":\"habit\",\"perDay\":\"done or not\",\"actions\":[\"add\",\"delete\",\"tick for today\"],\"askBeforeDelete\":\"yes\",\"views\":[\"the last days per item\"],\"dayCount\":\"7\"}\nWhich numbers should the app show? Choose every one that the request needs (none is allowed):\n- streak: days in a row, ending today or yesterday\n- done this week: how many of the last 7 days were done\n- done today out of all: how many items are done today, out of all of them\n- best streak: the longest run of days ever",
+   "schema": {
+    "type": "object",
+    "required": [
+     "numbers"
+    ],
+    "properties": {
+     "numbers": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": {
+       "type": "string",
+       "enum": [
+        "streak",
+        "done this week",
+        "done today out of all",
+        "best streak"
+       ]
+      }
+     }
+    }
+   },
+   "answer": {
+    "numbers": [
+     "streak"
+    ]
+   },
+   "tokensIn": 214,
+   "tokensOut": 18,
+   "ms": 2871
+  },
+  {
+   "key": "look",
+   "user": "Request: \"I want a habit tracker. I can add habits, tick each one off for today, and see the last 7 days for each one, with a streak count. It should remember everything when I come back. I can delete a habit.\"\nDecided so far: {\"noun\":\"habit\",\"perDay\":\"done or not\",\"actions\":[\"add\",\"delete\",\"tick for today\"],\"askBeforeDelete\":\"yes\",\"views\":[\"the last days per item\"],\"dayCount\":\"7\",\"numbers\":[\"streak\"]}\nWhich look should the app have? Answer one of:\n- clean: calm, neutral, plenty of white\n- bold: vivid colour, rounded, lively\n- warm: soft pastel colours, large rounded corners",
+   "schema": {
+    "type": "object",
+    "required": [
+     "look"
+    ],
+    "properties": {
+     "look": {
+      "type": "string",
+      "enum": [
+       "clean",
+       "bold",
+       "warm"
+      ]
+     }
+    }
+   },
+   "answer": {
+    "look": "clean"
+   },
+   "tokensIn": 182,
+   "tokensOut": 7,
+   "ms": 1756
+  },
+  {
+   "key": "words.header",
+   "user": "Request: \"I want a habit tracker. I can add habits, tick each one off for today, and see the last 7 days for each one, with a streak count. It should remember everything when I come back. I can delete a habit.\"\nDecided so far: {\"noun\":\"habit\",\"perDay\":\"done or not\",\"actions\":[\"add\",\"delete\",\"tick for today\"],\"askBeforeDelete\":\"yes\",\"views\":[\"the last days per item\"],\"dayCount\":\"7\",\"numbers\":[\"streak\"],\"look\":\"clean\"}\nWrite the words for the header. Plain words, no markdown, no quotes, no example items.\n- title (max 32 characters): the app's title at the top of the page\n- subtitle (max 80 characters): one line under the title",
+   "schema": {
+    "type": "object",
+    "required": [
+     "title",
+     "subtitle"
+    ],
+    "properties": {
+     "title": {
+      "type": "string",
+      "maxLength": 32
+     },
+     "subtitle": {
+      "type": "string",
+      "maxLength": 80
+     }
+    }
+   },
+   "answer": {
+    "title": "Habit Tracker",
+    "subtitle": "Track your daily habits and build consistent streaks"
+   },
+   "tokensIn": 199,
+   "tokensOut": 29,
+   "ms": 3528
+  },
+  {
+   "key": "words.add",
+   "user": "Request: \"I want a habit tracker. I can add habits, tick each one off for today, and see the last 7 days for each one, with a streak count. It should remember everything when I come back. I can delete a habit.\"\nDecided so far: {\"noun\":\"habit\",\"perDay\":\"done or not\",\"actions\":[\"add\",\"delete\",\"tick for today\"],\"askBeforeDelete\":\"yes\",\"views\":[\"the last days per item\"],\"dayCount\":\"7\",\"numbers\":[\"streak\"],\"look\":\"clean\"}\nWrite the words for the add row. Plain words, no markdown, no quotes, no example items.\n- placeholder (max 40 characters): the hint inside the empty field where a new item's name is typed\n- button (max 16 characters): the button that adds it",
+   "schema": {
+    "type": "object",
+    "required": [
+     "placeholder",
+     "button"
+    ],
+    "properties": {
+     "placeholder": {
+      "type": "string",
+      "maxLength": 40
+     },
+     "button": {
+      "type": "string",
+      "maxLength": 16
+     }
+    }
+   },
+   "answer": {
+    "placeholder": "Enter new habit name",
+    "button": "Add"
+   },
+   "tokensIn": 204,
+   "tokensOut": 13,
+   "ms": 2312
+  },
+  {
+   "key": "words.empty",
+   "user": "Request: \"I want a habit tracker. I can add habits, tick each one off for today, and see the last 7 days for each one, with a streak count. It should remember everything when I come back. I can delete a habit.\"\nDecided so far: {\"noun\":\"habit\",\"perDay\":\"done or not\",\"actions\":[\"add\",\"delete\",\"tick for today\"],\"askBeforeDelete\":\"yes\",\"views\":[\"the last days per item\"],\"dayCount\":\"7\",\"numbers\":[\"streak\"],\"look\":\"clean\"}\nWrite the words for the empty list. Plain words, no markdown, no quotes, no example items.\n- text (max 90 characters): the line shown while the list is empty",
+   "schema": {
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 90
+     }
+    }
+   },
+   "answer": {
+    "text": "No habits added yet"
+   },
+   "tokensIn": 182,
+   "tokensOut": 9,
+   "ms": 1823
+  },
+  {
+   "key": "words.row",
+   "user": "Request: \"I want a habit tracker. I can add habits, tick each one off for today, and see the last 7 days for each one, with a streak count. It should remember everything when I come back. I can delete a habit.\"\nDecided so far: {\"noun\":\"habit\",\"perDay\":\"done or not\",\"actions\":[\"add\",\"delete\",\"tick for today\"],\"askBeforeDelete\":\"yes\",\"views\":[\"the last days per item\"],\"dayCount\":\"7\",\"numbers\":[\"streak\"],\"look\":\"clean\"}\nWrite the words for the each row. Plain words, no markdown, no quotes, no example items.\n- tick (max 24 characters): the button on an item that marks it done for today\n- ticked (max 24 characters): the same button once it is done today\n- delete (max 12 characters): the button that deletes an item\n- confirm (max 60 characters): the question asked before an item is deleted\n- streak (max 20 characters): shown after the streak number, as in \"4 …\"",
+   "schema": {
+    "type": "object",
+    "required": [
+     "tick",
+     "ticked",
+     "delete",
+     "confirm",
+     "streak"
+    ],
+    "properties": {
+     "tick": {
+      "type": "string",
+      "maxLength": 24
+     },
+     "ticked": {
+      "type": "string",
+      "maxLength": 24
+     },
+     "delete": {
+      "type": "string",
+      "maxLength": 12
+     },
+     "confirm": {
+      "type": "string",
+      "maxLength": 60
+     },
+     "streak": {
+      "type": "string",
+      "maxLength": 20
+     }
+    }
+   },
+   "answer": {
+    "tick": "Mark as done",
+    "ticked": "Done for today",
+    "delete": "Delete habit",
+    "confirm": "Are you sure you want to delete this habit?",
+    "streak": "Streak"
+   },
+   "tokensIn": 259,
+   "tokensOut": 58,
+   "ms": 5772
+  }
+ ],
+ "notBuilt": [],
+ "mcp": [
+  {
+   "tool": "create_project",
+   "isError": false,
+   "ms": 213,
+   "chars": 6851
+  },
+  {
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 3,
+   "chars": 1953
+  },
+  {
+   "tool": "find_tools",
+   "isError": false,
+   "ms": 3,
+   "chars": 1702
+  },
+  {
+   "tool": "call_tool",
+   "isError": false,
+   "ms": 2,
+   "chars": 94
+  },
+  {
+   "tool": "call_tool",
+   "isError": false,
+   "ms": 2,
+   "chars": 68
+  },
+  {
+   "tool": "get_component",
+   "isError": false,
+   "ms": 1,
+   "chars": 672
+  },
+  {
+   "tool": "get_style_vocabulary",
+   "isError": false,
+   "ms": 4,
+   "chars": 39716
+  },
+  {
+   "tool": "create_plan",
+   "isError": false,
+   "ms": 2,
+   "chars": 1128
+  },
+  {
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 36,
+   "chars": 127
+  },
+  {
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 25,
+   "chars": 437
+  },
+  {
+   "tool": "stage_plan_operation",
+   "isError": false,
+   "ms": 32,
+   "chars": 741
+  },
+  {
+   "tool": "apply_plan",
+   "isError": false,
+   "ms": 1437,
+   "chars": 6143,
+   "head": "{\"applied\":[{\"operation\":\"op-1\",\"target\":\"Components/Day Cell\",\"revision\":\"049bff672d37a9\"},{\"operation\":\"op-2\",\"target\":\"Components/Item Row\",\"revision\":\"167aefb072fec6\"},{\"operation\":\"op-3\",\"target\":\"Pages/Home\",\"revision\":\"18d6cf0bcdf177\"}],\"docs\":[],\"skipped\":[],\"validation\":{\"summary\":{\"errors\":0,\"warnings\":0,\"infos\":1},\"diagnostics\":[{\"code\":\"dynamic-port-skipped\",\"severity\":\"info\",\"message\":\"3 nodes set parameters the catalog sees no port for, because their type makes those ports at run time, so those parameters were not checked (a misspelt name is not caught here; get_node_type on the type says how it makes them): JavaScriptFunction: add-fn \\\"runOnChange-in-name\\\", \\\"runOnChange-in-items\\\", tick-fn \\\"runOnChange-in-id\\\", \\\"runOnChange-in-ticks\\\", delete-fn \\\"runOnChange-in-id\\\", \\\"runOnChange-in-items\\\", \\\"runOnChange-in-ticks\\\".\",\"location\":{\"component\":\"/Pages/Home\"},\"count\":3}]},\"render\":{\"summary\":\"0 errors, 5 warnings (no-imagery, no-display-type, single-ground). desktop 1280×900px, 4 texts, 4 on screen, 0 images; phone 390×844px, 4 texts, 4 on screen, 0 images.\",\"findings\":[{\"code\":\"no-imagery\",\"severity\":\"warning\",\"viewport\":\"desktop\",\"message\":\"4 text elements and not one picture or glyph — no images, no icons. README §2's second WordPress-starter tell is \\\"no imagery and no iconography anywhere on the page\\\", and this page measures as exactly that. The Image and Icon nodes are in the kit and the starter modules ship photographs and 1,998 Lucide glyphs.\"},{\"co"
+  },
+  {
+   "tool": "render_report",
+   "isError": false,
+   "ms": 1560,
+   "chars": 11548,
+   "head": "DONE — Rendered, and nothing is broken — but it measures as a default template: no-imagery, no-display-type, single-ground. Nothing here blocks; look at the screenshot before calling it finished.\n{\"project\":\"/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/a3c0738a-99ac-4ed0-9f97-110da4681b47/scratchpad/g4-harness/tracker\",\"projectName\":\"Habit Tracker\",\"durationMs\":1483,\"settle\":{\"count\":3,\"waitedMs\":627,\"fixedTimerMs\":5900,\"savedMs\":5273,\"atCeiling\":0,\"rows\":[{\"what\":\"boot\",\"waitedMs\":263,\"ceilingMs\":3500,\"quiet\":true,\"waitedFor\":[\"load\"]},{\"what\":\"viewport desktop\",\"waitedMs\":184,\"ceilingMs\":1200,\"quiet\":true,\"waitedFor\":[]},{\"what\":\"viewport phone\",\"waitedMs\":180,\"ceilingMs\":1200,\"quiet\":true,\"waitedFor\":[]}]},\"tokens\":\"193 shipped defaults\",\"components\":\"4\",\"viewports\":{\"desktop\":{\"requested\":{\"width\":1280,\"height\":900},\"lists\":[],\"layout\":{\"rowGaps\":[],\"drifts\":[],\"edgeTexts\":[],\"lowContrast\":[],\"contrastChecked\":4,\"contrastAbstained\":0},\"visibleCount\":17,\"transparentExcluded\":0,\"layoutWidth\":1280,\"clientWidth\":1280,\"clientHeight\":900,\"scrollWidth\":1280,\"pageHeight\":900,\"contentBottom\":900,\"overflowing\":[],\"overflowingCount\":0,\"textsWiderThanBox\":[],\"textsWiderThanBoxCount\":0,\"controls\":{\"textScale\":[12,14,16,18,20,24,30,36,48,60],\"items\":[{\"kind\":\"Text Input\",\"box\":0,\"textSize\":16},{\"kind\":\"Button\",\"box\":0,\"textSize\":14}],\"count\":2},\"text\":{\"elements\":4,\"onScreen\":4,\"unreachable\":0,\"fontWeights\":{\"400\":2,\"600\":1,\"700\":1},\"fontSizes\":{\"30px\":1,\"14p"
+  }
+ ],
+ "result": {
+  "applied": true,
+  "stagedClean": true,
+  "modelSeconds": 36,
+  "minutes": 0.7,
+  "modelCalls": 12,
+  "unparsed": 0,
+  "tokensIn": 2144,
+  "tokensOut": 216,
+  "preset": "modern",
+  "notBuilt": []
+ },
+ "digest": "ee6656371218",
+ "staged": [
+  {
+   "path": "Components/Day Cell",
+   "ok": true,
+   "readable": [],
+   "errors": [],
+   "warnings": []
+  },
+  {
+   "path": "Components/Item Row",
+   "ok": true,
+   "readable": [],
+   "errors": [],
+   "warnings": []
+  },
+  {
+   "path": "Pages/Home",
+   "ok": true,
+   "readable": [],
+   "errors": [],
+   "warnings": []
+  }
+ ],
+ "apply": {
+  "applied": [
+   {
+    "operation": "op-1",
+    "target": "Components/Day Cell",
+    "revision": "049bff672d37a9"
+   },
+   {
+    "operation": "op-2",
+    "target": "Components/Item Row",
+    "revision": "167aefb072fec6"
+   },
+   {
+    "operation": "op-3",
+    "target": "Pages/Home",
+    "revision": "18d6cf0bcdf177"
+   }
+  ],
+  "docs": [],
+  "skipped": [],
+  "validation": {
+   "summary": {
+    "errors": 0,
+    "warnings": 0,
+    "infos": 1
+   },
+   "diagnostics": [
+    {
+     "code": "dynamic-port-skipped",
+     "severity": "info",
+     "message": "3 nodes set parameters the catalog sees no port for, because their type makes those ports at run time, so those parameters were not checked (a misspelt name is not caught here; get_node_type on the type says how it makes them): JavaScriptFunction: add-fn \"runOnChange-in-name\", \"runOnChange-in-items\", tick-fn \"runOnChange-in-id\", \"runOnChange-in-ticks\", delete-fn \"runOnChange-in-id\", \"runOnChange-in-items\", \"runOnChange-in-ticks\".",
+     "location": {
+      "component": "/Pages/Home"
+     },
+     "count": 3
+    }
+   ]
+  },
+  "render": {
+   "summary": "0 errors, 5 warnings (no-imagery, no-display-type, single-ground). desktop 1280×900px, 4 texts, 4 on screen, 0 images; phone 390×844px, 4 texts, 4 on screen, 0 images.",
+   "findings": [
+    {
+     "code": "no-imagery",
+     "severity": "warning",
+     "viewport": "desktop",
+     "message": "4 text elements and not one picture or glyph — no images, no icons. README §2's second WordPress-starter tell is \"no imagery and no iconography anywhere on the page\", and this page measures as exactly that. The Image and Icon nodes are in the kit and the starter modules ship photographs and 1,998 Lucide glyphs."
+    },
+    {
+     "code": "no-display-type",
+     "severity": "warning",
+     "viewport": "desktop",
+     "message": "The largest text on this page renders at 30px across 2 distinct sizes. README §2 calls a headline under ~48px on desktop a WordPress-starter tell; nothing on this page is operating as display type.",
+     "evidence": {
+      "30px": 1,
+      "14px": 3
+     }
+    },
+    {
+     "code": "single-ground",
+     "severity": "warning",
+     "viewport": "desktop",
+     "message": "Every full-width band on this page is painted the same — 1 distinct ground across the whole page. README §2's first WordPress-starter tell is \"one background colour end to end\". A ground can be a colour, a gradient or an image, and alternating them is what makes a page read as sections rather than as one column.",
+     "evidence": [
+      {
+       "ground": "rgb(255, 255, 255)",
+       "count": 1
+      }
+     ]
+    },
+    {
+     "code": "no-imagery",
+     "severity": "warning",
+     "viewport": "phone",
+     "message": "4 text elements and not one picture or glyph — no images, no icons. README §2's second WordPress-starter tell is \"no imagery and no iconography anywhere on the page\", and this page measures as exactly that. The Image and Icon nodes are in the kit and the starter modules ship photographs and 1,998 Lucide glyphs."
+    },
+    {
+     "code": "single-ground",
+     "severity": "warning",
+     "viewport": "phone",
+     "message": "Every full-width band on this page is painted the same — 1 distinct ground across the whole page. README §2's first WordPress-starter tell is \"one background colour end to end\". A ground can be a colour, a gradient or an image, and alternating them is what makes a page read as sections rather than as one column.",
+     "evidence": [
+      {
+       "ground": "rgb(255, 255, 255)",
+       "count": 2
+      }
+     ]
+    }
+   ],
+   "viewports": {
+    "desktop": {
+     "layoutWidth": 1280,
+     "pageHeight": 900,
+     "texts": 4,
+     "images": 0,
+     "brokenImages": 0,
+     "placeholderTexts": 0
+    },
+    "phone": {
+     "layoutWidth": 390,
+     "pageHeight": 844,
+     "texts": 4,
+     "images": 0,
+     "brokenImages": 0,
+     "placeholderTexts": 0
+    }
+   },
+   "note": "Numbers only. Call render_report for the screenshots — a picture that loads is not a picture of the right thing."
+  },
+  "done": true,
+  "doneBecause": "Rendered, and nothing is broken — but it measures as a default template: no-imagery, no-display-type, single-ground. Nothing here blocks; look at the screenshot before calling it finished.",
+  "looksLike": {
+   "verdict": "This page measures as a default template — nothing is broken and nothing shows a decision.",
+   "tells": [
+    {
+     "code": "no-imagery",
+     "message": "4 text elements and not one picture or glyph — no images, no icons. README §2's second WordPress-starter tell is \"no imagery and no iconography anywhere on the page\", and this page measures as exactly that. The Image and Icon nodes are in the kit and the starter modules ship photographs and 1,998 Lucide glyphs."
+    },
+    {
+     "code": "no-display-type",
+     "message": "The largest text on this page renders at 30px across 2 distinct sizes. README §2 calls a headline under ~48px on desktop a WordPress-starter tell; nothing on this page is operating as display type."
+    },
+    {
+     "code": "single-ground",
+     "message": "Every full-width band on this page is painted the same — 1 distinct ground across the whole page. README §2's first WordPress-starter tell is \"one background colour end to end\". A ground can be a colour, a gradient or an image, and alternating them is what makes a page read as sections rather than as one column."
+    }
+   ],
+   "blocking": false
+  },
+  "handover": {
+   "note": "Every page the scope agreed (docs/decisions/000-initial-scope.md) is built: the plan is done, so hand over now, in one message and no questions: what they own, what they can change in Studio themselves, that an editor can be built for them if Studio is too much, and how to come back. Say it from `theyOwn` and `comeBack`, the canon's words.",
+   "theyOwn": "When it's finished, the app is yours in a way code from an agency never is. The project is a folder of files on your computer. NodeGX Studio is installed beside it: an open-source editor for pages, elements, workflows and data. Change a heading, a font, a button colour or a translation yourself. It works without the AI. Nobody charges you for it or can take it away. If Studio itself is more than you want, ask your AI coder for an editor that matches how you think about your app, with only the things you change in it.",
+   "comeBack": "When you want more, come back. Ask for a contact form, or a members' area with payments. The files are a blueprint the AI reads, and the build was written down as it went, so it picks up where it left off.",
+   "rule": "When the plan is done, hand over: say what they own, what they can change in Studio themselves, that an editor can be built for them if Studio is too much, and how to come back."
+  },
+  "note": "Plan applied and discarded. Re-read components with get_component for fresh revisions."
+ },
+ "render": "DONE — Rendered, and nothing is broken — but it measures as a default template: no-imagery, no-display-type, single-ground. Nothing here blocks; look at the screenshot before calling it finished.\n{\"project\":\"/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/a3c0738a-99ac-4ed0-9f97-110da4681b47/scratchpad/g4-harness/tracker\",\"projectName\":\"Habit Tracker\",\"durationMs\":1483,\"settle\":{\"count\":3,\"waitedMs\":627,\"fixedTimerMs\":5900,\"savedMs\":5273,\"atCeiling\":0,\"rows\":[{\"what\":\"boot\",\"waitedMs\":263,\"ceilingMs\":3500,\"quiet\":true,\"waitedFor\":[\"load\"]},{\"what\":\"viewport desktop\",\"waitedMs\":184,\"ceilingMs\":1200,\"quiet\":true,\"waitedFor\":[]},{\"what\":\"viewport phone\",\"waitedMs\":180,\"ceilingMs\":1200,\"quiet\":true,\"waitedFor\":[]}]},\"tokens\":\"193 shipped defaults\",\"components\":\"4\",\"viewports\":{\"desktop\":{\"requested\":{\"width\":1280,\"height\":900},\"lists\":[],\"layout\":{\"rowGaps\":[],\"drifts\":[],\"edgeTexts\":[],\"lowContrast\":[],\"contrastChecked\":4,\"contrastAbstained\":0},\"visibleCount\":17,\"transparentExcluded\":0,\"layoutWidth\":1280,\"clientWidth\":1280,\"clientHeight\":900,\"scrollWidth\":1280,\"pageHeight\":900,\"contentBottom\":900,\"overflowing\":[],\"overflowingCount\":0,\"textsWiderThanBox\":[],\"textsWiderThanBoxCount\":0,\"controls\":{\"textScale\":[12,14,16,18,20,24,30,36,48,60],\"items\":[{\"kind\":\"Text Input\",\"box\":0,\"textSize\":16},{\"kind\":\"Button\",\"box\":0,\"textSize\":14}],\"count\":2},\"text\":{\"elements\":4,\"onScreen\":4,\"unreachable\":0,\"fontWeights\":{\"400\":2,\"600\":1,\"700\":1},\"fontSizes\":{\"30px\":1,\"14px\":3},\"distinctFontSizes\":2,\"largestFontSize\":30,\"bodyFontFamily\":\"Inter, ui-sans-serif, system-ui, sans-serif, \\\"Apple Color Emoji\\\", \\\"Segoe UI Emoj\"},\"placeholders\":{\"count\":0,\"byText\":{},\"samples\":[]},\"images\":{\"total\":0,\"icons\":0,\"onScreen\":0,\"unreachable\":0,\"broken\":0,\"brokenSources\":[]},\"emptyDecoratedBoxes\":{\"count\":0,\"samples\":[]},\"colors\":{\"distinctAccents\":1,\"accents\":[{\"color\":\"rgb(37, 99, 235)\",\"area\":3097,\"share\":0.003}],\"distinctNeutrals\":1,\"viewportArea\":1152000},\"grounds\":{\"distinct\":1,\"values\":[{\"ground\":\"rgb(255, 255, 255)\",\"count\":1}]},\"rhythm\":{\"bands\":1,\"distinctSpacings\":0,\"spacings\":[]},\"repeatedGroups\":[],\"consoleErrors\":[],\"screenshot\":\"/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/a3c0738a-99ac-4ed0-9f97-110da4681b47/scratchpad/g4-harness/tracker/.previews/shots/pages-home-desktop.png\"},\"phone\":{\"requested\":{\"width\":390,\"height\":844},\"lists\":[],\"layout\":{\"rowGaps\":[],\"drifts\":[],\"edgeTexts\":[],\"lowContrast\":[],\"contrastChecked\":4,\"contrastAbstained\":0},\"visibleCount\":17,\"transparentExcluded\":0,\"layoutWidth\":390,\"clientWidth\":390,\"clientHeight\":844,\"scrollWidth\":390,\"pageHeight\":844,\"contentBottom\":844,\"overflowing\":[],\"overflowingCount\":0,\"textsWiderThanBox\":[],\"textsWiderThanBoxCount\":0,\"controls\":{\"textScale\":[12,14,16,18,20,24,30,36,48,60],\"items\":[{\"kind\":\"Text Input\",\"box\":0,\"textSize\":16},{\"kind\":\"Button\",\"box\":0,\"textSize\":14}],\"count\":2},\"text\":{\"elements\":4,\"onScreen\":4,\"unreachable\":0,\"fontWeights\":{\"400\":2,\"600\":"
+}

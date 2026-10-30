@@ -1,6 +1,6 @@
 # OWN-034 — The habit tracker race: DeepSeek in Cline against Gemma through questions
 
-**Opened 2026-10-30** (Opus, after OWN-032 s8, at Richard's ask). **Status: 🟡 s2 (2026-10-30): four of six lanes run and graded** (D·code 13, 13; D·kit 12, 12; G4·code 11; G2·code 7; `own-034/RESULTS.md` §2–§6). AC1 met in s1. Next: the harness lab (§5, §8 step 4). OWN-033 stays
+**Opened 2026-10-30** (Opus, after OWN-032 s8, at Richard's ask). **Status: 🟡 s3 (2026-10-30): all six lanes built and graded (AC2)** (D·code 13, 13; D·kit 12, 12; G4·harness 11, and 12 under tuning T1; G2·harness 11, and 12 under T1; G4·code 11; G2·code 7; `own-034/RESULTS.md` §2–§7). AC1 met in s1. Next: the blind gallery (§8 step 5). OWN-033 stays
 reserved for stitching heroes into pages (parked).
 **Models:** DeepSeek V4.1 Flash on Richard's ClinePass (`cline-pass/…`, the OWN-020 lab); Gemma 4 E2B and E4B on
 Ollama 0.40.12, the OWN-030 §0 digests (`07ea59a47401`, `ee6656371218`).
