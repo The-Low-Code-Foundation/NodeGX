@@ -1,0 +1,6 @@
+# Made by _make/ (fetched, baked, vendored): rebuilt by `node _make/make.mjs`, never committed.
+_make/source/
+assets/people/
+vendor/
+shots/
+.chrome-profile-*

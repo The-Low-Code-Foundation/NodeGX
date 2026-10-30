@@ -1,0 +1,8 @@
+[
+  { "viewport": [1368, 912, 2] },
+  { "waitFor": "window.__play && __play.ready", "timeout": 60000, "label": "the game is up" },
+  { "waitFor": "__fixture.lives.folk.some(f => f.state === 'walk')", "timeout": 30000, "label": "someone sets off walking" },
+  { "eval": "JSON.stringify({ people: __fixture.crowd.count, hero: !!__fixture.hero.object.parent, draws: __play.stage.renderer.info.render.calls })", "expect": "r => r.people === 20 && r.hero && r.draws < 40", "label": "twenty flat people and one real one, in few draw calls" },
+  { "eval": "JSON.stringify(__fixture.lives.folk.slice(0, 20).map(f => __fixture.crowd.get(f.i).clip))", "expect": "r => new Set(r).size >= 2", "label": "the crowd is doing more than one thing" },
+  { "shot": "two-rooms.png" }
+]

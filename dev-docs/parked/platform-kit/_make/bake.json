@@ -1,0 +1,4 @@
+[
+  { "waitFor": "window.__bake && (__bake.done || __bake.error)", "timeout": 900000, "label": "the bake finishes" },
+  { "eval": "JSON.stringify({ phase: __bake.phase, error: __bake.error, log: __bake.log.slice(-14) })", "expect": "r => r.phase === 'done' && !r.error", "label": "the bake succeeded" }
+]
