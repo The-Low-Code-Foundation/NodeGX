@@ -39,7 +39,8 @@ import {
   findReusableBackend,
   listBackendConfigs,
   provisionBackend,
-  stopBackend
+  stopBackend,
+  type ProvisionCollection
 } from '../backend/provision';
 import { reapOrphanedBackends } from '../backend/reaper';
 import { deployProjectCloudFunctions, replacedNote } from '../cloud/deploy';
@@ -68,7 +69,7 @@ const collectionSchema = z.object({
 });
 
 /** The tables `metadata.dbCollections` declares, as the backend's createTable takes them (`_User` and the like are the backend's own). */
-function declaredCollections(projectFile: unknown): { name: string; columns: { name: string; type: string }[] }[] {
+function declaredCollections(projectFile: unknown): ProvisionCollection[] {
   const tables = (projectFile as { metadata?: { dbCollections?: unknown } } | undefined)?.metadata?.dbCollections;
   if (!Array.isArray(tables)) return [];
   return tables
@@ -78,8 +79,22 @@ function declaredCollections(projectFile: unknown): { name: string; columns: { n
       columns: (Array.isArray(t.columns) ? t.columns : [])
         .filter((c): c is { name: string; type: string } => !!c && typeof c.name === 'string' && typeof c.type === 'string')
         .filter((c) => !['objectId', 'createdAt', 'updatedAt', 'ACL'].includes(c.name))
-        .map((c) => ({ name: c.name, type: c.type }))
+        .map((c) => ({ name: c.name, type: c.type })),
+      ...rulesOf((t as { checks?: unknown }).checks)
     }));
+}
+
+/**
+ * P123-STU-CHOICENOTENFORCED — a declared table's rules for its values, as `setChecks` takes them. The file holds them in
+ * two shapes: Studio writes the rule itself (`{ field, oneOf }`); the editor's schema cache and this tool's write-back
+ * keep the backend's entry (`{ name, rule, declared }`), whose undeclared ones are drift the backend found, not rules.
+ */
+function rulesOf(checks: unknown): { checks?: NonNullable<ProvisionCollection['checks']> } {
+  if (!Array.isArray(checks)) return {};
+  const rules = checks
+    .map((c) => (c && typeof c === 'object' && 'rule' in c ? ((c as { declared?: boolean }).declared === false ? null : (c as { rule: unknown }).rule) : c))
+    .filter((r): r is { field: string } => !!r && typeof r === 'object' && typeof (r as { field?: unknown }).field === 'string');
+  return rules.length ? { checks: rules } : {};
 }
 
 /**
@@ -165,7 +180,12 @@ export function registerProvisionTools(server: McpServer, binding: ProjectBindin
       // P127-BKO006-TABLESNOTINFILES: the project's own tables seed the backend too (the files are the truth, R1),
       // the agent's named ones winning where both name a table
       const named = args.collections ?? [];
-      const collections = [...named, ...declaredCollections(projectFile).filter((c) => !named.some((n) => n.name === c.name))];
+      // a table the agent names keeps the rules the project declares for it (the tool takes no rules of its own)
+      const declared = declaredCollections(projectFile);
+      const collections = [
+        ...named.map((n) => ({ ...declared.find((c) => c.name === n.name), ...n })),
+        ...declared.filter((c) => !named.some((n) => n.name === c.name))
+      ];
       const result = await provisionBackend({
         name: args.name,
         collections,

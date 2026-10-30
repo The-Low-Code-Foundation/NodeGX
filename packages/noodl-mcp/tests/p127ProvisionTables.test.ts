@@ -87,4 +87,32 @@ describeOrSkip('P127-BKO006-TABLESNOTINFILES — provision_backend keeps the tab
     expect(columnsOf((json as any).tables, 'Shelf')).toMatchObject({ label: 'String' });
     expect(columnsOf(readProject(dir).metadata.dbCollections, 'Shelf')).toMatchObject({ label: 'String' });
   });
+
+  // P123-STU-CHOICENOTENFORCED: a Choice declared in the project (a rule for its values) reached neither the backend
+  // nor survived the write back — the backend's own table, made from columns only, replaced the declaration.
+  it("a declared table's rules for its values are set on the backend and stay in the project", async () => {
+    const oneOf = ['Furniture', 'Books'];
+    const dir = project('rules', { dbCollections: [{ name: 'Listing', columns: [{ name: 'category', type: 'String' }], checks: [{ field: 'category', oneOf }] }] });
+    const res = await provision(dir, { name: 'Swapshop' });
+    expect(res.isError).toBe(false);
+    const client = new BackendClient(listBackends().find((b) => b.id === res.data.backendId)!);
+    const { json } = await client.request('GET', '/admin/schema');
+    const ruleOf = (t: any) => (t?.checks ?? []).map((c: any) => c.rule ?? c).find((r: any) => r.field === 'category')?.oneOf;
+    expect(ruleOf((json as any).tables.find((t: any) => t.name === 'Listing'))).toEqual(oneOf);
+    expect(ruleOf(readProject(dir).metadata.dbCollections.find((t: any) => t.name === 'Listing'))).toEqual(oneOf);
+    const bad = await client.request('POST', '/classes/Listing', { category: 'Cars' }, [400]);
+    expect(bad).toMatchObject({ status: 400, json: { reason: 'check-failed' } });
+  });
+
+  it('a table the agent names keeps the rules the project declares, in the shape the editor caches them', async () => {
+    const oneOf = ['open', 'closed'];
+    const cached = [{ name: 'chk_Task_oneof_status', rule: { field: 'status', oneOf }, declared: true }, { name: 'drift', rule: { field: 'title', maxLength: 3 }, declared: false }];
+    const dir = project('named-rules', { dbCollections: [{ name: 'Task', columns: [{ name: 'status', type: 'String' }], checks: cached }] });
+    const res = await provision(dir, { name: 'Tasks', collections: [{ name: 'Task', columns: [{ name: 'status', type: 'String' }, { name: 'title', type: 'String' }] }] });
+    expect(res.isError).toBe(false);
+    const { json } = await new BackendClient(listBackends().find((b) => b.id === res.data.backendId)!).request('GET', '/admin/schema');
+    const rules = (json as any).tables.find((t: any) => t.name === 'Task').checks.map((c: any) => c.rule);
+    expect(rules).toEqual([{ field: 'status', oneOf }]);
+    expect(columnsOf(readProject(dir).metadata.dbCollections, 'Task')).toMatchObject({ status: 'String', title: 'String' });
+  });
 });

@@ -761,6 +761,11 @@ export function installExitHooks(root = backendsRoot()): void {
 export interface ProvisionCollection {
   name: string;
   columns: { name: string; type: string }[];
+  /**
+   * P123-STU-CHOICENOTENFORCED — the table's rules for its values (`{ field, oneOf }`, `{ field, maxLength }` …, as the
+   * backend's `setChecks` takes them), set once the table exists. The backend's own rules on other fields are kept.
+   */
+  checks?: { field: string; [rule: string]: unknown }[];
 }
 
 export interface ProvisionRequest {
@@ -914,6 +919,32 @@ export async function provisionBackend(request: ProvisionRequest): Promise<Provi
         `"${collection.name}" was not created (${error instanceof Error ? error.message : String(error)}). ` +
           'The backend will create it the first time something writes to it.'
       );
+    }
+  }
+
+  // ── P123-STU-CHOICENOTENFORCED: a table made from its columns alone took any value its project's rules refuse (a
+  // Choice took "Cars"). Set apart from createTable, so rows that already break a rule refuse the rule, not the table.
+  const ruled = request.collections.filter((c) => c.checks?.length && created.includes(c.name));
+  if (ruled.length) {
+    let tables: { name?: string; checks?: { rule?: { field?: string }; declared?: boolean }[] }[] = [];
+    try {
+      tables = ((await client.request('GET', '/admin/schema')).json as { tables?: typeof tables } | null)?.tables ?? [];
+    } catch {
+      /* each set below says so */
+    }
+    for (const collection of ruled) {
+      const fields = new Set(collection.checks!.map((rule) => rule.field));
+      const kept = (tables.find((t) => t.name === collection.name)?.checks ?? [])
+        .filter((c) => c.declared && c.rule && !fields.has(String(c.rule.field)))
+        .map((c) => c.rule);
+      try {
+        await client.request('POST', '/admin/schema', { action: 'setChecks', table: collection.name, checks: [...kept, ...collection.checks!] });
+      } catch (error) {
+        warnings.push(
+          `"${collection.name}"'s rules for its values were not set (${error instanceof Error ? error.message : String(error)}), ` +
+            'so it takes any value until they are.'
+        );
+      }
     }
   }
 
