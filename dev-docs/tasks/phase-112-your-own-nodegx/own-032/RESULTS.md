@@ -1148,3 +1148,88 @@ https://claude.ai/artifact/P7umD3HEoDJrTiv1Q3KQqh (same link, version 3) asks th
    (2.78 on the wash)?
 2. **Top or centred** words beside the photo (11c: pottery, jazz, bakery, calm)?
 3. **When a request names no look** (11b): ask "clean, bold or warm?", build calm by default, or something else?
+
+## 12. s7 — Richard's round-three answers in the arm: centred words, a readable line (2026-10-30)
+
+**Richard, 2026-10-30, on round three:** "yep i like the comfy look, centred is better, just make sure the subtitle is
+big enough to be read, those ones are tiny". So: (1) the warm look as built in 11a is right; (2) centred; (3) the line
+under the headline is too small. He did not answer the bakery's amber line (2.78) or question 3 (no named look); both
+stay open.
+
+**Measured before the change:** every s6 hero (w20m ×6, w21w ×3) ended with the line at `text-base`, **16 px**, under a
+`display-lg` headline (`clamp(2.75rem, 1.4rem + 5.6vw, 6rem)`: about 94 px at 1280, 44 px on a phone). Nothing in the
+arm ever offered it bigger; the only line-size check (`lineSize`) makes it *smaller*. Part of "tiny" was the page itself:
+the 1280 px pictures were shown about a third of their size (16 px read as about 5 px). Round four shows them larger.
+
+### 12a. `centreWords` + `lineReadable` (w22)
+
+Two rules, both `only` fixes, on w20's rules (no `look3`, which 11b showed unsafe):
+- `centreWords`: a Group setting **beside the photo** {top, centred}. `centred` is 11c's change word for word (`sizeMode
+  explicit`, height 100 %, `justifyContent center`). Check `wordsCentred` fires once the words column stands beside the
+  photo (after `photoRight` and `together` are clear) and its Group is not centred.
+- `lineReadable`: check fires when the line is smaller than `text-xl`; it offers only `text-xl` (**20 px**). Why 20,
+  not 18: 18 is +2 px on 16, and "tiny" asks for a visible change. It cannot meet `lineSize`, which needs the line at
+  least the headline's size.
+
+Runs: `w22m-{bakery,pottery,puppy,jazz}` (calm, `--style auto` two looks, as w20) against `w20m-*`; `w22w-{bakery,
+pottery,puppy}` (`--style warm`) against `w21w-*`. One at a time on Ollama. Bold is not run (no w20s control; 11c showed
+centring changes nothing there).
+
+**Pre-registered (before any w22 run):**
+1. Both new checks close in **7 of 7**: the final line is `text-xl` and the words column `centred`.
+2. The final line renders **20 px** on both widths (block height ≥ 26 px per line). Phone: ≤ 3 lines, no new `atEdge`,
+   `overflowX` 0.
+   *Amended before any w22 result came in:* "≥ 26 px per line" assumed a 1.3 line height. The controls measure 18–22 px per
+   line at 16 px (1.125–1.375), so 20 px is **≥ 22 px per line**, and larger than the control's per-line height on every run.
+3. Calm desktop: words centre within **±2 px** of the photo centre (w20m: −19 to −59 px; 11c centred: 0 to +1).
+   Warm desktop: the words are taller than the photo (368 px vs 320 px on bakery), so centring moves nothing; the offset
+   is graded only for sign (words taller ⇒ offset ≥ 0).
+4. Turns: each run takes the control's turns **+2 (±3)**; none reaches the cap of 40.
+5. Everything the control closed stays closed. `lowContrast` is the control's list: bakery warm keeps its amber line
+   (2.78) and button (3.19); no new entry, because the 20 px line is in the dark text colour.
+6. Words (weak): the headline and line text match the control in **≥ 4 of 7**. Each new finding changes "WHAT THE LAST
+   LOOK FOUND" from the turn it first fires, so later words may move.
+
+**w22m-bakery, the first run, and why the set was stopped.** Both checks closed: the line ended at `text-xl` (26 px
+per line, 2 lines on a desktop, 4 on a phone) and the words column centred (offset −19 → **0** px). What was left open
+is the control's own (the kit's button, 3.19). But it took **30 turns, +7** (prediction 4 fails). At turn 13 `lineReadable`
+raised the line to `text-xl` while the headline was still `text-base`; `lineSize` (the line at least as big as the
+headline, above `text-base`) then took it back down, `text-lg`, `text-base`, and the two traded the line until the
+headline's own fix made it a display size (turns 13–19). A fault in the rule, not in the model, so I stopped the set
+after this one run (the pottery run, part-way, was deleted) rather than spend six more runs on it.
+
+### 12b. `lineReadable` waits for the headline (w23)
+
+The one change: `lineReadable` fires only when the headline is already a headline size (`display-md` or `display-lg`,
+the `hierarchy` check's own list). With the headline at a display size, a `text-xl` line can never meet `lineSize`.
+`runs/w23.edit.json` is w22's, rule for rule. Same seven pairs, the same predictions 1–6 of 12a, unchanged.
+
+**Result (w23, 7 runs, 2026-10-30; `node grade-w22.mjs` → `runs/grade-w22.json`):**
+
+| run | turns (ctl → w23) | line px / lines, desktop | phone lines | centre offset, desktop (ctl → w23) | left open | words |
+|---|---|---|---|---|---|---|
+| m-bakery | 23 → 25 | 26 / 2 | 3 | −19 → **0** | kit button 3.19 (ctl's) | same |
+| m-pottery | 22 → 24 | 23 / 1 | 2 | −59 → **+1** | nothing | same |
+| m-puppy | 22 → 24 | 27 / 1 | 2 | −47 → **0** | nothing | same |
+| m-jazz | 24 → 26 | 23 / 2 | 3 | −29 → **+1** | nothing | headline + line rewritten |
+| w-bakery | 33 → 35 | 26 / 2 | 2 | +24 → +40 | amber line 2.78, button 3.19 (ctl's) | same |
+| w-pottery | 35 → 37 | 23 / 1 | 2 | +23 → +25 | nothing | same |
+| w-puppy | 33 → 35 | 27 / 2 | 2 | +25 → +41 | nothing | same |
+
+**Graded against 12a's predictions:**
+1. Both checks closed in **7 of 7**. ✔
+2. The line is `text-xl` everywhere: 23–27 px per line, more than the control's 18–22 on every run (as amended). Phone
+   ≤ 3 lines, `atEdge` 0, `overflowX` 0 on all seven. ✔
+3. Calm: offset within ±2 px on **4 of 4** (0, +1, 0, +1). ✔ Warm: words taller than the photo on 3 of 3 (370–401 px vs
+   320), offset ≥ 0. ✔ The warm offsets *grew* (+24 → +40 on bakery, +25 → +41 on puppy): the bigger line wraps onto a
+   second line, so the words grow further past the photo, which stays at the top of its column.
+4. Turns: **+2 on 7 of 7**, exactly one turn per new fix. ✔ (w22m-bakery's +7 was the rule fault, 12a.)
+5. Nothing the control closed is open; `lowContrast` is the control's list on every run. ✔
+6. Words: the same on **6 of 7** (≥ 4 predicted). ✔ Jazz rewrote its headline ("Jazz Evening" → "Live Jazz").
+
+**What this settles:** both of Richard's round-three answers are in the arm (`centreWords`, `lineReadable`), on both the
+calm and the warm look, at two turns' cost and nothing else. Round four is on the same page (version 4).
+
+**Open, for Richard (on the page):** (a) on the warm look the photo stays at the top beside taller words (+40 px):
+centre the photo too? (b) the bakery's amber line, 2.78; (c) a request that names no look. Bold (`s-`) runs were not
+made with these rules.

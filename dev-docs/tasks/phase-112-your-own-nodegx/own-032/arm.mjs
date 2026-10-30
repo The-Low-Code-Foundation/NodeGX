@@ -117,6 +117,8 @@ export const SETTINGS = {
     justify: { say: 'where its parts sit along it', options: { start: { justifyContent: 'flex-start' }, centre: { justifyContent: 'center' }, end: { justifyContent: 'flex-end' }, 'spread out': { justifyContent: 'space-between' } } },
     'max width': { say: 'how wide it may grow', options: maxW },
     'self align': { say: 'where it sits inside its own parent', options: { 'parent decides': { alignSelf: undefined }, start: { alignSelf: 'flex-start' }, centre: { alignSelf: 'center' }, end: { alignSelf: 'flex-end' } } },
+    // centreWords (s7, Richard: "centred is better"): 11c's centring, the words Group filling its column, parts in the middle
+    ...(EDIT.rules?.centreWords ? { 'beside the photo': { say: 'where its parts sit beside a taller photo', options: { top: { sizeMode: 'contentHeight', height: undefined, justifyContent: undefined }, centred: { sizeMode: 'explicit', height: { value: 100, unit: '%' }, justifyContent: 'center' } } } } : {}),
     ground: { say: 'what is behind it', options: { none: { backgroundColor: undefined, backgroundGradient: undefined }, 'page colour': { backgroundColor: 'var(--background)', backgroundGradient: undefined }, 'soft grey': { backgroundColor: 'var(--muted)', backgroundGradient: undefined }, 'brand colour': { backgroundColor: 'var(--primary)', backgroundGradient: undefined }, 'dark brand gradient': { backgroundGradient: 'var(--gradient-spotlight)', backgroundColor: undefined }, ...(STYLE === 'warm' ? { 'soft pastel': { backgroundColor: PASTEL, backgroundGradient: undefined } } : {}) } }
   },
   Columns: {
@@ -254,8 +256,13 @@ async function judge(q, png) {
 //                 a Fredoka semibold headline, a Caveat line above it in the brand colour, a 40 px photo corner, a pill
 //                 button in Fredoka, and the calm rhythm. The font, pastel and 40 px options exist only in a warm run,
 //                 and the run copies the two font modules into its bench (fonts.mjs)
+// s7 switches (default off; Richard on round three: "centred is better, just make sure the subtitle is big enough"):
+//   centreWords   once the words column stands beside the photo, its Group is "centred" (11c's change: height 100 %,
+//                 justify centre), an `only` fix (12b: calm offsets −19…−59 → 0…+1 px, +1 turn)
+//   lineReadable  the line under the headline is at least text-xl (20 px), an `only` fix, and only once the headline
+//                 is a display size (12a: under a text-base headline it fought `lineSize` for 7 turns)
 // The touching / edge thresholds are not rules: bench.mjs FACTS fixes them (4 px, 8 px), and probe-vision's key with them.
-const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false, roles: false, endGate: false, addWhileMissing: false, shortHeadline: false, blankRetry: false, rhythm: false, fixesOnly: false, factsKept: false, nameAndMore: false, writeRepeat: false, rhythmCalm: false, look3: false }, ...(EDIT.rules || {}) };
+const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false, roles: false, endGate: false, addWhileMissing: false, shortHeadline: false, blankRetry: false, rhythm: false, fixesOnly: false, factsKept: false, nameAndMore: false, writeRepeat: false, rhythmCalm: false, look3: false, centreWords: false, lineReadable: false }, ...(EDIT.rules || {}) };
 // roles (s2, after w4-t15a): each part is told what it is when it is added, and keeps it through moves and removes;
 // the shape checks read the roles, never the document order (t15a: a move made the headline texts[1], and the size
 // fix went to the other Text, so the hero ended with two headlines and no line under them)
@@ -315,6 +322,10 @@ export function findingsFrom(shot, nodes) {
       const hw = String(nodes[h].params.text ?? '').trim().split(/\s+/).length, most = Math.max(3, Math.floor((2 * hw) / (hb?.lines || 1)));
       if (RULES.shortHeadline && hb && hb.lines >= 3 && sz(h) === SIZES.indexOf(big[0])) res.push({ check: 'headlineLong', say: `On a desktop, the headline ${name(h)} breaks onto ${hb.lines} lines at the smallest headline size: it has too many words (${hw}).`, fix: { node: h, setting: 'words', write: true, shorten: hb.lines, ask: `It is now ${hw} words and breaks onto ${hb.lines} lines on a desktop: write it again in at most ${RULES.nameAndMore ? Math.max(most, GOAL.name.split(/\s+/).length + 2) : most} words.${RULES.factsKept ? (RULES.nameAndMore ? ` It must say "${GOAL.name}" and, with it, a few words about what ${GOAL.name} is: never the name alone.` : ` It must say "${GOAL.name}".`) : ''}`, say: `make the headline ${name(h)} shorter (${hw} words, it breaks onto ${hb.lines} lines on a desktop)` } });
       if (hb && hb.lines >= 3 && sz(h) > SIZES.indexOf(big[0])) res.push({ check: 'headlineWraps', say: `On a desktop, the headline ${name(h)} breaks onto ${hb.lines} lines: it is too big for its column.`, fix: { node: h, setting: 'size', smaller: true, floor: big[0], say: `make ${name(h)} a little smaller (it breaks onto ${hb.lines} lines on a desktop; now: ${currentOf(nodes[h], 'size')})` } });
+      // lineReadable (s7, Richard: "make sure the subtitle is big enough to be read, those ones are tiny"): every s6 hero
+      // ended with the line at text-base, 16 px under a display headline of up to 96 px. Only once the headline is a
+      // headline size: w22m-bakery raised the line under a text-base headline, and `lineSize` took it back down, 7 turns
+      if (RULES.lineReadable && big.includes(currentOf(nodes[h], 'size')) && sz(line) < SIZES.indexOf('text-xl')) res.push({ check: 'lineReadable', say: `The line under the headline (${name(line)}) is small beside the headline: it is hard to read.`, fix: { node: line, setting: 'size', only: ['text-xl'], say: `make ${name(line)} bigger (it is hard to read beside the headline; now: ${currentOf(nodes[line], 'size')})` } });
       if (sz(line) >= sz(h) && sz(line) > SIZES.indexOf('text-base')) res.push({ check: 'lineSize', say: `The line under the headline (${name(line)}) is as big as the headline: they read as two headlines.`, fix: { node: line, setting: 'size', smaller: true, say: `make ${name(line)} smaller than the headline (it reads as a second headline; now: ${currentOf(nodes[line], 'size')})` } });
     }
     if (h !== undefined && !big.some((t) => nodes[h].params.fontSize === `var(--${t})`)) res.push({ check: 'hierarchy', say: `The headline ${name(h)} is the size of ordinary words (${currentOf(nodes[h], 'size')}): it does not stand out.`, fix: { node: h, setting: 'size', bigger: true, say: `make ${name(h)} bigger (the headline does not stand out; now: ${currentOf(nodes[h], 'size')})` } });
@@ -333,6 +344,8 @@ export function findingsFrom(shot, nodes) {
       const words = [...(eb !== undefined ? [eb] : []), h, line, btn];
       if (cols === undefined || side(h) !== 0 || side(img) !== 1) res.push({ check: 'photoRight', say: `The photo ${name(img)} is not on the right of the words: for that, one Columns must hold the words in its first column and the photo in its second.`, fix: structureStep(nodes, root, words, img) });
       else if (RULES.roles && words.some((x) => x !== undefined && side(x) !== 0)) { const out = words.filter((x) => x !== undefined && side(x) !== 0); res.push({ check: 'together', say: `${out.map((x) => `${ROLE_SAY[nodes[x].role]} ${name(x)}`).join(' and ')} ${out.length > 1 ? 'are' : 'is'} not in the words column, beside the photo.`, fix: structureStep(nodes, root, words, img) }); }
+      // centreWords: once the words column stands beside the photo, its parts sit in the middle, level with the photo
+      else if (RULES.centreWords && kids.includes(nodes[h].parent) && kindOf(nodes[nodes[h].parent]) === 'Group' && currentOf(nodes[nodes[h].parent], 'beside the photo') !== 'centred') { const col = nodes[h].parent; res.push({ check: 'wordsCentred', say: `The words column ${name(col)} sits at the top beside the photo, with empty space under it.`, fix: { node: col, setting: 'beside the photo', only: ['centred'], say: `centre the parts of ${name(col)} beside the photo (they sit at the top, with empty space under them; now: ${currentOf(nodes[col], 'beside the photo')})` } }); }
     }
     if (RULES.roles && STYLE === 'stylish') {
       // each fix offers only the values the look asks for (`only`), so the model takes the fix or leaves it

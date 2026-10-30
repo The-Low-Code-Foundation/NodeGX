@@ -1,0 +1,146 @@
+{
+ "htmlMs": 107,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [
+    {
+     "text": "Welcome to Puppy Haven",
+     "left": 0,
+     "right": 1093
+    },
+    {
+     "text": "Find your perfect furry friend and start",
+     "left": 0,
+     "right": 786
+    },
+    {
+     "text": "A place for loving pups",
+     "left": 0,
+     "right": 1115
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Welcome to Puppy Haven",
+     "x": 0,
+     "y": 0,
+     "w": 187,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Find your perfect furry friend and start",
+     "x": 0,
+     "y": 38,
+     "w": 494,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "A place for loving pups",
+     "x": 0,
+     "y": 76,
+     "w": 165,
+     "h": 22,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:52435/",
+   "blank": false,
+   "words": 21,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [
+    {
+     "text": "Welcome to Puppy Haven",
+     "left": 0,
+     "right": 203
+    },
+    {
+     "text": "Find your perfect furry friend and start",
+     "left": 0,
+     "right": 15
+    },
+    {
+     "text": "A place for loving pups",
+     "left": 0,
+     "right": 225
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Welcome to Puppy Haven",
+     "x": 0,
+     "y": 0,
+     "w": 187,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Find your perfect furry friend and start",
+     "x": 0,
+     "y": 38,
+     "w": 375,
+     "h": 44,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "A place for loving pups",
+     "x": 0,
+     "y": 98,
+     "w": 165,
+     "h": 22,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:52435/",
+   "blank": false,
+   "words": 21,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "ms": 2265
+}

@@ -1,0 +1,512 @@
+{
+ "w22m-bakery": {
+  "control": "w20m-bakery",
+  "run": {
+   "turns": 30,
+   "ended": "nothing on the menu fixes what is left (contrast)",
+   "style": "minimal",
+   "lineSize": "var(--text-xl)",
+   "centred": true,
+   "lineD": {
+    "h": 52,
+    "lines": 2,
+    "perLine": 26
+   },
+   "lineP": {
+    "h": 104,
+    "lines": 4,
+    "perLine": 26
+   },
+   "offset": 0,
+   "wordsH": 312,
+   "photoH": 320,
+   "open": [
+    "goalMet",
+    "contrast"
+   ],
+   "lowD": [
+    "Bake Now 3.19"
+   ],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 800,
+   "headline": "Maison Levain: Family Bakery",
+   "line": "Experience the warmth and tradition of authentic, handcrafted bread made with love."
+  },
+  "ctl": {
+   "turns": 23,
+   "ended": "nothing on the menu fixes what is left (contrast)",
+   "style": "minimal",
+   "lineSize": "var(--text-base)",
+   "centred": false,
+   "lineD": {
+    "h": 21,
+    "lines": 1,
+    "perLine": 21
+   },
+   "lineP": {
+    "h": 42,
+    "lines": 2,
+    "perLine": 21
+   },
+   "offset": -19,
+   "wordsH": 281,
+   "photoH": 320,
+   "open": [
+    "goalMet",
+    "contrast"
+   ],
+   "lowD": [
+    "Bake Now 3.19"
+   ],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 738,
+   "headline": "Maison Levain: Family Bakery",
+   "line": "Experience the warmth and tradition of our family-made breads and pastries."
+  }
+ },
+ "w23m-bakery": {
+  "control": "w20m-bakery",
+  "run": {
+   "turns": 25,
+   "ended": "nothing on the menu fixes what is left (contrast)",
+   "style": "minimal",
+   "lineSize": "var(--text-xl)",
+   "centred": true,
+   "lineD": {
+    "h": 52,
+    "lines": 2,
+    "perLine": 26
+   },
+   "lineP": {
+    "h": 78,
+    "lines": 3,
+    "perLine": 26
+   },
+   "offset": 0,
+   "wordsH": 312,
+   "photoH": 320,
+   "open": [
+    "goalMet",
+    "contrast"
+   ],
+   "lowD": [
+    "Bake Now 3.19"
+   ],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 774,
+   "headline": "Maison Levain: Family Bakery",
+   "line": "Experience the warmth and tradition of our family-made breads and pastries."
+  },
+  "ctl": {
+   "turns": 23,
+   "ended": "nothing on the menu fixes what is left (contrast)",
+   "style": "minimal",
+   "lineSize": "var(--text-base)",
+   "centred": false,
+   "lineD": {
+    "h": 21,
+    "lines": 1,
+    "perLine": 21
+   },
+   "lineP": {
+    "h": 42,
+    "lines": 2,
+    "perLine": 21
+   },
+   "offset": -19,
+   "wordsH": 281,
+   "photoH": 320,
+   "open": [
+    "goalMet",
+    "contrast"
+   ],
+   "lowD": [
+    "Bake Now 3.19"
+   ],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 738,
+   "headline": "Maison Levain: Family Bakery",
+   "line": "Experience the warmth and tradition of our family-made breads and pastries."
+  }
+ },
+ "w23m-pottery": {
+  "control": "w20m-pottery",
+  "run": {
+   "turns": 24,
+   "ended": "nothing on the menu fixes what is left (nothing)",
+   "style": "minimal",
+   "lineSize": "var(--text-xl)",
+   "centred": true,
+   "lineD": {
+    "h": 23,
+    "lines": 1,
+    "perLine": 23
+   },
+   "lineP": {
+    "h": 46,
+    "lines": 2,
+    "perLine": 23
+   },
+   "offset": 1,
+   "wordsH": 207,
+   "photoH": 320,
+   "open": [
+    "goalMet"
+   ],
+   "lowD": [],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 699,
+   "headline": "Potter Portfolio",
+   "line": "Handmade bowls and weekend pottery classes."
+  },
+  "ctl": {
+   "turns": 22,
+   "ended": "nothing on the menu fixes what is left (nothing)",
+   "style": "minimal",
+   "lineSize": "var(--text-base)",
+   "centred": false,
+   "lineD": {
+    "h": 18,
+    "lines": 1,
+    "perLine": 18
+   },
+   "lineP": {
+    "h": 36,
+    "lines": 2,
+    "perLine": 18
+   },
+   "offset": -59,
+   "wordsH": 202,
+   "photoH": 320,
+   "open": [
+    "goalMet"
+   ],
+   "lowD": [],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 689,
+   "headline": "Potter Portfolio",
+   "line": "Handmade bowls and weekend pottery classes."
+  }
+ },
+ "w23m-puppy": {
+  "control": "w20m-puppy",
+  "run": {
+   "turns": 24,
+   "ended": "nothing on the menu fixes what is left (nothing)",
+   "style": "minimal",
+   "lineSize": "var(--text-xl)",
+   "centred": true,
+   "lineD": {
+    "h": 27,
+    "lines": 1,
+    "perLine": 27
+   },
+   "lineP": {
+    "h": 54,
+    "lines": 2,
+    "perLine": 27
+   },
+   "offset": 0,
+   "wordsH": 230,
+   "photoH": 320,
+   "open": [
+    "goalMet"
+   ],
+   "lowD": [],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 718,
+   "headline": "Puppy Haven",
+   "line": "Find your perfect furry friend in a loving and caring community."
+  },
+  "ctl": {
+   "turns": 22,
+   "ended": "nothing on the menu fixes what is left (nothing)",
+   "style": "minimal",
+   "lineSize": "var(--text-base)",
+   "centred": false,
+   "lineD": {
+    "h": 22,
+    "lines": 1,
+    "perLine": 22
+   },
+   "lineP": {
+    "h": 44,
+    "lines": 2,
+    "perLine": 22
+   },
+   "offset": -47,
+   "wordsH": 225,
+   "photoH": 320,
+   "open": [
+    "goalMet"
+   ],
+   "lowD": [],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 708,
+   "headline": "Puppy Haven",
+   "line": "Find your perfect furry friend in a loving and caring community."
+  }
+ },
+ "w23m-jazz": {
+  "control": "w20m-jazz",
+  "run": {
+   "turns": 26,
+   "ended": "nothing on the menu fixes what is left (nothing)",
+   "style": "minimal",
+   "lineSize": "var(--text-xl)",
+   "centred": true,
+   "lineD": {
+    "h": 46,
+    "lines": 2,
+    "perLine": 23
+   },
+   "lineP": {
+    "h": 69,
+    "lines": 3,
+    "perLine": 23
+   },
+   "offset": 1,
+   "wordsH": 289,
+   "photoH": 320,
+   "open": [
+    "goalMet"
+   ],
+   "lowD": [],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 756,
+   "headline": "The Blue Room: Live Jazz",
+   "line": "Join us for an intimate and sophisticated evening of live jazz on 14 November."
+  },
+  "ctl": {
+   "turns": 24,
+   "ended": "nothing on the menu fixes what is left (nothing)",
+   "style": "minimal",
+   "lineSize": "var(--text-base)",
+   "centred": false,
+   "lineD": {
+    "h": 18,
+    "lines": 1,
+    "perLine": 18
+   },
+   "lineP": {
+    "h": 36,
+    "lines": 2,
+    "perLine": 18
+   },
+   "offset": -29,
+   "wordsH": 261,
+   "photoH": 320,
+   "open": [
+    "goalMet"
+   ],
+   "lowD": [],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 723,
+   "headline": "The Blue Room: Jazz Evening",
+   "line": "Join us for an intimate and sophisticated jazz evening on 14 November."
+  }
+ },
+ "w23w-bakery": {
+  "control": "w21w-bakery",
+  "run": {
+   "turns": 35,
+   "ended": "nothing on the menu fixes what is left (contrast, contrast)",
+   "style": "warm",
+   "lineSize": "var(--text-xl)",
+   "centred": true,
+   "lineD": {
+    "h": 52,
+    "lines": 2,
+    "perLine": 26
+   },
+   "lineP": {
+    "h": 52,
+    "lines": 2,
+    "perLine": 26
+   },
+   "offset": 40,
+   "wordsH": 399,
+   "photoH": 320,
+   "open": [
+    "goalMet",
+    "contrast",
+    "contrast"
+   ],
+   "lowD": [
+    "Lyon's family bake 2.78",
+    "Bake Now 3.19"
+   ],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 752,
+   "headline": "Maison Levain",
+   "line": "Artisan breads, sweet pastries, and warm moments crafted with love."
+  },
+  "ctl": {
+   "turns": 33,
+   "ended": "nothing on the menu fixes what is left (contrast, contrast)",
+   "style": "warm",
+   "lineSize": "var(--text-base)",
+   "centred": false,
+   "lineD": {
+    "h": 21,
+    "lines": 1,
+    "perLine": 21
+   },
+   "lineP": {
+    "h": 42,
+    "lines": 2,
+    "perLine": 21
+   },
+   "offset": 24,
+   "wordsH": 368,
+   "photoH": 320,
+   "open": [
+    "goalMet",
+    "contrast",
+    "contrast"
+   ],
+   "lowD": [
+    "Lyon's family bake 2.78",
+    "Bake Now 3.19"
+   ],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 742,
+   "headline": "Maison Levain",
+   "line": "Artisan breads, sweet pastries, and warm moments crafted with love."
+  }
+ },
+ "w23w-pottery": {
+  "control": "w21w-pottery",
+  "run": {
+   "turns": 37,
+   "ended": "nothing on the menu fixes what is left (nothing)",
+   "style": "warm",
+   "lineSize": "var(--text-xl)",
+   "centred": true,
+   "lineD": {
+    "h": 23,
+    "lines": 1,
+    "perLine": 23
+   },
+   "lineP": {
+    "h": 46,
+    "lines": 2,
+    "perLine": 23
+   },
+   "offset": 25,
+   "wordsH": 370,
+   "photoH": 320,
+   "open": [
+    "goalMet"
+   ],
+   "lowD": [],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 746,
+   "headline": "Potter Portfolio",
+   "line": "Handmade bowls and cozy weekend pottery classes await you."
+  },
+  "ctl": {
+   "turns": 35,
+   "ended": "nothing on the menu fixes what is left (nothing)",
+   "style": "warm",
+   "lineSize": "var(--text-base)",
+   "centred": false,
+   "lineD": {
+    "h": 18,
+    "lines": 1,
+    "perLine": 18
+   },
+   "lineP": {
+    "h": 36,
+    "lines": 2,
+    "perLine": 18
+   },
+   "offset": 23,
+   "wordsH": 365,
+   "photoH": 320,
+   "open": [
+    "goalMet"
+   ],
+   "lowD": [],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 736,
+   "headline": "Potter Portfolio",
+   "line": "Handmade bowls and cozy weekend pottery classes await you."
+  }
+ },
+ "w23w-puppy": {
+  "control": "w21w-puppy",
+  "run": {
+   "turns": 35,
+   "ended": "nothing on the menu fixes what is left (nothing)",
+   "style": "warm",
+   "lineSize": "var(--text-xl)",
+   "centred": true,
+   "lineD": {
+    "h": 54,
+    "lines": 2,
+    "perLine": 27
+   },
+   "lineP": {
+    "h": 54,
+    "lines": 2,
+    "perLine": 27
+   },
+   "offset": 41,
+   "wordsH": 401,
+   "photoH": 320,
+   "open": [
+    "goalMet"
+   ],
+   "lowD": [],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 807,
+   "headline": "Welcome to Puppy Haven",
+   "line": "Find your perfect furry friend and start a loving new adventure today."
+  },
+  "ctl": {
+   "turns": 33,
+   "ended": "nothing on the menu fixes what is left (nothing)",
+   "style": "warm",
+   "lineSize": "var(--text-base)",
+   "centred": false,
+   "lineD": {
+    "h": 22,
+    "lines": 1,
+    "perLine": 22
+   },
+   "lineP": {
+    "h": 44,
+    "lines": 2,
+    "perLine": 22
+   },
+   "offset": 25,
+   "wordsH": 369,
+   "photoH": 320,
+   "open": [
+    "goalMet"
+   ],
+   "lowD": [],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 797,
+   "headline": "Welcome to Puppy Haven",
+   "line": "Find your perfect furry friend and start a loving new adventure today."
+  }
+ }
+}

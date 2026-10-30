@@ -1,4 +1,81 @@
-# OWN-032 — next session (s7)
+# OWN-032 — next session (s8)
+
+**Paste this to start the session:**
+
+> OWN-032 s8. Read `dev-docs/tasks/phase-112-your-own-nodegx/own-032/NEXT-SESSION-PROMPT.md` (this section), then
+> `RESULTS.md` §12. First read Richard's answers to the three open questions on
+> https://claude.ai/artifact/P7umD3HEoDJrTiv1Q3KQqh (version 4; it has no answer store, so ask him in chat if he has not
+> said). Then build what he rules, in order: one experiment at a time on Ollama, each against a control, each
+> pre-registered in RESULTS §13 before it runs. Commit after each one.
+
+## Where it stands (s7, 2026-10-30)
+
+- **Richard's round-three answers (2026-10-30):** "yep i like the comfy look, centred is better, just make sure the
+  subtitle is big enough to be read, those ones are tiny". So the warm look as built in 11a is right, and centred words.
+  He did not answer the bakery's amber line or the no-look question.
+- **Both answers are in the arm (12b, w23):**
+  - `centreWords`: a Group setting "beside the photo" {top, centred}, with check `wordsCentred` as an `only` fix;
+  - `lineReadable`: the line under the headline goes to `text-xl` (20 px, from 16), `only` fix.
+
+  Both are on in `runs/w23.edit.json` (= w20 + the two; no `look3`). Seven runs, 4 calm and 3 warm:
+  - every check closed;
+  - +2 turns on every run;
+  - calm words centred to within 0–1 px (before: −19 to −59);
+  - words the same in 6 of 7;
+  - nothing new open.
+
+  Warm runs use `--style warm` (`EXTRA="--style warm" zsh run-set.sh …`).
+- **Where the plan was wrong:** `lineReadable` first fired under a headline that was not yet a display size. The old
+  `lineSize` check then shrank the line back, and the two traded it for 7 turns (w22m-bakery, 12a). Fixed: it waits
+  for the headline to be `display-md`/`-lg`.
+- **"Tiny" was partly the page.** Round three showed 1280 px heroes at about a third of their size. Round four shows
+  them larger, and each picture opens at full size.
+
+## Waiting on Richard (the page above, version 4)
+
+1. **The warm photo:** the warm words (370–401 px) are taller than the 320 px photo, which sits at the top of its
+   column (offset +25 to +41). Centre the photo too?
+2. **The bakery's amber line above the headline** (2.78 on the amber wash): make it dark?
+3. **A request that names no look:** ask "clean, bold or warm?", calm by default, or something else?
+
+## The experiments, in order (each only if he says so)
+
+1. **Centre the photo on the warm look (answer 1).**
+   - First measure how: a Columns column wrapper stretches to the row, and the Image has a fixed height. Try
+     `alignSelf: center` on the Image, or a Group around it built the way `centreWords` is.
+   - Use `centre.mjs`'s copy-a-bench pattern before any arm code.
+   - Control: w23w-*. Pre-register an offset within ±2 px on the warm look, and the calm look unchanged.
+2. **The bakery's warm line (answer 2):** `eyebrowColour` offers dark text on the warm look, or the brand colour only
+   when it reads (≥ 3). Control: w23w-bakery.
+3. **The look question with three looks (answer 3).** Every candidate must pass the 11b probe (`probe-look3b.mjs`:
+   strict, plain and sets) before `--style auto` offers warm. Pre-register: plain requests do not reach warm at ≥ 0.9,
+   and m-running stays minimal. Candidates:
+   - a separate yes/no warm question after the two-look one;
+   - a warm description without "welcoming";
+   - asking whenever no look is named.
+4. **Bold runs with `centreWords` + `lineReadable`.** These were not made in s7; there is no w20s control, so run w19s
+   rules alongside.
+
+## Not this session
+
+- **Folding the looks and the s5–s7 switches into OWN-031 `build_app`** is the other session's lane. Ask first, briefly.
+- **OWN-033 stitching** waits until the hero work settles.
+- **The kit's contrast** (P112-OWN030-PRIMARYCONTRAST): bakery's white on amber, 3.19, is still open.
+- **The button's words are 14 px** (`text-sm`, as the kit's). Richard named only the line under the headline; ask
+  before changing it.
+
+## Traps (s7)
+
+- **A new size fix can meet an old one going the other way.** Before adding a fix on a setting, list every check that
+  moves the same setting, and gate the new one on the state where they cannot both fire.
+- **A picture shrunk on the page grades the type wrongly.** Show a hero at a size where its words read at their real
+  size, or link it full size.
+- **s6 runs predate `photos` in FACTS.** `grade-w22.mjs` falls back to 11c's photo rect (top 96 px) for them.
+- Everything in s6's traps below still holds.
+
+---
+
+# s7 plan (done: RESULTS §12)
 
 **Paste this to start the session:**
 

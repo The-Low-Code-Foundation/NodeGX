@@ -1,0 +1,174 @@
+{
+ "htmlMs": 93,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Bake Now",
+     "ratio": 3.19
+    },
+    {
+     "text": "Lyon's family bakery",
+     "ratio": 2.78
+    }
+   ],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 652,
+     "y": 317,
+     "w": 596,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Maison Levain",
+     "x": 32,
+     "y": 96,
+     "w": 602,
+     "h": 114,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Artisan breads, sweet pastries, and warm",
+     "x": 32,
+     "y": 226,
+     "w": 637,
+     "h": 26,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Bake Now",
+     "x": 32,
+     "y": 268,
+     "w": 94,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Lyon's family bakery",
+     "x": 32,
+     "y": 317,
+     "w": 164,
+     "h": 30,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:51565/",
+   "blank": false,
+   "words": 17,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Bake Now",
+     "ratio": 3.19
+    }
+   ],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 733
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Bake Now",
+     "ratio": 3.19
+    },
+    {
+     "text": "Lyon's family bakery",
+     "ratio": 2.78
+    }
+   ],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 32,
+     "y": 328,
+     "w": 326,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Maison Levain",
+     "x": 32,
+     "y": 96,
+     "w": 283,
+     "h": 53,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Artisan breads, sweet pastries, and warm",
+     "x": 32,
+     "y": 165,
+     "w": 328,
+     "h": 52,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Bake Now",
+     "x": 32,
+     "y": 233,
+     "w": 94,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Lyon's family bakery",
+     "x": 32,
+     "y": 282,
+     "w": 164,
+     "h": 30,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:51565/",
+   "blank": false,
+   "words": 17,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Bake Now",
+     "ratio": 3.19
+    }
+   ],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 744
+ },
+ "ms": 2303
+}
