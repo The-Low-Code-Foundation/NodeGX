@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Habits</title>
+<!-- OWN-034 §5b.1: the grader's clean control. A hand-made habit tracker on localStorage; the two broken copies
+     (make-broken.mjs) differ from it in one line each. -->
+<style>
+  :root { --bg: #f6f5f2; --card: #fff; --ink: #1d1d1f; --muted: #6b6b70; --line: #e3e1dc; --on: #2f7d4f; --off: #ecebe7; --warn: #a33; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.4 system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  main { max-width: 560px; margin: 0 auto; padding: 24px 16px; }
+  h1 { font-size: 24px; margin: 0 0 16px; }
+  form { display: flex; gap: 8px; margin-bottom: 16px; }
+  input { flex: 1; min-width: 0; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; }
+  button { font: inherit; min-height: 44px; padding: 0 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; }
+  .add { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .empty { color: var(--muted); }
+  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  li { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+  .top { display: flex; align-items: center; gap: 8px; }
+  .name { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+  .tick[aria-pressed="true"] { background: var(--on); color: #fff; border-color: var(--on); }
+  .del { color: var(--warn); }
+  .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 10px; }
+  .day { text-align: center; font-size: 12px; color: var(--muted); }
+  .dot { display: block; height: 20px; border-radius: 4px; background: var(--off); margin-top: 2px; }
+  .day.done .dot { background: var(--on); }
+  .streak { font-size: 14px; color: var(--muted); margin-top: 8px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Habits</h1>
+  <form id="add">
+    <input id="name" placeholder="New habit" aria-label="New habit" autocomplete="off">
+    <button class="add" type="submit">Add</button>
+  </form>
+  <p class="empty" id="empty">No habits yet. Add your first one above.</p>
+  <ul id="list"></ul>
+</main>
+<script>
+  const KEY = 'habits-v1';
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || { items: [], ticks: {} }; } catch { return { items: [], ticks: {} }; } };
+  const state = load();
+  const save = () => localStorage.setItem(KEY, JSON.stringify(state));
+  const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const daysAgo = (n) => { const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - n); return d; };
+  const done = (id, d) => (state.ticks[id] || []).includes(ymd(d));
+  // Days in a row, ending today if today is ticked, else yesterday.
+  function streak(id) { let n = 1, s = 0; while (done(id, daysAgo(n))) { s++; n++; } return s; }
+
+  const list = document.getElementById('list');
+  const empty = document.getElementById('empty');
+  const DAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  function render() {
+    empty.hidden = state.items.length > 0;
+    list.replaceChildren();
+    for (const it of state.items) {
+      const today = done(it.id, daysAgo(0));
+      const s = streak(it.id);
+      const li = document.createElement('li');
+      li.innerHTML = `<div class="top"><span class="name"></span>
+        <button class="tick" aria-pressed="${today}">${today ? 'Done today' : 'Mark done'}</button>
+        <button class="del">Delete</button></div>
+        <div class="week">${[6, 5, 4, 3, 2, 1, 0].map((n) => { const d = daysAgo(n); return `<span class="day${done(it.id, d) ? ' done' : ''}">${DAY[d.getDay()]}<span class="dot"></span></span>`; }).join('')}</div>
+        <div class="streak">Streak: ${s} day${s === 1 ? '' : 's'}</div>`;
+      li.querySelector('.name').textContent = it.name;
+      li.querySelector('.tick').onclick = () => {
+        const k = ymd(daysAgo(0)), t = state.ticks[it.id] || (state.ticks[it.id] = []);
+        const i = t.indexOf(k);
+        if (i >= 0) t.splice(i, 1); else t.push(k);
+        save(); render();
+      };
+      li.querySelector('.del').onclick = () => {
+        if (!confirm(`Delete "${it.name}"?`)) return;
+        state.items = state.items.filter((x) => x.id !== it.id);
+        delete state.ticks[it.id];
+        save(); render();
+      };
+      list.append(li);
+    }
+  }
+  document.getElementById('add').onsubmit = (e) => {
+    e.preventDefault();
+    const input = document.getElementById('name');
+    const name = input.value.trim();
+    if (!name) return;
+    state.items.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name });
+    input.value = '';
+    save(); render();
+  };
+  render();
+</script>
+</body>
+</html>

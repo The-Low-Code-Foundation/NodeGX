@@ -1,6 +1,6 @@
 # OWN-034 — The habit tracker race: DeepSeek in Cline against Gemma through questions
 
-**Opened 2026-10-30** (Opus, after OWN-032 s8, at Richard's ask). **Status: ⬜ scoped, not started.** OWN-033 stays
+**Opened 2026-10-30** (Opus, after OWN-032 s8, at Richard's ask). **Status: 🟡 s1 (2026-10-30): the grader is built and AC1 is met** (`own-034/grade.mjs`, six one-line controls, `RESULTS.md` §1). No model has been called yet. OWN-033 stays
 reserved for stitching heroes into pages (parked).
 **Models:** DeepSeek V4.1 Flash on Richard's ClinePass (`cline-pass/…`, the OWN-020 lab); Gemma 4 E2B and E4B on
 Ollama 0.40.12, the OWN-030 §0 digests (`07ea59a47401`, `ee6656371218`).
