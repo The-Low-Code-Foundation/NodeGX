@@ -71,6 +71,10 @@ const AGENT_NOTE = [
   'If I ask for an editor, a viewer or a tool of my own that reads or changes an app here, the guide is the skill',
   '`nodegx-your-own-editor` (`.claude/skills/nodegx-your-own-editor/SKILL.md`). Read it first; any agent can.',
   '',
+  // P127 BKO-009: the backend's twin, for a tool that shows or changes the app's backend.
+  "If it shows or changes the app's backend (its tables, rules, people, triggers or runs), the guide is",
+  '`nodegx-your-own-backend-editor` (`.claude/skills/nodegx-your-own-backend-editor/SKILL.md`).',
+  '',
   // P18 EXP-023 (Richard, 2026-10-21): the off-ramp is on npm, and the note says how to leave.
   'If I want to leave NodeGX with the source: `npx @nodegx/export export <the app\'s folder> --dry-run` says first what',
   'will and will not translate, and without `--dry-run <an empty folder>` writes a React + Vite app there. To put the',

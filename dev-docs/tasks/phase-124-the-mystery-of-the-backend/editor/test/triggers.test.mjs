@@ -11,7 +11,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { triggerFlows, functionNamed } from '../lib/triggers.mjs';
+import { triggerFlows, functionNamed } from '@nodegx/backend-kit';
 import { freePort, stop, makeCopy, startBackend, adminClient } from './copies.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));

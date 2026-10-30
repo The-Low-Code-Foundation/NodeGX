@@ -1,5 +1,5 @@
-// @nodegx/backend-map/kit (P127 BKO-008) — what anyone needs to build their own backend editor or viewer, with no screen
-// in it. The map is built on this and imports nothing else of the package's (`server.mjs`, `public/`).
+// @nodegx/backend-kit (P127 BKO-008; its own package by ruling R2) — what anyone needs to build their own backend editor
+// or viewer, with no screen in it. The backend map (@nodegx/backend-map) is built on this and on nothing private.
 //
 //   What's in the backend          readFacts, tableRows, openProject, backend, projectBackend
 //   Who may touch a table, in words words (ruleWords, tableRule, handWords, …), dryRuns, rulesOff
@@ -9,7 +9,8 @@
 //   Change it so it holds          setTableRule, makeHands (rule, addTrigger, removeTrigger, setEnabled, undo):
 //                                  the backend and the project's file together, a stale page refused, rolled back
 //   What ran just now              makeRuns
-//   Is my editor right?            runSuite, referenceAdapter, EDIT_KINDS (and the `backend-suite` command)
+//   Is my editor right?            runSuite, referenceAdapter, EDIT_KINDS (and the `backend-suite` command); its read
+//                                  half grades what an editor shows one person was handed (gradeHanded)
 
 export { backend, BackendError } from './backend.mjs';
 export { backendsRoot, localBackends, projectBackend } from './discover.mjs';
@@ -31,3 +32,4 @@ export { makeRuns } from './runs.mjs';
 export * as words from './words.js';
 
 export { EDIT_KINDS, editWords, referenceAdapter, runSuite } from './suite.mjs';
+export { gradeHanded, samplePeopleByGroups } from './handed.mjs';

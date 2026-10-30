@@ -12,7 +12,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { runSuite, referenceAdapter, EDIT_KINDS } from '@nodegx/backend-map/kit';
+import { runSuite, referenceAdapter, EDIT_KINDS } from '@nodegx/backend-kit';
 import mapAdapter from './backend-adapter.mjs';
 import { hashTree, freePort, stop, makeCopy, startBackend } from './copies.mjs';
 
@@ -20,7 +20,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const TEMPLATES = path.resolve(here, '..', '..', '..', '..', '..', 'templates');
 const MEMBERS = process.env.MEMBERS_AREA ?? path.join(TEMPLATES, 'members-area');
 const TODO = process.env.TODO_LIST ?? path.join(TEMPLATES, 'todo-list');
-const CLI = path.join(here, '..', 'bin', 'backend-suite.js');
+const CLI = path.join(path.dirname(fileURLToPath(import.meta.resolve('@nodegx/backend-kit/package.json'))), 'bin', 'backend-suite.js');
 
 let failures = 0;
 const ok = (cond, words, detail) => {
@@ -77,7 +77,12 @@ for (const [label, source] of [['members', MEMBERS], ['todo', TODO]]) {
     const endRules = await fetch(base + '/admin/permissions', { headers: { Authorization: `Bearer ${c.token}` } }).then((r) => r.json());
     // key by key, sorted: a table put back comes last in the backend's answer
     const sorted = (v) => (Array.isArray(v) ? v.map(sorted) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, sorted(v[k])])) : v);
-    ok(JSON.stringify(sorted(endRules.config)) === JSON.stringify(sorted(startRules.config)), `${label}: the backend's rules are back as they started, after four runs`);
+    const keysOf = (c) => Object.entries(c ?? {}).flatMap(([k, v]) => (v && typeof v === 'object' && !Array.isArray(v) && k !== 'defaults' ? Object.keys(v).map((x) => `${k}.${x}`) : [k]));
+    const movedRules = [...new Set([...keysOf(startRules.config), ...keysOf(endRules.config)])].filter((k) => {
+      const at = (c) => k.split('.').reduce((o, p) => o?.[p], c);
+      return JSON.stringify(sorted(at(startRules.config))) !== JSON.stringify(sorted(at(endRules.config)));
+    });
+    ok(!movedRules.length, `${label}: the backend's rules are back as they started, after four runs`, movedRules.map((k) => `${k}: ${JSON.stringify(k.split('.').reduce((o, p) => o?.[p], startRules.config))} → ${JSON.stringify(k.split('.').reduce((o, p) => o?.[p], endRules.config))}`));
     const folderAfter = hashTree(c.copy);
     const moved = Object.keys({ ...folderBefore, ...folderAfter }).filter((k) => folderBefore[k] !== folderAfter[k]);
     ok(!moved.length, `${label}: the copy's folder is byte-identical at the end`, moved);

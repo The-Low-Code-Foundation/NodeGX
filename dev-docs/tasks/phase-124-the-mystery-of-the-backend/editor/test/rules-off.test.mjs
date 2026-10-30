@@ -3,8 +3,7 @@
 //
 //   node test/rules-off.test.mjs
 
-import { dryRuns } from '../lib/rules.mjs';
-import { anonymousReach } from '../lib/reach.mjs';
+import { dryRuns, anonymousReach } from '@nodegx/backend-kit';
 
 let failures = 0;
 const ok = (cond, words) => {

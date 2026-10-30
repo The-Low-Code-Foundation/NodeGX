@@ -36,5 +36,7 @@ console.log('\n— the hands, driven in Chrome: drags, the chooser, a wire cut w
 if (run([path.join(here, 'hands-ui.test.mjs')]) !== 0) bad++;
 console.log('\n— the backend suite (the kit): the map’s adapter, the kit’s writers and two controls, on members-area and todo copies —');
 if (run([path.join(here, 'backend-suite.test.mjs')]) !== 0) bad++;
+console.log('\n— the backend suite’s read half: what one person was handed, on the Riverside club filled through its own doors —');
+if (run([path.join(here, 'handed.test.mjs')]) !== 0) bad++;
 console.log(bad ? `\n${bad} part(s) FAILED` : '\nEverything passed.');
 process.exit(bad ? 1 : 0);

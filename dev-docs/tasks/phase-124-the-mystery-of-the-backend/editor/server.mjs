@@ -13,9 +13,9 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { look, wireColors } from '@nodegx/canvas-look';
-// BKO-008: the map is built on its kit and imports nothing else of the package's. A stranger's editor imports the same
-// thing as `@nodegx/backend-map/kit`.
-import { openProject, analyseProject, backend, BackendError, Refusal, setTableRule, entryFor, dryRuns, makeViews, asPerson, projectBackend, makeHands, readFacts, tableRows, makeRuns, makeLens } from '@nodegx/backend-map/kit';
+// BKO-008: the map is built on the kit (@nodegx/backend-kit) and on nothing private. A stranger's editor imports the
+// same package.
+import { openProject, analyseProject, backend, BackendError, Refusal, setTableRule, entryFor, dryRuns, makeViews, asPerson, projectBackend, makeHands, readFacts, tableRows, makeRuns, makeLens } from '@nodegx/backend-kit';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
@@ -88,7 +88,7 @@ export function createEditor(opts) {
   return { buildMap, runs: makeRuns({ be, mine }), rows: (table) => tableRows(be, table), changeRule, hands, check: (table) => dryRuns(be, table), views, project, be, reachOf: lens.reachOf, everyone: lens.everyone };
 }
 
-const WORDS = fileURLToPath(import.meta.resolve('@nodegx/backend-map/kit/words.js'));
+const WORDS = fileURLToPath(import.meta.resolve('@nodegx/backend-kit/words.js'));
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png' };
 
 /**

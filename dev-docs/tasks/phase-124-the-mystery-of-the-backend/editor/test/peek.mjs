@@ -1,6 +1,6 @@
 // Prints what the map reads from a project folder, in short. Read-only.
 import fs from 'node:fs';
-import { openProject, analyseProject } from '../lib/project.mjs';
+import { openProject, analyseProject } from '@nodegx/backend-kit';
 
 const dir = process.argv[2] ?? '../training';
 const schema = JSON.parse(fs.readFileSync(`${dir}/backend/schema.json`, 'utf8'));

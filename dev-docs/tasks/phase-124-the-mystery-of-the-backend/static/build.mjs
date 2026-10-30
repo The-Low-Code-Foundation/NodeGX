@@ -26,7 +26,7 @@ fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
 fs.cpSync(path.join(here, '..', 'editor', 'public'), out, { recursive: true });
 // BKO-008: the page's words are the kit's (the server serves them at /words.js); the public copy carries the file
-fs.copyFileSync(path.join(here, '..', 'editor', 'lib', 'words.js'), path.join(out, 'words.js'));
+fs.copyFileSync(path.join(here, '..', '..', 'phase-127-the-backend-in-the-open', 'kit', 'lib', 'words.js'), path.join(out, 'words.js'));
 fs.cpSync(data, path.join(out, 'data'), { recursive: true });
 fs.copyFileSync(path.join(here, 'recorded.js'), path.join(out, 'recorded.js'));
 

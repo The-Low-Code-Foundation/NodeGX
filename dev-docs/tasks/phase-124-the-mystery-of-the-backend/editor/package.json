@@ -1,7 +1,7 @@
 {
   "name": "@nodegx/backend-map",
   "version": "0.1.6",
-  "description": "Your NodeGX app's backend as a map: its screens, cloud functions and tables, and who can reach which rows, measured by running its functions as each person. Its kit (/kit) is what anyone needs to build their own backend editor, with a suite that says PASS.",
+  "description": "Your NodeGX app's backend as a map: its screens, cloud functions and tables, and who can reach which rows, measured by running its functions as each person. It is built on @nodegx/backend-kit, which is what anyone needs to build their own backend editor.",
   "license": "GPL-3.0-only",
   "homepage": "https://nodegx.io/backend-map/",
   "repository": {
@@ -11,20 +11,16 @@
   },
   "type": "module",
   "bin": {
-    "backend-map": "./bin/backend-map.js",
-    "backend-suite": "./bin/backend-suite.js"
+    "backend-map": "./bin/backend-map.js"
   },
   "main": "./server.mjs",
   "exports": {
     ".": "./server.mjs",
-    "./kit": "./lib/index.mjs",
-    "./kit/words.js": "./lib/words.js",
     "./package.json": "./package.json"
   },
   "files": [
     "bin",
     "server.mjs",
-    "lib",
     "public",
     "README.md",
     "LICENSE"
@@ -37,11 +33,12 @@
     "test": "node test/run-all.mjs"
   },
   "dependencies": {
-    "@nodegx/canvas-look": "^0.1.0",
-    "@nodegx/project-contract": "^0.2.1"
+    "@nodegx/backend-kit": "^0.1.0",
+    "@nodegx/canvas-look": "^0.1.0"
   },
   "devDependencies": {
     "@nodegx/preview": "^0.2.4",
+    "@nodegx/project-contract": "^0.2.1",
     "puppeteer-core": "^25.15.0"
   },
   "publishConfig": {

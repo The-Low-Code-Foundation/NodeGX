@@ -105,10 +105,10 @@ question and deleted straight after, and its secret is never shown or saved. Eve
 - **Pick a person** and the map measures, for real, which rows reach them: it runs as them every function they may
   run that only reads, follows what came back the way the app would (a person's id in a list → that person's rows),
   and finds every row of every table in the answers. What it knows about whoever is signed in is their id, plus the
-  key of their row in any table with one row per person (`lib/people.mjs`: a column that names a person and no two
+  key of their row in any table with one row per person (the kit's `people.mjs`: a column that names a person and no two
   rows share). The runs play out on the map: a table lights up,
   counts up and fills its pink bar only when rows of it come back. Tables nothing came back from stay dark.
-  `lib/reach.mjs`; `POST /api/as/everything` streams one JSON line per run. `{ "person": null }` is someone not
+  The kit's `reach.mjs`; `POST /api/as/everything` streams one JSON line per run. `{ "person": null }` is someone not
   signed in.
 - **Who sees how much?** measures everyone the same way and ranks them (`POST /api/everyone`).
 - **A table's rows** come first in its panel; looking as someone, their rows are lit. Click a row, then **Who can
@@ -118,54 +118,12 @@ question and deleted straight after, and its secret is never shown or saved. Eve
 
 ## Build your own: the kit
 
-Everything the map knows and every change it makes is in its kit, with no screen in it. The map is built on the kit
-and imports nothing else of this package's. Your own editor or viewer can use it the same way:
-
-```js
-import { backend, openProject, readFacts, makeHands, makeLens, asPerson, makeRuns, words } from '@nodegx/backend-map/kit';
-```
-
-| question | the kit's answer |
-|---|---|
-| What's in the backend: tables, fields, rows, people, groups? | `readFacts({ be, project })`, `tableRows(be, table)`, `loadWorld(be)` |
-| Who may touch a table, in words? | `words.tableRule`, `words.ruleWords`, `words.handWords`; `dryRuns(be, table)` asks the backend itself |
-| What do the functions and pages touch? | `analyseProject(project, tableNames)`: a table the code *names*, not the rows it hands over |
-| What starts by itself? | `triggerFlows({ backend, workflows, file, functions })` |
-| What did one person actually get? | `makeLens({ be, project, ap: asPerson(be) }).reachOf(personId)`: their functions run as them |
-| How do I change a rule or a trigger so it holds? | `makeHands({ be, files, functions })`: `rule`, `addTrigger`, `removeTrigger`, `setEnabled`, `undo`; `setTableRule` |
-| What ran just now? | `makeRuns({ be })(since)` |
-
-`be` is `backend(url, adminToken)`; `project` is `openProject(folder)`. Keep the admin token on your server, as the
-map does. The writers change the running backend **and** the project's file together or not at all, refuse when
-either changed since you looked, and put the backend back when the file can't be written. The words are one text:
-`@nodegx/backend-map/kit/words.js` touches neither Node nor the page, so a page can load it as it is (the map's
-does, at `/words.js`).
-
-### Is your editor right? The backend suite
-
-Write an adapter (`open({ project, backend, token })`, `apply(edit)`, optionally `close()`) that makes each edit
-through your editor's own code, the path a person's click takes. Then, on a **copy** of the app and the copy's
-backend:
-
-```
-npx -p @nodegx/backend-map backend-suite my-adapter.mjs <copy of the app> edits.json --backend <url> --token-file <file>
-```
-
-The edits are `grant` and `revoke` (`table`, `who`: `public`, `authenticated`, `role:<name>` or `maker`, and for a
-grant `what`: `see`, `change` or `both`), `add_trigger` (`fn`, `table`, `actions`), `schedule` (`fn`, `cron`),
-`turn_off` and `remove_trigger` (`trigger`: an id, or `"@3"` for the trigger edit 3 made). `apply` returns
-`{ id }` for the two that make a trigger. After each edit the suite reads the backend and the files itself and
-compares them with the kit's own writers: the same entry in both places, and each file byte for byte as the kit
-writes it. It prints `PASS — <editor> on <app> (… ms); both places put back`, or `FAIL` with a sentence per
-difference:
-
-```
-after edit 1 (grant: Anyone signed in may see on Meeting): Meeting in nodegx.security.json is reading the member
-group or the admin group, adding the admin group; the backend says reading anyone signed in, adding the admin group.
-```
-
-Before you trust a PASS, break your adapter on purpose (skip the file) and check it says FAIL. `test/backend-adapter.mjs`
-is the map's own adapter; `test/backend-adapter-skipfile.mjs` is that control.
+Everything the map knows and every change it makes is in `@nodegx/backend-kit`, which has no screen in it. The map is
+built on the kit and on nothing private. Your own editor or viewer can use it the same way, and the kit's
+`backend-suite` command says whether it's right: what it shows one person got, and what it writes when someone
+changes a rule or a trigger. The kit's README lists its exports, and `npm create nodegx` writes its guide into your
+folder (`.claude/skills/nodegx-your-own-backend-editor/SKILL.md`). `test/backend-adapter.mjs` is the map's own
+adapter for the suite, and `test/backend-adapter-skipfile.mjs` is its control.
 
 ## The public copy
 

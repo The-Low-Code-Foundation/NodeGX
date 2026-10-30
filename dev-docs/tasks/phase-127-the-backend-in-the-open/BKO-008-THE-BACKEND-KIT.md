@@ -65,6 +65,13 @@ lockfile change, and it can move to its own package without changing its API.
 |---|---|---|
 | R2 | Its own package (`@nodegx/backend-kit`, beside `project-contract`) or `@nodegx/backend-map/kit`? | Start as `/kit`; move to its own package when the lockfile is free, before BKO-009's stranger round, so the skill names a package that says what it is |
 
+**R2 ruled 2026-10-30: its own package first.** Built in BKO-009 s1 as `@nodegx/backend-kit` 0.1.0 in
+`phase-127-the-backend-in-the-open/kit/`, not under `packages/` (the reason is in BKO-009's log). The map's `./kit`
+export and its `backend-suite` bin are gone; the map depends on the kit. **Studio:** its `functionTouches`
+(`editor/serve.mjs`) imports the map's `lib/project.mjs` by path, which is no longer in the map. When Studio's pin moves
+past 0.1.4 it must import `openProject`, `projectTables` and `analyseProject` from `@nodegx/backend-kit`, or it says
+"isn't installed" and names no touches.
+
 ## The other copies (AC4: not changed here)
 
 | copy | what it writes | what moving it onto the kit would take |

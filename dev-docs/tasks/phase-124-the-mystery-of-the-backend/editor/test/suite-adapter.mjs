@@ -10,8 +10,7 @@
 // The control, test/suite-adapter-broken.mjs, writes a number as text on the way out: the suite must FAIL.
 
 import { memoryFiles } from '@nodegx/project-contract/format.js';
-import { openProject, analyseProject } from '../lib/project.mjs';
-import { readSecurityFile } from '../lib/rules.mjs';
+import { openProject, analyseProject, readSecurityFile } from '@nodegx/backend-kit';
 
 export default function () {
   let files;

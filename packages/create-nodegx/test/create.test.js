@@ -81,13 +81,35 @@ test('P112 OWN-007 (R3): the folder gets the editor brief as a project skill, na
     assert.ok(text.includes(`\n${heading}\n`), heading);
   }
   // The kit is written as a copy of profiles/core, so a change there is what ships.
-  assert.deepEqual(coreSkillFiles().map((f) => f.to), [path.join('.claude', 'skills', 'nodegx-your-own-editor', 'SKILL.md')]);
+  assert.deepEqual(coreSkillFiles().map((f) => f.to), [
+    path.join('.claude', 'skills', 'nodegx-your-own-backend-editor', 'SKILL.md'),
+    path.join('.claude', 'skills', 'nodegx-your-own-editor', 'SKILL.md')
+  ]);
   // Every other agent is pointed at the same file from the agent notes.
   assert.match(AGENT_NOTE, /`nodegx-your-own-editor` \(`\.claude\/skills\/nodegx-your-own-editor\/SKILL\.md`\)/);
   // P18 EXP-023: the note says how the person leaves, and that the preflight comes first.
   assert.match(AGENT_NOTE, /`npx @nodegx\/export export <the app's folder> --dry-run` says first what/);
   assert.match(AGENT_NOTE, /`npx nodegx-deploy` \(from `@nodegx\/preview`\)/);
-  assert.match(run.stdout, /Wrote \.claude\/skills\/nodegx-your-own-editor\/SKILL\.md/);
+  assert.match(run.stdout, /Wrote [^\n]*\.claude\/skills\/nodegx-your-own-editor\/SKILL\.md/);
+});
+
+test('P127 BKO-009: the folder gets the backend editor brief beside the editor one, and the agent notes name it', () => {
+  const dir = path.join(tmp(), 'my-apps');
+  const run = spawnSync(process.execPath, [BIN, dir], { encoding: 'utf8' });
+  assert.equal(run.status, 0, run.stderr);
+  const skill = path.join(dir, '.claude', 'skills', 'nodegx-your-own-backend-editor', 'SKILL.md');
+  const text = fs.readFileSync(skill, 'utf8');
+  assert.match(text, /^---\nname: nodegx-your-own-backend-editor\ndescription: "/);
+  assert.match(text, /LOAD when the person asks for a tool of their own that shows or changes their app's backend/);
+  for (const heading of ['## The kit', '## Done means PASS', '## What the tools before yours got wrong', '## What your editor must not do']) {
+    assert.ok(text.includes(`\n${heading}\n`), heading);
+  }
+  // the kit it names, and the suite's read half and write half
+  assert.match(text, /npm install @nodegx\/backend-kit/);
+  assert.match(text, /\*\*`handed\(person\)`\*\*/);
+  assert.match(text, /\*\*`apply\(edit\)`\*\*/);
+  assert.match(AGENT_NOTE, /`nodegx-your-own-backend-editor` \(`\.claude\/skills\/nodegx-your-own-backend-editor\/SKILL\.md`\)/);
+  assert.match(run.stdout, /Wrote \.claude\/skills\/nodegx-your-own-backend-editor\/SKILL\.md/);
 });
 
 test('P112 OWN-012 AC4 (R4, teach both equally): the brief teaches the real app and the drawn screen side by side, each with its cost', () => {
@@ -110,7 +132,8 @@ test("P112 OWN-007: a person's own skill file is never replaced", () => {
   const skill = path.join(dir, '.claude', 'skills', 'nodegx-your-own-editor', 'SKILL.md');
   fs.mkdirSync(path.dirname(skill), { recursive: true });
   fs.writeFileSync(skill, 'mine\n');
-  assert.deepEqual(setUp(dir).skills, []);
+  // only the skill that is absent is written (P127 BKO-009 added the backend one beside it)
+  assert.deepEqual(setUp(dir).skills, [path.join('.claude', 'skills', 'nodegx-your-own-backend-editor', 'SKILL.md')]);
   assert.equal(fs.readFileSync(skill, 'utf8'), 'mine\n');
 });
 

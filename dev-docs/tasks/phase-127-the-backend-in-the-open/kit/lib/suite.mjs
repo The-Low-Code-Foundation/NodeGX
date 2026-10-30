@@ -6,8 +6,10 @@
 // trigger, and what each place says. At the end both places are put back as they were before the first edit.
 //
 // An adapter is a module whose default export is an object, or a function returning one:
-//   { name, open({ project, backend, token }), apply(edit) → { id }? , close()? }
+//   { name, open({ project, backend, token }), apply(edit) → { id }? , handed(person)?, close()? }
 // `apply` must return { id } for add_trigger and schedule: the trigger's id, so later edits can name it ("@3").
+// `handed` is the read half (BKO-009, lib/handed.mjs): what the editor shows one person was handed, step by step. It is
+// graded first, on the backend as it starts. An editor that changes nothing offers `handed` and an empty edit script.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -19,6 +21,7 @@ import { SECURITY_FILE } from './rules.mjs';
 import { AUTOMATIONS_FILE } from './triggers.mjs';
 import { makeHands, projectTrigger } from './hands.mjs';
 import { handEntry, ruleWords, tableWords, whoWords, MAKER } from './words.js';
+import { gradeHanded } from './handed.mjs';
 
 export const EDIT_KINDS = ['grant', 'revoke', 'add_trigger', 'schedule', 'remove_trigger', 'turn_off'];
 
@@ -100,10 +103,11 @@ async function loadAdapter(adapter) {
  * @param {string} o.project   the app's folder (a copy: the adapter writes into it)
  * @param {string} o.backend   the running backend that folder's app uses (a copy's: the adapter changes it)
  * @param {string} o.token     its admin credential
- * @param {object[]} o.edits   the script
- * @returns {Promise<{ pass: boolean, line: string, differences: string[], putBack: boolean, ms: number }>}
+ * @param {object[]} o.edits   the script (may be empty for an editor that only shows)
+ * @param {string[]} [o.people] whom the read half asks about: `_User` ids, emails or names (left out: one per set of groups)
+ * @returns {Promise<{ pass: boolean, line: string, differences: string[], putBack: boolean, ms: number, handed: object|null }>}
  */
-export async function runSuite({ adapter, project, backend, token, edits }) {
+export async function runSuite({ adapter, project, backend, token, edits, people }) {
   const t0 = Date.now();
   const be = backendClient(backend, token);
   const read = (name) => (fs.existsSync(path.join(project, name)) ? fs.readFileSync(path.join(project, name), 'utf8') : null);
@@ -129,8 +133,16 @@ export async function runSuite({ adapter, project, backend, token, edits }) {
   const say = (i, words, about = words) => !said.has(about) && (said.add(about), differences.push(`after ${editWords(edits[i], i)}: ${words}`));
   const idOf = (ref) => (typeof ref === 'string' && /^@\d+$/.test(ref) ? minted[Number(ref.slice(1)) - 1] : ref);
 
+  let handed = null;
   try {
     await ed.open({ project, backend, token });
+    // the read half first, on the backend as it starts
+    if (typeof ed.handed === 'function') {
+      handed = await gradeHanded({ ed, be, project: openProject(project), people, name });
+      differences.push(...handed.differences);
+    } else if (!edits.length) {
+      differences.push(`${name} offers no handed() and the script has no edits, so there was nothing to grade.`);
+    }
     for (let i = 0; i < edits.length && differences.length < 10; i++) {
       const edit = { ...edits[i] };
       if (edit.trigger !== undefined) edit.trigger = idOf(edit.trigger);
@@ -256,6 +268,9 @@ export async function runSuite({ adapter, project, backend, token, edits }) {
     /* the folder's name */
   }
   const tail = putBack.length ? `; NOT put back: ${putBack.join(', ')}` : '; both places put back';
-  const line = differences.length ? `FAIL — ${name} on ${where}, ${differences.length} difference${differences.length === 1 ? '' : 's'} (${ms} ms)${tail}` : `PASS — ${name} on ${where}, ${edits.length} edits (${ms} ms)${tail}`;
-  return { pass: !differences.length, line, differences, putBack: !putBack.length, ms };
+  const reads = !handed
+    ? '; reads not graded: the adapter offers no handed()'
+    : `; ${handed.steps} step${handed.steps === 1 ? '' : 's'} shown to ${handed.people} ${handed.people === 1 ? 'person' : 'people'}${handed.notGraded ? `, ${handed.notGraded} not graded (a function that changes data is never run; a table a path rule narrows can’t be checked row by row)` : ''}`;
+  const line = differences.length ? `FAIL — ${name} on ${where}, ${differences.length} difference${differences.length === 1 ? '' : 's'} (${ms} ms)${tail}` : `PASS — ${name} on ${where}, ${edits.length} edits${reads} (${ms} ms)${tail}`;
+  return { pass: !differences.length, line, differences, putBack: !putBack.length, ms, handed };
 }

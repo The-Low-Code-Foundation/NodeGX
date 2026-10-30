@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { analyseProject, openProject } from '../lib/project.mjs';
+import { analyseProject, openProject } from '@nodegx/backend-kit';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const TODO = path.resolve(here, '..', '..', '..', '..', '..', 'templates', 'todo-list');

@@ -12,9 +12,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createEditor, serve } from '../server.mjs';
-import { makeHands, projectTrigger } from '../lib/hands.mjs';
-import { analyseProject } from '../lib/project.mjs';
-import { backend } from '../lib/backend.mjs';
+import { makeHands, projectTrigger, analyseProject, backend } from '@nodegx/backend-kit';
 import { REAL_APP, hashTree, freePort, stop, makeCopy, startBackend, seedWorld } from './copies.mjs';
 
 let failures = 0;
