@@ -1233,3 +1233,113 @@ calm and the warm look, at two turns' cost and nothing else. Round four is on th
 **Open, for Richard (on the page):** (a) on the warm look the photo stays at the top beside taller words (+40 px):
 centre the photo too? (b) the bakery's amber line, 2.78; (c) a request that names no look. Bold (`s-`) runs were not
 made with these rules.
+
+## 13. s8 — Richard's round-four answers: the warm photo centred, a dark line on warm, three looks asked (2026-10-30)
+
+**Richard, 2026-10-30, asked in chat (round four had no answer store, and no comments):**
+1. *The warm photo, words 370–401 px beside a 320 px photo at the top of its column: centre it too?* → **"Centre it"**.
+2. *The bakery's amber line above the headline, 2.78 on the amber wash: brand colour only where it reads, always dark on
+   warm, or leave it?* → **"Always dark on warm"** (not my recommendation, which was the brand colour where it reads).
+3. *A request that names no look: keep today's (warm only when asked, else "clean or bold?"), ask "clean, bold or
+   warm?", or calm by default?* → **"Ask 'clean, bold or warm?'"**. I said this needs the model first to stop treating
+   warm as the default (11b: 20 of 20 plain requests went to warm, 11 at ≥ 0.9).
+
+### 13a. Centring the warm photo: measured first (`centre-photo.mjs`, on `-centre` bench copies)
+
+A Columns item wrapper is a plain block stretched to the row (`Columns.tsx`: `alignItems: stretch`, the wrapper is not a
+flex box), so the Image's own vertical alignment (`alignY`, a margin in a flex column) should do nothing there. Four
+variants on each final w23 hero (desktop offset = words' middle − photo's middle):
+
+| hero | built | `alignY: center` | `fill` (height 100 %) | `wrapped` (Group: height 100 %, justify centre) |
+|---|---|---|---|---|
+| w23w-puppy | +41 | +41 | 0, photo 447 px, page +46 px, phone photo 245 px | **0**, phone the same |
+| w23w-bakery | +40 | +40 | 0, photo 447 px, page +48 px | **0**, phone the same |
+| w23w-pottery | +25 | +25 | +1, photo 447 px, page +77 px | **0**, phone the same |
+| w23m-pottery (calm, words shorter) | +1 | +1 | 0, photo 447 px, page +127 px | +1, nothing moves |
+
+`alignY` does nothing, as the wrapper says. `fill` is not centring: it makes the photo 447 px, taller than the words,
+and changes the page and the phone. `wrapped` centres the photo exactly and moves nothing else, on any width or look.
+
+**The arm (`centrePhoto`, needs `centreWords`):** once the words are centred, a photo standing straight in its Columns
+column beside a words column measured taller than it (desktop, by more than 4 px) gets one `wrap` fix: the photo goes
+into a new Group already "centred" (the words Group's own option). One step, not a wrap and then a setting.
+`runs/w24.edit.json` = w23 + `centrePhoto`.
+
+Runs: `w24w-{bakery,pottery,puppy}` (`--style warm`) against `w23w-*`; `w24m-puppy` (calm) against `w23m-puppy`, where
+the words are shorter than the photo and the check must not fire.
+
+**Pre-registered (before any w24 run):**
+1. `photoCentred` fires and closes on **3 of 3** warm runs: the final tree has the photo inside a centred Group.
+2. Warm desktop offset within **±2 px** on 3 of 3 (w23w: +25 to +41).
+3. Phone: the same photo rect and page height as the control, `overflowX` 0, no `atEdge`.
+4. Turns: the control's **+1** on each warm run (±2); none reaches 40.
+5. Calm `w24m-puppy`: `photoCentred` never fires, and the run is the control's action for action (`compare.mjs`).
+6. Nothing the control closed is open; `lowContrast` is the control's list. Words the same in ≥ 2 of 3 warm runs.
+
+**First w24 set, void: the check could not fire.** The three warm runs came back the control action for action (35, 37,
+35 turns; offsets +40, +25, +41; photo not wrapped). `photoCentred` asked whether the photo's parent was one of the
+Columns' children, but a photo standing straight in its column has the Columns itself as its parent. Fixed to
+`nodes[img].parent === cols` and checked outside the arm on the four final heroes: it fires on w24w-bakery, -pottery
+and -puppy (words 399, 370, 401 px beside a 320 px photo), not on w23m-puppy (230 px). The calm control was stopped
+part-way. All four re-run under the same name and the same pre-registration.
+
+**Result (w24, re-run with the fixed check, 2026-10-30; `node grade.mjs w24 …` → `runs/grade-w24.json`):**
+
+| run | turns (ctl → w24) | photo top, desktop (ctl → w24) | offset (ctl → w24) | phone photo / page | left open | words |
+|---|---|---|---|---|---|---|
+| w-bakery | 35 → 36 | 96 → 136 | +40 → **0** | same / 752 same | amber line 2.78, button 3.19 (ctl's) | same |
+| w-pottery | 37 → 38 | 96 → 121 | +25 → **0** | same / 746 same | nothing | same |
+| w-puppy | 35 → 36 | 96 → 137 | +41 → **0** | same / 807 same | nothing | same |
+| m-puppy (calm) | 24 → 24 | 96 → 96 | 0 → 0 | same / 718 same | nothing | same |
+
+**Graded against 13a's predictions:**
+1. `photoCentred` fired and closed on **3 of 3** warm runs (turn 35, 37, 35, the last fix before the end); the photo ends
+   in a centred Group. ✔
+2. Warm offset **0 px** on 3 of 3 (±2 predicted). ✔
+3. Phone: the same photo rect and page height on all four; `overflowX` 0, `atEdge` 0. ✔
+4. Turns: **+1** on 3 of 3. ✔
+5. Calm w24m-puppy: the check never fired; `drift.mjs`: 24 actions the same, never parts, odds drift 0.0000. ✔
+6. Nothing the control closed is open; `lowContrast` is the control's list; words the same on **3 of 3**. ✔
+
+**What this settles:** Richard's "centre it" is in the arm (`centrePhoto`), at one turn on the warm look and nothing on
+the calm one. The bold look (words taller than its photo too, 11c) will take it as well; that is experiment 4.
+
+### 13b. The small line on warm is dark (`eyebrowDark`, w25)
+
+Richard: "always dark on warm". `eyebrowDark` (warm only) turns the `eyebrowColour` check round: the small handwritten
+line must be `dark text`, an `only` fix, instead of the brand colour. A new Text starts as `dark text`
+(`var(--foreground)`), so in a warm run the check should never fire at all. `runs/w25.edit.json` = w24 + `eyebrowDark`.
+Runs: `w25w-{bakery,pottery,puppy}` against `w24w-*`.
+
+**Pre-registered (before any w25 run, and before the w24 re-runs were graded):**
+1. The small line ends `var(--foreground)` on **3 of 3**; `eyebrowColour` fires on none.
+2. Bakery: `lowContrast` loses the amber line (2.78) and keeps only the kit's button (3.19). Pottery and puppy: none.
+3. Turns: the control's **−1** on each run (±2): the step that put the line in the brand colour is gone.
+4. Everything else the control closed stays closed; photo and words offsets as the control's (±2 px). Words the same in
+   ≥ 2 of 3: the colour step comes late, so the prompts part only from where the control took it.
+
+### 13c. "Clean, bold or warm?" when no look is named (`probe-look4.mjs`, probe only)
+
+Richard's rule: a request that names no look is asked "clean, bold or warm?". 11b's three-look question cannot be that
+rule: it put 20 of 20 plain requests on warm, 11 at ≥ 0.9. Three candidates, each a decision per request (minimal,
+stylish, warm, or **ask**), at T 0 in every option order:
+- **A** two looks, then a yes/no "do their words ask for a warm, cosy look: soft pastel colours and rounded shapes?":
+  warm at mean P(yes) ≥ 0.9, else the two-look rule (P(stylish) ≤ 0.1 minimal, ≥ 0.9 stylish, else ask);
+- **B** three looks, warm described without "welcoming" or "friendly" ("cosy and gentle: a soft pastel ground, rounded
+  shapes, a handwritten touch"): the top look at mean P ≥ 0.9, else ask;
+- **C** a yes/no "do their words say anything about how the page should look or feel?": ask when P(yes) < 0.5, else
+  11b's three looks, the top look at ≥ 0.9, else ask.
+
+Sets: 11b's 8 strict warm requests (none says warm, friendly or welcoming), the 20 plain ones, the 11 run-set requests
+(calm and bold), and the 3 warm run-set requests.
+
+**Pre-registered (before the probe runs). A candidate passes when all four hold:**
+1. plain: **ask on ≥ 18 of 20, warm on 0**;
+2. strict: warm on **≥ 7 of 8**;
+3. sets: the right look on **≥ 10 of 11**, and m-running ("A calm, simple page for Park Runners…") is minimal or ask,
+   never warm;
+4. warm run-set: warm on **3 of 3**.
+
+Only a passing candidate goes into the arm's `--style auto`. If none passes, nothing changes in the arm, and the rule
+stays as it is today (warm only with `--style warm`; "clean or bold?").
+My guess, for the record: C does best on plain; A's yes/no leans to "yes" on plain requests as the three-look question did.

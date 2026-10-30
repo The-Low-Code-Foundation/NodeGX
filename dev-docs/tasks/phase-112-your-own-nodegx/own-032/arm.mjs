@@ -261,8 +261,13 @@ async function judge(q, png) {
 //                 justify centre), an `only` fix (12b: calm offsets −19…−59 → 0…+1 px, +1 turn)
 //   lineReadable  the line under the headline is at least text-xl (20 px), an `only` fix, and only once the headline
 //                 is a display size (12a: under a text-base headline it fought `lineSize` for 7 turns)
+// s8 switches (default off; Richard on round four: "centre it", "always dark on warm"):
+//   centrePhoto   (centreWords) once the words are centred, a photo standing straight in its column beside a TALLER
+//                 words column (desktop, > 4 px) is put in a Group that fills the column and centres it, one `wrap` fix
+//                 (13a: the Image's own alignY does nothing in a Columns wrapper, a block; the Group: offset 0, phone same)
+//   eyebrowDark   (warm) the small handwritten line is dark text, not the brand colour (bakery's amber read 2.78)
 // The touching / edge thresholds are not rules: bench.mjs FACTS fixes them (4 px, 8 px), and probe-vision's key with them.
-const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false, roles: false, endGate: false, addWhileMissing: false, shortHeadline: false, blankRetry: false, rhythm: false, fixesOnly: false, factsKept: false, nameAndMore: false, writeRepeat: false, rhythmCalm: false, look3: false, centreWords: false, lineReadable: false }, ...(EDIT.rules || {}) };
+const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false, roles: false, endGate: false, addWhileMissing: false, shortHeadline: false, blankRetry: false, rhythm: false, fixesOnly: false, factsKept: false, nameAndMore: false, writeRepeat: false, rhythmCalm: false, look3: false, centreWords: false, lineReadable: false, centrePhoto: false, eyebrowDark: false }, ...(EDIT.rules || {}) };
 // roles (s2, after w4-t15a): each part is told what it is when it is added, and keeps it through moves and removes;
 // the shape checks read the roles, never the document order (t15a: a move made the headline texts[1], and the size
 // fix went to the other Text, so the hero ended with two headlines and no line under them)
@@ -346,6 +351,13 @@ export function findingsFrom(shot, nodes) {
       else if (RULES.roles && words.some((x) => x !== undefined && side(x) !== 0)) { const out = words.filter((x) => x !== undefined && side(x) !== 0); res.push({ check: 'together', say: `${out.map((x) => `${ROLE_SAY[nodes[x].role]} ${name(x)}`).join(' and ')} ${out.length > 1 ? 'are' : 'is'} not in the words column, beside the photo.`, fix: structureStep(nodes, root, words, img) }); }
       // centreWords: once the words column stands beside the photo, its parts sit in the middle, level with the photo
       else if (RULES.centreWords && kids.includes(nodes[h].parent) && kindOf(nodes[nodes[h].parent]) === 'Group' && currentOf(nodes[nodes[h].parent], 'beside the photo') !== 'centred') { const col = nodes[h].parent; res.push({ check: 'wordsCentred', say: `The words column ${name(col)} sits at the top beside the photo, with empty space under it.`, fix: { node: col, setting: 'beside the photo', only: ['centred'], say: `centre the parts of ${name(col)} beside the photo (they sit at the top, with empty space under them; now: ${currentOf(nodes[col], 'beside the photo')})` } }); }
+      // centrePhoto (s8, Richard: "centre it"): the words column measured taller than the photo, which stands straight in
+      // its column and so sits at its top. The words column is every desktop block left of the photo (centre.mjs's measure)
+      else if (RULES.centreWords && RULES.centrePhoto && nodes[img].parent === cols) {
+        const p = shot.desktop.facts.photos?.[0], bl = p ? shot.desktop.facts.blocks.filter((b) => b.x + b.w <= p.x) : [];
+        const tall = bl.length ? Math.max(...bl.map((b) => b.y + b.h)) - Math.min(...bl.map((b) => b.y)) : 0;
+        if (p && tall > p.h + 4) res.push({ check: 'photoCentred', say: `The photo ${name(img)} sits at the top of its column, beside words taller than it (${tall}px of words, a ${p.h}px photo).`, fix: { act: { kind: 'wrap', node: img, centred: true }, say: `put the photo ${name(img)} in a Group that holds it in the middle, level with the words (it sits at the top, with empty space under it)` } });
+      }
     }
     if (RULES.roles && STYLE === 'stylish') {
       // each fix offers only the values the look asks for (`only`), so the model takes the fix or leaves it
@@ -373,7 +385,9 @@ export function findingsFrom(shot, nodes) {
       if (h !== undefined && currentOf(nodes[h], 'font') !== 'rounded') res.push({ check: 'headlineFont', say: `The headline ${name(h)} is not in a rounded face: the look asked for is soft and round.`, fix: { node: h, setting: 'font', only: ['rounded'], say: `put ${name(h)} in the rounded face (the look asked for is soft and round; now: ${currentOf(nodes[h], 'font')})` } });
       if (h !== undefined && currentOf(nodes[h], 'weight') !== 'semibold') res.push({ check: 'headlineWeight', say: `The headline ${name(h)} is not semibold: the rounded face reads thin without it.`, fix: { node: h, setting: 'weight', only: ['semibold'], say: `make ${name(h)} semibold (the rounded face reads thin without it; now: ${currentOf(nodes[h], 'weight')})` } });
       if (eb !== undefined && currentOf(nodes[eb], 'font') !== 'handwritten') res.push({ check: 'eyebrowFont', say: `${ROLE_SAY.eyebrow} ${name(eb)} is not handwritten: the look asked for has a small handwritten line.`, fix: { node: eb, setting: 'font', only: ['handwritten'], say: `make ${name(eb)} handwritten (it is the small line above the headline; now: ${currentOf(nodes[eb], 'font')})` } });
-      if (eb !== undefined && currentOf(nodes[eb], 'colour') !== 'brand colour text') res.push({ check: 'eyebrowColour', say: `${ROLE_SAY.eyebrow} ${name(eb)} is not in the brand colour.`, fix: { node: eb, setting: 'colour', only: ['brand colour text'], say: `put ${name(eb)} in the brand colour (it is the small handwritten line; now: ${currentOf(nodes[eb], 'colour')})` } });
+      // eyebrowDark (s8, Richard: "always dark on warm"): the bakery's amber line read 2.78 on its own amber wash
+      if (RULES.eyebrowDark && eb !== undefined && currentOf(nodes[eb], 'colour') !== 'dark text') res.push({ check: 'eyebrowColour', say: `${ROLE_SAY.eyebrow} ${name(eb)} is not dark: on the soft pastel ground the warm look keeps its words dark.`, fix: { node: eb, setting: 'colour', only: ['dark text'], say: `make ${name(eb)} dark (the warm look keeps its words dark on the pastel; now: ${currentOf(nodes[eb], 'colour')})` } });
+      else if (!RULES.eyebrowDark && eb !== undefined && currentOf(nodes[eb], 'colour') !== 'brand colour text') res.push({ check: 'eyebrowColour', say: `${ROLE_SAY.eyebrow} ${name(eb)} is not in the brand colour.`, fix: { node: eb, setting: 'colour', only: ['brand colour text'], say: `put ${name(eb)} in the brand colour (it is the small handwritten line; now: ${currentOf(nodes[eb], 'colour')})` } });
       if (img !== undefined && currentOf(nodes[img], 'corners') !== 'very soft') res.push({ check: 'photoCorners', say: `The photo ${name(img)} has hard corners: the look asked for has everything rounded.`, fix: { node: img, setting: 'corners', only: ['very soft'], say: `give ${name(img)} very soft corners (the look asked for has everything rounded; now: ${currentOf(nodes[img], 'corners')})` } });
       if (btn !== undefined && currentOf(nodes[btn], 'corners') !== 'pill') res.push({ check: 'buttonShape', say: `The button ${name(btn)} has square-ish corners: the look asked for has a pill button.`, fix: { node: btn, setting: 'corners', only: ['pill'], say: `make ${name(btn)} a pill (now: ${currentOf(nodes[btn], 'corners')})` } });
       if (btn !== undefined && currentOf(nodes[btn], 'font') !== 'rounded') res.push({ check: 'buttonFont', say: `The button ${name(btn)} is not in the rounded face, as the headline is.`, fix: { node: btn, setting: 'font', only: ['rounded'], say: `put ${name(btn)} in the rounded face (as the headline; now: ${currentOf(nodes[btn], 'font')})` } });
@@ -553,7 +567,8 @@ function apply(state, a) {
   if (a.kind === 'wrap') {
     // a new Group takes the part's place among its siblings, and the part goes inside it
     if (n[a.node]?.parent === -1) return 'The section itself cannot be wrapped.';
-    n.push({ type: KINDS.Group.type, role: '', parent: n[a.node].parent, seq: n[a.node].seq ?? a.node, params: KINDS.Group.make() });
+    // centred (centrePhoto): the new Group is "centred" beside the photo's neighbour, as the words Group is
+    n.push({ type: KINDS.Group.type, role: '', parent: n[a.node].parent, seq: n[a.node].seq ?? a.node, params: { ...KINDS.Group.make(), ...(a.centred ? SETTINGS.Group['beside the photo'].options.centred : {}) } });
     n[a.node].parent = n.length - 1; n[a.node].seq = Math.max(...n.map((x, j) => x.seq ?? j)) + 1;
   }
   if (a.kind === 'remove') {

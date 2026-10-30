@@ -1,0 +1,146 @@
+{
+ "htmlMs": 179,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 652,
+     "y": 188,
+     "w": 596,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Find your perfect furry friend and start",
+     "x": 32,
+     "y": 96,
+     "w": 618,
+     "h": 27,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Adopt Now",
+     "x": 32,
+     "y": 139,
+     "w": 101,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "A place for loving pups",
+     "x": 32,
+     "y": 188,
+     "w": 182,
+     "h": 30,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Welcome to Puppy Haven",
+     "x": 32,
+     "y": 234,
+     "w": 553,
+     "h": 228,
+     "lines": 2
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:53276/",
+   "blank": false,
+   "words": 23,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 604
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 32,
+     "y": 383,
+     "w": 326,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Find your perfect furry friend and start",
+     "x": 32,
+     "y": 96,
+     "w": 316,
+     "h": 54,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Adopt Now",
+     "x": 32,
+     "y": 166,
+     "w": 101,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "A place for loving pups",
+     "x": 32,
+     "y": 215,
+     "w": 182,
+     "h": 30,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Welcome to Puppy Haven",
+     "x": 32,
+     "y": 261,
+     "w": 260,
+     "h": 106,
+     "lines": 2
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:53276/",
+   "blank": false,
+   "words": 23,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 799
+ },
+ "ms": 2381
+}
