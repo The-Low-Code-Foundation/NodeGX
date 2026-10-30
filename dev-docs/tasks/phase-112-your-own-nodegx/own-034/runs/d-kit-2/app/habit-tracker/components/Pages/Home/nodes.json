@@ -1,0 +1,342 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "24556dd8-9834-5793-8616-03668e3e1160",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "canvas"
+      ],
+      "parameters": {
+        "title": "Habit Tracker",
+        "urlPath": "home"
+      }
+    },
+    {
+      "id": "canvas",
+      "type": "Group",
+      "label": "Page canvas",
+      "x": 300,
+      "y": 40,
+      "parent": "page",
+      "children": [
+        "band"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--background)",
+        "flexDirection": "column",
+        "alignItems": "center"
+      }
+    },
+    {
+      "id": "band",
+      "type": "Group",
+      "label": "Band",
+      "x": 300,
+      "y": 160,
+      "parent": "canvas",
+      "children": [
+        "shell"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "paddingTop": "var(--space-10)",
+        "paddingBottom": "var(--space-16)"
+      }
+    },
+    {
+      "id": "shell",
+      "type": "Group",
+      "label": "Centred shell",
+      "x": 300,
+      "y": 280,
+      "parent": "band",
+      "children": [
+        "head",
+        "add-2",
+        "list",
+        "empty_wrap"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 640,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "rowGap": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      },
+      "metadata": {
+        "comment": "640px, not 1200: this is one column of a few short lines to read, and a wider shell would leave the name, the week and the streak too far apart to take in at a glance."
+      }
+    },
+    {
+      "id": "head",
+      "type": "Group",
+      "label": "Heading",
+      "x": 300,
+      "y": 400,
+      "parent": "shell",
+      "children": [
+        "title",
+        "summary"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)"
+      }
+    },
+    {
+      "id": "title",
+      "type": "Text",
+      "label": "Habits",
+      "x": 220,
+      "y": 520,
+      "parent": "head",
+      "parameters": {
+        "text": "Habits",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-tight)",
+        "letterSpacing": "var(--tracking-tight)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "summary",
+      "type": "Group",
+      "label": "How today is going",
+      "x": 420,
+      "y": 520,
+      "parent": "head",
+      "children": [
+        "summary_text"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row"
+      },
+      "metadata": {
+        "comment": "Mounted false and hidden until the count arrives: '0 of 0 done today' is not a fact worth the line, and it is not what a returning visitor has."
+      }
+    },
+    {
+      "id": "summary_text",
+      "type": "Text",
+      "label": "Done today",
+      "x": 420,
+      "y": 640,
+      "parent": "summary",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "add-2",
+      "type": "Group",
+      "label": "Add a habit",
+      "x": 300,
+      "y": 760,
+      "parent": "shell",
+      "children": [
+        "add_input",
+        "add_button"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)"
+      }
+    },
+    {
+      "id": "add_input",
+      "type": "net.noodl.controls.textinput",
+      "label": "What to call it",
+      "x": 240,
+      "y": 880,
+      "parent": "add-2",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "placeholder": "Add a habit…",
+        "enterKeyHint": "done"
+      },
+      "metadata": {
+        "comment": "The field and the button both fire the same Add signal, so pressing Enter and pressing the button cannot double-add or drift apart."
+      }
+    },
+    {
+      "id": "add_button",
+      "type": "net.noodl.controls.button",
+      "label": "Add it",
+      "x": 560,
+      "y": 880,
+      "parent": "add-2",
+      "parameters": {
+        "useLabel": true,
+        "useIcon": true,
+        "label": "Add",
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-plus",
+          "codeAsClass": true
+        },
+        "iconSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "iconPlacement": "left",
+        "iconSpacing": "var(--space-2)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize"
+      },
+      "metadata": {
+        "comment": "Disabled until there is a name, so a blank habit is never created and no error message is needed to explain it."
+      }
+    },
+    {
+      "id": "list",
+      "type": "For Each",
+      "label": "One row per habit",
+      "x": 300,
+      "y": 1000,
+      "parent": "shell",
+      "parameters": {
+        "template": "/Components/Habit Row"
+      },
+      "metadata": {
+        "comment": "One row per habit, and the rows carry the id the store matches a tick or a delete against."
+      }
+    },
+    {
+      "id": "empty_wrap",
+      "type": "Group",
+      "label": "Shown only when there are none",
+      "x": 300,
+      "y": 1120,
+      "parent": "shell",
+      "children": [
+        "empty_state"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "column"
+      },
+      "metadata": {
+        "comment": "Mounted false, or a returning visitor with habits already saved sees 'No habits yet' for the moment before the store answers."
+      }
+    },
+    {
+      "id": "empty_state",
+      "type": "/Components/Empty State",
+      "label": "The empty state",
+      "x": 300,
+      "y": 1240,
+      "parent": "empty_wrap",
+      "parameters": {
+        "title": "No habits yet",
+        "body": "Add one above and tick it off each day. The last seven days and your streak build up here.",
+        "actionLabel": "Add your first habit"
+      },
+      "metadata": {
+        "comment": "A placed component has no mounted of its own, so the wire goes to the Group around it."
+      }
+    },
+    {
+      "id": "store",
+      "type": "/Components/Habit Store",
+      "label": "The habit store",
+      "x": 1000,
+      "y": 40,
+      "metadata": {
+        "comment": "Placed once and left to sit: it holds the only copy of what is on this device, and every action the page takes goes through it."
+      }
+    },
+    {
+      "id": "summary_format",
+      "type": "String Format",
+      "label": "How today reads",
+      "x": 1000,
+      "y": 300,
+      "parameters": {
+        "format": "{done} of {total} done today"
+      }
+    },
+    {
+      "id": "show_summary",
+      "type": "Expression",
+      "label": "Only once there is something to count",
+      "x": 1000,
+      "y": 440,
+      "parameters": {
+        "expression": "total > 0"
+      }
+    },
+    {
+      "id": "can_add",
+      "type": "Expression",
+      "label": "Is there a name to add",
+      "x": 1000,
+      "y": 580,
+      "parameters": {
+        "expression": "typeof habitName === 'string' && habitName.trim().length > 0"
+      },
+      "metadata": {
+        "comment": "The typeof guard matters: at load the name has not arrived, and String(undefined) would read as nine characters and light the button up before anything was typed."
+      }
+    }
+  ],
+  "visualRoots": [
+    "page"
+  ]
+}

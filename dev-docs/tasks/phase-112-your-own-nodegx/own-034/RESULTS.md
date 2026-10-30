@@ -199,3 +199,55 @@ presses at 390 px: the input's centre focuses it; 4 px inside the drawn box's to
 and focuses nothing. Nothing on the wrapper moves focus to the input (`TextInput.tsx:296–303`; only the optional
 icon has `this.focus()`). Every NodeGX Text Input with padding has this band. Filed as **P112-OWN034-INPUTHIT** (`kit:
 node-spec`, open), not fixed in this lane.
+
+### Round 2 (`runs/d-kit-2/`, 2026-10-30 15:18 CET)
+
+| | |
+|---|---|
+| finish | **`completed`**, exit 0, by itself |
+| wall time | **16 min 56 s**, 55 iterations |
+| tokens | 7.67 M in (7.43 M of it cached, 97%), 37.7 K out |
+| tools | 16 `get_node_type`, 10 `stage_plan_operation`, 7 `list_examples`, 7 `get_example`, 6 `update_component`, 4 `drive_page`, 3 `write_project_doc`, 2 `write_script_file`, … |
+| tap | 55 requests, 0 bad, 0 retries |
+| seal audit | **one path outside:** `editor: /tmp/fix-note.txt`. The seal refused it (the reason is in the journal) and the file was never written |
+| **grade** | **12/13**: B13 `too small: the name field 216×22`, the same Text Input defect (P112-OWN034-INPUTHIT) |
+
+**What it built:** components Home, Habit Store, Habit Row, Day Dot and Empty State. It uses 20 Groups, 9 Expressions,
+4 JavaScript Functions, Component Inputs/Outputs on the reused parts, and 2 For Each. The rules (the day string, the
+streak, what the screen is shown) are in a **script file, `scripts/habits.js` (143 lines)**, which the Habit Store's
+Functions call. The Functions do the `localStorage` reading and writing, and the script touches no browser API.
+That is the kit's script-file mechanism used as the kit means it, not one big Function. Again it does not use the
+Global Store with Persist.
+
+The look is the cleanest of the four: a round tick disc beside the name, Delete as a quiet text button, seven dots
+with day letters, a streak pill that appears only above 0, and **"N of M done today" (C1, unasked, a third time)**.
+**Delete asks first, in the page.** The list gives way to "Delete this habit and its ticks?" with Delete and Keep.
+That was the grader's first real `confirmRemove`, and B11 passed through it. It says itself that the tick disc is a
+Group with a click, so a screen reader cannot name it; the reason is written in its decision record.
+
+**The locator:** rows are `div:has(> .habit-tick)` (the model set that class itself). The streak shows only above 0,
+as an 8th cell at the end of the day row, so the days are the cells that hold a dot (`div:has(> div:not(.ndl-visual-text))`).
+A done day is the dot's `var(--primary)`. Done today is the check icon inside the tick.
+
+## 4. The DeepSeek lanes, side by side
+
+| run | grade | wall | iterations | in (cached) | out | delete asks | C1 / C2 unasked |
+|---|---|---|---|---|---|---|---|
+| D·code 1 | **13/13** | 3 m 50 s | 20 | 0.62 M (90%) | 14.3 K | `confirm()` | C2 |
+| D·code 2 | **13/13** | 3 m 25 s | 19 | 0.51 M (88%) | 14.0 K | `confirm()` | C1 |
+| D·kit 1 | 12/13 | 23 m 10 s | 52 | 8.83 M (97%) | 29.9 K | no | C1 |
+| D·kit 2 | 12/13 | 16 m 56 s | 55 | 7.67 M (97%) | 37.7 K | in the page | C1 |
+
+- **§7's prediction holds on the numbers.** D·code was predicted at 12–13 and scored 13 twice. D·kit was predicted at
+  11–13 "at about 2–3× the time and quota". It scored 12 twice, but **at about 5–6× the time and about 14× the input
+  tokens**. The prediction was too kind on cost. Most of that input is cache reads (97%), on a ClinePass that
+  Richard has said not to meter.
+- **The predicted misses were wrong.** I expected D·kit to miss on B8–B10 (date logic in a Function) and B13. Both
+  kit rounds got all the date logic right. Both missed only B13, and both for a reason in NodeGX, not in the model's
+  app: P112-OWN034-INPUTHIT. Fix that, and both kit apps would score 13/13 on the same graph.
+- **Where the logic lives.** Neither kit app used the Global Store with Persist. Both kept the store and the date rules
+  in JavaScript (one 144-line Function; a 143-line script file behind four small Functions) and drew the screen
+  with For Each, Component Inputs and Expressions. Whether that counts as "NodeGX helping" is §2.3's question. The
+  graph holds the screens and the wiring; the logic is code in both media.
+- **The change round will say less than planned.** C1 is already in three of the four apps and C2 in one. On these
+  lanes, C3 (days of the week per habit) is the change that tests anything.

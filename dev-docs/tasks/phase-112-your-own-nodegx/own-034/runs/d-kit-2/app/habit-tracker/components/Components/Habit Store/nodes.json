@@ -1,0 +1,295 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "0275b8cd-ddee-5c56-81cc-ce283fa68bcd",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "store_inputs",
+      "type": "Component Inputs",
+      "label": "What the page asks for",
+      "x": 40,
+      "y": 60,
+      "ports": [
+        {
+          "name": "Load",
+          "plug": "output",
+          "type": "signal",
+          "index": 0
+        },
+        {
+          "name": "Add",
+          "plug": "output",
+          "type": "signal",
+          "index": 1
+        },
+        {
+          "name": "Toggle",
+          "plug": "output",
+          "type": "signal",
+          "index": 2
+        },
+        {
+          "name": "Delete",
+          "plug": "output",
+          "type": "signal",
+          "index": 3
+        },
+        {
+          "name": "Name",
+          "plug": "output",
+          "type": "*",
+          "index": 4
+        },
+        {
+          "name": "Habit Id",
+          "plug": "output",
+          "type": "*",
+          "index": 5
+        }
+      ]
+    },
+    {
+      "id": "store_outputs",
+      "type": "Component Outputs",
+      "label": "What the page is handed",
+      "x": 40,
+      "y": 420,
+      "ports": [
+        {
+          "name": "Habits",
+          "plug": "input",
+          "type": "*",
+          "index": 0
+        },
+        {
+          "name": "Count",
+          "plug": "input",
+          "type": "*",
+          "index": 1
+        },
+        {
+          "name": "Done",
+          "plug": "input",
+          "type": "*",
+          "index": 2
+        },
+        {
+          "name": "Empty",
+          "plug": "input",
+          "type": "*",
+          "index": 3
+        },
+        {
+          "name": "Added",
+          "plug": "input",
+          "type": "signal",
+          "index": 4
+        }
+      ],
+      "metadata": {
+        "comment": "One row per habit, ready to draw: the streak and the seven days are worked out here so the row component holds no dates at all."
+      }
+    },
+    {
+      "id": "load",
+      "type": "JavaScriptFunction",
+      "label": "Load what is saved",
+      "x": 480,
+      "y": 40,
+      "parameters": {
+        "functionScript": "// Runs when the page is ready. Whatever was saved is read back whole, and\n// today is decided here rather than in the view.\nconst store = Scripts.habits;\nconst today = store.today();\nconst state = store.parse(localStorage.getItem(store.KEY));\nconst view = store.view(state, today);\nOutputs.habits = view.habits;\nOutputs.count = view.count;\nOutputs.done = view.done;\nOutputs.empty = view.empty;\n",
+        "uses": "habits.js"
+      },
+      "metadata": {
+        "comment": "Today is worked out on every load, not once at build: a page left open overnight, or opened the next morning, shows the day the person is actually in."
+      },
+      "ports": [
+        {
+          "name": "out-habits",
+          "displayName": "habits",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "displayName": "count",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "add",
+      "type": "JavaScriptFunction",
+      "label": "Add a habit",
+      "x": 480,
+      "y": 280,
+      "parameters": {
+        "functionScript": "// A habit is created on the Add signal alone, and only if there is a name\n// to give it. The store refuses a blank one either way.\nconst store = Scripts.habits;\nconst today = store.today();\nconst state = store.parse(localStorage.getItem(store.KEY));\nconst added = store.add(state, Inputs.name, today);\nif (added) {\n  localStorage.setItem(store.KEY, store.serialise(state));\n  Outputs.added();\n}\nconst view = store.view(state, today);\nOutputs.habits = view.habits;\nOutputs.count = view.count;\nOutputs.done = view.done;\nOutputs.empty = view.empty;\n",
+        "runOnChange-in-name": false,
+        "uses": "habits.js"
+      },
+      "metadata": {
+        "comment": "The name arrives as a value, so Run On Value Change is off for it: left on, this would add a habit per keystroke."
+      },
+      "ports": [
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-added",
+          "displayName": "added",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-habits",
+          "displayName": "habits",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "displayName": "count",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "toggle",
+      "type": "JavaScriptFunction",
+      "label": "Tick today off, or back on",
+      "x": 480,
+      "y": 560,
+      "parameters": {
+        "functionScript": "// Today is the only day this ever writes: the last seven days are read\n// from the ticks that are already there.\nconst store = Scripts.habits;\nconst today = store.today();\nconst state = store.parse(localStorage.getItem(store.KEY));\nstore.toggle(state, Inputs.habitId, today);\nlocalStorage.setItem(store.KEY, store.serialise(state));\nconst view = store.view(state, today);\nOutputs.habits = view.habits;\nOutputs.count = view.count;\nOutputs.done = view.done;\nOutputs.empty = view.empty;\n",
+        "runOnChange-in-habitId": false,
+        "uses": "habits.js"
+      },
+      "ports": [
+        {
+          "name": "in-habitId",
+          "displayName": "habitId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-habits",
+          "displayName": "habits",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "displayName": "count",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "remove",
+      "type": "JavaScriptFunction",
+      "label": "Delete a habit and its ticks",
+      "x": 480,
+      "y": 840,
+      "parameters": {
+        "functionScript": "// The habit goes and its ticks go with it. A tick left behind with no\n// habit to belong to is data nobody can ever see or remove again.\nconst store = Scripts.habits;\nconst today = store.today();\nconst state = store.parse(localStorage.getItem(store.KEY));\nstore.remove(state, Inputs.habitId);\nlocalStorage.setItem(store.KEY, store.serialise(state));\nconst view = store.view(state, today);\nOutputs.habits = view.habits;\nOutputs.count = view.count;\nOutputs.done = view.done;\nOutputs.empty = view.empty;\n",
+        "runOnChange-in-habitId": false,
+        "uses": "habits.js"
+      },
+      "ports": [
+        {
+          "name": "in-habitId",
+          "displayName": "habitId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-habits",
+          "displayName": "habits",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "displayName": "count",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ]
+}

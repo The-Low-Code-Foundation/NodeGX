@@ -1,0 +1,1 @@
+editor: /tmp/fix-note.txt

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "0a0ad33f-a187-563a-8a42-cd7337196af5",
+  "name": "Day Dot",
+  "path": "/Components/Day Dot",
+  "type": "visual",
+  "created": "2026-10-30T14:27:31.463Z",
+  "modified": "2026-10-30T14:27:31.463Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One day of a habit's last seven: a disc filled when ticked, ringed when it is today, with the weekday's initial beneath it."
+}

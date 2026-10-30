@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "8cb1964a-f456-56a7-8465-5570b7d2e04e",
+  "name": "Habit Row",
+  "path": "/Components/Habit Row",
+  "type": "visual",
+  "created": "2026-10-30T14:28:39.021Z",
+  "modified": "2026-10-30T14:33:04.696Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One habit: name, a tick box for today, a streak pill, the last seven days as a strip, and a delete that asks first."
+}

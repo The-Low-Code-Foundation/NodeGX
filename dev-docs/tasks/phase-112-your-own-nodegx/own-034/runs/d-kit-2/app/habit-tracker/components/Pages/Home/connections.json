@@ -1,0 +1,115 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "24556dd8-9834-5793-8616-03668e3e1160",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "page",
+      "fromProperty": "didMount",
+      "toId": "store",
+      "toProperty": "Load"
+    },
+    {
+      "fromId": "store",
+      "fromProperty": "Habits",
+      "toId": "list",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "store",
+      "fromProperty": "Count",
+      "toId": "summary_format",
+      "toProperty": "total"
+    },
+    {
+      "fromId": "store",
+      "fromProperty": "Count",
+      "toId": "show_summary",
+      "toProperty": "total"
+    },
+    {
+      "fromId": "store",
+      "fromProperty": "Done",
+      "toId": "summary_format",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "show_summary",
+      "fromProperty": "result",
+      "toId": "summary",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "summary_format",
+      "fromProperty": "formatted",
+      "toId": "summary_text",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "store",
+      "fromProperty": "Empty",
+      "toId": "empty_wrap",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "store",
+      "fromProperty": "Added",
+      "toId": "add_input",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "add_button",
+      "fromProperty": "onClick",
+      "toId": "store",
+      "toProperty": "Add"
+    },
+    {
+      "fromId": "add_input",
+      "fromProperty": "onEnter",
+      "toId": "store",
+      "toProperty": "Add"
+    },
+    {
+      "fromId": "add_input",
+      "fromProperty": "onTextChanged",
+      "toId": "store",
+      "toProperty": "Name"
+    },
+    {
+      "fromId": "add_input",
+      "fromProperty": "onTextChanged",
+      "toId": "can_add",
+      "toProperty": "habitName"
+    },
+    {
+      "fromId": "can_add",
+      "fromProperty": "result",
+      "toId": "add_button",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "list",
+      "fromProperty": "itemOutputSignal-Toggle",
+      "toId": "store",
+      "toProperty": "Toggle"
+    },
+    {
+      "fromId": "list",
+      "fromProperty": "itemOutputSignal-Delete",
+      "toId": "store",
+      "toProperty": "Delete"
+    },
+    {
+      "fromId": "list",
+      "fromProperty": "itemActionItemId",
+      "toId": "store",
+      "toProperty": "Habit Id"
+    },
+    {
+      "fromId": "empty_state",
+      "fromProperty": "Action",
+      "toId": "add_input",
+      "toProperty": "focus"
+    }
+  ]
+}

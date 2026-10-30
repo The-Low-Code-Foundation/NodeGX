@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "0275b8cd-ddee-5c56-81cc-ce283fa68bcd",
+  "name": "Habit Store",
+  "path": "/Components/Habit Store",
+  "type": "visual",
+  "created": "2026-10-30T14:27:10.682Z",
+  "modified": "2026-10-30T14:27:10.682Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The data layer: localStorage read whole, four Functions each doing one thing, all rules in scripts/habits.js."
+}

@@ -1,0 +1,133 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8cb1964a-f456-56a7-8465-5570b7d2e04e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "row_inputs",
+      "fromProperty": "name",
+      "toId": "name_text",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "row_inputs",
+      "fromProperty": "tickedToday",
+      "toId": "tick_icon",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "row_inputs",
+      "fromProperty": "tickedToday",
+      "toId": "tick_fill",
+      "toProperty": "tickedToday"
+    },
+    {
+      "fromId": "row_inputs",
+      "fromProperty": "tickedToday",
+      "toId": "tick_edge",
+      "toProperty": "tickedToday"
+    },
+    {
+      "fromId": "row_inputs",
+      "fromProperty": "tickedToday",
+      "toId": "name_tone",
+      "toProperty": "tickedToday"
+    },
+    {
+      "fromId": "row_inputs",
+      "fromProperty": "streak",
+      "toId": "streak_format",
+      "toProperty": "days"
+    },
+    {
+      "fromId": "row_inputs",
+      "fromProperty": "streak",
+      "toId": "show_streak",
+      "toProperty": "streak"
+    },
+    {
+      "fromId": "row_inputs",
+      "fromProperty": "days",
+      "toId": "days",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "tick_fill",
+      "fromProperty": "result",
+      "toId": "tick",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "tick_edge",
+      "fromProperty": "result",
+      "toId": "tick",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "name_tone",
+      "fromProperty": "result",
+      "toId": "name_text",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "streak_format",
+      "fromProperty": "formatted",
+      "toId": "streak_text",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "show_streak",
+      "fromProperty": "result",
+      "toId": "streak_pill",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "show_normal",
+      "fromProperty": "result",
+      "toId": "normal",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "confirming",
+      "fromProperty": "state",
+      "toId": "confirm",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "confirming",
+      "fromProperty": "state",
+      "toId": "show_normal",
+      "toProperty": "confirming"
+    },
+    {
+      "fromId": "tick",
+      "fromProperty": "onClick",
+      "toId": "row_outputs",
+      "toProperty": "Toggle"
+    },
+    {
+      "fromId": "delete_btn",
+      "fromProperty": "onClick",
+      "toId": "confirming",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "confirm_keep",
+      "fromProperty": "onClick",
+      "toId": "confirming",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "confirm_delete",
+      "fromProperty": "onClick",
+      "toId": "confirming",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "confirm_delete",
+      "fromProperty": "onClick",
+      "toId": "row_outputs",
+      "toProperty": "Delete"
+    }
+  ]
+}
