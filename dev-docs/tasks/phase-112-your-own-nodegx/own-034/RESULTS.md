@@ -251,3 +251,45 @@ A done day is the dot's `var(--primary)`. Done today is the check icon inside th
   graph holds the screens and the wiring; the logic is code in both media.
 - **The change round will say less than planned.** C1 is already in three of the four apps and C2 in one. On these
   lanes, C3 (days of the week per habit) is the change that tests anything.
+
+## 5. G4·code and G2·code (Gemma 4 on Ollama, one call each)
+
+**The lane:** `gemma-code.mjs`, OWN-030's bare lane on this brief. The prompt is §3's brief word for word plus
+"Write it as one HTML file, with the CSS and the JavaScript inline." It is one `/api/chat` call: T 0, `think: false`,
+`num_ctx` 20480, `num_predict` 16000, unloaded after (`keep_alive: 0`). Ollama was checked idle first (the OWN-031
+session shares it). The digests match OWN-030 §0.
+
+| run | model (digest) | grade | wall | tokens in / out | stop |
+|---|---|---|---|---|---|
+| `runs/g4-code/` | E4B (`ee6656371218`) | **11/13** | 3 m 57 s | 74 / 3,572 | `stop` |
+| `runs/g2-code/` | E2B (`07ea59a47401`) | **7/13** | 1 m 35 s | 74 / 2,808 | `stop` |
+
+**G4·code (449 lines), 11/13.** It is a working tracker on `localStorage`: a form, a card per habit, a "Mark Complete"
+/ "✅ Done Today" button, a × with `confirm()`, and seven grey or green squares.
+- **B9 fails, `streak: 1`.** The streak counts *forward* from today (`checkDate.setDate(+1)`), so it is only ever 1 or
+  0. B10 passes by luck: 0, then 1 is what forward counting gives on a broken run.
+- **B13 fails: `scrolls sideways: 400 > 390; too small: Drink water's delete 22×23`.** The `.container` is
+  `width: 100%` with 30 px padding and no `box-sizing`. The phone shot shows the card's left edge cut off.
+- It mixes a local "today" with `toISOString()` (UTC) days for the history. At noon in Paris both agree, so the
+  frozen clock does not catch it. Late in the evening west of Greenwich, it would file a tick under tomorrow.
+
+**G2·code (341 lines), 7/13.** It is the nothing-saved control, written by a model: **`getHabits()` is defined and
+never called**, so every load starts empty. It fails exactly the six checks `control/nothing-saved` fails (B6,
+B8–B12). The tick is any day cell, and every cell toggles *today* (the locator presses the today cell). An empty
+name raises an `alert()`, which the grader accepts. Its streak loop also mutates its date cumulatively (`-0, -1,
+-2 …` from an already moved date), but nothing reached that far.
+
+**Against §7:** I predicted G4·code at 7–10 (persistence and the 7 days present, the streak wrong on B10). It scored
+**11**: persistence and the week are right, and the streak is wrong on **B9**, not B10. I predicted G2·code at 4–7. It
+scored **7**, with persistence as the whole failure.
+
+## 6. Where the race stands (s2, 2026-10-30)
+
+| lane | runs | B1–B13 |
+|---|---|---|
+| D·code | 2 | 13, 13 |
+| D·kit | 2 | 12, 12 (both: P112-OWN034-INPUTHIT) |
+| G4·code | 1 | 11 |
+| G2·code | 1 | 7 |
+| G4·harness | — | the lab is not built (§8 step 4) |
+| G2·harness | — | the same |

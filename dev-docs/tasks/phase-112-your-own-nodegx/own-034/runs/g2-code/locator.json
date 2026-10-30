@@ -1,0 +1,17 @@
+{
+  "app": "runs/g2-code (G2·code, Gemma 4 E2B, one call, T 0)",
+  "serve": ".",
+  "page": "index.html",
+  "addInput": "#new-habit-name",
+  "addButton": "#add-habit-btn",
+  "rows": "#habit-list > .habit-item",
+  "rowName": ".habit-name",
+  "tick": ".day-cell.today",
+  "todayDone": "row => row.querySelector('.day-cell.today').classList.contains('completed')",
+  "days": ".tracker-grid .day-cell",
+  "daysOrder": "oldest-first",
+  "dayDone": "cell => cell.classList.contains('completed')",
+  "streak": ".streak-count",
+  "remove": ".delete-btn",
+  "confirmRemove": null
+}

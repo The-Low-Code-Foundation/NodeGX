@@ -1,116 +1,93 @@
-# OWN-034 — next session (s2): the DeepSeek rounds, with Richard's go
+# OWN-034 — next session (s3): the harness lab, for G4 and G2
 
 **Paste this to start the session:**
 
-> OWN-034 s2. Read `dev-docs/tasks/phase-112-your-own-nodegx/own-034/NEXT-SESSION-PROMPT.md`, then
-> `../OWN-034-THE-HABIT-TRACKER-RACE.md` and `RESULTS.md` §1. The grader is proven. Next is §8 step 2, the DeepSeek
-> lanes. First add a bare mode to the Cline runner for D·code, then ask Richard for his go and his quota readings
-> before each round.
+> OWN-034 s3. Read `dev-docs/tasks/phase-112-your-own-nodegx/own-034/NEXT-SESSION-PROMPT.md`, then
+> `../OWN-034-THE-HABIT-TRACKER-RACE.md` §5 and `RESULTS.md` §4–§6. Four of the six lanes are run and graded. Next is
+> §8 step 4, the harness lab: Gemma answers closed questions, and the script builds the NodeGX app from fixed blocks.
 
-## s2 so far (2026-10-30, Opus)
+## Where it stands (s2, 2026-10-30, Opus, `cline-dev`)
 
-- **Step 1 done:** `round-cline.mjs --bare` (and `--dry-run`), checked by a dry run and a free mock round.
-  `round-d.sh` runs one DeepSeek round through the retry tap and copies the record to `runs/<name>/`.
-- **D·code round 1 done:** `completed` in 3 min 50 s, **13/13** (`RESULTS.md` §2). The grader's B13 read an
-  `sr-only` label as cut off text; fixed, controls re-run, filed P112-OWN034-SRONLY.
-- **Richard's ClinePass readings for round 1 are still owed.** He gave the go ("Yep") without them.
-- Next: D·code round 2 (his go), then D·kit ×2. Before D·kit, dry-run `--kit cline` once, because s2 moved its code
-  inside an if/else.
+**Done and committed** (`41315bb95`, `31959346a`, `9ddc65f8a`, and this file):
 
-## Where it stood after s1 (2026-10-30, Opus, `cline-dev`)
+| lane | runs | B1–B13 | where |
+|---|---|---|---|
+| D·code | 2 | **13, 13** | `runs/d-code-1/`, `runs/d-code-2/` |
+| D·kit | 2 | **12, 12** | `runs/d-kit-1/`, `runs/d-kit-2/` |
+| G4·code | 1 | **11** | `runs/g4-code/` |
+| G2·code | 1 | **7** | `runs/g2-code/` |
 
-**Done and committed:**
-- s0's scoping, committed at `46f0ee55e`;
-- s1's grader, controls, results and bug, committed with this file.
+Each run folder holds its locator, `grade/` (grade.json and four screenshots) and the app. DeepSeek runs also hold
+the journal (gzipped from d-code-2 on), `run-result.json`, the tap log and the seal audit.
 
-**No model has been called. No ClinePass quota has been spent.**
+**Richard, 2026-10-30:** "Don't worry about ClinePass, just rock out". So no quota readings, and a standing go for
+the DeepSeek rounds; the cost is tokens and wall time.
 
-**Built in s1:**
-- `grade.mjs <locator.json> [--out <dir>]` checks B1–B13 over CDP.
-  - The clock is frozen per day: a `Date` override injected before any page script, noon Europe/Paris on Mon 2,
-    Tue 3 and Thu 5 Nov.
-  - It uses one Chrome profile per app, so storage survives reloads, and a new page load for each day.
-  - Presses are real, at the element's centre, and refused if they would land on something else. `confirm()` is
-    accepted.
-  - It writes `grade.json` and four screenshots. Exit 0 means 13/13.
-  - Chrome needs the Bash sandbox off.
-- **The locator format** is in the grader's header comment: CSS selectors, plus page-side function source for
-  `todayDone` and `dayDone`. It may say only where things are; it never computes a streak or a date. It serves a
-  folder (`serve` + `page`) or points at a `url`.
-- **`control/`**: `clean/` (a hand-made tracker on `localStorage`), and `make-broken.mjs`, which writes five copies
-  with one line changed each.
+**Built in s2:**
+- `own-020/round-cline.mjs --bare` (an empty folder, no create-nodegx, `mcpServers: {}`, the same seal) and
+  `--dry-run`;
+- `round-d.sh` (one DeepSeek round through the retry tap, copied to `runs/<name>/`);
+- `brief.txt`;
+- `gemma-code.mjs` (one Ollama call, T 0).
 
-**Readings, all on the final grader** (`RESULTS.md` §1, each matching its prediction):
+**The kit the D·kit lane ran:** create-nodegx, mcp and preview, all **0.2.8** from the registry. `@nodegx/mcp` 0.2.9
+is P128's `.mcpb` re-cut, and create-nodegx 0.2.8 pins mcp 0.2.8.
 
-| control | result | failed |
-|---|---|---|
-| clean | 13/13 | — |
-| streak-off-by-one | 11/13 | B9, B10 |
-| nothing-saved | 7/13 | B6, B8–B12 |
-| adds-empty | 10/13 | B4, B6, B11 |
-| week-ends-yesterday | 11/13 | B8, B12 |
-| scrolls-sideways | 12/13 | B13 |
+**Filed:**
+- **P112-OWN034-SRONLY** (fixed). B13 read an `sr-only` label as cut-off text. It now skips boxes of at most 1×1 px;
+  clean and scrolls-sideways were re-run unchanged.
+- **P112-OWN034-INPUTHIT** (open, `kit: node-spec`). A NodeGX Text Input is drawn 40 px tall, but only the 22 px
+  `<input>` takes a press. It is the only miss in both D·kit apps. It is not this lane's to fix: it touches the
+  runtime, the node-spec scenarios and P107-C68's onMouseDown. Tell Richard if a controls lane picks it up.
 
-**AC1 is met.**
-
-## What s1 settled, including where the handoff was wrong
-
-- **The handoff predicted that nothing-saved would fail "B6/B11". That was wrong.** Every new day is a new page load,
-  as for a person coming back, so an app that saves nothing has no yesterday and fails B8–B12 too. B7 was moved ahead
-  of B6 so that it does not depend on saving. B12 runs before B11, so both habits' weeks are read.
-- **B13 was blind on its first version.** Under `mobile: true`, Chrome grows `innerWidth` to the content: on a page
-  486 px wide at a 390 px phone, `innerWidth` reads 486. The scrolls-sideways copy scored 13/13. B13 now measures
-  against the 390 the grader set.
-  - Two older lab graders have the same blind check: `own-019/grade-launch.mjs` (phone) and P78's todo
-    `staging-e2e.js`. They are filed as **P112-OWN034-INNERWIDTH**.
-  - `render_report` is not affected: `nodegx-render-measure` uses `clientWidth`.
-  - Memory: `a-phone-overflow-check-against-innerwidth-never-fires`.
-- **Still unexercised:**
-  - a locator for a NodeGX app (drawn after load; the grader waits for the name field, for up to 15 s);
-  - an in-page delete confirm (`confirmRemove`);
-  - B1 and B3, which no copy fails. B1 is mostly "no crash"; B3 is B2 plus order.
-- **`own-020/round-cline.mjs` has no bare mode.** It always runs `npm create nodegx` in the folder (AGENTS.md,
-  `.mcp.json`) and always writes the nodegx MCP entry (lines ~101–122). D·code needs an empty folder, no AGENTS.md and
-  no MCP server.
+**What the readings say so far (RESULTS §4):**
+- The kit costs about 5–6× the time and about 14× the input tokens of plain code. Most of that input is cache reads.
+- Both kit apps got the date logic right.
+- Neither used the Global Store with Persist. Both put the store and rules in JavaScript: one big Function in
+  d-kit-1; a `scripts/habits.js` file behind four Functions in d-kit-2.
+- C1 is already built, unasked, in three of four DeepSeek apps, and C2 in one.
 
 ## Next, in order
 
-1. **A bare mode for D·code** in `round-cline.mjs`, for example `--bare`: an empty `apps/`, no create-nodegx, and an
-   empty `mcpServers`.
-   - Keep the HOME seal and the `disabledTools` the same, so the two lanes differ only in the kit.
-   - Check it without spending quota: run up to the point where Cline would start, then read the written
-     `cline_mcp_settings.json` and the folder.
-   - Reinstall the pinned Cline first: `npm i cline@3.0.71` in this session's scratchpad, then pass `--cline-bin`.
-2. **Ask Richard** for a go on D·code round 1, with his 5-hour and week bar readings before it.
-   - Run it with `stream-tap.mjs --mode retry`.
-   - Read `finishReason`, because exit 0 is not success.
-   - Get his readings after the round.
-   - The sentence is §3's brief, word for word.
-3. **Write the locator** for the app it built, by reading the DOM, before grading. Save it with the run under
-   `own-034/runs/d-code-1/`, then grade.
-4. Round 2 of D·code, then D·kit ×2 (`--kit cline`), **one round at a time, each with Richard's go**. For a D·kit app,
-   the locator's `url` is the preview of the app. Start the preview as OWN-018/019 did (`npx @nodegx/preview`), and add
-   a `start` field to the grader if that is cleaner.
-5. Then G4·code and G2·code (§8 step 3: one Ollama call each). Check `ollama ps` first, because the OWN-031 session
-   shares Ollama.
+1. **The harness lab (§5), in `own-034/`, not in `build_app`.**
+   - It is an MCP stdio client against `noodl-mcp`, as `own-027/harness.mjs` and `own-027/mcp.mjs` were. Read those
+     first, and OWN-027's rule: every option in the words.
+   - The model answers closed questions (§5's list).
+   - The script owns the blocks:
+     - the store: a Global Store with Persist on (`net.noodl.GlobalStore`);
+     - the add row;
+     - For Each with a row component;
+     - one Function per derived number, with the date logic written once and **tested against the grader's frozen
+       days before any model runs**;
+     - the summary band.
+   - Tune it on the habit brief only.
+   - The Text Input in the add row will hit P112-OWN034-INPUTHIT, so expect B13 to fail on it too. Do not route
+     around it in the block: that would hide the kit defect from the race.
+2. **Run G4·harness and G2·harness** at T 0. Check `ollama ps` first, and unload with `keep_alive: 0`.
+3. **Grade both,** with a locator per app as in D·kit (preview from the 0.2.8 tarball, fixed port, scratch copy).
+   - `dom-dump.mjs` / `tick-probe.mjs` were scratchpad probes. If you need them, rewrite them in `own-034/`.
+4. **Then §8 step 5:** the blind gallery for Richard (OWN-030's `gallery.mjs` pattern, the `db` capability, ranks under
+   `rankings/habit`). Each app is seeded with the same three habits and a week of ticks, at full size and on a phone.
 
 ## Needs Richard (do not do alone)
 
-- A go for each DeepSeek round, with his quota readings before and after.
-- The blind ranking, later (§5b.2).
-- Porting the harness into `build_app` belongs to the OWN-031 session's lane. Ask that session first, and briefly.
-- Not this lane's to fix, but his call: whether the OWN-019 phone passes should be re-graded now that
-  P112-OWN034-INNERWIDTH shows they were blind.
+- The blind ranking (§5b.2), once all six are built.
+- Porting the harness into `build_app` is the OWN-031 session's lane: ask that session first, and briefly.
+- Not this lane's: whether OWN-019's phone passes should be re-graded (P112-OWN034-INNERWIDTH), and who fixes
+  P112-OWN034-INPUTHIT.
 
 ## Known before starting
 
-- The runner's other traps (OWN-020):
-  - the key comes from the repo `.env` (`CLINE_PASS_API_KEY`); never print it;
-  - the gateway's in-band stream error is real, so use the retry tap.
-- **Saved data in NodeGX** is `net.noodl.GlobalStore` with Persist on.
-- **Box:**
-  - one heavy job at a time;
-  - never run a lane beside the grader's Chrome;
-  - use `nice -n 19` for anything long.
-- **Memory index:** about 20.0 K UTF-16 units against a 17.5 K target, shared with other sessions. s1 added nothing to
-  it; the new note is linked from `harness-and-gates-pointers.md`.
+- **Kit pack:**
+  `npm pack create-nodegx@0.2.8 @nodegx/mcp@0.2.8 @nodegx/preview@0.2.8` into a scratch folder.
+- **Pinned Cline:**
+  `npm i cline@3.0.71` in the scratchpad. The binary is `node_modules/cline/bin/cline`; the `.bin` link is not
+  made.
+- **Locating a NodeGX app's DOM:** the runtime draws `div`s with generated `ndl-d-…` classes, no ids and no ARIA. Find
+  rows by shape (`:has`), done days by the inline `style.backgroundColor` token, and done today by text or an icon.
+  A class the model set itself (d-kit-2's `.habit-tick`) is the best anchor there is.
+- **Previews:** run the preview on the scratch copy, never the repo copy (it wrote nothing in s2, but do not rely on
+  that). Use a fixed port, so storage is one origin for the whole grade, and stop it before the next lane.
+- **Committing:** a peer has `dev-docs/parked/README.md` staged. s2 committed through a temporary index and then
+  `git reset -q HEAD -- <own paths>`, so the real index matches HEAD.
+- **Box:** one heavy job at a time; never run a lane beside the grader's Chrome; `nice -n 19`.

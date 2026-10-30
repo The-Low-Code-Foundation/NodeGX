@@ -1,0 +1,17 @@
+{
+  "app": "runs/g4-code (G4·code, Gemma 4 E4B, one call, T 0)",
+  "serve": ".",
+  "page": "index.html",
+  "addInput": "#habit-name-input",
+  "addButton": "#add-habit-btn",
+  "rows": "#habit-list > .habit-card",
+  "rowName": ".habit-name",
+  "tick": ".tick-button",
+  "todayDone": "row => row.querySelector('.tick-button').dataset.completed === 'true'",
+  "days": ".history-grid .day-indicator",
+  "daysOrder": "oldest-first",
+  "dayDone": "cell => cell.classList.contains('done')",
+  "streak": ".streak-info",
+  "remove": ".delete-btn",
+  "confirmRemove": null
+}
