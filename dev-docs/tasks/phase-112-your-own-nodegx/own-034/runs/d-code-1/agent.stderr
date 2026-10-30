@@ -1,0 +1,1 @@
+[plugin-sandbox] hook "beforeTool" received a payload that is not JSON-serializable (The object can not be cloned.); retrying with non-serializable values dropped. Host-only objects must not be placed on tool contexts or hook payloads.

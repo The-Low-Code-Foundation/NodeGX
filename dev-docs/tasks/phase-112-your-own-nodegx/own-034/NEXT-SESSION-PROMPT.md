@@ -7,7 +7,17 @@
 > lanes. First add a bare mode to the Cline runner for D·code, then ask Richard for his go and his quota readings
 > before each round.
 
-## Where it stands (s1, 2026-10-30, Opus, `cline-dev`)
+## s2 so far (2026-10-30, Opus)
+
+- **Step 1 done:** `round-cline.mjs --bare` (and `--dry-run`), checked by a dry run and a free mock round.
+  `round-d.sh` runs one DeepSeek round through the retry tap and copies the record to `runs/<name>/`.
+- **D·code round 1 done:** `completed` in 3 min 50 s, **13/13** (`RESULTS.md` §2). The grader's B13 read an
+  `sr-only` label as cut off text; fixed, controls re-run, filed P112-OWN034-SRONLY.
+- **Richard's ClinePass readings for round 1 are still owed.** He gave the go ("Yep") without them.
+- Next: D·code round 2 (his go), then D·kit ×2. Before D·kit, dry-run `--kit cline` once, because s2 moved its code
+  inside an if/else.
+
+## Where it stood after s1 (2026-10-30, Opus, `cline-dev`)
 
 **Done and committed:**
 - s0's scoping, committed at `46f0ee55e`;

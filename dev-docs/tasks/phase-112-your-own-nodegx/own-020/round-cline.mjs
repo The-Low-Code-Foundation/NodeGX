@@ -27,6 +27,10 @@
 //
 //   node round-cline.mjs <root> <tgz-dir> <prompt-file> --model cline-pass/<m> [--cline-bin <path>] [--timeout-min 120]
 //                        [--stall-min 30] [--thinking none|low|medium|high|xhigh] [--kit cline] [--result-chars N]
+//                        [--bare] [--dry-run]
+// --bare (OWN-034's D·code lane): no kit. An empty work/apps, no create-nodegx, no AGENTS.md, and an empty
+// mcpServers; <tgz-dir> is not read (pass -). The HOME seal and disabledTools are the same, so the two lanes differ
+// only in the kit. --dry-run writes everything up to the cline spawn (settings, seal, command.txt) and stops there.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
@@ -41,6 +45,8 @@ if (!/^cline-pass\/[\w.-]+$/.test(MODEL || '')) throw new Error('--model cline-p
 const CLINE = 'cline@3.0.71'; // npm latest on 2026-10-15; source read in OWN-020 s1
 const clineBin = opt('--cline-bin', null); // a pinned install of CLINE (a 105 MB binary; npx would fetch it every round)
 const kit = opt('--kit', null);
+const bare = rest.includes('--bare');
+if (bare && kit) throw new Error('--bare is the lane without the kit; it takes no --kit');
 
 const REPO = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../../..');
 fs.mkdirSync(rootArg, { recursive: true });
@@ -91,8 +97,9 @@ fs.writeFileSync(path.join(root, 'cline-seal.json'), JSON.stringify(globalSettin
 const ALLOWED = [APPS, path.join(HOME, 'tmp')];
 writeSealPlugin(path.join(CLINE_DIR, 'plugins'), ALLOWED);
 
-// 1. npm create nodegx apps, from the packed tarball.
-const created = spawnSync('npx', ['-y', `--package=${tgz('create-nodegx')}`, 'create-nodegx', APPS, ...(kit === 'cline' ? ['--cline'] : [])], { cwd: path.dirname(APPS), env, encoding: 'utf8' });
+// 1. npm create nodegx apps, from the packed tarball. --bare: the empty folder alone.
+if (bare) fs.mkdirSync(APPS);
+const created = bare ? { status: 0, stdout: '--bare: no create-nodegx\n', stderr: '' } : spawnSync('npx', ['-y', `--package=${tgz('create-nodegx')}`, 'create-nodegx', APPS, ...(kit === 'cline' ? ['--cline'] : [])], { cwd: path.dirname(APPS), env, encoding: 'utf8' });
 fs.writeFileSync(path.join(root, 'create.log'), created.stdout + created.stderr);
 if (created.status !== 0) throw new Error(`create-nodegx exited ${created.status}; see create.log`);
 // --seed <previous round root>: a later sitting. 3.0.71 can't resume a session headless (`--id` forces interactive,
@@ -109,20 +116,26 @@ if (seed) {
 // other agents (opencode.json's command: --allow-writes --screenshots-to-files) and a timeout. `--kit cline`
 // (create-nodegx --cline, OWN-020 s-kit): the kit wrote the entry itself into CLINE_MCP_SETTINGS_PATH, so the round
 // keeps exactly what it wrote (flags, timeout, metadata) and only points the registry name at the tarball.
-let written, timeout = 300, metadata;
-if (kit === 'cline') {
-  const entry = JSON.parse(fs.readFileSync(env.CLINE_MCP_SETTINGS_PATH, 'utf8')).mcpServers.nodegx;
-  written = [entry.command, ...entry.args];
-  ({ timeout, metadata } = entry);
+// --bare: Cline's MCP file is written empty, so nothing of Richard's or the kit's can be listed.
+let serverArgs = null;
+if (bare) {
+  fs.writeFileSync(env.CLINE_MCP_SETTINGS_PATH, JSON.stringify({ mcpServers: {} }, null, 2) + '\n');
 } else {
-  written = JSON.parse(fs.readFileSync(path.join(APPS, 'opencode.json'), 'utf8')).mcp.nodegx.command;
+  let written, timeout = 300, metadata;
+  if (kit === 'cline') {
+    const entry = JSON.parse(fs.readFileSync(env.CLINE_MCP_SETTINGS_PATH, 'utf8')).mcpServers.nodegx;
+    written = [entry.command, ...entry.args];
+    ({ timeout, metadata } = entry);
+  } else {
+    written = JSON.parse(fs.readFileSync(path.join(APPS, 'opencode.json'), 'utf8')).mcp.nodegx.command;
+  }
+  if (JSON.stringify(written.slice(0, 4)) !== JSON.stringify(['npx', '-y', MCP_AT(), '--allow-writes'])) throw new Error(`the kit names the server as ${JSON.stringify(written)}`);
+  serverArgs = ['-y', `--package=${tgz('nodegx-mcp')}`, 'noodl-mcp', ...written.slice(3)];
+  const mcp = { mcpServers: { nodegx: { command: 'npx', args: serverArgs, timeout, ...(metadata ? { metadata } : {}) } } };
+  fs.writeFileSync(env.CLINE_MCP_SETTINGS_PATH, JSON.stringify(mcp, null, 2) + '\n');
+  // Warm the server's npx install so the first connect doesn't race Cline's clock.
+  spawnSync('npx', [...serverArgs.slice(0, 3), '--version'], { cwd: APPS, env, encoding: 'utf8', timeout: 240000 });
 }
-if (JSON.stringify(written.slice(0, 4)) !== JSON.stringify(['npx', '-y', MCP_AT(), '--allow-writes'])) throw new Error(`the kit names the server as ${JSON.stringify(written)}`);
-const serverArgs = ['-y', `--package=${tgz('nodegx-mcp')}`, 'noodl-mcp', ...written.slice(3)];
-const mcp = { mcpServers: { nodegx: { command: 'npx', args: serverArgs, timeout, ...(metadata ? { metadata } : {}) } } };
-fs.writeFileSync(env.CLINE_MCP_SETTINGS_PATH, JSON.stringify(mcp, null, 2) + '\n');
-// Warm the server's npx install so the first connect doesn't race Cline's clock.
-spawnSync('npx', [...serverArgs.slice(0, 3), '--version'], { cwd: APPS, env, encoding: 'utf8', timeout: 240000 });
 
 // 3. cline in the folder, headless.
 const prompt = fs.readFileSync(promptFile, 'utf8').trim();
@@ -137,8 +150,12 @@ fs.writeFileSync(
   `cd ${APPS} && ${cmd} ${args.slice(0, -1).join(' ')} "$(cat ${path.resolve(promptFile)})"\n` +
     `# HOME=${HOME} (CLINE_DIR, data dir and TMPDIR inside it); seal ${path.join(SETTINGS, 'global-settings.json')} + ${path.join(CLINE_DIR, 'plugins')}\n` +
     `# key: CLINE_PASS_API_KEY from the repo .env, passed as CLINE_API_KEY (value never written)\n` +
-    `# server: npx ${serverArgs.join(' ')} (timeout 300 s)\n`
+    (serverArgs ? `# server: npx ${serverArgs.join(' ')} (timeout 300 s)\n` : `# --bare: no MCP server, no kit\n`)
 );
+if (rest.includes('--dry-run')) {
+  console.log('dry run: stopped before cline; see', root);
+  process.exit(0);
+}
 const log = fs.createWriteStream(path.join(root, 'agent.jsonl'));
 const err = fs.createWriteStream(path.join(root, 'agent.stderr'));
 const child = spawn(cmd, args, { cwd: APPS, env: { ...env, PWD: APPS }, stdio: ['ignore', 'pipe', 'pipe'] });

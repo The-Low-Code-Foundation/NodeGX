@@ -1,0 +1,1 @@
+I want a habit tracker. I can add habits, tick each one off for today, and see the last 7 days for each one, with a streak count. It should remember everything when I come back. I can delete a habit.

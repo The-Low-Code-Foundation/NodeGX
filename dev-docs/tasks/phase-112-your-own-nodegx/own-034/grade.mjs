@@ -241,6 +241,9 @@ await check('B13', 'phone (390 px): nothing cut off, no sideways scroll, every c
     for (const el of document.body.querySelectorAll('*')) {
       if (!seen(el) || ![...el.childNodes].some((c) => c.nodeType === 3 && c.textContent.trim())) continue;
       const r = el.getBoundingClientRect(), cs = getComputedStyle(el);
+      // A 1×1 box is the screen-reader-only pattern (.sr-only: clipped on purpose, never seen); D·code 1's form label
+      // failed B13 as "cut off" on a phone shot with nothing cut off.
+      if (r.width <= 1 && r.height <= 1) continue;
       if (r.right > W + 1 || r.left < -1) out.push('off screen: ' + el.innerText.trim().slice(0, 30));
       else if (cs.overflowX !== 'visible' && el.scrollWidth > el.clientWidth + 1) out.push('cut off: ' + el.innerText.trim().slice(0, 30));
     }

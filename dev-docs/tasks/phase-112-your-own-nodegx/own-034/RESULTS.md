@@ -74,3 +74,48 @@ graders compare against `innerWidth` under the same emulation: `own-019/grade-la
 
 **Not tested by the controls:** the locator for a NodeGX app (an app drawn by the runtime after load; the grader
 waits for the name field), and an in-page delete confirm (`confirmRemove`). Both get their first run on D·kit.
+
+## 2. D·code (DeepSeek V4.1 Flash, bare Cline, plain HTML)
+
+**The lane:** `own-020/round-cline.mjs --bare` (s2). The work folder starts empty: no create-nodegx, no AGENTS.md, and
+an empty `mcpServers`. The HOME seal and `disabledTools` are the same as in D·kit. It ran through `stream-tap.mjs
+--mode retry` with Cline 3.0.71 on its defaults (no `--thinking`), with §3's brief as the whole prompt
+(`brief.txt`). The script is `round-d.sh`.
+
+Before any quota was spent, a mock round (`mock-model.mjs`) checked the bare mode. Cline offered the model
+`read_files`, `search_codebase` and `editor`, and nothing else. Its system prompt does not mention NodeGX or MCP. A
+`nodegx__…` call was rejected as an unavailable tool, the seal refused all four paths outside the folder, and the one
+write inside the folder landed.
+
+### Round 1 (`runs/d-code-1/`, 2026-10-30 14:35 CET)
+
+| | |
+|---|---|
+| finish | **`completed`**, exit 0, by itself |
+| wall time | **3 min 50 s**, 20 iterations |
+| tokens | 620 K in (557 K of it cached, 90%), 14.3 K out |
+| tools | 13 `editor` writes to `index.html`, 1 to `README.md`, 8 `read_files`, 3 `search_codebase` |
+| tap | 20 requests, 0 bad, 0 retries |
+| seal audit | clean |
+| ClinePass bars | _Richard's readings: to come_ |
+| **grade** | **13/13** (after P112-OWN034-SRONLY; 12/13 before it, a grader fault) |
+
+**What it built:** one `index.html` (695 lines, 25 KB, no dependencies) on `localStorage` (`habit-tracker.v1`), and a
+README. A dark card per habit holds a "Mark done for today" button, the last 7 days as buttons that can be pressed
+to correct a day, and three chips: the streak, the **best streak**, and the number done in the last 7 days.
+It also shows the date, an empty state, a warning if storage is blocked, and syncing between tabs. Delete goes
+through `window.confirm`. The streak counts back from yesterday when today is not yet ticked, and the page says so.
+
+Not asked for, and worth noting for §6: **C2 (best streak) is already there.** It also wrote self-tests behind
+`#selftest`, and its final message says it "built and verified". It could not have run them, because `run_commands`
+is disabled. So "verified" is a claim, not a run.
+
+**The locator** (`runs/d-code-1/locator.json`) was written from the markup before grading. The tick is the row's
+`[data-action=toggle-today]`. The days are `[data-role=days] .day`, oldest first, done when `aria-pressed`. The streak
+is `[data-role=streak]` ("No streak yet" at 0, which the grader reads as none shown).
+
+**The first grading failed B13, and the grader was wrong.** The check read `cut off: Habit name`, but the phone shot
+(`grade/phone.png`) shows nothing cut off. The text was the form's `sr-only` label, a 1×1 px clipped box that is
+meant for screen readers only. B13 now skips boxes of at most 1×1 px. Re-measured: clean 13/13 and scrolls-sideways
+12/13 (B13, the same reasons) are unchanged, and d-code-1 is 13/13. B13's note: the delete ✕ is under 44 px
+(noted, not failed). Filed as P112-OWN034-SRONLY (fixed).
