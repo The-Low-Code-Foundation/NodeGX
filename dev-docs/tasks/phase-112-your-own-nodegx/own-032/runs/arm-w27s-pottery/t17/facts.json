@@ -1,0 +1,156 @@
+{
+ "htmlMs": 113,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Potter Portfolio",
+     "ratio": 1
+    }
+   ],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 32,
+     "y": 372,
+     "w": 1216,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 32,
+     "y": 0,
+     "w": 30,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Potter Portfolio",
+     "x": 32,
+     "y": 66,
+     "w": 578,
+     "h": 111,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 32,
+     "y": 225,
+     "w": 30,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 32,
+     "y": 291,
+     "w": 77,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:64838/",
+   "blank": false,
+   "words": 5,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 740
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Potter Portfolio",
+     "ratio": 1
+    }
+   ],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 32,
+     "y": 313,
+     "w": 326,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 32,
+     "y": 0,
+     "w": 30,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Potter Portfolio",
+     "x": 32,
+     "y": 66,
+     "w": 278,
+     "h": 52,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 32,
+     "y": 166,
+     "w": 30,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 32,
+     "y": 232,
+     "w": 77,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:64838/",
+   "blank": false,
+   "words": 5,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 681
+ },
+ "ms": 2500
+}

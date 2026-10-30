@@ -1,0 +1,441 @@
+{
+ "w27s-bakery": {
+  "control": "w17s-bakery",
+  "run": {
+   "turns": 36,
+   "ended": "nothing on the menu fixes what is left (contrast, contrast, contrast)",
+   "style": "stylish",
+   "lineSize": "var(--text-xl)",
+   "centred": true,
+   "lineD": {
+    "h": 52,
+    "lines": 2,
+    "perLine": 26
+   },
+   "lineP": {
+    "h": 78,
+    "lines": 3,
+    "perLine": 26
+   },
+   "offset": 0,
+   "wordsH": 402,
+   "photoH": 320,
+   "open": [
+    "goalMet",
+    "contrast",
+    "contrast",
+    "contrast"
+   ],
+   "lowD": [
+    "Lyon's Finest Bake 3.19",
+    "Artisan breads and 3.19",
+    "Bake Now 3.16"
+   ],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 770,
+   "photoD": {
+    "x": 652,
+    "y": 137,
+    "w": 596,
+    "h": 320
+   },
+   "photoP": {
+    "x": 32,
+    "y": 354,
+    "w": 326,
+    "h": 320
+   },
+   "photoWrapped": true,
+   "eyebrow": "var(--primary-foreground)",
+   "lowP": [
+    "Lyon's Finest Bake 3.19",
+    "Artisan breads and 3.19",
+    "Bake Now 3.16"
+   ],
+   "headline": "Maison Levain",
+   "line": "Artisan breads and pastries crafted with passion in the heart of Lyon."
+  },
+  "ctl": {
+   "turns": 33,
+   "ended": "nothing on the menu fixes what is left (contrast, contrast, contrast)",
+   "style": "stylish",
+   "lineSize": "var(--text-base)",
+   "centred": false,
+   "lineD": {
+    "h": 21,
+    "lines": 1,
+    "perLine": 21
+   },
+   "lineP": {
+    "h": 42,
+    "lines": 2,
+    "perLine": 21
+   },
+   "offset": 26,
+   "wordsH": 371,
+   "photoH": 320,
+   "open": [
+    "goalMet",
+    "contrast",
+    "contrast",
+    "contrast"
+   ],
+   "lowD": [
+    "Lyon's Finest Bake 3.19",
+    "Artisan breads and 3.19",
+    "Bake Now 3.16"
+   ],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 734,
+   "photoWrapped": false,
+   "eyebrow": "var(--primary-foreground)",
+   "lowP": [
+    "Lyon's Finest Bake 3.19",
+    "Artisan breads and 3.19",
+    "Bake Now 3.16"
+   ],
+   "headline": "Maison Levain",
+   "line": "Artisan breads and pastries crafted with passion in the heart of Lyon."
+  }
+ },
+ "w27s-jazz": {
+  "control": "w17s-jazz",
+  "run": {
+   "turns": 37,
+   "ended": "nothing on the menu fixes what is left (nothing)",
+   "style": "stylish",
+   "lineSize": "var(--text-xl)",
+   "centred": true,
+   "lineD": {
+    "h": 23,
+    "lines": 1,
+    "perLine": 23
+   },
+   "lineP": {
+    "h": 46,
+    "lines": 2,
+    "perLine": 23
+   },
+   "offset": 0,
+   "wordsH": 349,
+   "photoH": 320,
+   "open": [
+    "goalMet"
+   ],
+   "lowD": [],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 730,
+   "photoD": {
+    "x": 652,
+    "y": 111,
+    "w": 596,
+    "h": 320
+   },
+   "photoP": {
+    "x": 32,
+    "y": 314,
+    "w": 326,
+    "h": 320
+   },
+   "photoWrapped": true,
+   "eyebrow": "var(--primary-foreground)",
+   "lowP": [],
+   "headline": "The Blue Room",
+   "line": "Experience the magic of jazz on 14 November."
+  },
+  "ctl": {
+   "turns": 34,
+   "ended": "nothing on the menu fixes what is left (nothing)",
+   "style": "stylish",
+   "lineSize": "var(--text-base)",
+   "centred": false,
+   "lineD": {
+    "h": 18,
+    "lines": 1,
+    "perLine": 18
+   },
+   "lineP": {
+    "h": 36,
+    "lines": 2,
+    "perLine": 18
+   },
+   "offset": 12,
+   "wordsH": 344,
+   "photoH": 320,
+   "open": [
+    "goalMet"
+   ],
+   "lowD": [],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 720,
+   "photoWrapped": false,
+   "eyebrow": "var(--primary-foreground)",
+   "lowP": [],
+   "headline": "The Blue Room",
+   "line": "Experience the magic of jazz on 14 November."
+  }
+ },
+ "w27s-plumber": {
+  "control": "w17s-plumber",
+  "run": {
+   "turns": 36,
+   "ended": "nothing on the menu fixes what is left (nothing)",
+   "style": "stylish",
+   "lineSize": "var(--text-xl)",
+   "centred": true,
+   "lineD": {
+    "h": 46,
+    "lines": 2,
+    "perLine": 23
+   },
+   "lineP": {
+    "h": 69,
+    "lines": 3,
+    "perLine": 23
+   },
+   "offset": 0,
+   "wordsH": 372,
+   "photoH": 320,
+   "open": [
+    "goalMet"
+   ],
+   "lowD": [],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 805,
+   "photoD": {
+    "x": 652,
+    "y": 122,
+    "w": 596,
+    "h": 320
+   },
+   "photoP": {
+    "x": 32,
+    "y": 389,
+    "w": 326,
+    "h": 320
+   },
+   "photoWrapped": true,
+   "eyebrow": "var(--primary-foreground)",
+   "lowP": [],
+   "headline": "Dupont Plumbing",
+   "line": "Expert plumbing solutions you can trust for all your home and commercial needs."
+  },
+  "ctl": {
+   "turns": 33,
+   "ended": "nothing on the menu fixes what is left (nothing)",
+   "style": "stylish",
+   "lineSize": "var(--text-base)",
+   "centred": false,
+   "lineD": {
+    "h": 18,
+    "lines": 1,
+    "perLine": 18
+   },
+   "lineP": {
+    "h": 36,
+    "lines": 2,
+    "perLine": 18
+   },
+   "offset": 12,
+   "wordsH": 344,
+   "photoH": 320,
+   "open": [
+    "goalMet"
+   ],
+   "lowD": [],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 772,
+   "photoWrapped": false,
+   "eyebrow": "var(--primary-foreground)",
+   "lowP": [],
+   "headline": "Dupont Plumbing",
+   "line": "Expert plumbing solutions delivered with unmatched quality and reliability."
+  }
+ },
+ "w27s-pottery": {
+  "control": "w17s-pottery",
+  "run": {
+   "turns": 36,
+   "ended": "nothing on the menu fixes what is left (nothing)",
+   "style": "stylish",
+   "lineSize": "var(--text-xl)",
+   "centred": true,
+   "lineD": {
+    "h": 46,
+    "lines": 2,
+    "perLine": 23
+   },
+   "lineP": {
+    "h": 69,
+    "lines": 3,
+    "perLine": 23
+   },
+   "offset": 0,
+   "wordsH": 372,
+   "photoH": 320,
+   "open": [
+    "goalMet"
+   ],
+   "lowD": [],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 753,
+   "photoD": {
+    "x": 652,
+    "y": 122,
+    "w": 596,
+    "h": 320
+   },
+   "photoP": {
+    "x": 32,
+    "y": 337,
+    "w": 326,
+    "h": 320
+   },
+   "photoWrapped": true,
+   "eyebrow": "var(--primary-foreground)",
+   "lowP": [],
+   "headline": "Potter Portfolio",
+   "line": "Handmade bowls and weekend classes for a unique pottery experience."
+  },
+  "ctl": {
+   "turns": 33,
+   "ended": "nothing on the menu fixes what is left (nothing)",
+   "style": "stylish",
+   "lineSize": "var(--text-base)",
+   "centred": false,
+   "lineD": {
+    "h": 18,
+    "lines": 1,
+    "perLine": 18
+   },
+   "lineP": {
+    "h": 36,
+    "lines": 2,
+    "perLine": 18
+   },
+   "offset": 12,
+   "wordsH": 344,
+   "photoH": 320,
+   "open": [
+    "goalMet"
+   ],
+   "lowD": [],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 720,
+   "photoWrapped": false,
+   "eyebrow": "var(--primary-foreground)",
+   "lowP": [],
+   "headline": "Potter Portfolio",
+   "line": "Handmade ceramic bowls and weekend pottery classes."
+  }
+ },
+ "w27s-running": {
+  "control": "w19s-running",
+  "run": {
+   "turns": 39,
+   "ended": "nothing on the menu fixes what is left (contrast, contrast, contrast)",
+   "style": "stylish",
+   "lineSize": "var(--text-xl)",
+   "centred": true,
+   "lineD": {
+    "h": 54,
+    "lines": 2,
+    "perLine": 27
+   },
+   "lineP": {
+    "h": 108,
+    "lines": 4,
+    "perLine": 27
+   },
+   "offset": 0,
+   "wordsH": 357,
+   "photoH": 320,
+   "open": [
+    "goalMet",
+    "contrast",
+    "contrast",
+    "contrast"
+   ],
+   "lowD": [
+    "Saturday Morning R 3.3",
+    "Your Saturday morn 3.3",
+    "Run Now 3.3"
+   ],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 841,
+   "photoD": {
+    "x": 652,
+    "y": 115,
+    "w": 580,
+    "h": 320
+   },
+   "photoP": {
+    "x": 48,
+    "y": 425,
+    "w": 294,
+    "h": 320
+   },
+   "photoWrapped": true,
+   "eyebrow": "var(--primary-foreground)",
+   "lowP": [
+    "Saturday Morning R 3.3",
+    "Your Saturday morn 3.3",
+    "Run Now 3.3"
+   ],
+   "headline": "Park Runners: Saturday Run",
+   "line": "Your Saturday morning adventure starts here—join the movement and discover the park with us."
+  },
+  "ctl": {
+   "turns": 36,
+   "ended": "nothing on the menu fixes what is left (contrast, contrast, contrast)",
+   "style": "stylish",
+   "lineSize": "var(--text-base)",
+   "centred": false,
+   "lineD": {
+    "h": 44,
+    "lines": 2,
+    "perLine": 22
+   },
+   "lineP": {
+    "h": 66,
+    "lines": 3,
+    "perLine": 22
+   },
+   "offset": 14,
+   "wordsH": 347,
+   "photoH": 320,
+   "open": [
+    "goalMet",
+    "contrast",
+    "contrast",
+    "contrast"
+   ],
+   "lowD": [
+    "Saturday Morning R 3.3",
+    "Find your rhythm a 3.3",
+    "Run Now 3.3"
+   ],
+   "atEdgeP": 0,
+   "overflowP": 0,
+   "phoneH": 799,
+   "photoWrapped": false,
+   "eyebrow": "var(--primary-foreground)",
+   "lowP": [
+    "Saturday Morning R 3.3",
+    "Find your rhythm a 3.3",
+    "Run Now 3.3"
+   ],
+   "headline": "Park Runners: Saturday Club",
+   "line": "Find your rhythm and make every Saturday an adventure with our energetic community."
+  }
+ }
+}

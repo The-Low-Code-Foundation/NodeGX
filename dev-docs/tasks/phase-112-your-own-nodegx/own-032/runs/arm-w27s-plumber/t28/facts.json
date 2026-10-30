@@ -1,0 +1,146 @@
+{
+ "htmlMs": 328,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 652,
+     "y": 470,
+     "w": 596,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Reliable & Professional Plumbing",
+     "x": 32,
+     "y": 96,
+     "w": 272,
+     "h": 15,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Dupont Plumbing",
+     "x": 32,
+     "y": 159,
+     "w": 741,
+     "h": 111,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Expert plumbing solutions you can trust ",
+     "x": 32,
+     "y": 318,
+     "w": 703,
+     "h": 23,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Fixing Your Pipes",
+     "x": 32,
+     "y": 389,
+     "w": 147,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:64414/",
+   "blank": false,
+   "words": 22,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 886
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 32,
+     "y": 525,
+     "w": 326,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Reliable & Professional Plumbing",
+     "x": 32,
+     "y": 96,
+     "w": 272,
+     "h": 15,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Dupont Plumbing",
+     "x": 32,
+     "y": 159,
+     "w": 193,
+     "h": 104,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Expert plumbing solutions you can trust ",
+     "x": 32,
+     "y": 311,
+     "w": 305,
+     "h": 69,
+     "lines": 3
+    },
+    {
+     "kind": "button",
+     "text": "Fixing Your Pipes",
+     "x": 32,
+     "y": 428,
+     "w": 147,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:64414/",
+   "blank": false,
+   "words": 22,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 941
+ },
+ "ms": 2840
+}

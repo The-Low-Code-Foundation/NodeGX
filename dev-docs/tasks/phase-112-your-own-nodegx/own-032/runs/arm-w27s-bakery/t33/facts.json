@@ -1,0 +1,182 @@
+{
+ "htmlMs": 297,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Lyon's Finest Bakery",
+     "ratio": 3.19
+    },
+    {
+     "text": "Artisan breads and pastries crafted with",
+     "ratio": 3.19
+    },
+    {
+     "text": "Bake Now",
+     "ratio": 3.16
+    }
+   ],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 652,
+     "y": 96,
+     "w": 596,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Lyon's Finest Bakery",
+     "x": 32,
+     "y": 96,
+     "w": 154,
+     "h": 16,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Maison Levain",
+     "x": 32,
+     "y": 128,
+     "w": 352,
+     "h": 244,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Artisan breads and pastries crafted with",
+     "x": 32,
+     "y": 388,
+     "w": 592,
+     "h": 52,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Bake Now",
+     "x": 32,
+     "y": 456,
+     "w": 97,
+     "h": 34,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63455/",
+   "blank": false,
+   "words": 19,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Bake Now",
+     "ratio": 3.16
+    }
+   ],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 586
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Lyon's Finest Bakery",
+     "ratio": 3.19
+    },
+    {
+     "text": "Artisan breads and pastries crafted with",
+     "ratio": 3.19
+    },
+    {
+     "text": "Bake Now",
+     "ratio": 3.16
+    }
+   ],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 32,
+     "y": 346,
+     "w": 326,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Lyon's Finest Bakery",
+     "x": 32,
+     "y": 96,
+     "w": 154,
+     "h": 16,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Maison Levain",
+     "x": 32,
+     "y": 128,
+     "w": 304,
+     "h": 58,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Artisan breads and pastries crafted with",
+     "x": 32,
+     "y": 202,
+     "w": 331,
+     "h": 78,
+     "lines": 3
+    },
+    {
+     "kind": "button",
+     "text": "Bake Now",
+     "x": 32,
+     "y": 296,
+     "w": 97,
+     "h": 34,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63455/",
+   "blank": false,
+   "words": 19,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Bake Now",
+     "ratio": 3.16
+    }
+   ],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 762
+ },
+ "ms": 2676
+}

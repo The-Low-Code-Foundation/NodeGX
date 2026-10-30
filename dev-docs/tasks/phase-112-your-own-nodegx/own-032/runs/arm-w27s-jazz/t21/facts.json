@@ -1,0 +1,146 @@
+{
+ "htmlMs": 180,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 652,
+     "y": 473,
+     "w": 596,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 32,
+     "y": 96,
+     "w": 30,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "The Blue Room",
+     "x": 32,
+     "y": 162,
+     "w": 598,
+     "h": 111,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 32,
+     "y": 321,
+     "w": 37,
+     "h": 23,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 32,
+     "y": 392,
+     "w": 77,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63935/",
+   "blank": false,
+   "words": 6,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 889
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 32,
+     "y": 430,
+     "w": 326,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 32,
+     "y": 96,
+     "w": 30,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "The Blue Room",
+     "x": 32,
+     "y": 162,
+     "w": 286,
+     "h": 52,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 32,
+     "y": 262,
+     "w": 37,
+     "h": 23,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 32,
+     "y": 333,
+     "w": 77,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63935/",
+   "blank": false,
+   "words": 6,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 846
+ },
+ "ms": 2628
+}

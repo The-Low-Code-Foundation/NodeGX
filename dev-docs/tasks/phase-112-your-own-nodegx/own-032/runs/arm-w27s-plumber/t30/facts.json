@@ -1,0 +1,158 @@
+{
+ "htmlMs": 166,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [
+    {
+     "a": "Reliable & Professional Plumbing",
+     "b": "Dupont Plumbing",
+     "gap": 0
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 652,
+     "y": 248,
+     "w": 596,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Expert plumbing solutions you can trust ",
+     "x": 32,
+     "y": 96,
+     "w": 703,
+     "h": 23,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Fixing Your Pipes",
+     "x": 32,
+     "y": 167,
+     "w": 147,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Reliable & Professional Plumbing",
+     "x": 32,
+     "y": 248,
+     "w": 272,
+     "h": 15,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Dupont Plumbing",
+     "x": 32,
+     "y": 263,
+     "w": 405,
+     "h": 222,
+     "lines": 2
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:64414/",
+   "blank": false,
+   "words": 22,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 664
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [
+    {
+     "a": "Reliable & Professional Plumbing",
+     "b": "Dupont Plumbing",
+     "gap": 0
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 32,
+     "y": 429,
+     "w": 326,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Expert plumbing solutions you can trust ",
+     "x": 32,
+     "y": 96,
+     "w": 305,
+     "h": 69,
+     "lines": 3
+    },
+    {
+     "kind": "button",
+     "text": "Fixing Your Pipes",
+     "x": 32,
+     "y": 213,
+     "w": 147,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Reliable & Professional Plumbing",
+     "x": 32,
+     "y": 294,
+     "w": 272,
+     "h": 15,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Dupont Plumbing",
+     "x": 32,
+     "y": 309,
+     "w": 193,
+     "h": 104,
+     "lines": 2
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:64414/",
+   "blank": false,
+   "words": 22,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 845
+ },
+ "ms": 2646
+}

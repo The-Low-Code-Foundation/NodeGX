@@ -1,0 +1,164 @@
+{
+ "htmlMs": 113,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "The Blue Room",
+     "ratio": 1
+    },
+    {
+     "text": "Text",
+     "ratio": 1
+    }
+   ],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 32,
+     "y": 284,
+     "w": 1216,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 32,
+     "y": 0,
+     "w": 30,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "The Blue Room",
+     "x": 32,
+     "y": 66,
+     "w": 133,
+     "h": 23,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 32,
+     "y": 137,
+     "w": 30,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 32,
+     "y": 203,
+     "w": 77,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63935/",
+   "blank": false,
+   "words": 6,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 604
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "The Blue Room",
+     "ratio": 1
+    },
+    {
+     "text": "Text",
+     "ratio": 1
+    }
+   ],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 32,
+     "y": 284,
+     "w": 326,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 32,
+     "y": 0,
+     "w": 30,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "The Blue Room",
+     "x": 32,
+     "y": 66,
+     "w": 133,
+     "h": 23,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 32,
+     "y": 137,
+     "w": 30,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 32,
+     "y": 203,
+     "w": 77,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63935/",
+   "blank": false,
+   "words": 6,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 604
+ },
+ "ms": 2514
+}

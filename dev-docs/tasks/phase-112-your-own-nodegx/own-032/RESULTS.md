@@ -1454,3 +1454,48 @@ with `lookD` the arm's `--style auto` takes its look, or stops before turn 1 wit
 **What this settles:** Richard's third answer is in the arm. With `lookD`, a request that says how it should look is
 built in that look, of three (warm included, with or without the word "warm"); a request that does not is asked
 "clean, bold or warm?" before anything is built. Held out: 32 of 32 at the question, 4 of 4 end to end.
+
+### 13f. The bold look with s7–s8's rules (w27s)
+
+No bold run has had `centreWords`, `lineReadable` or `centrePhoto`. The bold controls (w17s-bakery, -jazz, -plumber,
+-pottery; w19s-running, the last full bold set, s5) all end with the line at `text-base` (16 px), the words column
+not centred, and the words taller than the photo (344–371 px vs 320), so the photo sits high: offset +12 to +26 px.
+`w27s-*` run `runs/w26.edit.json` (every switch, `lookD`, `style: auto`) on the five bold run-set requests.
+
+**Pre-registered (before any w27s run):**
+1. Rule D says **stylish on 5 of 5** (13c: P(named) ≥ 0.727 and three-look stylish ≥ 0.947 on all five).
+2. `wordsCentred`, `lineReadable` and `photoCentred` each fire and close on **5 of 5**: the line ends `text-xl`, the
+   words Group centred, the photo in a centred Group.
+3. Desktop offset within **±2 px** on 5 of 5 (controls +12 to +26).
+4. Turns: the control's **+3 (±3)**, none reaching 40.
+5. Phone: `atEdge` 0, `overflowX` 0, the line on ≤ 3 lines.
+6. Left open: the control's own list, entry for entry. Bakery and running keep their white-on-gradient line, now at
+   20 px (still under the 24 px "large text" size, so still graded at 4.5). Nothing new is open.
+7. Each run parts from its control no earlier than the turn the first of the three new findings appears (`drift.mjs`
+   before that turn: the same actions, drift 0).
+
+**Result (w27s, 2026-10-30; `node grade.mjs w27s …` → `runs/grade-w27s.json`):**
+
+| run (control) | turns | line px / lines, desktop · phone | offset | first new finding → parts | left open | words |
+|---|---|---|---|---|---|---|
+| s-bakery (w17s) | 33 → 36 | 26 / 2 · 3 | +26 → **0** | t20 → t21 | ctl's 3 contrast (3.19, 3.19, 3.16) | same |
+| s-jazz (w17s) | 34 → 37 | 23 / 1 · 2 | +12 → **0** | t16 → t16 | nothing | same |
+| s-plumber (w17s) | 33 → 36 | 23 / 2 · 3 | +12 → **0** | t18 → t21 | nothing | line rewritten |
+| s-pottery (w17s) | 33 → 36 | 23 / 2 · 3 | +12 → **0** | t16 → t16 | nothing | line rewritten |
+| s-running (w19s) | 36 → 39 | 27 / 2 · **4** | +14 → **0** | t16 → t16 | ctl's 3 contrast (3.3) | headline + line rewritten |
+
+**Graded against 13f's predictions:**
+1. Rule D: stylish on **5 of 5**. ✔
+2. The three checks closed on **5 of 5**: `text-xl` line, words centred, photo in a centred Group. ✔
+3. Offset **0** on 5 of 5. ✔
+4. Turns **+3** on 5 of 5. ✔
+5. Phone `atEdge` 0 and `overflowX` 0 on 5 of 5 ✔, but **running's line takes 4 lines on a phone** (≤ 3 predicted) ✘:
+   its rewritten line is longer (16 words, "Your Saturday morning adventure starts here—join the movement and discover the park
+   with us."), at 20 px, and the run gave the section `space-12` side padding (column 294 px, not 326). No check reads
+   the line's phone lines, so nothing in the arm sees it.
+6. Left open: the control's list on 5 of 5 (running's middle entry is its new line, at the same 3.3); nothing new. ✔
+7. Each run parts at or after the turn its first new finding (`lineReadable`) appears; before it, the same actions,
+   drift 0. ✔
+
+**What this settles:** the bold look takes s7–s8's rules as the calm and warm looks do (+3 turns, offsets 0, the
+line 20 px). All three looks now run on one harness, `runs/w26.edit.json`, with the look decided by rule D.
