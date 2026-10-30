@@ -1,0 +1,146 @@
+{
+ "htmlMs": 152,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 652,
+     "y": 96,
+     "w": 580,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Your Happy Place",
+     "x": 48,
+     "y": 96,
+     "w": 142,
+     "h": 30,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Welcome to Puppy Haven",
+     "x": 48,
+     "y": 142,
+     "w": 553,
+     "h": 228,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Find your perfect furry friend and start",
+     "x": 48,
+     "y": 386,
+     "w": 580,
+     "h": 54,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Adopt Now",
+     "x": 48,
+     "y": 456,
+     "w": 101,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:62882/",
+   "blank": false,
+   "words": 21,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 585
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 48,
+     "y": 410,
+     "w": 294,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Your Happy Place",
+     "x": 48,
+     "y": 96,
+     "w": 142,
+     "h": 30,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Welcome to Puppy Haven",
+     "x": 48,
+     "y": 142,
+     "w": 260,
+     "h": 106,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Find your perfect furry friend and start",
+     "x": 48,
+     "y": 264,
+     "w": 263,
+     "h": 81,
+     "lines": 3
+    },
+    {
+     "kind": "button",
+     "text": "Adopt Now",
+     "x": 48,
+     "y": 361,
+     "w": 101,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:62882/",
+   "blank": false,
+   "words": 21,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 826
+ },
+ "ms": 2460
+}

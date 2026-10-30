@@ -20,6 +20,9 @@ REQ[m-puppy]="A simple, calm page for Puppy Haven, a puppy adoption site. Lots o
 REQ[w-bakery]="A warm, friendly page for Maison Levain, our family bakery in Lyon. Soft and welcoming."
 REQ[w-pottery]="A warm, gentle page for Potter Portfolio: handmade bowls and weekend pottery classes. Soft and welcoming."
 REQ[w-puppy]="A warm, friendly page for Puppy Haven, where families adopt puppies. Soft and welcoming."
+# s8 (13e): a plain request (13d's, word for word) and a warm one with no look word, for lookD's `--style auto`
+REQ[p-puppy]="A page for my dental surgery."
+REQ[k-puppy]="A page for Puppy Haven that feels like a hug, where families adopt puppies."
 for k in "$@"; do
   brief=${k#*-}
   while [ -n "$(ollama ps | tail -n +2)" ]; do sleep 20; done

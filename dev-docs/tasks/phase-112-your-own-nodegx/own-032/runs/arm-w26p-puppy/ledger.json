@@ -1,0 +1,69 @@
+{
+ "run": "w26p-puppy",
+ "request": "A page for my dental surgery.",
+ "lookAsked": {
+  "rule": "D",
+  "style": "ask",
+  "pNamed": 0.266,
+  "three": {
+   "style": "warm",
+   "top": 0.858,
+   "mean": {
+    "minimal": 0.104,
+    "stylish": 0.038,
+    "warm": 0.858
+   }
+  },
+  "pStylish": 0.361
+ },
+ "edit": {
+  "wordsTemperature": 0,
+  "rules": {
+   "missingFirst": true,
+   "markMissing": true,
+   "namedGoal": true,
+   "legalOnly": true,
+   "fixMenu": true,
+   "goalLine": true,
+   "ownerNamed": true,
+   "shapeChecks": true,
+   "roles": true,
+   "endGate": true,
+   "addWhileMissing": true,
+   "shortHeadline": true,
+   "blankRetry": true,
+   "rhythm": true,
+   "fixesOnly": true,
+   "factsKept": true,
+   "nameAndMore": true,
+   "writeRepeat": true,
+   "rhythmCalm": true,
+   "centreWords": true,
+   "lineReadable": true,
+   "centrePhoto": true,
+   "eyebrowDark": true,
+   "lookD": true
+  },
+  "style": "auto",
+  "askBand": [
+   0.1,
+   0.9
+  ]
+ },
+ "turns": [],
+ "end": {
+  "ask": "clean, bold or warm?",
+  "pNamed": 0.266,
+  "three": {
+   "style": "warm",
+   "top": 0.858,
+   "mean": {
+    "minimal": 0.104,
+    "stylish": 0.038,
+    "warm": 0.858
+   }
+  },
+  "pStylish": 0.361
+ },
+ "at": "2026-10-30T11:51:21.605Z"
+}

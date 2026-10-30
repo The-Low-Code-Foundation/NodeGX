@@ -38,3 +38,21 @@ export async function lookOf3(model, request) {
   const style = keys.reduce((a, b) => (mean[b] > mean[a] ? b : a));
   return { looks: 3, style, top: mean[style], mean, agree: picks.filter((p) => p === style).length, picks };
 }
+
+// s8, rule D (13c fitted, 13d held out 32 of 32; Richard: a request that names no look is asked "clean, bold or warm?"):
+// first "do their words say how it should look?" (probe-look4.mjs Q_NAMED, word for word); where P(yes) ≥ 0.5 and the
+// three-look question's top look is ≥ 0.9, that look; else the two-look rule (P(stylish) ≤ 0.1 minimal, ≥ 0.9 stylish),
+// else `ask`
+export const namedQuestion = (request, order) => `A person asked for a web page:\n"${request}"\n\nDo their words say anything about how the page should look or feel: its colours, its mood or its style?\n${order.map((k) => `- ${k}`).join('\n')}`;
+export async function lookOfD(model, request) {
+  let pNamed = 0;
+  for (const order of [['yes', 'no'], ['no', 'yes']]) {
+    const j = await chat(model, [{ role: 'system', content: SYSTEM }, { role: 'user', content: namedQuestion(request, order) }], { format: { type: 'object', properties: { answer: { type: 'string', enum: order } }, required: ['answer'] }, logprobs: true });
+    pNamed += (dist(j, order)?.find((x) => x.label === 'yes')?.p ?? 0) / 2;
+  }
+  pNamed = +pNamed.toFixed(3);
+  const three = await lookOf3(model, request), two = await lookOf(model, request);
+  const named = pNamed >= 0.5 && three.top >= 0.9 ? three.style : null;
+  const style = named || (two.pStylish <= 0.1 ? 'minimal' : two.pStylish >= 0.9 ? 'stylish' : 'ask');
+  return { rule: 'D', style, pNamed, three: { style: three.style, top: three.top, mean: three.mean }, pStylish: two.pStylish };
+}

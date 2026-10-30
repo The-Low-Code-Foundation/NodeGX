@@ -29,7 +29,7 @@ export const Q_NAMED = (request, order) => `${head(request)}Do their words say a
 export const LOOKS3B = { ...LOOKS, warm: 'cosy and gentle: a soft pastel ground, rounded shapes, a handwritten touch' };
 const perms = (a) => (a.length <= 1 ? [a] : a.flatMap((x, i) => perms([...a.slice(0, i), ...a.slice(i + 1)]).map((p) => [x, ...p])));
 
-async function yesOf(model, q, request) {
+export async function yesOf(model, q, request) {
   let p = 0;
   for (const order of [['yes', 'no'], ['no', 'yes']]) {
     const j = await chat(model, [{ role: 'system', content: SYSTEM }, { role: 'user', content: q(request, order) }], { format: { type: 'object', properties: { answer: { type: 'string', enum: order } }, required: ['answer'] }, logprobs: true });

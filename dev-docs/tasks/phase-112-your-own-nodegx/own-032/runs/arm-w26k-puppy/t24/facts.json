@@ -1,0 +1,146 @@
+{
+ "htmlMs": 290,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 652,
+     "y": 359,
+     "w": 580,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Your Happy Place",
+     "x": 48,
+     "y": 96,
+     "w": 142,
+     "h": 30,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Welcome to Puppy Haven",
+     "x": 48,
+     "y": 142,
+     "w": 1075,
+     "h": 114,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Find your perfect furry friend and start",
+     "x": 48,
+     "y": 272,
+     "w": 507,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 48,
+     "y": 310,
+     "w": 74,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:62882/",
+   "blank": false,
+   "words": 20,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 775
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 48,
+     "y": 389,
+     "w": 294,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Your Happy Place",
+     "x": 48,
+     "y": 96,
+     "w": 142,
+     "h": 30,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Welcome to Puppy Haven",
+     "x": 48,
+     "y": 142,
+     "w": 260,
+     "h": 106,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Find your perfect furry friend and start",
+     "x": 48,
+     "y": 264,
+     "w": 291,
+     "h": 44,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 48,
+     "y": 324,
+     "w": 74,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:62882/",
+   "blank": false,
+   "words": 20,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 805
+ },
+ "ms": 2544
+}

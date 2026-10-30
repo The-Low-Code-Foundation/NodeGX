@@ -1369,3 +1369,88 @@ Sets: 11b's 8 strict warm requests (none says warm, friendly or welcoming), the 
 Only a passing candidate goes into the arm's `--style auto`. If none passes, nothing changes in the arm, and the rule
 stays as it is today (warm only with `--style warm`; "clean or bold?").
 My guess, for the record: C does best on plain; A's yes/no leans to "yes" on plain requests as the three-look question did.
+
+**Result (`probe-look4.mjs`, E2B, 2026-10-30; `runs/probe-look4-gemma4_e2b-it-qat.json`):**
+
+| candidate | 1. plain → ask (≥ 18, warm 0) | 2. strict → warm (≥ 7/8) | 3. sets right (≥ 10/11), running not warm | 4. warm set 3/3 | passes |
+|---|---|---|---|---|---|
+| A two looks + yes/no warm | **20/20**, warm 0 ✔ | 5/8 ✘ (hospice and vet `ask`, P(yes) 0.68/0.67; yoga minimal, 0.83) | **11/11** ✔ | ✔ | no |
+| B three looks, no "welcoming" | 17/20, **warm 3** ✘ (cheese 0.95, records 0.93, pottery 0.95) | 8/8 ✔ | 10/11 ✔ (running `ask`) | ✔ | no |
+| C "does it say how it looks?" first | **20/20**, warm 0 ✔ | **8/8** ✔ | 9/11 ✘ (plumber "plain, uncluttered" `ask`, P(named) 0.446; running `ask`) | ✔ | no |
+
+**No candidate passes, so nothing changes in the arm.** My guess was half right: C is the best on plain (P(named) 0.07–0.42
+on all 20), but A's yes/no did *not* lean to yes on plain requests (P(yes) 0.01–0.49): its fault is the other way, a
+"yes" too weak on strict warm requests that never say a look word.
+
+What the numbers show: C's first question separates "named a look" from "did not" on plain and strict requests, and the
+two-look question is decisive on every named calm or bold request (P(stylish) ≤ 0.004 or ≥ 0.988) while no plain
+request is decisive (0.11–0.70). So **C, then the two-look rule only where C says ask** gets every row of this probe
+right. That rule is fitted to these 42 rows after seeing them, so it is a hypothesis, not a result: 13d tests it on
+new requests.
+
+### 13d. Rule D on held-out requests (`probe-look5.mjs`, probe only)
+
+**Rule D** (fitted on 13c): ask C's question first ("do their words say anything about how the page should look or
+feel?"). Where P(yes) ≥ 0.5 and 11b's three-look question gives a top look at ≥ 0.9, build that look. Otherwise use the
+two-look rule: P(stylish) ≤ 0.1 → minimal, ≥ 0.9 → stylish, else **ask "clean, bold or warm?"**.
+
+**32 new requests, written before any model was asked of them** (listed in `probe-look5.mjs` `HELD`):
+- 8 warm: 4 with a look word (warm, welcoming, friendly, soft, cosy, gentle), 4 without ("make it feel like home",
+  "comforting, kind", "sweet and homely", "nurturing");
+- 12 plain: trades, shops, clubs, events, two of them dated;
+- 6 calm (clean, minimal, plain, understated, white, sober);
+- 6 bold (bold, dark and edgy, loud and punchy, sleek with a dark background, glamorous, high-energy).
+
+**Pre-registered (before the probe runs). Rule D passes when all four hold:**
+1. plain: ask on **≥ 11 of 12**, warm on 0;
+2. warm: warm on **≥ 7 of 8**;
+3. calm and bold: the right look on **≥ 11 of 12**, and none goes to warm;
+4. nothing named goes to the wrong named look (a calm request built bold, or the reverse): **0**.
+
+If D passes, it goes into the arm's `--style auto` behind a switch (`lookD`), with the arm's existing "ask" exit now
+saying "clean, bold or warm?". If it fails, the arm stays as it is, and Richard sees the numbers.
+
+**Result (`probe-look5.mjs`, E2B, 2026-10-30; `runs/probe-look5-gemma4_e2b-it-qat.json`): rule D, 32 of 32.**
+
+| set | right | notes |
+|---|---|---|
+| warm (8) | **8/8** ✔ | P(named) 0.83–0.93, three-look top ≥ 0.997, the 4 with no look word included |
+| plain (12) | **12/12 ask**, warm 0 ✔ | P(named) 0.13–0.43; P(stylish) 0.113–0.711 |
+| calm (6) | **6/6** ✔ | two of six fall through the first question (architecture 0.48, law firm 0.452) and are caught by the two-look rule (P(stylish) 0.001) |
+| bold (6) | **6/6** ✔ | P(stylish) ≥ 0.983 |
+| named built as the other named look | **0** ✔ | |
+
+**Rule D passes all four.** Two thin places, for the record: a plain request is one P(stylish) ≤ 0.1 away from being
+built calm without asking (allotment society 0.113 here, the village choir 0.11 in 13c), and two of six calm requests
+reach "calm" only through the fallback.
+
+### 13e. Rule D in the arm (`lookD`, w26)
+
+`lookq.mjs lookOfD` asks the three questions (the first word for word as `probe-look4.mjs` `Q_NAMED`, checked equal);
+with `lookD` the arm's `--style auto` takes its look, or stops before turn 1 with "ask: clean, bold or warm?".
+`runs/w26.edit.json` = w25 + `lookD` (still `style: auto`). No `--style` on the command line.
+
+**Pre-registered (before any w26 run):**
+1. `w26w-bakery` (the warm run-set request): rule D says warm, and the build is w25w-bakery's action for action
+   (`drift.mjs`: never parts, drift 0).
+2. `w26m-puppy` (the calm request): minimal, and the build is w24m-puppy's action for action (eyebrowDark is warm-only).
+3. `w26p-puppy`, "A page for my dental surgery." (13d's plain request): stops before turn 1, ledger `end.ask` =
+   "clean, bold or warm?", no turns.
+4. `w26k-puppy`, "A page for Puppy Haven that feels like a hug, where families adopt puppies." (new, no look word, not
+   asked of any model before): warm, and the build ends with every check closed, the photo centred and the small line
+   dark.
+
+**Result (w26, 2026-10-30):**
+
+| run | rule D's numbers | look | build vs control |
+|---|---|---|---|
+| p-puppy "A page for my dental surgery." | P(named) 0.266, P(stylish) 0.361 | **ask: "clean, bold or warm?"**, no turns | — |
+| w-bakery (warm request) | P(named) 0.92, three-look warm 1.000 | warm | **= w25w-bakery**: 35 actions, never parts, drift 0.0000 |
+| m-puppy (calm request) | P(named) 0.871, three-look minimal 0.959 | minimal | **= w24m-puppy**: 24 actions, never parts, drift 0.0000 |
+| k-puppy "…feels like a hug…" (new) | P(named) 0.935, three-look warm 0.999 | warm | 35 turns, every check closed, offset 0, small line dark, `lowContrast` none; vs w25w-puppy only the line's words differ ("…a loving family adventure today.") |
+
+**Graded against 13e's predictions:** 1 ✔, 2 ✔, 3 ✔, 4 ✔.
+
+**What this settles:** Richard's third answer is in the arm. With `lookD`, a request that says how it should look is
+built in that look, of three (warm included, with or without the word "warm"); a request that does not is asked
+"clean, bold or warm?" before anything is built. Held out: 32 of 32 at the question, 4 of 4 end to end.

@@ -63,16 +63,18 @@ const REQUEST = opt('--request', EDIT.request);
 // `--style auto` asks the builder model which look the request names (lookq.mjs), before turn 1; the answer is ledgered
 // look3 (s6): the question offers three looks (lookq.mjs lookOf3), and the third, `warm`, can be built (`--style warm`)
 const LOOK3 = !!EDIT.rules?.look3;
-const LOOK_ASKED = (opt('--style', EDIT.style) === 'auto') ? await (await import('./lookq.mjs'))[LOOK3 ? 'lookOf3' : 'lookOf'](MODEL, REQUEST || GOAL.about) : null;
-const STYLE = LOOK_ASKED ? LOOK_ASKED.style : opt('--style', EDIT.style || 'minimal');
+// lookD (s8): rule D (lookq.mjs lookOfD) decides the look or `ask`, with the three looks; it replaces askBand's test
+const LOOKD = !!EDIT.rules?.lookD;
+const LOOK_ASKED = (opt('--style', EDIT.style) === 'auto') ? await (await import('./lookq.mjs'))[LOOKD ? 'lookOfD' : LOOK3 ? 'lookOf3' : 'lookOf'](MODEL, REQUEST || GOAL.about) : null;
+const STYLE = LOOK_ASKED ? (LOOK_ASKED.style === 'ask' ? 'minimal' : LOOK_ASKED.style) : opt('--style', EDIT.style || 'minimal');
 const ASK_BAND = opt('--ask-band') ? opt('--ask-band').split(',').map(Number) : EDIT.askBand;
 // with two looks, P(stylish) inside the band; with three, the top look under the band's top (the same rule, for two)
-const UNSAID = ASK_BAND && LOOK_ASKED && (LOOK3 ? LOOK_ASKED.top < ASK_BAND[1] : LOOK_ASKED.pStylish > ASK_BAND[0] && LOOK_ASKED.pStylish < ASK_BAND[1]);
+const UNSAID = LOOKD ? LOOK_ASKED?.style === 'ask' : ASK_BAND && LOOK_ASKED && (LOOK3 ? LOOK_ASKED.top < ASK_BAND[1] : LOOK_ASKED.pStylish > ASK_BAND[0] && LOOK_ASKED.pStylish < ASK_BAND[1]);
 if (UNSAID) {
   // the request does not say which look: nothing is built, and the question goes back to the person
   const out = path.join(HERE, 'runs', `arm-${RUN}`);
   fs.mkdirSync(out, { recursive: true });
-  const end = LOOK3 ? { ask: 'clean, bold or warm?', mean: LOOK_ASKED.mean, band: ASK_BAND } : { ask: 'clean or bold?', pStylish: LOOK_ASKED.pStylish, band: ASK_BAND };
+  const end = LOOKD ? { ask: 'clean, bold or warm?', pNamed: LOOK_ASKED.pNamed, three: LOOK_ASKED.three, pStylish: LOOK_ASKED.pStylish } : LOOK3 ? { ask: 'clean, bold or warm?', mean: LOOK_ASKED.mean, band: ASK_BAND } : { ask: 'clean or bold?', pStylish: LOOK_ASKED.pStylish, band: ASK_BAND };
   fs.writeFileSync(path.join(out, 'ledger.json'), JSON.stringify({ run: RUN, request: REQUEST, lookAsked: LOOK_ASKED, edit: EDIT, turns: [], end, at: new Date().toISOString() }, null, 1));
   await fetch('http://127.0.0.1:11434/api/generate', { method: 'POST', body: JSON.stringify({ model: MODEL, keep_alive: 0 }) }).catch(() => {});
   console.log(JSON.stringify(end));
@@ -266,8 +268,11 @@ async function judge(q, png) {
 //                 words column (desktop, > 4 px) is put in a Group that fills the column and centres it, one `wrap` fix
 //                 (13a: the Image's own alignY does nothing in a Columns wrapper, a block; the Group: offset 0, phone same)
 //   eyebrowDark   (warm) the small handwritten line is dark text, not the brand colour (bakery's amber read 2.78)
+//   lookD         `--style auto` decides by rule D (lookq.mjs lookOfD; Richard: "ask 'clean, bold or warm?'"): a request
+//                 that says how it looks gets that look of three, else the two-look rule where it is decisive, else the
+//                 arm stops before turn 1 with "ask: clean, bold or warm?" (13c fitted on 42 requests, 13d 32 of 32 held out)
 // The touching / edge thresholds are not rules: bench.mjs FACTS fixes them (4 px, 8 px), and probe-vision's key with them.
-const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false, roles: false, endGate: false, addWhileMissing: false, shortHeadline: false, blankRetry: false, rhythm: false, fixesOnly: false, factsKept: false, nameAndMore: false, writeRepeat: false, rhythmCalm: false, look3: false, centreWords: false, lineReadable: false, centrePhoto: false, eyebrowDark: false }, ...(EDIT.rules || {}) };
+const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false, roles: false, endGate: false, addWhileMissing: false, shortHeadline: false, blankRetry: false, rhythm: false, fixesOnly: false, factsKept: false, nameAndMore: false, writeRepeat: false, rhythmCalm: false, look3: false, centreWords: false, lineReadable: false, centrePhoto: false, eyebrowDark: false, lookD: false }, ...(EDIT.rules || {}) };
 // roles (s2, after w4-t15a): each part is told what it is when it is added, and keeps it through moves and removes;
 // the shape checks read the roles, never the document order (t15a: a move made the headline texts[1], and the size
 // fix went to the other Text, so the hero ended with two headlines and no line under them)
