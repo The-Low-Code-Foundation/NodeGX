@@ -1,0 +1,324 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "af35bfec-c542-54c4-8b60-3139fd6ba7c4",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "card",
+      "type": "Group",
+      "label": "Habit card",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "borderColor": "var(--border-subtle)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "flexDirection": "column",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "rowGap": "var(--space-3)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "metadata": {
+        "comment": "Vertical padding and the rowGap do the spacing; no cell or row carries horizontal padding of its own."
+      },
+      "children": [
+        "topRow",
+        "midRow",
+        "tickBtn"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "topRow",
+      "type": "Group",
+      "label": "Name, streak, delete",
+      "parent": "card",
+      "parameters": {
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "flexDirection": "row",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "children": [
+        "nameText",
+        "streakPill",
+        "deleteBtn"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "nameText",
+      "type": "Text",
+      "label": "Habit name",
+      "parent": "topRow",
+      "parameters": {
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-medium)",
+        "lineHeight": "var(--leading-snug)",
+        "sizeMode": "contentHeight",
+        "text": "Habit",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "metadata": {
+        "comment": "Width 100% and the two contentSize siblings beside it: the name takes what is left over."
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "streakPill",
+      "type": "Group",
+      "label": "Streak pill",
+      "parent": "topRow",
+      "parameters": {
+        "alignItems": "center",
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-full)",
+        "flexDirection": "row",
+        "paddingBottom": "var(--space-1)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1)",
+        "sizeMode": "contentSize"
+      },
+      "children": [
+        "streakText"
+      ],
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "streakText",
+      "type": "Text",
+      "label": "Streak",
+      "parent": "streakPill",
+      "parameters": {
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "text": "No streak yet",
+        "textAlignX": "center"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "deleteBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Delete habit",
+      "parent": "topRow",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-xs)",
+        "label": "Delete",
+        "sizeMode": "contentSize"
+      },
+      "metadata": {
+        "comment": "Quiet on purpose: deleting takes the habit's history with it, so it is not styled like the button that ticks the day off."
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "midRow",
+      "type": "Group",
+      "label": "Last seven days",
+      "parent": "card",
+      "parameters": {
+        "alignItems": "center",
+        "columnGap": "var(--space-1)",
+        "flexDirection": "row",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "children": [
+        "daysList"
+      ],
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "daysList",
+      "type": "For Each",
+      "label": "One mark per day",
+      "parent": "midRow",
+      "parameters": {
+        "template": "/Components/DayMark",
+        "templateType": "explicit"
+      },
+      "metadata": {
+        "comment": "The repeater draws nothing itself: it puts one DayMark per entry of `days` into midRow, where the rowGap is already set."
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "tickBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Tick today off",
+      "parent": "card",
+      "parameters": {
+        "label": "Mark done today",
+        "sizeMode": "contentHeight",
+        "width": {
+          "unit": "%",
+          "value": 100
+        },
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-check",
+          "codeAsClass": true
+        },
+        "iconPlacement": "left",
+        "iconSourceType": "icon",
+        "useIcon": true
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "tickFlag",
+      "type": "Boolean To String",
+      "label": "Value a press sets",
+      "parameters": {
+        "falseString": "1",
+        "trueString": "0"
+      },
+      "metadata": {
+        "comment": "The value a press SETS is the opposite of the state the button shows, which is also what makes each press carry a string the previous press did not."
+      },
+      "x": 470,
+      "y": 1240
+    },
+    {
+      "id": "tickLabel",
+      "type": "Boolean To String",
+      "label": "Button label",
+      "parameters": {
+        "falseString": "Mark done today",
+        "trueString": "Done today"
+      },
+      "x": 470,
+      "y": 1000
+    },
+    {
+      "id": "tickCommand",
+      "type": "String Format",
+      "label": "The tick command",
+      "parameters": {
+        "format": "set:{id}:{flag}"
+      },
+      "x": 470,
+      "y": 1360
+    },
+    {
+      "id": "removeCommand",
+      "type": "String Format",
+      "label": "The delete command",
+      "parameters": {
+        "format": "remove:{id}"
+      },
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "tickGate",
+      "type": "String",
+      "label": "Tick press, committed",
+      "parameters": {
+        "runOnChange-value": false
+      },
+      "metadata": {
+        "comment": "A press is a signal and a signal carries no value: the String node latches the command and commits it on the press, so the page sees a value change rather than a pulse. runOnChange-value is off so that a flip of the data behind the pending value (the day being ticked, say) cannot commit on its own."
+      },
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "removeGate",
+      "type": "String",
+      "label": "Delete press, committed",
+      "parameters": {
+        "runOnChange-value": false
+      },
+      "x": 470,
+      "y": 640
+    },
+    {
+      "id": "row_inputs",
+      "type": "Component Inputs",
+      "label": "One habit in",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "streakLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "doneToday",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "days",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "metadata": {
+        "comment": "Plugged \"output\" — that inversion is what makes these the component's inputs."
+      },
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "setVar",
+      "type": "Set Variable",
+      "label": "Publish this row's command on the shared channel",
+      "parameters": {
+        "name": "habit-command",
+        "setWith": "string"
+      },
+      "x": 470,
+      "y": 1600,
+      "metadata": {
+        "comment": "shared on purpose: this is the one channel every row publishes its command onto — the page's store reads it and applies whichever command arrived last. It is not per-row state, so the rows sharing it is the design."
+      }
+    }
+  ],
+  "visualRoots": [
+    "card"
+  ]
+}

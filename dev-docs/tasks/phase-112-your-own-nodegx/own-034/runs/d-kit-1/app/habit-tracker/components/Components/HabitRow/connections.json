@@ -1,0 +1,133 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "af35bfec-c542-54c4-8b60-3139fd6ba7c4",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "row_inputs",
+      "fromProperty": "name",
+      "toId": "nameText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "row_inputs",
+      "fromProperty": "streakLabel",
+      "toId": "streakText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "row_inputs",
+      "fromProperty": "days",
+      "toId": "daysList",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "row_inputs",
+      "fromProperty": "id",
+      "toId": "tickCommand",
+      "toProperty": "id"
+    },
+    {
+      "fromId": "row_inputs",
+      "fromProperty": "id",
+      "toId": "removeCommand",
+      "toProperty": "id"
+    },
+    {
+      "fromId": "row_inputs",
+      "fromProperty": "doneToday",
+      "toId": "tickFlag",
+      "toProperty": "input"
+    },
+    {
+      "fromId": "row_inputs",
+      "fromProperty": "doneToday",
+      "toId": "tickLabel",
+      "toProperty": "input"
+    },
+    {
+      "fromId": "tickFlag",
+      "fromProperty": "currentValue",
+      "toId": "tickCommand",
+      "toProperty": "flag"
+    },
+    {
+      "fromId": "tickCommand",
+      "fromProperty": "formatted",
+      "toId": "tickGate",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tickBtn",
+      "fromProperty": "onClick",
+      "toId": "tickGate",
+      "toProperty": "saveValue"
+    },
+    {
+      "fromId": "removeCommand",
+      "fromProperty": "formatted",
+      "toId": "removeGate",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "deleteBtn",
+      "fromProperty": "onClick",
+      "toId": "removeGate",
+      "toProperty": "saveValue"
+    },
+    {
+      "fromId": "tickLabel",
+      "fromProperty": "currentValue",
+      "toId": "tickBtn",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tickGate",
+      "fromProperty": "savedValue",
+      "toId": "setVar",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "removeGate",
+      "fromProperty": "savedValue",
+      "toId": "setVar",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tickGate",
+      "fromProperty": "changed",
+      "toId": "setVar",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tickGate",
+      "fromProperty": "done",
+      "toId": "setVar",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tickGate",
+      "fromProperty": "completed",
+      "toId": "setVar",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "removeGate",
+      "fromProperty": "changed",
+      "toId": "setVar",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "removeGate",
+      "fromProperty": "done",
+      "toId": "setVar",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "removeGate",
+      "fromProperty": "completed",
+      "toId": "setVar",
+      "toProperty": "do"
+    }
+  ]
+}

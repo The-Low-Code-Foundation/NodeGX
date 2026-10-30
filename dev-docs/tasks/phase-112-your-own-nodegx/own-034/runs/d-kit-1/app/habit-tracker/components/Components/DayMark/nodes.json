@@ -1,0 +1,123 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "a6b0decc-fea7-5e93-887d-cd4aa6109fc4",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mark",
+      "type": "Group",
+      "label": "Day mark",
+      "parameters": {
+        "backgroundColor": "var(--muted)",
+        "borderColor": "var(--border-subtle)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "flexDirection": "column",
+        "height": {
+          "unit": "px",
+          "value": 28
+        },
+        "justifyContent": "center",
+        "width": {
+          "unit": "px",
+          "value": 28
+        }
+      },
+      "metadata": {
+        "comment": "28px square: seven of these plus their gaps have to fit beside the delete button at 390px."
+      },
+      "children": [
+        "letterText"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "letterText",
+      "type": "Text",
+      "label": "Weekday letter",
+      "parent": "mark",
+      "parameters": {
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentHeight",
+        "text": "M",
+        "textAlignX": "center",
+        "width": {
+          "unit": "%",
+          "value": 100
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "fillPick",
+      "type": "Boolean To String",
+      "label": "Done or not: the fill",
+      "parameters": {
+        "falseString": "var(--muted)",
+        "trueString": "var(--primary)"
+      },
+      "metadata": {
+        "comment": "A boolean cannot be wired into a colour port, so each of the three conditional looks is a node rather than a Function."
+      },
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "inkPick",
+      "type": "Boolean To String",
+      "label": "Done or not: the letter",
+      "parameters": {
+        "falseString": "var(--muted-foreground)",
+        "trueString": "var(--primary-foreground)"
+      },
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "ringPick",
+      "type": "Boolean To String",
+      "label": "Today or not: the ring",
+      "parameters": {
+        "falseString": "var(--border-subtle)",
+        "trueString": "var(--border-strong)"
+      },
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "day_inputs",
+      "type": "Component Inputs",
+      "label": "One day in",
+      "ports": [
+        {
+          "name": "letter",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "done",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "isToday",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "metadata": {
+        "comment": "Ports are plugged \"output\": values flow out of this node into the graph, which is what makes them the component's inputs."
+      },
+      "x": 350,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "mark"
+  ]
+}

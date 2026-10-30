@@ -1,0 +1,58 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/styles-v2.json",
+  "variants": [
+    {
+      "typename": "net.noodl.controls.button",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "fontFamily": "var(--font-sans)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "minHeight": "var(--space-11)"
+      },
+      "stateParameters": {
+        "hover": {
+          "backgroundColor": "var(--primary-hover)"
+        },
+        "disabled": {
+          "opacity": 0.5
+        }
+      }
+    },
+    {
+      "typename": "net.noodl.controls.textinput",
+      "parameters": {
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontFamily": "var(--font-sans)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "labelfontSize": "var(--text-sm)",
+        "labelfontWeight": "var(--font-normal)",
+        "labelcolor": "var(--foreground)",
+        "labelSpacing": "var(--space-2)"
+      },
+      "stateParameters": {
+        "hover": {
+          "borderColor": "var(--border-strong)"
+        },
+        "disabled": {
+          "opacity": 0.5
+        }
+      }
+    }
+  ]
+}

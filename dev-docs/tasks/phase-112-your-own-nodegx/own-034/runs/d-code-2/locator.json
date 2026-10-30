@@ -1,0 +1,17 @@
+{
+  "app": "runs/d-code-2 (D·code round 2, DeepSeek V4.1 Flash, bare Cline)",
+  "serve": "app",
+  "page": "index.html",
+  "addInput": "#habit-input",
+  "addButton": "#add-form button[type=submit]",
+  "rows": "#habit-list > li.habit",
+  "rowName": ".habit__name",
+  "tick": "[data-action=toggle-today]",
+  "todayDone": "row => row.querySelector('[data-action=toggle-today]').getAttribute('aria-pressed') === 'true'",
+  "days": "[data-role=week] .day__btn",
+  "daysOrder": "oldest-first",
+  "dayDone": "cell => cell.getAttribute('aria-pressed') === 'true'",
+  "streak": ".streak",
+  "remove": "[data-action=delete]",
+  "confirmRemove": null
+}

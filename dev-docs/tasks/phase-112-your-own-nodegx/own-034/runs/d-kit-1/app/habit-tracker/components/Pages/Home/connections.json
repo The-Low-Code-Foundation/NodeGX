@@ -1,0 +1,115 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "21a79976-0b4e-5ffb-854f-e565dc2ac6bd",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "store",
+      "fromProperty": "out-habits",
+      "toId": "habitsList",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "store",
+      "fromProperty": "out-namesLower",
+      "toId": "canAddExpr",
+      "toProperty": "namesLower"
+    },
+    {
+      "fromId": "store",
+      "fromProperty": "out-namesLower",
+      "toId": "dupExpr",
+      "toProperty": "namesLower"
+    },
+    {
+      "fromId": "store",
+      "fromProperty": "out-count",
+      "toId": "emptyExpr",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "store",
+      "fromProperty": "out-summary",
+      "toId": "summaryText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "store",
+      "fromProperty": "out-todayLabel",
+      "toId": "todayText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "store",
+      "fromProperty": "out-added",
+      "toId": "nameInput",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "canAddExpr",
+      "fromProperty": "asBoolean",
+      "toId": "addBtn",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "dupExpr",
+      "fromProperty": "asBoolean",
+      "toId": "dupHint",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "emptyExpr",
+      "fromProperty": "asBoolean",
+      "toId": "emptyState",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nameInput",
+      "fromProperty": "onTextChanged",
+      "toId": "addCommand",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "nameInput",
+      "fromProperty": "onTextChanged",
+      "toId": "canAddExpr",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "nameInput",
+      "fromProperty": "onTextChanged",
+      "toId": "dupExpr",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "addCommand",
+      "fromProperty": "formatted",
+      "toId": "addGate",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "addBtn",
+      "fromProperty": "onClick",
+      "toId": "addGate",
+      "toProperty": "saveValue"
+    },
+    {
+      "fromId": "nameInput",
+      "fromProperty": "onEnter",
+      "toId": "addGate",
+      "toProperty": "saveValue"
+    },
+    {
+      "fromId": "addGate",
+      "fromProperty": "savedValue",
+      "toId": "store",
+      "toProperty": "in-command"
+    },
+    {
+      "fromId": "readVar",
+      "fromProperty": "value",
+      "toId": "store",
+      "toProperty": "in-command"
+    }
+  ]
+}

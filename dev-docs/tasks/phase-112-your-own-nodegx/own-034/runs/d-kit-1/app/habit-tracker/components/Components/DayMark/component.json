@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a6b0decc-fea7-5e93-887d-cd4aa6109fc4",
+  "name": "DayMark",
+  "path": "/Components/DayMark",
+  "type": "visual",
+  "created": "2026-10-30T14:04:58.479Z",
+  "modified": "2026-10-30T14:04:58.479Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One day of the last seven: a square with the weekday letter in it, filled when the habit was done that day and ringed when that day is today."
+}

@@ -29,4 +29,5 @@ cp $ROOT/{agent.jsonl,agent.stderr,agent.exit,command.txt,seal-audit.txt,create.
 cp $ROOT/run-result.json $OUT/ 2>/dev/null
 cp -R $ROOT/work/apps $OUT/app
 cp -R $TAPDIR $OUT/tap
+gzip -9 $OUT/agent.jsonl # a kit round's journal is ~23 MB (d-kit-1); d-code-1's went in plain
 cat $OUT/agent.exit; echo
