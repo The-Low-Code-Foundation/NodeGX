@@ -20,7 +20,25 @@
   commit). Remade by `node _make/lab.mjs`, which refuses a folder that is not empty. A packed copy was checked: nothing in
   it names this repository, NodeGX or a path on this Mac, and its example is 10 / 10 green inside it.
 
-## What this session settled, and where the plan of record was wrong
+## s2b (2026-10-30, later): the lab was not sealed; now it is
+
+- **Measured:** a plain `claude` started in a lab folder loads **11 MCP servers**, Richard's user scope and his claude.ai
+  connectors: `nodegx` (its instructions: *"when the person asks for an app, build it with this server … do not write
+  … hand-made HTML and JavaScript"*), `nodegx-puppy-test-3`, `nodegx-observe`, `dbt-lessons`, Claude Docs, Gmail,
+  Google Drive, Google Calendar and three more. Both arms would have been told to build the game as a NodeGX project.
+  Also his `/next` and `/next-go` commands (they name this repo), and `..` = `~/vscode_projects`: this repo, the other
+  arm, and about a hundred projects, several of them games.
+- **`_make/arm.mjs A|B`** starts Opus 5.5 in the arm with `--strict-mcp-config` and an empty config,
+  `--disable-slash-commands`, and a deny list on Read and Edit for every folder in `~/vscode_projects` but the lab, the
+  other arm, `/Users/Shared/nodegx-lab`, and every transcript folder in `~/.claude/projects` but the arm's own (1,557
+  folders). The list is written to `_make/.arm-<arm>.settings.json` (gitignored), not in the lab.
+- **Proven 2026-10-30** with `--probe` (haiku, a scratch lab, stream-json read): sealed → 0 MCP servers, 0 skills,
+  0 commands, and a Read of this repo's README refused by the rule (*"denied by your permission settings"*); the same
+  question unsealed → the 11 servers. Bash is not fenced (a rule cannot fence a shell): the reader reports it.
+- **`_make/read-lab.mjs`** reads an arm without touching it (its transcripts' `cost-state` line gives the dollars).
+  Proven on `~/vscode_projects/flicker-lab`, where it found an earlier session's real edit of this repo's `.env`.
+
+## What s2 settled, and where the plan of record was wrong
 
 - The handoff said "choose about 12 from the zoo's set and Life Sim's converted 12". Life Sim's 12 are everyday clothes
   converted with masks for recolouring; the zoo's are FBX with job outfits. One source is simpler: all twelve are
@@ -35,12 +53,15 @@
 
 ## Do next, in order
 
-1. **Richard runs s3, the build** (we do not sit in). In each lab folder, the same first message, for example
-   `cd ~/vscode_projects/platform-lab/A && claude --model claude-opus-5-5`, then *"Read BRIEF.md and build the game."*
-   (and the same in `/B`). The castle's rounds after that (THE-TEST §3). Record per arm: minutes and dollars to the
+1. **Richard runs s3, the build** (we do not sit in), **through the launcher, never a plain `claude`** (s2b below):
+   from `dev-docs/parked/platform-kit/`, `node _make/arm.mjs A` in one terminal and `node _make/arm.mjs B` in another,
+   then the same first message in each: *"Read BRIEF.md and build the game."* Later sittings: the same command (add
+   `-- --continue` to resume). The castle's rounds after that (THE-TEST §3). Record per arm: minutes and dollars to the
    first picture, rounds to "fun", and for A every `check.mjs` red the agent argued with or suppressed.
-2. **Ours, when he has a round or more:** read both folders as they are (`git log`, `node tools/check.mjs` in A,
-   `node tools/what.mjs` in A), write THE-TEST §3's measures into a new `RESULTS.md` in this phase. Do not fix their games.
+2. **Ours, when he has a round or more:** `node _make/read-lab.mjs` (add `--gates` for A's own `check.mjs` and
+   `what.mjs`: headless Chrome, outside the sandbox) prints per session the time, dollars, owner's prompts, tool calls
+   before the first edit, every check run with its reds, every reach outside the arm, then commits and lines. Put that
+   and THE-TEST §3's measures into a new `RESULTS.md` in this phase. Do not fix their games.
 3. **s4, the heat** (THE-TEST §4–5): Richard's pedantic list, a fresh Opus session per arm, then the measures per ask.
 4. **s5:** the verdict into P129 CANON draft 3.
 
@@ -54,8 +75,8 @@
   Recommended: keep it as a deliberately hard ask (the agent must add recolouring itself). The alternative is to swap it
   for another editor-on-demand ask, for example "let me drag dwellers between rooms".
 - **Ruling 8**, the title.
-- **What the agents can reach:** the lab is beside `~/vscode_projects/OpenNoodl`, so `ls ..` finds this repo. Run them as
-  they are and record whether either looks, or run them somewhere this repo is not.
+- **What the agents can reach:** settled in s2b by `_make/arm.mjs` (no MCP, no skills, file tools fenced); Bash is
+  still open, and `read-lab.mjs` reports any use of it outside the arm. Nothing for Richard here.
 - Optional: the tablet's `?bench` numbers for PEOPLE.md §4 (200 flat at 30 fps is still unmeasured).
 
 ## Traps met or already known

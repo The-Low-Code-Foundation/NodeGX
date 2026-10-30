@@ -20,7 +20,7 @@ binding. **Prose advises, gates bind**: `CLAUDE.md` is the short note, `tools/ch
 | `tools/drive.mjs` | headless drives with `expect`, exit 1; first step `{ "viewport": [w, h, dpr] }` | Life Sim's, game-specific steps removed |
 | `tools/what.mjs` · `tools/check.mjs` · `tools/chrome.mjs` | the page, the ten gates, headless Chrome for both | new |
 | `CLAUDE.md` · `RECORD.md` · `LOOK.md` | the note (P129 §8 + the castle procedure, P118 CANON) and the two records | new |
-| `_make/` (not packed) | `make.mjs` = `vendor.mjs` + `fetch-people.mjs` + `bake-people.mjs`; `pack.mjs`; `gate-proof.mjs`; `fixture/` | |
+| `_make/` (not packed) | `make.mjs` = `vendor.mjs` + `fetch-people.mjs` + `bake-people.mjs`; `pack.mjs`; `gate-proof.mjs`; `fixture/`; `lab.mjs`; `arm.mjs` (starts Claude in an arm, sealed: no MCP, no skills, file tools fenced to the arm); `read-lab.mjs` (an arm's sessions and git, as measures) | |
 
 ## The people (ruling 9: flat Rocketbox, functional clothes, as shipped)
 

@@ -4,3 +4,5 @@ assets/people/
 vendor/
 shots/
 .chrome-profile-*
+# Written by _make/arm.mjs at each launch (the deny list names folders on this Mac).
+_make/.arm-*
