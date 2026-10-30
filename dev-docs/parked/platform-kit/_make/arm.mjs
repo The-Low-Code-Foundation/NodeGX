@@ -48,5 +48,11 @@ const ask = 'List every tool you have, by exact name, comma-separated, nothing e
 const args = probe
   ? ['-p', ask, '--model', 'haiku', ...sealed, '--no-session-persistence', ...rest]
   : ['--model', 'claude-opus-5-5', ...sealed, ...rest];
-console.error(`arm ${arm}: ${dir}, ${fenced.length} folders fenced from the file tools, no MCP, no skills`);
-process.exit(spawnSync('claude', args, { cwd: dir, stdio: 'inherit' }).status ?? 1);
+// The `claude` on the PATH (2.1.251, 2026-10-30) refuses `claude-opus-5-5` and reads `opus` as Opus 5; the VS Code
+// extension's own copy is newer. Take the newest of those, or CLAUDE_BIN.
+const exts = path.join(os.homedir(), '.vscode/extensions');
+const bundled = children(exts).filter((p) => /anthropic\.claude-code-/.test(p)).map((p) => path.join(p, 'resources/native-binary/claude'))
+  .filter((p) => fs.existsSync(p)).sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
+const bin = process.env.CLAUDE_BIN ?? bundled[0] ?? 'claude';
+console.error(`arm ${arm}: ${dir}, ${fenced.length} folders fenced from the file tools, no MCP, no skills; ${bin}`);
+process.exit(spawnSync(bin, args, { cwd: dir, stdio: 'inherit' }).status ?? 1);
