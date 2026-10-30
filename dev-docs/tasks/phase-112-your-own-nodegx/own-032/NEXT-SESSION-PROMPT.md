@@ -1,4 +1,74 @@
-# OWN-032 — next session (s8)
+# OWN-032 — next session (s9)
+
+**Paste this to start the session:**
+
+> OWN-032 s9. Read `dev-docs/tasks/phase-112-your-own-nodegx/own-032/NEXT-SESSION-PROMPT.md` (this section), then
+> `RESULTS.md` §13. First show Richard round five on https://claude.ai/artifact/P7umD3HEoDJrTiv1Q3KQqh (same file path,
+> same URL, version 5): what his three round-four answers look like built. Then ask him the two questions below. Build what
+> he rules: one experiment at a time on Ollama, each against a control, each pre-registered in RESULTS §14 before it runs.
+> Commit after each one.
+
+## Where it stands (s8, 2026-10-30)
+
+Richard answered round four in chat (the page has no answer store): **centre the warm photo; the small line is always
+dark on warm; a request that names no look is asked "clean, bold or warm?"**. All three are in the arm, plus the bold look
+on the same rules. **The harness for every look is now `runs/w26.edit.json`** (`style: auto`, rule D decides the look).
+
+- **13a `centrePhoto`** (w24, `d2a399630`): the warm words (370–401 px) stand beside a 320 px photo. The photo goes into a
+  Group that fills its column and centres it, one `wrap` fix. Offsets went from +25…+41 to **0** on 3 of 3, at +1 turn;
+  the phone is the same, and the calm look is untouched (drift 0). Measured first on bench copies (`centre-photo.mjs`):
+  - the Image's own `alignY` does nothing in a Columns wrapper, which is a block, not a flex box;
+  - height 100 % resizes the photo to 447 px.
+- **13b `eyebrowDark`** (w25, `6f1821aad`): the small handwritten line is dark on warm. The bakery's amber line (2.78)
+  is gone, and the runs take 1–2 fewer turns. The line under the headline was rewritten on 3 of 3 (prediction ✘, see
+  the traps).
+- **13c–13e rule D, `lookD`** (`4522fb2ac`):
+  - 13c: three candidates failed their pre-registration;
+  - rule D was fitted on the 13c rows: first "do their words say how it should look?", then the three looks at ≥ 0.9,
+    else the two-look rule where it is decisive, else **ask**;
+  - 13d: 32 of 32 on new requests written before the model saw them;
+  - 13e: end to end, a plain request stops with "clean, bold or warm?", the warm and calm requests build exactly as
+    their controls, and "…feels like a hug…" builds warm.
+- **13f bold** (w27s, `e540e9e68`): stylish was chosen on 5 of 5; the line went to 20 px, the words and photo centred,
+  offsets 0, +3 turns. One miss: **running's line takes 4 lines on a phone**, and no check reads that.
+
+## For Richard (round five, then two questions)
+
+Show, at a size where the words read (link each picture full size):
+- the warm heroes with the photo centred and the small line dark (w25w-*, w26k-puppy);
+- the bold heroes with the 20 px line (w27s-*), running's phone included;
+- what a plain request now gets: the question "clean, bold or warm?" before anything is built.
+
+Questions, in plain words:
+1. **Running's line on a phone is 4 lines** (16 words at 20 px). Shorter words, or leave it?
+2. **The button's words are 14 px.** He named only the line under the headline. Bigger too?
+
+## Not this session
+
+- **Folding the looks, rule D and the s5–s8 switches into OWN-031 `build_app`** is the other session's lane. Ask
+  first, briefly.
+- **OWN-033 stitching** waits until the hero work settles.
+- **The kit's contrast** (P112-OWN030-PRIMARYCONTRAST): the bakery's white on amber (3.19) and the bold
+  white-on-gradient lines (bakery 3.19, running 3.3) are still open.
+
+## Traps (s8)
+
+- **A run that matches its control exactly may have a check that cannot fire.** The first w24 set came back the
+  control's action for action because `photoCentred` tested the wrong parent level. Before a set, evaluate a new
+  check's predicate on the control's final heroes, outside the arm (importing arm.mjs runs it). It must fire where
+  predicted and stay silent elsewhere.
+- **Runs part where a finding first APPEARS, not where its fix is taken.** `eyebrowColour` is listed from the turn the
+  small line is added (t5). Removing it moved every later prompt, so the words changed from t6. This was 12a's lesson
+  too, and I mispredicted it again.
+- **Rule D is thin in two places:**
+  - a plain request with P(stylish) ≤ 0.1 is built calm without being asked (allotment 0.113, choir 0.11);
+  - two of six calm requests reach "calm" only through the two-look fallback (architecture 0.48 and law firm 0.452
+    on the first question).
+- Everything in s7's traps below still holds.
+
+---
+
+# s8 plan (done: RESULTS §13)
 
 **Paste this to start the session:**
 
