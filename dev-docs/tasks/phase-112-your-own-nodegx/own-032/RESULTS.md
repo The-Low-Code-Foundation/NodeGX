@@ -1318,6 +1318,32 @@ Runs: `w25w-{bakery,pottery,puppy}` against `w24w-*`.
 4. Everything else the control closed stays closed; photo and words offsets as the control's (±2 px). Words the same in
    ≥ 2 of 3: the colour step comes late, so the prompts part only from where the control took it.
 
+**Result (w25, 2026-10-30; `node grade.mjs w25 …` → `runs/grade-w25.json`):**
+
+| run | turns (ctl → w25) | small line | `lowContrast` (ctl → w25) | offset | parts from ctl | words |
+|---|---|---|---|---|---|---|
+| w-bakery | 36 → 35 | dark | amber line 2.78 + button 3.19 → **button 3.19 only** | 0 → 0 | t6 | line rewritten |
+| w-pottery | 38 → 36 | dark | none → none | 0 → 0 | t7 | line rewritten |
+| w-puppy | 36 → 35 | dark | none → none | 0 → 0 | t8 | line rewritten |
+
+**Graded against 13b's predictions:**
+1. The small line ends `var(--foreground)` on **3 of 3**; `eyebrowColour` fired on none. ✔
+2. Bakery: the amber line is gone from `lowContrast`; only the kit's button (3.19) is left. ✔
+3. Turns −1, −2, −1 (−1 ± 2 predicted). ✔
+4. Offsets 0 on 3 of 3, nothing the control closed is open. ✔ **Words: ✘**: the line under the headline is rewritten on
+   3 of 3 (headlines the same; ≥ 2 of 3 the same was predicted). And on bakery and puppy the section's side padding
+   ends `space-12`, not `space-8` (photo 580 px wide, not 596; the phone line wraps onto 3 lines, not 2).
+
+**Where the prediction was wrong:** I reasoned from when the control *takes* the colour fix (late). What matters is when
+its *finding* first appears: as soon as the small line is added (turn 5), the control lists "not in the brand colour"
+and w25 does not. From then on every prompt differs by that line, so the runs part at turn 6–8, before any words are
+written. The same mechanism as 12a's prediction 6. Each run's words read as well as the control's (the bakery's new line,
+"Handcrafted breads and pastries made with love, right here in Lyon.", names the city), and no measure is worse.
+
+**What this settles:** Richard's "always dark on warm" is in the arm (`eyebrowDark`): the bakery's amber line (2.78) is
+gone, and a warm run is a turn or two shorter. What is left open on the warm bakery is only the kit's button
+(P112-OWN030-PRIMARYCONTRAST).
+
 ### 13c. "Clean, bold or warm?" when no look is named (`probe-look4.mjs`, probe only)
 
 Richard's rule: a request that names no look is asked "clean, bold or warm?". 11b's three-look question cannot be that

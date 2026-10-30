@@ -1,0 +1,146 @@
+{
+ "htmlMs": 105,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 652,
+     "y": 145,
+     "w": 596,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "button",
+     "text": "Create Your Space",
+     "x": 32,
+     "y": 96,
+     "w": 149,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Handmade pottery and classes",
+     "x": 32,
+     "y": 145,
+     "w": 250,
+     "h": 30,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Potter Portfolio",
+     "x": 32,
+     "y": 191,
+     "w": 378,
+     "h": 228,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Discover handcrafted bowls and join our ",
+     "x": 32,
+     "y": 435,
+     "w": 580,
+     "h": 46,
+     "lines": 2
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:54882/",
+   "blank": false,
+   "words": 19,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 577
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "photos": [
+    {
+     "x": 32,
+     "y": 345,
+     "w": 326,
+     "h": 320
+    }
+   ],
+   "blocks": [
+    {
+     "kind": "button",
+     "text": "Create Your Space",
+     "x": 32,
+     "y": 96,
+     "w": 149,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Handmade pottery and classes",
+     "x": 32,
+     "y": 145,
+     "w": 250,
+     "h": 30,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Potter Portfolio",
+     "x": 32,
+     "y": 191,
+     "w": 313,
+     "h": 53,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Discover handcrafted bowls and join our ",
+     "x": 32,
+     "y": 260,
+     "w": 322,
+     "h": 69,
+     "lines": 3
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:54882/",
+   "blank": false,
+   "words": 19,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 761
+ },
+ "ms": 2322
+}
