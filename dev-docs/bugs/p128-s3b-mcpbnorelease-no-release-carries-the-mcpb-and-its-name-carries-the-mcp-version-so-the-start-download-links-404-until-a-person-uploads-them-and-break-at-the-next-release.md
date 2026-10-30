@@ -57,3 +57,11 @@ here either, so that is this Mac's Rosetta, not the bundle; a real Intel Mac is 
 Still open: the workflow has not run (it runs on a pushed tag); v0.1.0 carries only the versioned names, so /start keeps
 its 0.2.9 links until a release (or a `gh release upload` of the two copies, Richard's yes) carries the version-free
 ones; then /start's two hrefs drop the version. Item 3 (the Intel bundle on a real Intel Mac) is unchanged.
+
+## 2026-10-30: v0.1.0 carries the version-free names (Richard's yes)
+
+`gh release upload v0.1.0` of the two published bundles, unchanged, as `nodegx-darwin-arm64.mcpb` and
+`nodegx-darwin-x64.mcpb`. From outside: `releases/latest/download/nodegx-darwin-{arm64,x64}.mcpb` answer 200 and
+download as sha1 `bcd7997e…` and `8680d91a…`, the same bytes as the versioned files. Left: /start's two hrefs
+(nodegx-web `site/start/`, drop `0.2.9-`) — not edited here, the folder holds another session's uncommitted changes;
+Studio's `@nodegx/mcp` pin (0.2.8), which the CI leg now refuses; item 3, a real Intel Mac.

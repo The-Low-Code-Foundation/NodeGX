@@ -14,3 +14,5 @@ launch: none
 What a person sees: nothing measured. The gate's click on Record did not start a recording once, under load, and the
 next run passed. The next session that sees it red reads `#recbtn`'s rect before and after the click and whether
 `#morebtn` toggled in between, before calling it the fold or the machine.
+
+2026-10-30 13:40: check:timeline 53/53 on nodegx-studio 31892c3, alone under HEAVY.lock. Not seen again; stays open until it is, with the reading above.

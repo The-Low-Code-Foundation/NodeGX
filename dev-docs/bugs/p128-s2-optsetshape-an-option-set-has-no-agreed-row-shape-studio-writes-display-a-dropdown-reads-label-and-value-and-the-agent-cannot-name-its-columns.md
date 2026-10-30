@@ -1,7 +1,8 @@
 ---
 id: P128-S2-OPTSETSHAPE
 title: "An option set has no agreed row shape: Studio writes and shows only the attributes in `metadata.optionSet` (default `display`), a Dropdown reads `Label` and `Value` off each row, and the agent's write has no way to set the metadata, so an agent's option set shows blank columns in Studio and Studio's own blank labels in a Dropdown"
-status: open
+status: fixed
+commit: nodegx-studio be3a9c5 (reads an agent's set) + nodegx-studio 31892c3 (writes Label and Value)
 severity: medium
 area: "nodegx-studio `editor/studio.html` (`optionSet` 1490–1497, the Option sets grid 5457–5476, `newoptset` 5428–5441); `noodl-viewer-react` `src/nodes/controls/options.ts` `optionItems` 372 and `components/controls/Select/Select.tsx` 148–210 (`Label`/`Value`); noodl-mcp `create_component` / `update_component` (no component `metadata` argument; `set_component_info` takes description, displayName, category, tags)"
 found: P128 S2 (OWN-027), 2026-10-27, writing `get_example('option-set')`
@@ -36,3 +37,18 @@ made", 3 lines; the two Studio lines FAIL on HEAD's studio.html).
 `display`, and a Dropdown reads `Label` and `Value`, so wiring a Studio-made set into a Dropdown draws blank options.
 Either Studio's first column becomes `Label` (with an optional `Value`), as the agent and the Dropdown have it, or it
 stays `display` and Studio maps it where a Dropdown reads the set.
+
+## 2026-10-30: Richard's ruling, "Label + Value"; built
+
+Asked in plain words (Studio's own sets write `display`, a Dropdown reads `Label` and `Value`): **"Label + Value"**.
+Studio's New option set now makes the columns `Label` and `Value` (`OPTION_COLUMNS`); a typed option is a `{ Label }`
+row; an emptied cell other than the first is no field (a Dropdown takes the Label as the Value when there is none); a
+set made before keeps its `display`, which Studio still reads. check:shapes (21/21) makes a set in Studio, has the agent
+place the example's page on it, and reads the running app's Dropdown: `["Small", "Large"]`. On HEAD's studio.html the
+same lines FAIL: rows `[{ display: "Small" }, { display: "Large" }]`, and the Dropdown draws no labelled option.
+check:editor's option-set line now asserts `Label`.
+
+Not changed: the Bubble importer's sets keep Bubble's `{ value, display, … }` rows (its `:display` and stored values
+read those), and every Dropdown it converts maps them to Label/Value itself (`app-to-nodegx.mjs` STU-053). A person
+who wires an imported set into a new Dropdown in Studio by hand would see blank options: not measured, the next row
+if it is.

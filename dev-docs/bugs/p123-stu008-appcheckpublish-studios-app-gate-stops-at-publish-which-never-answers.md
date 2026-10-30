@@ -57,3 +57,9 @@ never read from the app's stdout. Next time it stops, keep `running.log()` and r
 - **Instrumented (nodegx-studio a3a02fd):** when no answer comes, 3b now reports whether the page that pressed Publish
   is still there (`samePage`), whether it ever showed "Publishing…" (`busy`), and the page's last errors (`problems`).
   The next stop names which of the two it is.
+
+## 2026-10-30 13:04 and 13:10: Publish passes alone, twice (after the Studio sweep's commits)
+
+`check:app` on nodegx-studio be3a9c5, run alone under HEAVY.lock (load 3.2–4.9): every Publish row green both times.
+The first run failed one other line, "Close puts it away" (the import report's Close, clicked by position, left the
+panel up); the second run 67/67. Once, not chased: if it comes back, read what sits over `#reportclose` at the click.
