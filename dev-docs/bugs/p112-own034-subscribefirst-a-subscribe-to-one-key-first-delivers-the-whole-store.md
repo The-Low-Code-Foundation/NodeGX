@@ -2,7 +2,7 @@
 id: P112-OWN034-SUBSCRIBEFIRST
 title: A Subscribe to Store watching one key first delivers the whole store (of the default store name) down its wire
 status: fixed
-commit: PENDING
+commit: 012c5236a
 severity: medium
 area: runtime / Subscribe to Store (packages/noodl-runtime/src/nodes/std-library/agent/globalstoresubscribenode.ts, the `value` getter and `projectValue`)
 found: P112 OWN-034 s3, 2026-10-30 (G4·harness, B6 and B11)

@@ -2,7 +2,7 @@
 id: P112-OWN034-INPUTHIT
 title: A Text Input's drawn box is taller than the part that takes a tap: a press on its padding focuses nothing
 status: fixed
-commit: PENDING
+commit: 012c5236a
 severity: medium
 area: runtime / Text Input (packages/noodl-viewer-react/src/components/controls/TextInput/TextInput.tsx, the `inputWrapper` div at :296–303)
 found: P112 OWN-034 s2, 2026-10-30 (D·kit round 1, B13 on a 390 px phone)

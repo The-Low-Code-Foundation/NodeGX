@@ -2,7 +2,7 @@
 id: P112-OWN034-INNERWIDTH
 title: A "does the phone scroll sideways" check that compares against innerWidth can never fire under mobile emulation, because Chrome grows innerWidth to the content; two lab graders do it
 status: fixed
-commit: PENDING
+commit: 012c5236a
 severity: medium
 area: lab graders — dev-docs/tasks/phase-112-your-own-nodegx/own-019/grade-launch.mjs (phone check), dev-docs/tasks/phase-78-the-templates/todo-digitalbricks/staging-e2e.js (phoneOverflowX)
 found: P112 OWN-034 s1, 2026-10-30 (the grader's own controls)
