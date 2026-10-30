@@ -21,6 +21,9 @@ opens it. The admin key stays in this process; the page never sees it. Another f
 In NodeGX Studio it is the **Backend map** tab: Studio's own server mounts it (`handler()` from this package) on the
 project's backend.
 
+The map is dark; `?look=light` on its address (or `data-look="light"` on the page's `<html>`, for a page written into
+a frame with no address) draws it light, in Studio's colours. Studio asks for the light one.
+
 See it without a backend: https://nodegx.io/backend-map/ (a recording).
 
 ## What you can do
