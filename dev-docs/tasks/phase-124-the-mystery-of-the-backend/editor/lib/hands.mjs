@@ -10,7 +10,7 @@ import crypto from 'node:crypto';
 import { serializeV2File } from '@nodegx/project-contract/format.js';
 import { setTableRule, verify, Refusal, SECURITY_FILE } from './rules.mjs';
 import { AUTOMATIONS_FILE } from './triggers.mjs';
-import { handEntry, tableWords } from '../public/words.js';
+import { handEntry, tableWords } from './words.js';
 
 const ACTIONS = ['create', 'update', 'delete'];
 const ACTION_WORDS = { create: 'made', update: 'changed', delete: 'deleted' };
@@ -63,6 +63,16 @@ function patchedAutomations(file, id, stored) {
   const triggers = stored ? [...rest, projectTrigger(stored)].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)) : rest;
   return serializeV2File({ version: 1, workflows: file.config.workflows, triggers }, file.text);
 }
+
+/** A trigger in words for a toast, when it has no name of its own: “acceptPrivacy, every day at 09:00”, never its id. */
+function triggerLabel(t) {
+  if (t.name) return `“${t.name}”`;
+  const fn = String(t.target?.name ?? 'it').split('/').pop();
+  if (t.type === 'schedule') return t.scheduleWords ? `${fn} (${t.scheduleWords.charAt(0).toLowerCase()}${t.scheduleWords.slice(1)})` : `${fn} on its schedule`;
+  if (t.type === 'db-change') return `${fn} (when a row of ${tableWords(t.dbChange?.collection ?? '')} changes)`;
+  return `${fn} (its webhook)`;
+}
+const KEPT = { schedule: 'its schedule', 'db-change': 'its table and the changes it watches', webhook: 'its address and secret' };
 
 const slug = (s) => String(s).split('/').pop().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'it';
 
@@ -186,6 +196,39 @@ export function makeHands({ be, files, functions }) {
     return { removed: true, inBackend: !!now.onBackend, inFile: !!now.inFile, automationsStamp: now.stamp, words, undo };
   }
 
+  /**
+   * BKO-008: turn a trigger off (or on again) and keep it: the backend's `/enabled` (it keeps the trigger, its secret and
+   * its history), then the file's entry patched from what the backend stored. A file that can't take it puts the backend
+   * back. A trigger only in the file is refused: there is nothing running to turn off, and the backend loads the file's
+   * triggers only into an empty backend (BKO-001).
+   */
+  async function setEnabled({ id, enabled, automationsStamp }) {
+    if (typeof enabled !== 'boolean') throw new Refusal('On or off?');
+    const before = await triggerNow(id);
+    if (!before.onBackend) throw new Refusal(before.inFile ? 'That trigger is in the app’s files but not on the backend, so there is nothing running to turn off.' : 'There’s no such trigger, on the backend or in the app’s files.');
+    const file = readAutomations(files);
+    if (automationsStamp !== undefined && automationsStamp !== file.stamp) {
+      throw new Refusal(`The app’s ${AUTOMATIONS_FILE} was changed by something else since this map was opened. Nothing was changed. Look again and choose again.`);
+    }
+    const name = triggerLabel(before.onBackend);
+    if ((before.onBackend.enabled !== false) === enabled && (!before.inFile || (before.inFile.enabled !== false) === enabled)) {
+      return { unchanged: true, words: `Nothing to change: ${name} is ${enabled ? 'on' : 'off'} already.`, inBackend: true, inFile: !!before.inFile, automationsStamp: before.stamp };
+    }
+    const path = `/admin/triggers/${encodeURIComponent(id)}/enabled`;
+    const { trigger: stored } = await be.post(path, { enabled });
+    try {
+      if (files.stamp(AUTOMATIONS_FILE) !== file.stamp) throw new Error(`${AUTOMATIONS_FILE} changed while saving`);
+      files.write(AUTOMATIONS_FILE, patchedAutomations(file, id, stored));
+    } catch (e) {
+      await be.post(path, { enabled: before.onBackend.enabled !== false }).catch(() => {});
+      throw new Refusal(`The backend turned it ${enabled ? 'on' : 'off'} but the app’s ${AUTOMATIONS_FILE} couldn’t be written (${e.message}), so the backend was put back as it was.`);
+    }
+    const now = await triggerNow(id);
+    const words = enabled ? `${name} runs by itself again.` : `${name} is turned off: it won’t run by itself until it’s turned on. It’s kept, with ${KEPT[before.onBackend.type] ?? 'everything it had'}.`;
+    const undo = remember({ kind: 'trigger-enabled', id, was: before.onBackend.enabled !== false, enabled, fileBefore: file.text, fileAfter: files.read(AUTOMATIONS_FILE), words });
+    return { trigger: stored, inBackend: !!now.onBackend, inFile: !!now.inFile, automationsStamp: now.stamp, words, undo };
+  }
+
   /** The schedule's words and next runs, from the backend's own reader. Nothing is stored. */
   const schedulePreview = (cron) => be.post('/admin/triggers/preview', { cron: String(cron ?? '').trim(), count: 3 });
 
@@ -248,8 +291,24 @@ export function makeHands({ be, files, functions }) {
       const now = await triggerNow(u.id);
       return { undone: true, words: `Undone: “${u.def.name ?? u.id}” runs by itself again.`, inBackend: !!now.onBackend, inFile: !!now.inFile, automationsStamp: now.stamp };
     }
+    if (u.kind === 'trigger-enabled') {
+      if (!unchangedSince(AUTOMATIONS_FILE, u.fileAfter)) throw changedSince(AUTOMATIONS_FILE);
+      const live = await be.get(`/admin/triggers/${encodeURIComponent(u.id)}`).then((r) => r.trigger, () => null);
+      if (!live || (live.enabled !== false) !== u.enabled) throw new Refusal('Someone changed that trigger on the backend since, so this can’t be undone exactly. Nothing was changed.');
+      const path = `/admin/triggers/${encodeURIComponent(u.id)}/enabled`;
+      await be.post(path, { enabled: u.was });
+      try {
+        restore(AUTOMATIONS_FILE, u.fileBefore);
+      } catch (e) {
+        await be.post(path, { enabled: u.enabled }).catch(() => {});
+        throw e;
+      }
+      undos.delete(id);
+      const now = await triggerNow(u.id);
+      return { undone: true, words: `Undone: it’s ${u.was ? 'on' : 'off'} again.`, inBackend: !!now.onBackend, inFile: !!now.inFile, automationsStamp: now.stamp };
+    }
     throw new Refusal('That can’t be undone.');
   }
 
-  return { rule, addTrigger, removeTrigger, schedulePreview, undo };
+  return { rule, addTrigger, removeTrigger, setEnabled, schedulePreview, undo };
 }

@@ -3,7 +3,7 @@
 // in the backend is undone at the next start). Both, or neither.
 
 import { serializeV2File } from '@nodegx/project-contract/format.js';
-import { OPS, entryForChange, ruleWords, tableRule } from '../public/words.js';
+import { OPS, entryForChange, ruleWords, tableRule } from './words.js';
 
 export const SECURITY_FILE = 'nodegx.security.json';
 

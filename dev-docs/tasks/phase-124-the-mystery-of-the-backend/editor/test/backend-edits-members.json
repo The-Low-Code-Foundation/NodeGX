@@ -1,0 +1,10 @@
+[
+  { "kind": "grant", "table": "Meeting", "who": "authenticated", "what": "see" },
+  { "kind": "add_trigger", "fn": "notifyMembers", "table": "Announcement", "actions": ["create", "update"] },
+  { "kind": "schedule", "fn": "myStanding", "cron": "0 8 * * 1" },
+  { "kind": "revoke", "table": "Association", "who": "role:admin" },
+  { "kind": "grant", "table": "MemberRequest", "who": "maker" },
+  { "kind": "turn_off", "trigger": "@3" },
+  { "kind": "remove_trigger", "trigger": "@2" },
+  { "kind": "revoke", "table": "Meeting", "who": "authenticated" }
+]

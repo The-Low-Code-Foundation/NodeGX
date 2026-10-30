@@ -1,4 +1,6 @@
-// Plain words for the backend's rules. Shared by the page and the editor's server.
+// Plain words for the backend's rules, its triggers and its runs: the kit's one text (BKO-008). The page loads this file
+// (the server serves it at /words.js), the kit's writers say their sentences from it, and a stranger's editor imports it
+// as `@nodegx/backend-map/kit/words.js`. Nothing in it touches Node or the DOM.
 
 export const OPS = ['find', 'get', 'create', 'update', 'delete'];
 

@@ -202,6 +202,17 @@ try {
   }, sc?.id);
   await page.mouse.click(...scAt);
   await page.waitForFunction((id) => document.getElementById('panelBody').dataset.node === `g:${id}`, { timeout: 5000 }, sc?.id).catch(() => {});
+  // BKO-008: turned off first, kept in both places
+  ok((await page.$eval('#toggleTrigger', (e) => e.innerText).catch(() => '')) === 'Turn it off', 'its panel offers to turn it off');
+  await clearToast();
+  await page.click('#toggleTrigger');
+  ok(await toastUndo(), 'turned off, with Undo');
+  const off = ((await admin('/admin/triggers')).triggers ?? []).find((t) => t.id === sc?.id);
+  const offInFile = JSON.parse(fs.readFileSync(AUTO, 'utf8')).triggers.find((t) => t.id === sc?.id);
+  ok(off?.enabled === false && offInFile?.enabled === false, 'off on the backend and in the file, and kept in both', { off, offInFile });
+  await page.waitForFunction(() => document.getElementById('toggleTrigger')?.innerText === 'Turn it on', { timeout: 5000 }).catch(() => {});
+  ok((await page.$eval('#toggleTrigger', (e) => e.innerText).catch(() => '')) === 'Turn it on' && /Turned off\./.test(await page.$eval('#panelBody', (e) => e.innerText)), 'the panel says it is turned off and offers to turn it on');
+  await page.screenshot({ path: path.join(shots, 'bko-008-01-turned-off.png') });
   ok(!!(await page.$('#removeTrigger')), 'its panel offers to stop it');
   await clearToast();
   await page.click('#removeTrigger');

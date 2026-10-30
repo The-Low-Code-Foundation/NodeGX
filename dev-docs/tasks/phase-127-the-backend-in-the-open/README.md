@@ -51,7 +51,7 @@ Where those facts come from:
 | [BKO-005](BKO-005-WORKFLOWS-AND-TRIGGERS-DRAWN.md) | Backend workflows and triggers drawn, on the Workflow tab and the map | the automations, drawn |
 | [BKO-006](BKO-006-BRIEFS-NOT-TEMPLATES.md) | Three full-stack briefs no template covers, by a stranger agent; then Richard's Desktop run | the proof, and the Beta's real list |
 | [BKO-007](BKO-007-THE-HANDS.md) | The hands: grant by dragging, revoke by cutting, a trigger by dropping a function on a table, a schedule by dropping a clock; both places or neither, with Undo | P124's *"you can take control"* half, never built (added 2026-10-30). **Built s1 the same evening**, AC1–AC8 measured; AC9 (in Studio) waits on backend-map 0.1.5's publish |
-| [BKO-008](BKO-008-THE-BACKEND-KIT.md) | The backend kit: the map's facts, as-person runs and writers published, a backend suite that says PASS; the map rebuilt on it | build your own backend editor outside Studio (Richard, 2026-10-30) |
+| [BKO-008](BKO-008-THE-BACKEND-KIT.md) | The backend kit: the map's facts, as-person runs and writers published, a backend suite that says PASS; the map rebuilt on it | build your own backend editor outside Studio (Richard, 2026-10-30). **Built s1 the same evening**: `@nodegx/backend-map/kit`, the backend suite (PASS on members-area and todo, control FAIL naming the file, run from a packed install), the map imports only the kit; 0.1.6 unpublished |
 | [BKO-009](BKO-009-A-STRANGERS-BACKEND-EDITOR.md) | The skill, and a stranger who builds a backend editor in a shape Studio doesn't have | the proof the kit is enough |
 
 BKO-002 and BKO-003 can run beside BKO-001 (different files: Studio's `hosted.js` / the map's package versus the

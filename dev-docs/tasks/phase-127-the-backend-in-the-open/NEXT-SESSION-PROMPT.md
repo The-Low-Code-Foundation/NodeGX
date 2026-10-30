@@ -343,3 +343,16 @@ array); the noodl-mcp suite takes ~16 min and has 8 red files at HEAD that are n
 runs the backend bundle. None was rebuilt. Ask before rebuilding the Desktop dist (from a clean worktree, the CCN rule).
 🔴 `make-worktree.sh` symlinks `dist/` to the primary checkout: a build in the worktree writes the PRIMARY's bundle.
 🔴 Studio's `studio.html` is a busy file (a peer committed into it during s2). The map change lives in `hosted.js`.
+
+## s11 (2026-10-30 evening): BKO-007 committed, BKO-008 built
+
+- **BKO-007** (the hands) was built by another session and committed by this one on Richard's word (`b9adee5ae`).
+- **BKO-008 built**: the kit is `@nodegx/backend-map/kit` (`lib/index.mjs`), with the backend suite
+  (`backend-suite`, `lib/suite.mjs`) and a new turn-off writer (`setEnabled`, plus Turn it off / Turn it on on the map).
+  The measurements are in BKO-008's log. The map's `npm test` passes 227 checks.
+- **For Richard:** publish `@nodegx/backend-map` 0.1.6 (it carries BKO-007's 0.1.5 too): `cd
+  dev-docs/tasks/phase-124-the-mystery-of-the-backend/editor && npm publish --access public`. Studio's pin and
+  `vendor/NODEGX.json` then move to 0.1.6 together, and BKO-007 AC9 is measured in Studio.
+- **Next:** BKO-009 (the skill, and a stranger who builds a backend editor in a shape Studio lacks). R2 (the kit as its
+  own package) should be ruled before that round, once `package-lock.json` is free. Workflows have no kit writer yet.
+

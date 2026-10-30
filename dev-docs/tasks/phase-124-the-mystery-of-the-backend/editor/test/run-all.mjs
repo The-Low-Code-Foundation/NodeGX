@@ -34,5 +34,7 @@ console.log('\n— the hands: grant, cut, a row-change trigger, a schedule, undo
 if (run([path.join(here, 'hands.test.mjs')]) !== 0) bad++;
 console.log('\n— the hands, driven in Chrome: drags, the chooser, a wire cut with Delete, the toast’s Undo —');
 if (run([path.join(here, 'hands-ui.test.mjs')]) !== 0) bad++;
+console.log('\n— the backend suite (the kit): the map’s adapter, the kit’s writers and two controls, on members-area and todo copies —');
+if (run([path.join(here, 'backend-suite.test.mjs')]) !== 0) bad++;
 console.log(bad ? `\n${bad} part(s) FAILED` : '\nEverything passed.');
 process.exit(bad ? 1 : 0);

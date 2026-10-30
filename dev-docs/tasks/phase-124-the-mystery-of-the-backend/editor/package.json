@@ -1,7 +1,7 @@
 {
   "name": "@nodegx/backend-map",
-  "version": "0.1.5",
-  "description": "Your NodeGX app's backend as a map: its screens, cloud functions and tables, and who can reach which rows, measured by running its functions as each person.",
+  "version": "0.1.6",
+  "description": "Your NodeGX app's backend as a map: its screens, cloud functions and tables, and who can reach which rows, measured by running its functions as each person. Its kit (/kit) is what anyone needs to build their own backend editor, with a suite that says PASS.",
   "license": "GPL-3.0-only",
   "homepage": "https://nodegx.io/backend-map/",
   "repository": {
@@ -11,11 +11,14 @@
   },
   "type": "module",
   "bin": {
-    "backend-map": "./bin/backend-map.js"
+    "backend-map": "./bin/backend-map.js",
+    "backend-suite": "./bin/backend-suite.js"
   },
   "main": "./server.mjs",
   "exports": {
     ".": "./server.mjs",
+    "./kit": "./lib/index.mjs",
+    "./kit/words.js": "./lib/words.js",
     "./package.json": "./package.json"
   },
   "files": [

@@ -1219,6 +1219,7 @@ function renderPanel() {
   if (n.kind === 'table' && $('ruleEditor')) wireTableControls(n);
   for (const b of $('panelBody').querySelectorAll('[data-cut]')) b.onclick = () => cutWire(state.edges.find((e) => e.id === b.dataset.cut));
   if ($('removeTrigger')) $('removeTrigger').onclick = () => removeTrigger(n.trigger);
+  if ($('toggleTrigger')) $('toggleTrigger').onclick = () => toggleTrigger(n.trigger);
 }
 
 // ───────────────────────────── round 2: real people ─────────────────────────────
@@ -2038,7 +2039,8 @@ function triggerPanel(n) {
     <p style="font-size:12px;color:var(--dim)">${asWhom}</p>
     <h4>Its last run</h4>
     <p>${last ?? (t.notOnBackend ? 'None: it isn’t on the backend.' : 'It hasn’t run yet.')}</p>
-    ${hands() && t.type !== 'webhook' ? '<button class="ghost" id="removeTrigger">Stop it running by itself</button>' : ''}
+    ${hands() && !t.notOnBackend ? `<button class="ghost" id="toggleTrigger">${t.enabled ? 'Turn it off' : 'Turn it on'}</button>` : ''}
+    ${hands() && t.type !== 'webhook' ? '<button class="ghost" id="removeTrigger">Remove it</button>' : ''}
   `;
 }
 
@@ -2264,6 +2266,11 @@ function offerCut(e, sx, sy) {
 
 function removeTrigger(t) {
   gesture('api/hand/trigger-remove', { id: t.id, automationsStamp: state.map.automationsStamp }, null);
+}
+
+/** BKO-008: off keeps the trigger (its schedule or table, a webhook's secret); on again from the same button. */
+function toggleTrigger(t) {
+  gesture('api/hand/trigger-enabled', { id: t.id, enabled: !t.enabled, automationsStamp: state.map.automationsStamp }, null);
 }
 
 /** The visible who→table wire under a point on the screen, if any (only the ones drawn can be cut). */

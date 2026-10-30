@@ -73,8 +73,8 @@ kinds of people, never for one named person. These kinds are what you drag.
 - **Run a function when a row changes:** drag the function onto a table and tick *made*, *changed* or *deleted*.
 - **Run a function on a schedule:** drag the 🕘 clock from the hint bar onto a function. As you type, the backend
   says in its own words when it would run. It lists the next three runs.
-- **Stop it running by itself:** a trigger's panel has **Stop it running by itself** (not for a webhook: its
-  secret can't be given back).
+- **Turn it off, or take it away:** a trigger's panel has **Turn it off** (it's kept, with its schedule or its
+  table, and **Turn it on** brings it back) and **Remove it** (not for a webhook: its secret can't be given back).
 
 Every change goes to the running backend **and** the project's file, or to neither. A rule is kept in
 `nodegx.security.json` and a trigger in `nodegx.automations.json`. If either place changed since the map looked,
@@ -116,6 +116,57 @@ question and deleted straight after, and its secret is never shown or saved. Eve
 - A function that changes data is never run, and one with many possible arguments is asked at most 16 ways: the
   panel says when, and that the count is then "at least".
 
+## Build your own: the kit
+
+Everything the map knows and every change it makes is in its kit, with no screen in it. The map is built on the kit
+and imports nothing else of this package's. Your own editor or viewer can use it the same way:
+
+```js
+import { backend, openProject, readFacts, makeHands, makeLens, asPerson, makeRuns, words } from '@nodegx/backend-map/kit';
+```
+
+| question | the kit's answer |
+|---|---|
+| What's in the backend: tables, fields, rows, people, groups? | `readFacts({ be, project })`, `tableRows(be, table)`, `loadWorld(be)` |
+| Who may touch a table, in words? | `words.tableRule`, `words.ruleWords`, `words.handWords`; `dryRuns(be, table)` asks the backend itself |
+| What do the functions and pages touch? | `analyseProject(project, tableNames)`: a table the code *names*, not the rows it hands over |
+| What starts by itself? | `triggerFlows({ backend, workflows, file, functions })` |
+| What did one person actually get? | `makeLens({ be, project, ap: asPerson(be) }).reachOf(personId)`: their functions run as them |
+| How do I change a rule or a trigger so it holds? | `makeHands({ be, files, functions })`: `rule`, `addTrigger`, `removeTrigger`, `setEnabled`, `undo`; `setTableRule` |
+| What ran just now? | `makeRuns({ be })(since)` |
+
+`be` is `backend(url, adminToken)`; `project` is `openProject(folder)`. Keep the admin token on your server, as the
+map does. The writers change the running backend **and** the project's file together or not at all, refuse when
+either changed since you looked, and put the backend back when the file can't be written. The words are one text:
+`@nodegx/backend-map/kit/words.js` touches neither Node nor the page, so a page can load it as it is (the map's
+does, at `/words.js`).
+
+### Is your editor right? The backend suite
+
+Write an adapter (`open({ project, backend, token })`, `apply(edit)`, optionally `close()`) that makes each edit
+through your editor's own code, the path a person's click takes. Then, on a **copy** of the app and the copy's
+backend:
+
+```
+npx -p @nodegx/backend-map backend-suite my-adapter.mjs <copy of the app> edits.json --backend <url> --token-file <file>
+```
+
+The edits are `grant` and `revoke` (`table`, `who`: `public`, `authenticated`, `role:<name>` or `maker`, and for a
+grant `what`: `see`, `change` or `both`), `add_trigger` (`fn`, `table`, `actions`), `schedule` (`fn`, `cron`),
+`turn_off` and `remove_trigger` (`trigger`: an id, or `"@3"` for the trigger edit 3 made). `apply` returns
+`{ id }` for the two that make a trigger. After each edit the suite reads the backend and the files itself and
+compares them with the kit's own writers: the same entry in both places, and each file byte for byte as the kit
+writes it. It prints `PASS — <editor> on <app> (… ms); both places put back`, or `FAIL` with a sentence per
+difference:
+
+```
+after edit 1 (grant: Anyone signed in may see on Meeting): Meeting in nodegx.security.json is reading the member
+group or the admin group, adding the admin group; the backend says reading anyone signed in, adding the admin group.
+```
+
+Before you trust a PASS, break your adapter on purpose (skip the file) and check it says FAIL. `test/backend-adapter.mjs`
+is the map's own adapter; `test/backend-adapter-skipfile.mjs` is that control.
+
 ## The public copy
 
 `../static/`: `record.mjs` records every answer this server gives from a running copy; `build.mjs` copies `public/`
@@ -142,6 +193,8 @@ own from the kit): the NodeGX kit's editor suite and its control, the rule chang
 restarts, the page driven in Chrome, and the real-person views on a copy holding the app's whole world.
 `test/hands.test.mjs` grades every drag through the page's own requests against the backend and the files (a row
 made in a watched table runs the function; undo byte for byte; a control writer that skips the file must fail), and
-`test/hands-ui.test.mjs` does them with a mouse in Chrome.
+`test/hands-ui.test.mjs` does them with a mouse in Chrome. `test/backend-suite.test.mjs` runs the kit's backend
+suite on members-area and todo copies: the map's adapter and the kit's writers say PASS, a writer that skips the
+file and one that writes it its own way say FAIL, and the command's exit code follows.
 The app's own `tools/setup-backend.mjs` and `tools/deploy-functions.mjs`, run from the copy, set up its
 people, rows and functions.

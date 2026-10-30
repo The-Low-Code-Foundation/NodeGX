@@ -5,7 +5,7 @@
 //   backend-map [project folder] [--backend <url> --token-file <file>] [--port <n>] [--no-open]
 //
 // With no folder it opens the current one. With no --backend it finds the backend the project is linked
-// to on this computer (lib/discover.mjs). BACKEND-URL and ADMIN-TOKEN beside the project still work.
+// to on this computer (the kit's projectBackend). BACKEND-URL and ADMIN-TOKEN beside the project still work.
 
 import http from 'node:http';
 import fs from 'node:fs';
@@ -13,17 +13,9 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { look, wireColors } from '@nodegx/canvas-look';
-import { openProject, analyseProject, tableLinks, projectTables } from './lib/project.mjs';
-import { backend, BackendError } from './lib/backend.mjs';
-import { setTableRule, entryFor, readSecurityFile, dryRuns, Refusal, SECURITY_FILE } from './lib/rules.mjs';
-import { makeViews } from './lib/views.mjs';
-import { KEY_SUFFIX, asPerson } from './lib/asperson.mjs';
-import { triggerFlows, readAutomationsFile } from './lib/triggers.mjs';
-import { personColumns, personKeys, idOf } from './lib/people.mjs';
-import { projectBackend } from './lib/discover.mjs';
-import { loadWorld, personReach, anonymousReach } from './lib/reach.mjs';
-import { makeHands } from './lib/hands.mjs';
-import { AUTOMATIONS_FILE } from './lib/triggers.mjs';
+// BKO-008: the map is built on its kit and imports nothing else of the package's. A stranger's editor imports the same
+// thing as `@nodegx/backend-map/kit`.
+import { openProject, analyseProject, backend, BackendError, Refusal, setTableRule, entryFor, dryRuns, makeViews, asPerson, projectBackend, makeHands, readFacts, tableRows, makeRuns, makeLens } from '@nodegx/backend-map/kit';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
@@ -64,7 +56,8 @@ export function createEditor(opts) {
   const ctx = { be, files: project.files };
   const mine = new Map(); // request id → { person, fn, key }: the runs this map made, as whom
   const views = makeViews({ be, project, mine });
-  const keyActors = new Map(); // request id → the key that made a run, from the audit
+  // Round 3: what one person can reach, row by row, on a world the lens reads once a quarter of a minute.
+  const lens = makeLens({ be, project, ap: asPerson(be, { mine }) });
   // BKO-007: what a drag on the map changes; a trigger names a function as the backend serves it (the map's own name).
   // Every change forgets the world the reach measures from, so a person looked at again is measured on the new rules.
   const madeBy = makeHands({ be, files: project.files, functions: () => analyseProject(project, []).functions.map((f) => f.name) });
@@ -72,199 +65,30 @@ export function createEditor(opts) {
     try {
       return await fn(...args);
     } finally {
-      worldCache = null;
+      lens.forget();
     }
   };
-  const hands = { ...madeBy, rule: forgetting(madeBy.rule), addTrigger: forgetting(madeBy.addTrigger), removeTrigger: forgetting(madeBy.removeTrigger), undo: forgetting(madeBy.undo) };
+  const hands = { ...madeBy, rule: forgetting(madeBy.rule), addTrigger: forgetting(madeBy.addTrigger), removeTrigger: forgetting(madeBy.removeTrigger), setEnabled: forgetting(madeBy.setEnabled), undo: forgetting(madeBy.undo) };
 
+  /** What the page draws: the kit's facts, in the map's look. */
   async function buildMap() {
-    const health = await be.health();
-    if (!health) throw new BackendError(0, `The backend at ${be.base} isn’t answering. Is it running?`);
-    // BKO-003: each source fails alone and the map says which; one failed call no longer blanks the map.
-    const problems = [];
-    const ask = (what, p, fallback) => p.catch((e) => (problems.push({ what, words: e.message }), fallback));
-    const [schema, perms, fnPerms, roles, users, triggers, workflows, audit] = await Promise.all([
-      ask('tables', be.get('/admin/schema'), { tables: [] }),
-      ask('rules', be.getWithHeaders('/admin/permissions'), { json: { config: {}, etag: null } }),
-      ask('functions', be.get('/admin/permissions/functions'), { functions: [] }),
-      ask('groups', be.get('/admin/roles'), { roles: [] }),
-      ask('people', be.get('/admin/users?limit=200'), { users: [], total: null }),
-      be.get('/admin/triggers').catch(() => ({ triggers: [] })),
-      be.get('/admin/workflow-defs').catch(() => ({ workflows: [] })),
-      be.get('/admin/audit?limit=12').catch(() => ({ entries: [] }))
-    ]);
-    const counts = await Promise.all(
-      schema.tables.map((t) =>
-        be.get(`/api/${encodeURIComponent(t.name)}?count=1&limit=0`).then((r) => r.count ?? null, () => null)
-      )
-    );
-    const tableNames = schema.tables.map((t) => t.name);
-    const app = analyseProject(project, tableNames);
-    const file = readSecurityFile(project.files);
-    const config = perms.json.config ?? {};
-    const deployed = Object.fromEntries(fnPerms.functions.map((f) => [f.name, f]));
-    // A table the project has and the backend doesn't (yet): drawn, and said so.
-    const onBackend = new Set(tableNames);
-    const missing = [...projectTables(project, file.config, app)].filter(([name]) => !onBackend.has(name));
-    const declared = missing.map(([name, t]) => ({ name, columns: t.columns ?? [], indexes: [] }));
-    const column = (c) => ({ name: c.name, type: c.type, ...(c.targetClass ? { targetClass: c.targetClass } : {}) });
-    return {
-      app: { name: app.name, folder: opts.project },
-      backend: { name: health.backendName, url: be.base, enforced: !!health.security?.enforced, devOpen: !!health.security?.devOpen },
-      problems,
-      tables: [
-        ...schema.tables.map((t, i) => ({
-          name: t.name,
-          rows: t.name === '_User' ? users.total ?? users.users.length : counts[i],
-          columns: t.columns.map(column),
-          keys: (t.indexes || []).filter((x) => x.unique).map((x) => x.fields),
-          people: personColumns(t)
-        })),
-        ...missing.map(([name, t]) => ({ name, rows: null, columns: (t.columns ?? []).map(column), keys: [], people: personColumns({ columns: t.columns ?? [] }), notOnBackend: true, from: t.from }))
-      ],
-      links: tableLinks([...schema.tables, ...declared]),
-      personKeys: [...personKeys(schema.tables)],
-      functions: app.functions.map((f) => ({
-        ...f,
-        deployed: !!deployed[f.name]?.deployed,
-        call: deployed[f.name]?.call ?? config.functions?.[f.name]?.call ?? null,
-        rateLimit: deployed[f.name]?.effectiveRateLimit ?? null
-      })),
-      helpers: app.helpers,
-      screens: app.screens,
-      calls: app.calls,
-      uses: app.uses,
-      config: { defaults: config.defaults, collections: config.collections ?? {}, functions: config.functions ?? {}, files: config.files, signup: config.signup },
-      fileCollections: file.config?.collections ?? {},
-      etag: perms.json.etag,
-      fileStamp: file.stamp,
-      securityFile: SECURITY_FILE,
-      roles: rolesIn(roles.roles, config, file.config),
-      people: problems.some((p) => p.what === 'people') ? null : users.total ?? users.users.length,
-      // BKO-005: what the backend starts by itself, from the backend and the project's automations file
-      triggers: triggerFlows({ backend: triggers.triggers ?? [], workflows: workflows.workflows ?? [], file: readAutomationsFile(project.files), functions: app.functions.map((f) => f.name) }),
-      automationsStamp: project.files.stamp(AUTOMATIONS_FILE),
-      audit: (audit.entries ?? []).map((e) => ({ at: e.at, action: e.action, outcome: e.outcome, target: e.target })),
-      look: { colors: look.colors.dark, signal: wireColors('signal', 'dark'), data: wireColors('data', 'dark') }
-    };
-  }
-
-  /** The backend's groups, plus any group the backend's rules or the app's rules file names that has no members yet. */
-  function rolesIn(backendRoles, ...configs) {
-    const out = backendRoles.map((r) => ({ name: r.name, members: r.users.length }));
-    const named = new Set();
-    for (const config of configs) JSON.stringify(config ?? {}, (k, v) => (typeof v === 'string' && v.startsWith('role:') && named.add(v.slice(5)), v));
-    for (const n of named) if (!out.some((r) => r.name === n)) out.push({ name: n, members: 0 });
-    return out;
-  }
-
-  async function runs(since) {
-    const q = new URLSearchParams({ limit: '60', offset: '0' });
-    if (since) q.set('since', String(since));
-    const { json, headers } = await be.getWithHeaders(`/executions?${q}`);
-    // A run through the MCP door was made with a key: the audit names the key, by the run's request id.
-    const viaKey = json.filter((r) => /\/mcp/.test(r.metadata?.triggerSource ?? '') && !keyActors.has(r.metadata?.requestId));
-    if (viaKey.length) {
-      const audit = await be.get('/admin/audit?action=mcp.tool.call&limit=200').catch(() => ({ entries: [] }));
-      for (const e of audit.entries ?? []) if (e.requestId) keyActors.set(e.requestId, e.actor);
-    }
-    return {
-      total: Number(headers.get('x-total-count') ?? json.length),
-      runs: json.map((r) => {
-        const rid = r.metadata?.requestId;
-        const ours = rid && mine.get(rid);
-        const actor = rid && keyActors.get(rid);
-        return {
-          id: r.id,
-          name: r.workflowId,
-          kind: r.kind,
-          status: r.status,
-          startedAt: r.startedAt,
-          durationMs: r.durationMs,
-          errorMessage: r.errorMessage ?? null,
-          byMap: ours ? { person: ours.person, key: ours.key } : actor && actor.endsWith(KEY_SUFFIX) ? { person: null, key: actor } : null,
-          byKey: actor && !actor.endsWith(KEY_SUFFIX) ? actor : null
-        };
-      })
-    };
-  }
-
-  /** A table's rows, each with a short label in words and its plain values, for the explorer. */
-  async function rows(table) {
-    const schema = await be.get('/admin/schema');
-    const t = schema.tables.find((x) => x.name === table);
-    if (!t) throw new Refusal('No such table.');
-    const results = table === '_User' ? (await be.get('/admin/users?limit=500')).users : (await be.get(`/api/${encodeURIComponent(table)}?limit=500`)).results;
-    const keys = (t.indexes ?? []).filter((i) => i.unique && i.fields.length === 1).map((i) => i.fields[0]);
-    const words = ['subject', 'title', 'name', 'projectName', 'label', 'email', 'username', 'body', 'content'];
-    // BKO-003: an app whose rows have none of those words is labelled by its first text column
-    const firstText = t.columns.find((c) => c.type === 'String' && !/Id$|^(ACL|owner|objectId)$/.test(c.name) && !words.includes(c.name))?.name;
-    const people = personColumns(t).map((c) => c.name);
-    return results.map((r) => {
-      const w = [...words, firstText].map((k) => k && r[k]).find((v) => typeof v === 'string' && v.trim());
-      // a row told apart only by several columns together reads as those values: "l-marie · what-the-web-is"
-      const multi = (t.indexes ?? []).find((i) => i.unique && i.fields.length > 1);
-      const key = keys.map((k) => r[k]).find((v) => typeof v === 'string') ?? (multi ? multi.fields.map((f) => r[f]).filter((v) => v !== null && v !== undefined).join(' · ') : undefined);
-      const owner = people.map((k) => idOf(r[k])).find(Boolean);
-      const cells = {};
-      for (const c of t.columns) {
-        const v = r[c.name];
-        if (c.name === 'ACL' || /password|token|secret/i.test(c.name)) continue;
-        cells[c.name] = v === null || v === undefined ? null : typeof v === 'object' ? JSON.stringify(v).slice(0, 120) : String(v).slice(0, 160);
-      }
-      return { objectId: r.objectId, label: w ? w.slice(0, 80) : key ?? r.objectId, key: key ?? null, owner: owner ?? null, cells };
-    });
-  }
-
-  // Round 3: what one person can reach, row by row (lib/reach.mjs). The world (every row) is read once
-  // a quarter of a minute: the backend limits admin requests.
-  const ap = asPerson(be, { mine });
-  let worldCache = null;
-  async function reachWorld() {
-    if (worldCache && Date.now() - worldCache.at < 15_000) return worldCache;
-    const world = await loadWorld(be);
-    const app = analyseProject(project, world.schema.tables.map((t) => t.name));
-    const perms = await be.get('/admin/permissions');
-    worldCache = { at: Date.now(), world, app, config: perms.config };
-    return worldCache;
-  }
-  async function reachOf(personId, emit) {
-    const w = await reachWorld();
-    if (!personId) {
-      const summary = await anonymousReach({ be, app: w.app, world: w.world, config: w.config });
-      emit({ type: 'start', person: summary.person, tools: summary.tools, notAllowed: w.app.functions.map((f) => f.name).filter((f) => !summary.tools.includes(f)), readers: [], direct: [] });
-      for (const c of summary.changers) emit({ type: 'skip', ...c, writes: w.app.functions.find((f) => f.name === c.fn)?.touches.filter((t) => t.hows.some((h) => h !== 'reads' && h !== 'mentions')).map((t) => t.table) ?? [] });
-      emit({ type: 'done', summary });
-      return summary;
-    }
-    const user = w.world.rowsByTable._User.find((u) => u.objectId === personId);
-    if (!user) throw new Refusal('No such person in the backend.');
-    return personReach({ be, ap, app: w.app, world: w.world, config: w.config, user, emit });
-  }
-  async function everyone(emit) {
-    const w = await reachWorld();
-    const out = [];
-    const people = [null, ...w.world.rowsByTable._User.map((u) => u.objectId)];
-    for (const id of people) {
-      const s = await reachOf(id, () => {});
-      const brief = { person: s.person, reachedRows: s.reachedRows, totalRows: s.totalRows, tables: s.tables, tools: s.tools.length, readers: s.readers.length };
-      out.push(brief);
-      emit({ type: 'person', ...brief });
-    }
-    emit({ type: 'done' });
-    return out;
+    const facts = await readFacts({ be, project, folder: opts.project });
+    return { ...facts, look: { colors: look.colors.dark, signal: wireColors('signal', 'dark'), data: wireColors('data', 'dark') } };
   }
 
   async function changeRule(body) {
     const { table, reset, read, change, creatorOwns, etag, fileStamp } = body;
     if (!table || typeof table !== 'string') throw new Refusal('Which table?');
     const entry = reset ? null : entryFor({ read, change, creatorOwns });
-    return setTableRule(ctx, table, entry, { etag, fileStamp });
+    const result = await setTableRule(ctx, table, entry, { etag, fileStamp });
+    lens.forget();
+    return result;
   }
 
-  return { buildMap, runs, rows, changeRule, hands, check: (table) => dryRuns(be, table), views, project, be, reachOf, everyone };
+  return { buildMap, runs: makeRuns({ be, mine }), rows: (table) => tableRows(be, table), changeRule, hands, check: (table) => dryRuns(be, table), views, project, be, reachOf: lens.reachOf, everyone: lens.everyone };
 }
 
+const WORDS = fileURLToPath(import.meta.resolve('@nodegx/backend-map/kit/words.js'));
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png' };
 
 /**
@@ -298,6 +122,7 @@ export function handler(editor) {
       if (url.pathname === '/api/hand/rule' && req.method === 'POST') return send(res, 200, await editor.hands.rule(await body()));
       if (url.pathname === '/api/hand/trigger' && req.method === 'POST') return send(res, 200, await editor.hands.addTrigger(await body()));
       if (url.pathname === '/api/hand/trigger-remove' && req.method === 'POST') return send(res, 200, await editor.hands.removeTrigger(await body()));
+      if (url.pathname === '/api/hand/trigger-enabled' && req.method === 'POST') return send(res, 200, await editor.hands.setEnabled(await body()));
       if (url.pathname === '/api/hand/schedule' && req.method === 'POST') return send(res, 200, await editor.hands.schedulePreview((await body()).cron));
       if (url.pathname === '/api/hand/undo' && req.method === 'POST') return send(res, 200, await editor.hands.undo((await body()).id));
       if (url.pathname === '/api/people' && req.method === 'GET') return send(res, 200, { people: await editor.views.people() });
@@ -328,6 +153,11 @@ export function handler(editor) {
       }
       if (req.method !== 'GET') return send(res, 405, { error: 'Not here.' });
       const rel = url.pathname === '/' ? 'index.html' : decodeURIComponent(url.pathname).replace(/^\/+/, '');
+      // BKO-008: the page's words are the kit's one text, served from the kit (the page and Studio import /words.js)
+      if (rel === 'words.js') {
+        res.writeHead(200, { 'Content-Type': TYPES['.js'], 'Cache-Control': 'no-store' });
+        return fs.createReadStream(WORDS).pipe(res);
+      }
       const file = path.join(pub, rel);
       if (!file.startsWith(pub + path.sep) || !fs.existsSync(file)) return send(res, 404, { error: 'Not found.' });
       res.writeHead(200, { 'Content-Type': TYPES[path.extname(file)] ?? 'application/octet-stream', 'Cache-Control': 'no-store' });
