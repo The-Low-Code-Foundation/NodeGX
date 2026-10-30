@@ -294,7 +294,9 @@ scored **7**, with persistence as the whole failure.
 | G4·code | 1 | 11 |
 | G2·code | 1 | 7 |
 
-All six lanes are built and graded (AC2). Next is §8 step 5, the blind gallery for Richard.
+All six lanes are built and graded (AC2). §8 tests whether the model in the harness lanes is doing anything: a random
+pick from the same menus scores 4–10 (median 5), and on the held-out briefs H1 and H2 the blocks build a habit
+tracker wearing the new brief's words. Next is the blind gallery for Richard.
 
 ## 7. The harness lab: G4·harness and G2·harness (s3, 2026-10-30)
 
@@ -398,3 +400,119 @@ tick's inline `var(--primary)`; a done day is the dot's. The class names change 
 
 **Saved per run:** the ledger (every call verbatim), the build log, the app (the 4.1 MB unused `starter-imagery`
 left out), the render report's two shots, and `grade/`.
+
+## 8. Is the model doing anything? Two tests (s3, 2026-10-30, at Richard's question)
+
+**Richard, after §7:** "Isn't this just showing 'if you want to build an app with a 2B model, you need Claude to
+basically prebuild the app and then give the 2B model some choices but the final result will not differ much and you
+may as well have just finished doing it with Claude'?"
+
+On §7 alone, yes. My hand-written answers (the control) scored the same 12 as both models. The blocks were written for
+this brief, and tested against the grader's days, before any model ran. The model chose names, menu items, a look
+and words. Two tests separate "the model chooses something that matters" from "the blocks are the app":
+
+1. **A null model** (`--random <seed>`): every menu question answered at random from the same options, the words
+   taken from the control, under T1, graded on B1–B13. If random answers score like Gemma, the grader cannot see
+   the model's decisions at all.
+2. **The held-out briefs, H1 and H2** (§3), on the blocks unchanged, G4 and G2, T1. If they fail, the harness is a
+   habit-tracker template, and the write-up says so (§7's last bullet).
+
+### Predictions (written before either test ran)
+
+**The null model, seeds 1–5.** A 12 needs add, tick and delete among the actions (2 of the 15 possible non-empty
+picks), the last days (½) and the streak (½): about 3% a run. Without "add" (7 picks in 15) nothing can be added,
+so everything after B1 fails.
+- I predict **no seed reaches 12**, the median is **3 or less**, and at least two seeds score 1.
+- Gemma's 12 then measures one thing the random answers lack: reading the three verbs the brief states (add, tick,
+  delete) and the two things it shows (the last 7 days, a streak). That is real, but it is reading, not building.
+
+**H1, the chore chart.** What a person needs, with whether a block exists for it:
+
+| H1 needs | block? |
+|---|---|
+| a list of chores, each ticked off per day | yes (the item list and the tick) |
+| **two children: a tick per chore per child per day** | **no**: there is one tick per item per day, and no question can express a second dimension |
+| **stars per child this week** | **no**: "done this week" counts per item, not per child |
+
+Predicted: **fails**. It builds a one-person chore list, and the child dimension, the point of the brief, is
+missing. Neither model can ask for it, because no option says it.
+
+**H2, the plant tracker.**
+
+| H2 needs | block? |
+|---|---|
+| a list of plants, a watering recorded per day | yes (a tick is a watering) |
+| when each was last watered | partly: visible only within the last N days shown, never as a date |
+| **each plant's own number of days between waterings** | **no**: an item holds a name only |
+| **which plants are due today** | **no**: no number or view computes "due" |
+
+Predicted: **fails**. It builds a list of plants you can tick per day, which is a habit tracker with plants in it.
+
+If both predictions hold, the honest headline for §2.2 is: **a 2B model in this harness fills in a form written
+for one app. It does not build an app, and the form does not carry to the next app.** Making it carry would mean
+Claude writing the blocks the next app needs, which is building that app.
+
+### Readings (2026-10-30, the same 0.2.8 kit, T1 on every run)
+
+**The null model** (`runs/random-1/` … `random-5/`, graded on B1–B13):
+
+| seed | actions | views | numbers | B1–B13 | failed |
+|---|---|---|---|---|---|
+| 1 | add, tick, rename | — | streak, done this week | 9 | B8, B11, B12, B13 |
+| 2 | add | — | all four | 4 | B5–B13 |
+| 3 | add, delete | last 5 days, summary | streak | 5 | B5–B10, B12, B13 |
+| 4 | add, delete, tick, rename | last 7 days | done today out of all, best streak | **10** | B9, B10, B13 |
+| 5 | add, delete, rename | summary | streak, done this week | 5 | B5–B10, B12, B13 |
+
+The median is **5**, and the best is **10**. Gemma's 12 is above every seed.
+
+**Against my prediction:**
+- **"No seed reaches 12": held.**
+- **"Median 3 or less, at least two seeds score 1": wrong.** All five seeds happened to pick "add" (about a 4% chance at 8 in 15 each), and the grader gives a
+  lot of partial credit to any app with add and tick. Seed 1 has no day row and still passes the streak checks
+  (B9, B10). Seed 4 has every action and the day row but no streak, and loses only B9 and B10.
+
+**So the model's decisions are visible on the grader.** They are worth about 7 checks over a median random pick, and
+2 over the best. But what they are is plain: picking "add", "tick for today", "delete", "the last days" and
+"streak" from a menu, when the brief says "add", "tick", "delete", "last 7 days" and "streak" in so many words.
+
+**The held-out briefs** (`runs/g4-harness-h1/`, `g2-harness-h1/`, `g4-harness-h2/`, `g2-harness-h2/`; built and
+rendered, not graded: there is no checklist for them, and the tables above say what each needs):
+
+| run | what it chose | what the app does | the brief's core |
+|---|---|---|---|
+| G4 · H1 | chore; add, tick; summary; done this week; warm | a list of chores, each ticked once a day, "N Weekly total", a summary | **no children, no stars** |
+| G2 · H1 | chore; add, tick; last 7 days; done this week; bold | the same, with the 7 days | **no children, no stars** |
+| G4 · H2 | plant; **add, rename**; summary; done today out of all; clean | a list of plant names. **Nothing records a watering** (no tick chosen; rename has no block) | **no last-watered date, no interval, nothing due** |
+| G2 · H2 | plant; add, tick; last 7 days; done today out of all; warm | plants ticked "watered today", the last 7 days | **no interval, nothing due**; last watered only as a dot within 7 days |
+
+Each build took 13–25 s of model time and 1.5–1.9 K tokens in. Every one staged clean and applied.
+
+**Both predictions held, and the words made it worse.** The models wrote, in the apps' own text, the features the
+blocks could not build:
+- G2·H1's title line: "Track daily chores and weekly star points for both children";
+- its empty state: "A simple chore chart tracking daily completion and weekly star counts for two children";
+- G4·H1's: "Daily tasks and weekly star rewards for your children";
+- G2·H2's: "Track watering history and due dates for all your plants", with a summary that renders as
+  "0 of 2 3 of 5 plants due today".
+
+None of those apps can do what its words say. A person opening one would be told it is a chore chart for two
+children, and find a one-list habit tracker.
+
+### What this says (§2.2)
+
+Richard's reading is right, and the numbers now say so plainly:
+
+1. **The app is the blocks.** My hand-written answers score 12. A random pick from the same menus scores 4–10.
+   Gemma 2B and 4B score 12 by choosing the menu items the brief names.
+2. **The model reads; it does not build.** Its measurable contribution is matching the brief's verbs to a menu.
+   Its other contribution, the words, is the worst part of every harness app. It names features that do not exist.
+3. **The blocks do not carry.** On the two held-out briefs, the same blocks build a habit tracker wearing the new
+   brief's words. Neither the children in H1 nor the interval in H2 can be asked for, because no option says it.
+   The harness is a habit-tracker template, as §7 said the write-up would have to say if this happened.
+4. **For one app, Claude alone wins.** D·code built a 13/13 tracker in under 4 minutes. The blocks cost a session
+   of Opus work, and making them carry to H1 or H2 means writing the blocks those apps need: building those apps.
+
+What a small model could still be for is narrower: a free, local, private configurator over a kit Claude writes once,
+for many apps of one kind. That is a product bet on the kit, and nothing here measures it. The race measures that the
+model adds reading, not building.

@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "63c43e39-bd72-54ab-841e-931137096a58",
+  "name": "Item Row",
+  "path": "/Components/Item Row",
+  "type": "visual",
+  "created": "2026-10-30T15:34:14.548Z",
+  "modified": "2026-10-30T15:34:14.548Z",
+  "modifiedBy": "noodl-mcp"
+}

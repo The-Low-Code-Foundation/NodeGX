@@ -20,7 +20,17 @@
 Every 12 has the same single miss, B13 on a Text Input (P112-OWN034-INPUTHIT). `runs/blocks-control/` is the
 harness blocks on hand-written answers, with no model: 12/13.
 
+**Also s3, at Richard's question** ("isn't this just Claude prebuilding the app and giving the 2B model some
+choices?"), RESULTS §8:
+- a null model (`--random <seed>`, `runs/random-1/` … `random-5/`) scores **9, 4, 5, 10, 5**;
+- **H1 and H2 ran early** on the blocks unchanged (`runs/g{4,2}-harness-h{1,2}/`). Both build a habit tracker
+  wearing the new brief's words: no children or stars in H1; no interval or due date in H2. G4·H2 cannot even
+  record a watering (it chose add and rename).
+- The conclusion is in RESULTS §8 "What this says". Richard's reading was right: the app is the blocks, the model
+  reads, and the blocks do not carry to the next app. §8 step 7 is done. Do not rerun it.
+
 **Built in s3:**
+- `--brief <file>` and `--random <seed>` on the harness; `brief-h1.txt`, `brief-h2.txt`;
 - the lab: `harness.mjs` (questions → blocks → the kit's MCP), `prompts.mjs`, `blocks.mjs`, `blocks/days.js` (the
   date logic), `test-days.mjs` (10 checks × 3 time zones), `mcp.mjs` (the 0.2.8 server), `probe-console.mjs`;
 - `questions.md` is generated (`node harness.mjs --questions`). Do not edit it by hand.
@@ -60,6 +70,8 @@ Persist. Both D·kit apps followed that line. The harness is the only lane that 
    each change as a re-run from the request with the change added, and the saved data must survive the change.
    - C1 (done today out of all) and C2 (best streak) are on the harness menu.
    - C3 (days of the week per habit) is not a block. §7 predicts it fails there.
+   - Given §8, ask Richard whether the change round is still worth running on the harness lane. On the code and
+     kit lanes it still tests something (C3).
 
 ## Needs Richard (do not do alone)
 

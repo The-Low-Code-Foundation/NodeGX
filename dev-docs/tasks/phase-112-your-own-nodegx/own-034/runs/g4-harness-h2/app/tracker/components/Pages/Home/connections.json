@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "10ebbf47-ce15-5324-81d0-387943c65254",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "add-input",
+      "fromProperty": "onTextChanged",
+      "toId": "add-fn",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "items-2",
+      "fromProperty": "value",
+      "toId": "add-fn",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "add-button",
+      "fromProperty": "onClick",
+      "toId": "add-fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "add-input",
+      "fromProperty": "onEnter",
+      "toId": "add-fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "add-fn",
+      "fromProperty": "out-items",
+      "toId": "set-items-add",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "add-fn",
+      "fromProperty": "out-added",
+      "toId": "set-items-add",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "add-fn",
+      "fromProperty": "out-added",
+      "toId": "add-input",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "items-2",
+      "fromProperty": "value",
+      "toId": "rows-fn",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "ticks-2",
+      "fromProperty": "value",
+      "toId": "rows-fn",
+      "toProperty": "in-ticks"
+    },
+    {
+      "fromId": "rows-fn",
+      "fromProperty": "out-rows",
+      "toId": "list",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "rows-fn",
+      "fromProperty": "out-empty",
+      "toId": "empty",
+      "toProperty": "mounted"
+    }
+  ]
+}

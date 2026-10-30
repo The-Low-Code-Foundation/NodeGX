@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "5bc8f192-72bf-5416-8109-9f9ead5ec326",
+  "name": "Home",
+  "path": "/Pages/Home",
+  "type": "page",
+  "modified": "2026-10-30T15:35:23.053Z",
+  "modifiedBy": "noodl-mcp"
+}

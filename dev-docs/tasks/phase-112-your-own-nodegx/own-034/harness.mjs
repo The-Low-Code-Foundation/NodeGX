@@ -21,7 +21,8 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
 const opt = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
 const OLLAMA = process.env.OLLAMA_HOST || 'http://127.0.0.1:11434';
-const REQUEST = fs.readFileSync(path.join(HERE, 'brief.txt'), 'utf8').trim();
+// --brief: the request file (default §3's brief.txt; H1 and H2 are brief-h1.txt, brief-h2.txt, run on the blocks unchanged).
+const REQUEST = fs.readFileSync(path.resolve(HERE, opt('--brief', 'brief.txt')), 'utf8').trim();
 const LOOK_PRESET = { clean: 'modern', bold: 'playful', warm: 'soft' };
 
 // ─── questions.md ─────────────────────────────────────────────────────────────────────────────────────────────────
@@ -53,14 +54,18 @@ const TUNING = Object.fromEntries((opt('--tuning', '') || '').split(',').filter(
 for (const t of Object.keys(TUNING)) if (!P.TUNINGS[t]) throw new Error(`unknown tuning ${t}`);
 const MODEL = opt('--model');
 const ANSWERS = opt('--answers');
+// --random <seed>: the null model. Every menu question is answered at random from the same options (an array takes
+// each option with p ½, redrawn until the schema's bounds hold); every free-text answer (the item's name, the words)
+// is taken from control-answers.json. If this scores like a model, the grader cannot see the model's decisions.
+const RANDOM = opt('--random');
 const PROJECT = opt('--project');
-if (!RUN || !PROJECT || (!MODEL && !ANSWERS)) throw new Error('usage: node harness.mjs --run <name> (--model <ollama model> | --answers <card.json>) --project <empty dir>');
+if (!RUN || !PROJECT || (!MODEL && !ANSWERS && !RANDOM)) throw new Error('usage: node harness.mjs --run <name> (--model <ollama model> | --answers <card.json> | --random <seed>) [--brief <file>] --project <empty dir>');
 if (fs.existsSync(PROJECT) && fs.readdirSync(PROJECT).length) throw new Error(`${PROJECT} exists and is not empty`);
 const OUT = path.join(HERE, 'runs', RUN);
 fs.mkdirSync(OUT, { recursive: true });
 
 const t0 = Date.now();
-const ledger = { run: RUN, model: MODEL || null, answers: ANSWERS || null, request: REQUEST, project: PROJECT, tuning: Object.keys(TUNING).map((t) => P.TUNINGS[t]), startedAt: new Date().toISOString(), mcpBin: process.env.OWN034_MCP_BIN, card: {}, calls: [], notBuilt: [], mcp: [], result: null };
+const ledger = { run: RUN, model: MODEL || null, answers: ANSWERS || null, random: RANDOM ?? null, brief: opt('--brief', 'brief.txt'), request: REQUEST, project: PROJECT, tuning: Object.keys(TUNING).map((t) => P.TUNINGS[t]), startedAt: new Date().toISOString(), mcpBin: process.env.OWN034_MCP_BIN, card: {}, calls: [], notBuilt: [], mcp: [], result: null };
 const writeLedger = () => fs.writeFileSync(path.join(OUT, 'ledger.json'), JSON.stringify(ledger, null, 1) + '\n');
 process.on('uncaughtException', (e) => { ledger.result = { crashed: String(e?.stack || e) }; writeLedger(); console.error(e); unload().finally(() => process.exit(1)); });
 
@@ -72,9 +77,22 @@ if (MODEL) {
   ledger.digest = (await (await fetch(`${OLLAMA}/api/tags`)).json()).models.find((m) => m.name === MODEL)?.digest?.slice(0, 12);
 }
 const fixed = ANSWERS ? JSON.parse(fs.readFileSync(path.resolve(ANSWERS), 'utf8')) : null;
+const WORDS_FROM = RANDOM ? JSON.parse(fs.readFileSync(path.join(HERE, 'control-answers.json'), 'utf8')) : null;
+// xorshift, OWN-030's generator
+const rnd = (() => { let x = Number(RANDOM) >>> 0 || 1; return () => { x ^= x << 13; x ^= x >>> 17; x ^= x << 5; return ((x >>> 0) % 1e9) / 1e9; }; })();
+function randomAnswer(key, schema) {
+  const out = {};
+  for (const [k, p] of Object.entries(schema.properties)) {
+    if (p.enum) out[k] = p.enum[Math.floor(rnd() * p.enum.length)];
+    else if (p.type === 'array') { let pick; do pick = p.items.enum.filter(() => rnd() < 0.5); while (pick.length < (p.minItems ?? 0) || pick.length > (p.maxItems ?? 99)); out[k] = pick; }
+    else out[k] = WORDS_FROM[key]?.[k] ?? '';
+  }
+  return out;
+}
 
 async function ask(key, q) {
   if (fixed) { const a = fixed[key]; ledger.calls.push({ key, fixed: true, answer: a }); return a; }
+  if (RANDOM) { const a = randomAnswer(key, q.schema); ledger.calls.push({ key, random: true, answer: a }); console.log(`  ${key} → ${JSON.stringify(a).slice(0, 140)} (random)`); return a; }
   const t = Date.now();
   const r = await fetch(`${OLLAMA}/api/chat`, { method: 'POST', body: JSON.stringify({ model: MODEL, stream: false, format: q.schema, think: false, keep_alive: '10m',
     messages: [{ role: 'system', content: P.SYSTEM }, { role: 'user', content: q.user }], options: { temperature: 0, num_predict: 400, num_ctx: 4096 } }) });
@@ -163,7 +181,7 @@ ledger.render = rr.text.slice(0, 3000);
 await s.close();
 
 ledger.result = { applied: !ap.isError, stagedClean: staged.every((x) => x.ok && !x.errors.length), modelSeconds: Math.round(modelMs / 1000), minutes: +((Date.now() - t0) / 60000).toFixed(1),
-  modelCalls: ledger.calls.filter((c) => !c.fixed).length, unparsed: ledger.calls.filter((c) => !c.fixed && !c.answer).length,
+  modelCalls: ledger.calls.filter((c) => !c.fixed && !c.random).length, unparsed: ledger.calls.filter((c) => !c.fixed && !c.random && !c.answer).length,
   tokensIn: ledger.calls.reduce((a, c) => a + (c.tokensIn || 0), 0), tokensOut: ledger.calls.reduce((a, c) => a + (c.tokensOut || 0), 0), preset, notBuilt: ledger.notBuilt };
 writeLedger();
 console.log(JSON.stringify({ staged, result: ledger.result }, null, 1));

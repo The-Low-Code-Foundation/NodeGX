@@ -1,0 +1,96 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "63c4bdbb-1fb3-5c75-847d-8a0220ba8eec",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "in",
+      "type": "Component Inputs",
+      "label": "One item",
+      "ports": [
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "ticks",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "row",
+      "type": "Group",
+      "label": "One item",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "cssClassName": "item-row"
+      },
+      "children": [
+        "top"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "top",
+      "type": "Group",
+      "label": "Name and delete",
+      "parent": "row",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)"
+      },
+      "children": [
+        "name"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "name",
+      "type": "Text",
+      "label": "The item's name",
+      "parent": "top",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "cssClassName": "item-name"
+      },
+      "x": 160,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "row"
+  ]
+}

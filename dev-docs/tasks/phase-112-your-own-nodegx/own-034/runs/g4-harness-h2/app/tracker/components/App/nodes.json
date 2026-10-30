@@ -1,0 +1,24 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e686afa3-a1dc-58f2-8daa-9d16e7fac4ab",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "f3c35e37-d496-4052-9a85-dbf47ad14d69",
+      "type": "Router",
+      "label": "Main Router",
+      "parameters": {
+        "name": "Main",
+        "pages": {
+          "startPage": "/Pages/Home",
+          "routes": [
+            "/Pages/Home"
+          ]
+        }
+      }
+    }
+  ],
+  "visualRoots": [
+    "f3c35e37-d496-4052-9a85-dbf47ad14d69"
+  ]
+}

@@ -1,0 +1,446 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "ec69fee1-9fe2-53f0-81c5-35aa96282ffc",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "57fa0167-3f4b-42f6-82b5-8ef125b10a1d",
+      "type": "Page",
+      "label": "Home",
+      "parameters": {
+        "title": "Kids Chore Tracker",
+        "urlPath": "home"
+      },
+      "children": [
+        "canvas"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "canvas",
+      "type": "Group",
+      "label": "Page canvas",
+      "parent": "57fa0167-3f4b-42f6-82b5-8ef125b10a1d",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--background)",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "paddingTop": "var(--space-10)",
+        "paddingBottom": "var(--space-16)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "children": [
+        "shell"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "shell",
+      "type": "Group",
+      "label": "One column",
+      "parent": "canvas",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 560,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-5)"
+      },
+      "children": [
+        "head",
+        "summary",
+        "add-row",
+        "list-box",
+        "empty"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "head",
+      "type": "Group",
+      "label": "Heading",
+      "parent": "shell",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "title",
+        "subtitle"
+      ],
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "title",
+      "type": "Text",
+      "label": "Title",
+      "parent": "head",
+      "parameters": {
+        "text": "Kids Chore Tracker",
+        "as": "h1",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": "var(--font-bold)",
+        "lineHeight": "var(--leading-tight)",
+        "color": "var(--foreground)"
+      },
+      "x": 280,
+      "y": 520
+    },
+    {
+      "id": "subtitle",
+      "type": "Text",
+      "label": "One line under the title",
+      "parent": "head",
+      "parameters": {
+        "text": "Daily tasks and weekly star rewards for your children",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 280,
+      "y": 640
+    },
+    {
+      "id": "summary",
+      "type": "/Components/Summary",
+      "label": "Done today out of all",
+      "parent": "shell",
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "store-2",
+      "type": "net.noodl.GlobalStore",
+      "label": "Everything kept on this device",
+      "parameters": {
+        "storeName": "tracker",
+        "persist": true,
+        "storageKey": "nodegx.tracker",
+        "initialState": {
+          "items": [],
+          "ticks": {}
+        }
+      },
+      "x": 530,
+      "y": 1600
+    },
+    {
+      "id": "items-2",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "label": "Watch the items",
+      "parameters": {
+        "storeName": "tracker",
+        "keys": "items"
+      },
+      "x": 530,
+      "y": 1720
+    },
+    {
+      "id": "ticks-2",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "label": "Watch the ticks",
+      "parameters": {
+        "storeName": "tracker",
+        "keys": "ticks"
+      },
+      "x": 530,
+      "y": 1840
+    },
+    {
+      "id": "add-row",
+      "type": "Group",
+      "label": "Add one",
+      "parent": "shell",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)"
+      },
+      "children": [
+        "add-input",
+        "add-button"
+      ],
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "add-input",
+      "type": "net.noodl.controls.textinput",
+      "label": "Its name",
+      "parent": "add-row",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "Enter chore name",
+        "enterKeyHint": "done",
+        "cssClassName": "add-input"
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "add-button",
+      "type": "net.noodl.controls.button",
+      "label": "Add it",
+      "parent": "add-row",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "useLabel": true,
+        "label": "Add",
+        "cssClassName": "add-button"
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "add-fn",
+      "type": "JavaScriptFunction",
+      "label": "Add an item",
+      "parameters": {
+        "functionScript": "// B-add: an empty name adds nothing.\nconst name = String(Inputs.name || '').trim();\nif (!name) { Outputs.refused(); return; }\nconst items = ((Array.isArray(Inputs.items) ? Inputs.items : [])).slice();\nitems.push({ id: 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: name });\nOutputs.items = items;\nOutputs.added();\n",
+        "runOnChange-in-name": false,
+        "runOnChange-in-items": false
+      },
+      "x": 530,
+      "y": 1000,
+      "ports": [
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-items",
+          "displayName": "items",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-added",
+          "displayName": "added",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-items",
+          "displayName": "items",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "set-items-add",
+      "type": "net.noodl.GlobalStore.Set",
+      "label": "Write the items",
+      "parameters": {
+        "storeName": "tracker",
+        "key": "items"
+      },
+      "x": 530,
+      "y": 1960
+    },
+    {
+      "id": "list-box",
+      "type": "Group",
+      "label": "The list",
+      "parent": "shell",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "list"
+      ],
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "list",
+      "type": "For Each",
+      "label": "One row per item",
+      "parent": "list-box",
+      "parameters": {
+        "template": "/Components/Item Row"
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "rows-fn",
+      "type": "JavaScriptFunction",
+      "label": "The rows",
+      "parameters": {
+        "functionScript": "// B-list: one row per item, with its own ticks; ids stay stable so rows keep their place.\nconst items = (Array.isArray(Inputs.items) ? Inputs.items : []);\nconst ticks = (Inputs.ticks && typeof Inputs.ticks === \"object\" && !Array.isArray(Inputs.ticks) ? Inputs.ticks : {});\nOutputs.rows = items.map(function (item) { return { id: item.id, name: item.name, ticks: ticks[item.id] || [] }; });\nOutputs.empty = items.length === 0;\n"
+      },
+      "x": 530,
+      "y": 1360,
+      "ports": [
+        {
+          "name": "in-items",
+          "displayName": "items",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-ticks",
+          "displayName": "ticks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "empty",
+      "type": "Text",
+      "label": "Nothing here yet",
+      "parent": "shell",
+      "parameters": {
+        "mounted": false,
+        "text": "No chores added yet. Start ticking them off!",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "cssClassName": "empty-line"
+      },
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "tick-fn",
+      "type": "JavaScriptFunction",
+      "label": "Tick or untick for today",
+      "parameters": {
+        "functionScript": "// B-tick: from the one date file; a second press unticks.\nif (!Inputs.id) return;\nOutputs.ticks = Scripts.days.toggle((Inputs.ticks && typeof Inputs.ticks === \"object\" && !Array.isArray(Inputs.ticks) ? Inputs.ticks : {}), Inputs.id, Scripts.days.today(), true);\nOutputs.changed();\n",
+        "uses": "days.js",
+        "runOnChange-in-id": false,
+        "runOnChange-in-ticks": false
+      },
+      "x": 530,
+      "y": 1480,
+      "ports": [
+        {
+          "name": "in-id",
+          "displayName": "id",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-ticks",
+          "displayName": "ticks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-changed",
+          "displayName": "changed",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ticks",
+          "displayName": "ticks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "set-ticks",
+      "type": "net.noodl.GlobalStore.Set",
+      "label": "Write the ticks",
+      "parameters": {
+        "storeName": "tracker",
+        "key": "ticks"
+      },
+      "x": 530,
+      "y": 2080
+    }
+  ],
+  "visualRoots": [
+    "57fa0167-3f4b-42f6-82b5-8ef125b10a1d"
+  ]
+}

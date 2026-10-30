@@ -1,0 +1,21 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/project-v2.json",
+  "name": "Habits",
+  "id": "a992c04f-7539-4287-9725-763387117504",
+  "version": "5",
+  "nodegxVersion": "0.2.8",
+  "runtimeVersion": "react19",
+  "created": "2026-10-30T15:33:36.770Z",
+  "modified": "2026-10-30T15:33:36.770Z",
+  "settings": {
+    "htmlTitle": "Habits",
+    "navigationPathType": "path",
+    "bodyScroll": true
+  },
+  "structure": {
+    "componentsDir": "components",
+    "assetsDir": "assets"
+  },
+  "rootNodeId": "ee1d0476-8517-4346-b48d-3e331f62cebd",
+  "metadata": {}
+}

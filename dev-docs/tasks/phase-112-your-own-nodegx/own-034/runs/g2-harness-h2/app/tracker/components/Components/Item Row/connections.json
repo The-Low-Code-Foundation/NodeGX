@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "741585fb-385d-561c-8883-839b885ebbb6",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "in-2",
+      "fromProperty": "name",
+      "toId": "name",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "in-2",
+      "fromProperty": "ticks",
+      "toId": "days-fn",
+      "toProperty": "in-ticks"
+    },
+    {
+      "fromId": "days-fn",
+      "fromProperty": "out-cells",
+      "toId": "days",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "in-2",
+      "fromProperty": "ticks",
+      "toId": "today-fn",
+      "toProperty": "in-ticks"
+    },
+    {
+      "fromId": "today-fn",
+      "fromProperty": "out-doneToday",
+      "toId": "tick-label",
+      "toProperty": "doneToday"
+    },
+    {
+      "fromId": "today-fn",
+      "fromProperty": "out-doneToday",
+      "toId": "tick-fill",
+      "toProperty": "doneToday"
+    },
+    {
+      "fromId": "today-fn",
+      "fromProperty": "out-doneToday",
+      "toId": "tick-ink",
+      "toProperty": "doneToday"
+    },
+    {
+      "fromId": "tick-label",
+      "fromProperty": "result",
+      "toId": "tick",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tick-fill",
+      "fromProperty": "result",
+      "toId": "tick",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "tick-ink",
+      "fromProperty": "result",
+      "toId": "tick",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "tick",
+      "fromProperty": "onClick",
+      "toId": "out",
+      "toProperty": "Tick"
+    }
+  ]
+}

@@ -1,0 +1,257 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "741585fb-385d-561c-8883-839b885ebbb6",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "in-2",
+      "type": "Component Inputs",
+      "label": "One item",
+      "ports": [
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "ticks",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "out",
+      "type": "Component Outputs",
+      "label": "What the row reports upward",
+      "ports": [
+        {
+          "name": "Tick",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "row",
+      "type": "Group",
+      "label": "One item",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "cssClassName": "item-row"
+      },
+      "children": [
+        "top",
+        "days-row",
+        "tick"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "top",
+      "type": "Group",
+      "label": "Name and delete",
+      "parent": "row",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)"
+      },
+      "children": [
+        "name"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "name",
+      "type": "Text",
+      "label": "The item's name",
+      "parent": "top",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "cssClassName": "item-name"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "days-row",
+      "type": "Group",
+      "label": "The last 7 days",
+      "parent": "row",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "days"
+      ],
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "days",
+      "type": "For Each",
+      "label": "One cell per day, oldest first",
+      "parent": "days-row",
+      "parameters": {
+        "template": "/Components/Day Cell"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "days-fn",
+      "type": "JavaScriptFunction",
+      "label": "The last 7 days",
+      "parameters": {
+        "functionScript": "// B-days: the last 7 days, oldest first, each with a stable id.\nOutputs.cells = Scripts.days.lastDays(Inputs.ticks || [], Scripts.days.today(), 7);\n",
+        "uses": "days.js"
+      },
+      "x": 410,
+      "y": 520,
+      "ports": [
+        {
+          "name": "in-ticks",
+          "displayName": "ticks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-cells",
+          "displayName": "cells",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "tick",
+      "type": "net.noodl.controls.button",
+      "label": "Tick it off for today",
+      "parent": "row",
+      "parameters": {
+        "useLabel": true,
+        "label": "mark as watered",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--primary)",
+        "borderRadius": "var(--radius-md)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "cssClassName": "item-tick"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "today-fn",
+      "type": "JavaScriptFunction",
+      "label": "Is it done today",
+      "parameters": {
+        "functionScript": "// B-tick: done today or not, from the one date file.\nOutputs.doneToday = (Inputs.ticks || []).indexOf(Scripts.days.today()) !== -1;\n",
+        "uses": "days.js"
+      },
+      "x": 410,
+      "y": 1120,
+      "ports": [
+        {
+          "name": "in-ticks",
+          "displayName": "ticks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-doneToday",
+          "displayName": "doneToday",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "tick-label",
+      "type": "Expression",
+      "label": "The tick's words",
+      "parameters": {
+        "expression": "doneToday ? \"watered today\" : \"mark as watered\""
+      },
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "tick-fill",
+      "type": "Expression",
+      "label": "Done is filled",
+      "parameters": {
+        "expression": "doneToday ? 'var(--primary)' : 'var(--surface)'"
+      },
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "tick-ink",
+      "type": "Expression",
+      "label": "Done reads on the fill",
+      "parameters": {
+        "expression": "doneToday ? 'var(--primary-foreground)' : 'var(--primary)'"
+      },
+      "x": 410,
+      "y": 1000
+    }
+  ],
+  "visualRoots": [
+    "row"
+  ]
+}

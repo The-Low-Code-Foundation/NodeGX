@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7394b035-1857-5358-8d81-e0d0cc035df1",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "in-2",
+      "fromProperty": "name",
+      "toId": "name",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "delete",
+      "fromProperty": "onClick",
+      "toId": "out",
+      "toProperty": "Delete"
+    },
+    {
+      "fromId": "in-2",
+      "fromProperty": "ticks",
+      "toId": "best-fn",
+      "toProperty": "in-ticks"
+    },
+    {
+      "fromId": "best-fn",
+      "fromProperty": "out-value",
+      "toId": "best-format",
+      "toProperty": "n"
+    },
+    {
+      "fromId": "best-format",
+      "fromProperty": "formatted",
+      "toId": "best-text",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "in-2",
+      "fromProperty": "ticks",
+      "toId": "days-fn",
+      "toProperty": "in-ticks"
+    },
+    {
+      "fromId": "days-fn",
+      "fromProperty": "out-cells",
+      "toId": "days",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "in-2",
+      "fromProperty": "ticks",
+      "toId": "today-fn",
+      "toProperty": "in-ticks"
+    },
+    {
+      "fromId": "today-fn",
+      "fromProperty": "out-doneToday",
+      "toId": "tick-label",
+      "toProperty": "doneToday"
+    },
+    {
+      "fromId": "today-fn",
+      "fromProperty": "out-doneToday",
+      "toId": "tick-fill",
+      "toProperty": "doneToday"
+    },
+    {
+      "fromId": "today-fn",
+      "fromProperty": "out-doneToday",
+      "toId": "tick-ink",
+      "toProperty": "doneToday"
+    },
+    {
+      "fromId": "tick-label",
+      "fromProperty": "result",
+      "toId": "tick",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tick-fill",
+      "fromProperty": "result",
+      "toId": "tick",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "tick-ink",
+      "fromProperty": "result",
+      "toId": "tick",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "tick",
+      "fromProperty": "onClick",
+      "toId": "out",
+      "toProperty": "Tick"
+    }
+  ]
+}

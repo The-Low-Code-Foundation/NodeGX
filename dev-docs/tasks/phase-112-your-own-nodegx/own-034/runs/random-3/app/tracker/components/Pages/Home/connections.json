@@ -1,0 +1,121 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0a26ba70-6d0d-53f9-8db6-3b1378e7ea40",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "add-input",
+      "fromProperty": "onTextChanged",
+      "toId": "add-fn",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "items-2",
+      "fromProperty": "value",
+      "toId": "add-fn",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "add-button",
+      "fromProperty": "onClick",
+      "toId": "add-fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "add-input",
+      "fromProperty": "onEnter",
+      "toId": "add-fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "add-fn",
+      "fromProperty": "out-items",
+      "toId": "set-items-add",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "add-fn",
+      "fromProperty": "out-added",
+      "toId": "set-items-add",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "add-fn",
+      "fromProperty": "out-added",
+      "toId": "add-input",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "items-2",
+      "fromProperty": "value",
+      "toId": "rows-fn",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "ticks-2",
+      "fromProperty": "value",
+      "toId": "rows-fn",
+      "toProperty": "in-ticks"
+    },
+    {
+      "fromId": "rows-fn",
+      "fromProperty": "out-rows",
+      "toId": "list",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "rows-fn",
+      "fromProperty": "out-empty",
+      "toId": "empty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "list",
+      "fromProperty": "itemOutputSignal-Delete",
+      "toId": "delete-fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "list",
+      "fromProperty": "itemActionItemId",
+      "toId": "delete-fn",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "items-2",
+      "fromProperty": "value",
+      "toId": "delete-fn",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "ticks-2",
+      "fromProperty": "value",
+      "toId": "delete-fn",
+      "toProperty": "in-ticks"
+    },
+    {
+      "fromId": "delete-fn",
+      "fromProperty": "out-items",
+      "toId": "set-items-del",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "delete-fn",
+      "fromProperty": "out-ticks",
+      "toId": "set-ticks-del",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "delete-fn",
+      "fromProperty": "out-removed",
+      "toId": "set-items-del",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "delete-fn",
+      "fromProperty": "out-removed",
+      "toId": "set-ticks-del",
+      "toProperty": "set"
+    }
+  ]
+}

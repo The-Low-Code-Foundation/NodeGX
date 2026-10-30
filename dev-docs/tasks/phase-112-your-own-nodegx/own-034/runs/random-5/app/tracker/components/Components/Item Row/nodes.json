@@ -1,0 +1,307 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "63c43e39-bd72-54ab-841e-931137096a58",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "in",
+      "type": "Component Inputs",
+      "label": "One item",
+      "ports": [
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "ticks",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "out",
+      "type": "Component Outputs",
+      "label": "What the row reports upward",
+      "ports": [
+        {
+          "name": "Delete",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 400
+    },
+    {
+      "id": "row",
+      "type": "Group",
+      "label": "One item",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "cssClassName": "item-row"
+      },
+      "children": [
+        "top",
+        "stats"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "top",
+      "type": "Group",
+      "label": "Name and delete",
+      "parent": "row",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)"
+      },
+      "children": [
+        "name",
+        "delete"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "name",
+      "type": "Text",
+      "label": "The item's name",
+      "parent": "top",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "cssClassName": "item-name"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "delete",
+      "type": "net.noodl.controls.button",
+      "label": "Delete this item",
+      "parent": "top",
+      "parameters": {
+        "useLabel": true,
+        "label": "Delete",
+        "sizeMode": "contentSize",
+        "color": "var(--muted-foreground)",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "cssClassName": "item-delete"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "stats",
+      "type": "Group",
+      "label": "The numbers",
+      "parent": "row",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "streak-pill",
+        "week-pill"
+      ],
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "streak-pill",
+      "type": "Group",
+      "label": "streak",
+      "parent": "stats",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-full)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)"
+      },
+      "children": [
+        "streak-text"
+      ],
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "streak-text",
+      "type": "Text",
+      "label": "streak, in words",
+      "parent": "streak-pill",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-medium)",
+        "color": "var(--foreground)",
+        "cssClassName": "item-streak"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "streak-fn",
+      "type": "JavaScriptFunction",
+      "label": "streak",
+      "parameters": {
+        "functionScript": "// B-number: streak, from the one date file.\nconst ticks = Inputs.ticks || [];\nOutputs.value = Scripts.days.streak(ticks, Scripts.days.today());\n",
+        "uses": "days.js"
+      },
+      "x": 470,
+      "y": 1120,
+      "ports": [
+        {
+          "name": "in-ticks",
+          "displayName": "ticks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-value",
+          "displayName": "value",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "streak-format",
+      "type": "String Format",
+      "label": "How streak reads",
+      "parameters": {
+        "format": "{n} day streak"
+      },
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "week-pill",
+      "type": "Group",
+      "label": "done this week",
+      "parent": "stats",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-full)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)"
+      },
+      "children": [
+        "week-text"
+      ],
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "week-text",
+      "type": "Text",
+      "label": "done this week, in words",
+      "parent": "week-pill",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-medium)",
+        "color": "var(--foreground)",
+        "cssClassName": "item-week"
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "week-fn",
+      "type": "JavaScriptFunction",
+      "label": "done this week",
+      "parameters": {
+        "functionScript": "// B-number: done this week, from the one date file.\nconst ticks = Inputs.ticks || [];\nOutputs.value = Scripts.days.doneThisWeek(ticks, Scripts.days.today());\n",
+        "uses": "days.js"
+      },
+      "x": 470,
+      "y": 1240,
+      "ports": [
+        {
+          "name": "in-ticks",
+          "displayName": "ticks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-value",
+          "displayName": "value",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "week-format",
+      "type": "String Format",
+      "label": "How done this week reads",
+      "parameters": {
+        "format": "{n} this week"
+      },
+      "x": 470,
+      "y": 1000
+    }
+  ],
+  "visualRoots": [
+    "row"
+  ]
+}

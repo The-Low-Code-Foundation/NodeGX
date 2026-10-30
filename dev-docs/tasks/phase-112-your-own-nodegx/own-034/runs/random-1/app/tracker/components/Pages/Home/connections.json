@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "eec90776-63d2-5216-861a-b9debadbf6c6",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "add-input",
+      "fromProperty": "onTextChanged",
+      "toId": "add-fn",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "items",
+      "fromProperty": "value",
+      "toId": "add-fn",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "add-button",
+      "fromProperty": "onClick",
+      "toId": "add-fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "add-input",
+      "fromProperty": "onEnter",
+      "toId": "add-fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "add-fn",
+      "fromProperty": "out-items",
+      "toId": "set-items-add",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "add-fn",
+      "fromProperty": "out-added",
+      "toId": "set-items-add",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "add-fn",
+      "fromProperty": "out-added",
+      "toId": "add-input",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "items",
+      "fromProperty": "value",
+      "toId": "rows-fn",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "ticks",
+      "fromProperty": "value",
+      "toId": "rows-fn",
+      "toProperty": "in-ticks"
+    },
+    {
+      "fromId": "rows-fn",
+      "fromProperty": "out-rows",
+      "toId": "list",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "rows-fn",
+      "fromProperty": "out-empty",
+      "toId": "empty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "list",
+      "fromProperty": "itemOutputSignal-Tick",
+      "toId": "tick-fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "list",
+      "fromProperty": "itemActionItemId",
+      "toId": "tick-fn",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "ticks",
+      "fromProperty": "value",
+      "toId": "tick-fn",
+      "toProperty": "in-ticks"
+    },
+    {
+      "fromId": "tick-fn",
+      "fromProperty": "out-ticks",
+      "toId": "set-ticks",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tick-fn",
+      "fromProperty": "out-changed",
+      "toId": "set-ticks",
+      "toProperty": "set"
+    }
+  ]
+}
