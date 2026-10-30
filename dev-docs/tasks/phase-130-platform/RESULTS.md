@@ -66,4 +66,36 @@ Not changed: the harness stays as it is for the rounds (changing A's note mid-te
 incomparable); his list for A carries the zoom, and whether A then reads the note's line as forbidding it is a
 measure. The note's fix (rule 6 says *by itself* only) goes into P129 CANON draft 3 with the verdict.
 
-Waits on Richard: A's three questions; a list per game (his remarks above, split per arm, to be confirmed by him).
+## s3, sitting 2 (2026-10-30, both resumed in their own session, side by side)
+
+Richard confirmed A's list (*"Confirm for A but I don't care that much about sending several poeple, I'd rather focus on
+the building detail AND btw B had way better background to the building, seeing the water and other buildings looked
+better, so A should improve this too."*) and answered A's questions (*"I'm playing on my Macbook right now. Waterline is
+fine. I think keep expeditions single person for the moment for testing, then multi people in the future and you decide
+who you're going to control in advance"*).
+
+**Sent to A** (the only edit: the background point is reworded without naming B, because A does not know B exists):
+the three answers verbatim; *"the game mechanics are good"*; the list (1 zoom in and out freely; 2 more 3D detail in the
+buildings; 3 the expedition building much more realistically destroyed; 4 *"The background to the building could be way
+better: seeing the water and other buildings."*); *"I don't care that much about sending several people, I'd rather focus
+on the building detail"*.
+
+**Sent to B:** *"The monsters are kind of silly, that's maybe the only criticism."* (his words, "B has" taken out).
+
+Each arm got only its own words, plus one line of praise each from his remarks (A: the mechanics; B: the only criticism).
+
+**What came back:**
+
+| | A | B |
+|---|---|---|
+| minutes, dollars | 44 min, $8.78 (session total $17.45) | 11 min, $2.89 (session total $12.80) |
+| asked | 4 points + 3 answers | 1 point |
+| built | free zoom (pinch toward the pointer, two-finger pan; Wide/Near kept as jumps; the expedition zooms too); per-room clutter, beams, ducts, windows over the bay, outside detail and a roof garden; the store wrecked (blown walls, sagging slabs, rebar, rubble), kept off the walking line; a sky, a lit sea, a drowned skyline with a broken bridge and cranes | the monsters remade as jointed animals (a giant woodlouse with a rear-up tell, a barnacled big one, a mangy herring gull that perches, circles and dives); bodies stay; the tower's rats left alone (*"weren't on the list"*) |
+| gates | 19 runs this sitting: red 1 once, then red 1+8, 8 ×3, 9 once, then green; our reader: 0 reaches outside | none |
+| read the note's camera line as forbidding the zoom? | **no**: it built the free zoom, *"it moves only when you move it"* | — |
+
+- **Gate 8 shaped a second decision:** the sea's sparkle and ripple roughness became fixed values because *"the checker
+  can't see a change to either at the scale it judges the sea, so it wouldn't accept them as knobs"*. Two of two
+  sittings: a visual value the owner might tune is taken **out** of the knobs to get past the inert-knob gate. The gate
+  is meant to catch a knob that does nothing; here it removes knobs that do something small.
+- A chose a 13" MacBook Air's window for its drives from *"my Macbook"* and asked which size.
