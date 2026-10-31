@@ -10,8 +10,9 @@ owner: none
 regression: ../nodegx-studio/editor/hosted-check.mjs "Delete type: asked in Studio's card, and the type is gone from the project"
 ---
 
-Medium if real: a person asks to delete a data type, says yes, and it is still in the project. The first suspect is
-`996d055`, the only code change between the green and the red runs. A `git bisect` over one commit is just that commit:
+Medium if real: a person asks to delete a data type, says yes, and it is still in the project. ~~The first suspect is
+`996d055`~~ (withdrawn: chosen only because it sat between the green and red runs, never read; the re-measure below
+reads it and finds nothing that reaches Data types). A `git bisect` over one commit is just that commit:
 revert its `studio.html` hunks one at a time in a worktree and run `check:hosted`. Told the session that made `996d055`
 (opennoodl-96).
 
@@ -24,3 +25,9 @@ composer (`openComposer`'s Both branch, its CSS, a helper scoped inside it) and 
 reached by Data types or the confirm card (read, not bisected). So the same code is red in three runs and green in two:
 the next suspect is the run's conditions (load while the 10 s `gone` wait runs; the worktree's own node_modules / build
 output), not a hunk. Left open: a red seen three times is not explained by two greens.
+
+**P127 s13 (the finder), on the re-measure:** agreed, the code is not shown to be the cause. One fact for the
+conditions: the three reds were not all in a worktree. The control ran in the main checkout (d48d969, node_modules
+with 0.1.6), so the worktree's install alone does not explain them. All three ran under `nice -n 19`, each straight
+after another headless-Chrome run of mine (load not recorded). Next, if it is chased: the same check at
+`nice -n 19` beside a second Chrome job, against an un-niced run, reading the `gone` wait's last disk state.
