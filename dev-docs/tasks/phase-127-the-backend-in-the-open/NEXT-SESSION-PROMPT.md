@@ -389,3 +389,16 @@ runs the backend bundle. None was rebuilt. Ask before rebuilding the Desktop dis
   publish --access public`). Then Studio's pin and `vendor/NODEGX.json` move to 0.1.7 together. His verdict on the
   stranger's screen (BKO-009 AC3); his fourth brief in Desktop (BKO-002 AC2, BKO-004 AC3, BKO-005 AC1, BKO-006).
 - **Next:** after the 0.1.7 publish, the Studio pin. BKO-009 AC4's create-nodegx half rides the next cut.
+
+**s13, later the same morning:** Richard published the map 0.1.7 (equal to source, carries `6de0f7066` + `49a843784` +
+STALEDRAFT); Studio `66a5580` pins it. BKO-009 AC3 ✅ (his verdict, verbatim in BKO-009). New red in Studio's
+`check:hosted`: P127-S13-DELETETYPEKEPT (green at `ef72785`, red since `996d055`; told opennoodl-96). The Desktop
+bundle for Richard's run: `/Users/Shared/nodegx-0.2.9-map017-darwin-arm64.mcpb` (published mcp 0.2.9, sha1 `5549d6f7`;
+Studio `66a5580`; map 0.1.7; kit 0.1.0). The ask he was given is in the next section.
+
+### Richard's Desktop run (BKO-006's second half; BKO-002 AC2, BKO-004 AC3, BKO-005 AC1, BKO-007 in Desktop)
+
+His brief in a new conversation, then in the same conversation: Studio opened; Data → Map → Who can reach what draws;
+Privacy lists each type; Workflow → On the backend opens the function as its graph and the Friday reminder in words;
+a drag on the map and its Undo; the reminder turned off in Studio, then "what changed?" to the agent. His findings
+are the Beta's list: each one a row in `dev-docs/bugs/`.

@@ -4,7 +4,8 @@
 ruled; the kit is its own package, the suite has a read half, the skill is written. Round 1: the stranger's editor
 says PASS from outside (AC1); its report, cost and guesses are below (AC2). s2 (2026-10-31): the kit is on npm
 (`@nodegx/backend-kit` 0.1.0, published by Richard) and the stranger's editor passes on it. **Open:** AC3 (Richard's
-verdict on the screen) and AC4's other half (the skill in the next `create-nodegx` cut).
+verdict on the screen) and AC4's other half (the skill in the next `create-nodegx` cut). **AC3 ✅ 2026-10-31:**
+Richard's verdict is in the log. Left: the skill in the next cut.
 
 ## What
 
@@ -156,3 +157,9 @@ After the fixes: `handed.test.mjs` 9/9, `backend-suite.test.mjs` 15/15, create-n
 - Studio reads touches through the kit now (`ef72785`), the open item from s1.
 - **Still open:** AC3, Richard's verdict on the screen; AC4's create-nodegx half (the skill ships in the next cut; no
   cut is scheduled, and the pin test is red on 0.2.9 for other reasons).
+
+**AC3 ✅ (2026-10-31), Richard, verbatim, on round 1's screen:** *"Very cool, I love the concept. It's an early
+prototype and I imagine more visual language and interactivity could easily come next"*. Read as: the kit is
+enough for a stranger to build an editor in a shape Studio lacks (the phase's point). The next step for that editor
+is more visual language and interactivity, which is the stranger's to build, not the kit's. No row is filed for it.
+
