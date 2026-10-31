@@ -7,7 +7,7 @@ area: "@nodegx/backend-map `public/app.js`: the table panel's draft (`state.edit
 found: P127 BKO-007 AC9, 2026-10-31, the hands driven inside Studio in the conversation (Studio's hosted-check, the todo copy)
 evidence: "MEASURED (hands-ui.test.mjs step 8, training copy, before the fix): Progress open, Anyone at all dragged onto it and made; the backend's find = public, the panel's read choice = authenticated, Make it so enabled, its preview 'After this: reading directly — Anyone signed in'. After the toast's Undo, the mirror: choice = public, Make it so enabled. Studio's picture: dev-docs/tasks/phase-127-the-backend-in-the-open/look/bko-007-hosted-made.png (the header says Open to anyone at all, the choice says Anyone signed in)"
 owner: P127 s13 (2026-10-31)
-commit: (this session's map commit)
+commit: 397e656f2
 regression: dev-docs/tasks/phase-124-the-mystery-of-the-backend/editor/test/hands-ui.test.mjs "its open panel shows the rule as it now is (anyone at all may see), and offers nothing to make" and "and its open panel shows the rule put back, with nothing to make"
 kit: backend-map
 ---
