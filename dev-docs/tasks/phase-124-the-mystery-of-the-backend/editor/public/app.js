@@ -1200,6 +1200,8 @@ function renderPanel() {
   // P127 BKO-004: inside Studio (Data → Map is a frame), a function opens as its graph on Studio's Workflow. Studio
   // checks the message came from its own map frame; a map on its own (no parent) draws no such link
   for (const a of $('panelBody').querySelectorAll('[data-open-steps]')) a.onclick = () => window.parent.postMessage({ nodegx: 'open-function', component: a.dataset.openSteps }, '*');
+  // nodegx-studio STU-093 (Richard's Greenhouse note 4): a trigger's last run opens in Studio, played on the workflow's steps
+  for (const a of $('panelBody').querySelectorAll('[data-open-run]')) a.onclick = () => window.parent.postMessage({ nodegx: 'open-workflow', id: a.dataset.openRun }, '*');
   for (const b of $('panelBody').querySelectorAll('[data-row]')) b.onclick = () => openRecord(n.key, b.dataset.row);
   for (const b of $('panelBody').querySelectorAll('[data-as]')) b.onclick = () => setPerson(b.dataset.as);
   if ($('findReach')) $('findReach').onclick = () => findReach();
@@ -2039,6 +2041,7 @@ function triggerPanel(n) {
     <p style="font-size:12px;color:var(--dim)">${asWhom}</p>
     <h4>Its last run</h4>
     <p>${last ?? (t.notOnBackend ? 'None: it isn’t on the backend.' : 'It hasn’t run yet.')}</p>
+    ${window.parent !== window && last && t.workflow && t.target?.kind === 'workflow' ? `<p><a data-open-run="${esc(t.target.name)}" title="Open the workflow in Studio's Backend tab, its run played step by step">Open that run in Studio ▶</a></p>` : ''}
     ${hands() && !t.notOnBackend ? `<button class="ghost" id="toggleTrigger">${t.enabled ? 'Turn it off' : 'Turn it on'}</button>` : ''}
     ${hands() && t.type !== 'webhook' ? '<button class="ghost" id="removeTrigger">Remove it</button>' : ''}
   `;
