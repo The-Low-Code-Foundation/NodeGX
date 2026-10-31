@@ -1,0 +1,82 @@
+{
+  "written": "2026-10-31",
+  "by": "sample",
+  "note": "These rooms are samples. Once the nightly run is set up, Claude writes them from your todo list and from what you carved into the stone the day before.",
+  "plants": [
+    {
+      "id": "sample-next-step",
+      "kind": "task",
+      "title": "The form you keep walking round",
+      "instructions": "There is a piece of admin you have been circling for weeks. Don't plan all of it. Find the next thing your body has to do: go somewhere, phone someone, print something.",
+      "ask": "Write that one step, the day, the time, and where you will be. Pick a time you would actually keep.",
+      "world": {
+        "name": "The Paperwork Mesa",
+        "theme": "desert",
+        "accent": "#f0a040",
+        "enemies": "robots",
+        "treasure": [
+          { "id": "sample-compass", "name": "Brass compass", "description": "It points at the next small step, never at the whole journey." },
+          { "id": "sample-stamp", "name": "Rubber stamp", "description": "APPROVED, it says. Somebody believed it would be." }
+        ],
+        "notes": [{ "title": "Scratched into the pillar", "text": "People who write down when and where they will do something follow through far more often than people who only mean to. The if-then planning studies find it again and again." }]
+      }
+    },
+    {
+      "id": "sample-cave-questions",
+      "kind": "learn",
+      "title": "Before the real dig goes further",
+      "instructions": "There is a sealed passage under the house. Most caves form where slightly acidic water dissolves limestone along cracks, over tens of thousands of years, and a cellar passage can just as easily be something people dug and filled in. Either way, what matters first is what the house is standing on.",
+      "ask": "Write three questions you would want answered before you dig further, and who could answer each one.",
+      "world": {
+        "name": "Research Station Kappa",
+        "theme": "station",
+        "accent": "#4ad0ff",
+        "enemies": "bugs",
+        "treasure": [
+          { "id": "sample-core", "name": "Rock core sample", "description": "Banded grey and cream. Somebody drilled for it and never came back." },
+          { "id": "sample-lamp", "name": "Carbide lamp", "description": "Cavers used these for a hundred years: water dripped on calcium carbide makes a gas that burns bright." }
+        ],
+        "notes": [{ "title": "Station log, day 3", "text": "Questions before digging under a building: Is the passage under a load-bearing wall? Is the ground clay, chalk, sandstone or fill? Is there water? A structural engineer can usually answer the first two in one visit." }]
+      }
+    },
+    {
+      "id": "sample-walk",
+      "kind": "body",
+      "title": "Fifteen minutes outside",
+      "instructions": "The anxiety will say there isn't time. It says that without evidence. Each walk you write down here is a piece of evidence one way or the other.",
+      "ask": "When today will you walk, and which way will you go? Write the time and the route.",
+      "world": {
+        "name": "The Amber Wood",
+        "theme": "forest",
+        "ground": "#8a9a3a",
+        "accent": "#f0b040",
+        "foliage": "#c8862a",
+        "enemies": "none",
+        "treasure": [
+          { "id": "sample-acorn", "name": "Golden acorn", "description": "Warm in the hand, as if it had been in the sun all day." },
+          { "id": "sample-feather", "name": "Owl feather", "description": "Silent flight: the edge is combed so the air makes no sound." },
+          { "id": "sample-stone", "name": "River stone", "description": "Smooth on one side, still rough on the other. It isn't finished." }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "sample-receipts",
+      "kind": "reflect",
+      "title": "Three receipts",
+      "instructions": "Not what you owe. What went in yesterday: something someone did, something you made, something that was simply good.",
+      "ask": "Three things, one line each.",
+      "world": {
+        "name": "Lantern Tundra",
+        "theme": "tundra",
+        "accent": "#9ad8ff",
+        "enemies": "beasts",
+        "treasure": [
+          { "id": "sample-lantern", "name": "Ice lantern", "description": "A candle inside a shell of ice. It lasts longer than you would think." },
+          { "id": "sample-tooth", "name": "Old tooth", "description": "From something big. It lost it a long time ago and was fine." }
+        ],
+        "notes": [{ "title": "On a frozen signpost", "text": "Writing down three good things each evening was one of the exercises in Seligman's 2005 study. Its effect showed up over weeks, not in a day." }]
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "the-dig",
+  "version": "0.0.1",
+  "private": true,
+  "description": "The Dig: a voxel first-person dig into an infinite deep, with rooms Claude plants each night that open portals to a secret world once Richard answers them. three.js, no bundler.",
+  "type": "module",
+  "license": "GPL-3.0",
+  "scripts": {
+    "prestart": "node tools/ensure-installed.mjs",
+    "start": "node server.mjs --open",
+    "serve": "node server.mjs",
+    "lan": "node server.mjs --lan"
+  },
+  "dependencies": {
+    "three": "0.186.1"
+  }
+}
