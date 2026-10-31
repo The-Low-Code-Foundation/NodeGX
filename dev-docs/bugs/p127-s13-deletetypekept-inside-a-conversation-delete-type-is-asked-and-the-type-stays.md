@@ -14,3 +14,13 @@ Medium if real: a person asks to delete a data type, says yes, and it is still i
 `996d055`, the only code change between the green and the red runs. A `git bisect` over one commit is just that commit:
 revert its `studio.html` hunks one at a time in a worktree and run `check:hosted`. Told the session that made `996d055`
 (opennoodl-96).
+
+**Re-measured (opennoodl-96, the session that made 996d055), 2026-10-31 09:30–09:45:** NOT reproduced. `check:hosted`
+**45/45 twice** in the main checkout at Studio `66a5580`, whose code is byte-identical to `d48d969` (`git diff
+d48d969 66a5580` touches only package.json, package-lock.json, vendor/NODEGX.json: the map pin), the line reading
+`{"asked":true,"gone":true}` both times; load ~2.4, nothing else running. Earlier, `check:hosted` 39/39 (before
+ef72785's six rows) ran green with 996d055's studio.html already in the working tree. 996d055 changes only the
+composer (`openComposer`'s Both branch, its CSS, a helper scoped inside it) and `sentence.mjs`; nothing it changes is
+reached by Data types or the confirm card (read, not bisected). So the same code is red in three runs and green in two:
+the next suspect is the run's conditions (load while the 10 s `gone` wait runs; the worktree's own node_modules / build
+output), not a hunk. Left open: a red seen three times is not explained by two greens.
