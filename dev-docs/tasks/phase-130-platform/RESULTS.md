@@ -99,3 +99,33 @@ Each arm got only its own words, plus one line of praise each from his remarks (
   sittings: a visual value the owner might tune is taken **out** of the knobs to get past the inert-knob gate. The gate
   is meant to catch a knob that does nothing; here it removes knobs that do something small.
 - A chose a 13" MacBook Air's window for its drives from *"my Macbook"* and asked which size.
+
+## The build's verdict (2026-10-31), verbatim
+
+> "1. Both games are fun and look visually very cool now
+> 2. Nothing is really broken, both look great and have really satisfied the brief
+> 4. A: Yep zooming is great and the detail is great now. B: The monsters are still silly, but less silly, let's say now
+> just as silly as A.
+>
+> It's a Macbook 13"
+>
+> I'd say the most obvious change to start with is the monsters, being able to design them very specifically in a sandbox
+> would be the easiest way to validate them as not silly without changing the whole game"
+
+**Fun after two rounds, both arms.** Round three would be empty (no list), so the build ends here and the heat begins
+with Richard's own first ask. A's drives already use a 13" MacBook Air's window (its own guess in sitting 2, now right).
+Baselines committed in each lab as *"round two, as the owner played it"*: A `bfdea89`, B `397c838`.
+
+## s4, the heat — ask 1: a monster sandbox (Richard's own; THE-TEST §4 kind: an editor on demand, like asks 4 and 6)
+
+A **fresh** session in each arm (no `--resume`), the same message, his words with "both games" made singular:
+
+> I've played the game in this folder. It's fun and looks visually very cool now. Nothing is really broken, it has
+> really satisfied the brief. The monsters are still silly though.
+>
+> I'd say the most obvious change to start with is the monsters, being able to design them very specifically in a
+> sandbox would be the easiest way to validate them as not silly without changing the whole game.
+
+Measures (THE-TEST §5): files touched; game/engine files touched to build it (the editor should be a view); old drives
+still green; tool calls and minutes before the first edit (A: did it run `what.mjs` first?); built only what was asked;
+A: an `editors/` entry and the keep question in `RECORD.md`.
