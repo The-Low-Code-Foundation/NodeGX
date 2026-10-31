@@ -2,8 +2,9 @@
 
 **Phase:** [127](README.md). **Depends on:** BKO-008 (the kit and the suite). **State:** s1 (2026-10-30): R2 and R3
 ruled; the kit is its own package, the suite has a read half, the skill is written. Round 1: the stranger's editor
-says PASS from outside (AC1); its report, cost and guesses are below (AC2). AC3 (Richard's verdict) and AC4 (the cut
-and the publish) are open.
+says PASS from outside (AC1); its report, cost and guesses are below (AC2). s2 (2026-10-31): the kit is on npm
+(`@nodegx/backend-kit` 0.1.0, published by Richard) and the stranger's editor passes on it. **Open:** AC3 (Richard's
+verdict on the screen) and AC4's other half (the skill in the next `create-nodegx` cut).
 
 ## What
 
@@ -142,3 +143,16 @@ them. Its report is `round-1/REPORT.md`.
 After the fixes: `handed.test.mjs` 9/9, `backend-suite.test.mjs` 15/15, create-nodegx 33/35 (the same two red).
 
 **AC3 waits on Richard's verdict on the screen. AC4 waits on the next create-nodegx cut and the kit's publish.**
+
+### s2 (2026-10-31): the kit on npm, and the stranger's editor on it
+
+- `@nodegx/backend-kit` 0.1.0 and `@nodegx/backend-map` 0.1.6 published by Richard; the registry's files equal HEAD's
+  source (kit `lib/` + `bin/`; map `server.mjs`, `public/`, `bin/`). **AC4's kit half ✅.**
+- **The stranger's editor on the published kit:** a copy of its `day-in-the-life` with its dependency moved from the
+  lab's tarball to `@nodegx/backend-kit@0.1.0` (the lock resolves it from registry.npmjs.org), graded by the
+  *published* kit's `runSuite` on a fresh club (`lab.mjs`): `PASS — A day in the life on Members' Area, 0 edits; 40
+  steps shown to 3 people; both places put back`. Its own broken adapter, the control: `FAIL … Dev, step 7
+  (Announcement): the editor shows 2 rows of Announcement the backend didn't hand them`.
+- Studio reads touches through the kit now (`ef72785`), the open item from s1.
+- **Still open:** AC3, Richard's verdict on the screen; AC4's create-nodegx half (the skill ships in the next cut; no
+  cut is scheduled, and the pin test is red on 0.2.9 for other reasons).

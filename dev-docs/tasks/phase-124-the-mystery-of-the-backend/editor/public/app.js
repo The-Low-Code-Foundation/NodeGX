@@ -1140,6 +1140,14 @@ function renderLensNote() {
 
 // ───────────────────────────── the side panel ─────────────────────────────
 
+/** A table's rule editor starts from the rule as it now is. Seeded again after a gesture or an undo changes it, or the
+    open panel offers to put the old rule back (P127-BKO007-STALEDRAFT). */
+function freshEdit(key) {
+  const d = directRead(key);
+  state.edit = { table: key, read: d.read, change: W.changeRule(d.rule.permissions), creatorOwns: d.rule.creatorOwns };
+}
+const freshEditOfOpenTable = () => state.byId[state.selected]?.kind === 'table' && freshEdit(state.byId[state.selected].key);
+
 function select(id) {
   const before = state.selected;
   state.selected = id;
@@ -1156,8 +1164,7 @@ function select(id) {
   }
   const n = state.byId[id];
   if (n?.kind === 'table') {
-    const d = directRead(n.key);
-    state.edit = { table: n.key, read: d.read, change: W.changeRule(d.rule.permissions), creatorOwns: d.rule.creatorOwns };
+    freshEdit(n.key);
     if (state.record && state.record.table !== n.key) state.record = null;
     if (!state.rows[n.key] && !n.table.notOnBackend) loadRows(n.key);
   }
@@ -2122,6 +2129,7 @@ async function afterGesture(r, flashId) {
   closeHand();
   await load(true);
   if (flashId) state.flashes[flashId] = { at: performance.now(), ok: true };
+  freshEditOfOpenTable();
   if (state.selected && state.byId[state.selected]) renderPanel();
   toast(r.words, r.enforced === false ? 'bad' : 'good', r.undo);
   if (state.lens === 'person' && state.reach && !state.reach.loading) setPerson(state.reach.id);
@@ -2320,6 +2328,7 @@ async function undo(id) {
   try {
     const r = await api('api/hand/undo', { id });
     await load(true);
+    freshEditOfOpenTable();
     if (state.selected && state.byId[state.selected]) renderPanel();
     toast(r.words, 'good');
     if (state.lens === 'person' && state.reach && !state.reach.loading) setPerson(state.reach.id);

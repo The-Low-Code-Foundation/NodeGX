@@ -373,3 +373,19 @@ runs the backend bundle. None was rebuilt. Ask before rebuilding the Desktop dis
 - **Next:** AC4 (the skill ships in the next create-nodegx cut; its pin test is red on 0.2.9 for other reasons).
   Open: a step shape for a filtered list; a kit export that plays a page as a person (the stranger wrote its own
   engine); Studio's `functionTouches` must import the kit when its pin moves past 0.1.4.
+
+## s13 (2026-10-31): the map and the kit on npm; Studio on them; BKO-007 done
+
+- Richard published `@nodegx/backend-map` 0.1.6 and `@nodegx/backend-kit` 0.1.0 (each file equal to the source).
+  Studio is on them (`ef72785`): `functionTouches` reads through the kit (0.1.6 ships no `lib/`), `vendor/` beside the
+  pins.
+- **BKO-007 AC9 ✅ inside the conversation** (Studio's `check:hosted`): a drag on the map in the src-less frame makes
+  the rule on the backend and in the file together; Undo puts both back. **BKO-007 is done.** The drive's picture
+  showed **P127-BKO007-STALEDRAFT** (an open table's panel offered to put the old rule back after a drag or an undo),
+  fixed in the map with `hands-ui` step 8. `hands.test.mjs` step 11's ECONNRESET is fixed (step 10 hashed per file).
+- **BKO-009:** the stranger's editor passes on the published kit (its broken adapter fails, the control).
+- P128-S4-HOSTEDPUSHSTATE is re-opened: its line in `check:hosted` is red at Studio `36251bd` with the old pins too.
+- **For Richard:** publish the map 0.1.7 (`cd dev-docs/tasks/phase-124-the-mystery-of-the-backend/editor && npm
+  publish --access public`). Then Studio's pin and `vendor/NODEGX.json` move to 0.1.7 together. His verdict on the
+  stranger's screen (BKO-009 AC3); his fourth brief in Desktop (BKO-002 AC2, BKO-004 AC3, BKO-005 AC1, BKO-006).
+- **Next:** after the 0.1.7 publish, the Studio pin. BKO-009 AC4's create-nodegx half rides the next cut.

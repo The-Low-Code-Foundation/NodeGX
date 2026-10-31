@@ -1,7 +1,7 @@
 ---
 id: P128-S4-HOSTEDPUSHSTATE
 title: Inside a conversation (Studio's /panel at the host's origin), the app preview's router pushes a URL on Studio's origin into the host's document and throws SecurityError
-status: fixed
+status: open
 commit: nodegx-studio be3a9c5
 regression: ../nodegx-studio/editor/hosted-check.mjs "the app's redirect to Sign in moves the frame there and is logged, with no SecurityError from its history"
 severity: low
@@ -32,3 +32,12 @@ now: frame at `/runtime/sign-in`, the probe's navs `["/panel.html", "/runtime/si
 
 Seen once while driving, not filed: in one direct run of four, Studio's page picker stayed on Todo while the app was on
 Sign in (no toast; the next three runs followed). If it comes back, it is `followApp` missing the router's event.
+
+## 2026-10-31: its regression line is red again at Studio `36251bd` (re-opened, not chased)
+
+P127 BKO-007 AC9 ran `check:hosted` three times: twice in a worktree on backend-map 0.1.6, once as the control in a
+clean worktree at Studio `36251bd` with HEAD's own pins (backend-map 0.1.4). All three: `FAIL the app's redirect to
+Sign in moves the frame there and is logged, with no SecurityError from its history — {"moved":false,"problems":[]}`.
+No SecurityError now, so the push no longer throws; the frame just never reaches `/runtime/sign-in` within the gate's
+20 s. It is not the map pin (the control has the old one). NOT MEASURED: what a person sees, and which Studio commit
+since `be3a9c5` moved it (`git bisect` over the Greenhouse commits is the next step).

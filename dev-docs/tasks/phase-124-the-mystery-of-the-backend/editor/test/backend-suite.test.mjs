@@ -58,7 +58,17 @@ for (const [label, source] of [['members', MEMBERS], ['todo', TODO]]) {
   const run = (adapter) => runSuite({ adapter, project: c.copy, backend: base, token: c.token, edits: script[label] });
   try {
     const folderBefore = hashTree(c.copy);
-    const startRules = await fetch(base + '/admin/permissions', { headers: { Authorization: `Bearer ${c.token}` } }).then((r) => r.json());
+    // the backend's rules, waiting out its admin rate limit. In two whole runs (10-30, 10-31) every key of the end read
+    // was undefined: an answer with no config. A 429 is one such answer (inferred, not caught); the read is now checked
+    // on its own and says its status
+    const readRules = async () => {
+      for (let i = 0; ; i++) {
+        const r = await fetch(base + '/admin/permissions', { headers: { Authorization: `Bearer ${c.token}` } });
+        if (r.status !== 429 || i >= 8) return { status: r.status, ...(await r.json()) };
+        await new Promise((res) => setTimeout(res, (Number(r.headers.get('retry-after')) || 1) * 1000 + 50));
+      }
+    };
+    const startRules = await readRules();
 
     const map = await run(mapAdapter);
     ok(map.pass && map.putBack, `${label}: ${map.line}`, map.differences);
@@ -74,7 +84,8 @@ for (const [label, source] of [['members', MEMBERS], ['todo', TODO]]) {
     const own = await run(ownWay);
     ok(!own.pass && own.differences.length === 1 && /written differently/.test(own.differences[0]), `${label}: the same rules written another way say FAIL, once — ${own.differences[0] ?? own.line}`, own.differences);
 
-    const endRules = await fetch(base + '/admin/permissions', { headers: { Authorization: `Bearer ${c.token}` } }).then((r) => r.json());
+    const endRules = await readRules();
+    ok(startRules.config && endRules.config, `${label}: the backend's rules were read before and after`, { start: startRules.status, end: endRules.status, endError: endRules.error });
     // key by key, sorted: a table put back comes last in the backend's answer
     const sorted = (v) => (Array.isArray(v) ? v.map(sorted) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, sorted(v[k])])) : v);
     const keysOf = (c) => Object.entries(c ?? {}).flatMap(([k, v]) => (v && typeof v === 'object' && !Array.isArray(v) && k !== 'defaults' ? Object.keys(v).map((x) => `${k}.${x}`) : [k]));

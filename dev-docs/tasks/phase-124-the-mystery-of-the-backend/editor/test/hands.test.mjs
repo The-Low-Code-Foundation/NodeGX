@@ -200,7 +200,10 @@ try {
 
   // ── 10. the folder ──
   console.log('\n— 10. the folder —');
-  const diff = Object.keys({ ...copyBefore, ...hashTree(copy) }).filter((k) => copyBefore[k] !== hashTree(copy)[k]);
+  // the folder hashed once: hashed per file it took ~9 s, longer than the map server's keep-alive, and the next fetch
+  // reused the socket the server had closed (ECONNRESET at step 11)
+  const copyNow = hashTree(copy);
+  const diff = Object.keys({ ...copyBefore, ...copyNow }).filter((k) => copyBefore[k] !== copyNow[k]);
   ok(!diff.length, 'every file of the copy is byte for byte what it was before the first gesture', diff);
 
   // ── 11. the control ──

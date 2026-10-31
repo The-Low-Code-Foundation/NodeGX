@@ -1,8 +1,9 @@
 # BKO-007 — The hands: change the backend by dragging on the map
 
 **Phase:** [127](README.md). **Depends on:** BKO-001 (the files are the truth), BKO-003 (any app), BKO-005 (triggers on
-the map). **State:** built 2026-10-30 (s1), AC1–AC8 measured; **AC9 waits on the publish** (Studio pins
-`@nodegx/backend-map` 0.1.4 from npm; 0.1.5 carries this and the light look, unpublished: Richard's OTP). **Lives in:** `@nodegx/backend-map`
+the map). **State:** built 2026-10-30 (s1), AC1–AC8 measured; **AC9 measured 2026-10-31 (s2)**: Studio on the
+published 0.1.6 (`ef72785`), one gesture driven inside the conversation. **Done.** The panel defect AC9 found
+(STALEDRAFT) is fixed in the map's 0.1.7, which waits on Richard's publish. **Lives in:** `@nodegx/backend-map`
 (`dev-docs/tasks/phase-124-the-mystery-of-the-backend/editor/`), so Studio's Backend map tab gets it with a version bump.
 
 ## Where it comes from
@@ -122,3 +123,32 @@ not by calling the agent's `get_project_info` / `what_changed_since` (noodl-mcp 
 AC9 (inside Studio) waits on 0.1.5's publish and Studio's pin; Studio mounts the package's handler for every
 `/backend-map/*` request, POSTs included (`editor/serve.mjs:702`), so no Studio change is expected. The map inside a
 conversation (BKO-002's src-less frame) was not driven with the hands.
+
+### s2 (2026-10-31): AC9 inside Studio, in the conversation; STALEDRAFT found and fixed
+
+Richard published `@nodegx/backend-map` 0.1.6 and `@nodegx/backend-kit` 0.1.0 (each file equal to HEAD's source:
+the kit's `lib/` and `bin/`, the map's `server.mjs`, `public/`, `bin/`). Studio moved to them (`ef72785`, built in a
+Studio worktree because a peer's Studio was serving from the main checkout's `node_modules`).
+
+- **The pin move needed a Studio change.** Studio's `functionTouches` imported the map's `lib/project.mjs` by file,
+  which 0.1.6 no longer ships (`ERR_MODULE_NOT_FOUND`, measured): every function would have said "the backend map isn't
+  installed". It now imports `@nodegx/backend-kit`. `check:functions` 695/695 + 46/46 (its touches asserted).
+- **AC9 ✅** in Studio's `check:hosted`, *inside the conversation* (the map in BKO-002's src-less frame, a fake MCP Apps
+  host): "Anyone at all" dragged onto Task with the mouse (both ends on the map's canvas, not on a card), asked twice,
+  made: the backend and `nodegx.security.json` hold the same entry; the toast's Undo puts the file back byte-identical
+  and the backend's rule as it was. Pictures: `look/bko-007-hosted-chooser.png`, `look/bko-007-hosted-made.png`. This
+  also covers s1's "the map inside a conversation was not driven with the hands": each gesture's POST crosses from the
+  host's origin to Studio's.
+- `check:hosted` 44/45. The red ("the app's redirect to Sign in moves the frame there") is red at Studio `36251bd` with
+  0.1.4 too (control). P128-S4-HOSTEDPUSHSTATE is re-opened with that measurement. The control also fails "the map
+  wears Studio's light look", which 0.1.6 passes.
+- **P127-BKO007-STALEDRAFT, found in the AC9 picture and fixed.** After a drag onto a table whose panel was open, the
+  panel's rule editor kept the draft from when the table was opened. It showed the old rule as the person's choice,
+  with Make it so enabled and a preview of the old rule, so one press took the grant back. After Undo, the mirror
+  image. `freshEdit` seeds the draft again after a gesture and after an undo. `hands-ui.test.mjs` step 8 grades both
+  halves; each was red before its line went in.
+- `hands.test.mjs` step 11 was red on every run: step 10 hashed the copy once per file (~9 s), longer than the map
+  server's keep-alive, and the next fetch reused a closed socket (`ECONNRESET`, measured). Hashed once now.
+- The map is at **0.1.7** for Richard to publish (STALEDRAFT, plus the peer's STU-093 "Open that run in Studio",
+  `6de0f7066`). Then Studio's pin and `vendor/NODEGX.json` move together.
+

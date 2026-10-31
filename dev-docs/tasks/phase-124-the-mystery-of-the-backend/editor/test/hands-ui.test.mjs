@@ -220,8 +220,45 @@ try {
   ok(!((await admin('/admin/triggers')).triggers ?? []).some((t) => t.id === sc?.id) && !JSON.parse(fs.readFileSync(AUTO, 'utf8')).triggers.some((t) => t.id === sc?.id), 'gone from the backend and the file');
   await page.screenshot({ path: path.join(shots, 'bko-007-07-stopped.png') });
 
+  // 8. a drag onto the table whose panel is open: its rule editor shows the rule as it now is, with nothing to make
+  // (P127-BKO007-STALEDRAFT: it kept the draft from when the table was opened and offered to put the old rule back).
+  // Both blocks in the open, left of the panel; Progress clicked open where a person sees it
+  const layout = () =>
+    page.evaluate(() => {
+      const s = window.__map, a = s.byId['w:public'], t = s.byId['t:Progress'];
+      s.cam.z = Math.min(0.55, 550 / Math.abs(t.x - a.x));
+      s.cam.x = 450 - a.x * s.cam.z;
+      s.cam.y = 480 - ((a.y + t.y) / 2 + a.h / 2) * s.cam.z;
+    });
+  await layout();
+  await page.mouse.click(...(await centre('t:Progress')));
+  await page.waitForFunction(() => document.getElementById('panelBody').dataset.node === 't:Progress' && !!document.getElementById('applyRule'), { timeout: 5000 }).catch(() => {});
+  ok(await page.evaluate(() => document.getElementById('panelBody').dataset.node === 't:Progress' && !!document.getElementById('applyRule')), 'Progress clicked open: its panel, with its rule editor');
+  const progressBefore = { live: JSON.stringify(await liveEntry('Progress')), file: fs.readFileSync(SEC, 'utf8') };
+  await layout();
+  await dragFrom(await centre('w:public'), await centre('t:Progress'));
+  ok(await handShown(), 'with Progress open, anyone at all dropped on it opens the chooser');
+  await clearToast();
+  await page.click('#handGo'); // anyone at all is asked twice
+  await page.waitForFunction(() => document.getElementById('handGo')?.textContent === 'Make it so', { timeout: 3000 }).catch(() => {});
+  await page.click('#handGo');
+  ok(await toastUndo(), 'made, with Undo');
+  await page.waitForFunction(() => document.getElementById('panelBody').dataset.node === 't:Progress' && !!document.getElementById('applyRule'), { timeout: 5000 }).catch(() => {});
+  const editor = await page.evaluate(() => ({ on: document.querySelector('#ruleEditor .pill.on[data-field=read]')?.dataset.value ?? null, apply: document.getElementById('applyRule')?.disabled ?? null, preview: document.querySelector('#ruleEditor .verdict')?.innerText ?? null }));
+  const nowRead = (await liveEntry('Progress'))?.permissions.find;
+  ok(has(nowRead, 'public') && /public/.test(editor.on ?? '') && editor.apply === true && !/After this/.test(editor.preview ?? ''), 'its open panel shows the rule as it now is (anyone at all may see), and offers nothing to make', { editor, nowRead });
+  await page.screenshot({ path: path.join(shots, 'bko-007-08-open-panel-after-a-drag.png') });
+  await page.click('#undoLast');
+  await page.waitForFunction(() => document.getElementById('toast').classList.contains('hidden') || /Undone|put back/i.test(document.getElementById('toast').innerText), { timeout: 8000 }).catch(() => {});
+  await new Promise((r) => setTimeout(r, 800));
+  ok(JSON.stringify(await liveEntry('Progress')) === progressBefore.live && fs.readFileSync(SEC, 'utf8') === progressBefore.file, 'Undo: Progress as it was, in both places');
+  await page.waitForFunction((want) => document.querySelector('#ruleEditor .pill.on[data-field=read]')?.dataset.value === want, { timeout: 10000 }, JSON.parse(progressBefore.live)?.permissions.find).catch(() => {});
+  const undone = await page.evaluate(() => ({ on: document.querySelector('#ruleEditor .pill.on[data-field=read]')?.dataset.value ?? null, apply: document.getElementById('applyRule')?.disabled ?? null }));
+  ok(undone.on === JSON.parse(progressBefore.live)?.permissions.find && undone.apply === true, 'and its open panel shows the rule put back, with nothing to make', { undone, before: progressBefore.live });
+
   ok(!errors.length, 'no page error', errors);
-  const changed = Object.keys({ ...before, ...hashTree(c.copy) }).filter((k) => before[k] !== hashTree(c.copy)[k]).sort();
+  const after = hashTree(c.copy);
+  const changed = Object.keys({ ...before, ...after }).filter((k) => before[k] !== after[k]).sort();
   ok(changed.join() === 'nodegx.automations.json,nodegx.security.json', 'the drive changed exactly the two files the gestures write, nothing else in the folder', changed);
 } catch (e) {
   ok(false, 'the drive ran to the end', e.stack);
