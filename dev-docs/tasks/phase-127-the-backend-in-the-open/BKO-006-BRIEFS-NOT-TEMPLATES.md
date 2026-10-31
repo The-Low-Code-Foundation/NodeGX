@@ -120,3 +120,22 @@ place of the agent's own refusal. The row has the version table.
 
 Not done: Richard's fourth brief in Claude Desktop (the acceptance's second half). A `.mcpb` from the 0.2.8 pin lacks
 P128-S3-HELPERNODE's fix (measured), so it needs `--mcp-tarball` from a pack at `560ee23d9` or later, or a 0.2.9.
+
+### s13 (2026-10-31): Richard's Desktop run, done
+
+The `.mcpb` with map 0.1.7 (`/Users/Shared/nodegx-0.2.9-map017-darwin-arm64.mcpb`), Sonnet 5.5, his own brief: a
+homework and feedback app (`~/nodegx_projects/homework_feedback`: Homework, Notification, WeeklyReport; teachers and
+students; an automation). His words: *"Claude built an app in studio, it opened in studio, everything usable and
+editable as expected, except the privacy rules"*, which another session is working on (P123-GH-NOGROUPS).
+
+One finding, filed: **P127-BKO006-ADMINTERMINAL** (high, beta, owner none). Asked to edit groups, the agent sent him
+to the backend manager, whose first login needs a terminal command; it had the tools to do it itself. He asked for an
+editor in the chat and the agent drew one with Claude's own widget tool (Desktop's web log: `visualize:show_widget`),
+not a NodeGX surface. The rules file holds what that widget shows, written 10:43:26; nothing reached the nodegx
+server after 11:07:47.
+
+Read from Desktop's logs: no content-security refusal anywhere in `claude.ai-web.log` (442 lines, 28 today);
+`NodeGX:open_studio` four times. Not reported: Data → Map, Workflow → On the backend, a drag and its Undo, the reminder
+turned off then "what changed?". BKO-002 AC2, BKO-004 AC3, BKO-005 AC1 and BKO-007 in Desktop stay open on those.
+
+**Acceptance met:** the three briefs graded (s6, s9), every failure a filed row, and Richard has done his run.
