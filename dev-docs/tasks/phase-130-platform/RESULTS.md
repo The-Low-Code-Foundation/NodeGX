@@ -148,5 +148,6 @@ A: an `editors/` entry and the keep question in `RECORD.md`.
   existed; it touched one game file. B had to retrofit parameters into the game first (seven files). But A's
   declaration was **too thin** for the ask (a size and two colours), so A also rebuilt the monsters: the knobs existed,
   but not enough of them.
-- **Every Bash call in both arms ran twice**, once bare and once with `cd <the arm> &&` (both arms, both sessions): an
-  effect of the headless runs, equal across arms; it doubles the tool-call counts, not the minutes.
+- **About half of each arm's Bash calls appear twice** in the transcript, the second with `cd <the arm> &&` in front
+  (A 23 of 47, B 31 of 67), although the first had already returned its output. Whether that is a second run or one
+  call recorded twice is unread. It is the same in both arms, so it inflates both tool-call counts alike.
