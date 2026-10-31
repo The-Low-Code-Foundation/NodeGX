@@ -169,3 +169,35 @@ minutes, with wider coverage (gait, stride, run speed) than A's pre-built declar
 reading so far against P129's "build the layer always": on this evidence the layer is cheaper and better made **when
 asked** than when obliged up front. What is still unmeasured is the claim's other half: whether B's seven-file
 retrofits break things as the asks pile up (B has no drives; ask 7 is the month-two test).
+
+## The verdict (2026-10-31): the lane closes
+
+Richard, verbatim: *"Meh I don't feel like it anymore. Knowing the power of Claude, I'd say thinking the game will
+'break' as changes pile up is an early 2026 prediction. Today Claude is pretty much able to audit the whole thing, fix
+everyting that's broken and keep adding changes with only minimal disruption and API usage. I don't think we're going to
+'trap' Claude into making mistakes that are difficult to repair or that create much serious tech debt vs what nodegx
+does. I think this lane might be a dead end, unless you have other ideas"*. We had none that rescue it.
+
+**For P129 CANON draft 3, what this phase measured** (one game, one model, two rounds and one heat ask per arm; small,
+but every reading pointed the same way):
+
+1. **Obliging the latent layer up front cost the game.** Same model, similar time and spend: the bare arm's game looked
+   nearer finished on day one (Richard: *"B definitely looks more like a nearly finished game"*); the harnessed arm's
+   effort went into compliance (265 `// why:` reasons, half of them labels; 24 gate runs in two sittings).
+2. **The layer built on demand was better than the layer built by obligation.** Asked for a monster sandbox, the bare
+   arm made every creature number a parameter in 14 minutes with wider coverage than the harnessed arm's declaration
+   (*"B, having modified the files, created a much better monster editor than A"*).
+3. **The gates bent decisions the wrong way twice:** gate 8 (no inert knob) took two small visual values *out* of the
+   knobs instead of making them judgeable, and the note's *"a change of view is a cut"* cost A the free zoom until the
+   owner asked for it.
+4. **What the harness did win, and what it is worth:** A ran `what.mjs` first, touched one game file instead of seven,
+   asked keep-or-throw, kept the owner's changes as data. Real, but invisible to the owner, who judged by the game.
+5. **The month-two claim (regressions as asks pile up) was not run.** Richard's ruling: a 2026 Claude audits and
+   repairs its own game cheaply, so the claim no longer carries the canon.
+
+So draft 3, if written: **no up-front obligation and no gates; the agent builds parameters and editors when the owner
+asks, over whatever the code already is.** The kit (`parked/platform-kit/`) stays parked as the record, with the lab
+tools (`_make/arm.mjs` seals a stranger Claude Code session; `_make/read-lab.mjs` reads one), which are reusable.
+
+The two games stay in `~/vscode_projects/platform-lab/A` (Waterline) and `/B` (High Water), each with its own git
+history (baseline + the heat's uncommitted sandbox).
