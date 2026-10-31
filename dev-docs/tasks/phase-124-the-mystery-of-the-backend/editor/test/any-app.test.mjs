@@ -197,6 +197,27 @@ try {
       ok(!errors.length, `${name}: no page errors`, errors);
 
       if (name === 'todo') {
+        // nodegx-studio STU-093 (Richard, 2026-10-31: "Yes please"): a page's own searches and saves are a column of their
+        // own between the screens and the functions, one block per page, level with it; the wires go screen → it → table
+        const own = await page.evaluate(() => {
+          const s = window.__map, col = (k) => s.nodes.filter((n) => n.kind === k);
+          return {
+            logic: col('logic').map((n) => ({ id: n.id, x: n.x, w: n.w, y: n.y, screenY: s.byId[`s:${n.key}`]?.y })),
+            screenRight: Math.max(...col('screen').map((n) => n.x + n.w)), tableLeft: Math.min(...col('table').map((n) => n.x)),
+            straight: s.edges.filter((e) => e.from.startsWith('s:') && e.to.startsWith('t:')).map((e) => e.id),
+            through: s.edges.filter((e) => e.from.startsWith('l:') && e.to.startsWith('t:')).map((e) => `${e.id} ${e.kind}`),
+            asks: s.edges.filter((e) => e.from.startsWith('s:') && e.to.startsWith('l:')).map((e) => e.id)
+          };
+        });
+        ok(own.logic.length > 0 && own.logic.every((n) => n.x > own.screenRight && n.x + n.w < own.tableLeft && n.y === n.screenY), `todo: the app's own logic is a column between the screens and the tables, one block per page that reads or writes itself, level with it (${own.logic.map((n) => n.id).join(', ')})`, own);
+        ok(!own.straight.length && own.through.some((e) => / writes$/.test(e)) && own.asks.length === own.logic.length, 'todo: no wire runs straight from a screen to a table: the screen asks its own logic, which writes Task', own);
+        const logicPanel = await page.evaluate((id) => {
+          const s = window.__map, n = s.byId[id];
+          const at = [n.x * s.cam.z + s.cam.x + 30, (n.y + n.h / 2) * s.cam.z + s.cam.y];
+          for (const t of ['pointerdown', 'pointerup']) document.getElementById('map').dispatchEvent(new PointerEvent(t, { clientX: at[0], clientY: at[1], pointerId: 1, bubbles: true }));
+        }, own.logic[0]?.id).then(() => page.waitForFunction((id) => document.getElementById('panelBody').dataset.node === id, { timeout: 5000 }, own.logic[0]?.id)).then(() => page.$eval('#panelBody', (e) => e.innerText)).catch((e) => String(e));
+        ok(/The app’s own logic/i.test(logicPanel) && /search|save/.test(logicPanel) && /Task/.test(logicPanel) && /may/.test(logicPanel), `todo: its panel lists each search and save, the table, and who the table's rule lets: “${logicPanel.slice(0, 200).replace(/\s+/g, ' ')}”`, logicPanel);
+        await page.screenshot({ path: path.join(shots, 'stu-093-own-logic.png') });
         const task = await page.evaluate(() => ({ node: !!window.__map.byId['t:Task'], not: window.__map.byId['t:Task']?.table.notOnBackend }));
         ok(task.node && task.not, 'todo: Task, which the app writes and the fresh backend lacks, is drawn and marked not on the backend', task);
         ok(!(await page.evaluate(() => !!window.__map.byId['t:LearnerProfile'])), 'todo: no LearnerProfile block (the training app’s table)');

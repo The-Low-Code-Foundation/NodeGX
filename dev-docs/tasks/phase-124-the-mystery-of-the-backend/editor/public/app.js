@@ -247,6 +247,12 @@ function layout() {
     add({ id: `g:${t.id}`, kind: 'trigger', col: 'screen', key: t.id, trigger: t, title: triggerTitle(t), x: 0, y: ty0 + i * 84, w: 230, h: 56 })
   );
   if ($('legendFires')) $('legendFires').hidden = !(m.triggers ?? []).length;
+  // nodegx-studio STU-093 (Richard, 2026-10-31: "Yes please"): the app's own logic that reaches the backend, a page's
+  // searches and saves, is a column between the screens and the functions: one node per page, its list in the panel,
+  // so what runs in the app and what runs on the backend are told apart on one drawing
+  const ownBy = {};
+  for (const u of m.uses ?? []) if (u.screen in sy) (ownBy[u.screen] ??= []).push(u);
+  for (const [screen, uses] of Object.entries(ownBy)) add({ id: `l:${screen}`, kind: 'logic', key: screen, uses, title: screenWords(screen), x: 0, y: sy[screen], w: 210, h: 56 });
 
   // Functions, ordered by the screens that call them.
   const callersOf = {};
@@ -285,10 +291,10 @@ function layout() {
 
   // BKO-003: a column the app doesn't have (no screens, no functions) leaves no hole: the next one moves up to the
   // gap the full map keeps between those two. With all four the places are the ones above.
-  const GAP = { screen: 100, fn: 200, table: 180 };
+  const GAP = { screen: 100, logic: 90, fn: 200, table: 180 };
   let cursor = null;
   const colOf = (n) => n.col ?? n.kind;
-  for (const kind of ['who', 'person', 'screen', 'fn', 'table']) {
+  for (const kind of ['who', 'person', 'screen', 'logic', 'fn', 'table']) {
     const col = nodes.filter((n) => colOf(n) === kind);
     if (!col.length) continue;
     const left = Math.min(...col.map((n) => n.x));
@@ -307,6 +313,7 @@ function layout() {
   }
 
   const byId = Object.fromEntries(nodes.map((n) => [n.id, n]));
+  for (const n of nodes) if (n.kind === 'logic') n.y = byId[`s:${n.key}`].y;
   const pairs = {};
   for (const c of m.calls) {
     const id = `s:${c.screen}>f:${c.fn}`;
@@ -315,12 +322,14 @@ function layout() {
     pairs[id].triggers.push(c);
   }
   edges.push(...Object.values(pairs));
-  // NPMAUDIT-BACKENDMAPSCREENS: the screen's own record nodes, straight to the table, no function between.
+  // NPMAUDIT-BACKENDMAPSCREENS: the screen's own record nodes, to the table with no function between; through the
+  // screen's own logic node (STU-093), which the screen asks
   const direct = {};
+  for (const n of nodes) if (n.kind === 'logic') edges.push({ id: `s:${n.key}>l:${n.key}`, kind: 'calls', from: `s:${n.key}`, to: n.id, own: true });
   for (const u of m.uses ?? []) {
-    const id = `s:${u.screen}>t:${u.table}`;
-    if (!byId[`s:${u.screen}`] || !byId[`t:${u.table}`]) continue;
-    direct[id] ??= { id, kind: 'reads', from: `s:${u.screen}`, to: `t:${u.table}`, hows: [], uses: [] };
+    const id = `l:${u.screen}>t:${u.table}`;
+    if (!byId[`l:${u.screen}`] || !byId[`t:${u.table}`]) continue;
+    direct[id] ??= { id, kind: 'reads', from: `l:${u.screen}`, to: `t:${u.table}`, hows: [], uses: [] };
     if (!direct[id].hows.includes(u.how)) direct[id].hows.push(u.how);
     if (u.how !== 'reads') direct[id].kind = 'writes';
     direct[id].uses.push(u);
@@ -401,6 +410,7 @@ function lensOf(node) {
       const t = R_.tables[node.key];
       return { can: !!t?.reached, direct: !!t?.directly, via: Object.keys(t?.via ?? {}) };
     }
+    if (node.kind === 'logic') return { can: node.uses.some((u) => R_.tables[u.table]?.directly) };
     if (node.kind === 'screen') {
       return {
         can:
@@ -414,6 +424,7 @@ function lensOf(node) {
   if (!p) return null;
   if (node.kind === 'person') return { can: true };
   if (node.kind === 'fn') return { can: W.passes(node.fn.call, p) };
+  if (node.kind === 'logic') return { can: node.uses.some((u) => W.passes(useRule(u), p)) };
   if (node.kind === 'table') {
     const d = directRead(node.key);
     const reads = W.passes(d.read, p);
@@ -437,7 +448,7 @@ function related(id) {
       set.add(e.to).add(e.id);
       for (const e2 of out(e.to)) if (e2.kind !== 'links') set.add(e2.to).add(e2.id);
     }
-  } else if (n.kind === 'fn') {
+  } else if (n.kind === 'fn' || n.kind === 'logic') {
     for (const e of [...out(id), ...inn(id)]) set.add(e.from).add(e.to).add(e.id);
   } else {
     for (const e of inn(id)) {
@@ -566,6 +577,7 @@ function draw(now) {
     ['person', 'PEOPLE', 'the real ones, from the database'],
     ['screen', 'THE APP’S SCREENS', 'where people click'],
     ['trigger', 'ON ITS OWN', 'what the backend starts by itself'],
+    ['logic', 'THE APP’S OWN LOGIC', 'its searches and saves, in the app'],
     ['fn', 'FUNCTIONS', 'the doors to the data, with their locks'],
     ['table', 'TABLES', 'where the data lives']
   ];
@@ -762,7 +774,7 @@ function drawNode(n, now, rel) {
   ctx.globalAlpha = alpha;
 
   const color =
-    n.kind === 'who' ? whoColor(n.key) : n.kind === 'person' ? COLORS.person : n.kind === 'screen' ? COLORS.screen : n.kind === 'fn' ? fnColor(n.fn) : n.kind === 'trigger' ? COLORS.trigger : COLORS.table;
+    n.kind === 'who' ? whoColor(n.key) : n.kind === 'person' ? COLORS.person : n.kind === 'screen' ? COLORS.screen : n.kind === 'logic' ? C.cyan : n.kind === 'fn' ? fnColor(n.fn) : n.kind === 'trigger' ? COLORS.trigger : COLORS.table;
   const sel = state.selected === n.id, hov = state.hover === n.id;
 
   // a run's flash
@@ -834,6 +846,13 @@ function drawNode(n, now, rel) {
   } else if (n.kind === 'screen') {
     ctx.strokeRect(ix - 8, iy - 10, 16, 20);
     ctx.fillRect(ix - 3, iy + 6, 6, 1.8);
+  } else if (n.kind === 'logic') {
+    // a magnifying glass: a page's own searches (and saves)
+    ctx.beginPath();
+    ctx.arc(ix - 2, iy - 2, 7, 0, Math.PI * 2);
+    ctx.moveTo(ix + 3, iy + 3);
+    ctx.lineTo(ix + 9, iy + 9);
+    ctx.stroke();
   } else if (n.kind === 'fn') {
     // a door with a padlock
     ctx.strokeRect(ix - 8, iy - 11, 16, 22);
@@ -1000,6 +1019,7 @@ function subtitle(n) {
     if (!fns.size && own.size) return `uses ${own.size} table${own.size === 1 ? '' : 's'} itself`;
     return `asks ${fns.size} function${fns.size === 1 ? '' : 's'}${own.size ? `, uses ${own.size} table${own.size === 1 ? '' : 's'} itself` : ''}`;
   }
+  if (n.kind === 'logic') return ownWords(n.uses);
   if (n.kind === 'fn') {
     if (!n.fn.deployed) return 'not live on the backend';
     return `${W.ruleWords(n.fn.call)} may run it`;
@@ -1183,6 +1203,8 @@ function renderPanel() {
       ? fnPanel(n)
       : n.kind === 'trigger'
       ? triggerPanel(n)
+      : n.kind === 'logic'
+      ? logicPanel(n)
       : state.pathway?.screen === n.key
       ? pathwayPanel(n)
       : screenPanel(n);
@@ -2306,16 +2328,34 @@ async function undo(id) {
   }
 }
 
+/** The table's own rule for what a page's own search or save does: read, or create / change / delete. */
+function useRule(u) {
+  const d = directRead(u.table);
+  return u.how === 'reads' ? d.read : d.change[{ creates: 0, changes: 1, deletes: 2 }[u.how] ?? 1];
+}
+// NPMAUDIT-BACKENDMAPSCREENS: what the screen reads and writes itself, by the table's own rule.
+const useLine = (u) => `<li>${esc(cap(u.trigger.words))} ${esc(u.how)} ${go(`t:${u.table}`, W.tableWords(u.table))}${u.label ? ` (“${esc(u.label)}”)` : ''} — ${esc(W.ruleWords(useRule(u)))} may</li>`;
+/** "2 searches, 1 save": a page's own logic, counted. */
+function ownWords(uses) {
+  const reads = uses.filter((u) => u.how === 'reads').length, saves = uses.length - reads;
+  return [reads ? `${reads} search${reads === 1 ? '' : 'es'}` : '', saves ? `${saves} save${saves === 1 ? '' : 's'}` : ''].filter(Boolean).join(', ');
+}
+/** STU-093: a page's own logic, opened: each search and save it makes itself, the table it reaches, and who the table's rule lets. */
+function logicPanel(n) {
+  const tables = [...new Set(n.uses.map((u) => u.table))];
+  return `
+    <div class="kind">The app’s own logic</div>
+    <h2>${esc(n.title)}: ${esc(ownWords(n.uses))}</h2>
+    <p>Logic on ${go(`s:${n.key}`, n.title)} that reaches ${tables.length === 1 ? 'a table' : `${tables.length} tables`} itself, from the app, with no function between. Each one is let in or turned away by the table’s own rule.</p>
+    <ul>${n.uses.map(useLine).join('')}</ul>
+    <p style="font-size:12px;color:var(--dim)">It runs in the person’s browser, so what the table’s rule lets is all that keeps a row safe. A function is a door with its own lock.</p>
+  `;
+}
+
 function screenPanel(n) {
   const m = state.map;
   const calls = m.calls.filter((c) => c.screen === n.key);
   const uses = (m.uses ?? []).filter((u) => u.screen === n.key);
-  // NPMAUDIT-BACKENDMAPSCREENS: what the screen reads and writes itself, by the table's own rule.
-  const useLine = (u) => {
-    const d = directRead(u.table);
-    const rule = u.how === 'reads' ? d.read : d.change[{ creates: 0, changes: 1, deletes: 2 }[u.how] ?? 1];
-    return `<li>${esc(cap(u.trigger.words))} ${esc(u.how)} ${go(`t:${u.table}`, W.tableWords(u.table))}${u.label ? ` (“${esc(u.label)}”)` : ''} — ${esc(W.ruleWords(rule))} may</li>`;
-  };
   return `
     <div class="kind">Screen</div>
     <h2>${esc(n.title)}</h2>
@@ -2503,6 +2543,7 @@ function tipFor(n) {
     const f = n.fn;
     return `<b>${esc(f.name)}</b><br>${esc(W.ruleWords(f.call))} may run it.<br>Touches ${f.touches.length} table${f.touches.length === 1 ? '' : 's'}. Click for the whole story${hands() ? '; drag it onto a table to run it whenever a row changes' : ''}.`;
   }
+  if (n.kind === 'logic') return `<b>${esc(n.title)}’s own logic</b><br>${esc(ownWords(n.uses))} it makes itself, in the app, straight to the tables: each table’s own rule decides. Click for the list.`;
   if (n.kind === 'trigger') {
     const t = n.trigger;
     return `<b>${esc(triggerWords(t))}</b><br>${t.notOnBackend ? 'Not on the backend yet. ' : !t.enabled ? 'Turned off. ' : ''}Runs ${t.fns.length ? t.fns.map(esc).join(', ') : 'no function the map can see'}${t.workflow ? `, in the workflow “${esc(t.workflow.name)}”` : ''}. Click for the whole story.`;
