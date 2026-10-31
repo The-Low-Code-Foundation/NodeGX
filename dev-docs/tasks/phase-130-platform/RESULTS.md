@@ -151,3 +151,21 @@ A: an `editors/` entry and the keep question in `RECORD.md`.
 - **About half of each arm's Bash calls appear twice** in the transcript, the second with `cd <the arm> &&` in front
   (A 23 of 47, B 31 of 67), although the first had already returned its output. Whether that is a second run or one
   call recorded twice is unread. It is the same in both arms, so it inflates both tool-call counts alike.
+
+### Ask 1, Richard's verdict (2026-10-31), verbatim
+
+> "A is good, some nice customisation as expected. B arguably goes further and offers a lot more customisation than A,
+> including run speed and how far apart the leg gait is and stuff, which is pretty impressive actually. So I could say
+> that B, having modified the files, created a much better monster editor than A. So although A got there faster, B did
+> a better job overall
+>
+> It's starting to feel like our idea has actually hindered A from creating a game that at least sits at the base line
+> of what an unassisted Claude session could one shot. Once again adding in nodegx concepts creates extra strain on the
+> model that ends up hurting its output overall vs not having used nodegx at all."
+
+Measured beside it: B was the faster (14 min to A's 23); A the cheaper ($3.26 to $3.93). **B, unasked for any layer,
+built the latent layer on demand** (every creature number into a settings table, defaults matched to ~1 mm) in 14
+minutes, with wider coverage (gait, stride, run speed) than A's pre-built declaration had. That is the strongest
+reading so far against P129's "build the layer always": on this evidence the layer is cheaper and better made **when
+asked** than when obliged up front. What is still unmeasured is the claim's other half: whether B's seven-file
+retrofits break things as the asks pile up (B has no drives; ask 7 is the month-two test).
