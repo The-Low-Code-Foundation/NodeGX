@@ -129,3 +129,24 @@ A **fresh** session in each arm (no `--resume`), the same message, his words wit
 Measures (THE-TEST §5): files touched; game/engine files touched to build it (the editor should be a view); old drives
 still green; tool calls and minutes before the first edit (A: did it run `what.mjs` first?); built only what was asked;
 A: an `editors/` entry and the keep question in `RECORD.md`.
+
+### Ask 1, what came back (2026-10-31)
+
+| | A | B |
+|---|---|---|
+| minutes, dollars, tool calls | 23 min, $3.26, 63 | 14 min, $3.93, 86 |
+| first move | `node tools/what.mjs` (the note's rule), then `RECORD.md`/`LOOK.md`, then the creature model and the kit | `git ls-files`, the `.md` files, then `src/creatures.js` and a grep through `level.js` |
+| first edit | +5 min, after 24 tool calls | +5 min, after 28 tool calls |
+| game files changed (vs the baseline) | **1**: `src/models/creatures.mjs` (+ `strings/en.json`, `RECORD.md`, `LOOK.md`); the sandbox is its own folder `editors/beasts/` | **7**: `creatures.js` (291 lines), `data.js`, `level.js`, `people.js`, `sim.js`, `tools/serve.mjs`, `README.md`; new `sandbox.html`, `src/sandbox.js`, `src/sandbox.css`, `src/designs.js` |
+| what it had to make first | rebuilt the rat and crab with far more parts and knobs (rat 24, crab 23; they had a size and two colours) | made the creatures read numbers from a settings table (they were fixed numbers), checked the defaults matched the old creatures to ~1 mm |
+| where the owner's changes go | `design/knobs/rat.json`, `crab.json` (autosave) | `src/designs.js`, via a new write route in its server ("Save to game") |
+| gates | 5 runs in the session; ours after: **10 / 10** (4,122 numbers read) | none |
+| asked keep or throw | **yes**, and wrote `asked: beasts — "<his words>"` into `RECORD.md` | no |
+| built only what was asked | the shapes changed too (its own first guesses, "tuning them is the point"); motion left for later | the shapes left as they were; motion knobs included; named four likely causes of "silly" for him to try |
+
+- **The latent layer paid where THE-TEST said it would:** A's sandbox is a view over a declaration that already
+  existed; it touched one game file. B had to retrofit parameters into the game first (seven files). But A's
+  declaration was **too thin** for the ask (a size and two colours), so A also rebuilt the monsters: the knobs existed,
+  but not enough of them.
+- **Every Bash call in both arms ran twice**, once bare and once with `cd <the arm> &&` (both arms, both sessions): an
+  effect of the headless runs, equal across arms; it doubles the tool-call counts, not the minutes.
