@@ -186,6 +186,13 @@ export function shownFields(klass: { fields: Readonly<Record<string, BackendFiel
   return Object.entries(klass?.fields ?? {}).filter(([field, decl]) => field !== 'ACL' && !(skipRelations && decl.relation !== undefined));
 }
 
+/**
+ * P123-GH-NOCREATEDAT — record-ports.ts `RECORD_BUILT_IN_DATES` / `recordBuiltInDatePorts`: the two dates every Parse-wire
+ * record carries whether or not its class declares them. The Record node draws a `date` `prop-` and a Changed for each a
+ * selected class's columns did not already draw, on a Parse-wire backend only — read side only, the writes never take them.
+ */
+export const RECORD_BUILT_IN_DATES: readonly string[] = Object.freeze(['createdAt', 'updatedAt']);
+
 /** record-ports.ts :147-149 `isParseWireContext` — the selected backend speaks the Parse wire: no type recorded, `parse` or `nodegx`. */
 export function onParseWire(context: Readonly<PortContext>): boolean {
   const type = context.schema?.backendType;

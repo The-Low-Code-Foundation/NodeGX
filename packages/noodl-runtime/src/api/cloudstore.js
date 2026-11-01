@@ -443,6 +443,10 @@ function _fromJSON(item, collectionName, modelScope) {
     if (_type === undefined && item[key] && item[key].__type === 'Pointer' && item[key].objectId !== undefined) {
       _type = 'Pointer';
     }
+    // P123-GH-NOCREATEDAT: the two dates every record carries (bare ISO strings on the wire) are Dates, as a declared Date
+    // field is. Parse's `GET /schemas` listed both as `Date`, so a Parse-era class typed them here; a NodeGX class's
+    // `columns` hold only the declared fields, which left them strings on every NodeGX project.
+    if (_type === undefined && (key === 'createdAt' || key === 'updatedAt')) _type = 'Date';
 
     const value = _deserializeJSON(item[key], _type, modelScope);
     // ISL-027 / P107-C49, ruled "Compare the list's contents": a list arrives as a NEW array on every

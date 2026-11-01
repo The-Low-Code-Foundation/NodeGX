@@ -300,7 +300,8 @@ describe('§6.6 — one derived.outputs, two readers: the editor draws the proje
     expect(Record.derived!.outputCandidates).toEqual(['prop-title', 'changed-title', 'prop-n', 'changed-n']);
     // the editor: a class's columns, a wired name, the picker with two backends; the play: the wires alone
     const drawn = drawnPorts(Record, { collectionName: 'Lesson' }, { schema: { classes: { Lesson: { fields: { title: { type: 'string' } } } } }, wiredOutputs: ['prop-zz'], backends: [{ id: 'b1', name: 'One' }, { id: 'b2', name: 'Two' }] });
-    expect(drawn.filter((p) => p.source === 'derived').map((p) => `${p.plug} ${p.name}`)).toEqual(['input backendId', 'input collectionName', 'output prop-title', 'output changed-title', 'output prop-zz']);
+    // P123-GH-NOCREATEDAT: after the class's columns, the record's own createdAt / updatedAt (no backend type: the Parse wire)
+    expect(drawn.filter((p) => p.source === 'derived').map((p) => `${p.plug} ${p.name}`)).toEqual(['input backendId', 'input collectionName', 'output prop-title', 'output changed-title', 'output prop-createdAt', 'output changed-createdAt', 'output prop-updatedAt', 'output changed-updatedAt', 'output prop-zz']);
     expect((drawn.find((p) => p.name === 'collectionName') as { enums?: readonly string[] }).enums).toEqual(['_User', '_Role', 'Lesson']);
     expect(Object.keys(playOutputs(Record, { collectionName: 'Lesson' }, { wiredOutputs: ['prop-n', 'changed-n'] }))).toEqual(['prop-n', 'changed-n']);
     expect(Object.keys(playOutputs(Record, { collectionName: 'Lesson' }, {}))).toEqual([]);

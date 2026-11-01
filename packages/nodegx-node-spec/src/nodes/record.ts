@@ -62,7 +62,7 @@ import { defineNode, said } from '../spec';
 import type { BackendScript, WorldScript } from '../world';
 import { valueDidChange } from './condition';
 import { emptyId, runOnChange } from './data-base';
-import { backendPickerPort, changedSignal, classPickerPort, discoverRecordPort, NO_BACKEND_MESSAGE, onRecordPort, RECORD_CANDIDATES, RECORD_FAILURE_CODE, recordFieldPort, recordWiredFieldNames, selectedClass, shownFields } from './record-base';
+import { backendPickerPort, changedSignal, classPickerPort, discoverRecordPort, NO_BACKEND_MESSAGE, onParseWire, onRecordPort, RECORD_BUILT_IN_DATES, RECORD_CANDIDATES, RECORD_FAILURE_CODE, recordFieldPort, recordWiredFieldNames, selectedClass, shownFields } from './record-base';
 import { sameList } from '../world';
 
 /** The two fields every world here holds — what a generated sequence may WIRE (`outputCandidates`), not a stand-in for a schema (s82). */
@@ -348,10 +348,19 @@ export const RecordNode = defineNode({
       // then `prop-` alone for every name a wire or a parameter declares and the schema does not (recordWiredFieldPorts :260-345)
       outputs: (params, context) => {
         const out: Record<string, OutputDecl<RecordState>> = {};
-        for (const [field, decl] of shownFields(selectedClass(params, context), true)) {
+        const klass = selectedClass(params, context);
+        for (const [field, decl] of shownFields(klass, true)) {
           out['prop-' + field] = { ...propertyOutput(field), ...recordFieldPort(decl) } as OutputDecl<RecordState>;
           out['changed-' + field] = changedSignal(field);
         }
+        // P123-GH-NOCREATEDAT (record-ports.ts recordBuiltInDatePorts): the record's own createdAt / updatedAt, typed date,
+        // where the class's columns did not draw them — on the Parse wire only
+        if (klass && onParseWire(context))
+          for (const field of RECORD_BUILT_IN_DATES)
+            if (!('prop-' + field in out)) {
+              out['prop-' + field] = propertyOutput(field, 'date');
+              if (!('changed-' + field in out)) out['changed-' + field] = changedSignal(field);
+            }
         for (const field of recordWiredFieldNames(params, context)) if (!('prop-' + field in out)) out['prop-' + field] = propertyOutput(field);
         return out;
       },

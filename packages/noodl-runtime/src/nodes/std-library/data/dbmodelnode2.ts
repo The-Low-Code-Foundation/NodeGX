@@ -25,6 +25,7 @@ import { outcomeOutputs, reportOutcomes } from '../../../outcome';
 
 import {
   recordBackendPickerPorts,
+  recordBuiltInDatePorts,
   recordClassPorts,
   recordFieldPorts,
   recordSchemaContext,
@@ -610,7 +611,10 @@ function updatePorts(
       })
     : [];
   ports.push(...fieldPorts);
-  ports.push(...recordWiredFieldPorts(node, fieldPorts, { plug: 'output' }));
+  // P123-GH-NOCREATEDAT — the record's own createdAt / updatedAt, which a NodeGX class's declared columns never list.
+  const datePorts = recordBuiltInDatePorts(ctx, fieldPorts, { includeChangedSignals: true });
+  ports.push(...datePorts);
+  ports.push(...recordWiredFieldPorts(node, [...fieldPorts, ...datePorts], { plug: 'output' }));
 
   sendSchemaPorts(editorConnection, node.id, ports, { staticPorts: staticPortNames(ModelNodeDefinition) });
 }

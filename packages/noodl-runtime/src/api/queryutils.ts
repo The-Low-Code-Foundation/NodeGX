@@ -327,6 +327,24 @@ export function convertVisualFilter(
   return Object.keys(where).length === 0 ? undefined : (where as ParseQuery);
 }
 
+const DATE_COMPARISONS: Record<string, (a: number, b: number) => boolean> = {
+  $eq: (a, b) => a === b,
+  $ne: (a, b) => a !== b,
+  $lt: (a, b) => a < b,
+  $lte: (a, b) => a <= b,
+  $gt: (a, b) => a > b,
+  $gte: (a, b) => a >= b
+};
+
+/** A filter operand as an instant: a Date, the wire's `{ __type: 'Date', iso }`, or a date as text. Else undefined. */
+function instantOf(operand: OpenJson): number | undefined {
+  let at: number | undefined;
+  if (operand instanceof Date) at = operand.getTime();
+  else if (operand && operand.__type === 'Date' && typeof operand.iso === 'string') at = Date.parse(operand.iso);
+  else if (typeof operand === 'string') at = Date.parse(operand);
+  return at === undefined || Number.isNaN(at) ? undefined : at;
+}
+
 /**
  * One operator of a leaf condition, evaluated against a loaded record's value.
  *
@@ -355,6 +373,13 @@ export function convertVisualFilter(
  */
 function matchesOperator(value: unknown, op: string, condition: OpenJson): boolean {
   const operand = condition[op];
+  // P123-GH-NOCREATEDAT — a record's dates are Dates (a declared Date field, and since then createdAt / updatedAt too),
+  // while the operand is the wire's `{ __type: 'Date', iso }` (parse.ts `parseValue`) or a date typed as text. `<` between
+  // a Date and either is NaN, false whatever the dates; compared as instants, as the backend compares them.
+  if (value instanceof Date && Object.prototype.hasOwnProperty.call(DATE_COMPARISONS, op)) {
+    const at = instantOf(operand);
+    if (at !== undefined) return DATE_COMPARISONS[op](value.getTime(), at);
+  }
   switch (op) {
     case '$eq':
       // Loose equality is deliberate: a filter value arriving from an input
