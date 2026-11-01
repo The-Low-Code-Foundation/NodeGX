@@ -26,6 +26,24 @@ const PREVIEW_PACKAGE = '@nodegx/preview';
 const SERVER_NAME = 'nodegx';
 
 /**
+ * P128-S3-NOSTUDIOFORTHEEDITOR (CCN-006 AC7, item 3) — the Studio fetched beside the server, so `open_studio` finds it
+ * on a machine without the desktop app. The server finds an installed `@nodegx/studio` with `require.resolve`
+ * (e0801764e), and `npx -y -p @nodegx/studio@<this> -p @nodegx/mcp@<MCP_VERSION> noodl-mcp` installs both into one
+ * folder, where it does (measured 2026-11-01 on the published 0.1.0 and 0.2.9: `.bin/noodl-mcp` is the server's,
+ * Studio's own pin on `@nodegx/mcp` nests under it, and Studio resolves from the server's `dist/`).
+ *
+ * `null` registers the server alone, exactly as 0.2.8 did. THE RELEASE FLIP is this one line, set to a published
+ * `@nodegx/studio` version, and only once `MCP_VERSION` names an `@nodegx/mcp` that carries e0801764e (0.2.9 does not):
+ * an older server never looks for the Studio fetched beside it, and the person waits for ~130 MB more for nothing
+ * (cold npx 8.2 s and 174 MB with Studio 0.1.0, 2.0 s and 43 MB without, measured 2026-11-01). Every registration this command writes (`.mcp.json`, `opencode.json`,
+ * `.vibe/config.toml`, Cline's entry, the "Another AI coder" line) comes from `serverArgs`, so they move together.
+ */
+const STUDIO_PACKAGE = '@nodegx/studio';
+const STUDIO_VERSION = null;
+/** `@nodegx/mcp`'s bin (packages/noodl-mcp/package.json): with two `-p` packages npx needs the command named. */
+const MCP_BIN = 'noodl-mcp';
+
+/**
  * What an agent opened in this folder reads before anything else (Claude Code: CLAUDE.md; other AI coders: AGENTS.md).
  * Written only when the file is absent: a person's own instructions are never replaced.
  */
@@ -364,9 +382,17 @@ function writeAgentNotes(dir, names = AGENT_FILES) {
   return written;
 }
 
+/** What follows `npx`: the server alone, or Studio and the server together once `STUDIO_VERSION` is set. */
+function serverArgs() {
+  const server = `${MCP_PACKAGE}@${MCP_VERSION}`;
+  return STUDIO_VERSION
+    ? ['-y', '-p', `${STUDIO_PACKAGE}@${STUDIO_VERSION}`, '-p', server, MCP_BIN, '--allow-writes']
+    : ['-y', server, '--allow-writes'];
+}
+
 /** The registration a client spawns. `cmd /c` on Windows, where `npx` is a `.cmd` a client cannot spawn directly. */
 function serverEntry(platform = process.platform) {
-  const npx = ['-y', `${MCP_PACKAGE}@${MCP_VERSION}`, '--allow-writes'];
+  const npx = serverArgs();
   return platform === 'win32'
     ? { type: 'stdio', command: 'cmd', args: ['/c', 'npx', ...npx] }
     : { type: 'stdio', command: 'npx', args: npx };
@@ -479,7 +505,7 @@ function sentence(result) {
     `  3. See it: npx ${PREVIEW_PACKAGE} <the app's folder> --open  (any day — it starts the app's backend too)`,
     '',
     'Any time you want the visual editor, open the same folder in NodeGX — nothing needs converting.',
-    `Another AI coder: give it the server "npx -y ${MCP_PACKAGE}@${MCP_VERSION} --allow-writes" (stdio).`
+    `Another AI coder: give it the server "npx ${serverArgs().join(' ')}" (stdio).`
   ].join('\n');
 }
 
@@ -503,4 +529,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { AGENT_FILES, AGENT_NOTE, CLINE_SERVER_FLAGS, CLINE_TIMEOUT_SECONDS, MCP_PACKAGE, MCP_VERSION, MISTRAL_SERVER_FLAGS, OPENCODE_CONFIG, SERVER_NAME, VIBE_AGENT, VIBE_ALLOWED_TOOLS, VIBE_CONFIG, VIBE_SERVER_FLAGS, clineMcpSettingsPath, clineServerEntry, coreSkillFiles, renderOpenCodeConfig, renderVibeConfig, serverEntry, setUp, vibeProfileFiles };
+module.exports = { AGENT_FILES, AGENT_NOTE, CLINE_SERVER_FLAGS, CLINE_TIMEOUT_SECONDS, MCP_PACKAGE, MCP_VERSION, MISTRAL_SERVER_FLAGS, MCP_BIN, OPENCODE_CONFIG, SERVER_NAME, STUDIO_PACKAGE, STUDIO_VERSION, VIBE_AGENT, VIBE_ALLOWED_TOOLS, VIBE_CONFIG, VIBE_SERVER_FLAGS, clineMcpSettingsPath, clineServerEntry, coreSkillFiles, renderOpenCodeConfig, renderVibeConfig, serverEntry, setUp, vibeProfileFiles };

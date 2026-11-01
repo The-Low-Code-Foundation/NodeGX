@@ -20,3 +20,10 @@ deprecated").
 length equals the bytes after it, then `verify`). Then one experiment before any certificate is bought or exported:
 a self-signed build double-clicked in Desktop, to see what the sheet says for a signed extension. Until then the
 trust work is the copy: /start says what the warning means before the person sees it.
+
+## 2026-11-01: re-measured, still upstream
+
+`npm view @anthropic-ai/mcpb version` → **2.1.2**, modified 2026-10-07: no newer CLI to re-test, so nothing of ours
+changes. `scripts/mcpb.mjs` still signs nothing (the right state while the CLI writes a malformed zip). Stays open as an
+upstream watch: re-run the Proposed check (EOCD comment length = bytes after it, then `verify`) when a version past
+2.1.2 ships.

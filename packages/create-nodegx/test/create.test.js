@@ -582,3 +582,82 @@ test('P112 OWN-020 (R41): `npm create nodegx-cline` is create-nodegx --cline, pi
   assert.deepEqual(read(CLINE_FILE(home)), read(CLINE_FILE(directHome)));
   assert.match(run.stdout, /&& cline\n/);
 });
+
+/**
+ * P128-S3-NOSTUDIOFORTHEEDITOR (CCN-006 AC7, item 3) — the release flip. A copy of the command with `STUDIO_VERSION`
+ * set to `version`, in a temporary folder beside the real `profiles/`, so both arms are graded through the one line
+ * the release session edits (and that line stays one line).
+ */
+const SRC = fs.readFileSync(BIN, 'utf8');
+const STUDIO_LINE = /^const STUDIO_VERSION = .*;$/gm;
+const withStudio = (version) => {
+  assert.equal((SRC.match(STUDIO_LINE) || []).length, 1, 'create-nodegx.js has exactly one `const STUDIO_VERSION = …;` line, the release flip');
+  const root = tmp();
+  fs.mkdirSync(path.join(root, 'bin'));
+  fs.symlinkSync(path.join(__dirname, '..', 'profiles'), path.join(root, 'profiles'), 'dir');
+  const bin = path.join(root, 'bin', 'create-nodegx.js');
+  fs.writeFileSync(bin, SRC.replace(STUDIO_LINE, `const STUDIO_VERSION = ${JSON.stringify(version)};`));
+  return { bin, mod: require(bin) };
+};
+
+/** Every registration one copy of the command writes, as the argv after the command (and the command), per agent. */
+const registrations = (bin) => {
+  const dir = path.join(tmp(), 'apps');
+  const plain = spawnSync(process.execPath, [bin, dir], { encoding: 'utf8' });
+  assert.equal(plain.status, 0, plain.stderr);
+  const vibeDir = path.join(tmp(), 'apps');
+  assert.equal(spawnSync(process.execPath, [bin, vibeDir, '--vibe'], { encoding: 'utf8' }).status, 0);
+  const home = tmp();
+  assert.equal(spawnSync(process.execPath, [bin, path.join(tmp(), 'apps'), '--cline'], { encoding: 'utf8', env: clineEnv(home) }).status, 0);
+  const tomlArgs = (file) => {
+    const toml = fs.readFileSync(file, 'utf8');
+    return [JSON.parse(toml.match(/^command = (.*)$/m)[1]), ...JSON.parse(toml.match(/^args = (\[.*\])$/m)[1])];
+  };
+  const claude = read(path.join(dir, '.mcp.json')).mcpServers.nodegx;
+  const cline = read(CLINE_FILE(home)).mcpServers.nodegx;
+  return {
+    'Claude Code (.mcp.json)': [claude.command, ...claude.args],
+    'OpenCode (opencode.json)': read(path.join(dir, OPENCODE_CONFIG)).mcp.nodegx.command,
+    'Mistral Vibe (.vibe/config.toml)': tomlArgs(path.join(dir, VIBE_CONFIG)),
+    'the Vibe kit (.vibe/config.toml)': tomlArgs(path.join(vibeDir, VIBE_CONFIG)),
+    'Cline (cline_mcp_settings.json)': [cline.command, ...cline.args],
+    'another AI coder (the sentence)': plain.stdout.match(/^Another AI coder: give it the server "(.*)" \(stdio\)\.$/m)[1].split(' ')
+  };
+};
+const AGENT_FLAGS = {
+  'Claude Code (.mcp.json)': [],
+  'OpenCode (opencode.json)': ['--screenshots-to-files'],
+  'Mistral Vibe (.vibe/config.toml)': VIBE_SERVER_FLAGS,
+  'the Vibe kit (.vibe/config.toml)': VIBE_SERVER_FLAGS,
+  'Cline (cline_mcp_settings.json)': CLINE_SERVER_FLAGS,
+  'another AI coder (the sentence)': []
+};
+
+test('P128-S3-NOSTUDIOFORTHEEDITOR: with no Studio version, every agent gets the server alone, exactly as 0.2.8 registered it', () => {
+  const { bin, mod } = withStudio(null);
+  const today = ['npx', '-y', `${MCP_PACKAGE}@${MCP_VERSION}`, '--allow-writes'];
+  const got = registrations(bin);
+  assert.deepEqual(Object.keys(got), Object.keys(AGENT_FLAGS));
+  for (const [agent, argv] of Object.entries(got)) assert.deepEqual(argv, [...today, ...AGENT_FLAGS[agent]], agent);
+  assert.deepEqual(mod.serverEntry('win32'), { type: 'stdio', command: 'cmd', args: ['/c', ...today] });
+  assert.deepEqual(mod.serverEntry('darwin'), { type: 'stdio', command: 'npx', args: today.slice(1) });
+});
+
+test('P128-S3-NOSTUDIOFORTHEEDITOR: with a Studio version set, every agent gets Studio and the server from one npx, the server\'s bin named', () => {
+  const { bin, mod } = withStudio('9.8.7');
+  // `npx -p a -p b <bin>` installs both into one folder and runs <bin> from it; the server's bin is `noodl-mcp`.
+  assert.equal(mod.MCP_BIN, Object.keys(require('../../noodl-mcp/package.json').bin)[0]);
+  const both = ['npx', '-y', '-p', '@nodegx/studio@9.8.7', '-p', `${MCP_PACKAGE}@${MCP_VERSION}`, 'noodl-mcp', '--allow-writes'];
+  const got = registrations(bin);
+  assert.deepEqual(Object.keys(got), Object.keys(AGENT_FLAGS));
+  for (const [agent, argv] of Object.entries(got)) assert.deepEqual(argv, [...both, ...AGENT_FLAGS[agent]], agent);
+  assert.deepEqual(mod.serverEntry('win32'), { type: 'stdio', command: 'cmd', args: ['/c', ...both] });
+});
+
+test('P128-S3-NOSTUDIOFORTHEEDITOR: the shipped Studio version is null or an exact version, and the shipped entry follows it', () => {
+  const { STUDIO_PACKAGE, STUDIO_VERSION } = require('../bin/create-nodegx.js');
+  assert.equal(STUDIO_PACKAGE, '@nodegx/studio');
+  assert.ok(STUDIO_VERSION === null || /^\d+\.\d+\.\d+$/.test(STUDIO_VERSION), `pinned exactly, never a range: ${STUDIO_VERSION}`);
+  const server = `${MCP_PACKAGE}@${MCP_VERSION}`;
+  assert.deepEqual(serverEntry('darwin').args, STUDIO_VERSION ? ['-y', '-p', `${STUDIO_PACKAGE}@${STUDIO_VERSION}`, '-p', server, 'noodl-mcp', '--allow-writes'] : ['-y', server, '--allow-writes']);
+});

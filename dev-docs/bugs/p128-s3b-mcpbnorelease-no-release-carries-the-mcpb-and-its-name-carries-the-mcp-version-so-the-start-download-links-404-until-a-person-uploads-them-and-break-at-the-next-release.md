@@ -65,3 +65,11 @@ ones; then /start's two hrefs drop the version. Item 3 (the Intel bundle on a re
 download as sha1 `bcd7997e…` and `8680d91a…`, the same bytes as the versioned files. Left: /start's two hrefs
 (nodegx-web `site/start/`, drop `0.2.9-`) — not edited here, the folder holds another session's uncommitted changes;
 Studio's `@nodegx/mcp` pin (0.2.8), which the CI leg now refuses; item 3, a real Intel Mac.
+
+## 2026-11-01: /start names the version-free files (nodegx-web 02ae176, not deployed)
+
+`curl -sIL …/releases/latest/download/nodegx-darwin-{arm64,x64}.mcpb` → 200 and 200. `site/start/_page.html` path 1
+now links and shows `nodegx-darwin-arm64.mcpb` / `nodegx-darwin-x64.mcpb` (no other source page named the versioned
+files). The built `site/start/index.html` was NOT regenerated: it holds another session's uncommitted rewrite, so the
+next site build writes it. Left: deploying the site (a push to nodegx-web deploys it: Richard's), Studio's
+`@nodegx/mcp` pin (the CI leg refuses 0.2.8), item 3 (a real Intel Mac).
