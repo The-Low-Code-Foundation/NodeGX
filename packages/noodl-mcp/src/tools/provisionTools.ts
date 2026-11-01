@@ -224,8 +224,11 @@ export function registerProvisionTools(server: McpServer, binding: ProjectBindin
         // DSG-007 — the identity this backend is owned by, and whether this call
         // had to mint it. A caller that sees `minted` is looking at a project
         // that could never have reused a backend before now.
-        projectId: identity.id,
-        projectIdentity: identity.outcome,
+        projectId: result.projectId ?? identity.id,
+        projectIdentity: result.copyOf ? 'reminted-for-copy' : identity.outcome,
+        // P123-STU-COPYADOPTS — this folder is a copy of another that owns the backend of this name: it got its own
+        // id and its own backend, and the sentence says so.
+        ...(result.copyOf ? { copyOf: result.copyOf } : {}),
         reuseVerdict: result.reuseVerdict,
         ...(result.reuseNote ? { reuseNote: result.reuseNote } : {}),
         boundTo: 'nodegx.project.json → metadata.cloudservices',
