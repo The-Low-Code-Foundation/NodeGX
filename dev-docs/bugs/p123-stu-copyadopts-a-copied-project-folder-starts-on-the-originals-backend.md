@@ -1,7 +1,8 @@
 ---
 id: P123-STU-COPYADOPTS
 title: A copied project folder with its binding removed still starts on the original's backend: Studio's Start a backend adopts it
-status: open
+status: fixed
+commit: NodeGX 737cc0cf0; nodegx-studio fcb1b81 (vendor/backend.cjs at ccc14822a carries it)
 severity: high
 area: nodegx-studio / Data → Start a backend (lib/backend.mjs provisionFor) over NodeGX provision (noodl-mcp backend/provision.ts findReusableBackend)
 found: STU-092 drive, 2026-10-30 (a copy of Greenhouse, `metadata.cloudservices` deleted, POST /api/backend-provision)
@@ -78,3 +79,6 @@ the copy case fails (`Expected: not "backend_…"`). Neighbours green, each run 
    so that backend is unrecorded; the proposed Studio change passes `dir` as the 4th argument.
 4. The editor's own `provisionBackend.ts` (noodl-editor) carries its copy of the reuse rule and is not changed here.
 
+## Reaches Studio 2026-11-02 (nodegx-studio fcb1b81)
+
+Studio's `vendor/` rebuilt at NodeGX ccc14822a: `lib/backend.mjs` now provisions through the fixed `provisionBackend`, so *Start a backend* on a copied folder gets the copy its own id and backend, and the copy note arrives in `warnings`. Studio gates green (data 91/91, hosted 46/46). Not done: the optional Studio diff that passes `copyOf` through `provisionFor`'s answer and records the folder in `attachNewBackend`, and the NodeGX editor's own `provisionBackend.ts` copy of the reuse rule (unchanged). Not driven on a real copied project.

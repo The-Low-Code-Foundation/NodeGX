@@ -1,7 +1,8 @@
 ---
 id: P123-STU-FNRUNVALUES
 title: A cloud function's run records each node's outcome but never its values, so Studio cannot say what went in or out of a node
-status: open
+status: fixed
+commit: NodeGX ccc14822a (the backend records values); nodegx-studio fcb1b81 (the step panel shows them)
 severity: medium
 area: nodegx-backend execution record (WorkflowRunner.ts step sink) / noodl-runtime Node.beginOutcome; nodegx-studio Backend tab
 found: STU-092 (Richard's Greenhouse note 3: "can't see a run's data, what went in and out of each step, as in the NodeGX editor"), 2026-10-30
@@ -65,3 +66,7 @@ cloud-secret-node, workflow-*), and earlier 21 files / 446 tests; runtime 27 fil
 seam. fed-003 AC3 caught the first version (the name rule hid `apiKeySecret: "MODEL_KEY"`, the secret's NAME the
 node deliberately records, and redacted `maxTokens` / `usage.*Tokens`), which is why the node's own context keeps
 the old scrub and token counts are spared.
+
+## Studio half, fixed 2026-11-02 (nodegx-studio fcb1b81)
+
+A function step's panel (Backend → Functions, a step clicked) has **In the last run**: ✓ Ran / ✗ Failed here, *What went in* (`inputData`) and *What came out* (`outputData.outputs`), as `GET /executions/:id` holds them, and says "(not recorded by this backend)" for a backend from before ccc14822a. Gate row in `check:hosted`: a step that ran in a signed-in call, opened, shows exactly its recorded input and output port names, or that this backend records none. **Measured tonight only in the second arm:** Studio runs `@nodegx/mcp` 0.2.8's backend from npm, which records no values; the recorded arm is graded in the backend spec (7/7) and reaches Studio with the next `@nodegx/mcp` release (or `NODEGX_REPO` with a rebuilt nodegx-backend). Studio gates, one at a time on 2026-11-02: editor 259/259, data 91/91, hosted 46/46, functions 695/695 + 50/50, the rest green (check:app could not run: the screen was locked, see P123-STU008-APPCHECKPUBLISH).

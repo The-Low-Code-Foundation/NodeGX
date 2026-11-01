@@ -1,9 +1,8 @@
 ---
 id: P123-STU008-APPCHECKPUBLISH
 title: Studio's app gate stops at Publish, which never answers, so check:app reads 26/30 at HEAD
-status: wontfix
-reason: does not reproduce — check:app 67/67 on 2026-11-01 run straight after every other Studio gate in one chain (the condition of every past stop), as on 10-30 alone (twice) and 10-24; 3b is instrumented (a3a02fd) so a future stop names its cause
-commit: nodegx-studio d0d16b2 (not reproduced; see the last section)
+status: fixed
+commit: nodegx-studio fcb1b81 (the gate names a locked screen)
 severity: medium
 area: nodegx-studio `app/check.mjs` step 3b (STU-008 Publish through the header button)
 found: STU-071 (opennoodl-d7), 2026-10-23 22:40, running check:app before committing
@@ -68,3 +67,30 @@ panel up); the second run 67/67. Once, not chased: if it comes back, read what s
 ## 2026-11-01: green in the chain, closed as not reproduced
 
 `check:app` **67/67** at nodegx-studio bd4fff1, run in one chain straight after `check:data`, `check:timeline`, `check:hosted`, the functions and automations gates and the importer (the condition the 10-30 notes said fitted every stop), each step niced, load 3–5. Every Publish row green. Closed as `wontfix` (not reproduced). The instrumentation from a3a02fd stays: if 3b stops again it reports `samePage`, `busy` and the page's errors, and the row should be reopened with them.
+
+## 2026-11-02 00:00–00:40: REOPENED. It reproduces every time, and the press is the part that fails
+
+The closure above lasted one gate run. From 23:53 on 2026-11-01, `check:app` stopped at 3b **seven times in seven runs**
+(36/40; 63/67 once the gate calls Publish directly, below), each run alone, niced, load about 2. The bisect shows it is
+not tonight's code: it fails the same way with s35's committed `studio.html` (bd4fff1), with the previous
+`vendor/backend.cjs`, and with the previous `vendor/specs.js`. The only green run was the first chain at about 23:30.
+
+The new instrumentation (nodegx-studio `app/check.mjs` 3b, uncommitted at the time of writing) says:
+- **the press lands on the button.** It presses only where `elementFromPoint` is `#publishbtn`
+  (`point {1392,22}`, `landed: "publishbtn"`).
+- **the button is ready.** It is wired (`onclick` set, `window.studio.publish` present), not disabled, and reads
+  "Publish". The page is still the one that pressed it.
+- **nothing starts.** It never reads "Publishing…" and `__ob.published` never arrives (120 s). `publishApp` sets that
+  text synchronously, so the click handler did not run.
+- **Publish itself works.** `window.__ob.publish()` called from the page right after answers in full: 16 files, the
+  backend question asked, every sentence said.
+- **the preview is down in the same runs.** Studio's status reads "The app is not shown: Timed out after 20000 ms
+  waiting for the app to draw." The gate never read the status in the green runs, so it is not known whether this is new.
+
+So the CDP mouse press at the button's centre does not become a click on it, while a script call works. Next: log
+`pointerdown`/`mousedown`/`click` on `document` (capture) around the press, to see which event stops and where. Then
+check the preview timeout against a green run. Whether a person's real click is affected is **not measured**.
+
+## Cause found 2026-11-02 00:45: the Mac's screen was locked
+
+`ioreg -n Root -d1` read `IOConsoleLocked = true`. On a locked console every window is occluded: Electron draws no frames (hence "Timed out … waiting for the app to draw") and a CDP mouse press reaches no element. A capture listener on `document` logged **no** pointerdown, mousedown or click for the press, while scripts still ran (the direct `__ob.publish()` answered in full). That explains each observation above. The earlier stops read as "load" or "after other gates" fit runs made while the screen was locked; the green ones fit an unlocked screen. Not a Studio defect: nobody can press a locked screen. **Fixed in the gate:** `app/check.mjs` reads `IOConsoleLocked` first and stops with that reason (`STUDIO_CHECK_LOCKED_OK=1` overrides), and 3b keeps its press diagnostics. To confirm: `check:app` with the screen unlocked (not possible tonight).

@@ -1,7 +1,8 @@
 ---
 id: P123-GH-NOCREATEDAT
 title: A record's own "when it was made" cannot be shown: createdAt is in no ⚡ menu and no row
-status: open
+status: fixed
+commit: NodeGX f3eee23d9 (runtime and node spec); nodegx-studio fcb1b81 (⚡, rows, sort)
 severity: medium
 area: nodegx-studio / repeating group row inputs, ⚡
 found: STU-091 Greenhouse, a whole app built through Studio's UI over CDP, 2026-10-30
@@ -64,3 +65,6 @@ Left (Studio, and a release): offer `prop-createdAt` / `prop-updatedAt` in ⚡ a
 `updatedAt`; Studio's preview reaches the new ports and the Date value only with an `@nodegx/preview` release carrying
 this (until then a row's `createdAt` input gets the ISO string). Not changed: the User node (`user-ports.ts`).
 
+## Studio half, fixed 2026-11-02 (nodegx-studio fcb1b81)
+
+`createdAt` and `updatedAt` are offered wherever ⚡ reads a record's fields (the page's own thing, a first page data item) and in page data's sort list (`withBuiltInDates`; not in `fieldsOf`, so a new page still shows its type's first real field). A new repeating group's row gets `createdAt` / `updatedAt` Component Inputs, which For Each fills by name. Gate rows in `check:editor`: ⚡ offers *This page's Note's createdAt* and *updatedAt*; the Note row carries createdAt. Reaches Studio's preview as a Date (rather than the ISO text) with the next `@nodegx/preview` release; the wire works today either way. Studio gates, one at a time on 2026-11-02: editor 259/259, data 91/91, hosted 46/46, functions 695/695 + 50/50, the rest green (check:app could not run: the screen was locked, see P123-STU008-APPCHECKPUBLISH).

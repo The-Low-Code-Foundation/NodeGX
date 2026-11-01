@@ -144,6 +144,14 @@ export const STUDIO_VOCABULARY = {
           "pageDataShown",
           "pageDataAsk"
         ]
+      },
+      {
+        "kind": "currentUser",
+        "words": "the current user",
+        "type": "net.noodl.user.User",
+        "metadata": [
+          "currentUser"
+        ]
       }
     ]
   },
