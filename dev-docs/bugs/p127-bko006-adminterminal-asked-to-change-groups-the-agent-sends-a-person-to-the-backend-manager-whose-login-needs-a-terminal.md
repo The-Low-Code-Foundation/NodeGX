@@ -1,7 +1,8 @@
 ---
 id: P127-BKO006-ADMINTERMINAL
 title: Asked to change who can do what, the Desktop agent sends the person to the backend manager, whose first login needs a command typed in a terminal
-status: open
+status: fixed
+commit: b25b12bec (NodeGX: get_backend_admin_dashboard); nodegx-studio bd4fff1 (Privacy groups, the grid, Backend manager ↗)
 severity: high
 area: "noodl-mcp `get_backend_admin_dashboard` (backendTools.ts: its description calls its URL \"the URL to send a human to\"); the backend manager's first login (BMG-014 setup, needs the admin credential, which is only on disk)"
 found: P127 BKO-006, Richard's Desktop run (homework_feedback, Sonnet 5.5, map 0.1.7 bundle), 2026-10-31
@@ -29,3 +30,7 @@ person to a page that needs a credential they don't have.
 person; Privacy in Studio is that place, and the agent's own tools do the rest. (2) Once NOGROUPS is fixed, the
 guidance names Privacy for groups. Regression: a stranger round where the brief asks for a group of teachers and the
 person asks "how do I make someone a teacher?"; grade that the reply names neither the manager nor a terminal.
+
+## Fixed (s35, 2026-10-31; landed 2026-11-01)
+
+Both halves: (1) `get_backend_admin_dashboard` no longer calls its URL the one to send a human to, and answers `forAPerson` (do it yourself, or Studio's Privacy and App data → User); `backendTools.test.ts` green. (2) Studio's Privacy makes groups and puts people in them (P123-GH-NOGROUPS), draws the manager's grid, and *Backend manager ↗* opens the manager signed in, so no terminal is needed. Reaches a person with the next `@nodegx/mcp` and Studio release. **Not re-measured** with the regression named above (a stranger round asking "how do I make someone a teacher?").

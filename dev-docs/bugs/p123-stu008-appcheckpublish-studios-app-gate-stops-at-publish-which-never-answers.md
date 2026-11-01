@@ -1,7 +1,8 @@
 ---
 id: P123-STU008-APPCHECKPUBLISH
 title: Studio's app gate stops at Publish, which never answers, so check:app reads 26/30 at HEAD
-status: open
+status: wontfix
+reason: does not reproduce — check:app 67/67 on 2026-11-01 run straight after every other Studio gate in one chain (the condition of every past stop), as on 10-30 alone (twice) and 10-24; 3b is instrumented (a3a02fd) so a future stop names its cause
 commit: nodegx-studio d0d16b2 (not reproduced; see the last section)
 severity: medium
 area: nodegx-studio `app/check.mjs` step 3b (STU-008 Publish through the header button)
@@ -63,3 +64,7 @@ never read from the app's stdout. Next time it stops, keep `running.log()` and r
 `check:app` on nodegx-studio be3a9c5, run alone under HEAVY.lock (load 3.2–4.9): every Publish row green both times.
 The first run failed one other line, "Close puts it away" (the import report's Close, clicked by position, left the
 panel up); the second run 67/67. Once, not chased: if it comes back, read what sits over `#reportclose` at the click.
+
+## 2026-11-01: green in the chain, closed as not reproduced
+
+`check:app` **67/67** at nodegx-studio bd4fff1, run in one chain straight after `check:data`, `check:timeline`, `check:hosted`, the functions and automations gates and the importer (the condition the 10-30 notes said fitted every stop), each step niced, load 3–5. Every Publish row green. Closed as `wontfix` (not reproduced). The instrumentation from a3a02fd stays: if 3b stops again it reports `samePage`, `busy` and the page's errors, and the row should be reopened with them.

@@ -1,7 +1,8 @@
 ---
 id: P123-STU-NOFNDEPLOY
 title: Studio's Start a backend never puts the app's cloud functions on it, so every workflow step that runs one fails
-status: open
+status: fixed
+commit: nodegx-studio bd4fff1
 severity: medium
 area: nodegx-studio / Data → Start a backend (lib/backend.mjs provisionFor), Backend tab
 found: STU-093 (Richard's Greenhouse note 4), driving a copy of Greenhouse on its own backend, 2026-10-31
@@ -29,3 +30,7 @@ running app's own Cloud Function node gets on such a backend (the same "not foun
 Fix direction: `provisionFor` deploys the project's `__cloud__/` components (through whatever path the agent's tools
 use to put them there: not read yet), and a function saved in Studio is redeployed, so *Start a backend* and the
 Backend tab tell the same story.
+
+## Fixed (s35, 2026-10-31; landed 2026-11-01)
+
+*Start a backend* puts the app's cloud functions on the backend it started (`serve.mjs`, after the provision's answer), and a function saved in the Backend tab is put there again (`lib/publish.mjs` `deployFunctionsToDev`). Every Studio gate green on 2026-11-01, run one at a time.
