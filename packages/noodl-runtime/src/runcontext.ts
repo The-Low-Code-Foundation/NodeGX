@@ -60,6 +60,17 @@ export interface RuntimeStepStart {
    * never less safe than the log.
    */
   inputData?: Record<string, unknown>;
+  /**
+   * P123-STU-FNRUNVALUES — the node's input port values at the moment it began acting, keyed by
+   * port name. Present only when the host set {@link NodeRunContext.recordValues}; signal ports
+   * and `undefined` values are left out.
+   *
+   * ⚠️ **LIVE references, not copies.** The runtime does not clone (that would cost every host,
+   * and a deep clone of a `Model` is not a thing). The host must serialise them inside
+   * `beginStep`, before control returns, and is responsible for redacting them exactly as for
+   * {@link inputData}.
+   */
+  inputs?: Record<string, unknown>;
 }
 
 /** How an invocation ended. `code` and `message` are present on `failure` only. */
@@ -85,6 +96,14 @@ export interface RuntimeStepEnd {
    * this is the noun that sentence is about, and a host is free to ignore it.
    */
   detail?: unknown;
+  /**
+   * P123-STU-FNRUNVALUES — the node's output port values as the invocation ended (after the
+   * outcome's signals were sent), keyed by port name. Present only when the host set
+   * {@link NodeRunContext.recordValues}. Signal ports, `undefined` values and a getter that
+   * throws are left out. The same two warnings as {@link RuntimeStepStart.inputs}: live
+   * references to serialise inside `endStep`, and the host redacts.
+   */
+  outputs?: Record<string, unknown>;
 }
 
 /**
@@ -168,6 +187,16 @@ export interface NodeRunContext {
   beginStep?(step: RuntimeStepStart): unknown;
   /** Close the invocation opened by {@link beginStep}. Never called without a handle from it. */
   endStep?(handle: unknown, end: RuntimeStepEnd): void;
+  /**
+   * P123-STU-FNRUNVALUES — ask the runtime to hand {@link beginStep} the node's input port values
+   * and {@link endStep} its output port values, so the record can say what went into and came out
+   * of each action after the run is over (the live trace is gone by then).
+   *
+   * **Opt-in, and only the backend's cloud-function runner opts in.** A host that leaves it unset
+   * — the browser, the editor preview, every spec that attaches its own `runContext` — gets the
+   * step objects exactly as before and pays nothing: the snapshot is never built.
+   */
+  recordValues?: boolean;
   /**
    * FED-003 — where a model call's cost lands. Absent in the browser, and absent in any host
    * that has no execution record to stamp; a node must treat it as optional exactly as it treats

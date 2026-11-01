@@ -35,8 +35,13 @@
  *    at all; the missing method is the second layer, not the first.)
  *  - **Nothing here logs.** Not the value, not on failure. The resolver's error
  *    messages are built from the NAME alone (`service.ts` resolveFunctionSecret),
- *    and the execution-history record stores only the scrubbed request — a cloud
- *    function's internal node outputs are never written anywhere.
+ *    and the execution-history record stores only the scrubbed request.
+ *  - **The run record redacts this node's outputs whole, by type.** Since
+ *    P123-STU-FNRUNVALUES a cloud function's record carries each acting node's
+ *    port values (nodegx-backend `workflow/stepValues.ts`); this node's `Value`
+ *    is written there as `[REDACTED]` whatever its length — value scrubbing
+ *    alone misses a secret shorter than 8 characters. A node it is WIRED into
+ *    gets the value scrub, as a log line does.
  *  - The one thing this node cannot prevent is an author wiring `Value` into a
  *    Response. That is the author writing a credential into their own API's
  *    reply, and no node can second-guess it.

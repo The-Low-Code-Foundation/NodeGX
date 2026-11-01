@@ -43,7 +43,7 @@ import type { ExecutionLogger as CloudExecutionLogger } from '@cloud-runtime/exe
 import type { ExecutionStore as CloudExecutionStore } from '@cloud-runtime/execution-history/store';
 
 import { logger } from '../ops/logger';
-import { boundText, boundValue, omittedMarker, RecordBounds } from './record-bounds';
+import { boundText, boundValue, isBoundedMarker, omittedMarker, RecordBounds } from './record-bounds';
 
 // Runtime require, type import — the same split `ExecutionStore.ts` explains: the cloud runtime
 // is bundled in by esbuild (jest: moduleNameMapper) and must not enter this package's module
@@ -80,6 +80,23 @@ export interface RecordCappedStamp {
 export const RECORD_CAPPED_HINT =
   'this run produced more record than executions.maxValueBytes / maxRunBytes allow — the run itself completed; ' +
   'raise the bounds in ops.json or make the workflow produce less';
+
+/**
+ * How many members of a plain object, to two levels (a step's `inputData` ports, its
+ * `outputData.outputs` ports), are `__truncated` markers.
+ */
+function countTruncatedMembers(value: unknown, depth = 0): number {
+  if (depth > 1 || !value || typeof value !== 'object' || Array.isArray(value)) return 0;
+  let n = 0;
+  for (const member of Object.values(value as Record<string, unknown>)) {
+    if (isBoundedMarker(member)) {
+      if ((member as { __truncated?: unknown }).__truncated === true) n++;
+    } else {
+      n += countTruncatedMembers(member, depth + 1);
+    }
+  }
+  return n;
+}
 
 export class BoundedExecutionLogger extends CloudLogger {
   private readonly getBounds: () => RecordBounds;
@@ -152,8 +169,12 @@ export class BoundedExecutionLogger extends CloudLogger {
     if (value === undefined || value === null) return undefined;
 
     const bounded = boundValue(value, this.bounds.maxValueBytes);
-    if (bounded.truncated) {
-      this.valuesTruncated++;
+    // P123-STU-FNRUNVALUES — a cloud function's step arrives with each PORT already bounded
+    // (`workflow/stepValues.ts`), so its cuts are one level down, where the whole-value test above
+    // cannot see them. Counted here so `recordCapped` and the one-time warning still tell the truth.
+    const portCuts = bounded.truncated ? 0 : countTruncatedMembers(bounded.value);
+    if (bounded.truncated || portCuts > 0) {
+      this.valuesTruncated += bounded.truncated ? 1 : portCuts;
       if (!this.announcedTruncation) {
         this.announcedTruncation = true;
         logger.warn('execution.record.truncated', {

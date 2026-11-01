@@ -28,10 +28,12 @@ import { promises as fs } from 'fs';
 import * as path from 'path';
 
 import type { ExecutionHistory } from '../execution/ExecutionStore';
+import { DEFAULT_RECORD_BOUNDS } from '../execution/ExecutionStore';
 import { boundText, boundValue, RecordBounds } from '../execution/record-bounds';
 import { logger } from '../ops/logger';
 import { bundleWiringProblems } from './bundleWiring';
 import { FunctionRuns } from './FunctionRuns';
+import { recordablePortValues, redactAllPorts, SECRET_OUTPUT_NODE_TYPES, StepValueOptions } from './stepValues';
 // SB-016 — the endpoint predicate, shared with the deploy interlock so the gate
 // and the runner cannot disagree about what a function is.
 import {
@@ -350,8 +352,20 @@ export class WorkflowRunner {
     // a thousand identical answers.
     const httpUserAgent = this.getHttpUserAgent ? this.getHttpUserAgent() : undefined;
 
+    // P123-STU-FNRUNVALUES — the steps opened for a node whose outputs are credentials, so `endStep`
+    // (which is handed only the step's handle) can redact them whole.
+    const secretOutputSteps = new Set<string>();
+    const valueOptions = (): StepValueOptions => ({
+      scrub: this.scrubSecretValues,
+      maxValueBytes: (this.getRecordBounds ? this.getRecordBounds() : DEFAULT_RECORD_BOUNDS).maxValueBytes
+    });
+
     return {
       requestId,
+      // P123-STU-FNRUNVALUES — ask the runtime for each acting node's port values. The record must
+      // survive the run (last night's run has no live trace), so the values are written here,
+      // through `stepValues.ts` (detach, redact by name, redact by value, bound).
+      recordValues: true,
       // FED-004 §3.2 / §3.3 — both absent in the browser, which is what makes the `Conditional`
       // port degrade rather than branch.
       ...(this.httpValidators ? { httpValidators: this.httpValidators } : {}),
@@ -426,15 +440,16 @@ export class WorkflowRunner {
           return undefined;
         }
 
-        const scrub = this.scrubSecretValues;
-        const inputData =
-          step.inputData !== undefined
-            ? ((scrub ? scrub.scrubValue(step.inputData) : step.inputData) as Record<string, unknown>)
-            : undefined;
+        // P123-STU-FNRUNVALUES — the node's input PORT values, the way a workflow step's
+        // `inputData` holds its params: one key per port. The node's own context (`Log` hands over
+        // its line) is laid over them, being the node's deliberate account of the invocation, and
+        // keeps the by-value scrub it always had (stepValues.ts says why not by name).
+        const inputData = recordablePortValues(step.inputs, valueOptions(), step.inputData);
 
         // `startNode` answers `''` when history is off or no execution is open. Normalised to
         // `undefined` so the runtime's "was this recorded" test is one check, not two.
         const stepId = execLogger.startNode({ nodeId: step.nodeId, nodeType: step.nodeType, inputData });
+        if (stepId && SECRET_OUTPUT_NODE_TYPES.has(step.nodeType)) secretOutputSteps.add(stepId);
         return stepId || undefined;
       },
 
@@ -484,7 +499,18 @@ export class WorkflowRunner {
           ? ((scrub ? scrub.scrubValue(raw) : raw) as Record<string, unknown>)
           : undefined;
 
-        execLogger.completeNode(handle, !failed, { outcome: end.status, ...(detail ? { detail } : {}) }, reason);
+        // P123-STU-FNRUNVALUES — the node's output PORT values, under `outputs` rather than beside
+        // `outcome`: a node may own a port called `outcome` or `detail`, and those two keys already
+        // mean something on this object. A `Secret`'s are redacted whole (stepValues.ts).
+        const secretOutputs = secretOutputSteps.delete(handle);
+        const outputs = secretOutputs ? redactAllPorts(end.outputs) : recordablePortValues(end.outputs, valueOptions());
+
+        execLogger.completeNode(
+          handle,
+          !failed,
+          { outcome: end.status, ...(detail ? { detail } : {}), ...(outputs ? { outputs } : {}) },
+          reason
+        );
       },
 
       /**

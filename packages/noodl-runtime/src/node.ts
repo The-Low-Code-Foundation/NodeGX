@@ -950,8 +950,21 @@ Node.prototype.raiseRuntimeError = function (code: string, message: string, deta
 
   // Opened and closed in one breath: a hand-rolled failure has no "started" moment to record —
   // the node reached this line having already decided it could not act.
-  const step = runContext.beginStep({ nodeId: this.id, nodeType: this.name });
-  if (step !== undefined && step !== null) runContext.endStep(step, { status: 'failure', code, message, detail });
+  const recordValues = !!runContext.recordValues;
+  const step = runContext.beginStep({
+    nodeId: this.id,
+    nodeType: this.name,
+    ...(recordValues ? { inputs: snapshotInputValues(this) } : {})
+  });
+  if (step !== undefined && step !== null) {
+    runContext.endStep(step, {
+      status: 'failure',
+      code,
+      message,
+      detail,
+      ...(recordValues ? { outputs: snapshotOutputValues(this) } : {})
+    });
+  }
 };
 
 /**
@@ -981,6 +994,72 @@ Object.defineProperty(Node.prototype, 'diagnosticsEnabled', {
     return diagnosticsEnabled(this);
   }
 });
+
+/** The two `NodeRegister` reads {@link snapshotInputValues} makes. */
+interface DeclaredPortsRegister {
+  hasNode(type: string): boolean;
+  getNodeMetadata(type: string): { inputs?: Record<string, { type?: unknown }> };
+}
+
+/** A port whose declared type is `signal`, in either spelling a definition uses. */
+function isSignalPortType(type: unknown): boolean {
+  if (type === 'signal') return true;
+  return !!type && typeof type === 'object' && (type as { name?: unknown }).name === 'signal';
+}
+
+/**
+ * P123-STU-FNRUNVALUES — the node's input port values, for a host that asked for them
+ * ({@link NodeRunContext.recordValues}). A shallow map of LIVE values: the host serialises.
+ *
+ * ⚠️ **Module functions, not `Node.prototype` methods**, for the reason `reportOutcome` records: several
+ * suites build a node as a bag of bound prototype methods, and a new method called from here would
+ * be absent there. Every field read is guarded for the same reason.
+ */
+function snapshotInputValues(node: RuntimeNode): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  const values = (node._inputValues || {}) as Record<string, unknown>;
+  const inputs = (node._inputs || {}) as Record<string, { type?: unknown } | undefined>;
+  // A declared signal input's instance entry is `{ set }` only (`nodedefinition.ts` keeps its type
+  // in the METADATA), so the instance cannot say it is a signal; the registered metadata can.
+  // Measured: without this, `Log.log`, `Secret.fetch` and `Response.send` were recorded as `true`.
+  let declared: Record<string, { type?: unknown } | undefined> = {};
+  try {
+    const register = node.context && (node.context as { nodeRegister?: DeclaredPortsRegister }).nodeRegister;
+    if (register && register.hasNode(node.name)) declared = register.getNodeMetadata(node.name).inputs || {};
+  } catch (e) {
+    // Metadata is a refinement; a node without it still records its values.
+  }
+  for (const name of Object.keys(values)) {
+    const value = values[name];
+    if (value === undefined || typeof value === 'function') continue;
+    const port = inputs[name];
+    if (port && isSignalPortType(port.type)) continue;
+    const meta = declared[name];
+    if (meta && isSignalPortType(meta.type)) continue;
+    out[name] = value;
+  }
+  return out;
+}
+
+/** The node's output port values, read through each port's getter. See {@link snapshotInputValues}. */
+function snapshotOutputValues(node: RuntimeNode): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  const list = (node._outputList || []) as Array<{ name: string; type?: unknown; value: unknown }>;
+  for (const port of list) {
+    if (!port || isSignalPortType(port.type)) continue;
+    let value: unknown;
+    try {
+      value = port.value;
+    } catch (e) {
+      // A getter that throws on a node's current state is that node's business; the record
+      // leaves the port out rather than failing the run it is describing.
+      continue;
+    }
+    if (value === undefined || typeof value === 'function') continue;
+    out[port.name] = value;
+  }
+  return out;
+}
 
 /**
  * Open an invocation of an action, so its outcome can be reported exactly once.
@@ -1016,7 +1095,13 @@ Node.prototype.beginOutcome = function (inputData) {
   const scope = this.nodeScope as { runContext?: NodeRunContext } | undefined;
   const runContext = scope && scope.runContext;
   if (runContext && runContext.beginStep) {
-    token.step = runContext.beginStep({ nodeId: this.id, nodeType: this.name, inputData });
+    token.step = runContext.beginStep({
+      nodeId: this.id,
+      nodeType: this.name,
+      inputData,
+      // P123-STU-FNRUNVALUES — opt-in; absent, the step object is exactly what it always was.
+      ...(runContext.recordValues ? { inputs: snapshotInputValues(this) } : {})
+    });
   }
 
   return token;
@@ -1170,7 +1255,10 @@ Node.prototype.reportOutcome = function (token, outcome, options) {
         message: options && options.message,
         // The subject of the failure, for a record whose steps are all called `http`. See
         // `RuntimeStepEnd.detail` — the node already composes this for the error bus.
-        detail: options && options.detail
+        detail: options && options.detail,
+        // P123-STU-FNRUNVALUES — read now, after the signals: "the outcome is the last thing an
+        // action does", so every value it produced is already on its ports.
+        ...(runContext.recordValues ? { outputs: snapshotOutputValues(this) } : {})
       });
     }
   }
