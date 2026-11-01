@@ -163,7 +163,7 @@ export const STUDIO_VOCABULARY = {
     ]
   },
   "readOnly": {
-    "$comment": "Drawn whole and read only: a cloud function's steps (Workflow, On the backend) and the wiring underneath a page (Design, Logic on this page).",
+    "$comment": "Drawn whole: a cloud function's steps (Backend, Functions: each step's settings and script are edited there and put on the backend; its wires are not) and the wiring underneath a page (Design, Logic on this page: read only).",
     "componentPrefix": "__cloud__/"
   },
   "subTabs": {
@@ -173,8 +173,11 @@ export const STUDIO_VOCABULARY = {
       "Page data"
     ],
     "workflow": [
-      "Workflows on this page",
-      "On the backend"
+      "Workflows on this page"
+    ],
+    "backend": [
+      "On its own",
+      "Functions"
     ],
     "data": [
       "Data types",

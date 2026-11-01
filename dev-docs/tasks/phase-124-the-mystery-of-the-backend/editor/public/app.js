@@ -20,9 +20,10 @@ const PALETTES = {
     screen: '#5ca9ff', green: '#45d08a', red: '#f97066', blue: '#4da3ff', purple: '#a78bfa', cyan: '#35c3e8',
     amber: '#fdb022', pink: '#f776c4', gold: '#f2c94c'
   },
-  // Studio's own tokens (editor/studio.html :root) where it has one
+  // Studio's own tokens (editor/studio.html :root) where it has one. Richard, 2026-10-31: the light map should look like
+  // Studio's Data model beside it, "not coherent" with nebulae and stars: a dotted ground (`grid`), plain cards (`plain`)
   light: {
-    ground: '#eef0f3', star: '#171b22', starAlpha: 0.2, particle: '#171b22', dot: '#ffffff',
+    ground: '#eef0f3', star: '#171b22', starAlpha: 0.2, particle: '#171b22', dot: '#ffffff', grid: 'rgba(23,27,34,0.13)', plain: true,
     text: '#171b22', sub: '#3d4452', dim: '#717886', card: '#ffffff', cardSel: '#f7f8fa', line: '#d3d7de',
     labelBg: 'rgba(255,255,255,0.94)', wash: 'rgba(23,27,34,0.07)',
     screen: '#2e7cd6', green: '#16a34a', red: '#dc2626', blue: '#1f5eff', purple: '#7c5ce0', cyan: '#0e9cc4',
@@ -494,6 +495,7 @@ function toWorld(sx, sy) {
 function roundRect(x, y, w, h, r) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
+  if (C.plain) { ctx.roundRect(x, y, w, h, 12); return; } // the light look's card is Data model's: no notch
   // the block's notch, like a building block
   ctx.lineTo(x + 18, y);
   ctx.lineTo(x + 24, y + 5);
@@ -541,8 +543,14 @@ function draw(now) {
   ctx.fillStyle = (LOOK === 'dark' && state.map?.look?.colors?.ground) || C.ground;
   ctx.fillRect(0, 0, Wd, Hd);
 
-  // nebulae and stars, drifting slower than the map
-  const neb = [
+  // the light look: Data model's dotted ground, the dots moving with the map
+  if (C.grid) {
+    const step = 22 * state.cam.z, r = Math.max(0.6, state.cam.z);
+    ctx.fillStyle = C.grid;
+    for (let x = ((state.cam.x % step) + step) % step; x < Wd; x += step) for (let y = ((state.cam.y % step) + step) % step; y < Hd; y += step) { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
+  }
+  // nebulae and stars, drifting slower than the map (the dark look's)
+  const neb = C.grid ? [] : [
     [0.18, 0.35, C.screen],
     [0.55, 0.6, C.purple],
     [0.85, 0.3, C.green]
@@ -555,7 +563,7 @@ function draw(now) {
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, Wd, Hd);
   }
-  for (const s of state.stars) {
+  for (const s of C.grid ? [] : state.stars) {
     const x = ((s.x + state.cam.x * s.d) % Wd + Wd) % Wd;
     const y = ((s.y + state.cam.y * s.d) % Hd + Hd) % Hd;
     ctx.globalAlpha = (0.35 + 0.35 * Math.sin(now / 900 + s.tw)) * C.starAlpha;
@@ -800,12 +808,12 @@ function drawNode(n, now, rel) {
   if (sel || hov || (lens && lens.can && n.kind !== 'screen' && n.kind !== 'trigger')) {
     ctx.shadowColor = lens && lens.direct ? C.red : color;
     ctx.shadowBlur = sel ? 28 : 18;
-  }
+  } else if (C.plain) { ctx.shadowColor = 'rgba(17,24,39,0.10)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 4; } // a card's soft shadow, as Data model's
   roundRect(n.x, n.y, n.w, n.h, 10);
   ctx.fillStyle = sel ? C.cardSel : C.card;
   ctx.fill();
-  ctx.shadowBlur = 0;
-  ctx.lineWidth = sel ? 2.4 : 1.2;
+  ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+  ctx.lineWidth = sel ? 2.4 : C.plain ? 1.5 : 1.2;
   ctx.strokeStyle = sel || hov ? color : C.line;
   if ((n.kind === 'fn' && !n.fn.deployed) || (n.kind === 'table' && n.table.notOnBackend) || (n.kind === 'trigger' && n.trigger.notOnBackend)) ctx.setLineDash([5, 4]);
   ctx.stroke();
@@ -816,7 +824,8 @@ function drawNode(n, now, rel) {
   roundRect(n.x, n.y, n.w, n.h, 10);
   ctx.clip();
   ctx.fillStyle = color;
-  ctx.fillRect(n.x, n.y, 6, n.h);
+  if (C.plain) ctx.fillRect(n.x, n.y, n.w, 4); // Data model's strip, along the top
+  else ctx.fillRect(n.x, n.y, 6, n.h);
   ctx.restore();
 
   // icon

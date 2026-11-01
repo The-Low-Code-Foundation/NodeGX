@@ -188,6 +188,13 @@ describeOrSkip('MCP backend permission tools (live backend)', () => {
     expect(data.security.hasReadonlyTier).toBe(false);
     expect(data.sections.collections).toBe(true);
     expect(data.sections.permissions).toBe(true);
+    // P127-BKO006-ADMINTERMINAL: the agent sent a person here, and the first sign-in needed a terminal. The answer says
+    // where a person goes instead, and the description no longer calls the URL the one to send a human to
+    expect((data as unknown as { forAPerson: string }).forAPerson).toMatch(/Do not send a person here.*Data → Privacy.*App data → User/s);
+    const listed = await session.client.listTools();
+    const described = listed.tools.find((t) => t.name === 'get_backend_admin_dashboard')?.description ?? '';
+    expect(described).not.toMatch(/send a human/);
+    expect(described).toMatch(/Data → Privacy/);
   });
 
   it('the full agent flow: lock a collection to a role, create it, assign a user, verify the effect', async () => {

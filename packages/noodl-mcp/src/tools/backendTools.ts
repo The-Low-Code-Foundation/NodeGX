@@ -295,7 +295,10 @@ export function registerBackendReadTools(server: McpServer): void {
       title: 'Get the backend admin dashboard status',
       description:
         'Whether a running backend serves its own web admin dashboard (BAK-005), where it is, and what it exposes. ' +
-        'Answers: the URL to send a human to, whether the credential in use is the FULL admin tier or the ' +
+        'A developer\'s page, not where a person changes groups or who may do what: do that yourself (create_backend_role, ' +
+        'assign_role_user, set_collection_permissions), or point them to NodeGX Studio\'s Data → Privacy. The dashboard\'s ' +
+        'first sign-in needs the admin credential, a file on disk (P127-BKO006-ADMINTERMINAL). ' +
+        'Answers: its URL, whether the credential in use is the FULL admin tier or the ' +
         'read-only one, whether a read-only tier is provisioned at all, whether enforcement is active or the ' +
         'backend is in dev-open (in which case the dashboard is reachable with no credential), and which sections ' +
         'this build can actually serve. A backend started with --no-admin reports `enabled: false` rather than ' +
@@ -323,6 +326,12 @@ export function registerBackendReadTools(server: McpServer): void {
         security: data.security,
         firstRun: data.firstRun,
         sections: data.features,
+        // P127-BKO006-ADMINTERMINAL: a person was sent here, and its first sign-in needs the credential from a file
+        forAPerson:
+          'Do not send a person here: signing in needs the admin credential, which only a terminal reads. Change groups and ' +
+          'rules yourself (create_backend_role, assign_role_user, set_collection_permissions) and say what you did, or point ' +
+          'them to NodeGX Studio: Data → Privacy (groups, and ticks for who may list, open, create, change and delete) and ' +
+          'App data → User (a person\'s groups). Studio\'s Privacy also opens this dashboard already signed in.',
         note: data.readonly
           ? 'The credential this server holds is the READ-ONLY tier: it can read everything and change nothing.'
           : undefined
