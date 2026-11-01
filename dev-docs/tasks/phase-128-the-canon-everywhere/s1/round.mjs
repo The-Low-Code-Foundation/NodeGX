@@ -13,7 +13,8 @@ const name = 'muddy';
 const [labRoot] = process.argv.slice(2);
 if (!labRoot) throw new Error('usage: round.mjs <labRoot> [--again <message.txt>]');
 const REPO = path.resolve(HERE, '../../../..');
-const BRIEF = '/Users/richardosborne/vscode_projects/NodeGX test projects/Muddy Paws Shelter/docs/decisions/000-initial-scope.md';
+// BRIEF: another brief (2026-11-02: the original is no longer on disk; brief-substitute.md stands in, labelled as such)
+const BRIEF = process.env.BRIEF ? path.resolve(process.env.BRIEF) : '/Users/richardosborne/vscode_projects/NodeGX test projects/Muddy Paws Shelter/docs/decisions/000-initial-scope.md';
 const DIST = path.join(REPO, 'packages/noodl-mcp/dist/noodl-mcp.cjs');
 
 const LAB = path.join(labRoot, 'lab', name);
@@ -49,7 +50,7 @@ if (againFile) {
 
 const prompt = againFile
   ? fs.readFileSync(againFile, 'utf8').trim()
-  : fs.readFileSync(path.join(HERE, 'prompt-1.txt'), 'utf8').trim();
+  : fs.readFileSync(process.env.PROMPT1 ? path.resolve(process.env.PROMPT1) : path.join(HERE, 'prompt-1.txt'), 'utf8').trim(); // PROMPT1: another turn 1 (P125-MUDDY-SURFACESUNSAID's re-run: prompt-1-studio.txt, so open_studio comes first)
 fs.writeFileSync(path.join(OUT, 'prompt.txt'), prompt + '\n');
 const bash = ['npm', 'npx', 'node', 'python3', 'ls', 'mkdir', 'cat', 'cd', 'head', 'tail', 'find', 'grep', 'wc', 'echo', 'sleep',
   'cp', 'diff', 'curl', 'mv', 'touch', 'sort', 'jq'].map((c) => `Bash(${c}:*)`);

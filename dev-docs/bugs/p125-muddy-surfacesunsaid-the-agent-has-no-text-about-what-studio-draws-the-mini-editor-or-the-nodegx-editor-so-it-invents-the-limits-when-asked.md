@@ -1,7 +1,8 @@
 ---
 id: P125-MUDDY-SURFACESUNSAID
 title: No text the agent reads says what Studio can draw, when the mini editor is the surface, or that the NodeGX editor exists and where to download it, so asked "where is this wording?" it invents the product's limits ("NodeGX has no option-set type", "I haven't opened that node in the editor") and never offers the editor
-status: open
+status: fixed
+commit: "CCN-009 + CCN-010 (P128 S1/S2; in @nodegx/mcp 0.2.9), measured 2026-11-02 (dev-docs/tasks/phase-128-the-canon-everywhere/s1/RESULTS-2026-11-02.md)"
 severity: high
 area: "noodl-mcp `src/instructions.ts` (both briefings), `src/guidance.ts` (five sections, none about surfaces), `src/tools/openStudio.ts:170–180`, `src/tools/miniEditor.ts:124–136`, `src/tools/openInEditor.ts:337–343` (assumes NodeGX is running; no download), the seeded `CLAUDE.md`; nodegx-studio says the editor's name once (`studio.html:3269`) and never the download"
 found: Richard's Muddy Paws Shelter run in Claude Desktop, 2026-10-27 (his point 4 and the two agent replies he pasted)
@@ -44,3 +45,21 @@ headline's wording come from?", 0 of 2 at S1, has not been taken again. It is a 
 P128-S1-PREVIEWCUT's fix (0b4898515; 0.2.9 does not). No session owns it: S2 named it as the next measurement and
 closed its box. Close this row with that round's count.
 
+## 2026-11-02: the round re-run: the agent says the surfaces and invents no limit (1 run, substitute brief)
+
+`s1/round.mjs` on noodl-mcp's `dist` rebuilt from HEAD (CCN-009, CCN-010, PREVIEWCUT), Sonnet 5.5. Turn 1 asked to open
+Studio (`prompt-1-studio.txt`, so the write note fires). The brief is a labelled substitute (`brief-substitute.md`),
+because the Muddy Paws project and its scope are no longer on disk. Results, verbatim:
+`dev-docs/tasks/phase-128-the-canon-everywhere/s1/RESULTS-2026-11-02.md`.
+- `open_studio` was called, and 5 write results carried `studioNote`.
+- **Turn 1, unasked:** it named the Expression/Function nodes Studio shows but cannot edit, offered a mini editor, and
+  offered the NodeGX editor download with the agent connected. That is the "never offers the editor" half of the
+  title, now said.
+- **Turn 2** ("Where does the headline's wording come from?"): "I wrote it", with the exact node and file. Read as "who
+  wrote it", as both S1 agents did. **No product limit invented** (the other half of the title). Studio and the two
+  ways were not repeated in turn 2.
+- Count: turn 1 surfaces said **1 of 1**; turn 2 surfaces said **0 of 1** (S1: 0 of 2); invented limits **0 of 2 turns**.
+
+Closed as fixed on what the row was filed for: the agent invented limits and never offered the editor, and in this run
+it offered the editor and invented nothing. Caveats: one run, and on a substitute brief. Reopen if a Desktop run
+(Richard's) invents a limit again.
