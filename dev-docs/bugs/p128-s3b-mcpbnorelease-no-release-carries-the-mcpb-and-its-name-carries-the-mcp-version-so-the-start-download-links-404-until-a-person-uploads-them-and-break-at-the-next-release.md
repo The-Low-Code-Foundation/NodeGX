@@ -73,3 +73,8 @@ now links and shows `nodegx-darwin-arm64.mcpb` / `nodegx-darwin-x64.mcpb` (no ot
 files). The built `site/start/index.html` was NOT regenerated: it holds another session's uncommitted rewrite, so the
 next site build writes it. Left: deploying the site (a push to nodegx-web deploys it: Richard's), Studio's
 `@nodegx/mcp` pin (the CI leg refuses 0.2.8), item 3 (a real Intel Mac).
+
+## 2026-11-02: Studio pins @nodegx/mcp 0.2.9 (nodegx-studio 16c4456)
+
+The next tag's macOS leg no longer fails on the 0.2.8 pin; every Studio gate green on it (check:app not run: the
+screen was locked). Left: deploying /start (nodegx-web 02ae176, a push: Richard's) and item 3 (a real Intel Mac).
