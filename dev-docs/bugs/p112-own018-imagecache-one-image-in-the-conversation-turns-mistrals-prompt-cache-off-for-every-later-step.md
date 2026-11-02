@@ -37,3 +37,10 @@ Tests: own018ScreenshotsToFiles (5; sabotage → the with-flag test fails), fld0
 
 **Not ours, still true:** an agent that opens a screenshot puts it back in its history. The manifest asks it to open
 only the ones it needs; OpenCode's compaction is what clears it.
+
+**Re-measured 2026-11-02 on Mistral Large 4.0** (`mistral-large-4` → `mistral-large-4-0`, the release; Vibe key; a
+22.5k-token system prompt with a fresh nonce, each request extending the last exactly, `max_tokens: 1`): with a
+768×1024 screenshot in the first user turn the chain cached **0 → 22,272 of 22,720 → 22,528 of 22,726**; the same
+chain with the image as a text line, 0 → 22,272 → 22,272. Large 4.0 caches across an image, so the kit's Vibe model
+entry now carries `supports_images = true` (without it Vibe 3 shows Large 4 another model's description of a
+screenshot, never the picture). `--screenshots-to-files` stays: it lets the model open only the shots it needs.

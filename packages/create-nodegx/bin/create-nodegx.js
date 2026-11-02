@@ -229,6 +229,9 @@ function renderVibeConfig(platform = process.platform, options = {}) {
     '',
     'active_model = "mistral-large-4"',
     ...(options.profile === 'vibe' ? [`default_agent = "${VIBE_AGENT}"`] : []),
+    // Vibe 3's sub-agents only read and search files; a NodeGX app is read through the server (the profile's `task` off
+    // did this on 2.x)
+    'enable_subagents = false',
     '',
     '[[models]]',
     'name = "mistral-large-4"',
@@ -237,7 +240,10 @@ function renderVibeConfig(platform = process.platform, options = {}) {
     'display_name = "Mistral Large 4"',
     'temperature = 1.0',
     'thinking = "high"',
-    'thinking_levels = ["low", "high"]',
+    'thinking_levels = ["low", "medium", "high"]',
+    // Without it Vibe 3 shows Large 4 another model's description of each screenshot, never the picture (as Mistral's own
+    // routed Large 4 entry, Vibe 3.0.4, 2026-11-02)
+    'supports_images = true',
     'max_context_length = 1000000',
     // Vibe 3 asks for the leftover context as max_tokens; Mistral allows at most 262,144, and Large 4's thinking counts (P112-OWN026-VIBEMAXTOKENS)
     'max_output_tokens = 262144',

@@ -94,6 +94,10 @@ Your tool list will not change in a session. Every `nodegx` tool that is not in 
 `call_tool({ name: "drive_page", arguments: { ... } })`. `call_tool({ name, describe: true })` shows a tool's
 arguments first. A new session is not bound to the project: `open_project` it first.
 
+A long answer (`get_project_info`, a big `get_node_type`) is kept in a file and you see its start. Its `readFirst`
+names the one `section` to ask for next: call that, rather than reading the file with `jq` or `python`. What a node
+or a tool does is in `get_node_type` and `describe: true`; the server's own source in the npm cache is not the manual.
+
 When the app needs an API key, don't ask me to paste it into the chat. Call `set_function_secret` without a value and
 tell me where to paste it in the project's `.env` file. The app reads the key from that file as soon as I save it, so
 there is nothing for you to load afterwards.

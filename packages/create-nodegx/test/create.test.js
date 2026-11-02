@@ -192,6 +192,10 @@ test('P112 OWN-018: Mistral Vibe gets Large 4, the same pinned server, and permi
   assert.match(toml, /^active_model = "mistral-large-4"$/m);
   // P112-OWN026-VIBEMAXTOKENS: without a cap Vibe 3 sends max_tokens ≈ the context (985k) and Mistral refuses it
   assert.match(toml, /^max_output_tokens = 262144$/m);
+  // Vibe 3 (2026-11-02): Large 4 sees its own screenshots (Large 4.0 caches across an image, P112-OWN018-IMAGECACHE's
+  // re-measure), and no sub-agents
+  assert.match(toml, /^supports_images = true$/m);
+  assert.match(toml, /^enable_subagents = false$/m);
   assert.match(toml, /^name = "mistral-large-4"$/m);
   // The same registration .mcp.json gets, plus the Vibe profile (OWN-019: worded for a tool list that never changes,
   // and screenshots to files — P112-OWN018-IMAGECACHE: an image in the conversation turns Mistral's cache off).
