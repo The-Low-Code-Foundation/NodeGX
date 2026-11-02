@@ -1,29 +1,39 @@
 # P132 — next session
 
-**BWF-001 is built** (s1, 2026-11-02: nodegx-studio `1cc7aa5`, NodeGX `f14e46fe8`; its
-[s1 log](BWF-001-WHAT-RICHARD-MET-FIXED.md#s1-2026-11-02-built-all-but-ac1s-app-gate-and-ac7) has each AC). What is
-left of it is Richard's:
+**BWF-002 is built** (s2, 2026-11-02: NodeGX `4aec3b83b` + `511e41d5d`, nodegx-studio `0872094`; its
+[s2 log](BWF-002-RUN-IT-ON-SAMPLE-DATA.md#s2-2026-11-02-built-ac1ac4-green) has each AC). BWF-001's P132-STEPPANEL was
+found with Richard and fixed (`2702c96`).
 
-1. **Ask Richard to re-walk points 1–4 (AC7)** in Studio from the checkout on a copy of Greenhouse. Point 1
-   (P132-STEPPANEL) did **not** reproduce in the Electron app on any path tried, and his own file shows the panel
-   opened for him once (*Add on Yes*). If a click still opens nothing for him, get the steps he took, measure that
-   state, then write the app gate AC1 asks for. Do not invent a cause before that.
-2. Then **take BWF-002** ([task](BWF-002-RUN-IT-ON-SAMPLE-DATA.md)): run it on sample data, each step's in and out.
+**Take BWF-003** ([task](BWF-003-PICK-A-VALUE-FROM-WHAT-CAME-BEFORE.md)): pick a value from what came before. What s2
+leaves for it:
+
+- A step's panel draws *What went in* / *What came out* as a tree (`valueTree` in `studio.html`), each line carrying
+  its path as `data-path` (`body.title`, `trigger.action`, `result.plant`). The picker builds on those lines.
+- *What went in* still holds the backend's deprecated top-level copy of the payload (`action`, `collection`, `id`,
+  `record` beside `body` / `trigger`: WFA-003's legacy view). Offer `body.*`, `trigger.*`, `upstream.<step>.*` only.
+- The tree needs a run: a person tests on a sample first (BWF-002). With no run yet, the field list comes from the
+  step kinds' declared output shapes (`GET /admin/workflow-step-kinds`, each kind's output) and the trigger's table
+  columns.
 
 Before anything: `git status` in both repos (NodeGX `cline-dev`, `../nodegx-studio`). Studio's `editor/studio.html`
-is the file every Studio session edits; an uncommitted change in it is someone's live work.
+is the file every Studio session edits; an uncommitted change in it is someone's live work. (At the end of s2, Studio's
+`docs/SCOPE.md` and three `docs/look/s2-composer-*.png` were someone else's, uncommitted.)
 
-**How s1 drove the app** (reuse it): a copy of Greenhouse with `metadata.cloudservices` deleted, given its own
-backend with `NODEGX_BACKENDS_DIR=<scratch>/backends node -e 'import("./lib/backend.mjs").then(m=>m.attachNewBackend(dir))'`
-run from the Studio checkout, then Electron started as `app/check.mjs` starts it (`--hidden`,
-`--remote-debugging-port`, `NODEGX_STUDIO_USER_DATA` of its own) and driven with `editor/cdp.mjs`. 🔴 Two copies of
-Greenhouse share one project id, so the second copy REUSES the first copy's backend (`findReusableBackend`): give each
-copy its own backends dir, or expect "the backend's copy differs".
+🔴 **Studio from the kit refuses every test** until a NodeGX release carries `511e41d5d` (`testRuns` in the catalog):
+the published backend (`@nodegx/mcp` 0.2.9) ignores `stopAfter` and would run every step for real. Drive with
+`NODEGX_REPO=<the NodeGX checkout>`, and **rebuild the backend's `dist/` first** (`npm run build` in
+`packages/nodegx-backend`: it is gitignored, and was 6 days stale at s2's start).
 
-Open from s1, not blocking: the backend's warnings reach Studio's screen only with a backend release carrying
-`f14e46fe8` (Studio runs the kit's backend); the list still shows triggers as rows of their own (BWF-001 item 8's fold
-not done); TriggerTest's three ports crowd the column gap at 71 %; check:hosted's "Delete type" line went red once and
-green on rerun.
+**Driving the Electron app on a Greenhouse copy:** [greenhouse-drive.mjs](greenhouse-drive.mjs) is s2's: it copies
+Greenhouse, gives it its own backend (`NODEGX_BACKENDS_DIR` under its own folder), starts Studio's Electron hidden on
+CDP 9461, deploys the functions, makes a Plant and a Watering row, then clicks through BWF-002. Copy it, change the
+middle. It drops `ELECTRON_RUN_AS_NODE`: a shell under VS Code or Claude Code inherits it, and Electron then starts as
+plain Node (`app` undefined in `main.cjs`). The first open of a workflow can take >10 s to be editable (the backend's
+step kinds): wait for `[data-act=sample]:not([disabled])`, not a fixed time.
 
-Studio gates before you commit: `npm run check:automations`, `check:hosted`, `check:editor`, `check:app` (screen
-unlocked), one at a time.
+Studio gates before you commit: `npm run check:automations` (with and without `NODEGX_REPO`: the second grades the
+refusal only), `check:hosted`, `check:editor`, `check:app` (screen unlocked), one at a time; the Chrome ones outside
+the Bash sandbox.
+
+Still open from s1: the list shows triggers as rows of their own (BWF-001 item 8's fold); TriggerTest's three ports
+crowd the column gap at 71 %; Richard's re-walk of BWF-001 points 2–4 (AC7) unless he did it with STEPPANEL.
