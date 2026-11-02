@@ -1,7 +1,7 @@
 ---
 id: P132-STEPPANEL
 title: A backend workflow's step can't be opened in Studio, so it can't be edited or have a step added after it
-status: scheduled
+status: fixed
 phase: P132
 task: BWF-001
 severity: high
@@ -9,6 +9,7 @@ area: nodegx-studio / Backend tab (step panel)
 found: Richard testing Greenhouse in Studio (checkout 16c4456, Electron app), 2026-11-02
 evidence: dev-docs/tasks/phase-132-a-backend-workflow-you-can-build-by-hand/README.md (his points 1 and 4, the screenshot)
 launch: beta
+commit: nodegx-studio 2702c96
 ---
 
 Richard: "I still can't click a workflow step to edit or see settings. I still can't add a workflow step or create a
@@ -35,3 +36,14 @@ while idle (a MutationObserver counted 0 in 8 s), and no page error was thrown.
 can only be made by the panel's *Add on Yes* (no other Studio action writes a route), and he wrote "I added an IF,
 added a yes branch". So it is not "the panel never opens". Unknown: which click failed and in what state. Left
 `scheduled` for BWF-001 AC7, his re-walk on a copy; if it fails for him there, record the steps he took.
+
+**Found with Richard, 2026-11-02 (P132 s1, his screenshot):** on a TRIGGER's page ("Every day at 08:00") he clicked
+the card of the workflow it starts ("The morning check") and nothing came up. Neither card on a trigger's page had a
+click: they look like a workflow's steps (same card, same pointer cursor) but only the small *Open the workflow* link
+opened anything, and what starts it had no settings panel at all. The measurement above was inside a workflow's page
+only, which is why it did not reproduce: the drive never clicked where he clicked.
+
+**Fixed** (nodegx-studio `2702c96`): the workflow card opens the workflow; the trigger card opens its settings on the
+right (on/off, time and days, the table and the changes it watches, a webhook's address, delete), each change on the
+backend and in the file. Gate: automations-drive, 5 lines; with the card's click removed, "a click on the workflow a
+trigger starts opens that workflow" fails.
