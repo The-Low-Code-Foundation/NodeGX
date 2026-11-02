@@ -18,6 +18,7 @@
 import type { RequestContext } from './HttpServer';
 import type { ExecutionHistory } from '../execution/ExecutionStore';
 import type { WorkflowSubsystem } from '../workflow/WorkflowSubsystem';
+import { definitionWarnings } from '../workflow/definitionWarnings';
 import { WorkflowConfigError } from '../workflow/WorkflowRegistry';
 import { buildRunPayload, spreadableBody } from '../workflow/runPayload';
 import { stepKindCatalog } from '../workflow/steps/kinds';
@@ -49,6 +50,8 @@ export interface WorkflowListResponse {
 /** The body of every single-definition response (GET / POST / PUT). */
 export interface WorkflowResponse {
   workflow: WorkflowDefinition;
+  /** P132 BWF-001: on a create or update, what the stored definition does that is valid but rarely meant. */
+  warnings?: string[];
 }
 
 /** `DELETE /admin/workflow-defs/:id`. */
@@ -68,6 +71,8 @@ export interface WorkflowDeletedResponse {
 export interface WorkflowValidateResponse {
   valid: boolean;
   errors: string[];
+  /** P132 BWF-001 (`definitionWarnings`): valid, but probably not what was meant. Never stops a save. */
+  warnings: string[];
   /**
    * CWF-005: **the definition this backend would store**, when it would accept
    * one. Null when it would not.
@@ -174,6 +179,7 @@ export class AdminWorkflowRoutes {
     sendJSON(ctx.res, 200, {
       valid: errors.length === 0,
       errors,
+      warnings: definitionWarnings(definition ?? (body as unknown as WorkflowDefinition)),
       definition
     } satisfies WorkflowValidateResponse);
   }
@@ -191,7 +197,7 @@ export class AdminWorkflowRoutes {
   private upsert(ctx: RequestContext, input: WorkflowInput, id: string | undefined, status: number): void {
     try {
       const def = this.subsystem().registry.upsert({ ...input, id: id || input.id });
-      sendJSON(ctx.res, status, { workflow: def } satisfies WorkflowResponse);
+      sendJSON(ctx.res, status, { workflow: def, warnings: definitionWarnings(def) } satisfies WorkflowResponse);
     } catch (e) {
       if (e instanceof WorkflowConfigError) throw new HttpError(400, e.message);
       throw e;
