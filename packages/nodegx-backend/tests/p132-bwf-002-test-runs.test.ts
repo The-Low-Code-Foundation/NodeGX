@@ -123,6 +123,11 @@ describe('P132 BWF-002: test a workflow on a sample', () => {
     expect(rec.metadata?.test).toBeUndefined();
   });
 
+  it('says it takes a test, in the step-kind catalog an editor asks first', async () => {
+    const res = await req<{ testRuns?: boolean }>('GET', '/admin/workflow-step-kinds');
+    expect(res.json.testRuns).toBe(true);
+  });
+
   it('refuses a step to stop after that the workflow does not have, and a sample of no known kind', async () => {
     const none = await req<ErrorBody>('POST', '/admin/workflow-defs/watered/run', { payload: {}, stopAfter: 'nope' });
     expect(none.status).toBe(400);

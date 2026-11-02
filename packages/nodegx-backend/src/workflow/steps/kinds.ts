@@ -1058,6 +1058,12 @@ export interface StepKindCatalog {
    * everything else here is.
    */
   migratedKinds: Record<string, string>;
+  /**
+   * P132 BWF-002: this backend's run route takes a test (`POST /admin/workflow-defs/:id/run` with `as`, `stopAfter`,
+   * `test`). An editor asks before it offers *Test up to this step*: a backend without it ignores `stopAfter` and runs
+   * every step, for real, which is the one thing that button promises not to do. Absent on an older backend.
+   */
+  testRuns?: boolean;
 }
 
 export function stepKindCatalog(): StepKindCatalog {
@@ -1070,7 +1076,8 @@ export function stepKindCatalog(): StepKindCatalog {
     conditionLanguage: CONDITION_LANGUAGE,
     transformLanguage: TRANSFORM_LANGUAGE,
     validateLanguage: VALIDATE_LANGUAGE,
-    migratedKinds: { ...MIGRATED_STEP_KINDS }
+    migratedKinds: { ...MIGRATED_STEP_KINDS },
+    testRuns: true
   };
 }
 
