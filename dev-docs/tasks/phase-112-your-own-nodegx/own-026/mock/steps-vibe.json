@@ -1,0 +1,61 @@
+[
+ {
+  "tool": "read_file",
+  "args": {
+   "path": "/Users/richardosborne/vscode_projects/OpenNoodl/README.md"
+  }
+ },
+ {
+  "tool": "bash",
+  "args": {
+   "command": "head -1 /Users/Shared/nodegx-lab/own026/series-t2-code.log; ls /private/tmp/claude-501 | head -2; ls /Users/Shared/nodegx-lab/own026/mistral-probe-sibling 2>&1 | head -2"
+  }
+ },
+ {
+  "tool": "bash",
+  "args": {
+   "command": "echo HOME=$HOME; echo PATH=$PATH; type npx node; node --version; head -4 .vibe/config.toml; ls AGENTS.md"
+  }
+ },
+ {
+  "tool": "search_tool_functions",
+  "args": {
+   "mode": "best_match",
+   "query": "fetch web url"
+  }
+ },
+ {
+  "tool": "search_tool_functions",
+  "args": {
+   "mode": "best_match",
+   "query": "nodegx list projects example"
+  }
+ },
+ {
+  "tool": "run_typescript",
+  "args": {
+   "code": "async function main() { return await tools.mcp_nodegx.get_example({ nope: 1 }); }"
+  }
+ },
+ {
+  "tool": "run_typescript",
+  "args": {
+   "code": "async function main() { const k = Object.keys(tools).find((x) => /nodegx/i.test(x)); if (!k) return 'NO NODEGX GROUP: ' + Object.keys(tools).join(','); const g = tools[k]; const a = await g.list_projects({}).catch((e) => 'ERR ' + String(e)); const b = await g.get_example({ name: 'cloud-members-can-edit-my-records' }).catch((e) => 'ERR ' + String(e)); return [k, JSON.stringify(a).slice(0, 500), JSON.stringify(b).slice(0, 300)]; }"
+  }
+ },
+ {
+  "tool": "run_typescript",
+  "args": {
+   "code": "async function main() { return await tools.mcp_nodegx.call_tool({ name: 'get_component', arguments: { componentName: '/Nope' } }); }"
+  }
+ },
+ {
+  "tool": "bash",
+  "args": {
+   "command": "npx @nodegx/preview --help 2>&1 | head -3; echo canary > /tmp/own026-vibe-canary.txt; echo wrote"
+  }
+ },
+ {
+  "text": "Done: the Vibe probe is finished."
+ }
+]
