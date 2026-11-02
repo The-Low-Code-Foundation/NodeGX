@@ -9,8 +9,11 @@
  *   tools once per session: started unbound by create-nodegx, it shows the seven bootstrap tools for the whole
  *   session, and every other tool is reachable only through `call_tool` (P112-OWN018-LISTCHANGED). A sentence that
  *   says "call find_tools and it arrives" sends such an agent looking for something that never comes.
- * - **Images are cheap.** Claude caches across images. One image part anywhere in a Mistral request turns its prompt
- *   cache off (P112-OWN018-IMAGECACHE), so "look at the screenshots" makes every later step full price.
+ * - **Images are cheap.** Claude caches across images. One image part anywhere in a Mistral request turned its prompt
+ *   cache off (P112-OWN018-IMAGECACHE, Large 4's preview), so "look at the screenshots" made every later step full
+ *   price. Mistral Large 4.0 caches across an image (re-measured 2026-11-02), and Vibe 3 cannot open a screenshot
+ *   file as a picture (its `read_file` returns the bytes as text), so the Vibe profile now gets its screenshots inline
+ *   like any client; no profile sets `imagesCostly` today.
  *
  * Neither fact can be read from the client: Vibe sends the Python SDK's default `clientInfo` (`mcp`), which any
  * Python client sends. So whoever starts the server says which client it is — `--profile vibe`, written by the
@@ -34,7 +37,7 @@ export interface ClientProfile {
 
 const PROFILES: Record<ClientProfileName, ClientProfile> = {
   default: { name: 'default', staticToolList: false, imagesCostly: false },
-  vibe: { name: 'vibe', staticToolList: true, imagesCostly: true }
+  vibe: { name: 'vibe', staticToolList: true, imagesCostly: false }
 };
 
 let current: ClientProfile = PROFILES.default;

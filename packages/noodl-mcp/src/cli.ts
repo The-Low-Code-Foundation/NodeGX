@@ -50,7 +50,7 @@ async function main(): Promise<void> {
     process.exitCode = 2;
     return;
   }
-  const screenshotsToFiles = argv.includes('--screenshots-to-files') || profileName === 'vibe';
+  const screenshotsToFiles = argv.includes('--screenshots-to-files');
   // P109 ISL-019 — `--reproducible <namespace>@<epoch>` or `--reproducible=<namespace>@<epoch>`.
   let reproducible: ReproducibleOutput | undefined;
   const reproducibleAt = argv.findIndex((a) => a === '--reproducible' || a.startsWith('--reproducible='));

@@ -42,9 +42,8 @@ Options:
   --profile <client>
                    Word what this server tells the agent for that client:
                    "vibe" (Mistral Vibe) — its tool list never changes after
-                   start, so every other tool is named as a call_tool call,
-                   and images cost its prompt cache, so screenshots go to files
-                   (implies --screenshots-to-files). Default: "default".
+                   start, so every other tool is named as a call_tool call.
+                   Default: "default".
   --graph[=<path prefix>]
                    Print the project as text and exit: a map of every component,
                    then each component's nodes, parameters, function code and
