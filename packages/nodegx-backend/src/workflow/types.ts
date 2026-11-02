@@ -196,6 +196,10 @@ export interface WorkflowRunResult {
   returned?: boolean;
   /** The `return` step that set `output`, when one did (first-wins). */
   returnedFrom?: string;
+  /** P132 BWF-002: a person's test on a sample, from an editor. */
+  test?: boolean;
+  /** P132 BWF-002: the run was asked to stop after this step and did; the steps after it are skipped, not failed. */
+  stoppedAfter?: string;
   error?: string;
 }
 

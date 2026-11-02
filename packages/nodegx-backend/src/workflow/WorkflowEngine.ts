@@ -68,6 +68,14 @@ export interface RunOptions {
   trigger: RunTriggerContext;
   /** The run payload — becomes each step's base input. */
   payload?: Record<string, unknown>;
+  /**
+   * P132 BWF-002 — *Test up to this step*: run only this step and the steps that lead to it, then stop. Every other
+   * step is recorded skipped, and the record says where it stopped (`stoppedAfter`), so a stop is never read as a
+   * failure. Not reached (a branch went the other way) is a normal outcome: no `stoppedAfter`.
+   */
+  stopAfter?: string;
+  /** P132 BWF-002 — a person's test from an editor, on a sample. Marked on the record; the run is otherwise real. */
+  test?: boolean;
 }
 
 interface ConcurrencyGate {
@@ -409,7 +417,9 @@ export class WorkflowEngine {
           ...(opts.trigger.source ? { triggerSource: opts.trigger.source } : {}),
           ...(opts.trigger.triggerId ? { triggerId: opts.trigger.triggerId } : {}),
           // BAK-009: the request that started this run, when an HTTP request did.
-          ...(opts.trigger.requestId ? { requestId: opts.trigger.requestId } : {})
+          ...(opts.trigger.requestId ? { requestId: opts.trigger.requestId } : {}),
+          ...(opts.test ? { test: true } : {}),
+          ...(opts.stopAfter ? { stopAfter: opts.stopAfter } : {})
         }
       }) || '';
 
@@ -436,6 +446,10 @@ export class WorkflowEngine {
     let lastOutput: Record<string, unknown> | undefined;
     let stepsRun = 0;
     let stepsSkipped = 0;
+    // BWF-002: with `stopAfter`, the steps that may run are that step and its ancestors; a sibling branch earlier in
+    // topological order is not on the way there and is skipped.
+    const upTo = opts.stopAfter ? new Set([opts.stopAfter, ...(ancestorsOf(def).get(opts.stopAfter) || [])]) : null;
+    let stoppedAfter: string | undefined;
 
     // CWF-002: what a `return` step decided the run answers with. FIRST WINS —
     // two Return steps on two branches is the normal shape (a success path and
@@ -472,7 +486,7 @@ export class WorkflowEngine {
 
         // Reachability: entry always runs; others run only if an upstream edge
         // was actually taken. Unreached steps are recorded skipped.
-        if (!isReached(step)) {
+        if (!isReached(step) || (upTo && !upTo.has(step.id))) {
           logger?.skipNode({ nodeId: step.id, nodeType: this.nodeType(step), nodeName: step.name });
           outcomes.set(step.id, { status: 'skipped' });
           stepsSkipped++;
@@ -573,6 +587,10 @@ export class WorkflowEngine {
               for (const t of step.routes?.[routeName] || []) take(t, step.id);
             }
           }
+          if (step.id === opts.stopAfter) {
+            stoppedAfter = step.id;
+            break;
+          }
         } catch (e) {
           if (e instanceof RunAbortedError) {
             // The step was interrupted by cancel/timeout — record it and stop.
@@ -609,6 +627,10 @@ export class WorkflowEngine {
           if (routes.length > 0) {
             // Routed: take error edges, keep going. The workflow can still succeed.
             for (const t of routes) take(t, step.id);
+            if (step.id === opts.stopAfter) {
+              stoppedAfter = step.id;
+              break;
+            }
           } else {
             // Unrouted: halt loudly.
             unroutedError = true;
@@ -661,7 +683,8 @@ export class WorkflowEngine {
           // Return step also ran and lost. Absent entirely for a workflow with
           // no Return step, so an existing record's metadata is unchanged.
           ...(returned ? { returnedFrom: returned.from } : {}),
-          ...(returnConflict.length ? { returnConflict: [returned!.from, ...returnConflict] } : {})
+          ...(returnConflict.length ? { returnConflict: [returned!.from, ...returnConflict] } : {}),
+          ...(stoppedAfter ? { stoppedAfter } : {})
         });
       }
 
@@ -677,6 +700,8 @@ export class WorkflowEngine {
         // which is exactly what every workflow written before CWF-002 gets.
         output: returned ? returned.value : lastOutput,
         ...(returned ? { returned: true, returnedFrom: returned.from } : {}),
+        ...(opts.test ? { test: true } : {}),
+        ...(stoppedAfter ? { stoppedAfter } : {}),
         error: errorMessage
       };
     } finally {

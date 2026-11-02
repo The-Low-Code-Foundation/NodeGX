@@ -317,6 +317,35 @@ things to know:
 A db-change run puts the changed record in `body`, and `collection` / `action` /
 `recordId` on `trigger`.
 
+### Testing a workflow on a sample
+
+`POST /admin/workflow-defs/<id>/run` is also how an editor tests a workflow while
+it is being built (P132 BWF-002). On the envelope form it takes two more keys:
+
+```jsonc
+{
+  "payload":   { "id": "w1", "plant": "Monstera" },        // the sample: becomes `body`
+  "as":        { "type": "db-change", "collection": "Watering", "action": "create", "recordId": "w1" },
+  "stopAfter": "read"                                       // optional: Test up to this step
+}
+```
+
+- **`as`** says what the sample stands for, and the run starts the way that
+  trigger starts it: the same envelope as above, the same trigger type on the
+  record (`db_change`, `webhook`, `schedule`, or `manual` without one). So a
+  db-change test runs as the app and a webhook test as a visitor, exactly as the
+  real fire would (P127 SCHEDULEAUTH). A webhook sample may carry `headers`,
+  `query` and `slug`; a schedule sample `cron`.
+- **`stopAfter`** runs that step and the steps that lead to it, then stops.
+  Every other step is recorded `skipped`, a sibling branch included; the run is a
+  success with `run.stoppedAfter` set, and the record's metadata says
+  `stoppedAfter`. If the step is never reached (a branch went the other way),
+  `stoppedAfter` is absent. A step the workflow does not have is a 400.
+- Either key, or `"test": true`, marks the run a **test**: `run.test` and the
+  record's `metadata.test`. A test is a real run on whichever backend it was sent
+  to. Steps that write really write, which is why editors send tests to the
+  development backend only.
+
 ### The condition language
 
 `branch`, `switch` and `for-each`'s filter take **declarative conditions**, not

@@ -62,10 +62,15 @@ export class WorkflowSubsystem {
   }
 
   /** Run a workflow by id with a payload. `found:false` if no such workflow. */
-  async run(id: string, trigger: RunTriggerContext, payload?: Record<string, unknown>): Promise<RunByIdResult> {
+  async run(
+    id: string,
+    trigger: RunTriggerContext,
+    payload?: Record<string, unknown>,
+    test?: { stopAfter?: string; test?: boolean }
+  ): Promise<RunByIdResult> {
     const def = this.registry.get(id);
     if (!def) return { found: false };
-    const result = await this.engine.run(def, { trigger, payload });
+    const result = await this.engine.run(def, { trigger, payload, ...test });
     return { found: true, result };
   }
 

@@ -8,7 +8,7 @@
  *   GET    /admin/workflow-defs/:id         get one
  *   PUT    /admin/workflow-defs/:id         update
  *   DELETE /admin/workflow-defs/:id         delete
- *   POST   /admin/workflow-defs/:id/run     run now (payload optional)
+ *   POST   /admin/workflow-defs/:id/run     run now (payload optional; P132 BWF-002: `as`, `stopAfter`, `test` for a test)
  *   POST   /admin/workflow-runs/:executionId/cancel   cancel an in-flight run
  *   GET    /admin/workflow-step-kinds       the WF-002 step-kind catalog
  *
@@ -18,6 +18,7 @@
 import type { RequestContext } from './HttpServer';
 import type { ExecutionHistory } from '../execution/ExecutionStore';
 import type { WorkflowSubsystem } from '../workflow/WorkflowSubsystem';
+import type { RunTriggerContext } from '../workflow/WorkflowRunner';
 import { definitionWarnings } from '../workflow/definitionWarnings';
 import { WorkflowConfigError } from '../workflow/WorkflowRegistry';
 import { buildRunPayload, spreadableBody } from '../workflow/runPayload';
@@ -92,6 +93,35 @@ export interface WorkflowValidateResponse {
 /** `POST /admin/workflow-defs/:id/run`. */
 export interface WorkflowRunResponse {
   run: WorkflowRunResult;
+}
+
+/**
+ * P132 BWF-002 — what a test's sample stands for, on the run's envelope form (`{ payload, test, as, stopAfter }`).
+ * The run is started the way that trigger starts it: the same payload shape, the same trigger type (so a `db-change`
+ * test runs as the app, a `webhook` one as a visitor, P127 SCHEDULEAUTH), and its record is marked a test.
+ */
+export type WorkflowTestAs =
+  | { type: 'db-change'; collection: string; action: string; recordId?: string }
+  | { type: 'webhook'; slug?: string; headers?: Record<string, unknown>; query?: Record<string, unknown> }
+  | { type: 'schedule'; cron?: string }
+  | { type: 'manual' };
+
+function testPayload(as: WorkflowTestAs | undefined, callerData: unknown): { type: RunTriggerContext['type']; payload: Record<string, unknown> } {
+  const legacy = spreadableBody(callerData);
+  if (!as || as.type === 'manual') return { type: 'manual', payload: buildRunPayload({ type: 'manual', body: callerData, legacy }) };
+  if (as.type === 'db-change') {
+    if (typeof as.collection !== 'string' || !as.collection || typeof as.action !== 'string' || !as.action) {
+      throw new HttpError(400, 'A db-change sample names its table (`as.collection`) and what happened to the row (`as.action`).');
+    }
+    const change = { action: as.action, collection: as.collection, id: as.recordId };
+    // dbchange.ts's shape: the row is the body, the change on `trigger`, and the deprecated top-level view beside it.
+    return { type: 'db_change', payload: buildRunPayload({ type: 'db_change', change, body: callerData, legacy: { ...change, record: callerData } }) };
+  }
+  if (as.type === 'webhook') {
+    return { type: 'webhook', payload: buildRunPayload({ type: 'webhook', slug: as.slug, headers: as.headers || {}, query: as.query || {}, body: callerData, legacy }) };
+  }
+  if (as.type === 'schedule') return { type: 'schedule', payload: buildRunPayload({ type: 'schedule', cron: as.cron, body: callerData, legacy: { cron: as.cron } }) };
+  throw new HttpError(400, `A test's sample is a "db-change", a "webhook", a "schedule" or a "manual" run, not ${JSON.stringify((as as { type?: unknown }).type)}.`);
 }
 
 /**
@@ -219,16 +249,19 @@ export class AdminWorkflowRoutes {
     // which is the shape every workflow authored before this reads.
     // BMG-009: `wait: false` is the page's, never part of the caller's data. It is
     // read off the envelope form only; a bare body is the payload, `wait` and all.
-    const noWait = !!body && body.wait === false && 'payload' in body;
+    const enveloped = !!body && 'payload' in body;
+    const noWait = enveloped && body.wait === false;
     const callerData = (body && (body.payload as Record<string, unknown>)) || body || {};
-    const payload = buildRunPayload({
-      type: 'manual',
-      body: callerData,
-      legacy: spreadableBody(callerData)
-    });
+    // P132 BWF-002: a test, on the envelope form only (as `wait` is): what the sample stands for, and where to stop.
+    const as = enveloped ? (body.as as WorkflowTestAs | undefined) : undefined;
+    const stopAfter = enveloped && typeof body.stopAfter === 'string' && body.stopAfter ? body.stopAfter : undefined;
+    const test = enveloped && (body.test === true || !!as || !!stopAfter);
+    const { type, payload } = testPayload(as, callerData);
     const id = ctx.params.id;
     const subsystem = this.subsystem();
-    if (!subsystem.registry.get(id)) throw new HttpError(404, `No workflow "${id}"`);
+    const def = subsystem.registry.get(id);
+    if (!def) throw new HttpError(404, `No workflow "${id}"`);
+    if (stopAfter && !def.steps.some((s) => s.id === stopAfter)) throw new HttpError(400, `Workflow "${id}" has no step "${stopAfter}" to stop after.`);
 
     let answered = false;
     let startedHook: ((executionId: string) => void) | undefined;
@@ -238,7 +271,8 @@ export class AdminWorkflowRoutes {
       startedHook = (executionId: string) => resolve({ started: true, executionId, workflowId: id });
     });
 
-    const finished = subsystem.run(id, { type: 'manual', source: `manual run of ${id}`, ...(noWait ? { onStarted: (eid) => startedHook && startedHook(eid) } : {}) }, payload);
+    const source = test ? `test of ${id}${as && as.type !== 'manual' ? ` on a ${as.type} sample` : ''}${stopAfter ? `, up to ${stopAfter}` : ''}` : `manual run of ${id}`;
+    const finished = subsystem.run(id, { type, source, ...(noWait ? { onStarted: (eid) => startedHook && startedHook(eid) } : {}) }, payload, test ? { test, stopAfter } : undefined);
     // Whichever comes first: the record opening (202) or, with the history off, the run ending (200).
     const outcome = await Promise.race([
       started.then((s) => ({ kind: 'started' as const, s })),
