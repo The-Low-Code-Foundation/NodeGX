@@ -168,6 +168,11 @@ export interface WorkflowRunResult {
   status: RunStatus;
   /** True when the run failed because a step failed with no error route. */
   unroutedError: boolean;
+  /**
+   * P132-RUNERRORNOREASON: the step that halted the run with no error route, and its own message. `error` alone said
+   * "a step failed", and an agent testing a workflow through the MCP has no tool that reads the per-step record.
+   */
+  failedStep?: { id: string; name?: string; message: string };
   /** True when a per-workflow (or the abort) timeout tripped. */
   timedOut: boolean;
   /** Steps actually executed (excludes skipped). */

@@ -112,6 +112,20 @@ function describe(v: unknown): string {
   return String(v);
 }
 
+/**
+ * An object with one `$` key in a formula's args is someone else's shorthand (a transform's `{"$default": …}`), which
+ * is data here. BWF-004 AC4's agent wrote one and read only "got an object"; say what to write instead.
+ */
+function dollarHint(v: unknown): string {
+  if (!isPlainObject(v)) return '';
+  const keys = Object.keys(v);
+  if (keys.length !== 1 || !keys[0].startsWith('$')) return '';
+  const name = keys[0].slice(1);
+  return Object.prototype.hasOwnProperty.call(FORMULA_DEFS, name)
+    ? ` (${JSON.stringify(keys[0])} is a transform's shorthand, data inside a formula: write {"$fn": "${name}", "args": [...]})`
+    : ` (${JSON.stringify(keys[0])} is not a formula: a formula is {"$fn": "<name>", "args": [...]})`;
+}
+
 function argLabel(name: string, i: number): string {
   const def = FORMULA_DEFS[name];
   const args = def.args;
@@ -892,7 +906,8 @@ export function collectFormulaErrors(value: unknown, where: string, depth = 0): 
     if (!literalFits(literal, spec.type, spec.oneOf)) {
       const wanted = spec.type === 'choice' ? `one of ${(spec.oneOf || []).join(', ')}` : TYPE_WORDS[spec.type];
       errors.push(
-        `${at}: "${def.label}" (${name}) needs ${wanted} for ${argLabel(name as string, i)}, got ${describe(literal)}`
+        `${at}: "${def.label}" (${name}) needs ${wanted} for ${argLabel(name as string, i)}, got ${describe(literal)}` +
+          dollarHint(literal)
       );
     } else {
       errors.push(...collectFormulaErrors(arg, at, depth + 2));

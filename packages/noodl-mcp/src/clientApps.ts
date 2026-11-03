@@ -91,8 +91,12 @@ export const RESULT_SIZE_META_KEY = 'anthropic/maxResultSizeChars';
 /** Twice today's `get_project_info`, so the guidance can grow before it is cut again; far under the 500,000 ceiling. */
 export const WHOLE_RESULT_CHARS = 120_000;
 
-/** The tools whose answer is read whole: the orientation the instructions say to call first, and the door to it. */
-export const WHOLE_RESULT_TOOLS: readonly string[] = ['get_project_info', 'call_tool'];
+/**
+ * The tools whose answer is read whole: the orientation the instructions say to call first, and the door to it; and
+ * the workflow step catalog (P132 BWF-004 AC4): BWF-004's `formulaLanguage` took the backend's served catalog to
+ * 50,351 characters, so a Claude Code agent got a 2 KB preview of it and never the formula list it is told to use.
+ */
+export const WHOLE_RESULT_TOOLS: readonly string[] = ['get_project_info', 'call_tool', 'list_backend_step_kinds'];
 
 export function clientIsClaudeCode(server: McpServer): boolean {
   const name = server.server.getClientVersion()?.name ?? '';

@@ -79,6 +79,11 @@ export interface RunOptions {
   test?: boolean;
 }
 
+/** A step's error message ended as a sentence, so another can follow it. */
+function sentence(message: string): string {
+  return /[.!?]$/.test(message) ? message : `${message}.`;
+}
+
 interface ConcurrencyGate {
   active: number;
   queue: Array<() => void>;
@@ -445,6 +450,7 @@ export class WorkflowEngine {
     const basePayload = opts.payload || {};
 
     let unroutedError = false;
+    let failedStep: WorkflowRunResult['failedStep'];
     let timedOut = false;
     let cancelled = false;
     let lastOutput: Record<string, unknown> | undefined;
@@ -647,8 +653,9 @@ export class WorkflowEngine {
               break;
             }
           } else {
-            // Unrouted: halt loudly.
+            // Unrouted: halt loudly, saying which step and why.
             unroutedError = true;
+            failedStep = { id: step.id, ...(step.name ? { name: step.name } : {}), message: err.message };
             break;
           }
         }
@@ -680,7 +687,8 @@ export class WorkflowEngine {
         : timedOut
           ? `Workflow exceeded its ${def.timeoutMs}ms timeout.`
           : unroutedError
-            ? 'A step failed with no error route; the workflow halted.'
+            ? `Step "${failedStep?.name ?? failedStep?.id}" failed: ${sentence(failedStep?.message ?? '')} It has no error ` +
+              'route, so the workflow halted.'
             : undefined;
 
       if (logger) {
@@ -708,6 +716,7 @@ export class WorkflowEngine {
         workflowId: def.id,
         status,
         unroutedError,
+        ...(failedStep ? { failedStep } : {}),
         timedOut,
         stepsRun,
         stepsSkipped,

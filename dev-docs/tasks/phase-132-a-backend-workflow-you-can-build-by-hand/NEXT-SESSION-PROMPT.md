@@ -1,24 +1,31 @@
 # P132 — next session
 
-**BWF-004 is built** (s4, 2026-11-03; its [s4 logs](BWF-004-FORMULAS-WITHOUT-CODE.md#s4-2026-11-03-the-engine-half--items-14-ac1-and-ac2-green)
-have each AC). A setting's value is typed, read from the run, or **a formula**: `{"$fn": "<name>", "args": [...]}` from
-the backend's closed list of 27 (`packages/nodegx-backend/src/workflow/steps/formulas.ts`, served as `formulaLanguage`,
-catalog 1.8.0), on in every step param, condition operand and transform field. In Studio it is picked by its words and
-drawn as a sentence ("days between at and now"); AC3 held in the Electron app on a Greenhouse copy (6 days). NodeGX
-`8d9907ccf`; nodegx-studio `759b834` (the editor) and `550d82a` (P132-STEPMENUOFFSCREEN, found on the way).
+**BWF-004 is done** (s4 built it; s5, 2026-11-03, ran AC4: [the record](BWF-004-FORMULAS-WITHOUT-CODE.md#s5-2026-11-03-ac4-the-agent-run-and-three-things-it-found)).
+Formulas are `{"$fn": "<name>", "args": [...]}` from the backend's closed list of 27 (`steps/formulas.ts`, served as
+`formulaLanguage`). s5's agent, asked to make *When a plant is watered* give back how many days ago the watering was,
+wrote a `date-difference` formula and no cloud function ([agent-round-bwf004.mjs](agent-round-bwf004.mjs), `build`
+round). AC4's own sentence ("work out how many days…") was read as a question and answered; it built nothing. s5 fixed
+what the round met: P132-STEPKINDSCUT (the step catalog passed Claude Code's 50,000-character cut with s4's formulas;
+now raised for Claude Code), P132-RUNERRORNOREASON (a failed run names its step and the step's message), and a clearer
+refusal for a transform's `$default` nested in a formula.
 
-**First: BWF-004's AC4, the agent run.** "Work out how many days since the plant was watered in the workflow" asked of
-an agent on a Greenhouse copy through the checkout's MCP: it should write a `$fn` formula, not a cloud function (one
-run, the result read from `nodegx.automations.json`). Its words are in `noodl-mcp` `backendTools.ts` (the step `params`
-description and `list_backend_step_kinds`); the always-on instructions say nothing about workflows. If the agent writes a
-function anyway, the measurement is which words it read, not a new sentence by reflex (budget gate:
-`tests/toolDisclosure.test.ts`).
+**Next: BWF-005** ([task](BWF-005-STEPS-THAT-ACT-ON-THE-DATA.md)): create, change, delete, find a record as steps.
+**Ruled (R5, README):** a Bubble-style *Ignore privacy rules* switch per workflow, **on by default**. On, a record step
+acts as the app; off, as whoever the run is for (nobody, for a schedule). Measured before asking: a function's record
+access always runs as the system (`service.ts:638-645`, the loopback client's admin key), and Greenhouse's Plant may
+be changed by its creator only, so *Mark watered* as a step (AC3) needs the switch on. Design noted in s5, not built: a
+record step can write through that same loopback (`globalThis._noodl_cloudservices`: endpoint, admin key, `X-NodeGX-Run`)
+so hooks, the ChangeBus (db-change triggers) and run attribution are the function path's by construction; with the
+switch off it sends no admin key. The db-change loop guard already exists (`triggers/dbchange.ts`, a depth cap of 1):
+AC2 tests it, it does not build one. A record's fields are filled with the same `runValueField` in Studio.
 
-**Then BWF-005** ([task](BWF-005-STEPS-THAT-ACT-ON-THE-DATA.md)): steps that act on the data (create, change, delete,
-find a record). Its owed ruling: who a record step acts as (recommend "as the app", P127-BKO006-SCHEDULEAUTH). A
-record's fields are filled with the same `runValueField` (typed / from the run / a formula).
+BWF-005's AC4 (an agent writes the step, not a function) reuses [agent-round-bwf004.mjs](agent-round-bwf004.mjs): add a
+prompt, keep the lab. 🔴 Rebuild `packages/noodl-mcp` first (`node build.mjs`; s5 found its dist a day older than the
+words it was testing) and the backend's `dist/`. 🔴 Fence the repo and the other rounds by name, never all of
+`//Users/**`: Claude Code saves a result over 50,000 characters under `~/.claude/projects/` and the agent must be able to
+open it. Write the request as a change to the app, not a question: s5's question-shaped AC sentence built nothing.
 
-What s4 leaves:
+What s4 leaves (still open):
 
 - **A record's date** (a Watering's `at`) unfolds in *What it can read* into `__type` and `iso`; a person wants it
   whole, as a Pointer already is (`readTree` in `studio.html` folds a Pointer only).

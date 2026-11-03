@@ -82,7 +82,7 @@ reinterpreted. The transform keeps its shorthand for reshaping; `{"$upper"}` out
 | AC1 | ✅ `tests/workflow-formulas.test.ts`: each of the 27 with a working and a failing case (a case per formula, asserted against the table), the date edges, the served list = the table = the docs page, every served sentence names exactly its args, every served example validates |
 | AC2 | ✅ `{"$fn":"eval"}` is a 400 naming the set and "takes no JavaScript"; inside a condition and a transform field too |
 | AC3 | ✅ **in the Electron app on a Greenhouse copy** ([greenhouse-drive-bwf004.mjs](greenhouse-drive-bwf004.mjs), the checkout's backend): a Return added after *Mark the plant watered*, its value *A formula…* → *Time between*, its From picked from the run (*at · from the Watering that was made*), no JSON typed; the file and the backend hold `{"$fn":"date-difference","args":[{"$path":"body.at"},{"$fn":"now"},"days"]}`; tested on a Watering made on 28 October: the record's Return gives `value: 6` (6 expected) and the panel says "value 6" ([formula](look/bwf-004-greenhouse-formula.png), [tested](look/bwf-004-greenhouse-tested.png)). Also in Chrome (automations-drive) |
-| AC4 | open: the agent run (next session) |
+| AC4 | ✅ in s5 (below), on the build-shaped request: a formula, no function. The task's own sentence built nothing (read as a question) |
 
 Gates: 44/44 formulas; the 18 workflow suites 333 + 3 skipped (ten pinned assertions moved: catalog 1.7.0 → 1.8.0 ×4,
 the three value forms → four ×3, the served "no arithmetic" sentences ×3); tsc clean; eslint clean on the new files.
@@ -119,3 +119,42 @@ the kit's backend; hosted 46/46; editor green; app 67/67.
 **Not built, for later:** a record's date (`at`) unfolds in *What it can read* into `__type` and `iso`; a person wants
 it whole, as a Pointer already is. A JSON setting (a Transform's fields, Validate's rules) still takes no formula
 control. AC4, the agent run, is open.
+
+## s5 (2026-11-03): AC4, the agent run, and three things it found
+
+**The lab** ([agent-round-bwf004.mjs](agent-round-bwf004.mjs)): a Greenhouse copy with its own backend (the checkout's,
+`dist/` built at `8d9907ccf`, run by Studio's `serve.mjs` with `NODEGX_REPO` and `NODEGX_BACKENDS_DIR`), functions
+deployed, a Monstera and one Watering seeded. One `claude -p` on Opus (`opus`: this CLI, 2.1.251, refuses
+`claude-opus-5-5`), `--strict-mcp-config` with the nodegx server alone from `packages/noodl-mcp/bin` (dist rebuilt
+first: it was 2 November's, older than s4's agent words), no web, no git, no curl, file tools fenced to the copy. The
+grade is the copy's `nodegx.automations.json` and `components/` afterwards (`--grade`).
+
+| round | request | what it did | cost |
+|---|---|---|---|
+| `asked` | AC4's sentence: *"Work out how many days since the plant was watered in the workflow."* | Read it as a question about the data: exported Plant and Watering, answered **"0 days"** (Mark watered stamps `lastWatered` now), offered to build a display. **Wrote nothing**: no formula, no function. | $1.18, 15 turns, 1.3 min |
+| `build` | *"In the workflow that runs when a plant is watered, work out how many days ago that watering was, and have the workflow give that number back at the end."* (names neither a formula nor a function) | **A formula, no function**: `when-watered` 2 → 5 steps, `days` = `{"$fn":"date-difference","args":[{"$path":"upstream.when.wateredAt"},{"$fn":"now"},"days"]}`, a Return of it; no new file under `components/`. Probed the value language with a scratch workflow it then deleted; two real runs returned 4 and 2 on dates it set. | $3.18, 44 turns, 5 min |
+
+Both prompts end "(I'm not at my desk: don't ask me anything …)", since a question asked back ends a `-p` run.
+**AC4 is green on the second sentence, not the first.** The first is a fair question, and the agent answered it; it
+was never a test of formula against function. The grade that matters (the file) held in the build round.
+
+**Found, and fixed this session:**
+
+- **P132-STEPKINDSCUT** (`launch: beta`): `list_backend_step_kinds` came back *"Output too large (53.5KB)… Preview
+  (first 2KB)"*. s4's 27 formulas took the served catalog from under Claude Code's 50,000-character limit to 50,351, so
+  the change that added formulas hid them from a Claude Code agent. The agent built its formula from the `params`
+  description's example and four trial runs. Fixed: the tool joins `WHOLE_RESULT_TOOLS` (120,000 for Claude Code).
+  🔴 My fence `Read(//Users/**)` also refused the saved file (P128 S1 recorded this exact trap): fence the repo and
+  sibling rounds by name.
+- **P132-RUNERRORNOREASON** (`launch: beta`): a probe failed and the run said only *"A step failed with no error
+  route"*; the MCP has no tool that reads a run's steps. The step's own message was already good. Fixed: the result
+  carries `failedStep` and the error reads *Step "How many days ago" failed: "Time between" needs a date … It has no
+  error route, so the workflow halted.*
+- **A transform's `$default` inside a formula** was refused with *"needs a date for from, got an object"*, so the agent
+  split one step into two. The refusal now adds *("$default" is a transform's shorthand, data inside a formula: write
+  {"$fn": "default", "args": [...]})*. Not a row: the refusal was right, its words were short.
+
+Not a defect, recorded so nobody chases it: Greenhouse's *Mark watered* overwrites the Watering's `at` with now, so a
+seeded back-dated watering reads 0 days once the trigger has run (round 1's answer). The build round read the
+trigger's snapshot (`body.at`, else `body.createdAt`) for that reason.
+

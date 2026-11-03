@@ -321,6 +321,22 @@ describe('BWF-004 validate knows the formulas', () => {
     ]);
   });
 
+  // BWF-004 AC4: an agent nested a transform's shorthand in a formula and read only "got an object".
+  it('a $-keyed object in a formula arg says what to write instead', () => {
+    const errors = validateWorkflowDefinition(
+      defWith({
+        a: fn('date-difference', { $default: [p('body.at'), p('body.createdAt')] }, fn('now'), 'days'),
+        b: fn('upper', { $shout: 'x' })
+      })
+    );
+    expect(errors).toEqual([
+      'step "s".params.a.args[0]: "Time between" (date-difference) needs a date for from, got an object ("$default" is ' +
+        'a transform\'s shorthand, data inside a formula: write {"$fn": "default", "args": [...]})',
+      'step "s".params.b.args[0]: "Uppercase" (upper) needs text for text, got an object ("$shout" is not a formula: ' +
+        'a formula is {"$fn": "<name>", "args": [...]})'
+    ]);
+  });
+
   it('accepts a $path anywhere an arg goes (its type is known only when the step runs)', () => {
     expect(
       validateWorkflowDefinition(
@@ -514,5 +530,31 @@ describe('BWF-004 end to end, through the engine', () => {
     const result = await engineWith(executor).run(d, { trigger: { type: 'manual' }, payload: { body: {} } });
     expect(result.status).toBe('error');
     expect(result.unroutedError).toBe(true);
+  });
+
+  // P132-RUNERRORNOREASON: BWF-004 AC4's agent tested a workflow through the MCP and was told only "A step failed with
+  // no error route"; it has no tool that reads the per-step record, so it guessed which of three values had failed.
+  it('a run halted by a failed step says which step and why', async () => {
+    const executor = new CompositeStepExecutor({ getRunner: () => null as never });
+    const d = def([
+      { id: 'when', kind: 'transform', params: { output: { at: p('body.at') } }, next: ['days'] },
+      {
+        id: 'days',
+        name: 'How many days ago',
+        kind: 'transform',
+        params: { output: { days: fn('date-difference', p('previous.result.at'), fn('now'), 'days') } }
+      }
+    ]);
+    const result = await engineWith(executor).run(d, {
+      trigger: { type: 'manual' },
+      payload: { body: { at: '2026-10-27T09:00:00.000Z' } }
+    });
+    expect(result.status).toBe('error');
+    expect(result.failedStep).toMatchObject({ id: 'days', name: 'How many days ago' });
+    expect(result.error).toBe(
+      'Step "How many days ago" failed: "Time between" needs a date (like 2026-11-03 or 2026-11-03T08:00:00Z) for from, ' +
+        'got nothing (the value is missing). A value that may be missing needs "First that is not empty" (default) ' +
+        'around it. It has no error route, so the workflow halted.'
+    );
   });
 });

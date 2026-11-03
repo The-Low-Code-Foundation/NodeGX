@@ -34,6 +34,7 @@ backend on :8625; screenshot of *TriggerTest* in the Backend tab):
 | R2 | Formulas in a step's settings? | **"Ok"**: a small fixed set of formulas (maths, joining text, dates, is empty), no JavaScript in a setting. The engine's no-eval rule (`workflow/values.ts:19-25`) stands. |
 | R3 | Connectors to other services? | **"Yep"**: *Call an API* with keys kept in Secrets, nothing more for Beta. No connector library. |
 | R4 | Order? | **"A first is fine"**: what's broken first (BWF-001), then the data (BWF-002..004), then the action steps (BWF-005..007), then the NodeGX editor (BWF-008), then the test (BWF-009). |
+| R5 | (2026-11-03, BWF-005) Whose privacy rules does a record step obey? | **"A switch per workflow"**: a Bubble-style *Ignore privacy rules* setting on each workflow, **on by default**. On, a record step reads and writes as the app (as a Record node inside a cloud function does today, whatever started the run); off, it acts as whoever the run is for. Put to him with the measurement: a function's record access runs as the system (`service.ts:638-645`, the loopback's admin key) and its Request node's "signed in only" is the only check; Greenhouse's Plant may be changed by its creator only, so *Mark watered* rebuilt as a step works only with the switch on. Chosen over "always as the app" (recommended) and "as the app except webhooks". |
 
 ## What is already there (measured 2026-11-02, so nobody re-derives it)
 
@@ -114,10 +115,7 @@ BWF-005..007 remove the code.
 
 ## Rulings owed (Richard), when the task reaches them
 
-- **BWF-005: who a record step acts as.** Recommended: *as the app*, like a function the app's own trigger starts
-  (P127 SCHEDULEAUTH), so privacy rules written for people don't block the app's own work; a webhook-started run stays
-  a visitor. Bubble's equivalent is "Ignore privacy rules when running the workflow", on by default for backend
-  workflows. Measure what a `call-function` step runs as today before asking.
+- ~~BWF-005: who a record step acts as.~~ Ruled 2026-11-03: R5 above.
 
 ## Bugs filed with this phase
 
