@@ -21,7 +21,7 @@ reads anyone's list.
 
 | Task | What | Round | State |
 |---|---|---|---|
-| [DIG-001](DIG-001-A-PRIVATE-HOME.md) | The game moves to a private repository; rounds 2–6 committed there | 7 | ⬜ |
+| [DIG-001](DIG-001-A-PRIVATE-HOME.md) | The game moves to a private repository; rounds 2–6 committed there | 7 | ✅ 11-03 |
 | [DIG-002](DIG-002-THE-SHIP.md) | The base becomes a big landed spaceship | 7 | ⬜ |
 | [DIG-003](DIG-003-THE-PULSE.md) | The pulse: fuzzy hollows through the rock, echoes you can hear | 7 | ⬜ |
 | [DIG-004](DIG-004-THE-COMPASS-AND-MORE-TO-FIND.md) | The compass stripped (R2); many more unmarked remnants | 7 | ⬜ |
@@ -58,8 +58,8 @@ DIG-010 can run beside any round. DIG-009 → 011 → 012 → 013.
 
 ## Where things live
 
-- The game: `dev-docs/parked/the-dig/` until DIG-001 moves it to its private repository (then the path is in
-  DIG-001's log).
+- The game: the private repository `richardosborne14/dig`, cloned at `~/vscode_projects/dig` (since 2026-11-03,
+  DIG-001). `dev-docs/parked/the-dig/` here is only a pointer.
 - The live static copy: https://nodegx.io/lab/dig/ (rebuilt and re-pushed after every change; recipe in the game's
   README, "Run it").
 - The todo app: todo.digitalbricks.io (TPL-008; its deploy README is

@@ -35,3 +35,24 @@ until the game lives somewhere private.
 What the browser fetches can always be read by a determined player. The wall's aim is that nobody stumbles on the
 lore (in a repository, a bundle, a chat), not that it is secret from someone reading network traffic. Texts are
 fetched as data per district, never baked into the code.
+
+## Log
+
+**2026-11-03, s1: done, AC1–AC4 green.** Richard named it `dig` (he first took `the-dig`, then "just call it 'dig'").
+
+- **AC1.** `github.com/richardosborne14/dig`, **private** (`gh repo view`: `PRIVATE`), cloned at `~/vscode_projects/dig`.
+  One commit holds rounds 1–6 as they stood (`858f554`), a second notes the new home in its README and handoff. A
+  fresh clone into a scratch folder installed three.js on its own and served `/`, `/vendor/three/three.module.js`,
+  `/src/game.mjs` and `/sfx/CREDITS.md` with 200 on port 8811 (served without `--open`, so nothing opened on his screen).
+- **`lore/`** exists with a README stating the wall at its top; empty until DIG-005.
+- **AC2.** `DIG_TEST_PORT=8811 sh tools/run-all.sh` from the new home, outside the sandbox, after the peers' check
+  runs ended: smoke 13/13, phone 20/20, views 3/3, round3 12/12, round4 13/13, round5 12/12, the round-6 numbers.
+- **AC3.** NodeGX `90ed094e4` (committed through a temporary index; a peer's staged `parked/README.md` untouched):
+  30 game files out, `dev-docs/parked/the-dig/README.md` is now the pointer, `.gitignore` kept. `git status` on the
+  folder is empty. Still on disk there, ignored: `node_modules/`, `shots/` (3 GB of old drive screenshots) and
+  `data/` (his round-1–6 answers and trophies; **copied** to the new home's `data/`, the original left in place).
+- **AC4.** `tools/build-static.mjs` from the new home gives the same 59 files the live folder held (`diff -rq`
+  empty; `rsync -n` lists only timestamps and owners), so nothing needed pushing. The phone drive on
+  `https://nodegx.io/lab/dig/`: 20/20.
+- The localStorage keys (`the-dig-save-v1`, …) and the package name keep their old names on purpose: renaming the
+  keys would lose every browser's save.
