@@ -197,3 +197,82 @@
     background-color: var(--theme-color-bg-2);
   }
 }
+
+/* P132 BWF-008 item 3: what a step can read, as trees (BWF-003's model). */
+.Reads {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 2px;
+  padding: 4px;
+  border: 1px solid var(--theme-color-bg-3);
+  border-radius: 3px;
+  max-height: 320px;
+  overflow: auto;
+}
+
+.ReadsSource {
+  display: flex;
+  flex-direction: column;
+}
+
+.ReadsHead,
+.ReadsRow {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  min-width: 0;
+}
+
+.Fold {
+  background: none;
+  border: none;
+  color: var(--theme-color-fg-default-shy);
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  width: 12px;
+  padding: 0;
+  flex: none;
+}
+
+.FoldSpace {
+  width: 12px;
+  flex: none;
+}
+
+.Field {
+  background: none;
+  border: none;
+  border-radius: 3px;
+  color: var(--theme-color-fg-default);
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  padding: 1px 4px;
+  text-align: left;
+  flex: none;
+
+  &:hover {
+    background-color: var(--theme-color-bg-3);
+  }
+}
+
+.FieldOn {
+  background-color: var(--theme-color-bg-3);
+  font-weight: 600;
+}
+
+.ReadsValue {
+  color: var(--theme-color-fg-default-shy);
+  font-size: var(--font-size-xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+/* A source's heading is a sentence ("The Watering that was made"): it wraps in the narrow panel rather than clipping. */
+.ReadsHead .Field {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

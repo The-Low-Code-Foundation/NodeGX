@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
+import { WorkflowEditorService } from '@noodl-models/workflow/WorkflowEditorService';
 import { danglingReference, upstreamSteps } from '@noodl-models/workflow/workflowScope';
+import { fieldRows, type ReadSource } from '@noodl-models/workflow/workflowSources';
 import { isLiteralSpec, isPathSpec } from '@noodl-models/workflow/types';
 
 import styles from './WorkflowCondition.module.scss';
@@ -22,6 +24,8 @@ export interface WorkflowValueInputProps {
   scope?: ScopeRoot[];
   placeholder?: string;
   ariaLabel?: string;
+  /** The param this value is for. A list step's `items` cannot read its own item; every other param of it can. */
+  paramName?: string;
 }
 
 /** How a value is currently written. */
@@ -85,9 +89,12 @@ export function WorkflowValueInput({
   stepId,
   scope,
   placeholder,
-  ariaLabel
+  ariaLabel,
+  paramName
 }: WorkflowValueInputProps) {
   const [mode, setMode] = useState<Mode>(modeOf(value));
+  const [picking, setPicking] = useState(false);
+  const reads = useReads(graph, stepId, paramName, picking);
 
   const upstream = useMemo(
     () => (graph && stepId ? upstreamSteps(graph, stepId) : []),
@@ -140,7 +147,31 @@ export function WorkflowValueInput({
         )}
       </div>
 
-      {mode === 'path' && (
+      {mode === 'path' && reads && (
+        <>
+          {path && <PathWords words={reads.words(path)} />}
+          <button
+            className={styles.SmallButton}
+            aria-expanded={picking}
+            onClick={() => setPicking(!picking)}
+            title="A value from what started the workflow, or from a step before this one"
+          >
+            {picking ? 'Close the list' : 'Choose what it reads…'}
+          </button>
+          {picking && (
+            <ReadsTree
+              sources={reads.sources}
+              current={path}
+              onPick={(p) => {
+                onChange({ $path: p });
+                setPicking(false);
+              }}
+            />
+          )}
+        </>
+      )}
+
+      {mode === 'path' && !reads && (
         <div className={styles.PathHelpers}>
           {/* The served scope has PATTERN entries — `upstream.<stepId>`,
               `<param name>` — which describe a family rather than name a root.
@@ -178,6 +209,122 @@ export function WorkflowValueInput({
       )}
 
       {dangling && <div className={styles.Error}>{dangling.message}</div>}
+    </div>
+  );
+}
+
+/**
+ * What this step can read, from the open workflow document (P132 BWF-008 item 3, BWF-003's model): null when no
+ * document holds this graph, and the picker keeps its chips. Opening the list asks for the newest run again, so a
+ * run made since shows.
+ */
+function useReads(graph: NodeGraphModel | undefined, stepId: string | undefined, paramName: string | undefined, picking: boolean) {
+  const document = WorkflowEditorService.instance?.document;
+  const mine = !!document && !!graph && !!stepId && document.graph === graph;
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    if (!mine) return;
+    const group = {};
+    document.on('readsChanged', () => setTick((t) => t + 1), group);
+    return () => void document.off(group);
+  }, [mine, document]);
+
+  useEffect(() => {
+    if (mine && picking) void document.refreshReads();
+  }, [mine, picking, document]);
+
+  if (!mine) return null;
+  const step = document.toInput().steps.find((s) => s.id === stepId);
+  const item = !!step && !!document.specFor(step.kind)?.params.some((p) => p.name === 'itemKey') && paramName !== 'items';
+  return {
+    sources: picking ? document.readsFor(stepId, item) : [],
+    words: (p: string) => document.valueWords(p, stepId)
+  };
+}
+
+const FROM_TAG: Record<string, string> = { shape: 'no run yet', sample: 'from the test sample' };
+
+function PathWords({ words }: { words: { name: string; from: string; missing?: boolean } }) {
+  return (
+    <div className={styles.Hint} data-test="path-words">
+      <b>{words.name}</b> · from {words.from}
+    </div>
+  );
+}
+
+/** The sources as trees: a source a heading, a field a line; a press picks its path. Folded as Studio folds them. */
+function ReadsTree({ sources, current, onPick }: { sources: ReadSource[]; current: string; onPick: (path: string) => void }) {
+  // A fold is open at the top level and closed below it, until pressed; the trigger's source starts closed.
+  const [flipped, setFlipped] = useState<Set<string>>(new Set());
+  const flip = (key: string) =>
+    setFlipped((was) => {
+      const next = new Set(was);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
+  const isOpen = (key: string, byDefault: boolean) => byDefault !== flipped.has(key);
+
+  return (
+    <div className={styles.Reads} role="tree" aria-label="A value from what came before">
+      {sources.map((src) => {
+        const open = isOpen(src.root, src.root !== 'trigger');
+        const words = src.words.charAt(0).toUpperCase() + src.words.slice(1);
+        const rows = src.leaf ? [] : fieldRows(src);
+        const closedBelow: string[] = [];
+        return (
+          <div key={src.root} className={styles.ReadsSource} data-root={src.root} data-from={src.from}>
+            <div className={styles.ReadsHead}>
+              {!src.leaf && (
+                <button className={styles.Fold} aria-expanded={open} aria-label={`${open ? 'Fold' : 'Unfold'} ${src.words}`} onClick={() => flip(src.root)}>
+                  {open ? '▾' : '▸'}
+                </button>
+              )}
+              <button
+                className={src.root === current ? `${styles.Field} ${styles.FieldOn}` : styles.Field}
+                data-path={src.root}
+                title={`Use all of it (${src.root})`}
+                onClick={() => onPick(src.root)}
+              >
+                {words}
+              </button>
+              {FROM_TAG[src.from] && <span className={styles.Hint}>{FROM_TAG[src.from]}</span>}
+            </div>
+            {open && !src.leaf && (rows.length ? (
+              rows.map((r) => {
+                if (closedBelow.some((c) => r.path.startsWith(`${c}.`))) return null;
+                const foldOpen = r.folds && isOpen(r.path, r.depth < 1);
+                if (r.folds && !foldOpen) closedBelow.push(r.path);
+                return (
+                  <div key={r.path} className={styles.ReadsRow} style={{ paddingLeft: 14 + r.depth * 12 }}>
+                    {r.folds ? (
+                      <button className={styles.Fold} aria-expanded={foldOpen} aria-label={`${foldOpen ? 'Fold' : 'Unfold'} ${r.name}`} onClick={() => flip(r.path)}>
+                        {foldOpen ? '▾' : '▸'}
+                      </button>
+                    ) : (
+                      <span className={styles.FoldSpace} />
+                    )}
+                    <button
+                      className={r.path === current ? `${styles.Field} ${styles.FieldOn}` : styles.Field}
+                      data-path={r.path}
+                      title={`Use ${r.path}`}
+                      onClick={() => onPick(r.path)}
+                    >
+                      {r.name}
+                    </button>
+                    {r.shown !== null && <span className={styles.ReadsValue}>{r.shown}</span>}
+                  </div>
+                );
+              })
+            ) : (
+              <div className={styles.Hint} style={{ paddingLeft: 14 }}>
+                {src.note ?? (src.from === 'shape' ? 'Its fields show once the workflow is tested.' : 'Nothing in it.')}
+              </div>
+            ))}
+          </div>
+        );
+      })}
+      <div className={styles.Hint}>Or type where it reads from in the box above.</div>
     </div>
   );
 }

@@ -15,6 +15,7 @@
  * @module models/workflow/WorkflowBackendClient
  */
 
+import { filesystem } from '@noodl/platform';
 import { ipcInvoke } from '@noodl-utils/ipc';
 
 import type { StepKindCatalog, WorkflowDefinition, WorkflowInput, WorkflowRef } from './types';
@@ -222,4 +223,63 @@ export async function runWorkflow(
     throw new Error(result?.error || 'The backend accepted the run but returned no execution id.');
   }
   return executionId as string;
+}
+
+/* ---- P132 BWF-008 item 3: what the value picker's field trees are drawn from (Studio's `readsFor`). Each one answers
+   null when it cannot be read: the tree then says the shape, "no run yet", rather than failing. ---- */
+
+/** The newest run of this workflow on this backend, with its steps, or null. Tests count: they are runs a person asked for. */
+export async function fetchLatestRun(
+  backendId: string,
+  workflowId: string
+): Promise<{ id: string; steps?: { nodeId: string; status?: string; stepIndex?: number; inputData?: unknown; outputData?: unknown }[] } | null> {
+  try {
+    const list = await ipcInvoke<{ executions?: { id: string; metadata?: { sourceId?: string } }[] }>('execution-history:list', {
+      workflowId,
+      limit: 5
+    });
+    const newest = (list?.executions ?? []).find((e) => e.metadata?.sourceId === backendId);
+    if (!newest) return null;
+    const record = await ipcInvoke<{ id: string; steps?: never[]; error?: string } | null>('execution-history:get', newest.id);
+    return record && !record.error ? record : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Each table's column names on this backend (`/admin/schema`), without the four every row has. */
+export async function fetchTableColumns(backendId: string): Promise<Map<string, string[]>> {
+  const out = new Map<string, string[]>();
+  try {
+    const schema = await ipcInvoke<{ tables?: { name?: string; columns?: unknown[] }[] }>('backend:getSchema', backendId);
+    for (const t of schema?.tables ?? []) if (t?.name) out.set(t.name, columnNames(t.columns));
+  } catch {
+    // not running, or not answering: the project's own columns still apply
+  }
+  return out;
+}
+
+const ROW_FIELDS = new Set(['objectId', 'createdAt', 'updatedAt', 'ACL']);
+
+/** Column names from a schema's or a project's list (strings, or `{ name }`), without the four every row has. */
+export function columnNames(cols: unknown): string[] {
+  return (Array.isArray(cols) ? cols : [])
+    .map((x) => (typeof x === 'string' ? x : (x as { name?: unknown })?.name))
+    .filter((n): n is string => typeof n === 'string' && !!n && !ROW_FIELDS.has(n));
+}
+
+/** This computer's test sample for a workflow: Studio keeps them in the project's `.nodegx/workflow-samples.json`. */
+export async function readWorkflowSample(
+  projectDir: string | undefined,
+  workflowId: string
+): Promise<{ body?: Record<string, unknown> } | null> {
+  if (!projectDir) return null;
+  try {
+    const file = filesystem.join(projectDir, '.nodegx', 'workflow-samples.json');
+    if (!filesystem.exists(file)) return null;
+    const j = await filesystem.readJson<{ samples?: Record<string, { body?: Record<string, unknown> }> }>(file);
+    return j?.samples?.[workflowId] ?? null;
+  } catch {
+    return null;
+  }
 }

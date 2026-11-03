@@ -50,10 +50,19 @@ import {
 } from './functionRefResolution';
 import { FunctionPlan, planFunctionFromStep } from './newFunctionFromStep';
 import { setDescent } from './workflowDescent';
-import { fetchStepKinds, fetchWorkflow, saveWorkflow } from './WorkflowBackendClient';
+import {
+  columnNames,
+  fetchLatestRun,
+  fetchStepKinds,
+  fetchTableColumns,
+  fetchWorkflow,
+  readWorkflowSample,
+  saveWorkflow
+} from './WorkflowBackendClient';
 import { WorkflowComponentModel } from './WorkflowComponentModel';
 import { WorkflowGraphModel } from './WorkflowGraphModel';
 import { layoutWorkflow } from './workflowLayout';
+import { itemSources, pathWords, readSources, stepsOfRun, type ReadSource, type RunStep } from './workflowSources';
 import {
   buildWorkflowNodeLibrary,
   isRoutePort,
@@ -1217,6 +1226,88 @@ export class WorkflowDocument extends Model {
     // P132 BWF-008: `project` says whether the project's file has it too, so the panel never says less or more
     this.notifyListeners('saved', { definition: saved, project });
     return saved;
+  }
+
+  /* ------------------------------------------------------------------------ */
+  /* P132 BWF-008 item 3 — what a step can read, as field trees               */
+  /* ------------------------------------------------------------------------ */
+
+  /** The newest run's steps, the test sample, the backend's columns: null until `refreshReads` lands. */
+  private reads: {
+    run: Map<string, RunStep> | null;
+    sample: { body?: Record<string, unknown> } | null;
+    columns: Map<string, string[]>;
+  } | null = null;
+
+  /**
+   * Ask the backend for the newest run of this workflow, its columns, and the project for the test sample. Called
+   * when a value picker opens, so a run made since shows; `readsChanged` when it lands.
+   */
+  async refreshReads(): Promise<void> {
+    const projectDir = ProjectModel.instance?._retainedProjectDirectory;
+    const [record, columns, sample] = await Promise.all([
+      fetchLatestRun(this.ref.backendId, this.definition.id),
+      fetchTableColumns(this.ref.backendId),
+      readWorkflowSample(projectDir, this.definition.id)
+    ]);
+    this.reads = { run: record ? stepsOfRun(record) : null, sample, columns };
+    this.notifyListeners('readsChanged', {});
+  }
+
+  /** A table's columns: the project's declared ones, else the backend's. */
+  private columnsOf(table: string): string[] | null {
+    const declared = (ProjectModel.instance?.getMetaData('dbCollections') as { name?: string; columns?: unknown[] }[] | undefined)
+      ?.find((c) => c?.name === table);
+    const mine = declared ? columnNames(declared.columns) : [];
+    if (mine.length) return mine;
+    return this.reads?.columns.get(table) ?? null;
+  }
+
+  /** The names a function step's function answers with: its Responses' `params`, refusals left out. */
+  private answersOf(step: WorkflowStep): string[] | null {
+    const resolution = this.resolveStep(step.id);
+    const component = resolution?.componentName
+      ? ProjectModel.instance?.getComponentWithName(resolution.componentName)
+      : null;
+    if (!component) return null;
+    const sends: string[] = [];
+    let any = false;
+    component.graph.forEachNode((n) => {
+      if (n.typename !== 'noodl.cloud.response' || n.parameters?.status === 'failure') return;
+      any = true;
+      for (const name of String(n.parameters?.params || '').split(',')) if (name.trim()) sends.push(name.trim());
+    });
+    return any ? [...new Set(sends)] : null;
+  }
+
+  /**
+   * What step `stepId` can read, a source each (`workflowSources.readSources`), from the graph as it stands. `item`
+   * adds a list step's item and position first (a filter's condition).
+   */
+  readsFor(stepId: string, item = false): ReadSource[] {
+    const steps = this.toInput().steps;
+    const out = readSources(steps, stepId, {
+      run: this.reads?.run ?? null,
+      sample: this.reads?.sample ?? null,
+      starts: this.triggers,
+      columns: (t) => this.columnsOf(t),
+      kind: (k) => this.specFor(k),
+      answers: (s) => this.answersOf(s)
+    });
+    const step = steps.find((s) => s.id === stepId);
+    return item && step ? [...itemSources(steps, step, out), ...out] : out;
+  }
+
+  /** A `$path` in words: "plant · from the Watering that was made". */
+  valueWords(path: string, stepId?: string): { name: string; from: string; missing?: boolean } {
+    const steps = this.toInput().steps;
+    const step = stepId ? steps.find((s) => s.id === stepId) : undefined;
+    const p = step?.params ?? {};
+    return pathWords(path, steps, this.triggers, {
+      item: typeof p.itemKey === 'string' ? p.itemKey : 'item',
+      index: typeof p.indexKey === 'string' ? p.indexKey : 'index',
+      kindName: (k) => this.specFor(k)?.displayName || k
+    });
   }
 
   dispose() {

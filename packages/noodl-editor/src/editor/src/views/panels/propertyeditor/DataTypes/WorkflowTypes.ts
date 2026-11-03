@@ -470,7 +470,8 @@ export class WorkflowValueType extends WorkflowTypeView {
           scope: this.scope,
           graph: this.graph,
           stepId: this.stepId,
-          ariaLabel: this.displayName
+          ariaLabel: this.displayName,
+          paramName: this.name
         })
       })
     );
