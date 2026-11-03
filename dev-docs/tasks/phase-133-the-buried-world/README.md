@@ -25,9 +25,9 @@ reads anyone's list.
 | [DIG-002](DIG-002-THE-SHIP.md) | The base becomes a big landed spaceship | 7 | 🟡 built 11-03; AC3 his look |
 | [DIG-003](DIG-003-THE-PULSE.md) | The pulse: fuzzy hollows through the rock, echoes you can hear | 7 | 🟡 built 11-03; AC7–8 his play |
 | [DIG-004](DIG-004-THE-COMPASS-AND-MORE-TO-FIND.md) | The compass stripped (R2); many more unmarked remnants | 7 | 🟡 built 11-03; AC4 his play |
-| [DIG-005](DIG-005-THE-CANON.md) | The canon, written behind the spoiler wall | 8 | ⬜ |
-| [DIG-006](DIG-006-THE-SETTLEMENT-ENGINE.md) | Settlements, roads, collapse, the new blocks | 8 | ⬜ |
-| [DIG-007](DIG-007-THE-FIRST-DISTRICT.md) | The sandbox: one hand-made district near the ship, the record | 8 | ⬜ |
+| [DIG-005](DIG-005-THE-CANON.md) | The canon, written behind the spoiler wall | 8 | ✅ 11-03 (30 practices, 11 corrected by the source pass; 20 of 22 contradictions fixed, 2 handed on) |
+| [DIG-006](DIG-006-THE-SETTLEMENT-ENGINE.md) | Settlements, roads, collapse, the new blocks | 8 | 🟡 built 11-03; AC1–4 Node ✅, safe rooms ✅, AC5 in part, AC6 his look |
+| [DIG-007](DIG-007-THE-FIRST-DISTRICT.md) | The sandbox: one hand-made district near the ship, the record | 8 | 🟡 built 11-03 (23 texts, a secret, a tuning find); AC4 his play |
 | [DIG-008](DIG-008-THE-WORLD-GROWS-AT-NIGHT.md) | The nightly district job, the checker, placement, the cost | 9 | ⬜ |
 | [DIG-009](DIG-009-ACCOUNTS.md) | One account with the todo app, saving, delete and export, its own address | 10 | ⬜ |
 | [DIG-010](DIG-010-THE-TODO-APP-LOOKS-FINISHED.md) | The todo app's look pass and its Dig button (R3) | any time | ⬜ |

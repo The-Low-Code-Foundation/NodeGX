@@ -31,3 +31,22 @@ are safe; the earlier expedition; why the ship's pulse rings in their halls. Plu
 - **AC3.** `lore/check-canon.mjs` exits 0: every practice has its source, family, table rows and asks; no banned word
   anywhere in `lore/`.
 - **AC4.** The report to Richard is one paragraph of counts and checks, with no names or quotes from the lore.
+
+## Log
+
+**2026-11-03, s2:** written by a separate agent in the private repo's `lore/` (never read into the main session's
+chat). `lore/check-canon.mjs` (written first, as the data contract) on the draft: canon 8,066 words, style guide 2,055,
+sources page 1,057; 30 practices in 15 families; all 32 kind × weight cells answered at least twice; looking ahead,
+hard 12 against good 37 (R4); 6 styles in 5 settings, 16 motifs. Mending with gold dropped: no page-numbered source
+found (the family draws on another text). AC1's second pass (a fresh agent checking every source) is running; AC2's
+consistency pass follows it.
+
+**2026-11-03, s2, later (private repo `dfeb30e`):** AC1 ✅ a second agent checked all 30 practices against public
+texts and corrected 11 (sayings the source does not contain, a teaching turned the wrong way, a wrong chapter or
+page, words given to the wrong speaker); three refs remain second-hand and say so in their `checked` notes (one 1969
+page number, one book page cited via a secondary source with a checked article as the main source, one paragraph
+number from the standard numbering). AC2 ✅ a fresh agent read the canon for contradictions: 22 found, 20 fixed in
+`lore/`; one was code (refuges safe only when whole, fixed in `5bb1d5f`); one is a placement rule handed to DIG-008.
+AC3 ✅ `node lore/check-canon.mjs` exits 0: canon 8,207 words, style guide 2,073, sources page 1,160; 30 practices
+in 15 families, all checked; 32/32 cells; looking ahead hard 12 / good 37; 6 styles, 16 motifs. AC4: the report to
+Richard was counts only.

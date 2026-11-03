@@ -30,3 +30,9 @@
 - **AC4.** A fresh save with seven districts published finds them laid out from the ship; a returning save finds the
   newest within a short dig of where it last stopped.
 - **AC5.** The cron is installed only after AC1–AC4, with a log the session reads (never Richard: the log holds lore).
+
+## Carried in from DIG-005
+
+- The canon gives one motif a "not before district N" rule; three styles carry it and the engine picks a style by
+  depth, not by district number, so `styles.json` cannot enforce it. The placer (or the night's checker) has to:
+  read the rule in `lore/CANON.md`, never quote it here.
