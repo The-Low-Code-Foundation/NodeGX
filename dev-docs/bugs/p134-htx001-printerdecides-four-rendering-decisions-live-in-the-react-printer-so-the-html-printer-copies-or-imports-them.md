@@ -43,6 +43,15 @@ plan marks the body (`JsFunctionPlan.late`) but not where its late writes go, so
 it. The persisted store's library was not copied: `lib/persistStore.js` is `persistStoreLibSource()` with its types out,
 made again by the spec.
 
+**HTX-003 session 4 (2026-11-03) copied eight more**, each marked in `printComponent.ts`: `fieldWriteCode` (a Set behind
+the focus test, a Clear, then the field's change chain with its text), the field refs and the Cleared mark with its reset,
+the controlled change chain's order (the row, then `changeHandlers`, then the field's Changed), P18-S116-FIELDMOUNT's
+mount announcement and its gates, the Did Mount gate's rule (`mountChains`: the element and every element above it
+whose Mounted a value decides), `renderRepeater`'s row mapping (template inputs, row props, the fields no authored row
+carries) and its Static Data key (`id` when every row has a unique one), and `contentAttrs` for a field and a button
+(`defaultValue`, `maxLength`, `inputMode`, `enterKeyHint`, Enabled as `disabled`). Twenty in all. The field write is the
+largest: some forty lines that must keep React's every branch.
+
 **What a fix needs:** the plan carries each answer as data (`tagOf[nodeId]`, a `mountedKeeps` flag beside the Mounted
 binding, the merged page declarations, the removed ids), and the three printers read it. AC4's ledger (HTX-005) is
 where a drift would show.

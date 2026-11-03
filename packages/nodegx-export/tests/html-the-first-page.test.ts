@@ -170,7 +170,7 @@ describe('P134 HTX-001: story-engine as plain files', () => {
     expect(p.planRefusals).toHaveLength(21);
     const losses = p.htmlLosses.map((l) => `${l.component} ${l.label ?? l.nodeId}: ${l.what}`);
     // The plan gives this For Each no items, so the React export draws no rows either.
-    expect(losses).toContain('Pages/Read One row per choice you can see: a For Each whose rows the HTML target does not draw yet (HTX-003)');
+    expect(losses).toContain("Pages/Read One row per choice you can see: a For Each not drawn: its items are fed by nothing the plan knows as a list (a Function's output, say), which the React export defers too (EXP-003)");
     // HTX-002: the Variable is read, and the logic component runs.
     expect(losses.filter((l) => /reads the Variable|logic component/.test(l))).toEqual([]);
     expect(app.files['EXPORT-PREFLIGHT.md']).toContain(`## Read in the plan, not printed by the HTML target yet (${p.htmlLosses.length})`);

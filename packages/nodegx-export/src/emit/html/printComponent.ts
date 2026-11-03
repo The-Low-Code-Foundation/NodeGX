@@ -293,6 +293,60 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     return names;
   };
 
+  // ---- fields ---------------------------------------------------------------------------------------------------
+
+  /*
+   * P18-S128-FIELDSET (EXP-011 §97), as the React printer reads it (`component.ts` `fieldRefs`, copied,
+   * P134-HTX001-PRINTERDECIDES). A field a Focus, a Blur or a Set acts on is held in a ref, `{ current }`, set while the
+   * field is on the page (a Set asks whether it has focus, as the runtime's does). A field that is both Set and Cleared
+   * keeps, in a second ref, whether a Clear has run since its Value was last delivered: the runtime's Set writes
+   * `_internal.text`, which the Clear empties and the next delivery fills.
+   */
+  const fieldActions: HandlerAction[] = [];
+  {
+    const seen = new Set<object>();
+    const visit = (v: unknown): void => {
+      if (v === null || typeof v !== 'object' || seen.has(v)) return;
+      seen.add(v);
+      if (Array.isArray(v)) return v.forEach(visit);
+      const a = v as { kind?: unknown; field?: unknown };
+      if (a.kind === 'field-focus' || (a.kind === 'state-set' && a.field !== undefined)) fieldActions.push(v as HandlerAction);
+      Object.values(v).forEach(visit);
+    };
+    visit(plan);
+  }
+  const fieldRefs = new Map<string, string>();
+  const fieldSetSources = new Map<string, ValueExpr>();
+  const fieldCleared = new Set<string>();
+  for (const a of fieldActions) {
+    const inputId = a.kind === 'field-focus' ? a.inputId : a.kind === 'state-set' && a.field?.port === 'set' ? a.field.inputId : undefined;
+    if (inputId !== undefined && !fieldRefs.has(inputId)) {
+      const named = lowerFirst(camelCase(nodeById.get(inputId)?.authoredLabel ?? ''));
+      fieldRefs.set(inputId, fresh(/^[A-Za-z_$]/.test(named) ? `${named}FieldRef` : 'fieldRef'));
+    }
+    if (a.kind === 'state-set' && a.field?.port === 'set' && a.expr !== undefined) fieldSetSources.set(a.field.inputId, a.expr);
+    if (a.kind === 'state-set' && a.field?.port === 'clear') fieldCleared.add(a.field.inputId);
+  }
+  const fieldClearedLocals = new Map<string, string>();
+  for (const inputId of fieldCleared) {
+    if (!fieldSetSources.has(inputId)) continue;
+    fieldClearedLocals.set(inputId, fresh(`${fieldRefs.get(inputId)!.replace(/FieldRef\d*$/, '')}Cleared`));
+  }
+  /** The field's own change chain, as its typing runs it. */
+  const fieldChainOf = (inputId: string): HandlerAction[] => [...(plan.changeHandlers[inputId] ?? []), ...((plan.handlers[inputId] ?? {})['onChange'] ?? [])];
+  /** The fields whose chain is being printed: a chain that Sets or Clears its own field does not run itself again. */
+  const printingFieldChains = new Set<string>();
+  /**
+   * P18-S116-FIELDMOUNT. While a field's chain is printed, a read of the field's text is this code: the text its typing
+   * left in the element, or the text a Set, a Clear or the mount announcement writes. Anywhere else it has no value.
+   */
+  let announced: { inputId: string; code: string } | undefined;
+  /**
+   * EXP-011 §100. While a For Each's row callback is printed, a read of that For Each's relayed value is what the row is
+   * handed for the input the value passes through (the React printer's `rowRelayCode`).
+   */
+  let relayed: { repeaterId: string; read: (input: string) => string } | undefined;
+
   // ---- values ---------------------------------------------------------------------------------------------------
 
   const TOP: Scope = { top: true, runs: new Map(), pulses: new Map(), declared: new Set() };
@@ -376,6 +430,10 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       }
       case 'store-key-get':
         return storeKeyRead(e.storeName, e.key, scope);
+      case 'input-text':
+        return announced?.inputId === e.inputId ? announced.code : undefined;
+      case 'row-relay':
+        return relayed?.repeaterId === e.repeaterId ? relayed.read(e.input) : 'undefined';
       case 'static-rows':
         // The authored rows, a constant above the component (STATIC-DATA-TARGET §3): `allowEditOnly`, so nothing changes them.
         return plan.staticData.some((d) => d.constName === e.constName) ? e.constName : undefined;
@@ -508,7 +566,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         const row = stateByName.get(a.name);
         if (!row) throw new Unprinted(`a write to ${a.name}, a value the plan does not keep`);
         const s = member('state', a.name);
-        if (a.field !== undefined) throw new Unprinted(`a ${a.field.port === 'set' ? 'Set' : 'Clear'} on a text field (HTX-003)`);
+        if (a.field !== undefined) return { lines: fieldWrite(a, a.field, pad, scope), scope };
         if (a.op === 'toggle') return one(`${s}.set(!${s}.peek());`);
         if (a.op === 'inc') return one(`${s}.set(${s}.peek() + 1);`);
         if (a.op === 'dec') return one(`${s}.set(${s}.peek() - 1);`);
@@ -568,6 +626,11 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       }
       case 'jsfun-pulse':
         return { lines: block(a.then, pad, scope), scope };
+      case 'field-focus': {
+        // A call on the field's element; nothing when it is not on the page (the Focus is not held, GAM-012 R13).
+        const ref = fieldRefs.get(a.inputId)!;
+        return one(`if (${ref}.current) ${ref}.current.${a.focus ? 'focus' : 'blur'}();`);
+      }
       case 'states-go': {
         const m = machineByNode.get(a.nodeId);
         if (!m) throw new Unprinted('a States move on a States node the plan does not keep');
@@ -585,6 +648,56 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       default:
         throw new Unprinted(`a ${a.kind} step, which the HTML target does not print yet`);
     }
+  };
+
+  /**
+   * P18-S128-FIELDSET and P18-S127-CLEAROUT (EXP-011 §97), the React printer's `fieldWriteCode` (copied,
+   * P134-HTX001-PRINTERDECIDES): the write, then the field's change chain with the text written where the chain reads the
+   * field. A Set is not written into a focused field (`setText`'s `hasFocus()`), and writes the Value as text: `undefined`
+   * leaves the start value, `null` is `''`, a Clear since the last delivery is `''`.
+   */
+  const fieldWrite = (a: Extract<HandlerAction, { kind: 'state-set' }>, field: NonNullable<Extract<HandlerAction, { kind: 'state-set' }>['field']>, pad: string, scope: Scope): string[] => {
+    const set = `${member('state', a.name)}.set`;
+    const cleared = fieldClearedLocals.get(field.inputId);
+    const chainLines = (code: string, at: string): string[] => {
+      if (printingFieldChains.has(field.inputId)) return [];
+      const list = fieldChainOf(field.inputId);
+      if (list.length === 0) return [];
+      const outer = announced;
+      announced = { inputId: field.inputId, code };
+      printingFieldChains.add(field.inputId);
+      try {
+        return block(list, at, scope);
+      } finally {
+        printingFieldChains.delete(field.inputId);
+        announced = outer;
+      }
+    };
+    if (field.port === 'clear') return [`${pad}${set}('');`, ...(cleared !== undefined ? [`${pad}${cleared}.current = true;`] : []), ...chainLines("''", pad)];
+    const ref = fieldRefs.get(field.inputId)!;
+    const inner = `${pad}  `;
+    const body: string[] = [];
+    let code: string;
+    if (a.expr === undefined || a.expr.kind === 'literal') {
+      const literal = js(a.expr?.kind === 'literal' ? String(a.expr.value) : (field.start ?? ''));
+      code = cleared !== undefined ? `(${cleared}.current ? '' : ${literal})` : literal;
+    } else {
+      const v = expr(a.expr, scope);
+      if (v === undefined) throw new Unprinted(`a Set on a text field from ${describe(a.expr)}, which the HTML target does not print yet`);
+      // Block-scoped, so a name another write's block uses is free here; one the component's scope holds is not.
+      const blockLocal = (base: string): string => {
+        let candidate = base;
+        for (let n = 2; taken.has(candidate) || scope.declared.has(candidate); n++) candidate = `${base}${n}`;
+        return candidate;
+      };
+      const value = blockLocal(`${a.name}Value`);
+      code = blockLocal(`${a.name}Text`);
+      const asText = `String(${value} ?? '')`;
+      const coerced = field.start === undefined || field.start === '' ? asText : `${value} === undefined ? ${js(field.start)} : ${asText}`;
+      body.push(`${inner}const ${value} = ${v};`, `${inner}const ${code} = ${cleared !== undefined ? `${cleared}.current ? '' : ${coerced}` : coerced};`);
+    }
+    body.push(`${inner}${set}(${code});`, ...chainLines(code, inner));
+    return [`${pad}if (${ref}.current !== document.activeElement) {`, ...body, `${pad}}`];
   };
 
   /** A chain from its start (a press, a callback, an effect), or undefined and a named loss: never half a chain. */
@@ -619,18 +732,31 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     }
     return false;
   };
+  /**
+   * P18 session 126 (EXP-011 §93). The Did Mount chains of the part `when(…)` is building: under a Mounted a value
+   * decides, an element is made each time that part is built, so its Did Mount runs at the end of the build, each time it
+   * mounts, children first: the React printer's gated mount effect, with the part's own life in place of its ref.
+   */
+  const partMounts: string[][] = [];
   const listen = (id: string, local: string, pad: string, known: Record<string, string>): string[] => {
     const out: string[] = [];
     for (const [port, list] of Object.entries(plan.handlers[id] ?? {})) {
       if (port === 'didMount') {
+        if (partMounts.length > 0) {
+          const body = chain(id, 'Did Mount', list, pad);
+          if (body !== undefined) partMounts[partMounts.length - 1].push(`${pad}// ${nodeById.get(id)?.authoredLabel ?? id}: Did Mount, each time it mounts.`, ...body);
+          continue;
+        }
         if (mountGated(id)) {
-          lose(id, 'its Did Mount sits under a Mounted a value decides, which the HTML target does not gate yet');
+          lose(id, 'its Did Mount sits under a Mounted whose value the HTML target does not print, so when it mounts is not known');
           continue;
         }
         const body = chain(id, 'Did Mount', list, '  ');
         if (body !== undefined) mounted.push(`  // ${nodeById.get(id)?.authoredLabel ?? id}: Did Mount.`, ...body);
         continue;
       }
+      // A text field's Changed runs from its typing, with its own text (drawn with the field).
+      if (port === 'onChange' && plan.roleOf[id] === 'input') continue;
       // P18-S128-FIELDSET. A text field's On Enter is its Enter key.
       if (port === 'onEnter' && plan.roleOf[id] === 'input') {
         const body = chain(id, port, list, `${pad}  `);
@@ -750,7 +876,9 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         // P134-HTX001-PRINTERDECIDES): a wire never delivers undefined, so while the source has no value the element keeps
         // its own authored Mounted (true unless the author turned it off).
         const keeps = literalParam(node, 'mounted') === false ? 'false' : 'true';
+        partMounts.push([]);
         const inner = drawNode(id, role, node, bound, 'into', 'at', `${pad}  `);
+        inner.push(...partMounts.pop()!);
         const outer = role === 'instance' ? 'null' : local(id);
         return [
           `${pad}// ${node.authoredLabel ?? id}: on the page while its Mounted is true.`,
@@ -795,17 +923,49 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     const rep = plan.repeaters[id];
     const target = rep?.templatePath ? ctx.project.byLegacyPath.get(rep.templatePath) : undefined;
     const module = rep?.templatePath ? ctx.moduleOf(rep.templatePath) : undefined;
-    const items = rep?.itemsExpr ? expr(rep.itemsExpr) : undefined;
+    // STATIC-DATA §3: the authored rows, the constant above the component, which nothing changes.
+    const staticData = rep?.itemsStaticId ? plan.staticData.find((s) => s.nodeId === rep.itemsStaticId) : undefined;
+    const items = rep?.itemsExpr ? expr(rep.itemsExpr) : staticData?.constName;
     if (!rep || !target || !module || target.hook || items === undefined || rep.mapping === null) {
-      lose(id, rep?.itemsStaticId || rep?.itemsQueryId || rep?.itemsCollectionName ? 'a For Each over Static Data, a query or a named list, which the HTML target does not draw yet (HTX-003)' : 'a For Each whose rows the HTML target does not draw yet (HTX-003)');
+      const why = !rep?.templatePath
+        ? 'it repeats no component'
+        : rep.mapping === null
+          ? 'its mapping script is more than a list of names'
+          : rep.itemsQueryId
+            ? 'its items are a backend query (HTX-004)'
+            : rep.itemsCollectionName
+              ? `its items are the named list "${rep.itemsCollectionName}", which the HTML target does not keep yet`
+              : rep.itemsExpr
+                ? `its items read ${describe(rep.itemsExpr)}, which the HTML target does not print yet`
+                : target?.hook
+                  ? 'its row is a logic component'
+                  : 'its items are fed by nothing the plan knows as a list (a Function\'s output, say), which the React export defers too (EXP-003)';
+      lose(id, `a For Each not drawn: ${why}`);
       return [`${pad}// ${node.authoredLabel ?? id}: a For Each, not drawn by this export yet (see EXPORT-PREFLIGHT.md).`];
     }
     importMount(module.file, module.mount);
     imports.dom.add('list');
-    const pairs =
-      rep.mapping === 'template-inputs'
-        ? target.props.filter((p) => p.tsType.replace(/\s+/g, '') !== INPUT_PULSE_TS_TYPE.replace(/\s+/g, '')).map((p) => `${key(p.name)}: ${member('item', p.name)}`)
-        : rep.mapping.map((m) => `${key(m.input)}: ${member('item', m.field)}`);
+    /*
+     * The row's inputs, the React printer's rule (`renderRepeater`, copied, P134-HTX001-PRINTERDECIDES): no script is the
+     * template's own inputs by name (`foreach.tsx` maps an item's properties onto same-named inputs by itself); the
+     * template's row props (an Object "From repeater") read their own field; over Static Data, a field no authored row
+     * carries is dropped, as the row never gets it.
+     */
+    const isPulse = (tsType: string) => tsType.replace(/\s+/g, '') === INPUT_PULSE_TS_TYPE.replace(/\s+/g, '');
+    const rowPropNames = new Set(target.rowProps.map((r) => r.prop));
+    const declared = rep.mapping === 'template-inputs' ? target.props.filter((p) => !isPulse(p.tsType) && !rowPropNames.has(p.name)).map((p) => ({ input: p.name, field: p.name })) : rep.mapping.filter((m) => !rowPropNames.has(m.input));
+    let mapping: Array<{ input: string; field: string; repeaterItem?: string }> = [...declared, ...target.rowProps.map((r) => ({ input: r.prop, field: r.field, repeaterItem: r.repeaterItem }))];
+    if (staticData !== undefined) {
+      const carried = new Set(staticData.fields.map((f) => f.name));
+      const idOk = staticData.keyField === 'id' && staticData.fields.find((f) => f.name === 'id')?.tsType === 'string';
+      for (const m of mapping) {
+        if (m.repeaterItem !== undefined && !idOk) lose(id, `its rows' Repeater Item ${m.repeaterItem} reads Item Id, which the authored rows do not carry as a unique text "id"`);
+        else if (m.repeaterItem === undefined && !carried.has(m.field)) lose(id, `it maps "${m.input}" from the field "${m.field}", which no authored row carries`);
+      }
+      mapping = mapping.filter((m) => (m.repeaterItem !== undefined ? idOk : carried.has(m.field)));
+    }
+    const pairs = mapping.map((m) => `${key(m.input)}: ${member('item', m.field)}`);
+    const fieldOfInput = (input: string): string | undefined => mapping.find((m) => m.input === input)?.field;
     const callbacks: string[] = [];
     const outputs = new Map(target.outputProps.map((o) => [o.port, o.prop]));
     const relays = plan.rowRelays.filter((r) => r.repeaterId === id && stateByName.has(r.stateName));
@@ -816,15 +976,25 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         lose(id, `its ${port} is not carried by the HTML target yet`);
         continue;
       }
-      const fn = callback(id, port, list, `${pad}    `, relays.map((r) => `${member('state', r.stateName)}.set(${member('item', r.input)});`));
+      // EXP-011 §99. The firing row's relayed values first: what this row is handed for the input each passes through.
+      const writes = relays.map((r) => {
+        const field = fieldOfInput(r.input);
+        return `${member('state', r.stateName)}.set(${field === undefined ? 'undefined' : member('item', field)});`;
+      });
+      const outer = relayed;
+      relayed = { repeaterId: id, read: (input) => (fieldOfInput(input) === undefined ? 'undefined' : member('item', fieldOfInput(input)!)) };
+      const fn = callback(id, port, list, `${pad}    `, writes);
+      relayed = outer;
       if (fn !== undefined) callbacks.push(`${key(prop)}: ${fn}`);
     }
     const label = node.authoredLabel ?? id;
+    // STATIC-DATA §3.2: keyed by `id` when every authored row has a unique one, the runtime's own record identity.
+    const keyField = staticData?.keyField;
     return [
-      `${pad}// ${label}: one ${target.file?.symbol ?? 'row'} for each item, kept by its place in the list.`,
+      `${pad}// ${label}: one ${target.file?.symbol ?? 'row'} for each item, ${keyField ? `kept with its item by its ${js(keyField)}` : 'kept by its place in the list'}.`,
       `${pad}list(l, ${parent}, function () {`,
       `${pad}  return ${items};`,
-      `${pad}}, function (into, item, index, at) {`,
+      `${pad}}, ${keyField ? `function (item) {\n${pad}  return ${member('item', keyField)};\n${pad}}` : 'null'}, function (into, item, index, at) {`,
       `${pad}  const inputs = function () {`,
       `${pad}    return { ${pairs.join(', ')} };`,
       `${pad}  };`,
@@ -840,6 +1010,22 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       `${pad}  };`,
       `${pad}}${before ? `, ${before}` : ''});`
     ];
+  };
+
+  /**
+   * A control's Enabled, as the React printer prints it (`contentAttrs`, LOGIC-TARGET §7; copied,
+   * P134-HTX001-PRINTERDECIDES): authored false is `disabled`; a wire is `disabled` while its value is not true, so a
+   * source with no value yet (`!!undefined`) disables it, the runtime's own coercion.
+   */
+  const enabledLines = (id: string, node: NodeIR, bound: Record<string, BindingSource>, pad: string): string[] => {
+    if (bound.enabled) {
+      const v = binding(id, 'enabled', bound.enabled);
+      if (v === undefined) return [];
+      imports.dom.add('bindAttr');
+      imports.dom.add('truthy');
+      return [`${pad}bindAttr(l, ${local(id)}, 'disabled', function () { return !truthy(${v}); });`];
+    }
+    return literalParam(node, 'enabled') === false ? [`${pad}${local(id)}.disabled = true;`] : [];
   };
 
   const drawNode = (id: string, role: string, node: NodeIR, bound: Record<string, BindingSource>, parent: string, before: string | undefined, pad: string): string[] => {
@@ -897,9 +1083,10 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         imports.dom.add('bindText');
         out.push(`${pad}bindText(l, ${local(id)}, function () { return ${label}; });`);
       }
+      out.push(...enabledLines(id, node, bound, pad));
       if (!plan.handlers[id]?.onClick) out.push(`${pad}// Nothing is wired to this press.`);
       out.push(...listen(id, local(id), pad, { onClick: 'click' }));
-      extra(['label']);
+      extra(['label', 'enabled']);
     } else if (role === 'input') {
       const tag = tagOf(id, node, role);
       out.push(elLine(id, tag, parent, undefined, before, pad));
@@ -912,22 +1099,38 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       } else if (typeof literalParam(node, 'placeholder') === 'string' && literalParam(node, 'placeholder') !== '') {
         out.push(`${pad}${local(id)}.placeholder = ${js(literalParam(node, 'placeholder'))};`);
       }
+      // The authored attributes React prints (`CONTENT_PARAMS`): the length, the soft keyboard and its Enter label.
+      const maxLength = literalParam(node, 'maxLength');
+      if (typeof maxLength === 'number') out.push(`${pad}${local(id)}.maxLength = ${maxLength};`);
+      for (const [param, attr] of [['inputMode', 'inputmode'], ['enterKeyHint', 'enterkeyhint']] as const) {
+        const v = literalParam(node, param);
+        if (typeof v === 'string' && v !== '') out.push(`${pad}${local(id)}.setAttribute(${js(attr)}, ${js(v)});`);
+      }
+      out.push(...enabledLines(id, node, bound, pad));
+      const ref = fieldRefs.get(id);
+      if (ref !== undefined) {
+        // Held while it is on the page, for the Set's focus test and a Focus or a Blur.
+        out.push(`${pad}${ref}.current = ${local(id)};`, `${pad}l.add(function () {`, `${pad}  ${ref}.current = null;`, `${pad}});`);
+      }
       const row = plan.stateVars.find((v) => v.originNodeId === id && v.origin === 'control');
       if (row) {
-        // The field's text is a value: written into the field when it changes, and set from the field as a person types.
-        out.push(
-          `${pad}l.run(function () {`,
-          `${pad}  const text = ${member('state', row.name)}.get();`,
-          `${pad}  if (${local(id)}.value !== text) ${local(id)}.value = text;`,
-          `${pad}});`,
-          `${pad}${local(id)}.addEventListener('input', function () {`,
-          `${pad}  ${member('state', row.name)}.set(${local(id)}.value);`,
-          `${pad}});`
-        );
-      } else lose(id, 'its text has no state row in the plan, so nothing reads what is typed');
-      if ((plan.changeHandlers[id] ?? []).length > 0) lose(id, 'its Changed chain is not printed yet (HTX-003)');
+        // The field's text is a value: written into the field when it changes, so typing keeps the cursor where it is.
+        out.push(`${pad}l.run(function () {`, `${pad}  const text = ${member('state', row.name)}.get();`, `${pad}  if (${local(id)}.value !== text) ${local(id)}.value = text;`, `${pad}});`);
+      } else {
+        // No row: the field keeps what is typed into it, starting from its typed-in Value (React's `defaultValue`).
+        const start = literalParam(node, 'startValue');
+        if (start !== undefined && start !== '') out.push(`${pad}${local(id)}.value = ${js(String(start))};`);
+      }
+      // As a person types: the text into its value, then the field's own change chain, with what is in the field.
+      const own = fieldChainOf(id);
+      if (row || own.length > 0) {
+        announced = { inputId: id, code: `${local(id)}.value` };
+        const body = own.length > 0 ? chain(id, 'Changed', own, `${pad}  `) : [];
+        announced = undefined;
+        out.push(`${pad}${local(id)}.addEventListener('input', function () {`, ...(row ? [`${pad}  ${member('state', row.name)}.set(${local(id)}.value);`] : []), ...(body ?? []), `${pad}});`);
+      }
       out.push(...listen(id, local(id), pad, {}));
-      extra(['placeholder', 'value']);
+      extra(['placeholder', 'value', 'enabled']);
     } else if (role === 'instance') {
       const target = ctx.project.byLegacyPath.get(node.type);
       const module = ctx.moduleOf(node.type);
@@ -949,6 +1152,27 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   // ---- the logic: React's effects, in the order the React printer writes them ----------------------------------
 
   const logic: string[] = [];
+  // P18-S128-FIELDSET. A field's element while it is on the page, and whether it has been Cleared since its Value was last
+  // delivered: a Variable delivers on every write, the same value too (the Set Variable's forceChange); anything else, on a
+  // change. React's `useRef` and its reset effect.
+  const fieldLines: string[] = [];
+  for (const [inputId, ref] of fieldRefs) fieldLines.push(`  const ${ref} = { current: null }; // the field "${nodeById.get(inputId)?.authoredLabel ?? inputId}", while it is on the page`);
+  for (const [inputId, cleared] of fieldClearedLocals) {
+    fieldLines.push(`  const ${cleared} = { current: false }; // a Clear has run since its Value was last delivered`);
+    const source = fieldSetSources.get(inputId)!;
+    if (source.kind === 'literal') continue;
+    const v = source.kind === 'store-get' ? variable(source.variableName) : undefined;
+    if (v !== undefined) {
+      logic.push(`  l.add(${v}.subscribe(function () {`, `    ${cleared}.current = false;`, '  }));');
+      continue;
+    }
+    const read = expr(source);
+    if (read === undefined) {
+      lose(inputId, `the Value its Set writes reads ${describe(source)}, which the HTML target does not print yet`);
+      continue;
+    }
+    logic.push('  l.watch(function () {', `    return [${read}];`, '  }, function () {', `    ${cleared}.current = false;`, '  });');
+  }
   // P18-S127-SIBLINGVALUE. A pulse handed on one update after it is sent, so the values lifted with it land first.
   for (const p of plan.instancePulses) {
     if (!p.delivered || !stateByName.has(p.delivered.name)) continue;
@@ -1028,6 +1252,57 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         ? { say: `a Variable: no value changes nothing, null stores ${empty}`, lines: ['if (arrival === undefined) return;', `if (arrival === null) return ${set}(${empty});`, 'const next = Number(arrival);', `${set}(Number.isNaN(next) ? ${empty} : next);`] }
         : { say: `a Variable: no value changes nothing, null stores ${empty}`, lines: ['if (arrival === undefined) return;', `${set}(arrival === null ? ${empty} : ${cast});`] });
     logic.push(`  // ${sync.stateName} follows its wire, as ${body.say}. Its Changed does not fire.`, '  l.watch(function () {', `    return [${src}];`, '  }, function (arrival) {', ...body.lines.map((b) => `    ${b}`), '  });');
+  }
+  /*
+   * P18-S116-FIELDMOUNT, the React printer's mount effect (copied, P134-HTX001-PRINTERDECIDES). A text field announces its
+   * Value as it mounts, so the chain its typing runs runs once then, with the start value: '' for an empty field. A wired
+   * Value lands first (the runtime delivers it at node creation): `undefined` is never delivered, `null` clears. Under a
+   * Mounted a value decides (P18 session 126), the first time the field's own conditions all hold.
+   */
+  for (const fm of plan.fieldMounts) {
+    const list = plan.changeHandlers[fm.inputId] ?? [];
+    if (list.length === 0) continue;
+    const gates: string[] = [];
+    for (const g of fm.gates ?? []) {
+      const source = plan.bindings[g]?.mounted;
+      const test = source ? binding(g, 'mounted', source) : undefined;
+      if (test === undefined) continue;
+      imports.dom.add('truthy');
+      gates.push(`(${test} === undefined ? ${literalParam(nodeById.get(g)!, 'mounted') === false ? 'false' : 'true'} : truthy(${test}))`);
+    }
+    const lines: string[] = [];
+    let code = js(fm.start);
+    if (fm.source !== undefined) {
+      const src = expr(fm.source);
+      if (src === undefined) {
+        lose(fm.inputId, `the Value it announces as it mounts reads ${describe(fm.source)}, which the HTML target does not print yet`);
+        continue;
+      }
+      const arrival = fresh('arrival');
+      code = fresh('mountValue');
+      lines.push(`    const ${arrival} = ${src};`, `    const ${code} = ${arrival} === undefined ? ${js(fm.start)} : ${arrival} === null ? '' : String(${arrival});`);
+    }
+    announced = { inputId: fm.inputId, code };
+    const body = chain(fm.inputId, 'Changed, as it mounts', list, '    ');
+    announced = undefined;
+    if (body === undefined) continue;
+    if (gates.length === 0) {
+      logic.push(`  // ${fm.comment}`, '  l.watch(function () {', '    return [];', '  }, function () {', ...lines, ...body, '  });');
+      continue;
+    }
+    const once = fresh('announced');
+    logic.push(
+      `  // ${fm.comment}`,
+      `  let ${once} = false;`,
+      '  l.watch(function () {',
+      `    return [${gates.join(' && ')}];`,
+      '  }, function (shown) {',
+      `    if (${once} || !shown) return;`,
+      `    ${once} = true;`,
+      ...lines,
+      ...body,
+      '  });'
+    );
   }
   // A Value Changed: its chain runs whenever its Input becomes a different value, the first arrival too (EXP-011 §39).
   for (const vc of plan.valueChangedEffects) {
@@ -1261,6 +1536,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   lines.push(...pulsesTaken);
   if (plan.role === 'page' && plan.head?.title) lines.push(`  document.title = ${js(plan.head.title)};`);
   lines.push(...keyLines);
+  lines.push(...fieldLines);
   lines.push(...nodeLines);
   lines.push(...machines);
   lines.push('');

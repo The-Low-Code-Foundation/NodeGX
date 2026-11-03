@@ -1,7 +1,7 @@
 # Phase 134 — The app in plain files
 
 **Scoped:** 2026-11-03, on Richard's ask ("Let's scope up the HTML export phase please, I think it'll be important").
-**State:** 🔵 HTX-001 and HTX-002 done (§10, session 3 of at most 10, 2026-11-03): the plan's logic, the Global Store (persisted) and a Function's late writes print on `lib/core.js`, and six desks read exactly what the runtime reads; HTX-003 (fields, lists, show and hide, focus) next. R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
+**State:** 🔵 HTX-001 and HTX-002 done, HTX-003 half done (§10, session 4 of at most 10, 2026-11-03): a text field's Set, Clear, Focus, typing chain and mount announcement, a For Each over Static Data kept by its id, a Did Mount each time its part mounts, and nothing left running when a part or a page goes; eleven desks read exactly what the runtime reads. HTX-003's second session next (Checkbox, Options, Image, Icon, Columns; the runtime arm mounts none of them yet). R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
 phase only** (BOARD §2); React and Swift stay paused. **Read first:** this page, then [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md),
 then the task you take. The Swift precedent this phase copies is
 [EXP-022](../phase-18-code-export-v2/EXP-022-THE-SAME-GRAPH-IN-SWIFT.md) §7–§9.
@@ -355,3 +355,62 @@ the pulse arms its run is printed with, the first the plan holds (`component.ts`
 lines, the arm 87, the generator 253. `plan.ts`, `component.ts` and `persistStoreLib.ts` were read, not changed. Nine
 suites pass (175 tests): both HTML specs, the CLI, harness, deploy CLI, Swift S2, and React's three specs for what was
 printed here (the persisted store, the Header, the script on arrival).
+
+### Session 4 — HTX-003, fields and lists (2026-11-03, Opus 5.5)
+
+**Result: a text field does what it is told, a list keeps each row with its item, and nothing keeps running after its
+part goes.** The spec is `packages/nodegx-export/tests/html-lists-fields-pages.test.ts` (16 rows, about 15 s, jsdom).
+Every graded row passed on its first run against the runtime's own nodes.
+
+**What prints now** (each copied from the React printer, marked with the rule it copies, P134-HTX001-PRINTERDECIDES):
+
+| React | plain JavaScript |
+|---|---|
+| `fieldWriteCode`: a Set behind `ref.current !== document.activeElement`, a Clear, then the field's change chain with its text | the same, in `printComponent`'s `fieldWrite`; the ref is `{ current }`, set while the field is on the page |
+| the Cleared mark and its reset (`draft.subscribe(…)`) | `nameCleared = { current: false }`, `l.add(variables.draft.subscribe(…))` |
+| `ref.current?.focus()` | `if (nameFieldRef.current) nameFieldRef.current.focus();` |
+| the controlled `onChange`: the row, then `changeHandlers` and the field's Changed | one `input` listener: the row, then the chain, reading `field.value` |
+| P18-S116-FIELDMOUNT's once-effect (gated under a value-decided Mounted) | `l.watch` over nothing (once), or over the gates with a once flag |
+| a Did Mount under a value-decided Mounted (a gated effect with a ref) | printed at the end of the `when(…)` build, so it runs each time the part is built |
+| `renderRepeater` over Static Data: `key={item.id}`, row props, fields no row carries dropped | `list(l, parent, read, keyOf, mountRow)`: keyed by `id`; the same mapping; a relayed value read from its field |
+| `contentAttrs`: `defaultValue`, `maxLength`, `inputMode`, `enterKeyHint`, Enabled as `disabled` | the same five; they were silently dropped before |
+
+`lib/dom.js`'s `list` is keyed now: each row sits between two comments, so it moves whole; an item that stays keeps its
+row (moved, handed the item again), a new one gets a row, a gone one's row is destroyed. `keyOf` null keeps the old
+by-place rule, which React's `key={index}` lists still take.
+
+**Graded** (predictions were the runtime's, `s129-fieldset/EXPECTED.md` and `s126-mounted/EXPECTED.md`):
+
+- **Equal at every reading, first run:** the Field Desk and its three variants (Set over typing, Clear sending its text
+  on, Focus, Blur, a focused field taking no Set, a Set after a Clear, a Did Mount Clear and Focus, Enter blurring, a
+  signal input's Set and Focus inside a placed Form, a typed-in Value under a wire with nothing written), the Root Desk
+  and its two variants (a root and an inner element mounted by a value, a Did Mount each time), and in
+  `html-state-and-scripts.test.ts` the Signal, Success and Relay Desks, whose cells HTX-002 had pinned on HTX-003.
+- **The Arrival Desk's echo is not HTX-003's.** Session 2 pinned it here; measured, it is the plan's refusal in every
+  export (`the-script-runs-on-arrival.test.ts` C3: the echo's ticked input is the field's text, which exists only in the
+  field's handler). C5 now pins it as that, beside the plan's own reason in the preflight.
+- **`lib/dom.js` alone (§C):** a keyed list, add three, delete the middle one (the field someone is in keeps its focus),
+  reorder (the same elements, moved), add one (each row made once); a part with a nested part, a placed component and a
+  list in it, shown and hidden a hundred times: the same live effects after as before, and none after the life ends.
+- **The cursor (§D):** typing into a field whose text round-trips through state keeps its focus and its caret.
+- **Back (§E):** story-engine, Read → Remix → Back, eleven times: the Read page again, with the live effects it had.
+- **Four mutants, all killed:** the Set's focus test removed (3 rows red), a gated Did Mount run once at the top (3), the
+  `when` not ending its part's life (C2), the keyed list never moving a row (C1).
+
+**Measured on todo-list:** 101 → 88 unprinted. Every field Clear and Focus prints (7 Clears, 5 Focuses), and the
+Note dialog's gated Did Mount, and the OK button's wired Enabled. Left: the backend (HTX-004), 14 style ports React drops
+too, and **five For Eaches fed by a Function's output**, which the plan refuses in every export (React's report: "items
+are fed by a source not statically typed as a list", EXP-003): todo-list's move form, project form, task picker, money
+form and next-move question draw in no export. Not new; the loss now says so.
+
+**Across all templates** (1,548 HTML losses, measured for HTX-003's second session): 38 custom nodes, 24 checkboxes
+(planning 11, planning-demo 11, gram, nightbook), 21 images, 18 icons, 15 Columns. The runtime arm
+(`runtime-mounted-arm.js`) mounts none of these, so grading them against the runtime starts with the arm.
+
+**Pages.** HTX-001 chose the address after `#` (R4); the task's "History API" line is that decision's. Navigate, a
+refresh on a page's address, and now Back, all graded.
+
+**Cost, so far:** 4 sessions. The printer is 2,239 hand-written lines (session 3: 1,907): `printComponent` 1,635,
+`emitHtml` 282, `libJs` 322. Lines moved out of React's helpers: 0. Tests: the new spec 408 lines. Six suites pass (109
+tests): the three HTML specs, the CLI, harness, deploy CLI. React's and Swift's output did not change (no file of theirs
+was touched).

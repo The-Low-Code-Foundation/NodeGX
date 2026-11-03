@@ -96,8 +96,9 @@ describe('§A the HTML export does what the runtime does, step by step (the Hook
 
 /**
  * §C. The other desks the React export is graded on, each driven with its own spec's steps, default variant, in both arms.
- * Where the readings differ, every differing cell is pinned here with the loss that names it (all HTX-003's: a field's Set,
- * Clear and typing chain, a For Each over Static Data), so a difference nobody named turns the row red.
+ * Where the readings differ, every differing cell is pinned here with the refusal that names it, so a difference nobody
+ * named turns the row red. HTX-002 pinned the cells HTX-003 then drew (a field's Set and Clear, a For Each over Static
+ * Data); what is left is the plan's own refusal, which the React export makes too.
  */
 describe('§C the desks the React export is graded on, in the HTML export', () => {
   const DESKS = {
@@ -109,7 +110,7 @@ describe('§C the desks the React export is graded on, in the HTML export', () =
     relay: { write: () => writeRelayDesk(), steps: ['Milk', 't2', 'Bread', 't1'], fields: false }
   };
   type Name = keyof typeof DESKS;
-  const got: Record<string, { html: string[][] | string; runtime: string[][]; losses: string[] }> = {};
+  const got: Record<string, { html: string[][] | string; runtime: string[][]; losses: string[]; refusals: string[] }> = {};
   beforeAll(async () => {
     for (const [name, d] of Object.entries(DESKS)) {
       const { dir } = d.write();
@@ -120,7 +121,7 @@ describe('§C the desks the React export is graded on, in the HTML export', () =
       } catch (e) {
         html = String(e);
       }
-      got[name] = { html, runtime: withoutDefault(runtimeArm(dir, [d.steps], d.fields)[0]), losses: exported.preflight.htmlLosses.map((l) => `${l.component} ${l.label ?? l.nodeId}: ${l.what}`) };
+      got[name] = { html, runtime: withoutDefault(runtimeArm(dir, [d.steps], d.fields)[0]), losses: exported.preflight.htmlLosses.map((l) => `${l.component} ${l.label ?? l.nodeId}: ${l.what}`), refusals: exported.preflight.planRefusals.map((r) => `${r.component} ${r.name}: ${r.reason}`) };
     }
   }, 300000);
   /** The cells where the two arms differ: `reading:column html≠runtime`. */
@@ -145,24 +146,30 @@ describe('§C the desks the React export is graded on, in the HTML export', () =
     expect(got.sibling.losses).toEqual([]);
   });
 
-  it("C3 the Signal Desk: equal but where the Banner's Wipe clears its field (HTX-003)", () => {
-    expect(diff('signal')).toEqual(['3:3 "note Ann"≠""', '8:3 "note Ann"≠""']);
-    expect(got.signal.losses).toEqual(['Components/Banner Banner: its signal input "wipe" runs a Clear on a text field (HTX-003); the chain is left out whole']);
+  it("C3 the Signal Desk: equal at every step, the Banner's Wipe clearing its field too (HTX-003)", () => {
+    expect(diff('signal')).toEqual([]);
+    expect(got.signal.losses).toEqual([]);
   });
 
-  it("C4 the Success Desk: equal but at the last step, the Editor's Fill setting its field (HTX-003)", () => {
-    expect(diff('success')).toEqual(['8:8 "filled nothing"≠"filled yes"', '8:9 "[draft]="≠"[draft]=edit Cleo"']);
-    expect(got.success.losses).toContain('Components/Editor Editor: its signal input "fill" runs a Set on a text field (HTX-003); the chain is left out whole');
+  it("C4 the Success Desk: equal at every step, the Editor's Fill setting its field too (HTX-003)", () => {
+    expect(diff('success')).toEqual([]);
+    expect(got.success.losses).toEqual(['Components/Editor draft: its runOnChange-startValue is not carried (no style the export knows for it)']);
   });
 
-  it("C5 the Arrival Desk: equal but the field's own echo, which its typing chain writes (HTX-003)", () => {
+  /**
+   * HTX-002 pinned these cells on HTX-003. Measured in HTX-003: they are the plan's refusal, the React export's own
+   * (`the-script-runs-on-arrival.test.ts` C3, A6): the echo's ticked input is the field's text, which exists only inside
+   * the field's handler, so no effect can watch it. The HTML export reads what the React export reads.
+   */
+  it("C5 the Arrival Desk: equal but the field-fed echo, which the plan refuses in every export (as React's C3)", () => {
     expect(diff('arrival')).toEqual([0, 1, 2, 3, 4, 5, 6].map((i) => `${i}:8 ""≠${JSON.stringify(i < 5 ? 'echo 2' : 'echo 3 Al')}`));
-    expect(got.arrival.losses).toEqual(['Pages/Home Name: its text has no state row in the plan, so nothing reads what is typed']);
+    expect(got.arrival.losses).toEqual([]);
+    expect(got.arrival.refusals.filter((r) => /The echo/.test(r))).toEqual([expect.stringMatching(/that value exists only inside a handler — the export cannot watch it/)]);
   });
 
-  it('C6 the Relay Desk: its rows are a For Each over Static Data, which HTX-003 draws; named, not drawn', () => {
-    expect(got.relay.html).toMatch(/no button "Milk"/);
-    expect(got.relay.losses).toEqual(['Components/List One row per task: a For Each over Static Data, a query or a named list, which the HTML target does not draw yet (HTX-003)']);
+  it('C6 the Relay Desk: its rows, a For Each over Static Data kept by their id, equal at every step (HTX-003)', () => {
+    expect(diff('relay')).toEqual([]);
+    expect(got.relay.losses).toEqual([]);
   });
 });
 
@@ -361,9 +368,11 @@ describe('§D todo-list', () => {
 
   it('D2 what is left out is named, and none of it is a logic component or a Function it could not place', () => {
     const losses = todo.preflight.htmlLosses.map((l) => l.what);
-    // 368 before HTX-002 (session 2's first measurement); the rest is the backend (HTX-004), fields and lists (HTX-003),
-    // and the style ports the React export drops too.
-    expect(losses.length).toBeLessThanOrEqual(101);
+    // 368 before HTX-002 (session 2's first measurement), 101 after it, 88 after HTX-003's fields; the rest is the backend
+    // (HTX-004), five For Eaches fed by a Function the plan refuses in every export (EXP-003), and the style ports the React
+    // export drops too.
+    expect(losses.length).toBeLessThanOrEqual(88);
+    expect(losses.filter((w) => /text field|field-focus|HTX-003/.test(w))).toEqual([]);
     expect(losses.filter((w) => /logic component|states-go|Variable's starting value|a Value Changed/.test(w))).toEqual([]);
   });
 

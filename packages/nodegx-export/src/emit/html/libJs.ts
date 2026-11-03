@@ -192,28 +192,84 @@ export function place(l, mount, parent, fixed, live, before) {
 
 /**
  * A For Each: one row per item of the list \`read()\` gives, drawn by \`mountRow(parent, item, index, before)\`, which returns
- * \`{ update(item, index), destroy() }\`. Rows are kept by their place in the list: when the list changes, the row at each
+ * \`{ update(item, index), destroy() }\`.
+ *
+ * \`keyOf(item)\` names each item's row. With it, a row stays with its item: when the list changes, an item already shown
+ * keeps its row (moved to its new place, and handed the item again), a new item gets a new row, and the row of an item
+ * that has gone is taken off the page. Without it (\`null\`), rows are kept by their place in the list: the row at each
  * place is handed its new item, new places get a new row, and the rows past the end are taken off the page.
+ *
+ * Each row sits between two markers in the page, so a row moves whole, whatever its component draws.
  */
-export function list(l, parent, read, mountRow, before) {
-  const marker = document.createComment(' a For Each: its rows are drawn before this ');
-  parent.insertBefore(marker, before || null);
-  const rows = [];
+export function list(l, parent, read, keyOf, mountRow, before) {
+  const end = document.createComment(' a For Each: its rows are drawn before this ');
+  parent.insertBefore(end, before || null);
+  let rows = [];
+  const add = function (item, index, at) {
+    const start = document.createComment(' a row ');
+    const stop = document.createComment(' end of the row ');
+    parent.insertBefore(start, at);
+    parent.insertBefore(stop, at);
+    return { key: keyOf ? keyOf(item) : index, start: start, stop: stop, part: mountRow(parent, item, index, stop) };
+  };
+  const remove = function (row) {
+    row.part.destroy();
+    let node = row.start;
+    while (node !== row.stop) {
+      const next = node.nextSibling;
+      node.remove();
+      node = next;
+    }
+    row.stop.remove();
+  };
+  /** Puts a row's nodes, its markers too, before \`at\`. */
+  const move = function (row, at) {
+    let node = row.start;
+    while (true) {
+      const next = node.nextSibling;
+      parent.insertBefore(node, at);
+      if (node === row.stop) return;
+      node = next;
+    }
+  };
   l.run(function () {
     const items = read();
     untracked(function () {
       const all = Array.isArray(items) ? items : [];
+      if (!keyOf) {
+        all.forEach(function (item, index) {
+          if (index < rows.length) rows[index].part.update(item, index);
+          else rows.push(add(item, index, end));
+        });
+        while (rows.length > all.length) remove(rows.pop());
+        return;
+      }
+      const old = new Map();
+      for (const row of rows) old.set(row.key, row);
+      const next = [];
       all.forEach(function (item, index) {
-        if (index < rows.length) rows[index].update(item, index);
-        else rows.push(mountRow(parent, item, index, marker));
+        const key = keyOf(item);
+        const row = old.get(key);
+        if (row !== undefined && !next.includes(row)) {
+          old.delete(key);
+          row.part.update(item, index);
+          next.push(row);
+        } else next.push(add(item, index, end));
       });
-      while (rows.length > all.length) rows.pop().destroy();
+      for (const row of old.values()) remove(row);
+      // In the list's order: each row before the one after it, moving only the rows that are not already there.
+      let at = end;
+      for (let i = next.length - 1; i >= 0; i--) {
+        if (next[i].stop.nextSibling !== at) move(next[i], at);
+        at = next[i].start;
+      }
+      rows = next;
     });
   });
   l.add(function () {
-    while (rows.length > 0) rows.pop().destroy();
+    while (rows.length > 0) remove(rows.pop());
   });
-  return marker;
+  return end;
 }
 `;
 

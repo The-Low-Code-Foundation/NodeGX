@@ -68,8 +68,8 @@ n8n … our ethos is … that they'd have the option of visually editing if they
 exported as HTML, CSS and JavaScript with no framework, npm or build step, and one NodeGX part placed in a page whose
 rest is plain code (*"it's about retaining control more than saving tokens, and contingency planning"*). Ruled the same
 day: a small readable library in the folder, a printer like Swift's (not an AI port), **all of it now** beside the Beta
-lanes, the backend and HiveClip before the game bridge. Seven tasks; **HTX-001 ✅ HTX-002 ✅ (3 of 10 sessions,
-11-03), HTX-003 next**; hard stop at 10 sessions;
+lanes, the backend and HiveClip before the game bridge. Seven tasks; **HTX-001 ✅ HTX-002 ✅ HTX-003 half (4 of 10
+sessions, 11-03: fields, Static Data lists, keyed list, show/hide and Back leak-free), HTX-003's controls next**; hard stop at 10 sessions;
 [P134 README](tasks/phase-134-the-app-in-plain-files/README.md). React and Swift stay paused.
 
 | release | what is in it | state 2026-10-23 |

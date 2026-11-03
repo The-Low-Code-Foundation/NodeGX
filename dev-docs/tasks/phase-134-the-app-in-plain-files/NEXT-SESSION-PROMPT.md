@@ -1,51 +1,52 @@
 # Next session — Phase 134, the app in plain files
 
-**Written 2026-11-03 by session 3 (HTX-002 done).** Read [README.md](README.md) §10 (sessions 1 to 3) first: how React's
-constructs map onto `lib/core.js`, what the desks read, and what is not printed yet. Sessions used: 3 of at most 10.
+**Written 2026-11-03 by session 4 (HTX-003, first half).** Read [README.md](README.md) §10 (sessions 1 to 4) first: how
+React's constructs map onto `lib/core.js`, what the desks read, and what is not printed yet. Sessions used: 4 of at most 10.
 
 ## Before anything
 
 1. **Is R4 ruled?** README §9/§10 session 1 ends with the question (double-click: Chrome and Firefox refuse; keep "any
-   static server", or also write a bundled copy). If Richard has not answered, carry on: HTX-003 does not depend on it.
-2. **BOARD.** Lane 4 is reopened for this phase only (BOARD §2 paragraph, which now says "HTX-001 ✅ HTX-002 ✅ (3 of 10
-   sessions), HTX-003 next"); React and Swift stay paused.
+   static server", or also write a bundled copy). If Richard has not answered, carry on: nothing here depends on it.
+2. **BOARD.** Lane 4 is reopened for this phase only (BOARD §2: "HTX-003 half (4 of 10 sessions)"); React and Swift stay
+   paused.
 3. **The box.** Export suites are a heavy job: one at a time, `nice -n 19 … --runInBand`, busy-check by
-   `ps -A -o pid,comm` (never `pgrep -f` in a wait loop). macOS has no `timeout`: a command wrapped in it prints nothing.
-   `grep` here skips some `.ts` files as binary (`src/analyze/appState.ts`): use `/usr/bin/grep -a`.
+   `ps -A -o pid,comm` (never `pgrep -f` in a wait loop). `grep` here skips some `.ts` files as binary: `/usr/bin/grep -a`.
 
-## Then: HTX-003 ([task](HTX-003-LISTS-SHOW-HIDE-PAGES-INPUTS.md))
+## Then: HTX-003's second session ([task](HTX-003-LISTS-SHOW-HIDE-PAGES-INPUTS.md))
 
-§C of `tests/html-state-and-scripts.test.ts` names the work by cell. Each row that HTX-003 fixes changes to "equal" in
-the same commit:
+Measured at the end of session 4 across all templates (1,548 HTML losses): 38 custom nodes, **24 checkboxes** (planning
+11, planning-demo 11, gram, nightbook), 21 images, 18 icons, 15 Columns, and Options (`select`) where it appears.
 
-1. **A field's Set and Clear** (`state-set` with `field`): C3 (the Signal Desk's Wipe, cells 3:3 and 8:3) and C4 (the
-   Success Desk's Fill, 8:8 and 8:9). The printer throws `Unprinted` at `a.field !== undefined` in `statement`.
-2. **Its typing chain and its mount announcement** (`changeHandlers`, `fieldMounts`): C5, the Arrival Desk's echo
-   column 8. The loss reads "its text has no state row in the plan, so nothing reads what is typed".
-3. **Focus** (`field-focus`): the field-desk spec (`the-field-does-what-it-is-told.test.ts`) has the steps for focus kept
-   while typing. todo-list has 5 such chains (3 On Enter, 2 Did Mount).
-4. **A For Each over Static Data** (`itemsStaticId`): C6, the Relay Desk. Then a keyed list in `lib/dom.js` (the task's
-   Build 1), and the effect-count spec for show and hide (Build 2), which runs in the suite.
+1. **The arm first.** `tests/helpers/runtime-mounted-arm.js` mounts the viewer's Group, Text, Button and Text Input only.
+   Teach it the Checkbox (and the Options) from the viewer's own components, as it mounts the Text Input, and a step
+   that ticks one (`tick:<label>`) in both arms (`tests/helpers/export-html-arm.ts` takes the same step).
+2. **Then the printer**, copied from React (`component.ts` `renderNode`'s `role === 'checkbox'` and `renderSelect`,
+   `changeAttrs` with `control-event`, `CONTROL_STATE_PARAM`): a checkbox is `<input type="checkbox">`, its row's
+   `checked` written by an effect, a `change` listener writing the row then the chain (reading `el.checked`); with
+   Use Label, the `<label>` wrapper `computeRoleCss` describes. Grade a small desk against the runtime, mutant included.
+3. **Image and Icon** after, if the session has room: React's `renderIcon` and `MEDIA_ATTRS`.
+4. **The Chrome drive** of the task's Done-when (add, tick, delete, open, back) waits on todo-list's backend: its lists
+   are records (HTX-004). Say so in the task when HTX-003 closes, and do it in HTX-004's drive.
 
 ## Known
 
-- The spec has 23 rows (about 32 s): §A Hook Desk; §C six desks, every differing cell pinned; §E the Global Store (Store,
-  Bad, Header, Other key); §F the Bell (late writes); §B printed text; §D todo-list (≤ 101 unprinted).
-- `tests/helpers/export-html-arm.ts` is the HTML arm: the runtime arm's readings (every `<p>`, then the fields, then
-  `storage=` per key) and steps (a button's words, `type:`, `enter:`). `storage: { keys, seeds }` as the runtime arm's.
-- Five library files are generated, never edited: `lib/core.js`, `lib/functionRun.js`, `lib/states.js`,
-  `lib/animate.js`, `lib/persistStore.js`. After a change to `packages/nodegx-core/src`, `functionRunLib.ts`,
-  `statesLib.ts`, `animateLib.ts` or `persistStoreLib.ts`, run
-  `npx ts-node --transpile-only -O '{"module":"commonjs"}' tests/helpers/html-core-js.ts` in `packages/nodegx-export`.
-- P134-HTX001-PRINTERDECIDES lists the twelve decisions copied from `component.ts`. Copy the next one the same way (a
-  comment naming the React rule) and add it there.
-- Three mutants survive, each a finding, not a gap (README §10 sessions 2 and 3): the SIBLINGVALUE delay, the "never
-  twice" guard, and `storeKey`'s own change check. Each is redundant on every shape the plan prints today.
-- A Function fed by a Subscribe of an untyped key is the plan's refusal (EXP-003), in every export: type the key with an
-  Initial State when a desk needs a reader beside its Subscribe.
+- `tests/html-lists-fields-pages.test.ts` (16 rows, about 15 s): §A the Field Desk ×4, §B the Root Desk ×3, §C
+  `lib/dom.js` alone (keyed list; effect count after 100 toggles, through `COUNTED_CORE`, a `lib/core.js` that counts its
+  `effect`s), §D the caret, §E Back on story-engine. Reuse `COUNTED_CORE` for any leak test.
+- `tests/html-state-and-scripts.test.ts` §C: all six desks equal but the Arrival Desk's echo, which is **the plan's**
+  refusal in every export (React's C3), pinned with its reason from `preflight.planRefusals`.
+- todo-list's five For Eaches fed by a Function's output draw in no export (EXP-003); the loss says so. Not HTX-003's.
+- A field's ref is `<label>FieldRef`; its element keeps its own local. A gated Did Mount prints at the end of its
+  `when(…)` build. `list(l, parent, read, keyOf, mountRow, before)`: `keyOf` null keeps rows by place.
+- P134-HTX001-PRINTERDECIDES now lists twenty copied decisions. Copy the next one the same way and add it there.
+- `runOnChange-startValue` is reported as an unmapped parameter by the HTML preflight and by React's report alike.
+- Five library files are generated, never edited (`lib/core.js`, `functionRun.js`, `states.js`, `animate.js`,
+  `persistStore.js`): regenerate with `npx ts-node --transpile-only -O '{"module":"commonjs"}' tests/helpers/html-core-js.ts`
+  in `packages/nodegx-export` after a change to their sources.
 - Headless Chrome lays out at 500 px when asked for 390: shoot phone width through a 390 px iframe (htx-001/README).
 
 ## At the end
 
 Update README's state line and §10, and this file; file every bug in `dev-docs/bugs/` (one file each,
-`node scripts/bugs.js`); update the memory `where-nodegx-fits-and-where-it-stops`; commit by pathspec.
+`node scripts/bugs.js`); update the memory `where-nodegx-fits-and-where-it-stops`; commit your own delta only.
+`dev-docs/BOARD.md` carries other sessions' uncommitted edits: commit it through a temporary index.

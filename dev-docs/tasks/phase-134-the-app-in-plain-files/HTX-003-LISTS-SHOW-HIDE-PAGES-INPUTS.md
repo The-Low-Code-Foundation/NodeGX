@@ -4,6 +4,13 @@
 
 These are the four jobs React did without anyone writing them. They are where the bugs will be.
 
+**Session 1 of 2 (README §10 session 4, 2026-11-03):** done: Build 1 (the keyed list), Build 2 (show and hide, the
+effect count in the suite), Build 3 (pages: navigate, refresh and Back, on HTX-001's `#` addresses), Build 4 for the Text
+Input (Set, Clear, Focus, Blur, Enter, its typing chain and its announcement, the caret kept). **Left for session 2:**
+Checkbox and Options (and Image, Icon, Columns, the next undrawn roles), each graded against the runtime once
+`runtime-mounted-arm.js` mounts it; the Chrome drive (add, tick, delete, open, back) waits on todo-list's backend
+(HTX-004), since its lists are records.
+
 ## The sentence
 
 > "I added three tasks, deleted the middle one, opened a task's page and came back. The list was right, the field I was
