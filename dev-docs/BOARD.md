@@ -58,6 +58,12 @@ to play with it to make whatever they want"*). Backend workflows and triggers mo
 map, functions and automations are drawn in Studio inside the conversation for any app. Only then the full-stack run
 (BKO-006), which replaces "a simple app" in the Beta test with three briefs no template covers.
 
+**Backend workflows built by hand, opened by Richard 2026-11-02 (P132, lanes 9 and 2):** after testing Studio's Backend
+tab on Greenhouse (*"I expected it to be something akin to Bubble's backend workflows, or in my dreams something like
+n8n … our ethos is … that they'd have the option of visually editing if they want to"*). On the Beta walk (his Beta says
+"editing workflows"), so lane 9's next work. Nine tasks, BWF-001 (what he met, fixed) first; rulings R1–R4 in the
+[P132 README](tasks/phase-132-a-backend-workflow-you-can-build-by-hand/README.md); about 10–13 sessions.
+
 | release | what is in it | state 2026-10-23 |
 |---|---|---|
 | **0.4.2** | the editor Richard's two jobs | ✅ published 2026-10-20 |
