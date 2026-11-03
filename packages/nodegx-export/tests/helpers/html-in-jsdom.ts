@@ -48,7 +48,8 @@ export async function bundleApp(files: Record<string, string>, entry = 'app.js')
   return result.outputFiles[0].text;
 }
 
-export async function openHtmlExport(files: Record<string, string>, hash = ''): Promise<HtmlPage> {
+/** `stored`: what the browser's storage holds before the page loads (a reload's leavings: the arms' `storage.seeds`). */
+export async function openHtmlExport(files: Record<string, string>, hash = '', stored: Record<string, string> = {}): Promise<HtmlPage> {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { JSDOM, VirtualConsole } = require('jsdom') as { JSDOM: new (html: string, options?: unknown) => any; VirtualConsole: new () => any };
   const errors: string[] = [];
@@ -64,6 +65,7 @@ export async function openHtmlExport(files: Record<string, string>, hash = ''): 
     pretendToBeVisual: true,
     virtualConsole
   });
+  for (const [k, text] of Object.entries(stored)) dom.window.localStorage.setItem(k, text);
   dom.window.eval(await bundleApp(files));
   const settle = async () => {
     for (let i = 0; i < 5; i++) await new Promise((r) => dom.window.setTimeout(r, 0));

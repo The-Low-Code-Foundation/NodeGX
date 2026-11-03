@@ -7,26 +7,35 @@
  * React export), then, with `fields`, each field's text by its placeholder and which field has the focus. A step is a
  * button's words (a click), `type:<placeholder>:<text>` (focus, write as a keystroke does, blur) or
  * `enter:<placeholder>` (an Enter keydown), as the runtime arm takes them.
+ *
+ * `storage: { keys, seeds? }` is the runtime arm's (P18 session 139): before scenario i the browser's storage holds
+ * `seeds[i]`, as a reload would leave it, and every reading ends with `storage=<text, or null>` for each key.
  */
 
 import { openHtmlExport, type HtmlPage } from './html-in-jsdom';
 
-const read = (page: HtmlPage, fields: boolean): string[] => {
+export interface HtmlArmOptions {
+  fields?: boolean;
+  storage?: { keys: string[]; seeds?: Array<Record<string, string>> };
+}
+
+const read = (page: HtmlPage, options: HtmlArmOptions): string[] => {
   const doc = page.document;
   const texts = [...doc.querySelectorAll('p')].map((p: any) => (p.textContent ?? '').trim());
-  if (!fields) return texts;
+  const stored = (options.storage?.keys ?? []).map((k) => `storage=${page.window.localStorage.getItem(k)}`);
+  if (options.fields !== true) return [...texts, ...stored];
   const els = [...doc.querySelectorAll('input, textarea')] as any[];
   const name = (el: any) => `[${el.getAttribute('placeholder') ?? ''}]`;
   const active = els.find((el) => el === doc.activeElement);
-  return [...texts, ...els.map((el) => `${name(el)}=${el.value}`), `focus=${active ? name(active) : 'none'}`];
+  return [...texts, ...els.map((el) => `${name(el)}=${el.value}`), `focus=${active ? name(active) : 'none'}`, ...stored];
 };
 
 /** Waits until two readings in a row agree: the effects, and the timers a Function's run at load sets, have all run. */
-async function settled(page: HtmlPage, fields: boolean): Promise<void> {
+async function settled(page: HtmlPage, options: HtmlArmOptions): Promise<void> {
   let last = '';
   for (let i = 0; i < 10; i++) {
     await page.settle();
-    const now = JSON.stringify(read(page, fields));
+    const now = JSON.stringify(read(page, options));
     if (now === last) return;
     last = now;
   }
@@ -57,17 +66,17 @@ function step(page: HtmlPage, label: string): void {
 }
 
 /** Per scenario: one reading after load, and one after each step. */
-export async function htmlArm(files: Record<string, string>, scenarios: string[][], options: { fields?: boolean } = {}): Promise<string[][][]> {
+export async function htmlArm(files: Record<string, string>, scenarios: string[][], options: HtmlArmOptions = {}): Promise<string[][][]> {
   const out: string[][][] = [];
-  for (const steps of scenarios) {
-    const page = await openHtmlExport(files);
+  for (const [index, steps] of scenarios.entries()) {
+    const page = await openHtmlExport(files, '', options.storage?.seeds?.[index] ?? {});
     try {
-      await settled(page, options.fields === true);
-      const readings = [read(page, options.fields === true)];
+      await settled(page, options);
+      const readings = [read(page, options)];
       for (const label of steps) {
         step(page, label);
-        await settled(page, options.fields === true);
-        readings.push(read(page, options.fields === true));
+        await settled(page, options);
+        readings.push(read(page, options));
       }
       out.push(readings);
     } finally {

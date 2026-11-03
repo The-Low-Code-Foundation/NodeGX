@@ -55,6 +55,8 @@ export interface HtmlComponentContext {
   moduleOf: (legacyPath: string) => { file: string; mount: string } | undefined;
   /** A Variable's name → its export in `variables.js`, or undefined where the plan does not keep it. */
   variableOf: (name: string) => string | undefined;
+  /** A Global Store's name → its export in `stores/<export>.js`, or undefined where the plan defers it. */
+  storeOf: (name: string) => string | undefined;
   /** A navigate action's `to` (a page's url path) → the router path it shows, or undefined for no such page. */
   routeOf: (urlPath: string) => string | undefined;
 }
@@ -158,6 +160,34 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     variableImports.add(exported);
     return member('variables', exported);
   };
+  /** The Global Stores this component reads or writes: each imported from its own `stores/<name>.js`, as React's are. */
+  const storeImports = new Set<string>();
+  const storeOf = (name: string): string | undefined => {
+    const exported = ctx.storeOf(name);
+    if (exported !== undefined) storeImports.add(exported);
+    return exported;
+  };
+  /**
+   * A store key read where the page draws: React's `useStore(desk, (s) => s.app)`, one local per key at the top of the
+   * component, which tells its readers only when that key's value is a different one (`storeKey` in `lib/dom.js`).
+   */
+  const keyLines: string[] = [];
+  const keyLocals = new Map<string, string>();
+  const storeKeyRead = (storeName: string, k: string, scope: Scope): string | undefined => {
+    const store = storeOf(storeName);
+    if (store === undefined) return undefined;
+    // In a chain, the store as it is now (React's handler reads `desk.get().app`).
+    if (!scope.top) return member(`${store}.get()`, k);
+    const id = `${storeName}\u0000${k}`;
+    let local = keyLocals.get(id);
+    if (local === undefined) {
+      local = fresh(`${store}${k.charAt(0).toUpperCase()}${camelCase(k).slice(1)}`);
+      keyLocals.set(id, local);
+      imports.dom.add('storeKey');
+      keyLines.push(`  const ${local} = storeKey(l, ${store}, ${js(k)}); // the store "${storeName}"'s ${js(k)}, as this component reads it`);
+    }
+    return `${local}.get()`;
+  };
 
   // ---- the styles: one class per styled node, named the way the React export names its classes ------------------
 
@@ -222,6 +252,8 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   // ---- names ---------------------------------------------------------------------------------------------------
 
   const taken = new Set(['variables', 'input', 'state', 'given', 'element', 'inputs', 'before', 'l', 'into', 'at', 'item', 'index', 'row', 'batch', 'life', 'el', 'show', 'truthy', 'keep', 'bindText', 'bindAttr', 'bindStyle', 'when', 'place', 'list', 'navigate', 'value', 'derived', 'functionNode', 'runFunction', 'tickedArrival', 'pulse', mount]);
+  // A store's module is imported under its own name (React's `import { desk } from '../stores/desk'`): no local takes it.
+  for (const st of ctx.project.stores) if (st.deferred === undefined) taken.add(st.exportName);
   /** A fresh local name, `base` or `base2`, `base3`… */
   const fresh = (base: string): string => {
     let name = base.replace(/[^\w$]/g, '_');
@@ -255,7 +287,6 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         if (plan.tickedRuns.find((t) => t.nodeId === def.nodeId)?.atLoad) nodeLines.push(`  let ${names.loaded} = false;`);
       }
       if (def.noodl !== undefined) lose(def.nodeId, `the Function "${def.fnName}" reads Noodl (${[...def.noodl.members, ...def.noodl.variables].join(', ')}), which the HTML target does not hand it yet (HTX-004)`);
-      if (def.late) lose(def.nodeId, `the Function "${def.fnName}" writes or signals after its run has returned (a timer or a listener); those late writes are not carried yet`);
       if (def.component) lose(def.nodeId, `the Function "${def.fnName}" reads Component.Object, which the HTML target does not hand it yet`);
       if (def.scripts?.length) lose(def.nodeId, `the Function "${def.fnName}" uses script files, which the HTML target does not carry yet`);
     }
@@ -343,6 +374,8 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         const v = variable(e.variableName);
         return v === undefined ? undefined : `${v}.get()`;
       }
+      case 'store-key-get':
+        return storeKeyRead(e.storeName, e.key, scope);
       case 'static-rows':
         // The authored rows, a constant above the component (STATIC-DATA-TARGET §3): `allowEditOnly`, so nothing changes them.
         return plan.staticData.some((d) => d.constName === e.constName) ? e.constName : undefined;
@@ -409,7 +442,11 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       if (v !== undefined) return `${v}.get()`;
       lose(id, `its ${port} reads the Variable "${source.variableName}", which the plan does not keep`);
     }
-    else if (source.kind === 'store-key') lose(id, `its ${port} reads the Global Store "${source.storeName}" (HTX-002)`);
+    else if (source.kind === 'store-key') {
+      const code = storeKeyRead(source.storeName, source.key, TOP);
+      if (code !== undefined) return code;
+      lose(id, `its ${port} reads the Global Store "${source.storeName}", which the plan defers`);
+    }
     else lose(id, `its ${port} has no source the plan could read`);
     return undefined;
   };
@@ -456,6 +493,13 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         const v = expr(a.expr, scope);
         if (target === undefined || v === undefined) throw new Unprinted(`a Set Variable of "${a.variableName}" from ${describe(a.expr)}, which the HTML target does not print yet`);
         return one(`${target}.set(${a.fallback !== undefined ? `${v} ?? ${js(a.fallback)}` : v});`);
+      }
+      case 'globalstore-set': {
+        // React's `desk.set({ app: … })`: one key patched, the rest kept (the Set's Merge is the plan's to read).
+        const store = storeOf(a.storeName);
+        const v = expr(a.expr, scope);
+        if (store === undefined || v === undefined) throw new Unprinted(`a Set of the Global Store "${a.storeName}"'s ${js(a.key)} from ${describe(a.expr)}, which the HTML target does not print yet`);
+        return one(`${store}.set({ ${key(a.key)}: ${a.fallback !== undefined ? `${v} ?? ${js(a.fallback)}` : v} });`);
       }
       case 'output-signal':
         if (!callbackProps.has(a.prop)) throw new Unprinted(`a signal out through ${a.prop}, which this component does not declare`);
@@ -1051,6 +1095,50 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   // ---- the module ---------------------------------------------------------------------------------------------
 
   const tree = plan.rootId ? draw(plan.rootId, 'element', 'before', '  ') : [];
+
+  /*
+   * EXP-019 (session 133), React's `<name>Node.late`: a kept Function whose body may call back after its run has returned
+   * (a timer, a listener: `JsFunctionPlan.late`). What it writes then lands in its row, and a signal it sends then runs
+   * that signal's chain, as the running app's node delivers them when they happen. The row and the pulse arms are the
+   * ones its run is printed with, found where the plan holds them. Printed after the drawing, when every Function the
+   * component's chains run is known; it is read only when a late write happens, long after the mount.
+   */
+  const lateLines: string[] = [];
+  for (const def of usedFunctions.values()) {
+    if (def.kind !== 'function' || def.late !== true || !keptNode(def.nodeId)) continue;
+    let pulses: Extract<HandlerAction, { kind: 'jsfun-pulses' }> | undefined;
+    let materialize: string | undefined;
+    const seen = new Set<object>();
+    const visit = (v: unknown): void => {
+      if (v === null || typeof v !== 'object' || seen.has(v)) return;
+      seen.add(v);
+      if (Array.isArray(v)) return v.forEach(visit);
+      const a = v as { kind?: unknown; nodeId?: unknown; materialize?: unknown };
+      if (a.nodeId === def.nodeId && a.kind === 'jsfun-pulses' && pulses === undefined) pulses = v as Extract<HandlerAction, { kind: 'jsfun-pulses' }>;
+      if (a.nodeId === def.nodeId && a.kind === 'jsfun-run' && typeof a.materialize === 'string' && materialize === undefined) materialize = a.materialize;
+      Object.values(v).forEach(visit);
+    };
+    visit(plan);
+    if (pulses === undefined && materialize === undefined) continue;
+    const names = useFunction(def);
+    const run = `${names.base}Run`;
+    const body: string[] = [];
+    if (materialize !== undefined && stateByName.has(materialize)) body.push(`    ${member('state', materialize)}.set({ ...${run}.outputs });`);
+    if (pulses !== undefined) {
+      const scope = chainScope();
+      scope.runs.set(def.nodeId, run);
+      try {
+        body.push(...statement(pulses, '    ', scope).lines);
+      } catch (e) {
+        if (!(e instanceof Unprinted)) throw e;
+        // The row still lands: the signals' chain is the part left out, whole.
+        lose(def.nodeId, `what the Function "${def.fnName}" signals after its run has returned runs ${e.message}; that chain is left out whole (what it writes then still lands)`);
+      }
+    }
+    if (body.length === 0) continue;
+    const label = (nodeById.get(def.nodeId)?.authoredLabel ?? def.fnName).replace(/\*\//g, '* /');
+    lateLines.push(`  // ${label} — what its body writes or sends after a run has returned (a timer, a listener) arrives as the running app's does.`, `  ${names.node}.late = function (${run}) {`, ...body, '  };');
+  }
   const rootLocal = plan.rootId ? localOf.get(plan.rootId) : undefined;
   const rootIsConditional = plan.rootId !== null && plan.bindings[plan.rootId]?.mounted !== undefined;
 
@@ -1153,6 +1241,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   if (imports.states.size) lines.push(`import { ${[...imports.states].sort().join(', ')} } from '${relative(file.dir, 'lib/states.js')}';`);
   for (const [mod, names] of [...childImports].sort(([a], [b]) => a.localeCompare(b))) lines.push(`import { ${[...names].sort().join(', ')} } from '${relative(file.dir, mod)}';`);
   if (variableImports.size) lines.push(`import * as variables from '${relative(file.dir, 'variables.js')}';`);
+  for (const st of [...storeImports].sort()) lines.push(`import { ${st} } from '${relative(file.dir, `stores/${st}.js`)}';`);
   lines.push(...fnImports.sort());
   lines.push('');
   lines.push(...moduleHead);
@@ -1171,6 +1260,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   if (state.length) lines.push('  const state = {', ...state, '  };');
   lines.push(...pulsesTaken);
   if (plan.role === 'page' && plan.head?.title) lines.push(`  document.title = ${js(plan.head.title)};`);
+  lines.push(...keyLines);
   lines.push(...nodeLines);
   lines.push(...machines);
   lines.push('');
@@ -1181,6 +1271,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   if (follows.length) lines.push('');
   lines.push(...tree);
   if (mounted.length) lines.push('', ...mounted);
+  if (lateLines.length) lines.push('', ...lateLines);
   lines.push('');
   lines.push('  return {');
   lines.push('    update(next) {');

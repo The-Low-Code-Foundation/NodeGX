@@ -64,6 +64,14 @@ n8n … our ethos is … that they'd have the option of visually editing if they
 "editing workflows"), so lane 9's next work. Nine tasks, BWF-001 (what he met, fixed) first; rulings R1–R4 in the
 [P132 README](tasks/phase-132-a-backend-workflow-you-can-build-by-hand/README.md); about 10–13 sessions.
 
+**The app in plain files, opened by Richard 2026-11-03 (P134, lane 4 reopened for this phase only):** a NodeGX app
+exported as HTML, CSS and JavaScript with no framework, npm or build step, and one NodeGX part placed in a page whose
+rest is plain code (*"it's about retaining control more than saving tokens, and contingency planning"*). Ruled the same
+day: a small readable library in the folder, a printer like Swift's (not an AI port), **all of it now** beside the Beta
+lanes, the backend and HiveClip before the game bridge. Seven tasks; **HTX-001 ✅ HTX-002 ✅ (3 of 10 sessions,
+11-03), HTX-003 next**; hard stop at 10 sessions;
+[P134 README](tasks/phase-134-the-app-in-plain-files/README.md). React and Swift stay paused.
+
 | release | what is in it | state 2026-10-23 |
 |---|---|---|
 | **0.4.2** | the editor Richard's two jobs | ✅ published 2026-10-20 |

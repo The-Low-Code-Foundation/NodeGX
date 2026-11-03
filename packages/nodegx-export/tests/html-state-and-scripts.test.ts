@@ -23,12 +23,17 @@ import { htmlAnimateJs, htmlFunctionRunJs, htmlStatesJs } from './helpers/html-c
 import { openHtmlExport } from './helpers/html-in-jsdom';
 import { writeHookDesk } from './helpers/hook-desk';
 import { htmlArm } from './helpers/export-html-arm';
-import { writeArrivalDesk } from './helpers/arrival-desk';
+import { addBell, writeArrivalDesk } from './helpers/arrival-desk';
 import { writeSignalDesk } from './helpers/signal-desk';
 import { writeSetDesk } from './helpers/set-desk';
 import { writeSiblingDesk } from './helpers/sibling-desk';
 import { writeRelayDesk } from './helpers/relay-desk';
 import { writeSuccessDesk } from './helpers/success-desk';
+import { button, SHOW_SCRIPT, STORE_KEY, writeStoreDesk } from './helpers/store-desk';
+import type { Desk } from './helpers/root-desk';
+import { writeHeaderDesk } from './helpers/header-desk';
+import { PERSIST_STORE_JS } from '../src/emit/html/persistStoreJs';
+import { htmlPersistStoreJs } from './helpers/html-core-js';
 
 const catalog = loadCatalog();
 const desk = writeHookDesk();
@@ -37,15 +42,18 @@ const app = emitHtmlApp(parseProject(desk.dir, catalog), catalog);
 const STEPS = ['More', 'Go A', 'Go B', 'Go A', 'More', 'pick b', 'pick a', 'More', 'pick c'];
 
 /** The runtime's own nodes, in a child process (as `a-logic-component-is-a-hook.test.ts` runs them). */
-const runtimeArm = (dir: string, scenarios: string[][], fields = false): string[][][] => {
+type Storage = { keys: string[]; seeds?: Array<Record<string, string>> };
+const runtimeArm = (dir: string, scenarios: string[][], fields = false, storage?: Storage): string[][][] => {
   try {
     return JSON.parse(
       execFileSync(process.execPath, [path.join(__dirname, 'helpers', 'runtime-mounted-arm.js')], {
-        input: JSON.stringify([{ dir, scenarios, fields }]),
+        input: JSON.stringify([{ dir, scenarios, fields, ...(storage ? { storage } : {}) }]),
         encoding: 'utf-8',
         stdio: ['pipe', 'pipe', 'pipe'],
         timeout: 120000,
-        maxBuffer: 16 * 1024 * 1024
+        maxBuffer: 16 * 1024 * 1024,
+        // P18 session 139: the runtime arm gives its window an origin, so it keeps a storage.
+        env: storage ? { ...process.env, RUNTIME_ARM_URL: 'http://localhost/' } : process.env
       })
     )[0];
   } catch (e) {
@@ -155,6 +163,157 @@ describe('§C the desks the React export is graded on, in the HTML export', () =
   it('C6 the Relay Desk: its rows are a For Each over Static Data, which HTX-003 draws; named, not drawn', () => {
     expect(got.relay.html).toMatch(/no button "Milk"/);
     expect(got.relay.losses).toEqual(['Components/List One row per task: a For Each over Static Data, a query or a named list, which the HTML target does not draw yet (HTX-003)']);
+  });
+});
+
+/**
+ * §E. The Global Store (HTX-002's last piece): the Store Desk and the Header Desk, the two the React export's persisted
+ * store is graded on (`a-persisted-store-travels.test.ts`, `a-header-writes-the-store.test.ts`), with the browser's
+ * storage seeded before load and read at every step, in both arms. The predictions are theirs
+ * (`phase-18-code-export-v2/s139-persisted-store/EXPECTED.md`, `s141-header-app/EXPECTED.md`).
+ */
+describe('§E the Global Store, kept in the browser', () => {
+  const stored = (items: string[] | null) => `storage=${items === null ? 'null' : JSON.stringify({ app: { items } })}`;
+  const KEPT = { [STORE_KEY]: JSON.stringify({ app: { items: ['kept'] } }) };
+  const STORE_STEPS = [['Save', 'Next', 'Save', 'Drop', 'Save'], ['Save']];
+  const STORE_STORAGE: Storage = { keys: [STORE_KEY], seeds: [{}, KEPT] };
+  const BAD_STEPS = [['Save', 'Bad write', 'Save'], ['Bad write']];
+  const HEADER_STEPS = [['Mark A', 'Mark B', 'Header drop', 'Mark A', 'Solo', 'Mark B'], ['Header drop', 'Solo'], ['Solo', 'Solo']];
+  const HEADER_STORAGE: Storage = { keys: [STORE_KEY], seeds: [{}, KEPT, {}] };
+  /**
+   * A write to another key: Show counts its own runs, and a page button writes `other`. The runtime's Subscribe of `app`
+   * fires only when `app` changed (`globalstoresubscribenode.ts`, its Changed port), as React's `useStore` selector does.
+   */
+  const otherKey = (d: Desk) => {
+    d.components['Logic/Show'].nodes.find((n) => n.id === 'shFn')!.parameters.functionScript = SHOW_SCRIPT + "\nthis.n = (this.n || 0) + 1;\nOutputs.line = Outputs.line + ' #' + this.n;";
+    const home = d.components['Pages/Home'];
+    home.nodes.find((n) => n.id === 'shell')!.children!.push('otherBtn');
+    home.nodes.push(button('otherBtn', 'Other', 'shell'), { id: 'otherSet', type: 'net.noodl.GlobalStore.Set', label: 'Write another key', parameters: { storeName: 'desk', key: 'other', merge: false, value: 'x' } });
+    home.connections.push({ fromId: 'otherBtn', fromProperty: 'onClick', toId: 'otherSet', toProperty: 'set' });
+    // A reader beside its Subscribe, in one component: a Function with no Run that counts its own runs, into a Text. Its
+    // key is `other`, which the store's Initial State types (an untyped key into a Function is the plan's refusal).
+    d.components['Logic/Store'].nodes.find((n) => n.id === 'stStore')!.parameters.initialState = '{"other":"none"}';
+    home.nodes.find((n) => n.id === 'shell')!.children!.push('hereText');
+    home.nodes.push(
+      { id: 'hereText', type: 'Text', label: 'here', parent: 'shell', parameters: {} },
+      { id: 'hereRead', type: 'net.noodl.GlobalStore.Subscribe', label: 'Read the app here', parameters: { storeName: 'desk', keys: 'other' } },
+      {
+        id: 'hereFn',
+        type: 'JavaScriptFunction',
+        label: 'Count here',
+        parameters: { functionScript: "this.n = (this.n || 0) + 1;\nOutputs.here = Inputs.other + ' #' + this.n;", 'runOnChange-in-other': true },
+        ports: [
+          { name: 'in-other', plug: 'input', type: '*' },
+          { name: 'out-here', plug: 'output', type: '*' }
+        ]
+      }
+    );
+    home.connections.push({ fromId: 'hereRead', fromProperty: 'value', toId: 'hereFn', toProperty: 'in-other' }, { fromId: 'hereFn', fromProperty: 'out-here', toId: 'hereText', toProperty: 'text' });
+  };
+  const OTHER_STEPS = [['Save', 'Other', 'Save', 'Other'], ['Other']];
+  const got: Record<string, { html: string[][][] | string; runtime: string[][][]; losses: string[]; files: Record<string, string> }> = {};
+  const both = async (name: string, dir: string, steps: string[][], storage: Storage) => {
+    const exported = emitHtmlApp(parseProject(dir, catalog), catalog);
+    let html: string[][][] | string;
+    try {
+      html = await htmlArm(exported.files, steps, { storage });
+    } catch (e) {
+      html = String(e);
+    }
+    got[name] = { html, runtime: runtimeArm(dir, steps, false, storage), losses: exported.preflight.htmlLosses.map((l) => `${l.component} ${l.label ?? l.nodeId}: ${l.what}`), files: exported.files };
+  };
+  beforeAll(async () => {
+    await both('store', writeStoreDesk().dir, STORE_STEPS, STORE_STORAGE);
+    await both('bad', writeStoreDesk({ bad: true }).dir, BAD_STEPS, STORE_STORAGE);
+    await both('header', writeHeaderDesk().dir, HEADER_STEPS, HEADER_STORAGE);
+    await both('other', writeStoreDesk({ edit: otherKey }).dir, OTHER_STEPS, STORE_STORAGE);
+  }, 300000);
+
+  it('E1 the Store Desk: the line and the stored JSON equal the runtime at every step, with nothing stored and with a stored copy', () => {
+    expect(got.store.runtime[1][0]).toEqual(['kept', stored(['kept'])]);
+    expect(got.store.html).toEqual(got.store.runtime);
+    expect(got.store.losses).toEqual([]);
+  });
+
+  it('E2 the Header Desk: three placed writers into one store, equal to the runtime at every step of all three scenarios', () => {
+    expect(got.header.runtime[0]).toHaveLength(7);
+    expect(got.header.html).toEqual(got.header.runtime);
+  });
+
+  it("E3 Bad: the plan refuses a pulse whose value it cannot deliver, so the store keeps what it held — the React export's readings, not the runtime's", () => {
+    expect(got.bad.html).toEqual([
+      [
+        ['none', stored(null)],
+        ['w0', stored(['w0'])],
+        ['w0', stored(['w0'])],
+        ['w0,w0', stored(['w0', 'w0'])]
+      ],
+      [
+        ['kept', stored(['kept'])],
+        ['kept', stored(['kept'])]
+      ]
+    ]);
+  });
+
+  it('E5 a write to one key runs nothing that reads another: Show (through a push) and a Function beside its Subscribe keep their run counts, in both arms', () => {
+    const lines = (r: string[][][] | string) => (typeof r === 'string' ? [[r]] : r.map((sc) => sc.map((x) => x[0])));
+    // Predicted before either arm ran: the count moves on Save, never on Other.
+    expect(lines(got.other.runtime)[0][2]).toBe(lines(got.other.runtime)[0][1]);
+    expect(lines(got.other.runtime)[0][4]).toBe(lines(got.other.runtime)[0][3]);
+    const here = (r: string[][][] | string) => (typeof r === 'string' ? [[r]] : r.map((sc) => sc.map((x) => x[1])));
+    // Beside its Subscribe: a Save (a write to `app`) runs nothing that reads `other`.
+    expect(here(got.other.runtime)[0][1]).toBe(here(got.other.runtime)[0][0]);
+    expect(here(got.other.runtime)[0][3]).toBe(here(got.other.runtime)[0][2]);
+    expect(got.other.html).toEqual(got.other.runtime);
+    expect(got.other.losses).toEqual([]);
+  });
+
+  it("E4 the store is its own file over lib/core.js's store(), Persist its one call, and lib/persistStore.js is React's, made again here", () => {
+    expect(PERSIST_STORE_JS).toBe(htmlPersistStoreJs());
+    const files = got.store.files;
+    expect(files['stores/desk.js']).toContain("export const desk = store('desk', {});");
+    expect(files['stores/desk.js']).toContain("persistStore(desk, 'store-desk');");
+    expect(files['lib/persistStore.js']).toBe(PERSIST_STORE_JS);
+    expect(files['components/Store.js']).toContain("const deskApp = storeKey(l, desk, 'app');");
+    expect(files['components/Store.js']).toContain('desk.set({ app: input.app.get() });');
+  });
+});
+
+/**
+ * §F. A write after the run has returned (EXP-019 session 133's Bell variant, `the-script-runs-on-arrival.test.ts` §E): a
+ * body that writes and signals from a zero timer at load (the bell), on a press (the chime), and from a promise (the
+ * promise). The kept node hands what happens later to the component, as React's `<name>Node.late` does.
+ */
+describe('§F a write after the run has returned', () => {
+  const BELL = 9; // bell · rings · chimed · promised · keeps, after the Arrival Desk's nine Texts
+  let html: string[][] | string = [];
+  let runtime: string[][] = [];
+  let printed: ReturnType<typeof emitHtmlApp>;
+  beforeAll(async () => {
+    const { dir } = writeArrivalDesk(addBell);
+    printed = emitHtmlApp(parseProject(dir, catalog), catalog);
+    try {
+      html = (await htmlArm(printed.files, [['Chime']]))[0];
+    } catch (e) {
+      html = String(e);
+    }
+    runtime = withoutDefault(runtimeArm(dir, [['Chime']])[0]);
+  }, 120000);
+
+  it('F1 the bell rang and the promise was kept at load, the chime writes after its press: equal to the runtime', () => {
+    expect(runtime.map((r) => r.slice(BELL))).toEqual([
+      ['rung object', '1', '', 'promise kept', '1'],
+      ['rung object', '1', 'chimed', 'promise kept', '1']
+    ]);
+    expect(typeof html === 'string' ? html : html.map((r) => r.slice(BELL))).toEqual(runtime.map((r) => r.slice(BELL)));
+  });
+
+  it("F2 each kept node is handed what its body does later: the row, and the signal's chain; nothing about it is left out", () => {
+    const home = printed.files['pages/Home.js'];
+    expect(home).toMatch(/theBellNode\.late = function \(theBellRun\) \{\n {4}state\.theBellOut\.set\(\{ \.\.\.theBellRun\.outputs \}\);\n {4}for \(const theBellPulse of theBellRun\.pulses\)/);
+    expect(home).toMatch(/theChimeNode\.late = function \(theChimeRun\) \{\n {4}state\.theChimeOut\.set\(\{ \.\.\.theChimeRun\.outputs \}\);\n {2}\};/);
+    expect(home).not.toContain('theStampNode.late');
+    expect(printed.preflight.htmlLosses.filter((l) => /after its run/.test(l.what))).toEqual([]);
   });
 });
 

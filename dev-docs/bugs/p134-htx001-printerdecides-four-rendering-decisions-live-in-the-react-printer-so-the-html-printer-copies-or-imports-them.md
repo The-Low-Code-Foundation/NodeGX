@@ -37,6 +37,12 @@ Two pieces did **not** have to be copied, because their cores are framework-free
 carries them as the same source with the types taken out and the React hooks cut off (`tests/helpers/html-core-js.ts`;
 a spec regenerates them and fails when they differ), so they cannot drift.
 
+**HTX-002 session 3 (2026-11-03) copied a twelfth:** where a Function's late write lands (EXP-019 session 133,
+`component.ts` "`<name>Node.late`"): the row and the pulse arms its run is printed with, the first the plan holds. The
+plan marks the body (`JsFunctionPlan.late`) but not where its late writes go, so both printers search their actions for
+it. The persisted store's library was not copied: `lib/persistStore.js` is `persistStoreLibSource()` with its types out,
+made again by the spec.
+
 **What a fix needs:** the plan carries each answer as data (`tagOf[nodeId]`, a `mountedKeeps` flag beside the Mounted
 binding, the merged page declarations, the removed ids), and the three printers read it. AC4's ledger (HTX-005) is
 where a drift would show.

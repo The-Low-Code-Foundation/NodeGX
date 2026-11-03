@@ -1,9 +1,11 @@
 # HTX-002 — State and scripts
 
 **Phase:** [134](README.md). **AC:** AC2 (logic). **Sessions:** 1–2. **Needs:** HTX-001.
-**State:** 🔵 nearly done (session 2, README §10): the logic prints, seven desks have an HTML arm (Hook, Set, Sibling
-equal at every reading; Signal, Success, Arrival, Relay differ only where HTX-003's fields and lists are named). Left:
-the Global Store and the Store Desk.
+**State:** ✅ done (sessions 2 and 3, README §10): the logic prints, and every desk the React export's logic is graded on
+has an HTML arm. Hook, Set, Sibling, Store (fresh and over a stored copy), Header and Bell are equal to the runtime at
+every reading; Signal, Success, Arrival and Relay differ only in cells pinned by name, all HTX-003's (a field's Set,
+Clear and typing chain, a For Each over Static Data). Not HTX-002's: a Function that awaits or reads `Noodl`, the
+session (HTX-004).
 
 ## The sentence
 

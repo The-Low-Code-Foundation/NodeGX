@@ -52,6 +52,23 @@ export function keep(initial) {
 }
 
 /**
+ * One key of a Global Store, as a component reads it (a Subscribe of that key): a value that follows \`store\`'s key and,
+ * like \`keep\`, tells its readers only when the key holds a different value. A write to another key changes nothing here.
+ */
+export function storeKey(l, store, key) {
+  const held = keep(untracked(function () {
+    return store.get()[key];
+  }));
+  l.run(function () {
+    const next = store.get()[key];
+    untracked(function () {
+      held.set(next);
+    });
+  });
+  return held;
+}
+
+/**
  * A component's life: the effects and the parts it made, stopped together.
  * \`run(fn)\` runs fn now and again whenever a value it read changes, until the life ends.
  * \`watch(read, act)\` runs \`act\` now and again whenever one of the values \`read()\` lists is a different value; what \`act\`

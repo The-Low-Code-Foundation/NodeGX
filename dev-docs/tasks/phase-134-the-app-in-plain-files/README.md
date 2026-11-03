@@ -1,7 +1,7 @@
 # Phase 134 — The app in plain files
 
 **Scoped:** 2026-11-03, on Richard's ask ("Let's scope up the HTML export phase please, I think it'll be important").
-**State:** 🔵 HTX-001 done, HTX-002 nearly (§10, session 2 of at most 10, 2026-11-03): the plan's logic prints on `lib/core.js` and the Hook, Set and Sibling desks read exactly what the runtime reads; the Global Store (the Store Desk) is HTX-002's one row left. R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
+**State:** 🔵 HTX-001 and HTX-002 done (§10, session 3 of at most 10, 2026-11-03): the plan's logic, the Global Store (persisted) and a Function's late writes print on `lib/core.js`, and six desks read exactly what the runtime reads; HTX-003 (fields, lists, show and hide, focus) next. R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
 phase only** (BOARD §2); React and Swift stay paused. **Read first:** this page, then [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md),
 then the task you take. The Swift precedent this phase copies is
 [EXP-022](../phase-18-code-export-v2/EXP-022-THE-SAME-GRAPH-IN-SWIFT.md) §7–§9.
@@ -303,3 +303,55 @@ the render-run memo, `combinedLifted`, the Did Mount gate, the event table, the 
 spec, a 78-line arm, the generator (223 lines, now four constants). Swift at the same point (S2): 2,781. `plan.ts` and
 `component.ts` were read, not changed. The CLI, deploy, harness, Swift S2 and both HTML suites pass (8 suites, 153 tests).
 
+
+### Session 3 — HTX-002 finished: the Global Store, and writes after a run (2026-11-03, Opus 5.5)
+
+**Result: HTX-002 done.** Three more desks read exactly what the runtime's own nodes read, at every step, on the first
+run: the Store Desk (nothing stored, and over a stored copy), the Header Desk (three placed writers into one store, three
+scenarios), and the Bell (a body that writes and signals from a timer and a promise, after its run has returned). The
+spec is `tests/html-state-and-scripts.test.ts` §E and §F (now 23 rows, about 32 s).
+
+**What prints now:**
+
+| React | plain JavaScript |
+|---|---|
+| `src/stores/desk.ts`: `store('desk', {…})` | `stores/desk.js`: the same call on `lib/core.js`'s `store()`, the same doc comment |
+| `src/lib/persistStore.ts` | `lib/persistStore.js`: the same source, types out (`htmlPersistStoreJs()` in the generator; the spec makes it again) |
+| `useStore(desk, (s) => s.app)` | `storeKey(l, desk, 'app')` in `lib/dom.js`: one local per key, telling its readers only when that key changes |
+| `desk.set({ app: … })` (a Set) | the same line |
+| `theBellNode.late = (run) => { … }` | `theBellNode.late = function (run) { … }`: the late row write, then the signal's chain |
+
+A key read inside a chain reads `desk.get().app`, as React's handler does. The browser's storage is in the HTML arm now
+(`storage: { keys, seeds }`, the runtime arm's): seeded before load, read at every step.
+
+**Graded** (predictions were the React specs', `s139-persisted-store/EXPECTED.md` and `s141-header-app/EXPECTED.md`):
+
+- **Equal at every reading:** Store, Header, Bell (from its ninth column on; the columns before are the Arrival Desk's,
+  graded in §C), and a new variant, **Other key**: the store declares `{"other":"none"}`, a page button writes `other`, Show
+  counts its own runs, and a Function beside its own Subscribe counts its runs on `other`. A write to one key runs nothing
+  that reads the other, in both arms; the Initial State is saved at load, in both arms.
+- **Bad** (the Function pair whose order the plan refuses to guess) reads the React export's readings, not the runtime's:
+  the store keeps what it held. The plan's refusal, not the printer's.
+- **Mutants.** Killed: Persist's call dropped (every §E row red); a Set writing `undefined`; the late handler dropped (both
+  §F rows red). **Survived, a finding like session 2's:** `storeKey`'s own "only when it changes" check. Every reader of a
+  key that does something already ignores an unchanged value on its own: a push goes through `watch`, a ticked run
+  through `tickedArrival`, and a Function with no Run that is pure gives the same answer. The check is kept: it is
+  `useStore`'s rule and the runtime's (a Subscribe of a key fires only when that key changed,
+  `globalstoresubscribenode.ts`), and it costs nothing.
+- **Found on the way, not a bug:** a Function fed straight by a Subscribe of an *untyped* key is refused by the plan
+  ("key … has no statically-typed value", EXP-003), in every export, and the preflight lists it under the plan's
+  refusals. The Other-key variant types its key with an Initial State for that reason.
+
+**Measured on the templates:** rocket-school, whose whole app is one persisted store (`/Logic/App store`), 61 → 59
+unprinted: the store's read and its write, so every page's `app` now loads, saves and arrives. todo-list stays at 101,
+since it has no Global Store. Its minute clock's late write lands now; its `wake` arm tests the session (HTX-004) and is
+named, whole, in place of the old "late writes are not carried yet".
+
+**Copied from the React printer** (P134-HTX001-PRINTERDECIDES, now twelve): where a late write lands, which is the row and
+the pulse arms its run is printed with, the first the plan holds (`component.ts`, EXP-019 session 133).
+
+**Cost, so far:** 3 sessions. The printer is 1,907 hand-written lines (session 2: 1,771): `printComponent` 1,359,
+`emitHtml` 282, `libJs` 266, plus four generated constants. Lines moved out of React's helpers: 0. Tests: the spec 379
+lines, the arm 87, the generator 253. `plan.ts`, `component.ts` and `persistStoreLib.ts` were read, not changed. Nine
+suites pass (175 tests): both HTML specs, the CLI, harness, deploy CLI, Swift S2, and React's three specs for what was
+printed here (the persisted store, the Header, the script on arrival).
