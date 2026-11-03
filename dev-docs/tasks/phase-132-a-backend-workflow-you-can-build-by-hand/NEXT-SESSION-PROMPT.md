@@ -1,6 +1,6 @@
 # P132 — next session
 
-**BWF-006 is done** (s7, 2026-11-03: [the record](BWF-006-CALL-AN-API.md#s7-2026-11-03-built)). `http-request`,
+**BWF-006 is done** (s7, 2026-11-03, NodeGX `c3a95ea65`, Studio `0ad1573`: [the record](BWF-006-CALL-AN-API.md#s7-2026-11-03-built)). `http-request`,
 *Call an API*: `steps/http.ts`, `steps/httpParams.ts`, `steps/outbound.ts`. The key is a Secret's NAME (`authSecret`),
 read at run time through `_noodl_get_secret`; 🔴 the engine records a workflow step's input and output UNSCRUBBED, so a
 secret must never be a param value (the same holds for BWF-007's SMTP password). Private and loopback addresses are

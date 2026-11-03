@@ -69,7 +69,7 @@ headers, body }`, the body parsed when it is JSON. Documented in `docs/runtime/W
 that a key a person pastes goes there, not in a file. `toolDisclosure` green; `instructions.test.ts` is red on
 `P132-BST006GOLDEN` alone (67 vs 68, before this session).
 
-**Studio**: the form from the catalog's `control`: `key-values` (query, headers, a body's fields: a name and a value
+**Studio** (`0ad1573`): the form from the catalog's `control`: `key-values` (query, headers, a body's fields: a name and a value
 box per row, the value typed, picked from the run or a formula), `secret` (the backend's Secrets by name, from `GET
 /admin/secrets`, read only when such a step opens; *Add a secret* is Studio's own name and password fields, written
 with `PUT /admin/secrets/:name` and never read back). Authentication is a section of its own and shows only what its
