@@ -115,3 +115,43 @@ Seen and not settled:
   discarded the edit without asking, and the canvas kept drawing the closed workflow until the stack restarted. Not
   reproduced, not filed: the first thing to try if anyone sees a step vanish.
 - Not done: the value input's picker as field trees (BWF-003's model) and AC2's crossing.
+
+## s11 (2026-11-03): item 3's field trees built and driven in the editor
+
+Driven in the dev editor on a fresh Greenhouse copy (backend made from Backend Services, removed by id after; the
+`~/.noodl/backends` census the same 19 before and after). Shots `look/bwf008-s11-1..3`.
+
+- **Ported, not shared.** Studio's page imports only its own modules, so one shared module would have to ship through
+  the kit and a release. `models/workflow/workflowSources.ts` is a TypeScript port of `automations.mjs`'s
+  `upstreamOf`, `shapeFields`, `startWords`, `readSources`, `itemSources`, `pathWords`, `stepsOfRun`, plus `fieldRows`
+  (a source as lines, from Studio's `readTree`). Its header says the two copies answer one question.
+- **What feeds it** (`WorkflowDocument.refreshReads` / `readsFor` / `valueWords`): the newest run of this workflow on this
+  backend (`execution-history:list` filtered by `metadata.sourceId`, then `get`), the test sample Studio keeps in the
+  project's `.nodegx/workflow-samples.json`, a table's columns (the project's `dbCollections`, else the backend's
+  `backend:getSchema`), a function step's answer (its `noodl.cloud.response` nodes' `params`, refusals left out), the
+  catalog's `output` words for every other kind. Asked again each time the list opens, so a run made since shows.
+- **The picker** (`WorkflowValueInput`): under a `from` value, the path in words (*plant · from the Watering that was
+  made*) and *Choose what it reads…*, which opens an inline list (not a floating menu: s4's menu ran off the window):
+  what started it, how it started (folded), each step before, a field a line with the run's value beside it, or *no
+  run yet* / *from the test sample*. A press writes the `$path` and closes the list. The box still takes a typed path.
+  A list step's `items` param does not offer its own item; its other params do. With no open document (no backend),
+  the old chips stay.
+- **Driven:** before a run, *The Watering that was made* showed `objectId`, `createdAt`, `updatedAt`, *no run yet*. Watering's
+  columns are on neither the project (it declares only `_User`) nor a fresh backend, so that is the honest shape, and
+  Studio draws the same. One run (`backend:run-workflow-def` with a Watering-shaped payload) and the list showed
+  *plant · a Plant*, *note "very dry"*, *objectId "w1"*, and the validate step's *ok true*, *checked 2*. Pressing *note*
+  wrote `body.note`; *Save* put `{"$path":"body.note"}` in `nodegx.automations.json`.
+- **Fixed in the drive:** a source's heading did not shrink, so the list scrolled sideways (179 px in a 153 px box):
+  headings now wrap (153/153).
+
+Tests: `tests-unit/workflow/p132-bwf008-sources` (14, each a case Studio's `check:automations` pins under BWF-003, plus
+`fieldRows`; mutant: the ACL let through → red). Editor gates `npx jest tests-main/local-backend tests-unit/workflow
+tests-unit/bmg-012` 13 suites / 159 green; `tsc -p packages/noodl-editor --noEmit` 0. Electron `test:ci` on the
+change (HEAD 37b51695 + this tree, seed 83494): **3083 specs, 2 failures**, both P132-AAQ001STARTPAGE's pair (filed s10,
+red before this change); every workflow spec green. Committed `7915c4af3`.
+
+Seen and filed: **P132-HIDDENPANELCHURN**. With a workflow open, the hidden Components panel's filter input and empty
+`.dialog-layer-portal-target` divs change about 15,000 times a second (a 2 s `MutationObserver` on `document.body`:
+29,904 portal childList + 3,204 input attribute mutations, none inside the new list). Cause unfound.
+
+Not done: a filter's item drawn in the app (Greenhouse has no filter; the spec covers it); AC2's crossing.

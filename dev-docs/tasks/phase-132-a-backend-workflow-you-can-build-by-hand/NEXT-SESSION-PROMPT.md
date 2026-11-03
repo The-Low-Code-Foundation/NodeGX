@@ -1,21 +1,29 @@
 # P132 — next session
 
-**BWF-008 item 3 (the words) is built** (s10, 2026-11-03, NodeGX `fed5b74d5`, [the record](BWF-008-THE-NODEGX-EDITOR-EDITS-THEM-TOO.md#s10-2026-11-03-item-3s-words-built-and-driven-in-the-editor)).
-Steps titled by name, function or kind (never the id); routes in served words (catalog **1.9.0**, a route's
-`displayName`); *Then* / *Always, as well* / *If it fails*; no page banner over a workflow; no "· COMPONENT"; the picker's
-preview from the catalog; retry help about the step; "It starts at Transform.". All driven in the editor on a Greenhouse
-copy. P132-STUDIOPRIVACYDROP fixed first (Studio `27a8727`). The stale picker search did not reproduce.
+**BWF-008 item 3 is done** (s11, 2026-11-03, [the record](BWF-008-THE-NODEGX-EDITOR-EDITS-THEM-TOO.md#s11-2026-11-03-item-3s-field-trees-built-and-driven-in-the-editor)).
+The editor's value picker draws what a step can read as field trees, BWF-003's model ported to
+`models/workflow/workflowSources.ts` (a port, not shared: Studio's page cannot import a NodeGX module without a kit
+release). Fed by `WorkflowDocument.refreshReads` (newest run, the test sample, columns, a function's answer). Driven
+in the editor on a Greenhouse copy: shape before a run, the run's values after, a press wrote `body.note`, Save put it
+in the file. s10's words were already in. Item 3 is closed. NodeGX `7915c4af3`. Electron `test:ci` (seed 83494):
+3083 specs, 2 failures, both P132-AAQ001STARTPAGE (s10's, not ours); the workflow specs green.
 
 **Next, in this order:**
 
-1. **The value input's picker as field trees** (BWF-008 item 3's last part): BWF-003's model (`upstreamOf`,
-   `readSources`, `shapeFields` in Studio's `automations.mjs`) in the editor's `WorkflowValueInput.tsx` /
-   `workflowScope.ts`. Studio's is plain JS: decide whether the editor ports it or both read one shared module.
-2. **AC2's crossing**: Studio and the editor open on one Greenhouse copy; a change in each shows in the other.
-3. **Studio reads the served route words** (catalog 1.9.0) before its own `ROUTE_WORDS`, so a new route's words reach
+1. **AC2's crossing**: Studio and the editor open on one Greenhouse copy; a change in each shows in the other (the
+   file watcher). The last open AC of BWF-008 apart from AC4's one-per-point.
+2. **Studio reads the served route words** (catalog 1.9.0) before its own `ROUTE_WORDS`, so a new route's words reach
    both surfaces from the backend. Studio from the kit keeps the table until a release carries 1.9.0.
-4. The picker's preview speaks the catalog's agent prose ("(P132)", `create-record`): a person's sentence per kind
-   needs a served field. Ask Richard if it matters before the Beta.
+3. **P132-HIDDENPANELCHURN** (filed s11, open): with a workflow open, ~15,000 DOM changes a second from the hidden
+   Components panel's filter input and empty dialog-portal divs. First measure the same 2 s observer at HEAD with a
+   page open, then with a workflow open. Not on the Beta walk, but it may be why canvas presses sometimes miss.
+4. Then BWF-009 (the test), per the README's order.
+
+**Asks for Richard** (his call, not ours):
+
+- The picker's preview speaks the catalog's agent prose ("(P132)", `create-record`): a person's sentence per kind
+  needs a served field. Does it matter before the Beta?
+- `P132-ROUTEDINSERT`: warn only for `branch`/`switch`, or ask at the insert?
 
 **Driving the editor on a copy** (s9, the recipe is in BWF-008's s9 step-1 record): fresh `id`, no
 `metadata.cloudservices`, `NOODL_USER_DATA_DIR=<scratch profile>` with a `recently_opened_project.json` listing only
@@ -25,8 +33,12 @@ computer*. The backend lands in `~/.noodl/backends/`: remove it by its id after 
 key event needs `code` too, or Escape does not close the picker. `cdp reload` leaves this renderer blank: restart the
 stack instead. The window size can change between
 launches: find cards and buttons by text, never by a remembered x,y.
+🔴 s11: in zsh, `$D eval …` with `D="node editor-drive.cjs"` runs nothing (no word splitting): use [editor-press.sh](editor-press.sh)
+(`editor-press.sh at "text" [selector] [dbl]`; any other first word passes to editor-drive.cjs) or `${=XY}`. The project card's title sits below the launcher's fold:
+press the card's picture. A step's properties open on a press on the card's lower half, not always on its title.
+`dev:stop` leaves the peers' `noodl-mcp` Electron processes alone (checked s11).
 
-Editor gates: `npx jest tests-main/local-backend tests-unit/workflow tests-unit/bmg-012` (green s9), `tsc -p
+Editor gates: `npx jest tests-main/local-backend tests-unit/workflow tests-unit/bmg-012` (green s11: 13 suites, 159), `tsc -p
 packages/noodl-editor --noEmit` (0). Full `jest` has 10 suites red that are not ours (same set at HEAD, s9 list in the
 record): compare by name before reading a red as yours.
 
