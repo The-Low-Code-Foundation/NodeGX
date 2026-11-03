@@ -43,6 +43,8 @@ const EXPECTED_KINDS = [
   'update-record',
   'delete-record',
   'find-records',
+  // P132 BWF-006: an outside API, its key from Secrets.
+  'http-request',
   'stop',
   'return',
   'wait',

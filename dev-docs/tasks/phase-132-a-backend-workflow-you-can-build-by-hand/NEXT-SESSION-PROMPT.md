@@ -1,35 +1,34 @@
 # P132 — next session
 
-**BWF-005 is done** (s6, 2026-11-03: [the record](BWF-005-STEPS-THAT-ACT-ON-THE-DATA.md#s6-2026-11-03-built)). Four
-record steps, `create-record` / `update-record` / `delete-record` / `find-records` (`steps/records.ts`, category
-*Workflow Records*), write through the backend's own `/classes` routes on loopback, so rules, hooks and db-change
-triggers apply as they do for a function's Record node. R5's *Ignore privacy rules* is `ignorePrivacyRules` on the
-workflow, on unless `false`. Studio (`c67b142`) draws their settings from the catalog's `control` (`table`,
-`record-fields`, `record-conditions`). AC1–AC2: `tests/p132-bwf-005-record-steps.test.ts` (11). AC3 in the Electron
-app on a Greenhouse copy ([greenhouse-drive-bwf005.mjs](greenhouse-drive-bwf005.mjs)): *Mark watered* replaced by
-*Change a record*, no function, no JSON. AC4: an agent given *"When a watering is logged, update the plant's
-last-watered date"* wrote the step, not a function ([agent-round-bwf005.mjs](agent-round-bwf005.mjs), $3.50).
+**BWF-006 is done** (s7, 2026-11-03: [the record](BWF-006-CALL-AN-API.md#s7-2026-11-03-built)). `http-request`,
+*Call an API*: `steps/http.ts`, `steps/httpParams.ts`, `steps/outbound.ts`. The key is a Secret's NAME (`authSecret`),
+read at run time through `_noodl_get_secret`; 🔴 the engine records a workflow step's input and output UNSCRUBBED, so a
+secret must never be a param value (the same holds for BWF-007's SMTP password). Private and loopback addresses are
+refused on the connection (`lookup` on Node's `http`), allowed by `--allow-private-http` / `NODEGX_ALLOW_PRIVATE_HTTP=1`.
+Studio: `key-values` and `secret` controls, *Paste a curl command* (`automations.mjs` `parseCurl`, a key in the line
+goes to Secrets first). AC1+AC2 `tests/p132-bwf-006-http-request.test.ts` (17); `check:automations` with `NODEGX_REPO`
+127/127; AC3 in Electron with Open-Meteo ([greenhouse-drive-bwf006.mjs](greenhouse-drive-bwf006.mjs), real network).
 
-**Next: BWF-006** ([task](BWF-006-CALL-AN-API.md)): an `http-request` kind, its key named from Secrets and never
-written into the file (R3). The Secret node's resolver (`_noodl_get_secret`, `service.ts` 4.6) is the seam a step can
-use the way the record steps use `_noodl_cloudservices`. Its URL is "text with values", which is the `text` formula
-today (s4: a single line with pills inline is not built). AC1 wants the secret redacted from the run record's
-`inputData`: the engine records `input` as resolved, so a secret resolved into a param would be written there; resolve
-it inside the executor, not as a param value.
+**Next: BWF-007** ([task](BWF-007-SEND-AN-EMAIL.md)): `send-email`, half a session. The seam is
+`_noodl_send_email` (`service.ts` 4.5, the Send Email node's), the way BWF-006 used the Secret node's resolver. Its
+`to` / `subject` / `body` are values; "text with values" is the `text` formula. `tests/email-secrets.test.ts` and
+`Mailer.setTransportForTesting` are the fake transport AC1 wants. A new kind turns three suites red on purpose (see
+below) and goes in a category: *Workflow Integrations* exists now (colour `component`). Studio's step form needs
+nothing new unless `to` takes a list (the `key-values` control is not that: a list control would be new).
 
-What s6 leaves (still open):
+What s7 leaves (still open):
 
-- **Studio has no control for *Ignore privacy rules*.** The agent or a hand edit sets it. 🔴 A local backend is
-  dev-open by default (`security.json` `devOpen: true`), so with the switch off nothing is refused there: a person
-  testing the switch locally sees no difference. Worth a sentence beside the control when it is built.
-- **"Change every plant found"** still needs a function: `for-each` calls a function per item, not a step.
-- **A Date typed as text** is written as a date only when the backend's table has the column. 🔴 The drives'
-  `attachNewBackend` makes a backend WITHOUT the project's declared columns (s6's agent found Plant had no
-  `lastWatered` and added it); Studio's `provisionFor` seeds them. Use `provisionFor` in the next lab.
-- From s4: a record's date unfolds into `__type` / `iso` in *What it can read*; a JSON setting takes no formula or
-  drop; text with values is the `text` formula's slots, not one line with pills.
-- `P132-BST006GOLDEN` (open, not ours): the MCP's bound-briefing capture says 67 backend tools, the server 68, so
-  `tests/instructions.test.ts` is red on HEAD.
+- No agent round for BWF-006 (not in its ACs). The MCP wording is in, ungraded by an agent.
+- A query row draws its name above its value, not beside it; an enum at its default reads "(default)", not its value.
+- Still from s6: Studio has no control for *Ignore privacy rules* (a local backend is dev-open, so the switch changes
+  nothing there); "change every plant found" needs a function (`for-each` calls a function per item, not a step); a
+  Date typed as text is a date only when the backend's table has the column (use `provisionFor` in a lab, not
+  `attachNewBackend`).
+- From s4: a record's date unfolds into `__type` / `iso` in *What it can read*; a JSON setting takes no formula or drop.
+- `P132-BST006GOLDEN` (open, not ours): `tests/instructions.test.ts` red on 67 vs 68 backend tools.
+
+🔴 **Syntax-check `studio.html` before a drive**: s7 lost one drive to an extra `)`, which reads only as "title stayed
+NodeGX Studio" two minutes in. Extract the `<script type="module">` body to a scratch `.mjs` and `node --check` it.
 
 Before anything: `git status` in both repos (NodeGX `cline-dev`, `../nodegx-studio`). Studio's `editor/studio.html` is
 the file every Studio session edits: `git diff -U0 editor/studio.html | grep ^@@` before committing; a peer ran
@@ -37,11 +36,11 @@ the file every Studio session edits: `git diff -U0 editor/studio.html | grep ^@@
 index may hold a peer's staged file (s6: `dev-docs/parked/README.md`): commit through a temporary index.
 
 🔴 **Studio from the kit** (backend 0.2.9) has no tests, formulas or record steps until a NodeGX release carries
-`511e41d5d`, `8d9907ccf` and s6's commit: Studio's check says "not graded" for each there. Drive with
+`511e41d5d`, `8d9907ccf`, `24914b305` and s7's commit: Studio's check says "not graded" for each there. Drive with
 `NODEGX_REPO=<the NodeGX checkout>`, and **rebuild the backend's `dist/` first** if `src/` is newer (`npm run build` in
 `packages/nodegx-backend`, gitignored). Rebuild `packages/noodl-mcp` too (`node build.mjs`) before an agent round.
 
-**Driving the Electron app on a Greenhouse copy:** [greenhouse-drive-bwf005.mjs](greenhouse-drive-bwf005.mjs) is the
+**Driving the Electron app on a Greenhouse copy:** [greenhouse-drive-bwf006.mjs](greenhouse-drive-bwf006.mjs) is the
 newest (copy it). It copies Greenhouse, gives it its own backend (`NODEGX_BACKENDS_DIR`), starts Studio's Electron
 hidden on CDP 9461 (check it is free: `lsof -nP -iTCP:9461 -sTCP:LISTEN`), drops `ELECTRON_RUN_AS_NODE`. Set
 `NODEGX_DRIVE_DIR` to your scratchpad. Its `press` scrolls a target into view first. A `<select>` is changed by

@@ -1190,6 +1190,58 @@ Searches a table.
 
 ---
 
+### `http-request`
+
+*Call an API* (P132 BWF-006). Calls an outside service over HTTP and hands on
+its answer. Use it instead of a cloud function whose only job is an HTTP
+Request node.
+
+| Param | Default | Description |
+|---|---|---|
+| `method` | `GET` | `GET`, `POST`, `PUT`, `PATCH`, `DELETE` or `HEAD`. A `GET` or `HEAD` takes no `body`. |
+| `url` | — (required) | The whole address, `https://` included. With values from the run, the `text` formula: `{"$fn": "text", "args": ["https://api.example.com/plants/", {"$path": "body.id"}]}`. |
+| `query` | — | `{ "<name>": <value> }`, added as `?name=value`. |
+| `headers` | — | `{ "<name>": <value> }`. Never a key: see Authentication. |
+| `body` | — | What a `POST`, `PUT` or `PATCH` sends: `{ "<field>": <value> }` or any JSON. |
+| `bodyType` | `json` | `json`, `form` (`a=1&b=2`) or `text`. |
+| `authType` | `none` | `bearer` (`Authorization: Bearer <key>`), `header` (the key in header `authName`), `query` (the key in query parameter `authName`), `basic` (user `authUser`, password the key). |
+| `authSecret` | — | The **name** of the Secret holding the key. |
+| `authName` | — | For `header` / `query`: e.g. `X-API-Key`. |
+| `authUser` | — | For `basic`. |
+| `timeoutMs` | 30000 | At most 300000. No answer in time is a step **failure**. |
+| `anyStatus` | `false` | Off: a status outside 200–299 **fails** the step, so `onError` handles it. On: every status is an answer. |
+| retry group | 1 attempt | `maxAttempts`, `delayMs`, `backoffMultiplier`, `maxDelayMs`, `jitter`, `retryOnStatus`: the same policy as `call-function`'s, off unless `maxAttempts` is 2 or more. |
+
+**Output:** `{ status, ok, headers, body }` — `body` parsed when it is JSON.
+With retries on, also `attempts` and `retried`.
+
+**A key is never in the file.** The step stores the Secret's name; the value is
+read when the step runs and is not in the run's record (it is cut out of the
+answer too, if the API echoes it). Write-time validation refuses a header or
+query parameter named like a credential (`Authorization`, `X-API-Key`,
+`api_key`, `token`…) with a typed value, and any literal shaped like a known key
+(`sk-…`, `AKIA…`, `ghp_…`, a JWT), with the sentence that moves it to Secrets.
+
+**Where it may call.** Not loopback, link-local (the cloud metadata address
+`169.254.169.254`) or private network ranges, checked on the connection itself
+and on every redirect, so a name that resolves to one is refused too. A backend
+started with `--allow-private-http` (or `NODEGX_ALLOW_PRIVATE_HTTP=1`) may, for
+calling a service on your own machine while developing.
+
+```jsonc
+{ "id": "weather", "kind": "http-request",
+  "params": { "url": "https://api.open-meteo.com/v1/forecast",
+              "query": { "latitude": 48.85, "longitude": 2.35, "current": "temperature_2m" } },
+  "next": ["save"] }
+{ "id": "post", "kind": "http-request",
+  "params": { "method": "POST", "url": "https://api.example.com/v1/messages",
+              "body": { "text": { "$path": "body.message" } },
+              "authType": "bearer", "authSecret": "EXAMPLE_API_KEY" },
+  "onError": ["tellSomeone"] }
+```
+
+---
+
 ### `stop`
 
 Ends this path deliberately.

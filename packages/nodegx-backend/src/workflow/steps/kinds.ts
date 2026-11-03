@@ -57,6 +57,14 @@ import type { ValidateLanguageSpec } from './validate';
 import { DEFAULT_MAX_BATCHES } from './data';
 import { FORMULA_LANGUAGE } from './formulas';
 import { FIND_DEFAULT_LIMIT, FIND_MAX_LIMIT, FIND_OPS, validateFindConditions } from './records';
+import {
+  HTTP_AUTH_TYPES,
+  HTTP_BODY_TYPES,
+  HTTP_DEFAULT_TIMEOUT_MS,
+  HTTP_MAX_TIMEOUT_MS,
+  HTTP_METHODS,
+  validateHttpRequestParams
+} from './httpParams';
 import type { FormulaLanguageSpec } from './formulas';
 import { isPlainObject, VALUE_LANGUAGE } from './values';
 
@@ -364,6 +372,37 @@ const LOOPBACK_NOTE =
   "It writes through the backend's own data routes, so a row it makes or changes fires db-change triggers like any " +
   "other write, and the backend's loop guard keeps a workflow's own write from starting it again.";
 
+/** P132 BWF-006: the *Call an API* step's settings that take a key from Secrets. */
+const AUTH_GROUP = 'Authentication';
+
+/**
+ * P132 BWF-006: the retry group on *Call an API*. The same knobs and loop as `call-function`'s, declared with a
+ * default of ONE attempt: the policy is off below 2, and a declared 3 would show a form promising retries the step
+ * never makes (a catalog default sets nothing).
+ */
+const HTTP_RETRY_PARAMS: StepParamSpec[] = [
+  {
+    name: 'maxAttempts',
+    group: RETRY_GROUP,
+    displayName: 'Total attempts (incl. the first)',
+    control: 'retry-backoff',
+    type: 'number',
+    default: 1,
+    description: 'How many times the API is called IN TOTAL before the step fails. 1 means no retry.'
+  },
+  { name: 'delayMs', group: RETRY_GROUP, displayName: 'First delay (ms)', type: 'number', default: 1000, description: 'The wait before the second attempt.' },
+  { name: 'backoffMultiplier', group: RETRY_GROUP, displayName: 'Delay multiplier', type: 'number', default: 2, description: 'Each later delay is the last one times this.' },
+  { name: 'maxDelayMs', group: RETRY_GROUP, displayName: 'Longest single delay (ms)', type: 'number', default: 60000, description: 'No one delay is longer than this.' },
+  { name: 'jitter', group: RETRY_GROUP, displayName: 'Spread delays randomly', type: 'boolean', default: false, description: 'Each delay is 50–100% of its length, at random.' },
+  {
+    name: 'retryOnStatus',
+    group: RETRY_GROUP,
+    displayName: 'Retry ONLY these statuses',
+    type: 'array',
+    description: 'Empty: retry any failure. Set (e.g. `[429, 503]`): only these statuses are retried; any other fails at once.'
+  }
+];
+
 export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
   'call-function': {
     kind: 'call-function',
@@ -372,9 +411,9 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
     source: 'WF-001',
     summary: 'Invokes an existing cloud function and uses its response as the step output.',
     whenToUse:
-      'Work no step expresses — calling an external API, sending email — is a cloud function graph, and this ' +
-      'step schedules it. A record made, changed, deleted or found is a record step (create-record, ' +
-      'update-record, delete-record, find-records), not a function (P132 BWF-005).',
+      'Work no step expresses — sending email, a calculation no formula covers — is a cloud function graph, and ' +
+      'this step schedules it. A record made, changed, deleted or found is a record step (create-record, ' +
+      'update-record, delete-record, find-records), and an outside API is http-request, not a function (P132).',
     invokesFunction: true,
     params: [
       REF_PARAM,
@@ -1017,6 +1056,108 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
     notes: [PRIVACY_NOTE, 'Routes like Filter\'s: `empty` when nothing was found, `nonempty` when something was.']
   },
 
+  'http-request': {
+    kind: 'http-request',
+    displayName: 'Call an API',
+    category: 'Workflow Integrations',
+    source: 'P132 BWF-006',
+    summary: 'Calls an outside API over HTTP and hands on its answer, its key read from Secrets by name.',
+    whenToUse:
+      'A workflow needs another service: fetch the weather, post to a chat, charge a card, look up an address. ' +
+      'Use this instead of a cloud function whose only job is an HTTP Request node. A key goes in Secrets and is ' +
+      'chosen here by its NAME (authType, authSecret); it is never typed into the step, and a key a person pastes ' +
+      'into a conversation goes to Secrets, not the file.',
+    invokesFunction: false,
+    params: [
+      { name: 'method', type: 'enum', enums: [...HTTP_METHODS], default: 'GET', displayName: 'Method', description: 'GET reads; POST, PUT, PATCH and DELETE change something.' },
+      {
+        name: 'url',
+        type: 'string',
+        required: true,
+        displayName: 'Address',
+        description:
+          'The whole address, https:// included. Text with values from the run is the `text` formula, e.g. ' +
+          '`{"$fn": "text", "args": ["https://api.example.com/plants/", {"$path": "body.id"}]}`.'
+      },
+      {
+        name: 'query',
+        type: 'object',
+        displayName: 'Query',
+        control: 'key-values',
+        description: '`{ "<name>": <value> }`, added to the address as `?name=value`. Each value a literal, a `{"$path"}` or a formula.'
+      },
+      {
+        name: 'headers',
+        type: 'object',
+        displayName: 'Headers',
+        control: 'key-values',
+        description: '`{ "<name>": <value> }`. A key never goes here: use Authentication.'
+      },
+      {
+        name: 'body',
+        type: 'any',
+        displayName: 'Body',
+        control: 'key-values',
+        description: 'What a POST, PUT or PATCH sends: `{ "<field>": <value> }` (or any JSON), each value a literal, a `{"$path"}` or a formula.'
+      },
+      {
+        name: 'bodyType',
+        type: 'enum',
+        enums: [...HTTP_BODY_TYPES],
+        default: 'json',
+        displayName: 'Send the body as',
+        description: '`json` (most APIs), `form` (a web form, `a=1&b=2`) or `text`.'
+      },
+      {
+        name: 'authType',
+        group: AUTH_GROUP,
+        type: 'enum',
+        enums: [...HTTP_AUTH_TYPES],
+        default: 'none',
+        displayName: 'Authentication',
+        description:
+          '`none`; `bearer` (`Authorization: Bearer <key>`); `header` (the key in the header `authName`); `query` ' +
+          '(the key in the query parameter `authName`); `basic` (user `authUser`, password the key).'
+      },
+      {
+        name: 'authSecret',
+        group: AUTH_GROUP,
+        type: 'string',
+        displayName: 'Key from Secrets',
+        control: 'secret',
+        description: "The NAME of the Secret holding the key. The value is read when the step runs and is never in the file or the run's record."
+      },
+      { name: 'authName', group: AUTH_GROUP, type: 'string', displayName: 'Header or parameter name', description: 'For `header` or `query`: the name the key goes under, such as `X-API-Key`.' },
+      { name: 'authUser', group: AUTH_GROUP, type: 'string', displayName: 'User name', description: 'For `basic`: the user name sent with the key.' },
+      {
+        name: 'timeoutMs',
+        type: 'number',
+        default: HTTP_DEFAULT_TIMEOUT_MS,
+        displayName: 'Give up after (ms)',
+        description: `How long to wait for an answer, at most ${HTTP_MAX_TIMEOUT_MS} ms. No answer in time is a step FAILURE.`
+      },
+      {
+        name: 'anyStatus',
+        type: 'boolean',
+        default: false,
+        displayName: 'Treat any status as an answer',
+        description: 'Off: a status outside 200–299 FAILS the step, so `onError` handles it. On: every status is an answer, and `ok` says which.'
+      },
+      ...HTTP_RETRY_PARAMS
+    ],
+    routes: [],
+    output:
+      '`{ status, ok, headers, body }` — `status` the HTTP status, `ok` true for 200–299, `headers` by lower-case ' +
+      'name, `body` the answer (parsed when it is JSON, text otherwise). With retries on, also `attempts` and `retried`.',
+    clientEquivalent: 'HTTP Request, with no function around it.',
+    notes: [
+      'It may not call loopback, link-local (the cloud metadata address) or private network addresses, checked on ' +
+        'the connection itself and on every redirect. A backend started with `--allow-private-http` may, for local ' +
+        'development.',
+      "The key's value is cut out of the answer wherever it appears, so an API that echoes it does not put it in the run's record."
+    ]
+  },
+
   stop: {
     kind: 'stop',
     displayName: 'Stop / Error',
@@ -1570,6 +1711,11 @@ export function validateStepShape(step: WorkflowStep): string[] {
           if (r !== 'empty' && r !== 'nonempty') errors.push(`${at}: find-records route "${r}" must be "empty" or "nonempty"`);
         }
       }
+      break;
+    }
+
+    case 'http-request': {
+      errors.push(...validateHttpRequestParams(p, at));
       break;
     }
 

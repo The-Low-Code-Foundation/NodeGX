@@ -143,6 +143,8 @@ describe('WF-002 step kinds end-to-end over a real backend', () => {
       'update-record',
       'delete-record',
       'find-records',
+      // P132 BWF-006: an outside API.
+      'http-request',
       'stop',
       'return',
       'wait',

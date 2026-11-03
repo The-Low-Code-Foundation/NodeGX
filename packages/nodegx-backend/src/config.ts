@@ -85,6 +85,13 @@ export interface BackendServiceOptions {
    */
   requireSecrets: boolean;
   /**
+   * P132 BWF-006 — a workflow's *Call an API* step may reach loopback, link-local and private network addresses.
+   * Off by default: on a VM those are this backend's own admin surface, the cloud metadata service and the
+   * network behind it. For local development (calling a service on your own machine) only.
+   * `NODEGX_ALLOW_PRIVATE_HTTP=1` is the same switch.
+   */
+  allowPrivateHttp: boolean;
+  /**
    * P112 OWN-026 FIX-01 — a backend with no `security.json` yet mints the default rules with
    * `devOpen: false`, so they are enforced on this machine from the first record, the same rules a
    * deploy enforces. Only the mint reads it: an existing `security.json`, or a project policy
@@ -123,6 +130,7 @@ const DEFAULTS: BackendServiceOptions = {
   readonlyToken: null,
   projectDir: null,
   requireSecrets: false,
+  allowPrivateHttp: false,
   enforceRules: false,
   serveApp: null
 };

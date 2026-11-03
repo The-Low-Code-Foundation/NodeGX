@@ -102,6 +102,10 @@ function parseArgs(argv: string[]): ParsedArgs {
       case '--require-secrets':
         options.requireSecrets = true;
         break;
+      // P132 BWF-006: a workflow's Call an API step may reach loopback and private addresses.
+      case '--allow-private-http':
+        options.allowPrivateHttp = true;
+        break;
       // SB-015: the project this backend was provisioned for. Read for exactly
       // one thing — installing `nodegx.security.json` as this backend's policy
       // on a first start that has none.
@@ -178,6 +182,7 @@ function parseArgs(argv: string[]): ParsedArgs {
   // PRD-005: a container that cannot edit its command line turns the stance on with the
   // environment instead. The flag and the variable are the same switch.
   if (requireSecretsFromEnv()) options.requireSecrets = true;
+  if (/^(1|true|yes)$/i.test(process.env.NODEGX_ALLOW_PRIVATE_HTTP || '')) options.allowPrivateHttp = true;
 
   return { command, positionals, options, extras };
 }
@@ -339,6 +344,12 @@ Options:
                          that cannot find one refuses and names it. Same as
                          NODEGX_REQUIRE_SECRETS=1. Off by default: minting is
                          right for a laptop and wrong for an empty volume.
+  --allow-private-http   Let a workflow's "Call an API" step reach loopback,
+                         link-local and private network addresses (a service
+                         on your own machine). Off by default: on a server
+                         those are this backend, the cloud metadata service and
+                         the network behind it. Same as
+                         NODEGX_ALLOW_PRIVATE_HTTP=1.
   --serve-app <dir>      Also serve the deployed app in <dir> (the folder with
                          its index.html), on this backend's own address: one
                          process, one port. API routes always win, and a path

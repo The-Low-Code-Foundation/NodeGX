@@ -203,7 +203,7 @@ export function registerBackendReadTools(server: McpServer): void {
       description:
         'The step vocabulary a backend can run (WF-002): every step `kind` with its params, routes, output shape ' +
         'and when to use it — call-function, branch, switch, for-each, merge, transform, validate, filter, sort, ' +
-        'deduplicate, split, create-record, update-record, delete-record, find-records, stop, return, wait, ' +
+        'deduplicate, split, create-record, update-record, delete-record, find-records, http-request, stop, return, wait, ' +
         'wait-until — PLUS `valueLanguage` (WFA-003): how a param ' +
         'references data ($path / $literal), what a $path may address (body, trigger, previous, ' +
         'upstream.<stepId>), and the one payload shape every entry point delivers, `conditionLanguage` (the ' +
@@ -944,8 +944,9 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
     {
       title: 'Set a cloud function secret',
       description:
-        'Store a credential (an API key, a token) on a running backend for cloud functions to read with a Secret ' +
-        'node of the same name. It lands in the backend\'s secrets.json, never in the project or the page, and is ' +
+        'Store a credential (an API key, a token) on a running backend for a cloud function\'s Secret node, or a ' +
+        'workflow http-request step\'s authSecret, of the same name. A key the person pastes goes here, not in a ' +
+        'file. It lands in the backend\'s secrets.json, never in the project or the page, and is ' +
         'never echoed. LEAVE OUT `value` (the person\'s way, P112-S14-PERSONKEY): the first call adds `NAME=` to ' +
         "the project's .env and tells you what to say. The app's backend reads that line itself whenever a function " +
         'asks, so once the person has pasted the key and saved, the feature works with nothing more to call; ' +
@@ -1292,8 +1293,9 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
       .describe(
         'What the step runs, e.g. call-function / branch / switch / for-each / merge / transform / validate / ' +
           'filter / sort / deduplicate / split / create-record / update-record / delete-record / find-records / ' +
-          'stop / return / wait / wait-until. A row made, changed, deleted or found in a workflow is one of the ' +
-          'four record steps, NOT a cloud function (P132 BWF-005). THE AUTHORITY IS THE TARGET ' +
+          'http-request / stop / return / wait / wait-until. A row made, changed, deleted or found in a workflow is ' +
+          'one of the four record steps, and an outside API is http-request, NOT a cloud function (P132). Its key ' +
+          'is a Secret named in authSecret (set_function_secret), never typed into the step. THE AUTHORITY IS THE TARGET ' +
           'BACKEND: call list_backend_step_kinds against the backend ' +
           "you are authoring for, and use what it returns — for each kind's params, routes and output shape, " +
           'and because the vocabulary differs between backend versions. A kind this backend does not serve is ' +

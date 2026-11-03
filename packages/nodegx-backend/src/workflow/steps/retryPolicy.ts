@@ -78,6 +78,17 @@ export async function invokeWithRetryPolicy(
   ref: string,
   ctx: StepExecContext
 ): Promise<Record<string, unknown>> {
+  return runWithRetryPolicy(ctx, (attempt) => invokeCloudFunction(getRunner, ref, { ...ctx.input, attempt }, ctx.startedByApp));
+}
+
+/**
+ * The backoff loop itself, around any attempt that fails by throwing (P132 BWF-006: *Call an API* reuses it, so
+ * the two kinds that talk to something that can be briefly down share one policy and one set of knobs).
+ */
+export async function runWithRetryPolicy(
+  ctx: StepExecContext,
+  attemptOnce: (attempt: number) => Promise<Record<string, unknown>>
+): Promise<Record<string, unknown>> {
   const p = (ctx.step.params || {}) as Record<string, unknown>;
 
   const maxAttempts = Math.max(1, Math.floor(numberParam(p.maxAttempts, RETRY_DEFAULTS.maxAttempts)));
@@ -95,7 +106,7 @@ export async function invokeWithRetryPolicy(
     if (ctx.signal.aborted) break;
 
     try {
-      const output = await invokeCloudFunction(getRunner, ref, { ...ctx.input, attempt }, ctx.startedByApp);
+      const output = await attemptOnce(attempt);
       return { ...output, attempts: attempt, retried: attempt > 1 };
     } catch (e) {
       lastError = e instanceof Error ? e : new Error(String(e));

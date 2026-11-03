@@ -62,7 +62,9 @@ const KNOWN_CATEGORIES = new Set([
   // a step that reshapes the run's data, which is what that token means here.
   'Workflow Data',
   // P132 BWF-005's record steps; mapped to `data` in CATEGORY_COLOR beside the family above.
-  'Workflow Records'
+  'Workflow Records',
+  // P132 BWF-006's Call an API; mapped to `component` in CATEGORY_COLOR (it calls out, as Call Function does).
+  'Workflow Integrations'
 ]);
 
 describe('WFA-004 — the served step-kind catalog is what the canvas assumes', () => {

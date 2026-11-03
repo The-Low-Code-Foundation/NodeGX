@@ -119,6 +119,8 @@ const CATEGORY_COLOR: Record<string, string> = {
   'Workflow Data': 'data',
   // P132 BWF-005's record steps (Create, Change, Delete, Find): they act on the app's data, so `data` too.
   'Workflow Records': 'data',
+  // P132 BWF-006's Call an API: it calls out to something else, as `Workflow`'s Call Function does, so `component`.
+  'Workflow Integrations': 'component',
   'Workflow Error Handling': 'default' // quiet on purpose: these are exception paths
 };
 

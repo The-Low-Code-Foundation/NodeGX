@@ -673,6 +673,10 @@ export class BackendService {
     //     `webhooks`, `email`, `auth`, `files` or `adminToken` at all. See the
     //     policy paragraph in config/SecretsStore.ts.
     (globalThis as any)._noodl_get_secret = (name: unknown): SecretLookupResult => this.resolveFunctionSecret(name);
+    // P132 BWF-006: where a workflow's Call an API step may connect (steps/outbound.ts). Re-set on every start, so
+    // a later service in the same process never inherits an earlier one's permission.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (globalThis as any)._noodl_http_step_policy = { allowPrivate: this.options.allowPrivateHttp === true };
 
     // 4.7 The user-administration nodes (CWF-015) reach the database the same
     //     way, and for the same reason the Secret node's seam is a resolver

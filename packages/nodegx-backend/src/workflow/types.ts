@@ -64,7 +64,9 @@ export type StepKind =
   | 'create-record'
   | 'update-record'
   | 'delete-record'
-  | 'find-records';
+  | 'find-records'
+  // P132 BWF-006: an outside API, its key named from Secrets
+  | 'http-request';
 
 export interface WorkflowStep {
   /** Unique within the workflow. Doubles as the execution-history `nodeId`. */
