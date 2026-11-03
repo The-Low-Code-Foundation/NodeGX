@@ -1,27 +1,29 @@
 # P132 — next session
 
-**BWF-008 is half done** (s9, 2026-11-03, NodeGX (this session's commits): [the record](BWF-008-THE-NODEGX-EDITOR-EDITS-THEM-TOO.md#s9-2026-11-03-items-2-and-4-built)).
-Step 1 measured in the editor and given to Richard (AC1): functions edit as graphs; the panel listed workflows only
-with a backend running and saved to the backend alone. Items 2 and 4 built: the editor's main process now keeps
-`nodegx.automations.json` (`local-backend/project-automations.js`, `BackendManager.writeBoth`), the panel lists the
-file's workflows when the backend is off (AC3 green in the app) and says where a save landed (AC2's editor half green
-in the app). The trigger toggle sent `PUT`, the backend serves `POST` (P132-EDITORTRIGGERPUT, fixed).
+**BWF-008 item 3 (the words) is built** (s10, 2026-11-03, NodeGX `fed5b74d5`, [the record](BWF-008-THE-NODEGX-EDITOR-EDITS-THEM-TOO.md#s10-2026-11-03-item-3s-words-built-and-driven-in-the-editor)).
+Steps titled by name, function or kind (never the id); routes in served words (catalog **1.9.0**, a route's
+`displayName`); *Then* / *Always, as well* / *If it fails*; no page banner over a workflow; no "· COMPONENT"; the picker's
+preview from the catalog; retry help about the step; "It starts at Transform.". All driven in the editor on a Greenhouse
+copy. P132-STUDIOPRIVACYDROP fixed first (Studio `27a8727`). The stale picker search did not reproduce.
 
 **Next, in this order:**
 
-1. **P132-STUDIOPRIVACYDROP** (`launch: beta`, one field): Studio's `serve.mjs` `projectWorkflow` drops
-   `ignorePrivacyRules` from the file. Add it, grade it in `check:automations`, then Studio's four gates.
-2. **BWF-008 item 3, the words**, in the editor's workflow canvas: steps titled by name, routes in the catalog's
-   words (`ROUTE_WORDS` in Studio), no component banner over a workflow, the picker's preview from the catalog's
-   description, no "· COMPONENT" on a step, retry help without "the function", the picker's search cleared on open.
-   Then the value input's picker as field trees (BWF-003's `upstreamOf`/`shapeFields`, in Studio's `automations.mjs`).
-3. **AC2's crossing**: Studio and the editor open on one Greenhouse copy; a change in each shows in the other.
+1. **The value input's picker as field trees** (BWF-008 item 3's last part): BWF-003's model (`upstreamOf`,
+   `readSources`, `shapeFields` in Studio's `automations.mjs`) in the editor's `WorkflowValueInput.tsx` /
+   `workflowScope.ts`. Studio's is plain JS: decide whether the editor ports it or both read one shared module.
+2. **AC2's crossing**: Studio and the editor open on one Greenhouse copy; a change in each shows in the other.
+3. **Studio reads the served route words** (catalog 1.9.0) before its own `ROUTE_WORDS`, so a new route's words reach
+   both surfaces from the backend. Studio from the kit keeps the table until a release carries 1.9.0.
+4. The picker's preview speaks the catalog's agent prose ("(P132)", `create-record`): a person's sentence per kind
+   needs a served field. Ask Richard if it matters before the Beta.
 
 **Driving the editor on a copy** (s9, the recipe is in BWF-008's s9 step-1 record): fresh `id`, no
 `metadata.cloudservices`, `NOODL_USER_DATA_DIR=<scratch profile>` with a `recently_opened_project.json` listing only
 the copy, `npm run dev:debug -- --quiet` in the background, Backend Services → *Add backend* → *Run one on this
 computer*. The backend lands in `~/.noodl/backends/`: remove it by its id after `dev:stop`. Canvas presses need a real
-`Input.dispatchMouseEvent` (a scratch `clickat.mjs`, one CDP connection). The window size can change between
+`Input.dispatchMouseEvent` with `buttons: 1` on the press, a move and a pause before it ([editor-drive.cjs](editor-drive.cjs)); a
+key event needs `code` too, or Escape does not close the picker. `cdp reload` leaves this renderer blank: restart the
+stack instead. The window size can change between
 launches: find cards and buttons by text, never by a remembered x,y.
 
 Editor gates: `npx jest tests-main/local-backend tests-unit/workflow tests-unit/bmg-012` (green s9), `tsc -p

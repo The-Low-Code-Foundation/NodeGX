@@ -74,3 +74,44 @@ How the drive was made, for the next one: copy with a fresh `id` and no `metadat
 - **Not done (item 3):** the words. Steps titled by id, routes as `ontrue`/`next`, the component banner over a
   workflow, "No documentation yet" in the picker, "· COMPONENT", retry help about "the function", a stale picker
   search. And the value input's picker extended to field trees from a sample run (BWF-003's model).
+
+## s10 (2026-11-03): item 3's words built and driven in the editor
+
+NodeGX `fed5b74d5`. Driven in the dev editor on a fresh Greenhouse copy (backend made from Backend Services, removed by id after). Shots
+`look/bwf008-s10-1..4`.
+
+- **Steps titled as a person reads them** (`WorkflowDocument.buildGraph`): the step's name; else, for a step that calls a
+  function, the function's own name, the last part of its path (`usePortAsLabel: 'ref'`, *Check thirst*); else the
+  kind's words (*Transform*, *Branch (IF)*), as Studio titles an unnamed step. Never the id. `givenName` keeps the
+  fallback out of the file: a save in the app left every unnamed step unnamed and kept *The end*.
+- **Routes in served words.** Catalog **1.9.0** (NodeGX backend `kinds.ts`): a route's `displayName`, the words Studio
+  had in its own `ROUTE_WORDS` (*Yes*, *No*, *If there are none*, *Anything else*, *When the time comes*…). The editor
+  draws them on the card and the wire, and the name on a backend that serves none. The two engine edges in Studio's
+  words: *Then*, *Always, as well* beside routes, *If it fails* (`workflowNodeLibrary.ts`, a comment names Studio's copy).
+- **No page banner over a workflow** (`previewStripWords.ts`: a `/#__workflow__/` canvas gets the quiet seam).
+- **No "· COMPONENT"**: steps set `hideCategoryChip`, as trigger nodes do. The header reads *CALL FUNCTION · CLOUD FUNC…*.
+- **The picker's preview** says the kind's `summary` and `whenToUse` (the type's `description`), not "No documentation yet."
+- **Retry help** is one line about the step: "No retry: the step runs once, and a failure fails it." (the second hint,
+  about "the function", is gone).
+- **The panel**: "It starts at Transform." (was "Entry step: transform.").
+- **Stale picker search: not reproduced.** Typed, closed, reopened: the box is empty. A synthetic Escape without `code`
+  does NOT close the picker, so it stays open with its search: s9's sighting was most likely that.
+
+Tests: backend `workflow-canvas-contract` names every route's words kind by kind (mutant: `Yes` removed → red); the
+42 workflow-layer suites 656/656; `tests-unit/workflow/p132-bwf008-panel-words` + `tests-unit/tvw-002` (strip: a
+workflow says nothing beside a component of the same name that does; mutant → red); Electron `tests/workflow/workflowcatalog`
+and `workflowdocument` (route words, fallback, next/onError words, description; titles, no name written back, a picked
+step unnamed, function title, `stepWords`, the chip). `tsc -p packages/noodl-editor` 0.
+
+Seen and not settled:
+
+- The picker's preview text is the catalog's, written for agents: it says "(P132)" and names kinds by id
+  (`create-record`, `http-request`). The words are right to come from the catalog; the catalog's `summary`/`whenToUse`
+  want a person's sentence beside the agent's (a served `description`?). Not done.
+- An unnamed function step's sub-label still repeats the function (*Call Function · Cloud Functions/Check thirst* under
+  *Check thirst*).
+- Early in the drive, a run of my presses (a helper without `buttons`, right after the warnings popup) took one step and
+  its wire off the canvas, unsaved. Six careful presses on the same card after a restart changed nothing. *Close* then
+  discarded the edit without asking, and the canvas kept drawing the closed workflow until the stack restarted. Not
+  reproduced, not filed: the first thing to try if anyone sees a step vanish.
+- Not done: the value input's picker as field trees (BWF-003's model) and AC2's crossing.
