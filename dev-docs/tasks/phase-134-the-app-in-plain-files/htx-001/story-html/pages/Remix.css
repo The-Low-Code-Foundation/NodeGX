@@ -1,0 +1,117 @@
+/* @nodegx:generated — Pages/Remix: one class per node, named <Component>-<node>. */
+
+/* Remix */
+.RemixPage-rxPage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  background-color: var(--background);
+  padding-top: var(--space-16);
+  padding-bottom: var(--space-16);
+}
+
+/* The column */
+.RemixPage-rxShell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 760px;
+  padding-right: var(--space-6);
+  padding-left: var(--space-6);
+  row-gap: var(--space-8);
+}
+
+/* What this page is for */
+.RemixPage-rxHead {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  row-gap: var(--space-2);
+}
+
+/* Remix */
+.RemixPage-rxEyebrow {
+  margin: 0;
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  white-space: pre;
+  color: var(--primary);
+}
+
+/* The heading */
+.RemixPage-rxTitle {
+  margin: 0;
+  width: 100%;
+  font-size: var(--text-3xl);
+  font-weight: var(--font-semibold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--foreground);
+}
+
+/* What to do */
+.RemixPage-rxLead {
+  margin: 0;
+  width: 100%;
+  max-width: 680px;
+  font-size: var(--text-lg);
+  line-height: var(--leading-relaxed);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--muted-foreground);
+}
+
+/* The contract */
+.RemixPage-rxHelp {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  background-color: var(--surface);
+  border: var(--border-1) solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  row-gap: var(--space-3);
+}
+
+/* The heading */
+.RemixPage-rxHelpHead {
+  margin: 0;
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--muted-foreground);
+}
+
+/* The four words */
+.RemixPage-rxHelpBody {
+  margin: 0;
+  width: 100%;
+  font-size: var(--text-base);
+  line-height: 1.8;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--foreground);
+}
+
+/* A whole story, three passages long */
+.RemixPage-rxHelpExample {
+  margin: 0;
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--muted-foreground);
+}

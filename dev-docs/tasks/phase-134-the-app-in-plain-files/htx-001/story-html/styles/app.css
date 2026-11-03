@@ -1,0 +1,37 @@
+/* @nodegx:generated — the app shell's own stylesheets, as written in NodeGX. */
+
+/* The page — the ground, the hover, the paste box (App) */
+/* The story engine — the few things a node port cannot say.
+   Everything a port CAN express is set on the node, not here. */
+
+.pressable { cursor: pointer; }
+
+/* 🔴 The BODY's ground. A Group's backgroundColor cannot reach the body, so
+   anything below the content is the browser's own white — which on a warm paper
+   page reads as a seam across the screen. Only a stylesheet can paint it.
+   (No backticks in this block: it lives inside a TS template literal.) */
+html, body { background: var(--background); }
+
+/* A choice lifts slightly under the pointer and settles back. 120ms is slow
+   enough to be felt and fast enough not to be waited for. */
+.story-choice {
+  transition: background-color 120ms ease-out, border-color 120ms ease-out, transform 120ms ease-out;
+}
+.story-choice:hover {
+  background-color: var(--surface-raised);
+  border-color: var(--primary);
+  transform: translateX(2px);
+}
+
+/* The paste box is code, so it is set in the mono face and given room to breathe
+   between lines — a 400-line story in a 1.2 line-height box is unreadable. */
+.story-paste {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  line-height: 1.55;
+  tab-size: 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-choice { transition: none; }
+  .story-choice:hover { transform: none; }
+}

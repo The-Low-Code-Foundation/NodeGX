@@ -1,0 +1,65 @@
+/* @nodegx:generated — Story/Paster: one class per node, named <Component>-<node>. */
+
+/* Paste a story */
+.Paster-paWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  row-gap: var(--space-4);
+}
+
+/* The story, as text */
+.Paster-paBox {
+  width: 100%;
+  height: 360px;
+  background-color: var(--surface);
+  border: var(--border-1) solid var(--border-control);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  font-size: 13px;
+  color: var(--foreground);
+}
+
+/* What is wrong with it */
+.Paster-paProblem {
+  margin: 0;
+  width: 100%;
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--destructive);
+}
+
+/* The two buttons */
+.Paster-paRow {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: var(--space-3);
+  column-gap: var(--space-3);
+}
+
+/* Read it */
+.Paster-paPlay {
+  background-color: var(--primary);
+  border-style: none;
+  border-radius: var(--radius-full);
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--primary-foreground);
+}
+
+/* Back to the story */
+.Paster-paBack {
+  background-color: transparent;
+  border: var(--border-1) solid var(--border-control);
+  border-radius: var(--radius-full);
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--foreground);
+}

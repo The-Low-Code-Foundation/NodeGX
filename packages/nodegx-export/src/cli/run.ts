@@ -36,6 +36,7 @@ import * as path from 'path';
 import { loadCatalog } from '../catalog';
 import { emitApp } from '../emit/emitApp';
 import { emitSwiftApp, renderSwiftPreflight } from '../emit/swift/emitSwift';
+import { emitHtmlApp, renderHtmlPreflight } from '../emit/html/emitHtml';
 import { renderPreflight, summarizePreflight } from '../emit/preflight';
 import { REPORT_PATH } from '../emit/report';
 import { errorMessage } from '../errorMessage';
@@ -220,6 +221,38 @@ export function runCli(argv: readonly string[], io: CliIO): ExitCode {
       );
       return EXIT.target;
     }
+  }
+
+  if (parsed.target === 'html') {
+    // P134. The same project, the same plan, the HTML printer: a folder a static server serves as it is. Its pre-flight
+    // is its own page (EXPORT-PREFLIGHT.md): the plan's refusals, and what the HTML target does not print yet.
+    let html;
+    try {
+      const catalog = loadCatalog();
+      html = emitHtmlApp(parseProject(projectDir, catalog), catalog);
+    } catch (error) {
+      io.err('The export could not be prepared, and nothing has been written.\n' + errorMessage(error) + '\n');
+      return EXIT.project;
+    }
+    const leftOutCount = html.preflight.planRefusals.length + html.preflight.htmlLosses.length;
+    if (parsed.dryRun) {
+      io.out(renderHtmlPreflight(html.preflight) + '\n');
+      return leftOutCount > 0 ? EXIT.refusals : EXIT.ok;
+    }
+    let written;
+    try {
+      written = writeExport(projectDir, outDir as string, html, fs);
+    } catch (error) {
+      io.err(`${errorMessage(error)}\n${outDir} now holds part of an app. Export again into an empty folder.\n`);
+      return EXIT.write;
+    }
+    io.out(
+      `${written.files} files written to ${outDir}${written.copies > 0 ? `, and ${written.copies} copied` : ''}: serve the folder with any static server ` +
+        '(`python3 -m http.server` in it, then open http://localhost:8000).' +
+        (leftOutCount > 0 ? ` ${leftOutCount} thing${leftOutCount === 1 ? ' is' : 's are'} left out — read EXPORT-PREFLIGHT.md first.` : '') +
+        '\n'
+    );
+    return EXIT.ok;
   }
 
   if (parsed.target === 'swift') {

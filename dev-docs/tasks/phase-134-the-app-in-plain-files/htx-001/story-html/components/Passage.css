@@ -1,0 +1,50 @@
+/* @nodegx:generated — Story/Passage: one class per node, named <Component>-<node>. */
+
+/* One passage */
+.Passage-psWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  border-left: var(--border-2) solid var(--border-strong);
+  padding-left: var(--space-6);
+  row-gap: var(--space-3);
+}
+
+/* Where you are */
+.Passage-psEyebrow {
+  margin: 0;
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  white-space: pre;
+  color: var(--primary);
+}
+
+/* The passage title */
+.Passage-psTitle {
+  margin: 0;
+  width: 100%;
+  font-family: var(--font-serif);
+  font-size: 34px;
+  font-weight: var(--font-bold);
+  line-height: 1.2;
+  letter-spacing: var(--tracking-tighter);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--foreground);
+}
+
+/* The passage itself */
+.Passage-psText {
+  margin: 0;
+  width: 100%;
+  max-width: 680px;
+  font-family: var(--font-serif);
+  font-size: 19px;
+  line-height: 1.72;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--foreground);
+}
