@@ -311,3 +311,11 @@ is then opened in NodeGX Studio (as Greenhouse, STU-091, was) to see what Studio
   header row: the app's Content Height + default 100% width in a row, unwarned (P112-OWN026-BUTTONFILLSROW, kit).
   (4) Styles listed three styles with blank names: Mistral's variants have no name, which makes each its type's default,
   and Studio printed the missing name (P123-STU-UNNAMEDSTYLE, fixed: "Default Button", read-only name).
+- **2026-11-03 10:34–10:42 CET — Large 4 fixes its own two (round `wc-fix-1`, seeded from wc-nodegx-1, request
+  `request-watering-can-fix.txt`: Richard's symptoms only, no cause).** One sitting, 466 s, 48 turns, $0.63, judged DONE,
+  0 sub-agents. Audit: one outside path, a `diff` against the seed round's folder, which the fence refused (empty output).
+  It reproduced both with drive_page signed in, then: App `gate_expr.isFalse → gate.mounted` (was `→ gate_inner.visible`),
+  and Home's Sign out `contentSize` + header `columnGap`. My drive of copies in Studio's /app, demo account signed in
+  through the form: "My plants" at y 1,115 → 35 (1920×1080) and 879 → 35 (390×844); New plant's title 1,149 → 69; Sign
+  out 489 px → 101 px at the row's right edge (phone 199 → 101, gap 0 → 98). Its last message matches those numbers and names
+  a quirk it left alone: a cold reload of a plant URL while signed in lands on Home (not measured by me).
