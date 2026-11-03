@@ -66,7 +66,9 @@ export type StepKind =
   | 'delete-record'
   | 'find-records'
   // P132 BWF-006: an outside API, its key named from Secrets
-  | 'http-request';
+  | 'http-request'
+  // P132 BWF-007: an email, through the backend's own SMTP settings
+  | 'send-email';
 
 export interface WorkflowStep {
   /** Unique within the workflow. Doubles as the execution-history `nodeId`. */

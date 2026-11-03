@@ -73,7 +73,8 @@ import { clearDiscoveryCache } from './auth/oidc';
 
 /** The shape the Send Email node (noodl-viewer-cloud) calls `_noodl_send_email` with. */
 export interface SendEmailNodeRequest {
-  to: string;
+  /** One address; several from a workflow's Send an email step (P132 BWF-007). */
+  to: string | string[];
   subject?: string;
   text?: string;
   html?: string;
@@ -81,6 +82,8 @@ export interface SendEmailNodeRequest {
   template?: string;
   /** Variables for `{{...}}` interpolation when `template` is set. `appName` defaults to the backend's name. */
   variables?: Record<string, string>;
+  /** Where an answer goes (P132 BWF-007). */
+  replyTo?: string;
 }
 
 /**
@@ -897,7 +900,7 @@ export class BackendService {
     if (!this.mailer || !this.emailConfig) {
       return { success: false, error: 'Email is not available: the backend service has not finished starting.' };
     }
-    if (!request.to) {
+    if (!request.to || (Array.isArray(request.to) && request.to.length === 0)) {
       return { success: false, error: 'Send Email: "to" is required.' };
     }
 
@@ -909,14 +912,15 @@ export class BackendService {
         appName: this.options.backendName,
         ...(request.variables || {})
       });
-      return this.mailer.send({ to: request.to, subject: rendered.subject, text: rendered.text, html: rendered.html });
+      return this.mailer.send({ to: request.to, subject: rendered.subject, text: rendered.text, html: rendered.html, replyTo: request.replyTo });
     }
 
     return this.mailer.send({
       to: request.to,
       subject: request.subject || '',
       text: request.text || '',
-      html: request.html
+      html: request.html,
+      replyTo: request.replyTo
     });
   }
 

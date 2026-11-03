@@ -203,7 +203,7 @@ export function registerBackendReadTools(server: McpServer): void {
       description:
         'The step vocabulary a backend can run (WF-002): every step `kind` with its params, routes, output shape ' +
         'and when to use it — call-function, branch, switch, for-each, merge, transform, validate, filter, sort, ' +
-        'deduplicate, split, create-record, update-record, delete-record, find-records, http-request, stop, return, wait, ' +
+        'deduplicate, split, create-record, update-record, delete-record, find-records, http-request, send-email, stop, return, wait, ' +
         'wait-until — PLUS `valueLanguage` (WFA-003): how a param ' +
         'references data ($path / $literal), what a $path may address (body, trigger, previous, ' +
         'upstream.<stepId>), and the one payload shape every entry point delivers, `conditionLanguage` (the ' +
@@ -1293,9 +1293,10 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
       .describe(
         'What the step runs, e.g. call-function / branch / switch / for-each / merge / transform / validate / ' +
           'filter / sort / deduplicate / split / create-record / update-record / delete-record / find-records / ' +
-          'http-request / stop / return / wait / wait-until. A row made, changed, deleted or found in a workflow is ' +
-          'one of the four record steps, and an outside API is http-request, NOT a cloud function (P132). Its key ' +
-          'is a Secret named in authSecret (set_function_secret), never typed into the step. THE AUTHORITY IS THE TARGET ' +
+          'http-request / send-email / stop / return / wait / wait-until. A row made, changed, deleted or found in a workflow is ' +
+          'one of the four record steps, an outside API is http-request and an email is send-email, NOT a cloud function (P132). Its key ' +
+          'is a Secret named in authSecret (set_function_secret), never typed into the step. send-email sends through the ' +
+          "backend's email settings, which are the person's to set (their SMTP server and password): never invent them. THE AUTHORITY IS THE TARGET " +
           'BACKEND: call list_backend_step_kinds against the backend ' +
           "you are authoring for, and use what it returns — for each kind's params, routes and output shape, " +
           'and because the vocabulary differs between backend versions. A kind this backend does not serve is ' +

@@ -50,6 +50,11 @@ function startApi(): Promise<{ server: http.Server; url: string; seen: Seen[] }>
     if (u.pathname === '/broken') return json(500, { error: 'the weather service fell over' });
     if (u.pathname === '/slow') return void setTimeout(() => json(200, { late: true }), 3000).unref();
     if (u.pathname === '/echo') return json(200, { youSent: req.headers.authorization, query: Object.fromEntries(u.searchParams) });
+    if (u.pathname === '/posted') {
+      const chunks: Buffer[] = [];
+      req.on('data', (c: Buffer) => chunks.push(c));
+      return void req.on('end', () => json(200, { got: JSON.parse(Buffer.concat(chunks).toString('utf8') || 'null') }));
+    }
     if (u.pathname === '/moved') {
       res.writeHead(302, { location: '/forecast?city=moved' });
       return void res.end();
@@ -140,6 +145,19 @@ describe('P132 BWF-006: http-request (a backend that may call this machine)', ()
     expect(r.status).toBe('success');
     expect(r.output).toBe(12.5);
     expect(api.seen.at(-1)).toMatchObject({ path: '/forecast', query: { city: 'Paris' } });
+  });
+
+  it('P132-PARAMSHADOW: a body value picked from the run\'s body reads the run, not the step\'s own body setting', async () => {
+    // WORKFLOW-NODES.md's own example: before the fix, the step's `body` param stood where the run's `body` stood,
+    // so `body.message` read the step's setting and sent { text: undefined }.
+    await b.define({
+      id: 'posted',
+      entry: 'call',
+      steps: [{ id: 'call', kind: 'http-request', params: { method: 'POST', url: `${api.url}/posted`, body: { text: { $path: 'body.message' } } } }]
+    });
+    const r = await b.run('posted', { message: 'water the fern' });
+    expect(r.status).toBe('success');
+    expect((r.output as { body: unknown }).body).toEqual({ got: { text: 'water the fern' } });
   });
 
   it('the output is { status, ok, headers, body }; a redirect is followed; a text answer stays text', async () => {

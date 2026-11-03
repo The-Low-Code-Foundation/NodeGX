@@ -145,6 +145,8 @@ describe('WF-002 step kinds end-to-end over a real backend', () => {
       'find-records',
       // P132 BWF-006: an outside API.
       'http-request',
+      // P132 BWF-007: an email.
+      'send-email',
       'stop',
       'return',
       'wait',

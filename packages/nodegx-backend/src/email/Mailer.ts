@@ -25,10 +25,13 @@ import { recordEmailSend } from '../ops/metrics';
 const nodemailer = require('nodemailer');
 
 export interface SendEmailRequest {
-  to: string;
+  /** One address, or several (P132 BWF-007: a workflow's Send an email step sends one email to a list). */
+  to: string | string[];
   subject: string;
   text: string;
   html?: string;
+  /** Where an answer goes, when it is not the "from" address (P132 BWF-007). */
+  replyTo?: string;
 }
 
 export interface SendEmailResult {
@@ -36,6 +39,8 @@ export interface SendEmailResult {
   error?: string;
   /** True when the first attempt failed and the documented retry ran (whether or not it then succeeded). */
   retried?: boolean;
+  /** The SMTP server's id for the message, when it gave one (P132 BWF-007: a workflow step hands it on). */
+  messageId?: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -81,7 +86,8 @@ export class Mailer {
 
     const { fromAddress, fromName } = this.config.config;
     const from = fromName ? `"${fromName}" <${fromAddress}>` : fromAddress;
-    const mailOptions = { from, to: req.to, subject: req.subject, text: req.text, html: req.html };
+    const mailOptions: Record<string, unknown> = { from, to: req.to, subject: req.subject, text: req.text, html: req.html };
+    if (req.replyTo) mailOptions.replyTo = req.replyTo;
 
     const first = await this.attempt(mailOptions);
     if (first.success) {
@@ -100,8 +106,8 @@ export class Mailer {
   private async attempt(mailOptions: Record<string, unknown>): Promise<SendEmailResult> {
     try {
       const transport = this.buildTransport();
-      await transport.sendMail(mailOptions);
-      return { success: true };
+      const info = await transport.sendMail(mailOptions);
+      return info && typeof info.messageId === 'string' ? { success: true, messageId: info.messageId } : { success: true };
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       return { success: false, error: `Failed to send email via SMTP: ${message}` };

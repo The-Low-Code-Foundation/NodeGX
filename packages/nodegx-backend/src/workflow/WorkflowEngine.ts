@@ -584,6 +584,7 @@ export class WorkflowEngine {
             step,
             input,
             scope,
+            paramScope,
             upstream,
             signal,
             // P127-BKO006-SCHEDULEAUTH: a run the app started itself lets its function steps past "signed in only".

@@ -29,6 +29,7 @@ import {
   UpdateRecordStepExecutor
 } from './records';
 import { HttpRequestStepExecutor } from './http';
+import { SendEmailStepExecutor } from './email';
 import { ReturnStepExecutor } from './returns';
 import { WaitStepExecutor, WaitUntilStepExecutor } from './timing';
 import { TransformStepExecutor } from './transform';
@@ -66,6 +67,7 @@ export class CompositeStepExecutor implements StepExecutor {
       'delete-record': new DeleteRecordStepExecutor(getRunner),
       'find-records': new FindRecordsStepExecutor(getRunner),
       'http-request': new HttpRequestStepExecutor(),
+      'send-email': new SendEmailStepExecutor(),
       ...(deps.overrides || {})
     } as Record<StepKind, StepExecutor>;
   }

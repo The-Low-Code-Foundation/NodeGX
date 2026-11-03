@@ -45,6 +45,8 @@ const EXPECTED_KINDS = [
   'find-records',
   // P132 BWF-006: an outside API, its key from Secrets.
   'http-request',
+  // P132 BWF-007: an email, through the backend's own SMTP settings.
+  'send-email',
   'stop',
   'return',
   'wait',

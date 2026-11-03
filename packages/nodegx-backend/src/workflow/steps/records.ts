@@ -89,7 +89,7 @@ export function ignoresPrivacyRules(ctx: StepExecContext): boolean {
  */
 function resolvedParams(ctx: StepExecContext): Record<string, unknown> {
   const out: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries(ctx.step.params || {})) out[k] = resolveValueDeep(v, ctx.scope);
+  for (const [k, v] of Object.entries(ctx.step.params || {})) out[k] = resolveValueDeep(v, ctx.paramScope ?? ctx.scope);
   return out;
 }
 

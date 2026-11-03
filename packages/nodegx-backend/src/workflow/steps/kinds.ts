@@ -65,6 +65,7 @@ import {
   HTTP_METHODS,
   validateHttpRequestParams
 } from './httpParams';
+import { EMAIL_BODY_FORMATS, EMAIL_MAX_RECIPIENTS, validateSendEmailParams } from './emailParams';
 import type { FormulaLanguageSpec } from './formulas';
 import { isPlainObject, VALUE_LANGUAGE } from './values';
 
@@ -1158,6 +1159,71 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
     ]
   },
 
+  'send-email': {
+    kind: 'send-email',
+    displayName: 'Send an email',
+    category: 'Workflow Integrations',
+    source: 'P132 BWF-007',
+    summary: "Sends one email through the backend's own email settings, its words filled with values from the run.",
+    whenToUse:
+      'A workflow tells someone something: the plants that need water, an order that came in, a form that was sent. ' +
+      'Use this instead of a cloud function whose only job is a Send Email node. It sends through the SMTP server ' +
+      "set on the backend manager's Email page; setting that up is the person's (their server, their password), and " +
+      'a password is never put in the step.',
+    invokesFunction: false,
+    params: [
+      {
+        name: 'to',
+        type: 'string',
+        required: true,
+        displayName: 'To',
+        description:
+          `One address, several separated by commas, or a list picked from the run (e.g. \`{"$fn": "pick", "args": [{"$path": "upstream.find.items"}, "email"]}\`). ` +
+          `One email goes to all of them, at most ${EMAIL_MAX_RECIPIENTS}.`
+      },
+      {
+        name: 'subject',
+        type: 'string',
+        required: true,
+        displayName: 'Subject',
+        description: 'The subject line. Text with values from the run is the `text` formula.'
+      },
+      {
+        name: 'body',
+        type: 'string',
+        displayName: 'Message',
+        control: 'long-text',
+        description:
+          'The words of the email. Values from the run go in with the `text` formula, a list of them with `join` ' +
+          '(e.g. `{"$fn": "join", "args": [{"$fn": "pick", "args": [{"$path": "upstream.find.items"}, "name"]}, "\\n"]}`).'
+      },
+      {
+        name: 'bodyFormat',
+        type: 'enum',
+        enums: [...EMAIL_BODY_FORMATS],
+        default: 'text',
+        displayName: 'Write the message as',
+        description: '`text` (plain words) or `html` (simple HTML: a plain-text copy is made from it and sent alongside).'
+      },
+      {
+        name: 'replyTo',
+        type: 'string',
+        displayName: 'Replies go to',
+        description: 'The address an answer goes to, when it is not the backend\'s "from" address.'
+      }
+    ],
+    routes: [],
+    output: '`{ sent, messageId, to }` — `sent` true, `messageId` the mail server\'s id for it (or null), `to` the addresses it went to.',
+    clientEquivalent: 'Send Email, with no function around it.',
+    notes: [
+      "With no email set up on the backend, the step FAILS with the sentence that says where to set it (the backend " +
+        "manager's Email page), so `onError` can catch it. A failed send is tried once more before it fails.",
+      'A test run sends for real: the email arrives. Studio says who it is about to write to before the first one.',
+      'One email to everyone in `to`, each seeing the others. To write to each person on their own, put this step ' +
+        'in a function a `for-each` calls, or send to one address a run.'
+    ]
+  },
+
   stop: {
     kind: 'stop',
     displayName: 'Stop / Error',
@@ -1716,6 +1782,11 @@ export function validateStepShape(step: WorkflowStep): string[] {
 
     case 'http-request': {
       errors.push(...validateHttpRequestParams(p, at));
+      break;
+    }
+
+    case 'send-email': {
+      errors.push(...validateSendEmailParams(p, at));
       break;
     }
 

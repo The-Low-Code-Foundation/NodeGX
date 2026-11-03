@@ -1242,6 +1242,43 @@ calling a service on your own machine while developing.
 
 ---
 
+### `send-email`
+
+*Send an email* (P132 BWF-007). Sends one email through the backend's own email
+settings (the backend manager's Email page), the same mailer the Send Email node
+uses. Use it instead of a cloud function whose only job is a Send Email node.
+
+| Param | Default | Description |
+|---|---|---|
+| `to` | — (required) | One address, several separated by commas, or a list from the run (texts, or records with an `email` field). One email to all of them, at most 50. |
+| `subject` | — (required) | The subject line. Values from the run: the `text` formula. |
+| `body` | `""` | The words. Values from the run: `text`; a list of them: `join` over `pick`. |
+| `bodyFormat` | `text` | `text`, or `html` (simple HTML; a plain-text copy is made from it and sent with it). |
+| `replyTo` | — | Where an answer goes, when it is not the backend's "from" address. |
+
+**Output:** `{ sent, messageId, to }` — `messageId` the mail server's id (or
+`null`), `to` the addresses it went to.
+
+**Setting up email is the person's.** The SMTP server, its user and its password
+are set on the backend manager's Email page; none of them is ever in the step.
+With none set, the step **fails** with the sentence that says where to set it,
+so `onError` can catch it. A failed send is tried once more before it fails.
+
+**A test run sends.** The email arrives; Studio says who it is about to write
+to before the first test that sends one.
+
+```jsonc
+{ "id": "find", "kind": "find-records",
+  "params": { "table": "Plant", "where": [{ "field": "needsWater", "op": "eq", "value": true }] },
+  "next": ["tell"] }
+{ "id": "tell", "kind": "send-email",
+  "params": { "to": "gardener@example.com",
+              "subject": "Plants that need water today",
+              "body": { "$fn": "join", "args": [{ "$fn": "pick", "args": [{ "$path": "upstream.find.items" }, "name"] }, "\n"] } } }
+```
+
+---
+
 ### `stop`
 
 Ends this path deliberately.

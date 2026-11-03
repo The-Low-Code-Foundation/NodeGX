@@ -53,6 +53,14 @@ export interface StepExecContext {
    */
   scope: Record<string, unknown>;
   /**
+   * P132-PARAMSHADOW: the scope the step's OWN params resolve against — the run's payload, `previous` and `upstream`,
+   * WITHOUT the params themselves (the engine's `paramScope`). An executor that resolves `ctx.step.params` itself
+   * must use this, not `scope`: in `scope` a param named `body`, `query` or `headers` stands where the run's own
+   * `body` stood, so `{"$path": "body.email"}` in a sibling param read the step's own setting instead of the
+   * payload. Absent where a context is built by hand (tests); fall back to `scope` there.
+   */
+  paramScope?: Record<string, unknown>;
+  /**
    * Outputs of every IMMEDIATE predecessor that took an edge into this step,
    * keyed by step id (WF-002 engine extension, for the `merge` kind).
    * Topological order guarantees they have all finished by the time this step
