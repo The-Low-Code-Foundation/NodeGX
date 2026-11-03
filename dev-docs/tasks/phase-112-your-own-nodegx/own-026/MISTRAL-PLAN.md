@@ -303,3 +303,11 @@ is then opened in NodeGX Studio (as Greenhouse, STU-091, was) to see what Studio
     kit's port text says Mounted removes it; Visible "leaves its space behind"), so Home starts at y≈1,115. Its
     proofs read the page's text, which is there off-screen. The header's Sign out button stretches across the row.
   Shots: scratchpad `drive/shots/` of session ef5e3b48 (design-home-signedin-reloaded.png, preview-app-signedin.png, tab-*.png, data-*.png).
+- **2026-11-03 ~09:40 CET — Richard's four notes, from his own Studio on a copy (~/wc):** (1) signed in through Use the
+  app and on to New plant, Workflow listed no workflows and, with Use the app off, nothing could be clicked, until another
+  page was picked and New plant again. Studio followed the app's page only for 3 s after a build, so it stayed on Sign in
+  (P123-STU-NAVNOTFOLLOWED, high, fixed: Studio follows every Router page change). (2) A screen-tall blank above every page:
+  the app's 100 vh gate, above, which no render check names (P112-OWN026-BLANKFIRSTSCREEN, kit). (3) Sign out fills the
+  header row: the app's Content Height + default 100% width in a row, unwarned (P112-OWN026-BUTTONFILLSROW, kit).
+  (4) Styles listed three styles with blank names: Mistral's variants have no name, which makes each its type's default,
+  and Studio printed the missing name (P123-STU-UNNAMEDSTYLE, fixed: "Default Button", read-only name).
