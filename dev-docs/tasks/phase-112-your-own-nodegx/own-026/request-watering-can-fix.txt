@@ -1,0 +1,7 @@
+I've been using Watering Can and two things look wrong.
+
+Once I'm signed in, every page (Home, New plant, a plant's own page) starts with a big empty space at the top, about as tall as the page's own content, before anything shows. I have to scroll down to find my plants.
+
+On Home, the Sign out button stretches across the whole header beside "My plants", with no gap between the title and the button. It should be an ordinary button sitting at the right.
+
+Please fix both without breaking anything else, and just do it without waiting for me to answer questions.
