@@ -24,8 +24,19 @@
  * language makes *referencing* values possible, never *computing* them. Compute
  * in a cloud function — that is what the function is for.
  *
+ * P132 BWF-004 (Richard's ruling R2) added the one exception, and kept the rule
+ * it excepts: `{"$fn": "<name>", "args": [...]}` computes a small value from a
+ * CLOSED table of named formulas (`formulas.ts`). Nothing is evaluated: a name is
+ * looked up, its args are resolved like any value, and an unknown name is refused
+ * at write time and fails loudly at run time. `$fn` is one reserved key, so it is
+ * on everywhere (params and condition operands alike) without reinterpreting any
+ * other `$`-keyed object as an operation — which is why it is not the transform's
+ * `{"$upper": …}` form below.
+ *
  * @module nodegx-backend/workflow/steps/values
  */
+
+import { applyFormula, FormulaError, isFormula } from './formulas';
 
 /**
  * How deep a `$path` / `$literal` spec is looked for inside a single param
@@ -129,8 +140,34 @@ export function resolveValue(spec: unknown, scope: Record<string, unknown>): unk
   if (isPlainObject(spec)) {
     if (typeof spec.$path === 'string') return getPath(scope, spec.$path);
     if ('$literal' in spec) return spec.$literal;
+    if (isFormula(spec)) return resolveFormula(spec, scope, 0);
   }
   return spec;
+}
+
+/**
+ * BWF-004: resolve a formula's args (each a value, deeply) and compute it.
+ *
+ * The args sit two levels below the formula (`{ args: [ <here> ] }`), and they
+ * are resolved at that depth so the resolver gives up exactly where
+ * `exceedsValueDepth` refuses at write time. The args resolve with whatever op
+ * table the caller passed, so inside a transform's field a formula's arg may be
+ * one of its operations, and everywhere else there is none.
+ */
+function resolveFormula(
+  spec: { $fn: unknown; args?: unknown },
+  scope: Record<string, unknown>,
+  depth: number,
+  ops?: ValueOpTable
+): unknown {
+  if (spec.args !== undefined && !Array.isArray(spec.args)) {
+    throw new FormulaError(`The formula ${JSON.stringify(spec.$fn)} takes its values as a list in "args".`);
+  }
+  const args = (spec.args as unknown[] | undefined) || [];
+  return applyFormula(
+    spec.$fn,
+    args.map((a) => resolveValueDeep(a, scope, depth + 2, ops))
+  );
 }
 
 /**
@@ -162,6 +199,7 @@ export function resolveValueDeep(
   if (isPlainObject(spec)) {
     if (typeof spec.$path === 'string') return getPath(scope, spec.$path);
     if ('$literal' in spec) return spec.$literal;
+    if (isFormula(spec)) return resolveFormula(spec, scope, depth, ops);
 
     if (ops) {
       const key = soleDollarKey(spec);
@@ -324,8 +362,8 @@ export interface ValueLanguageSpec {
  */
 export const VALUE_LANGUAGE: ValueLanguageSpec = {
   summary:
-    'Every step param, and every operand inside a condition, may be a literal or a reference. References are ' +
-    'resolved before the step runs; there are no expressions and no arithmetic.',
+    'Every step param, and every operand inside a condition, may be a literal, a reference, or a formula. ' +
+    'References and formulas are resolved before the step runs; there are no expressions and no JavaScript.',
   forms: [
     { form: 'literal', example: 'GBP', description: 'Any JSON value, used as-is.' },
     {
@@ -337,6 +375,13 @@ export const VALUE_LANGUAGE: ValueLanguageSpec = {
       form: '$literal',
       example: { $literal: { $path: 'not a path' } },
       description: 'Escape: the wrapped value is used verbatim, so a param that really does need a `$path` key can say so.'
+    },
+    {
+      form: '$fn',
+      example: { $fn: 'date-difference', args: [{ $path: 'body.lastWatered' }, { $fn: 'now' }, 'days'] },
+      description:
+        'A formula: a name from the closed list in `formulaLanguage` and its args, each a value. Small computations ' +
+        '(text with values, maths, dates, lists, is-empty) without code. An unknown name is refused at save.'
     }
   ],
   scope: [
@@ -394,7 +439,9 @@ export const VALUE_LANGUAGE: ValueLanguageSpec = {
       'canonical one wins.'
   },
   limits: [
-    'No arithmetic, string interpolation or function calls. Compute in a cloud function.',
+    // BWF-004 (R2): this sentence said "No arithmetic … compute in a cloud function" until formulas existed.
+    'No expressions and no JavaScript. Small computations are formulas (`$fn`, the closed list in ' +
+      '`formulaLanguage`); compute in a cloud function only what no formula or step can express.',
     'No cross-run or cross-workflow references.',
     // CWF-004: said here so a client reading only the value language does not
     // conclude that reshaping is impossible and send the author to a function.

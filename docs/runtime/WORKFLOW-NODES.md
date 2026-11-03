@@ -268,19 +268,67 @@ this language, evaluated when the step runs. They are marked `raw` in
 `GET /admin/workflow-step-kinds` and are passed to the step exactly as authored
 (so the execution record shows the comparison you wrote, not its answer).
 
-### No expressions, deliberately
+### No expressions — formulas instead
 
-There is no arithmetic, no string interpolation and no function call in a param.
-A workflow definition is a persisted, deployable, agent-authored JSON file, so an
+There is no expression language, no JavaScript and no `{{ }}` in a param. A
+workflow definition is a persisted, deployable, agent-authored JSON file, so an
 `eval`'d string inside one is a remote-code-execution surface with an admin
-credential in front of it. **Compute in a cloud function** — that is what the
-function is for. This language makes *referencing* values possible, not
-*computing* them.
+credential in front of it.
 
-**Reshaping is not computing**, and it has its own step: renaming, flattening,
-joining, trimming and defaulting are the [`transform`](#transform) step, whose
-operation vocabulary is a closed, backend-served table of names with fixed
-arities. It is still not an expression language, and it still has no arithmetic.
+What a person computes between two steps is usually small: a total, a greeting
+with a name in it, the days since a plant was watered, "is this empty". Those are
+**formulas** (P132 BWF-004, Richard's ruling R2): a NAME from a closed,
+backend-served list, with its values as arguments.
+
+```jsonc
+// Days since the plant was watered — in a setting, or either side of a condition.
+{ "$fn": "date-difference", "args": [ { "$path": "body.lastWatered" }, { "$fn": "now" }, "days" ] }
+
+// Text with values in it.
+{ "$fn": "text", "args": [ "Hi ", { "$path": "body.name" }, ", your plant needs water" ] }
+```
+
+Each arg is a value: a literal, a `$path`, or another formula. A formula works in
+every step setting, in every operand of a condition, and in a `transform`'s
+fields. `{"$fn"}` is one reserved key, so no other `$`-keyed object a step is
+handed is ever read as an operation.
+
+| group | formulas |
+|---|---|
+| text | `text` (text with values), `upper`, `lower`, `trim`, `length` |
+| numbers | `add`, `subtract`, `multiply`, `divide`, `round`, `min`, `max` |
+| logic | `is-empty`, `equals`, `default` (the first that is not empty), `not` |
+| dates | `now`, `add-to-date`, `date-difference`, `format-date`, `start-of` |
+| lists | `count`, `first`, `last`, `sum`, `pick`, `join` |
+
+Each one's words, sentence, typed args and what it gives are served as
+`formulaLanguage` by `GET /admin/workflow-step-kinds`; that list, not this table,
+is what an editor offers and what an agent should read.
+
+- **Refused at save:** an unknown name (`{"$fn": "eval"}` is a 400 that lists the
+  formulas), a wrong number of args, a literal arg of the wrong type (`"Divide"
+  needs a number for divided by, got "two"`), a formula nested where its result
+  cannot fit.
+- **Fails the step at run time**, through `onError` like any step: a divide by
+  zero, a date that is not one, text where a number belongs.
+- **Absence is ordinary**, as everywhere in this language: `is-empty`, `default`,
+  `equals`, `first`, `last` and `text` (which leaves a missing value out) take a
+  missing value; every other formula fails on one, so wrap a value that may be
+  missing in `default`.
+- **Dates** are ISO text, epoch milliseconds or a record's
+  `{"__type": "Date", "iso": …}`; a formula's date is ISO text, which a
+  condition orders as an instant. Dates are computed in UTC. A unit is one of
+  `minutes`, `hours`, `days`, `weeks`, `months`, `years` (`start-of`: `day`,
+  `week` — a Monday — or `month`); `format-date` takes a named format (`date`,
+  `date-time`, `time`, `long`, `short`, `weekday`, `month-year`, `iso`), not a
+  pattern language.
+
+**Compute in a cloud function** what no formula or step can express — that is
+what the function is for.
+
+**Reshaping** — renaming, flattening, parsing JSON, keeping some keys — is the
+[`transform`](#transform) step, whose operations (`{"$upper": …}`) are its own
+closed shorthand. A transform field may also be a formula.
 
 ### One payload, whatever started the run
 
@@ -785,21 +833,19 @@ interpolation and not a function call. It is the one operation that can look
 
 #### What is deliberately not here
 
-- **No arithmetic.** `$add` / `$subtract` / `$multiply` / `$divide` were proposed
-  and left out of the first cut. This page, the value language and the served
-  catalog all say "no arithmetic — compute in a cloud function", and shipping one
-  arithmetic operation would falsify that sentence everywhere it appears. Adding
-  an operation later is additive; removing one is not.
+- **No arithmetic operations.** `$add` / `$subtract` / `$multiply` / `$divide`
+  were proposed and left out of the first cut, which kept "no arithmetic" true
+  where it was served. P132 BWF-004 reopened it deliberately: arithmetic, dates
+  and text with values are [formulas](#no-expressions--formulas-instead)
+  (`{"$fn": "add", …}`), on in every setting, and a transform field may be one.
+  This table stays reshaping only.
 - **No wildcards in paths.** `lines.*.amount` is genuinely useful and it is a
   change to the `$path` walker that **conditions share** — so it is one change
   for both languages or none, never a second walker for transforms.
-- **No aggregation step** — no `count` / `sum` / `min` / `max` / `group-by` over
-  an array. Everything else in this family is *the data you already had, minus
-  some of it or in a different order*; aggregation is the one candidate that
-  **computes**, and "no arithmetic — compute in a cloud function" is served to
-  every client from `VALUE_LANGUAGE.limits`. Summing an array is a Call Function
-  step away, and after `filter` / `sort` / `deduplicate` / `split` the function it
-  calls is a three-line `reduce` over a list you have already made clean.
+- **No aggregation step** — no `group-by` over an array. Everything else in this
+  family is *the data you already had, minus some of it or in a different order*.
+  A count, a sum, the smallest or the largest of a list are formulas (`count`,
+  `sum`, `min`, `max`); grouping is a Call Function step away.
   ⚠️ Not to be confused with the **Aggregate Records** node, which is a database
   aggregation over a *stored collection query* inside a cloud function — it
   cannot see a payload merely passing through a workflow, so it is not the same

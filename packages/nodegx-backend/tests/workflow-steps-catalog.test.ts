@@ -104,7 +104,7 @@ describe('WF-002 step-kind catalog coverage', () => {
     // the kinds at all: a bundled copy can disagree with the backend that will
     // execute the definition.
     const wire = JSON.parse(JSON.stringify(stepKindCatalog())) as ReturnType<typeof stepKindCatalog>;
-    expect(wire.valueLanguage.forms.map((f) => f.form)).toEqual(['literal', '$path', '$literal']);
+    expect(wire.valueLanguage.forms.map((f) => f.form)).toEqual(['literal', '$path', '$literal', '$fn']); // $fn: P132 BWF-004
     expect(wire.valueLanguage.scope.map((s) => s.name)).toContain('upstream.<stepId>');
     expect(wire.valueLanguage.maxDepth).toBeGreaterThan(0);
     expect(wire.valueLanguage.payload.canonical.body).toBeTruthy();
@@ -199,9 +199,9 @@ describe('WF-002 author documentation coverage', () => {
       if (typeof op.arity === 'number') expect(op.args.length).toBe(op.arity);
       else expect(op.args.length).toBeGreaterThan(0);
     }
-    // The doctrine line has to survive contact with a step that reshapes data,
-    // or the next person reads the op table and assumes arithmetic is coming.
-    expect(doc).toMatch(/no arithmetic/i);
+    // The doctrine line has to survive contact with a step that reshapes data:
+    // since P132 BWF-004 arithmetic is the formulas', and the page says so.
+    expect(doc).toMatch(/No expressions — formulas instead/);
   });
 
   it('documents every validate type the catalog serves (CWF-004 slice 2)', () => {

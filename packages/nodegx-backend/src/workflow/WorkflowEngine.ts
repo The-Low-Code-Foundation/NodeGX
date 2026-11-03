@@ -32,6 +32,7 @@ import type { StepExecutor, StepExecContext, StepExecResult } from './StepExecut
 import { StepExecutionError, normalizeStepReturn } from './StepExecutor';
 import { runStartedByApp } from './startedByApp';
 import { rawParamNames, validateStepShape } from './steps/kinds';
+import { collectFormulaErrors } from './steps/formulas';
 import { collectValuePaths, exceedsValueDepth, MAX_VALUE_DEPTH, resolveStepParams } from './steps/values';
 import type {
   WorkflowDefinition,
@@ -241,6 +242,9 @@ function validateValueReferences(def: WorkflowDefinition): string[] {
         errors.push(`${at}.params.${name} nests deeper than ${MAX_VALUE_DEPTH} levels, past where values are resolved`);
       }
       found.push(...collectValuePaths(value, `${at}.params.${name}`));
+      // BWF-004: every formula, in a plain param, a condition or a transform's
+      // field: an unknown name (`eval`) or a wrong arg is a 400 naming the set.
+      errors.push(...collectFormulaErrors(value, `${at}.params.${name}`));
     }
 
     for (const { path, where } of found) {
@@ -524,7 +528,17 @@ export class WorkflowEngine {
           ...(previous ? { previous } : {}),
           upstream: upstreamByStepId
         };
-        const resolvedParams = resolveStepParams(step.params, paramScope, rawParamNames(step.kind));
+        // BWF-004: a formula in a param can fail ("cannot divide by zero"). That is
+        // THIS step failing, so it is held and thrown inside the step's own try
+        // below, where it is recorded on the step and takes its `onError` route,
+        // rather than escaping the loop and failing the whole run with no step named.
+        let resolvedParams: Record<string, unknown> = {};
+        let paramError: unknown;
+        try {
+          resolvedParams = resolveStepParams(step.params, paramScope, rawParamNames(step.kind));
+        } catch (e) {
+          paramError = e;
+        }
 
         // CWF-001: THIS is the param mapping, and it has worked since WFA-003 —
         // a step's params are merged in by NAME, so a `call-function` step whose
@@ -555,6 +569,7 @@ export class WorkflowEngine {
 
         const timeoutMs = step.timeoutMs && step.timeoutMs > 0 ? step.timeoutMs : def.stepTimeoutMs || 0;
         try {
+          if (paramError !== undefined) throw paramError;
           const ctx: StepExecContext = {
             workflow: def,
             step,

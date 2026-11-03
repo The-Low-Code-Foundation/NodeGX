@@ -208,7 +208,8 @@ export function registerBackendReadTools(server: McpServer): void {
         'upstream.<stepId>), and the one payload shape every entry point delivers, `conditionLanguage` (the ' +
         'closed comparison operators), `transformLanguage` (CWF-004: the closed operation vocabulary a transform ' +
         'step may use, with each operation\'s arity) and `validateLanguage` (CWF-004 slice 2: the closed type ' +
-        'vocabulary a validate step\'s path rules may assert, and its two rule forms). ' +
+        'vocabulary a validate step\'s path rules may assert, and its two rule forms) and `formulaLanguage` (the ' +
+        'closed formulas a setting may compute with). ' +
         'CALL THIS BEFORE AUTHORING A WORKFLOW. A workflow step is not a canvas node, so these are ' +
         'NOT in the node catalog (list_node_types); this is where their contract lives, and it is served by the ' +
         'running backend so it can never drift from what that backend actually executes.',
@@ -1306,8 +1307,9 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
         "Params merged into the step input, and the kind's own configuration (condition, cases, …). A param may " +
           'be a literal OR a reference: {"$path":"body.total"} reads the caller\'s data, ' +
           '{"$path":"previous.result.x"} the last step\'s output, {"$path":"upstream.<stepId>.x"} a named earlier ' +
-          'step (use this when a branch sits in between), {"$literal":…} escapes. No arithmetic — compute in a ' +
-          'cloud function. A reference to a step that does not exist, or is not upstream, is REJECTED at write ' +
+          'step (use this when a branch sits in between), {"$literal":…} escapes. Compute small things with a FORMULA ' +
+          '— {"$fn":"date-difference","args":[{"$path":"body.at"},{"$fn":"now"},"days"]}, from the closed ' +
+          '`formulaLanguage` only, never invented; a cloud function is for what no formula or step expresses. A reference to a step that does not exist, or is not upstream, is REJECTED at write ' +
           'time. Full spec in list_backend_step_kinds → valueLanguage.\n' +
           'CWF-001: for a kind whose catalog entry carries `paramMapping` (call-function), names OTHER than that ' +
           "kind's own params are yours to choose and arrive at the top level of the function's request body — so " +
@@ -1319,7 +1321,7 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
           'CLOSED and SERVED: read `transformLanguage` from list_backend_step_kinds and use only what is in it. ' +
           'Do NOT invent an operation — an unknown $op is refused at write time, not passed through. An ' +
           'operation with one operand takes it verbatim; one with two or more takes an array of exactly that ' +
-          'many. There is no arithmetic: compute in a cloud function.\n' +
+          'many. Arithmetic is a formula ($fn), which a field may be.\n' +
           'CWF-004 slice 2: a `validate` step\'s `rules` is a non-empty array where each rule has EXACTLY ONE of ' +
           '`path` ({"path":"body.email","type":"string","message":"…"} — `required` defaults to TRUE, so set it ' +
           'false for "optional, but this type when present") or `when` (any condition the branch language can ' +

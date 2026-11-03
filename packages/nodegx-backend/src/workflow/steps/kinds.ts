@@ -55,6 +55,8 @@ import type { TransformLanguageSpec } from './transform';
 import { CONTROL_VALIDATE_RULES, VALIDATE_LANGUAGE, VALIDATE_TYPE_NAMES, validateValidateRules } from './validate';
 import type { ValidateLanguageSpec } from './validate';
 import { DEFAULT_MAX_BATCHES } from './data';
+import { FORMULA_LANGUAGE } from './formulas';
+import type { FormulaLanguageSpec } from './formulas';
 import { isPlainObject, VALUE_LANGUAGE } from './values';
 
 /**
@@ -119,8 +121,18 @@ import { isPlainObject, VALUE_LANGUAGE } from './values';
  * `array` control, which is a JSON list rather than a rules editor, but is not
  * broken. A newer editor talking to a pre-1.7.0 backend is served none of the
  * kinds, so there is no card whose rules editor would have nothing to offer.
+ *
+ * 1.8.0 — P132 BWF-004 added `formulaLanguage`: the closed set of formulas
+ * (`{"$fn": …}`) a setting may compute with, each with its words, its sentence,
+ * its typed args and what it gives. Served for the fourth time for the same
+ * reason: an editor's picker offers what this backend computes, and an agent
+ * reads the list instead of inventing `eval`.
+ *
+ * Degradation: an editor that finds no `formulaLanguage` offers no formula (a
+ * pre-1.8.0 backend would hand a `{"$fn"}` object to a step as data). An older
+ * editor talking to a 1.8.0 backend shows a formula as the JSON it is.
  */
-export const STEP_KIND_CATALOG_VERSION = '1.7.0';
+export const STEP_KIND_CATALOG_VERSION = '1.8.0';
 
 export interface StepParamSpec {
   name: string;
@@ -603,7 +615,8 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
         description:
           'The object this step produces, as `{ "<field>": <value> }`. Each value is a literal, a ' +
           '`{"$path": "previous.user.order.payment"}` reference, or one of the operations in `transformLanguage` ' +
-          `(${TRANSFORM_OP_NAMES.join(', ')}) applied to values. A field cannot read another field of the same ` +
+          `(${TRANSFORM_OP_NAMES.join(', ')}) applied to values, or a formula from \`formulaLanguage\` ` +
+          '(`{"$fn": …}`). A field cannot read another field of the same ' +
           'transform — every field resolves against the run, in one pass.'
       }
     ],
@@ -616,9 +629,9 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
     notes: [
       'The vocabulary is CLOSED and served. An unknown `$operation` is refused when the definition is saved, ' +
         'never passed through as data — which is what stops a typo becoming a literal object inside a function.',
-      'There is no arithmetic in it. That was proposed and deliberately left out of the first cut: the value ' +
-        'language already tells every client "no arithmetic — compute in a cloud function", and shipping `$add` ' +
-        'would have falsified a served sentence. Adding an op later is additive; removing one is not.',
+      'Arithmetic, dates and text with values are formulas (`{"$fn": "add", "args": […]}`, the closed list in ' +
+        '`formulaLanguage`, P132 BWF-004), which work in a field here as in every other setting. The operations ' +
+        'above stay the transform\'s own shorthand for reshaping.',
       'Wildcard paths (`lines.*.amount`) are NOT in v1. They would be a change to the `$path` walker that ' +
         'conditions share, and a second walker for transforms is the one thing CWF-004 rules out by name.',
       'Chain two transform steps where one field genuinely depends on another. One pass, one scope, no order to ' +
@@ -1064,6 +1077,11 @@ export interface StepKindCatalog {
    * every step, for real, which is the one thing that button promises not to do. Absent on an older backend.
    */
   testRuns?: boolean;
+  /**
+   * P132 BWF-004: the closed formula set (`{"$fn": …}`), with each formula's words, sentence, typed args and what
+   * it gives — what a formula picker offers and what an agent writes instead of a cloud function for a small sum.
+   */
+  formulaLanguage: FormulaLanguageSpec;
 }
 
 export function stepKindCatalog(): StepKindCatalog {
@@ -1077,7 +1095,8 @@ export function stepKindCatalog(): StepKindCatalog {
     transformLanguage: TRANSFORM_LANGUAGE,
     validateLanguage: VALIDATE_LANGUAGE,
     migratedKinds: { ...MIGRATED_STEP_KINDS },
-    testRuns: true
+    testRuns: true,
+    formulaLanguage: FORMULA_LANGUAGE
   };
 }
 
@@ -1099,9 +1118,9 @@ function params(step: WorkflowStep): Record<string, unknown> {
   return (step.params || {}) as Record<string, unknown>;
 }
 
-/** True for `{"$path": …}` / `{"$literal": …}` — a value that is not known yet. */
+/** True for `{"$path": …}` / `{"$literal": …}` / `{"$fn": …}` (BWF-004) — a value that is not known yet. */
 function isValueSpec(v: unknown): boolean {
-  return isPlainObject(v) && (typeof v.$path === 'string' || '$literal' in v);
+  return isPlainObject(v) && (typeof v.$path === 'string' || '$literal' in v || '$fn' in v);
 }
 
 /**
