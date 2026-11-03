@@ -82,6 +82,9 @@ test('P112 OWN-007 (R3): the folder gets the editor brief as a project skill, na
   }
   // The kit is written as a copy of profiles/core, so a change there is what ships.
   assert.deepEqual(coreSkillFiles().map((f) => f.to), [
+    path.join('.claude', 'skills', 'nodegx-first-project', 'SKILL.md'),
+    path.join('.claude', 'skills', 'nodegx-making-a-game', 'SKILL.md'),
+    path.join('.claude', 'skills', 'nodegx-making-a-game', 'traps.md'),
     path.join('.claude', 'skills', 'nodegx-your-own-backend-editor', 'SKILL.md'),
     path.join('.claude', 'skills', 'nodegx-your-own-editor', 'SKILL.md')
   ]);
@@ -109,7 +112,7 @@ test('P127 BKO-009: the folder gets the backend editor brief beside the editor o
   assert.match(text, /\*\*`handed\(person\)`\*\*/);
   assert.match(text, /\*\*`apply\(edit\)`\*\*/);
   assert.match(AGENT_NOTE, /`nodegx-your-own-backend-editor` \(`\.claude\/skills\/nodegx-your-own-backend-editor\/SKILL\.md`\)/);
-  assert.match(run.stdout, /Wrote \.claude\/skills\/nodegx-your-own-backend-editor\/SKILL\.md/);
+  assert.match(run.stdout, /Wrote [^\n]*\.claude\/skills\/nodegx-your-own-backend-editor\/SKILL\.md/);
 });
 
 test('P112 OWN-012 AC4 (R4, teach both equally): the brief teaches the real app and the drawn screen side by side, each with its cost', () => {
@@ -127,13 +130,43 @@ test('P112 OWN-012 AC4 (R4, teach both equally): the brief teaches the real app 
   assert.doesNotMatch(text, /It doesn't draw the screen\./);
 });
 
+test('P112 OWN-036: the folder gets what our builds learned, as two skills the agent notes name, with no task ids in them', () => {
+  const dir = path.join(tmp(), 'my-apps');
+  const run = spawnSync(process.execPath, [BIN, dir], { encoding: 'utf8' });
+  assert.equal(run.status, 0, run.stderr);
+  for (const name of ['nodegx-first-project', 'nodegx-making-a-game']) {
+    const text = fs.readFileSync(path.join(dir, '.claude', 'skills', name, 'SKILL.md'), 'utf8');
+    // Claude Code lists a project skill by its frontmatter; the name must match its folder.
+    assert.match(text, new RegExp(`^---\nname: ${name}\ndescription: "[^"]*LOAD when`));
+    // Published text names how a lesson was measured, never the record it came from (PLY-001 AC2).
+    assert.doesNotMatch(text, /P\d+-|OWN-|TPL-|CCN-|ISL-|PLY-|CAS-/);
+    assert.match(AGENT_NOTE, new RegExp(`\`${name}\` \\(\`\\.claude\\/skills\\/${name}\\/SKILL\\.md\`\\)`));
+  }
+  // The game skill's full trap list ships beside it, with no task ids and no path from this repository in it.
+  const traps = fs.readFileSync(path.join(dir, '.claude', 'skills', 'nodegx-making-a-game', 'traps.md'), 'utf8');
+  assert.doesNotMatch(traps, /P\d+-|OWN-|TPL-|CCN-|ISL-|PLY-|CAS-|dev-docs|vscode_projects/);
+  assert.ok((traps.match(/^- \*\*/gm) || []).length >= 80, 'the trap list');
+  // A game's moving world is the one exception to "no hand-written HTML and JavaScript" (CANON "Where NodeGX fits").
+  assert.match(AGENT_NOTE, /The one exception is a game whose world moves on its own/);
+  // P130: the skill carries knowledge, never an obligation; its spine is the loop with the person.
+  const first = fs.readFileSync(path.join(dir, '.claude', 'skills', 'nodegx-first-project', 'SKILL.md'), 'utf8');
+  for (const heading of ['## Ask once, then build', '## The app arrives in rounds', "## Don't build what nobody asked for yet", '## Which parts are NodeGX']) {
+    assert.ok(first.includes(`\n${heading}\n`), heading);
+  }
+});
+
 test("P112 OWN-007: a person's own skill file is never replaced", () => {
   const dir = tmp();
   const skill = path.join(dir, '.claude', 'skills', 'nodegx-your-own-editor', 'SKILL.md');
   fs.mkdirSync(path.dirname(skill), { recursive: true });
   fs.writeFileSync(skill, 'mine\n');
   // only the skill that is absent is written (P127 BKO-009 added the backend one beside it)
-  assert.deepEqual(setUp(dir).skills, [path.join('.claude', 'skills', 'nodegx-your-own-backend-editor', 'SKILL.md')]);
+  assert.deepEqual(setUp(dir).skills, [
+    path.join('.claude', 'skills', 'nodegx-first-project', 'SKILL.md'),
+    path.join('.claude', 'skills', 'nodegx-making-a-game', 'SKILL.md'),
+    path.join('.claude', 'skills', 'nodegx-making-a-game', 'traps.md'),
+    path.join('.claude', 'skills', 'nodegx-your-own-backend-editor', 'SKILL.md')
+  ]);
   assert.equal(fs.readFileSync(skill, 'utf8'), 'mine\n');
 });
 

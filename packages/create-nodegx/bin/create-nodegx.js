@@ -54,6 +54,15 @@ const AGENT_NOTE = [
   'It was set up with `npm create nodegx`. When I ask for an app here, build it as a NodeGX app with the `nodegx`',
   "server's tools: `list_projects` and `open_project` for one that exists, `create_project` for a new one. Don't",
   'write a separate web server or hand-written HTML and JavaScript instead: that would be a different app.',
+  // P112 OWN-036 (Richard, 2026-11-03: "greeted with the combined knowledge of all of our successes and failures").
+  // What the builds people loved had in common is a skill, not a rule: P130 measured that obliging Opus up front cost
+  // the game on screen. And CANON "Where NodeGX fits": a game's moving world is plain code, so the line above has an
+  // exception a game needs to read before it starts.
+  'The one exception is a game whose world moves on its own (3D, a canvas game, physics): write that world as plain',
+  'code, and read the skill `nodegx-making-a-game` (`.claude/skills/nodegx-making-a-game/SKILL.md`) first.',
+  '',
+  'Before you build a new app or game, read `nodegx-first-project` (`.claude/skills/nodegx-first-project/SKILL.md`):',
+  'how the builds people loved were run. Any agent can read it.',
   '',
   "When the app needs an API key, don't ask me to paste it into the chat. Call `set_function_secret` without a value",
   "and tell me where to paste it in the project's `.env` file. The app reads the key from that file as soon as I save",
@@ -496,7 +505,7 @@ function sentence(result) {
       ? `${result.file} already has a "${SERVER_NAME}" server; it was left as it is.`
       : `${result.outcome === 'written' ? 'Wrote' : 'Added the NodeGX server to'} ${result.file}.`;
   const notes = result.notes && result.notes.length ? [`Wrote ${result.notes.join(' and ')}: they tell your agent that apps here are NodeGX apps.`] : [];
-  if (result.skills && result.skills.length) notes.push(`Wrote ${result.skills.join(', ')}: how your agent builds you an editor of your own.`);
+  if (result.skills && result.skills.length) notes.push(`Wrote ${result.skills.join(', ')}: guides your agent reads before it builds a first app, a game or an editor of your own.`);
   if (result.vibe === 'written') notes.push(`Wrote ${VIBE_CONFIG}: Mistral Vibe uses Mistral Large 4 and the NodeGX server here.`);
   if (result.opencode === 'written') notes.push(`Wrote ${OPENCODE_CONFIG}: OpenCode gets the NodeGX server here.`);
   return [

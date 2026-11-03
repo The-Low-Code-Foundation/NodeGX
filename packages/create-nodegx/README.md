@@ -23,9 +23,10 @@ address carries a token, so nobody else on the network can open it without being
 
 The command writes `my-apps/.mcp.json`, which gives your agent the NodeGX server (`@nodegx/mcp`, pinned to the
 version this release was made with), a short `CLAUDE.md` and `AGENTS.md` that tell the agent apps here are NodeGX
-apps, the same server for Mistral Vibe (`.vibe/config.toml`) and OpenCode (`opencode.json`), and one skill,
-`.claude/skills/nodegx-your-own-editor/SKILL.md`: how your agent builds you an editor of your own for these apps, from
-the published kit. It never touches your global agent settings, never replaces a file you already have, and if
+apps, and the same server for Mistral Vibe (`.vibe/config.toml`) and OpenCode (`opencode.json`). It also writes four
+skills into `.claude/skills/`. `nodegx-first-project` is how the apps and games people loved were built, and
+`nodegx-making-a-game` holds the mistakes we made building games. The other two show your agent how to build you an
+editor of your own for these apps, or for their backend. It never touches your global agent settings, never replaces a file you already have, and if
 `.mcp.json` already has a server called `nodegx` it leaves it alone.
 
 Not using Claude Code? Any agent that speaks MCP can use the same server: `npx -y @nodegx/mcp@<version> --allow-writes`

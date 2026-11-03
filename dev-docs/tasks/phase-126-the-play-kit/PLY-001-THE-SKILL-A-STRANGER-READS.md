@@ -31,6 +31,8 @@ Inside `@nodegx/play` as `npx @nodegx/play skill`, which writes `.claude/skills/
 as a Claude Code plugin if that route is simpler for a stranger by the time this is built (check what Claude Code
 offers then; do not guess from memory).
 
+**2026-11-03, [OWN-036](../phase-112-your-own-nodegx/OWN-036-THE-FIRST-PROJECT-KIT.md):** Richard asked that the npm install of a NodeGX project carry our learnings, so the skill's first version is written now as `packages/create-nodegx/profiles/core/skills/nodegx-making-a-game/SKILL.md`, and `npm create nodegx` writes it. That file stays the one source: `@nodegx/play skill` copies it when the package exists. AC1 and AC3 are still this task's to measure.
+
 ## Acceptance
 
 - **AC1.** A fresh Claude Code with no access to this repo, given only the skill, answers "make me a game like X" by
