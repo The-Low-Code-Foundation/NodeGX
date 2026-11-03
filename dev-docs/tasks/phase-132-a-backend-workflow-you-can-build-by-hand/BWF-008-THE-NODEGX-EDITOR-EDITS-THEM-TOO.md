@@ -35,3 +35,19 @@ over IPC, not `nodegx.automations.json`, and its own header still says workflows
   Studio shows in the editor (both open on one copy, the file watcher).
 - AC3: with the backend stopped, the panel draws the file's workflows and says they can't be edited until it runs.
 - AC4: the editor's existing workflow tests green, plus one per point above.
+
+## s9 (2026-11-03): step 1 measured
+
+In the dev editor on a Greenhouse copy, a backend made from Backend Services; the answers are in
+[P132-EDITORREADSBACKEND](../../bugs/p132-editorreadsbackend-the-nodegx-editors-workflows-panel-reads-the-running-backend-not-the-projects-file.md#measured-in-the-editor-bwf-008-step-1-s9-2026-11-03),
+the shots in `look/bwf008-m1..m6`. In one line each: the two cloud functions are in the Components panel and edit as
+graphs; the Workflows panel lists the three workflows only while a backend runs (it seeds from the file when new);
+an edit is saved to the backend and never reaches `nodegx.automations.json`; with no backend it says workflows live
+"not in this project". The new kinds (BWF-005..007) are already in its picker with generated forms, so item 3 is
+words and polish, not plumbing. Item 2 (the file) is the real work.
+
+How the drive was made, for the next one: copy with a fresh `id` and no `metadata.cloudservices`; a profile dir with
+`recently_opened_project.json` listing only the copy; `NOODL_USER_DATA_DIR=<profile> npm run dev:debug -- --quiet`
+(run in the background); the card, then Backend Services → *Add backend* → *Run one on this computer* → a name →
+*Create* → *Start backend*. The backend lands in `~/.noodl/backends/` (no env override): delete it by its id after
+`dev:stop`. Presses on the canvas need a real `Input.dispatchMouseEvent` at x,y (a scratch `clickat.mjs`).
