@@ -219,6 +219,24 @@ describe('WFA-004 — the served step-kind catalog is what the canvas assumes', 
     }
   });
 
+  it('P132 BWF-008: serves each fixed route in words, named here kind by kind', () => {
+    // 1.9.0. Named rather than looped: a loop over what is served passes when a route loses its words AND when a
+    // kind loses the route. A switch's case routes have no words of their own: the label the author typed is them.
+    const served = Object.fromEntries(
+      catalog.kinds
+        .filter((k) => k.routes.length)
+        .map((k) => [k.kind, Object.fromEntries(k.routes.map((r) => [r.name, (r as { displayName?: string }).displayName ?? null]))])
+    );
+    expect(served).toEqual({
+      branch: { ontrue: 'Yes', onfalse: 'No' },
+      switch: { '<case label>': null, default: 'Anything else' },
+      'for-each': { empty: 'If there are none', nonempty: 'If there are some' },
+      filter: { empty: 'If there are none', nonempty: 'If there are some' },
+      'find-records': { empty: 'If there are none', nonempty: 'If there are some' },
+      'wait-until': { done: 'When the time comes', skipped: 'If it was already past' }
+    });
+  });
+
   it('serves the value language beside the kinds', () => {
     // WFA-003 put it here so a client rendering a param control knows what a
     // `$path` may address without a second fetch or a bundled copy.

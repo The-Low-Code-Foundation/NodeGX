@@ -243,7 +243,7 @@ describe('BWF-004 each formula computes, and fails loudly in its own words', () 
 describe('BWF-004 the served list is the computed list, and the docs name it', () => {
   it('serves every formula in the table and nothing else, with words a picker can show', () => {
     const wire = JSON.parse(JSON.stringify(stepKindCatalog())) as ReturnType<typeof stepKindCatalog>;
-    expect(wire.version).toBe('1.8.0');
+    expect(wire.version).toBe('1.9.0');
     expect(wire.formulaLanguage.formulas.map((f) => f.name)).toEqual([...FORMULA_NAMES]);
     for (const f of wire.formulaLanguage.formulas) {
       expect(f.label.length).toBeGreaterThan(0);

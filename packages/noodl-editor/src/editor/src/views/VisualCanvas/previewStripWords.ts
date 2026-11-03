@@ -44,6 +44,8 @@
  * @module noodl-editor/views/VisualCanvas/previewStripWords
  */
 
+// `workflowPorts` imports nothing at all, so this module stays as pure as its tests need it.
+import { WORKFLOW_NAME_PREFIX } from '../../models/workflow/workflowPorts';
 import { OPEN_ON_WORKBENCH } from './benchWords';
 
 /**
@@ -165,6 +167,10 @@ export function previewStrip(input: StripInput): StripModel {
   // No canvas to diverge from — the detached window, or a surface that has not resolved yet. The
   // row is still drawn, because the seam is still there; it simply has nothing to say.
   if (!canvasLabel) return seam();
+  // P132 BWF-008: a backend workflow on the canvas is no component of the app. "TriggerTest isn't on any page yet —
+  // nothing in the app places it" was a true sentence about a page and a false one about the workflow, which runs
+  // on the backend when its trigger fires: no page will ever place it, and the door to the Workbench led nowhere.
+  if (input.canvasComponent?.startsWith(WORKFLOW_NAME_PREFIX)) return seam();
   if (onScreen) return agreeing(input);
 
   if (isLogic) {

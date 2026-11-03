@@ -15,6 +15,7 @@
 
 import { WorkflowDocument } from '../../src/editor/src/models/workflow/WorkflowDocument';
 import {
+  buildWorkflowNodeLibrary,
   PORT_NEXT,
   PORT_ON_ERROR,
   routePortName,
@@ -264,9 +265,72 @@ describe('WFA-004 workflow document', () => {
 
       const doc = WorkflowDocument.fromDefinition(REF, definition, CATALOG);
       const written = doc.toInput().steps.find((s) => s.id === 'start');
-      // The label falls back to the id on the canvas; writing that back as a
+      // The card falls back to the kind's words (P132 BWF-008; it was the id); writing that back as a
       // `name` would turn every unnamed step into a named one on first save.
       expect(written.name).toBeUndefined();
+    });
+  });
+
+  describe('P132 BWF-008 a step is titled by its name, or its kind, never its id', () => {
+    // The real node type, as the editor installs it from the catalog: a bare graph in this suite has none,
+    // and the title of an unnamed node is its type's to give. Installed on the node, not in the global library.
+    const { BasicNodeType } = require('../../src/editor/src/models/nodelibrary/BasicNodeType');
+    const typed = (doc: WorkflowDocument, id: string) => {
+      const node = doc.graph.findNodeWithId(id);
+      const spec = buildWorkflowNodeLibrary(CATALOG).nodetypes.find((t) => t.name === node.typename);
+      node.type = new BasicNodeType(spec);
+      return node;
+    };
+    const unnamedStart = () => {
+      const definition = orderPipeline();
+      delete definition.steps[0].name;
+      return WorkflowDocument.fromDefinition(REF, definition, CATALOG);
+    };
+
+    it('an unnamed step reads as its kind ("Wait"), not its id, and saves with no name', () => {
+      const doc = unnamedStart();
+      const node = typed(doc, 'start');
+      expect(node.label).toBe('Wait');
+      expect(doc.toInput().steps.find((s) => s.id === 'start').name).toBeUndefined();
+    });
+
+    it('a name typed on the card is kept', () => {
+      const doc = unnamedStart();
+      typed(doc, 'start').label = 'Hold five seconds';
+      expect(doc.toInput().steps.find((s) => s.id === 'start').name).toBe('Hold five seconds');
+    });
+
+    it('a step placed from the picker (no label) is saved with no name', () => {
+      const doc = WorkflowDocument.fromDefinition(REF, orderPipeline(), CATALOG);
+      const { NodeGraphNode } = require('../../src/editor/src/models/nodegraphmodel');
+      const node = NodeGraphNode.fromJSON({ id: '3f2a1c04-1111-2222-3333-444455556677', type: typeNameForKind('wait'), x: 0, y: 0 });
+      doc.graph.addRoot(node);
+      typed(doc, node.id);
+      expect(node.label).toBe('Wait');
+      expect(doc.toInput().steps.find((s) => s.id === node.id).name).toBeUndefined();
+    });
+
+    it('an unnamed step that calls a function is titled by the function, the last part of its path', () => {
+      const definition = orderPipeline();
+      const charge = definition.steps.find((s) => s.id === 'charge');
+      delete charge.name;
+      charge.ref = 'Cloud Functions/Charge card';
+      const doc = WorkflowDocument.fromDefinition(REF, definition, CATALOG);
+      expect(typed(doc, 'charge').label).toBe('Charge card');
+      // The function's name is the card's title, not a name the author gave the step.
+      expect(doc.toInput().steps.find((s) => s.id === 'charge').name).toBeUndefined();
+    });
+
+    it('the panel names the first step by its title, never its id', () => {
+      const doc = unnamedStart();
+      typed(doc, 'start');
+      expect(doc.stepWords('start')).toBe('Wait');
+      expect(doc.stepWords('nowhere')).toBe('nowhere');
+    });
+
+    it('its header names the kind with no colour word after it ("CALL AN API · COMPONENT")', () => {
+      const doc = WorkflowDocument.fromDefinition(REF, orderPipeline(), CATALOG);
+      expect(doc.graph.findNodeWithId('charge').metadata.hideCategoryChip).toBe(true);
     });
   });
 

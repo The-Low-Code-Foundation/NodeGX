@@ -352,7 +352,7 @@ export function WorkflowsPanel() {
               {dirty && <span className={styles.Dirty}> — unsaved</span>}
             </div>
             <div className={styles.OpenMeta}>
-              On {document.ref.backendName}. Entry step: {document.entry}.
+              On {document.ref.backendName}. It starts at {document.stepWords(document.entry)}.
             </div>
             <div className={styles.Actions}>
               <button className={`${styles.Button} ${styles.Primary}`} onClick={save} disabled={busy || !dirty}>

@@ -95,6 +95,8 @@ export interface StepParamMappingSpec {
 
 export interface StepRouteSpec {
   name: string;
+  /** Catalog 1.9.0 (P132 BWF-008): the words a person reads where the route leaves; `name` is the wire contract. */
+  displayName?: string;
   description: string;
   /** Route names derived from a param — `switch`'s case labels. */
   dynamic?: boolean;

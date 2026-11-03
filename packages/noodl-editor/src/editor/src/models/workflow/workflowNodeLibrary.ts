@@ -258,12 +258,25 @@ function validateTypes(catalog?: StepKindCatalog) {
   return catalog?.validateLanguage?.types || [];
 }
 
-/** A signal output that paints its name on the wire. */
-function routePort(route: string, index: number, description: string) {
+/**
+ * P132 BWF-008: the words for the two edges every step has, which no catalog route describes. Studio's
+ * `automations.mjs` says them the same way (`ALWAYS_WORDS`, `ROUTE_WORDS.onError`): change both or neither.
+ * A plain `next` on a step that also branches runs whatever the step decides (P132-BRANCHNEXT), so it is
+ * "Always, as well" there and "Then" on a step that has no other way on.
+ */
+export const NEXT_WORDS = 'Then';
+export const NEXT_WORDS_BESIDE_ROUTES = 'Always, as well';
+export const ON_ERROR_WORDS = 'If it fails';
+
+/**
+ * A signal output that paints its words on the wire: the catalog's (1.9.0), or the route's name from a backend
+ * that serves none.
+ */
+function routePort(route: string, index: number, description: string, words?: string) {
   return {
     name: routePortName(route),
-    displayName: route,
-    editorName: route,
+    displayName: words || route,
+    editorName: words || route,
     type: { name: 'signal', connectionLabel: true },
     plug: 'output',
     group: GROUP_ROUTES,
@@ -355,7 +368,7 @@ function portsForKind(spec: StepKindSpec, catalog?: StepKindCatalog) {
   // would drown the ones that carry meaning.
   ports.push({
     name: PORT_NEXT,
-    displayName: 'next',
+    displayName: spec.routes.length ? NEXT_WORDS_BESIDE_ROUTES : NEXT_WORDS,
     type: 'signal',
     plug: 'output',
     group: GROUP_ROUTES,
@@ -367,13 +380,13 @@ function portsForKind(spec: StepKindSpec, catalog?: StepKindCatalog) {
     // A dynamic route name is a placeholder in the catalog (`<case label>`) —
     // the real ports come per node from its own params.
     if (route.dynamic) continue;
-    ports.push(routePort(route.name, index++, route.description));
+    ports.push(routePort(route.name, index++, route.description, route.displayName));
   }
 
   ports.push({
     name: PORT_ON_ERROR,
-    displayName: 'onError',
-    editorName: 'onError',
+    displayName: ON_ERROR_WORDS,
+    editorName: ON_ERROR_WORDS,
     type: { name: WIRE_TYPE_ERROR, connectionLabel: true },
     plug: 'output',
     group: GROUP_ROUTES,
@@ -388,6 +401,13 @@ function nodeTypeForKind(spec: StepKindSpec, catalog?: StepKindCatalog): NodeLib
   return {
     name: typeNameForKind(spec.kind),
     displayNodeName: spec.displayName,
+    // P132 BWF-008: an unnamed step that calls a function is titled by the function's own name ("Check thirst"),
+    // the last part of its path, the way a component instance is; two calls side by side no longer both read
+    // "Call Function". With no function named yet, the kind's words. A name the author gives wins over both.
+    ...(spec.invokesFunction ? { usePortAsLabel: 'ref', portLabelTruncationMode: 'filename' } : {}),
+    // P132 BWF-008: the picker's card and preview read a type's `description` (LEG-006's door for project
+    // components); without one the preview said "No documentation yet." for a kind the catalog describes.
+    description: [spec.summary, spec.whenToUse].filter(Boolean).join(' '),
     category: spec.category,
     color: colorForCategory(spec.category),
     docs: '',

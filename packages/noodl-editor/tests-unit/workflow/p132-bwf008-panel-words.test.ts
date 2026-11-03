@@ -45,3 +45,25 @@ describe('P132 BWF-008 a save says where it landed', () => {
     ).toBe('Saved to the backend only: this backend was started without a project.');
   });
 });
+
+describe('P132 BWF-008 a workflow on the canvas is not a component the app forgot to place', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { previewStrip } = require('../../src/editor/src/views/VisualCanvas/previewStripWords');
+  const unplaced = (canvasComponent: string) =>
+    previewStrip({ canvasLabel: 'triggertest', canvasComponent, screenLabel: 'Sign in', screenPage: '/Pages/Sign in', onScreen: false, isLogic: false, showingPages: [] });
+
+  it('says nothing about pages over a workflow, while a component named the same still gets the sentence', () => {
+    // The known-firing arm beside the absence: the same input, a component's name, says "isn't on any page yet".
+    expect(unplaced('/triggertest').lead).toBe("triggertest isn't on any page yet");
+    expect(unplaced('/#__workflow__/triggertest').lead ?? '').toBe('');
+    expect(unplaced('/#__workflow__/triggertest').doors ?? []).toEqual([]);
+  });
+});
+
+describe('P132 BWF-008 retry help speaks of the step, not "the function"', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { backoffSummary } = require('../../src/editor/src/models/workflow/retryBackoff');
+  it('one attempt', () => {
+    expect(backoffSummary({ maxAttempts: 1 })).toBe('No retry: the step runs once, and a failure fails it.');
+  });
+});

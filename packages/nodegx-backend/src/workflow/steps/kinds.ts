@@ -141,8 +141,18 @@ import { isPlainObject, VALUE_LANGUAGE } from './values';
  * Degradation: an editor that finds no `formulaLanguage` offers no formula (a
  * pre-1.8.0 backend would hand a `{"$fn"}` object to a step as data). An older
  * editor talking to a 1.8.0 backend shows a formula as the JSON it is.
+ *
+ * 1.9.0 — P132 BWF-008 added `displayName` on a route: the words a person reads
+ * where the route leaves a step ("Yes", "If there are none"), apart from its
+ * name, which is the wire contract (`routes.ontrue`). The same split 1.4.0 made
+ * for params. The NodeGX editor drew `ontrue` on its canvas; Studio had the
+ * words in a table of its own, which a new route would have missed.
+ *
+ * Degradation: an editor that finds no route `displayName` draws the name, as
+ * every editor did before. A dynamic route (a switch's case) has none: its
+ * words are the case label the author typed.
  */
-export const STEP_KIND_CATALOG_VERSION = '1.8.0';
+export const STEP_KIND_CATALOG_VERSION = '1.9.0';
 
 export interface StepParamSpec {
   name: string;
@@ -194,6 +204,8 @@ export interface StepParamSpec {
 
 export interface StepRouteSpec {
   name: string;
+  /** 1.9.0: what a person reads where the route leaves the step. `name` is the wire contract. */
+  displayName?: string;
   description: string;
   /** True when the route names are derived from params (switch cases). */
   dynamic?: boolean;
@@ -514,8 +526,8 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
       }
     ],
     routes: [
-      { name: 'ontrue', description: 'Taken when the condition evaluates true.' },
-      { name: 'onfalse', description: 'Taken when the condition evaluates false.' }
+      { name: 'ontrue', displayName: 'Yes', description: 'Taken when the condition evaluates true.' },
+      { name: 'onfalse', displayName: 'No', description: 'Taken when the condition evaluates false.' }
     ],
     output: '`{ result: boolean, isfalse: boolean }` — mirrors the client Condition node output port names.',
     clientEquivalent:
@@ -556,7 +568,7 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
     ],
     routes: [
       { name: '<case label>', description: 'Taken when that case matches.', dynamic: true },
-      { name: 'default', description: 'Taken when no case matches.' }
+      { name: 'default', displayName: 'Anything else', description: 'Taken when no case matches.' }
     ],
     output: '`{ matched: string | null, value: unknown }`.',
     clientEquivalent:
@@ -615,8 +627,8 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
       }
     ],
     routes: [
-      { name: 'empty', description: 'Taken when the resolved array had no items to process.' },
-      { name: 'nonempty', description: 'Taken when at least one item was processed.' }
+      { name: 'empty', displayName: 'If there are none', description: 'Taken when the resolved array had no items to process.' },
+      { name: 'nonempty', displayName: 'If there are some', description: 'Taken when at least one item was processed.' }
     ],
     output: '`{ results: unknown[], count, skipped, errors: [{index,message}], failed: number }`.',
     clientEquivalent:
@@ -807,8 +819,8 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
       }
     ],
     routes: [
-      { name: 'empty', description: 'Taken when nothing matched.' },
-      { name: 'nonempty', description: 'Taken when at least one item matched.' }
+      { name: 'empty', displayName: 'If there are none', description: 'Taken when nothing matched.' },
+      { name: 'nonempty', displayName: 'If there are some', description: 'Taken when at least one item matched.' }
     ],
     output: '`{ items: unknown[], count, dropped, total }` — `items` is the kept list, in its original order.',
     clientEquivalent:
@@ -1049,8 +1061,8 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
       }
     ],
     routes: [
-      { name: 'empty', description: 'Taken when nothing was found.' },
-      { name: 'nonempty', description: 'Taken when at least one record was found.' }
+      { name: 'empty', displayName: 'If there are none', description: 'Taken when nothing was found.' },
+      { name: 'nonempty', displayName: 'If there are some', description: 'Taken when at least one record was found.' }
     ],
     output: '`{ items, count, first }` — `items` the records found, `count` how many, `first` the first one (or null).',
     clientEquivalent: 'Query Records, with no function around it.',
@@ -1351,8 +1363,8 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
       }
     ],
     routes: [
-      { name: 'done', description: 'Taken after waiting until the target.' },
-      { name: 'skipped', description: 'Taken immediately when the target is already in the past.' }
+      { name: 'done', displayName: 'When the time comes', description: 'Taken after waiting until the target.' },
+      { name: 'skipped', displayName: 'If it was already past', description: 'Taken immediately when the target is already in the past.' }
     ],
     output: '`{ waitedMs: number, skipped: boolean, target: string }`.',
     clientEquivalent: 'None.',

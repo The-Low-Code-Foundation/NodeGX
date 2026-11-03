@@ -88,7 +88,8 @@ const CATALOG: StepKindCatalog = {
       invokesFunction: false,
       params: [{ name: 'condition', type: 'condition', raw: true, required: true, description: 'A condition.' }],
       routes: [
-        { name: 'ontrue', description: 'true' },
+        // P132 BWF-008: one route with served words (catalog 1.9.0), one without (an older backend).
+        { name: 'ontrue', displayName: 'Yes', description: 'true' },
         { name: 'onfalse', description: 'false' }
       ],
       output: ''
@@ -251,6 +252,31 @@ describe('WFA-004 step kinds become node types', () => {
 
     const next = portsOf('branch').find((p) => p.name === PORT_NEXT);
     expect(typeof next.type).toBe('string');
+  });
+
+  it('P132 BWF-008: draws a route in the catalog’s words, and its name only where a backend serves none', () => {
+    const ontrue = portsOf('branch').find((p) => p.name === routePortName('ontrue')) as { displayName?: string; editorName?: string };
+    const onfalse = portsOf('branch').find((p) => p.name === routePortName('onfalse')) as { displayName?: string; editorName?: string };
+    // `editorName` is what the wire paints; `displayName` is the card's row. Both say the words.
+    expect([ontrue.displayName, ontrue.editorName]).toEqual(['Yes', 'Yes']);
+    expect([onfalse.displayName, onfalse.editorName]).toEqual(['onfalse', 'onfalse']);
+  });
+
+  it('P132 BWF-008: says next and onError in Studio’s words, "Always, as well" only beside routes', () => {
+    const word = (kind: string, port: string) => (portsOf(kind).find((p) => p.name === port) as { displayName?: string }).displayName;
+    expect(word('branch', PORT_NEXT)).toBe('Always, as well');
+    expect(word('merge', PORT_NEXT)).toBe('Then');
+    expect(word('merge', PORT_ON_ERROR)).toBe('If it fails');
+    expect((portsOf('merge').find((p) => p.name === PORT_ON_ERROR) as { editorName?: string }).editorName).toBe('If it fails');
+  });
+
+  it('P132 BWF-008: gives the picker the kind’s own description, summary first', () => {
+    const lib = buildWorkflowNodeLibrary({
+      ...CATALOG,
+      kinds: [{ ...CATALOG.kinds.find((k) => k.kind === 'merge'), summary: 'Joins what reached it.', whenToUse: 'After two branches.' }]
+    } as StepKindCatalog);
+    const merge = lib.nodetypes.find((t) => t.name === typeNameForKind('merge')) as unknown as { description?: string };
+    expect(merge.description).toBe('Joins what reached it. After two branches.');
   });
 
   it('namespaces route ports, so a route may safely be called `next`', () => {

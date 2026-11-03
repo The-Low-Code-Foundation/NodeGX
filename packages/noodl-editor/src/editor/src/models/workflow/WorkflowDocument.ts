@@ -152,6 +152,21 @@ function subLabel(spec: StepKindSpec, node: NodeGraphNode, isEntry: boolean, res
  * because nothing had been asked yet would be the lie the three-valued answer
  * exists to prevent. The document resolves as soon as the answer lands.
  */
+/**
+ * P132 BWF-008: the name a person gave the step, or nothing.
+ *
+ * An unnamed step's card is titled by its kind's words (the type's own title for an unlabelled node, as Studio titles
+ * it), and that title is not a name: written back, every step placed from the picker would be saved as "Call an API",
+ * and every agent's unnamed step would gain one on its first save here. A label equal to the id is the same: older
+ * builds of this canvas set the id as the label of every unnamed step.
+ */
+function givenName(node: NodeGraphNode): string | undefined {
+  const label = node.label;
+  if (!label || typeof label !== 'string') return undefined;
+  if (label === node.id || label === node.type?.labelForNode?.(node)) return undefined;
+  return label;
+}
+
 function subLabelFor(spec: StepKindSpec, step: WorkflowStep, isEntry: boolean): string {
   return subLabelParts(spec.displayName, spec.invokesFunction ? step.ref : undefined, isEntry);
 }
@@ -366,7 +381,7 @@ export class WorkflowDocument extends Model {
     const spec = kind ? this.specFor(kind) : undefined;
 
     return planFunctionFromStep(
-      { id: node.id, label: node.label, ref: node.parameters?.ref, parameters: node.parameters },
+      { id: node.id, label: givenName(node), ref: node.parameters?.ref, parameters: node.parameters },
       {
         // The kind's own knobs are not the function's inputs — `maxAttempts` is
         // a retry policy, not something the function receives. (It IS merged
@@ -1028,7 +1043,10 @@ export class WorkflowDocument extends Model {
 
     node.metadata = {
       ...(node.metadata || {}),
-      typeLabelOverride: subLabel(spec, node, node.id === this.entry, resolution)
+      typeLabelOverride: subLabel(spec, node, node.id === this.entry, resolution),
+      // P132 BWF-008: the header said "CALL AN API · COMPONENT": the chip's suffix names the colour, and a step's
+      // colour is its category's hue, not a kind of node. Trigger nodes opt out for the same reason.
+      hideCategoryChip: true
     };
 
     this.setRefWarning(node, resolution);
@@ -1111,6 +1129,16 @@ export class WorkflowDocument extends Model {
     NodeGraphContextTmp.nodeGraph?.repaint();
   }
 
+  /**
+   * P132 BWF-008: a step as a person reads it, the title its card shows (its name, or its function's, or its kind's
+   * words), never its id unless there is no such step on the canvas. The panel said "Entry step: transform.".
+   */
+  stepWords(stepId: string): string {
+    const node = this.graph.findNodeWithId(stepId);
+    const label = node?.label;
+    return typeof label === 'string' && label ? label : stepId;
+  }
+
   /** The definition as the graph currently stands. */
   toInput(): WorkflowInput {
     const stepsById = new Map<string, WorkflowStep>();
@@ -1137,8 +1165,8 @@ export class WorkflowDocument extends Model {
         ui: { x: Math.round(node.x), y: Math.round(node.y) }
       };
 
-      const label = node.label;
-      if (label && label !== node.id) step.name = label;
+      const name = givenName(node);
+      if (name) step.name = name;
       if (node.parameters?.ref) step.ref = String(node.parameters.ref);
       if (Object.keys(params).length) step.params = params;
 
@@ -1262,9 +1290,11 @@ function buildGraph(
       type: typeNameForKind(step.kind),
       x: pos.x,
       y: pos.y,
-      label: step.name || step.id,
+      // P132 BWF-008: no name, no label, so the card is titled by the kind's words ("Call an API") as Studio titles
+      // it, never by the id (`call-function-2`), which is the wire's name for it, not the person's.
+      label: step.name || undefined,
       parameters,
-      metadata: spec ? { typeLabelOverride: subLabelFor(spec, step, step.id === definition.entry) } : undefined
+      metadata: spec ? { typeLabelOverride: subLabelFor(spec, step, step.id === definition.entry), hideCategoryChip: true } : undefined
     });
 
     // Added to the graph BEFORE its dynamic ports are set, and the order is
