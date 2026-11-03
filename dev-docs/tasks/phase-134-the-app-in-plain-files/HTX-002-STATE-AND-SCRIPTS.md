@@ -1,6 +1,9 @@
 # HTX-002 — State and scripts
 
 **Phase:** [134](README.md). **AC:** AC2 (logic). **Sessions:** 1–2. **Needs:** HTX-001.
+**State:** 🔵 nearly done (session 2, README §10): the logic prints, seven desks have an HTML arm (Hook, Set, Sibling
+equal at every reading; Signal, Success, Arrival, Relay differ only where HTX-003's fields and lists are named). Left:
+the Global Store and the Store Desk.
 
 ## The sentence
 

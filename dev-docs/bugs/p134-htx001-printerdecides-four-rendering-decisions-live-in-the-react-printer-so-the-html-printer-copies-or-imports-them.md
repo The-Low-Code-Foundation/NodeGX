@@ -5,7 +5,7 @@ status: open
 severity: low
 area: export / the plan's edge (`packages/nodegx-export/src/emit/component.ts`: `TAGS` :297, `authoredTag` :256, `isTextArea`, `mountedCondOf` :5615, the Mounted-false removal; used by `src/emit/html/printComponent.ts`)
 found: P134 HTX-001, 2026-11-03, writing the HTML printer for story-engine
-evidence: dev-docs/tasks/phase-134-the-app-in-plain-files/README.md §10 HTX-001; dev-docs/tasks/phase-134-the-app-in-plain-files/htx-001/
+evidence: dev-docs/tasks/phase-134-the-app-in-plain-files/README.md §10 HTX-001 and HTX-002; dev-docs/tasks/phase-134-the-app-in-plain-files/htx-001/
 ---
 
 The third printer reads the plan, as Swift's does, and decides nothing the plan did not. Four decisions it needs are
@@ -22,6 +22,20 @@ not in the plan. They sit in the React printer, so the HTML printer had to take 
 
 Nothing differs today: the HTML spec and the side-by-side screenshots agree with the running app on story-engine. The
 risk is the next change to one of these rules landing in `component.ts` alone.
+
+**HTX-002 (session 2, 2026-11-03) copied seven more**, the same ones Swift S2 copied (filed then as
+P18-EXP022-S2-EMITDECIDES, low): which Functions keep a node (`keptNode`: pulsed, a host trait, or awaits);
+`expandActions`' flattening (which runs are their own statement, which are inlined at their reads); a Function with no
+Run read as the page draws is memoised (LIFTLOOP); `combinedLifted` (a lifted output that lands twice is one callback);
+the Did Mount gate (a Did Mount under a Mounted a value decides is not a plain mount effect; the HTML printer names it
+instead of gating it); the event table (`EVENT_ATTRS`, and a field's On Enter as its Enter key); the five sync-effect
+bodies (checkbox, slider, dropdown, text field, Variable) and the Expression wrapper's load gate. Each is a few lines in
+`src/emit/html/printComponent.ts`, each marked with the React rule it copies.
+
+Two pieces did **not** have to be copied, because their cores are framework-free: the Function runner
+(`functionRunLib.ts`) and the States machine with its run engine (`statesLib.ts`, `animateLib.ts`). The HTML export
+carries them as the same source with the types taken out and the React hooks cut off (`tests/helpers/html-core-js.ts`;
+a spec regenerates them and fails when they differ), so they cannot drift.
 
 **What a fix needs:** the plan carries each answer as data (`tagOf[nodeId]`, a `mountedKeeps` flag beside the Mounted
 binding, the merged page declarations, the removed ids), and the three printers read it. AC4's ledger (HTX-005) is

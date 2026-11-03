@@ -37,17 +37,25 @@ describe('P134 HTX-001: story-engine as plain files', () => {
       'components/Paster.js',
       'components/Sidebar.css',
       'components/Sidebar.js',
+      // HTX-002: the logic component, its Function in a file of its own, the runner, and the app's Variables.
+      'components/Source.js',
+      'functions/components/Source/Which_story_is_being_read.js',
       'index.html',
+      'lib/animate.js',
       'lib/core.js',
       'lib/dom.js',
+      'lib/functionRun.js',
       'lib/router.js',
+      // HTX-002: the States node is the React export's own machine (`statesLib.ts`), its types out.
+      'lib/states.js',
       'pages/Read.css',
       'pages/Read.js',
       'pages/Remix.css',
       'pages/Remix.js',
       'styles/app.css',
       'styles/base.css',
-      'styles/theme.css'
+      'styles/theme.css',
+      'variables.js'
     ]);
     for (const [file, text] of Object.entries(app.files)) {
       if (!file.endsWith('.js')) continue;
@@ -75,12 +83,12 @@ describe('P134 HTX-001: story-engine as plain files', () => {
     expect(app.files['app.js']).toContain("start: '/read'");
     const read = app.files['pages/Read.js'];
     expect(read).toContain("navigate('/remix');");
-    expect(read).toContain("whatThePageHasToSayInWords: value('reading')");
-    expect(read).toContain("reading: { note: '', panel: 'reading' },");
+    expect(read).toContain("const whatThePageHasToSayInWords = statesNode(WHAT_THE_PAGE_HAS_TO_SAY_IN_WORDS_STATES, 'reading');");
+    expect(read).toContain("note: { type: 'string', byState: { reading: '', ending: 'That is an ending.");
     expect(read).toContain(
       [
         '  when(l, rdShell, function () {',
-        '    const on = WHAT_THE_PAGE_HAS_TO_SAY_IN_WORDS_STATES[state.whatThePageHasToSayInWords.get()].note;',
+        '    const on = whatThePageHasToSayInWords.get().values.note;',
         '    return on === undefined ? true : truthy(on);',
         '  }, function (into, at, l) {'
       ].join('\n')
@@ -115,6 +123,9 @@ describe('P134 HTX-001: story-engine as plain files', () => {
       ]) {
         expect(text).toContain(words);
       }
+      // HTX-002: the logic component /Story/Source runs its Function over the Static Data and the Variable, and the value it
+      // sends out reaches the page.
+      expect(page.document.querySelector('.ReadPage-rdSourceLine').textContent).toBe('The story this template ships with — 7 passages');
       // The note is mounted only while the state's note is non-empty: in "reading" it is "".
       expect(page.document.querySelector('.ReadPage-rdNote')).toBeNull();
       const eyebrow = page.document.querySelector('.Passage-psEyebrow');
@@ -158,8 +169,10 @@ describe('P134 HTX-001: story-engine as plain files', () => {
     // The same plan refusals the Swift preflight counts (EXP-022 S1: 21).
     expect(p.planRefusals).toHaveLength(21);
     const losses = p.htmlLosses.map((l) => `${l.component} ${l.label ?? l.nodeId}: ${l.what}`);
-    expect(losses).toContain('Pages/Read One row per choice you can see: a For Each is not drawn by the HTML target yet (HTX-003)');
-    expect(losses).toContain('Pages/Read What you carry: its things reads the Variable "storyCarrying" (HTX-002)');
+    // The plan gives this For Each no items, so the React export draws no rows either.
+    expect(losses).toContain('Pages/Read One row per choice you can see: a For Each whose rows the HTML target does not draw yet (HTX-003)');
+    // HTX-002: the Variable is read, and the logic component runs.
+    expect(losses.filter((l) => /reads the Variable|logic component/.test(l))).toEqual([]);
     expect(app.files['EXPORT-PREFLIGHT.md']).toContain(`## Read in the plan, not printed by the HTML target yet (${p.htmlLosses.length})`);
   });
 });

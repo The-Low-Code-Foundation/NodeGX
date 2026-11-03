@@ -1,7 +1,7 @@
 # Phase 134 — The app in plain files
 
 **Scoped:** 2026-11-03, on Richard's ask ("Let's scope up the HTML export phase please, I think it'll be important").
-**State:** 🔵 HTX-001 done 2026-11-03 (§10, session 1 of at most 10): story-engine exports as plain files and its first page draws in Chrome beside the running app. R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
+**State:** 🔵 HTX-001 done, HTX-002 nearly (§10, session 2 of at most 10, 2026-11-03): the plan's logic prints on `lib/core.js` and the Hook, Set and Sibling desks read exactly what the runtime reads; the Global Store (the Store Desk) is HTX-002's one row left. R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
 phase only** (BOARD §2); React and Swift stay paused. **Read first:** this page, then [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md),
 then the task you take. The Swift precedent this phase copies is
 [EXP-022](../phase-18-code-export-v2/EXP-022-THE-SAME-GRAPH-IN-SWIFT.md) §7–§9.
@@ -236,4 +236,70 @@ pass (581 tests).
 **For Richard (R4, measured):** a double-clicked `index.html` draws nothing in Chrome or Firefox. Keep "any static
 server" (recommended: `python3 -m http.server` is one line and every host is a static server), or also write a
 bundled copy of `app.js` that opens by double-click and cannot be read?
+
+### Session 2 — HTX-002, state and scripts (2026-11-03, Opus 5.5)
+
+**Result: the plan's logic prints, and three desks read exactly what the runtime's own nodes read, at every step, on the
+first run.** The spec is `packages/nodegx-export/tests/html-state-and-scripts.test.ts` (18 rows, about 18 s, jsdom, no
+browser). §A drives the Hook Desk's nine presses in the HTML export (`tests/helpers/export-html-arm.ts`) beside
+`runtime-mounted-arm.js`, the arm and steps React and Swift were graded with; §C does the same for six more desks.
+
+**How React's model maps** (the printer's header says it too). The plan's rules were measured against React's timing,
+so the printer prints React's constructs one for one on `lib/core.js`, as Swift printed them on SwiftUI:
+
+| React | plain JavaScript |
+|---|---|
+| `useState` (setting the same value changes nothing) | `keep()` in `lib/dom.js`: a `value()` that tells its readers only when it changes |
+| `useEffect(fn, [deps])` | `l.watch(() => [deps], fn)`: runs when a listed value is a different one; what `fn` reads does not track |
+| `useMemo(() => Fn(inputs))` (a Function with no Run) | `derived(() => Fn(inputs))` |
+| `use<Name>(props)`, a logic component | `place(l, mount<Name>, null, fixed, live)`: a component with no element |
+| a For Each keyed by index | `list(l, parent, read, mountRow)` in `lib/dom.js` (only `itemsExpr`; Static Data and queries are HTX-003/004) |
+| `src/lib/functionRun.ts` | `lib/functionRun.js`: the same source, types out |
+| `useStates` over `statesLib.ts` | `statesNode()` over `lib/states.js` and `lib/animate.js`: the same machine, types out, the hooks cut off |
+| `src/stores/variables.ts` | `variables.js`, imported as one namespace (`variables.gameText`), so a Variable never clashes with an element's name |
+
+Each Function is its body as written in `functions/<component>/<Name>.js`, inside the EXP-019 wrapper (`Inputs`,
+`Outputs` with its signals, `this`, `Component`). An Expression is a function above its component, React's wrapper with
+its types out.
+
+**Graded** (predictions were the runtime's, written before any export ran; `s136-hooks/EXPECTED.md` for the Hook Desk):
+
+- **Equal at every reading:** the Hook Desk (10 readings: logic components chained, signals in and out, two placements
+  keeping two totals, the delivered count, a run at load that reads the clock, a lifted list into a For Each, a row's
+  relayed value), the Set Desk, the Sibling Desk.
+- **Equal but for cells pinned by name, every one HTX-003's:** the Signal Desk (two cells, a field's Clear), the Success
+  Desk (two cells at its last step, a field's Set), the Arrival Desk (the field's own echo, its typing chain). The Relay
+  Desk's rows are a For Each over Static Data, named and not drawn. §C fails on any cell nobody named.
+- **Four mutants.** Killed: a run's outputs written without a fresh copy (`keep` sees no change; every §A row red); the
+  run at load dropped (A1 red). **Survived, and the reason is a finding:** the one-update delay on a pulse sent with a
+  value (P18-S127-SIBLINGVALUE's `delivered`) and the "never twice" guard on a signal input are both redundant in the
+  plain page. A value's push and the pulse beside it land in one flush, in the order written; `watch` acts only when the
+  count changes. Both are kept, because they cost nothing and keep React's shape; the guard matters once a placement is
+  mounted a second time, which no desk does yet.
+- **The trap the task named** (a Function's output publishes only when it changes): the HTML export uses React's own
+  runner and `keep`'s `Object.is`, which is `useState`'s rule; the killed mutant above is the measurement that the
+  difference shows on the Hook Desk.
+
+**todo-list, the work list:** 195 files, all 36 logic components and 59 Function files; its first page runs in jsdom
+from its own files with no error and draws its tabs. Unprinted items **368 → 101**. The 101 are the backend (HTX-004:
+record writes and verbs, queries, the session, the one body that reads `Noodl`), fields and lists (HTX-003: a field's
+Set, Clear and focus, five For Eaches), 14 style ports the React export drops too, and one Did Mount under a value-decided
+Mounted. Printed this session besides the table: `state-set`, `jsfun-run` with its pulses, `store-set`, `branch`,
+`states-go` and the States listeners, push, sync, Value Changed, signal-input and ticked-run effects, Variable seeds,
+Static Data, Did Mount, On Enter, the hover, pointer, focus and blur events, and the three style ports React follows
+from a wire.
+
+**Not done in HTX-002:** the Global Store (`store-key-get`, `globalstore-set`, the Store Desk), a Function's late writes
+(todo-list's minute clock), a Function that awaits or reads `Noodl` (HTX-004), `Component.Object`.
+
+**The cores (§7, point 1).** No React helper had to move: `functionRun`, the States machine and its run engine are
+already framework-free and travel as their own source (types stripped, the hooks cut off) from
+`tests/helpers/html-core-js.ts`, and the spec regenerates them and fails when they differ. React's output did not change
+by a byte. **Copied instead** (P134-HTX001-PRINTERDECIDES, now eleven): which Functions keep a node, `expandActions`,
+the render-run memo, `combinedLifted`, the Did Mount gate, the event table, the sync bodies and the Expression wrapper.
+
+**Cost, so far:** 2 sessions. The printer is 1,771 hand-written lines (HTX-001 1,009): `printComponent` 1,268,
+`emitHtml` 254, `libJs` 249, plus three generated constants. Lines moved out of React's helpers: 0. Tests: the 220-line
+spec, a 78-line arm, the generator (223 lines, now four constants). Swift at the same point (S2): 2,781. `plan.ts` and
+`component.ts` were read, not changed. The CLI, deploy, harness, Swift S2 and both HTML suites pass (8 suites, 153 tests).
 
