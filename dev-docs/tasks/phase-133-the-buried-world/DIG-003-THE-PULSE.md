@@ -38,3 +38,22 @@ hollow. Ship kit, there from the first minute.
   by Richard.
 - **AC8.** Richard on the iPhone: does it feel like a cheat, or like a hint? His words into the README; tune reach,
   blur and recharge from them.
+
+## Log
+
+**2026-11-03, s1: built; AC1–AC6 green, AC7 green on the laptop; AC7 (iPhone) and AC8 wait on Richard.** Private repo
+`dig` `ed67fb7`.
+
+- Hold R / the round button above ▲ about a second and let go; glows in five colours, near first, six seconds; a cone
+  100° × 28 plus an 8-block sphere; the hollow you stand in left out (in a cavern it washed the whole view); echoes
+  panned and delayed; 12 s to charge; loud to a brute at 40. Pins: look at a glow and Use says **Pin** (desktop E),
+  on the compass, saved. The task said tap the glow: the Use button is the same aim-then-tap without fighting the look
+  drag; his call in play.
+- `tests/pulse.json` 12/12 on a rig 50 under the ground: **AC1** no glow from the hollow behind the wall on the left
+  facing ahead, a glow once turned; **AC2** 20 ahead shows, 40 ahead does not; **AC3** on-screen hue at the glow's
+  centre gold 43 for the worked room, blue 214 for the plain cave (both were near white at first, additive sprites
+  clipping; dimmed); **AC4** 12.0 s to charge, R during the charge sends nothing, a brute at 35 turns to it and one
+  at 44 does not; **AC5** a pin on the compass survives a reload. **AC6** the phone drive: Pulse on screen and on top
+  with each of the four in hand, and holding it sends one (22/22).
+- **AC7** `tools/time-pulse.mjs`, 24 spots on three seeds: worst median 6.5 ms, most under 1 ms (8.7 ms with string
+  keys before a typed grid).

@@ -25,3 +25,19 @@ stated"*: north, east, south, west, your depth, the ship and your own pins.
 - **AC2.** No remnant floats (the FLOATSITE check, extended) and none cuts a planted room (the ROOMOVERLAP check).
 - **AC3.** A drive reads the compass and finds no marks but the four letters, depth, the ship and a pin.
 - **AC4.** Richard on the iPhone: does he still dig for long stretches with nothing? His words into the README.
+
+## Log
+
+**2026-11-03, s1: built; AC1–AC3 green; AC4 waits on Richard.** Private repo `dig` `ed67fb7` (compass) and `9c95c3f`
+(remnants).
+
+- The compass: N/E/S/W, depth, the ship, pins. Help on both platforms, "Logbook, day 30" and the first death's hint
+  rewritten ("Scratched into a rune stone" never named the compass, kept). Inside a portal's world the compass still
+  shows home and treasure (R2 was about the cave).
+- Remnants, one chance per 20-block cell: shrines in five shapes, sealed caches, statues, niches, stairs to nowhere,
+  vent shafts; generic, no texts.
+- **AC1** `tools/census-finds.mjs`, three seeds, 512 × 512 round the ship: median dig to the nearest find
+  29.3–30.7 → 12.2–12.9 blocks in all three bands (0.41 of before); finds per 100k cells of rock 0.42–1.05 → 8.3–9.2.
+  **AC2** `tools/check-remnants.mjs` on the chunks: ~500 a seed, none floats (worst 19 % open under one; FLOATSITE's
+  line 25 %), all whole, none meets a planted room. **AC3** `tests/pulse.json`: after a reload nothing on the compass
+  but N/E/S/W, the ship, the pin and the depth.

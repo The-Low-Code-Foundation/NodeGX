@@ -22,9 +22,9 @@ reads anyone's list.
 | Task | What | Round | State |
 |---|---|---|---|
 | [DIG-001](DIG-001-A-PRIVATE-HOME.md) | The game moves to a private repository; rounds 2–6 committed there | 7 | ✅ 11-03 |
-| [DIG-002](DIG-002-THE-SHIP.md) | The base becomes a big landed spaceship | 7 | ⬜ |
-| [DIG-003](DIG-003-THE-PULSE.md) | The pulse: fuzzy hollows through the rock, echoes you can hear | 7 | ⬜ |
-| [DIG-004](DIG-004-THE-COMPASS-AND-MORE-TO-FIND.md) | The compass stripped (R2); many more unmarked remnants | 7 | ⬜ |
+| [DIG-002](DIG-002-THE-SHIP.md) | The base becomes a big landed spaceship | 7 | 🟡 built 11-03; AC3 his look |
+| [DIG-003](DIG-003-THE-PULSE.md) | The pulse: fuzzy hollows through the rock, echoes you can hear | 7 | 🟡 built 11-03; AC7–8 his play |
+| [DIG-004](DIG-004-THE-COMPASS-AND-MORE-TO-FIND.md) | The compass stripped (R2); many more unmarked remnants | 7 | 🟡 built 11-03; AC4 his play |
 | [DIG-005](DIG-005-THE-CANON.md) | The canon, written behind the spoiler wall | 8 | ⬜ |
 | [DIG-006](DIG-006-THE-SETTLEMENT-ENGINE.md) | Settlements, roads, collapse, the new blocks | 8 | ⬜ |
 | [DIG-007](DIG-007-THE-FIRST-DISTRICT.md) | The sandbox: one hand-made district near the ship, the record | 8 | ⬜ |

@@ -95,7 +95,7 @@ the strangers' corpus and the defect bed; no new template opens as a phase), the
 live on nodegx.io/gala/; its builds are OWN-026 part 3's material), and the game prototypes in [`parked/`](parked/README.md)
 (Threadspace, THREE in nodes), and **the Dig grows up** ([P133](tasks/phase-133-the-buried-world/README.md), opened
 2026-11-03: a landed ship, a pulse that finds hollows, a buried civilisation Claude extends each night for everyone,
-accounts shared with the todo app, Betr's prediction loop in it; DIG-001 first; never spoil the lore to Richard). A session takes one only when Richard names it. Their learnings and objects (not
+accounts shared with the todo app, Betr's prediction loop in it; DIG-001 ✅ private repo `dig`; round 7 built 11-03, waits on Richard's look and iPhone play; never spoil the lore to Richard). A session takes one only when Richard names it. Their learnings and objects (not
 their roadmaps) are lane 8's material.
 
 ## 3. Waits on Richard
