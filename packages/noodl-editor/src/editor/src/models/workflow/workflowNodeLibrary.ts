@@ -117,6 +117,8 @@ const CATEGORY_COLOR: Record<string, string> = {
   // `data`, from the existing five-key taxonomy: these steps reshape the run's
   // data and schedule nothing. No new colour — phase 23's law.
   'Workflow Data': 'data',
+  // P132 BWF-005's record steps (Create, Change, Delete, Find): they act on the app's data, so `data` too.
+  'Workflow Records': 'data',
   'Workflow Error Handling': 'default' // quiet on purpose: these are exception paths
 };
 

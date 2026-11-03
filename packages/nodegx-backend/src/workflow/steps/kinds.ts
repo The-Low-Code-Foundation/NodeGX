@@ -56,6 +56,7 @@ import { CONTROL_VALIDATE_RULES, VALIDATE_LANGUAGE, VALIDATE_TYPE_NAMES, validat
 import type { ValidateLanguageSpec } from './validate';
 import { DEFAULT_MAX_BATCHES } from './data';
 import { FORMULA_LANGUAGE } from './formulas';
+import { FIND_DEFAULT_LIMIT, FIND_MAX_LIMIT, FIND_OPS, validateFindConditions } from './records';
 import type { FormulaLanguageSpec } from './formulas';
 import { isPlainObject, VALUE_LANGUAGE } from './values';
 
@@ -321,6 +322,48 @@ const CALL_FUNCTION_MAPPING: StepParamMappingSpec = {
   shadows: [...SHADOWED_STEP_INPUT_KEYS]
 };
 
+/** P132 BWF-005: the table a record step acts on; Studio draws it as a picker of the backend's tables. */
+const TABLE_PARAM: StepParamSpec = {
+  name: 'table',
+  type: 'string',
+  required: true,
+  displayName: 'Table',
+  control: 'table',
+  description: 'The table (collection) the step acts on, by name: "Plant".'
+};
+
+/** P132 BWF-005: which record an update or delete acts on. */
+const RECORD_PARAM: StepParamSpec = {
+  name: 'record',
+  type: 'any',
+  required: true,
+  displayName: 'Which record',
+  description:
+    'The record, by its id — a literal, `{"$path": "body.plant"}` (a link to it), `{"$path": "upstream.find.first"}` ' +
+    '(a record a step found) or anything else that resolves to an id or to an object with an `objectId`.'
+};
+
+/** P132 BWF-005: the fields a create or update writes. */
+const FIELDS_PARAM: StepParamSpec = {
+  name: 'fields',
+  type: 'object',
+  displayName: 'Fields',
+  control: 'record-fields',
+  description:
+    'The fields to set, as `{ "<field>": <value> }`; each value a literal, a `{"$path"}` or a formula (`{"$fn"}`). ' +
+    'A date may be an ISO string and a link may be an id or a record: the step writes them in the form the column ' +
+    'takes. A field left out is left as it is.'
+};
+
+/** P132 BWF-005, ruling R5: said on every record kind, because it is the first thing a refused step needs. */
+const PRIVACY_NOTE =
+  'Who it acts as is the WORKFLOW\'s `ignorePrivacyRules` (R5), on unless set to `false`: on, as the app, past the ' +
+  "table's rules, as a Record node inside a cloud function always has; off, as a visitor, so the table's rules for " +
+  'nobody signed in decide.';
+const LOOPBACK_NOTE =
+  "It writes through the backend's own data routes, so a row it makes or changes fires db-change triggers like any " +
+  "other write, and the backend's loop guard keeps a workflow's own write from starting it again.";
+
 export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
   'call-function': {
     kind: 'call-function',
@@ -329,8 +372,9 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
     source: 'WF-001',
     summary: 'Invokes an existing cloud function and uses its response as the step output.',
     whenToUse:
-      'The workhorse step: any real work — reading or writing records, calling an external API, sending email — ' +
-      'is a cloud function graph, and this step schedules it. Prefer it over inventing new step kinds.',
+      'Work no step expresses — calling an external API, sending email — is a cloud function graph, and this ' +
+      'step schedules it. A record made, changed, deleted or found is a record step (create-record, ' +
+      'update-record, delete-record, find-records), not a function (P132 BWF-005).',
     invokesFunction: true,
     params: [
       REF_PARAM,
@@ -866,6 +910,113 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
     ]
   },
 
+  'create-record': {
+    kind: 'create-record',
+    displayName: 'Create a record',
+    category: 'Workflow Records',
+    source: 'P132 BWF-005',
+    summary: 'Makes a new record in a table, its fields set from the run.',
+    whenToUse:
+      'Any time a workflow should add a row — log what happened, make the thing a request asked for. Use this ' +
+      'instead of a cloud function whose only job is a Create Record node.',
+    invokesFunction: false,
+    params: [TABLE_PARAM, { ...FIELDS_PARAM, required: true }],
+    routes: [],
+    output: '`{ record, id }` — `record` is the new row as the table holds it (with `objectId` and `createdAt`), `id` its id.',
+    clientEquivalent: 'Create New Record, with no function around it.',
+    notes: [PRIVACY_NOTE, LOOPBACK_NOTE]
+  },
+
+  'update-record': {
+    kind: 'update-record',
+    displayName: 'Change a record',
+    category: 'Workflow Records',
+    source: 'P132 BWF-005',
+    summary: 'Changes fields of one record, named by its id or by a link to it.',
+    whenToUse:
+      'A workflow should change a row: *when a plant is watered*, set the Plant\'s `lastWatered` to the watering\'s ' +
+      'date. Use this instead of a cloud function that reads the row and writes it back.',
+    invokesFunction: false,
+    params: [TABLE_PARAM, RECORD_PARAM, { ...FIELDS_PARAM, required: true }],
+    routes: [],
+    output: '`{ record, id }` — `record` is the row after the change, `id` its id.',
+    clientEquivalent: 'Set Record Properties, with no function around it.',
+    notes: [PRIVACY_NOTE, LOOPBACK_NOTE, 'A record that does not exist (or that the step may not change) is a step FAILURE.']
+  },
+
+  'delete-record': {
+    kind: 'delete-record',
+    displayName: 'Delete a record',
+    category: 'Workflow Records',
+    source: 'P132 BWF-005',
+    summary: 'Deletes one record, named by its id or by a link to it.',
+    whenToUse: 'A workflow should remove a row — an expired invite, a cancelled booking.',
+    invokesFunction: false,
+    params: [TABLE_PARAM, RECORD_PARAM],
+    routes: [],
+    output: '`{ deleted: true, id }`.',
+    clientEquivalent: 'Delete Record, with no function around it.',
+    notes: [PRIVACY_NOTE, LOOPBACK_NOTE, 'A record that does not exist (or that the step may not delete) is a step FAILURE.']
+  },
+
+  'find-records': {
+    kind: 'find-records',
+    displayName: 'Find records',
+    category: 'Workflow Records',
+    source: 'P132 BWF-005',
+    summary: 'Searches a table: the records whose fields meet the conditions, in an order, up to a limit.',
+    whenToUse:
+      'A workflow needs rows it was not handed — the plants not watered for a week, the user with this email. The ' +
+      'first match is `first`, so "find the one" is this step with a limit of 1.',
+    invokesFunction: false,
+    params: [
+      TABLE_PARAM,
+      {
+        name: 'where',
+        type: 'array',
+        displayName: 'Conditions',
+        control: 'record-conditions',
+        enums: [...FIND_OPS],
+        description:
+          'A list of `{ "field": "<field>", "op": "<op>", "value": <value> }`, read as "<field> <op> <value>". ' +
+          '`op` is one of `enums` (the condition language\'s names and words); `exists` and `notExists` take no ' +
+          'value. A value may be a `{"$path"}` or a formula; a link may be matched by an id or a record. No ' +
+          'conditions finds every record, up to the limit.'
+      },
+      {
+        name: 'match',
+        type: 'enum',
+        enums: ['all', 'any'],
+        default: 'all',
+        displayName: 'Match',
+        description: '`all`: a record meets every condition. `any`: it meets at least one.'
+      },
+      { name: 'sortBy', type: 'string', displayName: 'Sort by', description: 'A field to order by. Unset: the order the table has.' },
+      {
+        name: 'order',
+        type: 'enum',
+        enums: ['ascending', 'descending'],
+        default: 'ascending',
+        displayName: 'Order',
+        description: 'Which way `sortBy` runs.'
+      },
+      {
+        name: 'limit',
+        type: 'number',
+        default: FIND_DEFAULT_LIMIT,
+        displayName: 'At most',
+        description: `How many records at most, 1 to ${FIND_MAX_LIMIT}. 1 finds one.`
+      }
+    ],
+    routes: [
+      { name: 'empty', description: 'Taken when nothing was found.' },
+      { name: 'nonempty', description: 'Taken when at least one record was found.' }
+    ],
+    output: '`{ items, count, first }` — `items` the records found, `count` how many, `first` the first one (or null).',
+    clientEquivalent: 'Query Records, with no function around it.',
+    notes: [PRIVACY_NOTE, 'Routes like Filter\'s: `empty` when nothing was found, `nonempty` when something was.']
+  },
+
   stop: {
     kind: 'stop',
     displayName: 'Stop / Error',
@@ -1387,6 +1538,37 @@ export function validateStepShape(step: WorkflowStep): string[] {
         errors.push(`${at}: split needs a "size" param — how many items go in each batch`);
       } else if (typeof p.size !== 'number' || !Number.isInteger(p.size) || p.size < 1) {
         errors.push(`${at}.params.size must be a whole number of 1 or more`);
+      }
+      break;
+    }
+
+    case 'create-record':
+    case 'update-record':
+    case 'delete-record':
+    case 'find-records': {
+      if (!isValueSpec(p.table) && (typeof p.table !== 'string' || !p.table)) {
+        errors.push(`${at}: ${step.kind} needs a "table" — the name of the table it acts on`);
+      }
+      if ((step.kind === 'update-record' || step.kind === 'delete-record') && (p.record === undefined || p.record === '')) {
+        errors.push(`${at}: ${step.kind} needs a "record" — which one, by its id or a link to it`);
+      }
+      if (step.kind === 'create-record' || step.kind === 'update-record') {
+        if (p.fields === undefined) errors.push(`${at}: ${step.kind} needs "fields" — { "<field>": <value> }`);
+        else if (!isPlainObject(p.fields) || isValueSpec(p.fields)) errors.push(`${at}.params.fields must be { "<field>": <value> }`);
+      }
+      if (step.kind === 'find-records') {
+        errors.push(...validateFindConditions(p.where, `${at}.params.where`));
+        if (p.match !== undefined && p.match !== 'all' && p.match !== 'any') errors.push(`${at}.params.match must be "all" or "any"`);
+        if (p.order !== undefined && p.order !== 'ascending' && p.order !== 'descending') {
+          errors.push(`${at}.params.order must be "ascending" or "descending"`);
+        }
+        if (p.sortBy !== undefined && typeof p.sortBy !== 'string') errors.push(`${at}.params.sortBy must be a field name`);
+        if (p.limit !== undefined && !isValueSpec(p.limit) && (typeof p.limit !== 'number' || !Number.isInteger(p.limit) || p.limit < 1 || p.limit > FIND_MAX_LIMIT)) {
+          errors.push(`${at}.params.limit must be a whole number from 1 to ${FIND_MAX_LIMIT}`);
+        }
+        for (const r of routeNames) {
+          if (r !== 'empty' && r !== 'nonempty') errors.push(`${at}: find-records route "${r}" must be "empty" or "nonempty"`);
+        }
       }
       break;
     }

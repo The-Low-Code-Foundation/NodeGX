@@ -1096,6 +1096,100 @@ that pair, and the answer is the same one.
 
 ---
 
+### `create-record`
+
+Makes a new record in a table. P132 BWF-005: the four record steps are the
+actions Bubble's backend workflows are made of, so a row made, changed, deleted
+or found no longer needs a cloud function around one Record node.
+
+| Param | Default | Description |
+|---|---|---|
+| `table` | — (required) | The table it acts on, by name. |
+| `fields` | — (required) | `{ "<field>": <value> }`; each a literal, `{"$path"}` or formula. A date may be an ISO string and a link an id or a record: the step writes the form the column takes. |
+
+**Output:** `{ record, id }` — the new row as the table holds it, and its id.
+
+**Who it acts as.** The workflow's `ignorePrivacyRules` (ruling R5), on unless
+set to `false`. On, the step reads and writes as the app, past the table's
+rules, as a Record node inside a cloud function always has. Off, it acts as a
+visitor (no run is for a signed-in person today, whatever started it), so the
+table's rules for nobody signed in decide, and a refusal says the switch is off.
+
+**Same path as everything else.** The record steps call the backend's own data
+routes on loopback, so hooks, a field's rules and the change feed apply: a row a
+step makes fires a db-change trigger, and the loop guard (`maxChangeDepth`, 1 by
+default) keeps a workflow's own write from starting it again.
+
+```jsonc
+{ "id": "log", "kind": "create-record",
+  "params": { "table": "Note", "fields": { "text": { "$path": "body.text" }, "plant": { "$path": "body.plant" } } } }
+```
+
+---
+
+### `update-record`
+
+Changes fields of one record.
+
+| Param | Default | Description |
+|---|---|---|
+| `table` | — (required) | The table. |
+| `record` | — (required) | Which record: an id, a link to it (`{"$path": "body.plant"}`), or a record a step found. |
+| `fields` | — (required) | The fields to change; a field left out is left as it is. |
+
+**Output:** `{ record, id }` — the row after the change. A record that does not
+exist, or that the step may not change, is a step **failure**.
+
+*When a plant is watered*, with no function:
+
+```jsonc
+{ "id": "mark", "kind": "update-record",
+  "params": { "table": "Plant", "record": { "$path": "body.plant" },
+              "fields": { "lastWatered": { "$path": "body.at" } } } }
+```
+
+---
+
+### `delete-record`
+
+Deletes one record.
+
+| Param | Default | Description |
+|---|---|---|
+| `table` | — (required) | The table. |
+| `record` | — (required) | Which record, as for `update-record`. |
+
+**Output:** `{ deleted: true, id }`. A record that does not exist, or that the
+step may not delete, is a step **failure**.
+
+---
+
+### `find-records`
+
+Searches a table.
+
+| Param | Default | Description |
+|---|---|---|
+| `table` | — (required) | The table. |
+| `where` | none: every record | A list of `{ "field", "op", "value" }`, read "field op value". `op` is one of `eq`, `neq`, `gt`, `gte`, `lt`, `lte`, `in`, `notIn`, `exists`, `notExists`, `contains`, `startsWith`, `endsWith` (the condition language's names; served as the param's `enums`). |
+| `match` | `all` | `all` or `any` of the conditions. |
+| `sortBy` | — | A field to order by. |
+| `order` | `ascending` | `ascending` or `descending`. |
+| `limit` | 100 | 1 to 1000. 1 finds one. |
+
+**Routes:** `empty` (nothing found) / `nonempty` (something was), as `filter`'s.
+
+**Output:** `{ items, count, first }` — `first` is the first record, or null.
+
+```jsonc
+{ "id": "dry", "kind": "find-records",
+  "params": { "table": "Plant", "where": [{ "field": "lastWatered", "op": "lt", "value": { "$fn": "add-to-date", "args": [{ "$fn": "now" }, -7, "days"] } }],
+              "sortBy": "lastWatered", "limit": 50 },
+  "routes": { "nonempty": ["remind"] } }
+```
+
+---
+
 ### `stop`
 
 Ends this path deliberately.

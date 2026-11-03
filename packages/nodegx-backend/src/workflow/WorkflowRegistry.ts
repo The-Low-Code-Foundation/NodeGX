@@ -140,6 +140,7 @@ export class WorkflowRegistry {
       concurrency: input.concurrency && input.concurrency >= 1 ? input.concurrency : 1,
       timeoutMs: input.timeoutMs,
       stepTimeoutMs: input.stepTimeoutMs,
+      ignorePrivacyRules: input.ignorePrivacyRules,
       steps: input.steps || [],
       createdAt: existing ? existing.createdAt : now,
       updatedAt: now

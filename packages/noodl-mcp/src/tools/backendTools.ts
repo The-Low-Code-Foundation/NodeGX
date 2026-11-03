@@ -203,7 +203,8 @@ export function registerBackendReadTools(server: McpServer): void {
       description:
         'The step vocabulary a backend can run (WF-002): every step `kind` with its params, routes, output shape ' +
         'and when to use it — call-function, branch, switch, for-each, merge, transform, validate, filter, sort, ' +
-        'deduplicate, split, stop, return, wait, wait-until — PLUS `valueLanguage` (WFA-003): how a param ' +
+        'deduplicate, split, create-record, update-record, delete-record, find-records, stop, return, wait, ' +
+        'wait-until — PLUS `valueLanguage` (WFA-003): how a param ' +
         'references data ($path / $literal), what a $path may address (body, trigger, previous, ' +
         'upstream.<stepId>), and the one payload shape every entry point delivers, `conditionLanguage` (the ' +
         'closed comparison operators), `transformLanguage` (CWF-004: the closed operation vocabulary a transform ' +
@@ -1290,7 +1291,9 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
       .string()
       .describe(
         'What the step runs, e.g. call-function / branch / switch / for-each / merge / transform / validate / ' +
-          'filter / sort / deduplicate / split / stop / return / wait / wait-until. THE AUTHORITY IS THE TARGET ' +
+          'filter / sort / deduplicate / split / create-record / update-record / delete-record / find-records / ' +
+          'stop / return / wait / wait-until. A row made, changed, deleted or found in a workflow is one of the ' +
+          'four record steps, NOT a cloud function (P132 BWF-005). THE AUTHORITY IS THE TARGET ' +
           'BACKEND: call list_backend_step_kinds against the backend ' +
           "you are authoring for, and use what it returns — for each kind's params, routes and output shape, " +
           'and because the vocabulary differs between backend versions. A kind this backend does not serve is ' +
@@ -1364,6 +1367,12 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
     concurrency: z.number().optional().describe('Max concurrent runs of this workflow (default 1; extra runs queue)'),
     timeoutMs: z.number().optional().describe('Whole-workflow timeout in ms (0/omitted = none)'),
     stepTimeoutMs: z.number().optional().describe('Default per-step timeout in ms'),
+    ignorePrivacyRules: z
+      .boolean()
+      .optional()
+      .describe(
+        "Record steps act as the app, past the tables' rules (omitted = true); false = as a visitor, so the rules decide"
+      ),
     steps: z.array(workflowStep).describe('The step DAG (must be acyclic; every edge target must exist)')
   };
 

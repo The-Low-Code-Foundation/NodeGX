@@ -22,6 +22,12 @@ import { DeduplicateStepExecutor, FilterStepExecutor, SortStepExecutor, SplitSte
 import { StopStepExecutor } from './errors';
 import { STEP_KINDS } from './kinds';
 import { BranchStepExecutor, ForEachStepExecutor, MergeStepExecutor, SwitchStepExecutor } from './logic';
+import {
+  CreateRecordStepExecutor,
+  DeleteRecordStepExecutor,
+  FindRecordsStepExecutor,
+  UpdateRecordStepExecutor
+} from './records';
 import { ReturnStepExecutor } from './returns';
 import { WaitStepExecutor, WaitUntilStepExecutor } from './timing';
 import { TransformStepExecutor } from './transform';
@@ -54,6 +60,10 @@ export class CompositeStepExecutor implements StepExecutor {
       wait: new WaitStepExecutor(),
       'wait-until': new WaitUntilStepExecutor(),
       return: new ReturnStepExecutor(),
+      'create-record': new CreateRecordStepExecutor(getRunner),
+      'update-record': new UpdateRecordStepExecutor(getRunner),
+      'delete-record': new DeleteRecordStepExecutor(getRunner),
+      'find-records': new FindRecordsStepExecutor(getRunner),
       ...(deps.overrides || {})
     } as Record<StepKind, StepExecutor>;
   }

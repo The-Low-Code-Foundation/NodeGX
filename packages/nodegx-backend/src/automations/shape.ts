@@ -90,6 +90,7 @@ export function projectWorkflow(w: WorkflowDefinition | ProjectWorkflow): Projec
     concurrency: m.concurrency && m.concurrency >= 1 ? m.concurrency : 1,
     timeoutMs: m.timeoutMs,
     stepTimeoutMs: m.stepTimeoutMs,
+    ignorePrivacyRules: m.ignorePrivacyRules,
     steps: m.steps
   }) as ProjectWorkflow;
 }

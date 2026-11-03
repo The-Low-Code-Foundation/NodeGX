@@ -122,6 +122,9 @@ export function validateWorkflowDefinition(def: WorkflowDefinition): string[] {
   if (typeof def.id !== 'string' || !def.id) errors.push('id must be a non-empty string');
   if (!Array.isArray(def.steps) || def.steps.length === 0) errors.push('steps must be a non-empty array');
   if (typeof def.concurrency !== 'number' || def.concurrency < 1) errors.push('concurrency must be a number >= 1');
+  if (def.ignorePrivacyRules !== undefined && typeof def.ignorePrivacyRules !== 'boolean') {
+    errors.push('ignorePrivacyRules must be true or false');
+  }
 
   if (!Array.isArray(def.steps)) return errors;
 

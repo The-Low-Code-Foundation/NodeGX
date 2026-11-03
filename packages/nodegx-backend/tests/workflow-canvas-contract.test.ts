@@ -60,7 +60,9 @@ const KNOWN_CATEGORIES = new Set([
   // CWF-004's `transform`, and the family the wider CWF-004 table opens
   // (Validate, Filter, Split, Sort, Dedupe). Mapped to `data` in CATEGORY_COLOR:
   // a step that reshapes the run's data, which is what that token means here.
-  'Workflow Data'
+  'Workflow Data',
+  // P132 BWF-005's record steps; mapped to `data` in CATEGORY_COLOR beside the family above.
+  'Workflow Records'
 ]);
 
 describe('WFA-004 — the served step-kind catalog is what the canvas assumes', () => {

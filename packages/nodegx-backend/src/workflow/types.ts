@@ -59,7 +59,12 @@ export type StepKind =
   | 'filter'
   | 'sort'
   | 'deduplicate'
-  | 'split';
+  | 'split'
+  // P132 BWF-005: a record made, changed, deleted or found, as a step rather than a function
+  | 'create-record'
+  | 'update-record'
+  | 'delete-record'
+  | 'find-records';
 
 export interface WorkflowStep {
   /** Unique within the workflow. Doubles as the execution-history `nodeId`. */
@@ -142,6 +147,12 @@ export interface WorkflowDefinition {
   timeoutMs?: number;
   /** Default per-step timeout in ms applied to steps without their own. 0 = none. */
   stepTimeoutMs?: number;
+  /**
+   * P132 BWF-005, ruling R5: Bubble's *Ignore privacy rules*. Absent or `true`, a record step reads and writes as the
+   * app (as a Record node inside a cloud function always has); `false`, as whoever the run is for, which today is
+   * nobody for every trigger, so the table's rules for a visitor apply.
+   */
+  ignorePrivacyRules?: boolean;
   steps: WorkflowStep[];
   createdAt: string;
   updatedAt: string;
@@ -155,6 +166,7 @@ export interface WorkflowInput {
   concurrency?: number;
   timeoutMs?: number;
   stepTimeoutMs?: number;
+  ignorePrivacyRules?: boolean;
   steps: WorkflowStep[];
 }
 

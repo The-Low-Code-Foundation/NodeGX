@@ -22,6 +22,7 @@ export type { FoundPath, ScopeEntrySpec, ValueFormSpec, ValueLanguageSpec, Value
 export * from './transform';
 export * from './validate';
 export * from './data';
+export * from './records';
 export * from './kinds';
 export * from './sleep';
 export * from './logic';

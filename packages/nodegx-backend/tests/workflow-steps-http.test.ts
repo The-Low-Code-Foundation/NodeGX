@@ -138,6 +138,11 @@ describe('WF-002 step kinds end-to-end over a real backend', () => {
       'sort',
       'deduplicate',
       'split',
+      // P132 BWF-005: a record made, changed, deleted or found, as a step.
+      'create-record',
+      'update-record',
+      'delete-record',
+      'find-records',
       'stop',
       'return',
       'wait',
