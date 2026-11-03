@@ -1,7 +1,7 @@
 # Phase 132 — A backend workflow you can build by hand
 
 **Opened:** 2026-11-02, on Richard's ask after he tested Studio's Backend tab on Greenhouse ("let's scope this up").
-**State:** BWF-001 built 2026-11-02 (s1: nodegx-studio `1cc7aa5`, NodeGX `f14e46fe8`); P132-STEPPANEL found with Richard and fixed (nodegx-studio `2702c96`). BWF-002 built in s2 (NodeGX `4aec3b83b` + `511e41d5d`, nodegx-studio `0872094`). BWF-003 built in s3 (Studio only, nodegx-studio `b4609f8`); BWF-004 next. **Lane:** 9 (the backend in the open) with lane 2 (Studio). It is on the Beta path:
+**State:** BWF-001 built 2026-11-02 (s1: nodegx-studio `1cc7aa5`, NodeGX `f14e46fe8`); P132-STEPPANEL found with Richard and fixed (nodegx-studio `2702c96`). BWF-002 built in s2 (NodeGX `4aec3b83b` + `511e41d5d`, nodegx-studio `0872094`). BWF-003 built in s3 (Studio only, nodegx-studio `b4609f8`). BWF-004 built in s4 (NodeGX `8d9907ccf`, nodegx-studio `759b834` + `550d82a`), AC4's agent run open. **Lane:** 9 (the backend in the open) with lane 2 (Studio). It is on the Beta path:
 Richard's Beta (BOARD §2, 2026-10-23) is someone like him "building a simple app in Studio, **editing workflows** and
 the DB, privacy rules, road testing it and deploying to a VM".
 **Read first:** this page, then [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md), then the task you take.
@@ -76,7 +76,7 @@ The **engine is already n8n-shaped**; what is missing is what a person touches.
 | [BWF-001](BWF-001-WHAT-RICHARD-MET-FIXED.md) | What Richard met, fixed | the step panel opening in the app, a Starts-on form per kind (webhook too), Yes/No drawn on their wires, a + on every wire, a branch never given a hidden `next`, any first step, R1's words in the list | 1 session | **built s1**; STEPPANEL fixed with Richard (`2702c96`) |
 | [BWF-002](BWF-002-RUN-IT-ON-SAMPLE-DATA.md) | Run it on sample data | *Test the workflow* / *Test up to this step* with a sample the person picks (a real row, a body); every step's in and out shown | 1 session | **built s2**; tests need a NodeGX release with `511e41d5d` in Studio from the kit |
 | [BWF-003](BWF-003-PICK-A-VALUE-FROM-WHAT-CAME-BEFORE.md) | Pick a value from what came before | the trigger's and each upstream step's output as a field tree; click or drag a field into a setting; a value drawn as a pill in words | 1–2 sessions | **built s3**; text with values waits on BWF-004 |
-| [BWF-004](BWF-004-FORMULAS-WITHOUT-CODE.md) | Formulas without code (R2) | `{"$fn": …}` in the engine, a closed set; text with values in it; in the catalog for the agent | 1–2 sessions | |
+| [BWF-004](BWF-004-FORMULAS-WITHOUT-CODE.md) | Formulas without code (R2) | `{"$fn": …}` in the engine, a closed set; text with values in it; in the catalog for the agent | 1–2 sessions | **built s4**; AC4 (agent) open |
 | [BWF-005](BWF-005-STEPS-THAT-ACT-ON-THE-DATA.md) | Steps that act on the data | *Create / Change / Delete a record*, *Find records*: new kinds in the engine, the agent's vocabulary, Studio's forms from the table's fields | 2–3 sessions | |
 | [BWF-006](BWF-006-CALL-AN-API.md) | Call an API (R3) | an `http-request` kind, its key named from Secrets, never written into the file | 1 session | |
 | [BWF-007](BWF-007-SEND-AN-EMAIL.md) | Send an email | a `send-email` kind over the backend's SMTP, refusing in words when none is set | ½ session | |
@@ -122,4 +122,4 @@ BWF-005..007 remove the code.
 ## Bugs filed with this phase
 
 `P132-STEPPANEL` (high), `P132-STARTSONFORM`, `P132-NOROUTELABELS`, `P132-BRANCHNEXT` (all `launch: beta`, all
-BWF-001's); `P132-EDITORREADSBACKEND` (BWF-008's); `P132-FILTERNOCONDITION` (`launch: beta`, found in BWF-003). `node scripts/bugs.js --from P132`.
+BWF-001's); `P132-EDITORREADSBACKEND` (BWF-008's); `P132-FILTERNOCONDITION` (`launch: beta`, found in BWF-003); `P132-STEPMENUOFFSCREEN` (`launch: beta`, found in BWF-004). `node scripts/bugs.js --from P132`.

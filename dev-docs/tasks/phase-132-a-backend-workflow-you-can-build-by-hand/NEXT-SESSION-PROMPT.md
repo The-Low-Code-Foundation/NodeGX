@@ -1,42 +1,58 @@
 # P132 — next session
 
-**BWF-003 is built** (s3, 2026-11-02, Studio only, committed nodegx-studio `b4609f8` after `check:app` 67/67 unlocked; its
-[s3 log](BWF-003-PICK-A-VALUE-FROM-WHAT-CAME-BEFORE.md#s3-2026-11-02-built-ac1ac4-green) has each AC). A step's panel
-shows *What it can read* (what started it, how, each upstream step, from the run / the sample / the shape), a field
-dragged onto a setting or picked from its *From the run* menu writes `{ "$path" }`, and the value is a pill in words.
-BWF-002 is s2's, BWF-001 s1's.
+**BWF-004 is built** (s4, 2026-11-03; its [s4 logs](BWF-004-FORMULAS-WITHOUT-CODE.md#s4-2026-11-03-the-engine-half--items-14-ac1-and-ac2-green)
+have each AC). A setting's value is typed, read from the run, or **a formula**: `{"$fn": "<name>", "args": [...]}` from
+the backend's closed list of 27 (`packages/nodegx-backend/src/workflow/steps/formulas.ts`, served as `formulaLanguage`,
+catalog 1.8.0), on in every step param, condition operand and transform field. In Studio it is picked by its words and
+drawn as a sentence ("days between at and now"); AC3 held in the Electron app on a Greenhouse copy (6 days). NodeGX
+`8d9907ccf`; nodegx-studio `759b834` (the editor) and `550d82a` (P132-STEPMENUOFFSCREEN, found on the way).
 
-**Take BWF-004** ([task](BWF-004-FORMULAS-WITHOUT-CODE.md)): formulas without code (ruling R2, a small closed set, no
-JavaScript in a setting). What s3 leaves for it:
+**First: BWF-004's AC4, the agent run.** "Work out how many days since the plant was watered in the workflow" asked of
+an agent on a Greenhouse copy through the checkout's MCP: it should write a `$fn` formula, not a cloud function (one
+run, the result read from `nodegx.automations.json`). Its words are in `noodl-mcp` `backendTools.ts` (the step `params`
+description and `list_backend_step_kinds`); the always-on instructions say nothing about workflows. If the agent writes a
+function anyway, the measurement is which words it read, not a new sentence by reflex (budget gate:
+`tests/toolDisclosure.test.ts`).
 
-- BWF-003's item 3, *text with values in it* ("Hi {name}, your {plant} needs water"), is BWF-004's text formula: the
-  pills exist (`runValueField` in `studio.html`, words from `automations.mjs` `pathWords`), a text setting that holds
-  several of them between words is what is missing.
-- A JSON setting (a Transform's output, Validate's rules, a Switch's cases: `jsonField`) takes no drop and no pill. A
-  formula setting will want the same picker: `pickMenu(anchor, w, item, done, asPath)` and the drop on `runValueField`
-  are the pieces to reuse; `PATH_MIME` is the drag's type.
-- The engine's no-eval rule (`nodegx-backend` `workflow/steps/values.ts` header) stands: `{ "$fn": … }` is resolved by a
-  closed table, and the catalog serves it for the agent (`/admin/workflow-step-kinds`, the value language).
+**Then BWF-005** ([task](BWF-005-STEPS-THAT-ACT-ON-THE-DATA.md)): steps that act on the data (create, change, delete,
+find a record). Its owed ruling: who a record step acts as (recommend "as the app", P127-BKO006-SCHEDULEAUTH). A
+record's fields are filled with the same `runValueField` (typed / from the run / a formula).
+
+What s4 leaves:
+
+- **A record's date** (a Watering's `at`) unfolds in *What it can read* into `__type` and `iso`; a person wants it
+  whole, as a Pointer already is (`readTree` in `studio.html` folds a Pointer only).
+- **A JSON setting** (a Transform's fields, Validate's rules, a Switch's cases: `jsonField`) still takes no formula
+  control and no drop.
+- **Text with values** is the `text` formula, its parts slots one under another; a single line with pills inline
+  ("Hi {name}, your {plant} needs water") is not built.
 
 Before anything: `git status` in both repos (NodeGX `cline-dev`, `../nodegx-studio`). Studio's `editor/studio.html` is
-the file every Studio session edits; an uncommitted change in it is someone's live work. (At the end of s3, Studio's
-`docs/SCOPE.md` and three `docs/look/s2-composer-*.png` were still someone else's, uncommitted.)
+the file every Studio session edits; an uncommitted change in it is someone's live work, and a pathspec commit takes a
+peer's unstaged hunks with yours (s3's commit took opennoodl-5d's: `git diff -U0 editor/studio.html | grep ^@@` first).
+Three `docs/look/s2-composer-*.png` in Studio are still someone else's, uncommitted. NodeGX's index may hold a peer's
+staged file: commit through a temporary index.
 
-🔴 **Studio from the kit refuses every test** until a NodeGX release carries `511e41d5d` (`testRuns` in the catalog).
-The picker itself works on the kit's backend (the drive's BWF-003 section passes there). Drive with
-`NODEGX_REPO=<the NodeGX checkout>`, and **rebuild the backend's `dist/` first** if `src/` is newer (`npm run build` in
-`packages/nodegx-backend`, gitignored).
+🔴 **Studio from the kit** (backend 0.2.9) has no tests (`testRuns`) and no formulas (`formulaLanguage`) until a NodeGX
+release carries `511e41d5d` and `8d9907ccf`: Studio refuses the test and offers no formula there (both graded). Drive
+with `NODEGX_REPO=<the NodeGX checkout>`, and **rebuild the backend's `dist/` first** if `src/` is newer
+(`npm run build` in `packages/nodegx-backend`, gitignored; it bundles to `dist/index.js`).
 
 **Driving the Electron app on a Greenhouse copy:** [greenhouse-drive.mjs](greenhouse-drive.mjs) (s2: sample, test, up
-to a step) and [greenhouse-drive-bwf003.mjs](greenhouse-drive-bwf003.mjs) (s3: the same, then a setting emptied and a
-field dragged onto it). Each copies Greenhouse, gives it its own backend (`NODEGX_BACKENDS_DIR` under its own folder),
-starts Studio's Electron hidden on CDP 9461 (check it is free: `lsof -nP -iTCP:9461 -sTCP:LISTEN`), and drops
-`ELECTRON_RUN_AS_NODE`. Set `NODEGX_DRIVE_DIR` to your scratchpad. In a template string passed to `ev`, write `\\s`, not
-`\s` (s3's printout lost every "s").
+to a step), [greenhouse-drive-bwf003.mjs](greenhouse-drive-bwf003.mjs) (s3: a field dragged onto a setting) and
+[greenhouse-drive-bwf004.mjs](greenhouse-drive-bwf004.mjs) (s4: a Return added, its value a formula from the menu, a
+value picked from the run, tested again). Copy the newest. Each copies Greenhouse, gives it its own backend
+(`NODEGX_BACKENDS_DIR`), starts Studio's Electron hidden on CDP 9461 (check it is free:
+`lsof -nP -iTCP:9461 -sTCP:LISTEN`), and drops `ELECTRON_RUN_AS_NODE`. Set `NODEGX_DRIVE_DIR` to your scratchpad.
+🔴 After a test a step's panel runs past the 1000 px window: s4's `press` scrolls its target into view and says so; the
+s2/s3 drives' `press` does not. In a template string passed to `ev`, a backslash is lost (`'value\\s+'` became
+`values+`): write the check without one.
 
 Studio gates before you commit: `npm run check:automations` (with and without `NODEGX_REPO`), `check:hosted`,
-`check:editor`, `check:app` (screen unlocked), one at a time; the Chrome ones outside the Bash sandbox. In zsh, run a
-list of gate commands with `eval "$g"`, never `env $g` (zsh does not split it: nothing runs and it exits 0).
+`check:editor`, `check:app` (screen unlocked), one at a time, the Chrome ones outside the Bash sandbox. Never
+`nice -n 10 NODEGX_REPO=… npm …` (nice runs the assignment as a program, exit 127): `NODEGX_REPO=… nice -n 10 npm …`.
+Backend: the 39 suites that reach the workflow layer (`grep -lE "workflow/|WorkflowEngine|WorkflowSubsystem|/steps/|workflow-defs|stepKindCatalog" tests/*.test.ts`)
+run in about 3 minutes; the whole backend suite holds 305 suites with browser drives and is not one gate.
 
 Still open: the list shows triggers as rows of their own (BWF-001 item 8's fold); TriggerTest's three ports crowd the
 column gap at 71 %; Richard's re-walk of BWF-001 points 2–4 (AC7).

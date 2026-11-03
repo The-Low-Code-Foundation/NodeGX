@@ -81,8 +81,8 @@ reinterpreted. The transform keeps its shorthand for reshaping; `{"$upper"}` out
 |---|---|
 | AC1 | ✅ `tests/workflow-formulas.test.ts`: each of the 27 with a working and a failing case (a case per formula, asserted against the table), the date edges, the served list = the table = the docs page, every served sentence names exactly its args, every served example validates |
 | AC2 | ✅ `{"$fn":"eval"}` is a 400 naming the set and "takes no JavaScript"; inside a condition and a transform field too |
-| AC3 | Studio: next |
-| AC4 | agent run: after AC3 |
+| AC3 | ✅ **in the Electron app on a Greenhouse copy** ([greenhouse-drive-bwf004.mjs](greenhouse-drive-bwf004.mjs), the checkout's backend): a Return added after *Mark the plant watered*, its value *A formula…* → *Time between*, its From picked from the run (*at · from the Watering that was made*), no JSON typed; the file and the backend hold `{"$fn":"date-difference","args":[{"$path":"body.at"},{"$fn":"now"},"days"]}`; tested on a Watering made on 28 October: the record's Return gives `value: 6` (6 expected) and the panel says "value 6" ([formula](look/bwf-004-greenhouse-formula.png), [tested](look/bwf-004-greenhouse-tested.png)). Also in Chrome (automations-drive) |
+| AC4 | open: the agent run (next session) |
 
 Gates: 44/44 formulas; the 18 workflow suites 333 + 3 skipped (ten pinned assertions moved: catalog 1.7.0 → 1.8.0 ×4,
 the three value forms → four ×3, the served "no arithmetic" sentences ×3); tsc clean; eslint clean on the new files.
@@ -91,3 +91,31 @@ step → 1 red.
 
 **Found while building:** a number past JavaScript's date range made an Invalid Date whose `toISOString` threw a bare
 `RangeError` (not the formula's words); `readDate` now refuses it and a date carried out of range says so.
+
+## s4 (2026-11-03): the Studio half — item 5, AC3 green (nodegx-studio `759b834`, `550d82a`)
+
+- A setting is *Typed*, *From the run* or **A formula…**, offered only when the backend serves `formulaLanguage` (on
+  the kit's 0.2.9 backend none is offered, graded). The menu is the backend's list in five groups (Text, Numbers, Yes
+  or no, Dates, Lists), searchable, each by its label and description.
+- A formula picked is saved at once with values the backend takes (`automations.mjs` `formulaStart`: a date is Now, a
+  unit days, Add two numbers, an optional arg left out), and drawn as its served sentence (`formulaParts` /
+  `formulaWords`: "days between at and now"; an optional arg left out takes its clause with it, "2.456 rounded").
+  Each value in it is a `runValueField` of its own, so it is typed, a pill from the run (picked or dragged), or
+  another formula. *More*: another formula, *Edit as JSON*, not a formula. A date slot switched to *Typed* starts at
+  today's date, since its start (Now) would undo the choice.
+- Served sentences changed so a reader can drop an absent optional arg: *Round* "{number} rounded, to {places} decimal
+  places", *Sum* "sum of {list}, by {field}".
+
+**Found:** P132-STEPMENUOFFSCREEN ([bug](../../bugs/p132-stepmenuoffscreen-the-step-menu-opened-low-in-the-window-runs-off-its-bottom-and-its-last-kinds-cannot-be-reached.md),
+`launch: beta`, fixed in `550d82a`): after a test, *Add a step after* sits low and the step menu ran from 700 to 1260 in
+a 1000 px window; *Stop*, *Return*, *Wait*, *Wait until* could not be pressed. Every gate clicked with `.click()`
+(`clientY` 0, the menu at the top), so none saw it; the drive now opens it near the bottom and asserts it fits (a
+mutant without the fix fails with the app's numbers). 🔴 The Electron drive's own presses were landing below the
+window too (y 1161 in 1000): `press` now scrolls its target into view and says when it had to.
+
+Gates: automations-check 98/98; automations-drive 107/107 with `NODEGX_REPO` (dist rebuilt at `8d9907ccf`), 94/94 on
+the kit's backend; hosted 46/46; editor green; app 67/67.
+
+**Not built, for later:** a record's date (`at`) unfolds in *What it can read* into `__type` and `iso`; a person wants
+it whole, as a Pointer already is. A JSON setting (a Transform's fields, Validate's rules) still takes no formula
+control. AC4, the agent run, is open.
