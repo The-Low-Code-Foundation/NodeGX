@@ -1182,11 +1182,12 @@ export class WorkflowDocument extends Model {
    * was.
    */
   async save(): Promise<WorkflowDefinition> {
-    const saved = await saveWorkflow(this.ref.backendId, this.toInput());
+    const { workflow: saved, project } = await saveWorkflow(this.ref.backendId, this.toInput());
     this.definition = saved;
     this._dirty = false;
     this.notifyListeners('dirtyChanged', { dirty: false });
-    this.notifyListeners('saved', { definition: saved });
+    // P132 BWF-008: `project` says whether the project's file has it too, so the panel never says less or more
+    this.notifyListeners('saved', { definition: saved, project });
     return saved;
   }
 
