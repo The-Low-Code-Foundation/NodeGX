@@ -7,6 +7,11 @@
 # exactly as tested (the session packed them in a worktree at a pushed commit), never re-packed here.
 set -euo pipefail
 dir="${1:?usage: publish-npm.sh <folder of .tgz files>}"
+# OWN-036 (Richard, 2026-11-03): a cut that ships create-nodegx carries what the last two weeks taught, or says why not.
+# A tarball publish runs no lifecycle script, so the package's own prepublishOnly never fires on this route.
+if ls "$dir"/create-nodegx-[0-9]*.tgz >/dev/null 2>&1; then
+  node "$(dirname "$0")/../kit-learnings/harvest.mjs" --gate
+fi
 # Dependencies first. @nodegx/node-spec before @nodegx/project-contract, whose published manifest depends on it
 # (`^<node-spec version>`, written by build-publish.mjs); @nodegx/canvas-look depends on nothing (a folder without its
 # tarball is skipped, so a cut that leaves it at its published version just omits it). @nodegx/mcp before

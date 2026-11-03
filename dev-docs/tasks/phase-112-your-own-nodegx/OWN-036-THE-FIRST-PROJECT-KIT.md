@@ -83,6 +83,17 @@ is cut. Every rule says how far it reaches (the camera rule now says *by itself*
   Richard's user-scope skills and commands kept out some other way (a separate `CLAUDE_CONFIG_DIR`, checked with a
   `--probe` that lists the skills the session sees: both arms must list exactly their folder's own).
 
+- **AC6 — new learnings reach new versions.** Richard, 2026-11-03: *"make sure that any future breakthroughs or
+  learnings we make here in this repo or any Claude built project in the vscode projects folder contribute new
+  versions to the npm package."* The loop is [KIT-LEARNINGS.md](../../guidelines/KIT-LEARNINGS.md):
+  1. capture, in any project: step 0 of `~/.claude/commands/next.md`, into `~/.nodegx/learnings/inbox/`;
+  2. harvest: `scripts/kit-learnings/harvest.mjs` reads the inbox, every project's Claude memory, the LEARNINGS and
+     LOOK files, and the bug ledger;
+  3. triage by verdict into the skills, under a privacy line. The ledger stays in `~/.nodegx`, out of this public repo;
+  4. version: `packages/create-nodegx/scripts/stamp.js` records what each cut shipped, `--count` says when a cut is
+     due, and the package test refuses a version moved without a stamp;
+  5. gate: `publish-npm.sh` and `prepublishOnly` refuse a cut while a learning from the last 14 days is unconsidered.
+
 ## Log
 
 - **s1, 2026-11-03.** Audit above; task written. Built: `nodegx-first-project/SKILL.md` (108 lines),
@@ -101,3 +112,12 @@ is cut. Every rule says how far it reaches (the camera rule now says *by itself*
     flags 75 lines of its arrow notation. It's a reference list; a pass that rewrites it as sentences is owed.
   - **AC4 ✅** read line by line: no gate, no declared layer, no compliance step; the camera rule says *by itself*.
   - **AC5 ⬜** not run. It spends four Opus arms (P130's cost about $9 each), so it waits on Richard's go.
+- **s1 (later), 2026-11-03: AC6 built.** The harvester's first run found 2,542 entries. 2,450 older than 2026-11-01
+  were parked as `backlog`: not reviewed, and listable with `--backlog`. This session took the game lessons from it by
+  hand. 92 remain fresh (memory 24, notes 3, bugs 65), and **the first triage is the next session's**. The stamp
+  records 0.2.8 as the release commit `1d4592272` shipped it; `--check` says the skills have changed since (OWN-036's
+  two skills and the Vibe kit's 11-02 work), so the next release cut is due. A stamp that bumped the version by itself
+  was built and taken out the same hour: the kit's versions move together in the release cut, lockfile included.
+  Tested: package tests 38/40 (the two filed reds), the inbox → `--count` → `--mark` loop in a scratch ledger, `--gate`
+  exits 1 on today's 92. The `/next` edit is in Richard's own `~/.claude/commands/next.md`, outside this repo; its
+  backup is in that session's scratchpad.

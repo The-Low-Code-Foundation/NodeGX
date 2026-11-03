@@ -1,0 +1,1 @@
+Let's use nodegx to build my first project. I run a small book club, there are 8 of us. I want an app where we can suggest books, vote on what to read next, and keep a list of what we've read with everyone's star rating.

@@ -22,7 +22,9 @@
     "node": ">=18"
   },
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "stamp": "node scripts/stamp.js",
+    "prepublishOnly": "node ../../scripts/kit-learnings/harvest.mjs --gate"
   },
   "publishConfig": {
     "access": "public"

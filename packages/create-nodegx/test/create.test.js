@@ -698,3 +698,18 @@ test('P128-S3-NOSTUDIOFORTHEEDITOR: the shipped Studio version is null or an exa
   const server = `${MCP_PACKAGE}@${MCP_VERSION}`;
   assert.deepEqual(serverEntry('darwin').args, STUDIO_VERSION ? ['-y', '-p', `${STUDIO_PACKAGE}@${STUDIO_VERSION}`, '-p', server, 'noodl-mcp', '--allow-writes'] : ['-y', server, '--allow-writes']);
 });
+
+test('P112 OWN-036: a release cut that moves the version stamps the profiles/ it ships; the wrappers move with it', () => {
+  // A learning that reaches a skill reaches the next version (dev-docs/guidelines/KIT-LEARNINGS.md). The cut bumps the
+  // version and runs `npm run stamp`; between cuts profiles/ may differ from the stamp, and `stamp --check` says so.
+  const { readStamp, status } = require('../scripts/stamp.js');
+  const stamp = readStamp();
+  assert.ok(stamp, 'profiles.stamp.json is missing: run `npm run stamp` in packages/create-nodegx');
+  assert.equal(stamp.version, require('../package.json').version, 'the version moved without a stamp: run `npm run stamp` in packages/create-nodegx');
+  assert.match(status().line, /^skills: /);
+  for (const wrapper of ['vibe', 'cline']) {
+    const pkg = require(`../${wrapper}/package.json`);
+    assert.equal(pkg.version, stamp.version, wrapper);
+    assert.equal(pkg.dependencies['create-nodegx'], stamp.version, wrapper);
+  }
+});
