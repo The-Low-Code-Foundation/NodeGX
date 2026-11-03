@@ -81,7 +81,7 @@ The **engine is already n8n-shaped**; what is missing is what a person touches.
 | [BWF-005](BWF-005-STEPS-THAT-ACT-ON-THE-DATA.md) | Steps that act on the data | *Create / Change / Delete a record*, *Find records*: new kinds in the engine, the agent's vocabulary, Studio's forms from the table's fields | 2–3 sessions | **built s6**, AC1–AC4 green (AC3 in the Electron app); Studio `c67b142`; needs a NodeGX release for Studio from the kit |
 | [BWF-006](BWF-006-CALL-AN-API.md) | Call an API (R3) | an `http-request` kind, its key named from Secrets, never written into the file | 1 session | **built s7**, AC1–AC3 green (AC3 in the Electron app, a real weather API); NodeGX `c3a95ea65`, Studio `0ad1573`; needs a NodeGX release for Studio from the kit |
 | [BWF-007](BWF-007-SEND-AN-EMAIL.md) | Send an email | a `send-email` kind over the backend's SMTP, refusing in words when none is set | ½ session | **built s8**, AC1–AC2 green (AC2 in the Electron app, an SMTP catcher); fixed P132-PARAMSHADOW on the way; Studio `9a4287c`; needs a NodeGX release for Studio from the kit |
-| [BWF-008](BWF-008-THE-NODEGX-EDITOR-EDITS-THEM-TOO.md) | The NodeGX editor edits them too | its Workflows panel reads and writes the file, draws the new kinds, the same picker and formulas | 1–2 sessions | |
+| [BWF-008](BWF-008-THE-NODEGX-EDITOR-EDITS-THEM-TOO.md) | The NodeGX editor edits them too | its Workflows panel reads and writes the file, draws the new kinds, the same picker and formulas | 1–2 sessions | **s9: step 1 measured (AC1), items 2+4 built**, AC3 and AC2's editor half green in the app; item 3 (words, picker) and AC2's crossing open |
 | [BWF-009](BWF-009-THE-TEST.md) | The test | Richard builds three workflows by hand with no code and no JSON; an agent builds the same three; both editors draw them | 1 session + Richard | last |
 
 About **10–13 sessions**. BWF-001 alone is what makes today's Backend tab usable; BWF-002..004 are the n8n feel;
@@ -120,4 +120,4 @@ BWF-005..007 remove the code.
 ## Bugs filed with this phase
 
 `P132-STEPPANEL` (high), `P132-STARTSONFORM`, `P132-NOROUTELABELS`, `P132-BRANCHNEXT` (all `launch: beta`, all
-BWF-001's); `P132-EDITORREADSBACKEND` (BWF-008's); `P132-FILTERNOCONDITION` (`launch: beta`, found in BWF-003); `P132-STEPMENUOFFSCREEN` (`launch: beta`, found in BWF-004). `P132-STU093WORDS` (a Studio gate, fixed) and `P132-BST006GOLDEN` (the MCP's briefing capture, open), met in BWF-005. `node scripts/bugs.js --from P132`.
+BWF-001's); `P132-EDITORREADSBACKEND` (BWF-008's, fixed s9), `P132-EDITORTRIGGERPUT` (fixed s9), `P132-STUDIOPRIVACYDROP` (open, `launch: beta`); `P132-FILTERNOCONDITION` (`launch: beta`, found in BWF-003); `P132-STEPMENUOFFSCREEN` (`launch: beta`, found in BWF-004). `P132-STU093WORDS` (a Studio gate, fixed) and `P132-BST006GOLDEN` (the MCP's briefing capture, open), met in BWF-005. `node scripts/bugs.js --from P132`.

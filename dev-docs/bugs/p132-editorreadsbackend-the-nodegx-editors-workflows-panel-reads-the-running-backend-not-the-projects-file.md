@@ -1,11 +1,12 @@
 ---
 id: P132-EDITORREADSBACKEND
 title: The NodeGX editor's Workflows panel reads the running backend, not the project's nodegx.automations.json
-status: scheduled
+status: fixed
 phase: P132
 task: BWF-008
 severity: medium
 area: editor / Workflows panel
+fixed: P132 s9 (BWF-008 item 2, its commit): main process project-automations.js; tests-main p132-bwf008-* (13), tests-unit p132-bwf008-* (4)
 found: P132 scoping (code read), 2026-11-02
 evidence: packages/noodl-editor/src/editor/src/views/panels/WorkflowsPanel*/WorkflowsPanel.tsx:38-43; WorkflowBackendClient.ts:1-40; dev-docs/tasks/phase-132-a-backend-workflow-you-can-build-by-hand/look/bwf008-m4-saved-to-backend-only.png
 ---
@@ -42,3 +43,14 @@ Also seen (BWF-008 item 3's work, not separate rows yet): steps are titled by th
 name; routes in engine words (`ontrue`, `next`); the component banner "triggertest isn't on any page yet" over a
 workflow; the picker's preview says "No documentation yet" for kinds the catalog describes; a new *Call an API* is
 headed "CALL AN API · COMPONENT" and its retry help speaks of "the function"; the picker opened with a stale search.
+
+## Fixed (s9, BWF-008 item 2)
+
+The main process keeps the file (`local-backend/project-automations.js`, `BackendManager.writeBoth`): a workflow
+saved or deleted, a trigger turned on or off or deleted, goes to the backend first and then into the project's
+`nodegx.automations.json`, the entry patched in its place; a file that cannot be written puts the backend back and
+says so. A backend started with no project saves alone and the panel says why. The panel says where a save landed
+("Saved to the backend and to nodegx.automations.json."), lists a backend's drift from its project's file in words,
+and with the project's backend not running lists the file's workflows (steps, what starts each) and says they open
+once it runs. Driven in the app on the Greenhouse copy: `look/bwf008-b1-file-list-no-backend.png`,
+`look/bwf008-b2-saved-to-both.png`; the file and the backend both held the edit.

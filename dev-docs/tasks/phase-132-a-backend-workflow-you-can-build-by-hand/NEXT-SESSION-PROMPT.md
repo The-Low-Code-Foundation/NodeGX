@@ -1,24 +1,32 @@
 # P132 — next session
 
-**BWF-007 is done** (s8, 2026-11-03, NodeGX (this session's commit), Studio `9a4287c`: [the record](BWF-007-SEND-AN-EMAIL.md#s8-2026-11-03-built)).
-`send-email`, *Send an email*: `steps/email.ts`, `steps/emailParams.ts`, through `_noodl_send_email` (the Send Email
-node's seam; `Mailer` now takes a list, `replyTo`, and returns `messageId`). No SMTP fails the step in words naming the
-backend manager's Email page. AC1 `tests/p132-bwf-007-send-email.test.ts` (9); the 42 workflow-layer suites 655/655;
-AC2 in Electron on a Greenhouse copy with an SMTP catcher ([greenhouse-drive-bwf007.mjs](greenhouse-drive-bwf007.mjs)):
-the email arrived, "Fern, Basil", built with no JSON.
+**BWF-008 is half done** (s9, 2026-11-03, NodeGX (this session's commits): [the record](BWF-008-THE-NODEGX-EDITOR-EDITS-THEM-TOO.md#s9-2026-11-03-items-2-and-4-built)).
+Step 1 measured in the editor and given to Richard (AC1): functions edit as graphs; the panel listed workflows only
+with a backend running and saved to the backend alone. Items 2 and 4 built: the editor's main process now keeps
+`nodegx.automations.json` (`local-backend/project-automations.js`, `BackendManager.writeBoth`), the panel lists the
+file's workflows when the backend is off (AC3 green in the app) and says where a save landed (AC2's editor half green
+in the app). The trigger toggle sent `PUT`, the backend serves `POST` (P132-EDITORTRIGGERPUT, fixed).
 
-🔴 **P132-PARAMSHADOW (fixed this session)**: executors that resolve their own params (`http.ts`, `records.ts`,
-`email.ts`) must resolve against `ctx.paramScope ?? ctx.scope`, never `ctx.scope`: there a param named `body` /
-`query` / `headers` stands where the run's `body` stood. A new executor that resolves params copies that line.
+**Next, in this order:**
 
-**Next: BWF-008** ([task](BWF-008-THE-NODEGX-EDITOR-EDITS-THEM-TOO.md)): the NodeGX editor's Workflows panel. Step 1
-is MEASURE ONLY (an hour), and its answers go to Richard the same day: open a Greenhouse COPY in the editor (the
-`run-editor` skill; never the real one), are the two cloud functions in the Components panel and editable; does the
-Workflows panel list the three workflows and their triggers; does a change reach the file, the backend, both or neither;
-with the backend stopped, what does it draw. Write them into `P132-EDITORREADSBACKEND`. Then items 2–4. The editor is a
-different stack from Studio: its gates are jest in `packages/noodl-editor` (`test:main` per-dir, see the harness
-memory), and its workflow canvas contract is `workflow-canvas-contract` in the backend tests (a colour per category in
-`workflowNodeLibrary.ts` `CATEGORY_COLOR`: *Workflow Integrations* has one).
+1. **P132-STUDIOPRIVACYDROP** (`launch: beta`, one field): Studio's `serve.mjs` `projectWorkflow` drops
+   `ignorePrivacyRules` from the file. Add it, grade it in `check:automations`, then Studio's four gates.
+2. **BWF-008 item 3, the words**, in the editor's workflow canvas: steps titled by name, routes in the catalog's
+   words (`ROUTE_WORDS` in Studio), no component banner over a workflow, the picker's preview from the catalog's
+   description, no "· COMPONENT" on a step, retry help without "the function", the picker's search cleared on open.
+   Then the value input's picker as field trees (BWF-003's `upstreamOf`/`shapeFields`, in Studio's `automations.mjs`).
+3. **AC2's crossing**: Studio and the editor open on one Greenhouse copy; a change in each shows in the other.
+
+**Driving the editor on a copy** (s9, the recipe is in BWF-008's s9 step-1 record): fresh `id`, no
+`metadata.cloudservices`, `NOODL_USER_DATA_DIR=<scratch profile>` with a `recently_opened_project.json` listing only
+the copy, `npm run dev:debug -- --quiet` in the background, Backend Services → *Add backend* → *Run one on this
+computer*. The backend lands in `~/.noodl/backends/`: remove it by its id after `dev:stop`. Canvas presses need a real
+`Input.dispatchMouseEvent` (a scratch `clickat.mjs`, one CDP connection). The window size can change between
+launches: find cards and buttons by text, never by a remembered x,y.
+
+Editor gates: `npx jest tests-main/local-backend tests-unit/workflow tests-unit/bmg-012` (green s9), `tsc -p
+packages/noodl-editor --noEmit` (0). Full `jest` has 10 suites red that are not ours (same set at HEAD, s9 list in the
+record): compare by name before reading a red as yours.
 
 What s8 leaves (still open):
 

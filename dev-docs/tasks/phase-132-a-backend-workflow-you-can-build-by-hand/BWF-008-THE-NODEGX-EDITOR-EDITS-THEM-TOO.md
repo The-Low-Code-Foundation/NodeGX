@@ -51,3 +51,26 @@ How the drive was made, for the next one: copy with a fresh `id` and no `metadat
 (run in the background); the card, then Backend Services → *Add backend* → *Run one on this computer* → a name →
 *Create* → *Start backend*. The backend lands in `~/.noodl/backends/` (no env override): delete it by its id after
 `dev:stop`. Presses on the canvas need a real `Input.dispatchMouseEvent` at x,y (a scratch `clickat.mjs`).
+
+## s9 (2026-11-03): items 2 and 4 built
+
+- **Item 2, the file.** `packages/noodl-editor/src/main/src/local-backend/project-automations.js` (read, patch in
+  place, restore, drift in words; the backend's `shape.ts` shapes, `ignorePrivacyRules` kept) and
+  `BackendManager.writeBoth`: `saveWorkflowDef`, `deleteWorkflowDef` (refused while a trigger in the file starts it,
+  Studio's rule), `setTriggerEnabled` (now `POST`, P132-EDITORTRIGGERPUT), `deleteTrigger`. New IPC
+  `backend:project-automations` (the BMG-012 census lists it). The panel: where a save landed, drift per backend,
+  the file's workflows listed read-only with what starts each while the project's backend is not running.
+- **Item 4.** The header comment rewritten (BKO-001: the file is the truth).
+- **AC3 green in the app** (`look/bwf008-b1-file-list-no-backend.png`). **AC2's editor half green in the app**: an
+  edit on TriggerTest saved, "Saved to the backend and to nodegx.automations.json.", both held it
+  (`look/bwf008-b2-saved-to-both.png`). The first editor save of a workflow also writes the canvas's positions into
+  each step (`ui: {x, y}`, which the backend keeps) and puts `next` before `routes`: one-time noise in git, not a
+  defect. AC2's crossing (Studio and the editor open on one copy) is not driven yet.
+- **AC4:** `tests-main/local-backend/p132-bwf008-workflows-keep-the-project-file.test.js` 13/13 (two mutants caught:
+  no file patch → 3 red, `PUT` back → 1 red), `tests-unit/workflow/p132-bwf008-panel-words.test.ts` 4/4, the
+  local-backend, workflow and BMG-012 suites green. Full `jest` 10 suites / 24 tests red, the same set with my files
+  put back to HEAD (the peers' tree: chr-007, hlt-012, exp-013 ×2, hlt-013, vfn-011, see-001, def007, hls009, el-009);
+  hlt-021 red in the full run only (a port). `tsc -p packages/noodl-editor --noEmit` 0.
+- **Not done (item 3):** the words. Steps titled by id, routes as `ontrue`/`next`, the component banner over a
+  workflow, "No documentation yet" in the picker, "· COMPONENT", retry help about "the function", a stale picker
+  search. And the value input's picker extended to field trees from a sample run (BWF-003's model).
