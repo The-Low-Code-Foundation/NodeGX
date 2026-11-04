@@ -1,0 +1,175 @@
+[
+  {
+    "arm": "faithful",
+    "total": 102,
+    "passed": 101,
+    "failed": 1,
+    "skipped": 0,
+    "failures": [
+      {
+        "id": "filters/regex",
+        "message": "no such function: nodegx_regexp"
+      }
+    ],
+    "ledger": {
+      "statements": 6803,
+      "refusedPragmas": {},
+      "droppedTransactionStatements": {
+        "SAVEPOINT": 23,
+        "RELEASE": 23,
+        "BEGIN": 2,
+        "COMMIT": 2
+      },
+      "transactionSyncCalls": 17,
+      "otherErrors": {
+        "duplicate column name: title": 223,
+        "duplicate column name: done": 2,
+        "duplicate column name: score": 170,
+        "duplicate column name: facts": 6,
+        "duplicate column name: note": 51,
+        "duplicate column name: doc": 1,
+        "duplicate column name: version": 4,
+        "duplicate column name: tag": 64,
+        "duplicate column name: body": 1,
+        "duplicate column name: name": 208,
+        "no such function: nodegx_regexp": 1,
+        "duplicate column name: tags": 5,
+        "duplicate column name: author": 2,
+        "duplicate column name: ACL": 103,
+        "no such table: _Join_items_RelOwner_cmw2e44b2cb23_53": 1,
+        "no such table: _Join_items_RelOwner_cmw2e44b2cb23_55": 1,
+        "no such table: _Join_items_RelOwner_cmw2e44b2cb23_57": 1,
+        "no such table: _Join_tags_RelOwner_cmw2e44b2cb23_57": 1,
+        "no such table: _Join_items_RelOwner_cmw2e44b2cb23_59": 1,
+        "no such table: _Join_items_RelOwner_cmw2e44b2cb23_61": 1,
+        "no such table: _Join_items_RelOwner_cmw2e44b2cb23_63": 1,
+        "duplicate column name: company": 112,
+        "duplicate column name: person": 196,
+        "duplicate column name: account": 84,
+        "duplicate column name: role": 84,
+        "duplicate column name: label": 29,
+        "duplicate column name: speakers": 28,
+        "duplicate column name: session": 42,
+        "duplicate column name: parent": 43,
+        "duplicate column name: added": 1,
+        "duplicate column name: email": 7,
+        "UNIQUE constraint failed: Sch_cmw2e44b2cb23_196.email": 1,
+        "duplicate column name: tenant": 3,
+        "UNIQUE constraint failed: Sch_cmw2e44b2cb23_198.tenant, Sch_cmw2e44b2cb23_198.email": 1,
+        "duplicate column name: learner": 7,
+        "duplicate column name: concept": 4,
+        "duplicate column name: pinned": 4,
+        "UNIQUE constraint failed: Sch_cmw2e44b2cb23_199.learner, Sch_cmw2e44b2cb23_199.concept": 1,
+        "duplicate column name: cohort": 3,
+        "CHECK constraint failed: Sch_cmw2e44b2cb23_200.chk_Sch_cmw2e44b2cb23_200_one_learner_cohort": 3,
+        "CHECK constraint failed: Sch_cmw2e44b2cb23_200.chk_Sch_cmw2e44b2cb23_200_range_score": 1,
+        "duplicate column name: colour": 1,
+        "duplicate column name: tier": 1,
+        "no such table: _Join_loose_Acct_cmw2e44b2cb23_203": 2,
+        "duplicate column name: owner": 4,
+        "NOT NULL constraint failed: Req_cmw2e44b2cb23_208.owner": 1,
+        "duplicate column name: code": 16,
+        "UNIQUE constraint failed: Invoice_cmw2e44b2cb23_214.code": 1,
+        "UNIQUE constraint failed: Invoice_cmw2e44b2cb23_215.code": 1,
+        "duplicate column name: number": 7,
+        "UNIQUE constraint failed: Invoice_cmw2e44b2cb23_220.code": 1
+      }
+    }
+  },
+  {
+    "arm": "refusing",
+    "total": 102,
+    "passed": 98,
+    "failed": 4,
+    "skipped": 0,
+    "failures": [
+      {
+        "id": "filters/regex",
+        "message": "no such function: nodegx_regexp"
+      },
+      {
+        "id": "schema/declared-index-is-built",
+        "message": "the declared index was reported as not built"
+      },
+      {
+        "id": "schema/a-partial-unique-index-holds-only-where-it-says",
+        "message": "the partial index is not reported as built and declared"
+      },
+      {
+        "id": "schema/drop-column-removes-it-and-refuses-one-in-use",
+        "message": "error in index idx_Sch_cmw2e44ioc5p7_201_title_w4861f83a after drop column: no such column: \"score\" - should this be a string literal in single-quotes?"
+      }
+    ],
+    "ledger": {
+      "statements": 6789,
+      "refusedPragmas": {
+        "journal_mode = WAL": 1,
+        "secure_delete = ON": 1,
+        "wal_checkpoint(TRUNCATE)": 6
+      },
+      "droppedTransactionStatements": {
+        "SAVEPOINT": 23,
+        "RELEASE": 23,
+        "ROLLBACK": 1,
+        "BEGIN": 2,
+        "COMMIT": 2
+      },
+      "transactionSyncCalls": 17,
+      "otherErrors": {
+        "not authorized": 26,
+        "duplicate column name: title": 223,
+        "duplicate column name: done": 2,
+        "duplicate column name: score": 170,
+        "duplicate column name: facts": 6,
+        "duplicate column name: note": 51,
+        "duplicate column name: doc": 1,
+        "duplicate column name: version": 4,
+        "duplicate column name: tag": 64,
+        "duplicate column name: body": 1,
+        "duplicate column name: name": 208,
+        "no such function: nodegx_regexp": 1,
+        "duplicate column name: tags": 5,
+        "duplicate column name: author": 2,
+        "duplicate column name: ACL": 103,
+        "no such table: _Join_items_RelOwner_cmw2e44ioc5p7_53": 1,
+        "no such table: _Join_items_RelOwner_cmw2e44ioc5p7_55": 1,
+        "no such table: _Join_items_RelOwner_cmw2e44ioc5p7_57": 1,
+        "no such table: _Join_tags_RelOwner_cmw2e44ioc5p7_57": 1,
+        "no such table: _Join_items_RelOwner_cmw2e44ioc5p7_59": 1,
+        "no such table: _Join_items_RelOwner_cmw2e44ioc5p7_61": 1,
+        "no such table: _Join_items_RelOwner_cmw2e44ioc5p7_63": 1,
+        "duplicate column name: company": 112,
+        "duplicate column name: person": 196,
+        "duplicate column name: account": 84,
+        "duplicate column name: role": 84,
+        "duplicate column name: label": 29,
+        "duplicate column name: speakers": 28,
+        "duplicate column name: session": 42,
+        "duplicate column name: parent": 43,
+        "duplicate column name: added": 1,
+        "duplicate column name: email": 7,
+        "UNIQUE constraint failed: Sch_cmw2e44ioc5p7_196.email": 1,
+        "duplicate column name: tenant": 3,
+        "UNIQUE constraint failed: Sch_cmw2e44ioc5p7_198.tenant, Sch_cmw2e44ioc5p7_198.email": 1,
+        "duplicate column name: learner": 7,
+        "duplicate column name: concept": 4,
+        "duplicate column name: pinned": 4,
+        "UNIQUE constraint failed: Sch_cmw2e44ioc5p7_199.learner, Sch_cmw2e44ioc5p7_199.concept": 1,
+        "duplicate column name: cohort": 3,
+        "CHECK constraint failed: Sch_cmw2e44ioc5p7_200.chk_Sch_cmw2e44ioc5p7_200_one_learner_cohort": 3,
+        "CHECK constraint failed: Sch_cmw2e44ioc5p7_200.chk_Sch_cmw2e44ioc5p7_200_range_score": 1,
+        "duplicate column name: colour": 1,
+        "error in index idx_Sch_cmw2e44ioc5p7_201_title_w4861f83a after drop column: no such column: \"score\" - should this be a string literal in single-quotes?": 1,
+        "duplicate column name: tier": 1,
+        "no such table: _Join_loose_Acct_cmw2e44ioc5p7_203": 2,
+        "duplicate column name: owner": 4,
+        "NOT NULL constraint failed: Req_cmw2e44ioc5p7_208.owner": 1,
+        "duplicate column name: code": 16,
+        "UNIQUE constraint failed: Invoice_cmw2e44ioc5p7_214.code": 1,
+        "UNIQUE constraint failed: Invoice_cmw2e44ioc5p7_215.code": 1,
+        "duplicate column name: number": 7,
+        "UNIQUE constraint failed: Invoice_cmw2e44ioc5p7_220.code": 1
+      }
+    }
+  }
+]

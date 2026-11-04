@@ -1,0 +1,17 @@
+name = "hst-records-spike"
+main = "src/worker.ts"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
+
+# HST-006: the record store in a SQLite-backed Durable Object (the class's own database; on the Free plan only the
+# SQLite backend is offered).
+[[durable_objects.bindings]]
+name = "RECORDS"
+class_name = "Records"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Records"]
+
+[observability]
+enabled = true

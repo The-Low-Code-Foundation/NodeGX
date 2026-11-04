@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "es2022",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "paths": {
+      "@noodl/backend-contract": ["../../../../packages/nodegx-backend-contract/src/index.ts"],
+      "@noodl/backend-contract/conformance": ["../../../../packages/nodegx-backend-contract/conformance/index.ts"],
+      "@noodl/backend-contract/*": ["../../../../packages/nodegx-backend-contract/*"],
+      "@noodl/runtime/*": ["../../../../packages/noodl-runtime/*"]
+    }
+  }
+}
