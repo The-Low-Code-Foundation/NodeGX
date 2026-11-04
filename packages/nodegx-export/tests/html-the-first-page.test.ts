@@ -166,8 +166,12 @@ describe('P134 HTX-001: story-engine as plain files', () => {
     const p = app.preflight;
     expect([...p.components].sort()).toEqual(['mountCarried', 'mountChoice', 'mountPassage', 'mountPaster', 'mountReadPage', 'mountRemixPage', 'mountSidebar']);
     expect(p.logic).toEqual(['Story/Source']);
-    // The same plan refusals the Swift preflight counts (EXP-022 S1: 21).
-    expect(p.planRefusals).toHaveLength(21);
+    // The same plan refusals the Swift preflight counts (EXP-022 S1: 21), less the one this target prints: the shell's
+    // CSS Definition, in styles/app.css, listed apart so the preflight never calls a printed node left out (HTX-004).
+    expect(p.planRefusals).toHaveLength(20);
+    expect(p.carried.map((c) => `${c.component} ${c.name}`)).toEqual(['App The page — the ground, the hover, the paste box']);
+    expect(p.planRefusals.some((r) => r.name === 'The page — the ground, the hover, the paste box')).toBe(false);
+    expect(app.files['EXPORT-PREFLIGHT.md']).toContain('## Carried here, though the React export leaves it out (1)');
     const losses = p.htmlLosses.map((l) => `${l.component} ${l.label ?? l.nodeId}: ${l.what}`);
     // The plan gives this For Each no items, so the React export draws no rows either.
     expect(losses).toContain("Pages/Read One row per choice you can see: a For Each not drawn: its items are fed by nothing the plan knows as a list (a Function's output, say), which the React export defers too (EXP-003)");

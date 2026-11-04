@@ -2,9 +2,11 @@
 
 **Phase:** [134](README.md). **AC:** AC3. **Sessions:** 1 (now 2). **Needs:** HTX-003.
 
-**Status (2026-11-04, session 6):** 🔵 the Build is done and graded in jsdom (README §10 session 6,
-`tests/html-the-backend.test.ts`): the client travels, and the Record, Noodl and Call desks read what was predicted at
-every step and send what the React export sends. **Left: the Chrome drive below** (session 7).
+**Status (2026-11-04, session 7): ✅ done.** The Build was graded in jsdom in session 6 (README §10,
+`tests/html-the-backend.test.ts`). The Chrome drive ran in session 7 ([`htx-004/`](htx-004/README.md)). The HTML export
+equals the React export at all 12 steps, request for request. All three arms agree on sign in, add, close, reload and
+sign out, and the field keeps its cursor. The one difference, filed: neither export can open a task
+(P134-HTX004-SELECTREFUSED, the plan's). todo-list has no delete to drive.
 
 ## The sentence
 

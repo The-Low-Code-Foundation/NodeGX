@@ -1,7 +1,7 @@
 # Phase 134 — The app in plain files
 
 **Scoped:** 2026-11-03, on Richard's ask ("Let's scope up the HTML export phase please, I think it'll be important").
-**State:** 🔵 HTX-001, HTX-002 and HTX-003 done; **HTX-004 half done** (§10, session 6 of at most 10, 2026-11-04): the React export's own backend client travels into the folder as ES modules, its types taken out, and the HTML printer calls it as React does (record and user verbs, queries, the session, Cloud Functions, Functions that await or read `Noodl`). Three desks read in jsdom exactly what was predicted at every step, and send what the React export sends, request for request. todo-list's HTML losses 87 → 29, none of them the backend's. **Left in HTX-004: its Chrome drive**, todo-list on a real backend, three arms (session 7). Options wait on the plan: all 39 in the templates are left out of every export (P134-HTX003-OPTIONSWIRED). R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
+**State:** 🔵 HTX-001 to HTX-004 done (§10, session 7 of at most 10, 2026-11-04). todo-list in Chrome on a real backend, three arms: the HTML export equals the React export at every step, request for request, and all three agree on sign in, add, close, reload and sign out. Neither export can open a task: the plan refuses a Variable set from a placed component's output (P134-HTX004-SELECTREFUSED, high, 180 wires across the templates). **Next: HTX-005** (the plain-JS `GraphTarget`, the ledger line), unless Richard rules SELECTREFUSED first (§9 R6). Options wait on the plan: all 39 in the templates are left out of every export (P134-HTX003-OPTIONSWIRED). R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
 phase only** (BOARD §2); React and Swift stay paused. **Read first:** this page, then [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md),
 then the task you take. The Swift precedent this phase copies is
 [EXP-022](../phase-18-code-export-v2/EXP-022-THE-SAME-GRAPH-IN-SWIFT.md) §7–§9.
@@ -172,6 +172,7 @@ The questions as scoped:
 | R3 | When? | **HTX-001 now (one session, it measures the cost), the rest after Beta** (BOARD §2, lanes 9 and 2 first). | All of it now as lane 4 reopened beside Beta. After Beta entirely. |
 | R4 | Must it open by double-clicking `index.html`? | **No: any static server** (`npx serve`, `python3 -m http.server`, every web host). Chrome refuses ES modules from a double-clicked file (other browsers to be measured in HTX-001). | Yes: a second, bundled copy of `app.js` beside the readable modules. |
 | R5 | Which first after HTX-003: the backend (HiveClip, web apps) or the game bridge (AC5)? | **The backend**: HiveClip is the app he named. | The game bridge first. |
+| R6 (asked 2026-11-04, session 7) | In both exported todo apps you cannot open a task: press one and nothing happens (`htx-004/side-by-side.png`, top row). It is the shared plan both exports read, and 180 wires across the templates have the same shape. Fix it now, or after the phase? | **After HTX-005 to HTX-007, as shared plan work counted apart** (Swift S6's ruling). Three of the ten sessions are left, one per remaining task. | Fix it now, in session 8, and let the phase run past ten. Hand it to the React lane when it reopens. |
 
 ## 10. Sessions
 
@@ -523,3 +524,54 @@ helpers: 0; four of `component.ts`'s functions are exported now, its output unch
 HTML arm takes `backend:` and `allowErrors` as the React arm does; `fake-parse-backend.js` answers `publishPage`. Nine
 suites pass (196 tests): the four HTML specs, React's Noodl, Cloud Function and Record specs, Swift S3, the CLI.
 
+
+### Session 7 — HTX-004 finished: todo-list in Chrome, three arms (2026-11-04, Opus 5.5)
+
+**Result: the plain-files todo app signed in and showed the same lists as the running app and the React export, on
+the same kind of backend, and sent the same writes.** Evidence: [`htx-004/`](htx-004/README.md) and its
+`side-by-side.png`. The prediction ([`htx-004/EXPECTED.md`](htx-004/EXPECTED.md)) was written before any arm ran, and
+the graded columns read it exactly.
+
+EXP-022 S6's drive, copied, with the HTML arm: a copy of todo-list bound to `nodegx-backend` from `src`, each arm on its
+own fresh seeded backend, the wire read from that backend's own request log, one headless Chrome at 390 × 844. The HTML
+arm is the folder `nodegx export --target html` wrote, served by `python3 -m http.server`: nothing built or edited.
+
+| step | the running app | the React export | the HTML export |
+|---|---|---|---|
+| sign in | `List (3)` `Today (2)` `Done (1)`; `/login` + 10 queries | `/login` + 9 | **React's 10, one for one** |
+| open the MOT, tick an action, back | its summary; "Tick off" sends `PUT Action`, `Event 201` | nothing opens | **nothing opens, as React** |
+| add, a word put in the middle | caret at 16; `Task 201`, `Event 201` once each | the same | **the same** |
+| close a task through its dialog | `PUT Task`, `Event 201` once each; `Done (2)`; first press | the same | **the same** |
+| reload; sign out; reload | signed in; Sign in; Sign in | the same | **the same** |
+
+**The HTML export equals the React export at all 12 steps**, page, tabs, rows, fields and requests. All three are
+equal on sign in, add, close, reload and sign out. Nothing is sent twice, and the field keeps its cursor (HTX-003's
+sentence, graded here). No arm logged an error. **There is no delete in todo-list** (5 Create nodes, 17 Update, no
+Delete), so that step of the task cannot be driven in any arm.
+
+**Found and filed:**
+
+- `P134-HTX004-SELECTREFUSED` (high, the plan's, shared): neither export can open a task. Every way todo-list opens
+  something sets a Variable from a placed component's output (a For Each row's `id` lifted out of `Todo/Task list`),
+  and the plan refuses that: "the value wire has no statically known source". All 14 such wires in todo-list are
+  refused. **Across the templates there are 180**, more than the Functions (152) or Expressions (73) that feed a
+  Variable. It is now the biggest loss the drive has shown, and the fix lands in both exports.
+- `P134-HTX004-PROJECTSTAB` (medium, shared): the Projects and money tab is in neither export. Its Functions call
+  `Noodl.Records` beyond `query`, which the client does not carry. 130 report lines, all in todo-list and its demo.
+
+**Fixed:** the HTML preflight listed the app shell's CSS Definition as "left out by the plan", though the HTML export
+prints it into `styles/app.css` (the dark palette, which theme icon shows). It is now listed apart as "Carried here,
+though the React export leaves it out", and the CLI's count is honest (todo-list 120 → 119, story-engine 24 → 23).
+`emitHtml.ts` +19/−5. `html-the-first-page.test.ts` reads both lists (20 + 1 carried); a mutant that puts the sheet back
+among the refusals is killed. The four HTML specs: 76 of 76.
+
+**Read, not graded:** the React export is light and shows all four header icons, because it drops the same stylesheet
+(P18-S140-SHELLUNSAID, open). Both exports draw the empty detail card at phone width ("One pane or two?", the same root as
+SELECTREFUSED).
+
+**Predicted wrong:** nothing in the graded columns. Two of my readers were wrong before the drive was: an action's title
+is a field, not a text, and an action's ✓ opens a note dialog too. Both were fixed in the drive before the run quoted.
+
+**Cost, so far:** 7 sessions (HTX-004 took two, as session 6 said). The printer is 2,896 hand-written lines
+(`printComponent` 2,011, `emitHtml` 306, `libJs` 322, `client` 257). The drive, outside the package: 274 lines
+(`drive.cjs`), plus S6's backend harness copied as it was.

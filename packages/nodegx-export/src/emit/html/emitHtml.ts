@@ -42,6 +42,11 @@ export interface HtmlPreflight {
   logic: string[];
   /** Plan-layer refusals: the same nodes the React export leaves out, for the same reasons. */
   planRefusals: Array<{ component: string; nodeId: string; name: string; reason: string }>;
+  /**
+   * Plan refusals this target prints all the same: the app shell's CSS Definitions, carried into `styles/app.css`
+   * (P18-S140-SHELLUNSAID is React's). Listed apart, so the preflight never calls a printed node left out (HTX-004).
+   */
+  carried: Array<{ component: string; nodeId: string; name: string }>;
   /** What the HTML printer read in the plan and does not print yet. */
   htmlLosses: HtmlLoss[];
 }
@@ -107,14 +112,15 @@ export function emitHtmlApp(ir: ExportIR, catalog: Catalog): EmittedHtmlApp {
   // export drops them (P18-S140-SHELLUNSAID); a stylesheet is what this target is made of.
   const shell = router ? ir.components.find((c) => c.path === router.componentPath) : undefined;
   const shellSheets = (shell?.nodes ?? []).filter((n) => n.type === 'CSS Definition');
-  const shellCss = shellSheets
+  const shellPrinted = shellSheets
     .map((n) => {
       const v = n.parameters.find((p) => p.name === 'style')?.value;
       // A codeeditor port parses as `{ kind: 'script', source }` (the plan's own reading of a CSS Definition, plan.ts).
       const css = v?.kind === 'script' ? v.source : v?.kind === 'literal' && typeof v.value === 'string' ? v.value : '';
-      return css.trim() === '' ? '' : `/* ${(n.authoredLabel ?? n.id).replace(/\*\//g, '* /')} (${shell!.path}) */\n${css.trim()}\n`;
+      return { node: n, text: css.trim() === '' ? '' : `/* ${(n.authoredLabel ?? n.id).replace(/\*\//g, '* /')} (${shell!.path}) */\n${css.trim()}\n` };
     })
-    .filter((s) => s !== '');
+    .filter((s) => s.text !== '');
+  const shellCss = shellPrinted.map((s) => s.text);
   if (shellCss.length > 0) files['styles/app.css'] = `/* @nodegx:generated — the app shell's own stylesheets, as written in NodeGX. */\n\n${shellCss.join('\n')}`;
   for (const n of shell?.nodes ?? []) {
     if (n.type === 'CSS Definition' || n.id === router?.nodeId) continue;
@@ -165,8 +171,12 @@ export function emitHtmlApp(ir: ExportIR, catalog: Catalog): EmittedHtmlApp {
     .join('\n')
     .concat('\n');
 
-  const planRefusals = project.plans.flatMap((p) => p.refusals.map((r) => ({ component: p.path, nodeId: r.nodeId, name: r.label ?? r.displayName, reason: r.reason })));
-  const preflight: HtmlPreflight = { appName, components, logic, planRefusals, htmlLosses: losses };
+  const carriedSheets = new Set(shellPrinted.map((s) => `${shell!.path}\u0000${s.node.id}`));
+  const allRefusals = project.plans.flatMap((p) => p.refusals.map((r) => ({ component: p.path, nodeId: r.nodeId, name: r.label ?? r.displayName, reason: r.reason })));
+  const isCarried = (r: { component: string; nodeId: string }) => carriedSheets.has(`${r.component}\u0000${r.nodeId}`);
+  const planRefusals = allRefusals.filter((r) => !isCarried(r));
+  const carried = allRefusals.filter(isCarried).map(({ component, nodeId, name }) => ({ component, nodeId, name }));
+  const preflight: HtmlPreflight = { appName, components, logic, planRefusals, carried, htmlLosses: losses };
   files['EXPORT-PREFLIGHT.md'] = renderHtmlPreflight(preflight);
   files['README.md'] = readme(appName, preflight, pages.map((p) => p.urlPath));
 
@@ -242,6 +252,10 @@ export function renderHtmlPreflight(p: HtmlPreflight): string {
     ''
   ];
   for (const r of p.planRefusals) lines.push(`- \`${r.component}\` "${r.name}" — ${r.reason}`);
+  if (p.carried.length > 0) {
+    lines.push('', `## Carried here, though the React export leaves it out (${p.carried.length})`, '');
+    for (const c of p.carried) lines.push(`- \`${c.component}\` "${c.name}" — the app shell's stylesheet, in \`styles/app.css\` as written`);
+  }
   lines.push('', `## Read in the plan, not printed by the HTML target yet (${p.htmlLosses.length})`, '');
   for (const l of p.htmlLosses) lines.push(`- \`${l.component}\`${l.nodeId ? ` ${l.label ? `"${l.label}"` : l.nodeId}` : ''} — ${l.what}`);
   lines.push('');
