@@ -79,10 +79,12 @@ three arms at all 12 steps; 80 of the 180 template wires compile, 3 before), ses
 export any kind of complex app or game, we're in trouble"*: reach measured on every template and HiveClip — only small
 apps came out whole; the printer's own gaps 346 → 166, the shared plan's ~1,700 untouched), session 12 (11-04: the
 printer's own 148 → 54 — a re-tested Condition, script files, Animate To Value, External Link, a Record's Fetch; 38 of
-the 54 are kit nodes, React components by their authors, R8 asked), session 13 (11-04: 54 → 38, all 38 the kit nodes
-R8 waits on — Drag and Repeat as React's own machines, graded on React's own desks, Close Popup, React's unkept-Fetch rule;
-HiveClip has none of the printer's own left; CLICKBUBBLES filed, R9 asked), then the plan's HTTP URL on a wire
-(HiveClip's engine calls), HTX-007 on a HiveClip copy, ThreadSpace's menu**; past the 10-session stop by Richard's rulings, said in the README;
+the 54 are kit nodes, React components by their authors, R8 asked), session 13 (11-04: the printer's own 54 → 0 — Drag and Repeat as React's
+own machines, graded on React's own desks, Close Popup, React's unkept-Fetch rule; R9 ruled and fixed: a press runs only
+where the app keeps it, graded against the running app; R8 ruled and built: kit nodes drawn by their kits' own code on
+React 19 in `lib/vendor/`, only where a kit is used), session 14 (11-04: R10 ruled and built — the click stop printed
+only where something above could hear it, 917 → 343; the plan's HTTP URL on a wire read when the request is sent, in
+both exports, HiveClip's 13 engine-call refusals gone), then HTX-007 on a HiveClip copy, ThreadSpace's menu**; past the 10-session stop by Richard's rulings, said in the README;
 [P134 README](tasks/phase-134-the-app-in-plain-files/README.md). React and Swift stay paused.
 
 | release | what is in it | state 2026-10-23 |

@@ -1,52 +1,63 @@
 # Next session — Phase 134, the app in plain files
 
-**Written 2026-11-04 by session 13 (the printer's own gaps 54 → 38, all 38 kit nodes waiting on R8).** Read
-[README.md](README.md) §9 and §10 (sessions 1 to 13) first. Sessions used: 13 (past ten by R6, and by Richard's asks of
-sessions 11 to 13: "let's keep pushing and see how many gaps we can close").
+**Written 2026-11-04 by session 14** (R9's suite fixed and R10 ruled and built; the plan's HTTP URL on a wire; the HTML
+printer's first request step). Read [README.md](README.md) §9 and §10 (sessions 1 to 14) first. Sessions used: 14 (past
+ten by R6 and by Richard's "keep pushing").
 
 ## Before anything
 
 1. **Measure where it stands:** `cd packages/nodegx-export && nice -n 19 npx ts-node --transpile-only -O
    '{"module":"commonjs"}' ../../dev-docs/tasks/phase-134-the-app-in-plain-files/census/own.ts` (the printer's own gaps per
-   app, beside the shared and the plan's). After session 13: `census/own-after-s13.txt` (38, every one a kit node; 12's and
-   11's beside it). `hive.ts` breaks down HiveClip; `kinds.ts` every loss kind.
-2. **Rulings:** **R8 asked in session 12** (README §9), and now the only thing between the HTML printer and zero of its
-   own: the 38 kit nodes are React components by their authors; leave them out, named (recommended), or carry React for
-   them. Until he answers they stay named losses. If he picks "carry React", that is the next build (the React export's
-   kit bridge, a box per kit node). R4 still open,
-   nothing depends on it. R7 ThreadSpace, HiveClip on a copy: both stand, and wait behind the order below.
+   app, beside the shared and the plan's). After session 14: `census/own-after-s14.txt` (0 everywhere; HiveClip's plan 68).
+   `hive.ts` breaks down HiveClip; `kinds.ts` every loss kind.
+2. **Rulings:** R8, R9, R10 ruled 2026-11-04 and built. R4 still open, nothing depends on it. R7 ThreadSpace, HiveClip on
+   a copy: both stand.
 3. **BOARD.** Lane 4 is reopened for this phase only (BOARD §2); React and Swift stay paused.
 4. **The box.** Suites and drives are heavy jobs: one at a time, `nice -n 19 … --runInBand`, busy-check by
    `ps -A -o pid,comm` (never `pgrep -f` in a wait loop). `grep` skips some `.ts` files as binary here: use
    `/usr/bin/grep -a`. Chrome from Claude's bash needs the sandbox off. The shell is zsh: a list in `$F` does not split.
-5. **Four reds in the package suite are not this phase's** (filed open, session 10): P134-S10-SENDSIGNAL,
-   P134-S10-SIGNINERROR, P134-S10-STUDIOSOCKET, P134-S10-PARAMFLOOR. Anything else red is new: look at it. Session 13's
-   suite: 172 of 181 suites green, the 5 red ones those rows exactly (4 more went red only because the laptop slept
-   mid-run, and passed alone, 86 of 86).
+5. **Read a suite from its JSON, never from a wrapper's exit line** (`npx jest --runInBand --json --outputFile=<scratch>`).
+   Session 13's handoff said 172 of 181 green; the tree it left was 58 suites red. Session 14's last full run is the
+   reading to beat: **179 of 184 suites green** (2026-11-05 00:03, `jest --json`), the 5 red ones exactly the four open rows not this phase's work
+   (P134-S10-SENDSIGNAL ×2 suites, -SIGNINERROR, -STUDIOSOCKET, -PARAMFLOOR, which reads exactly its own +3: 1229 of
+   1402 against the ledger's 1226 of 1399). Anything else red is new.
 
-## The order (Richard, sessions 11 to 13: "keep pushing and see how many gaps we can close")
+## The order
 
-1. **The printer's own is done but R8** (README §10 session 13). Two owed, both small: **a backend desk for a Record's
-   Fetch and its columns** (session 12's; members-area's shape; copy HTX-004's Record Desk and `htmlBackendArm`), and
-   **R9** (README §9, asked in session 13): P134-S13-CLICKBUBBLES, a wired Click inside a wired Click runs both in both
-   exports where the app stops at the first (reach 45, planning's block sheet the most of it). Recommended: fix it in
-   the plan and both printers now, counted apart, as R6 was; an HTML-only fix would make the desks read a difference
-   from React.
-2. **The plan's HTTP URL on a wire** (shared with React): HiveClip's 13, how its window reaches the engine. It blocks
-   HTX-007 in both exports; it is plan work, counted apart as R6's was.
-3. **HTX-007** (below), then ThreadSpace's menu (R7). HTX-007's drive is also the first time the Drag runs on a real
-   layout (session 13 graded it in jsdom with the sizes React's own §B gives).
-
-## Then: HTX-007 ([task](HTX-007-HIVECLIP-OFF-NODEGX.md))
-
-HiveClip's `ui/` exported to plain files on a copy (`~/vscode_projects/hiveclip-plain/`, never the real repo; Richard
-said yes), put where `shell/` reads `ui-dist/`, and `npm run check` in the copy's `shell/` passing on it as on the
-deploy. Then a stranger agent on a model that is not Claude (Mistral in Vibe, OWN-026's harness) makes one change
-Richard names, in the exported files. Start with `nodegx export --target html --dry-run <copy>/ui`: a refusal that
-blocks the window is the task.
+1. **HTX-007** ([task](HTX-007-HIVECLIP-OFF-NODEGX.md)). HiveClip's `ui/` exported to plain files on a copy
+   (`~/vscode_projects/hiveclip-plain/`, never the real repo; Richard said yes), put where `shell/` reads `ui-dist/`, and
+   `npm run check` in the copy's `shell/` passing on it as on the deploy. Start with `nodegx export --target html
+   --dry-run <copy>/ui` (CLI from source, below): **a refusal that blocks the window is the task**. Its requests now
+   print (session 14); measured next in its list: 2 requests whose Fetch "is never fired by a translatable trigger"
+   (Projects, Settings), 7 Settings Option logic nodes, 4 EngineFeed outputs not lifted, 13 For Each lists fed by a
+   Function (shared). Plan work is counted apart, as R6's was. HTX-007's drive is also the first time a Drag and a
+   request run in a real browser, against a real engine.
+2. Then the stranger agent (Mistral in Vibe, OWN-026's harness) makes the one change Richard names, in the exported
+   files.
+3. Then ThreadSpace's menu (R7).
+4. Small and owed: a backend desk for a Record's Fetch and its columns (session 12's; copy HTX-004's Record Desk); a
+   Chrome look at a kit page (rocket-school's race track); Swift's taps not measured for the click rule.
 
 ## Known
 
+- **Clicks (R9 session 13, R10 session 14)**: `clickStopsOf` is the running app's rule (where it keeps a click);
+  `narrowClickStops` (plan.ts, once per project after planning) keeps a stop only where something above could hear it
+  (a wired Click above in the component, a slot inside a component that wires one, or a placement under one: instance,
+  For Each row, Router page, Page Stack page; a popup is at the top; everywhere in an app with a kit; a component named any
+  other way keeps it). `plan.clickStops` is the narrowed list both printers read. Specs: `a-click-stays-where-it-is-used`
+  (C1 the rule, C1b and C6 the narrowing). Block Pointer Events stops only the click in the exports and says so
+  (`BLOCK_TOUCH_NOTE`).
+- **A request (session 14)**: a wired URL is `params.url` (`HttpCallPlan.urlParam`), read when the request is sent; the
+  other configuration inputs still refuse. The HTML printer's `http-call` step and `http-out` read are React's, copied.
+  `fake-parse-backend.js` answers `/engine/projects` and its `fetch` has `statusText`, `headers`, `json()`; the runtime arm
+  takes `allowErrors` and routes `fetch` to the fake. Specs: `http-request.test.ts` (P134-S14-URLWIRED block),
+  `html-a-request.test.ts` (the Request Desk, three arms).
+
+- **Kits (R8, session 13)**: `lib/kits.js` (generated by `htmlKitsJs` from `kits.ts` `runtimeFile()`), `mountKitNode` in
+  it, `drawKitNode` in `printComponent.ts`, React from `src/emit/html/reactGlobals.ts` (`dist/react19` packaged by
+  `build.mjs`, else `noodl-viewer-react/static/shared-react19`), `kits/<dir>.js` per kit. The jsdom page runs
+  `index.html`'s classic scripts first; a test must read the export's copies into its files (`landed` in
+  `html-the-kits.test.ts`). Both arms take `cells: <selector>`.
 - **Session 13's carriers**: a Drag is `dragNode(l, el, source, options, listeners)` (`lib/drag.js`, React's `drag.ts`
   with `useDrag` cut off; the handle and its `div` made above the drawing by `dragHandle` in `printComponent.ts`, the
   drawing inserts the element); a Repeat is `repeatNode(l, source, options, listeners)` (`lib/repeat.js`, `printRepeats`,
@@ -85,8 +96,8 @@ blocks the window is the task.
 - `bin/` runs `dist/`, which is stale: run the CLI from source with
   `npx ts-node --transpile-only -O '{"module":"commonjs"}' src/cli/main.ts export …` in `packages/nodegx-export`.
 - Headless Chrome lays out at 500 px when asked for 390 by window size: use CDP device metrics or a 390 px iframe.
-- Open rows: PROJECTSTAB, CLOUDARM, OPTIONSWIRED, TEXTKEEPS, BOXREMOUNT, HIDDENRUNS (new, s12), PRINTERDECIDES (thirty-five
-  copied decisions, four imported; add any new one there).
+- Open rows: PROJECTSTAB, CLOUDARM, OPTIONSWIRED, TEXTKEEPS, BOXREMOUNT, HIDDENRUNS, HTTPRAISEWORDS (new, s14),
+  PRINTERDECIDES (fifty copied decisions after s14's request step and its read; add any new one there).
 
 ## At the end
 

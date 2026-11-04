@@ -1,7 +1,7 @@
 # Phase 134 — The app in plain files
 
 **Scoped:** 2026-11-03, on Richard's ask ("Let's scope up the HTML export phase please, I think it'll be important").
-**State:** 🔵 HTX-001 to HTX-006 done, and SELECTREFUSED (§10, session 10, 2026-11-04). A NodeGX settings menu runs inside a three.js page that is not NodeGX: exported with `--component`, widened, exported again, and the page's own files byte-identical before and after; its look in the game equal to its own app's on all 90 cells read (§10 session 9). Ruled 2026-11-04 (§9): R6 "now, first" (the phase runs past ten), R7 ThreadSpace, HiveClip on a copy. The HTML export is graded by P107's scenarios the way React and Swift are: on every scenario it plays, its trace equals the React export's, event for event; the 13 React plays and it does not are this printer's, named (a Log step, the streaming stores, On App Error with the parsers). **Session 10 (past ten, by R6): SELECTREFUSED fixed in the plan** — a task opens in both exports, and todo-list's Chrome drive reads the same in the running app, the React export and the HTML export at all 12 steps; 80 of the 180 template wires compile (3 before). **Session 11 (Richard: "if nobody can export any kind of complex app or game, we're in trouble"):** measured reach on every template and HiveClip, then closed most of the printer's own gaps, 346 → 166 (Image, Video, Icon, Columns, slots, pages with parameters, Navigate To Path, `Component.Object`, Delay); the shared plan's ~1,700 untouched. **Session 12:** the printer's own 148 → 54 (a Condition that tests again 31, script files 30, Animate To Value 12, a Record's Fetch 8, External Link 5, Boolean To String 3, a sign-in's Error 3; the video's Play and Pause measured shared), each graded on a desk against React or the runtime but the Record Fetch (a backend desk owed); 38 of the 54 are kit nodes, React components by their authors (R8 asked). **Session 13:** 54 → 38, and all 38 are kit nodes (R8): Drag 5 and Repeat 4, each React's machine with its hook cut off and graded on React's own desk (HTML equal to React at every reading), Close Popup 2, the unkept Fetch 3 (React's rule copied), 2 reclassified as the plan's; HiveClip has none of the printer's own left; P134-S13-CLICKBUBBLES filed (both exports run every wired ancestor's Click; reach 45). **Next:** R8's answer, then the plan's HTTP URL on a wire (HiveClip's engine calls), then HTX-007; ThreadSpace's line after. Options wait on the plan (P134-HTX003-OPTIONSWIRED). R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
+**State:** 🔵 HTX-001 to HTX-006 done, and SELECTREFUSED (§10, session 10, 2026-11-04). A NodeGX settings menu runs inside a three.js page that is not NodeGX: exported with `--component`, widened, exported again, and the page's own files byte-identical before and after; its look in the game equal to its own app's on all 90 cells read (§10 session 9). Ruled 2026-11-04 (§9): R6 "now, first" (the phase runs past ten), R7 ThreadSpace, HiveClip on a copy. The HTML export is graded by P107's scenarios the way React and Swift are: on every scenario it plays, its trace equals the React export's, event for event; the 13 React plays and it does not are this printer's, named (a Log step, the streaming stores, On App Error with the parsers). **Session 10 (past ten, by R6): SELECTREFUSED fixed in the plan** — a task opens in both exports, and todo-list's Chrome drive reads the same in the running app, the React export and the HTML export at all 12 steps; 80 of the 180 template wires compile (3 before). **Session 11 (Richard: "if nobody can export any kind of complex app or game, we're in trouble"):** measured reach on every template and HiveClip, then closed most of the printer's own gaps, 346 → 166 (Image, Video, Icon, Columns, slots, pages with parameters, Navigate To Path, `Component.Object`, Delay); the shared plan's ~1,700 untouched. **Session 12:** the printer's own 148 → 54 (a Condition that tests again 31, script files 30, Animate To Value 12, a Record's Fetch 8, External Link 5, Boolean To String 3, a sign-in's Error 3; the video's Play and Pause measured shared), each graded on a desk against React or the runtime but the Record Fetch (a backend desk owed); 38 of the 54 are kit nodes, React components by their authors (R8 asked). **Session 13:** 54 → 0. First 54 → 38: Drag 5 and Repeat 4, each React's machine with its hook cut off and graded on React's own desk (HTML equal to React at every reading), Close Popup 2, the unkept Fetch 3 (React's rule copied), 2 reclassified as the plan's; HiveClip has none of the printer's own left; P134-S13-CLICKBUBBLES found (both exports ran every wired ancestor's Click; reach 45) and fixed by R9 in the plan and both printers, graded against the running app; then R8 ruled (carry React for kits) and built: the 38 kit nodes drawn by their kits' own code, React 19 in `lib/vendor/` only where a kit is used. **Session 14:** R9's suite was 58 suites red, not the handoff's 5: R10 ruled ("Only where it matters") and built, the stop printed where something above could hear the click (917 → 343), R8's and R9's own reds fixed; the plan's HTTP URL on a wire read when the request is sent, in both exports, and the HTML printer's first request step (it had none: the plan refused every one first), graded on a Request Desk in all three arms; the printer's own 0 again, HiveClip's plan refusals 87 → 68. **Next:** HTX-007; ThreadSpace's line after. Options wait on the plan (P134-HTX003-OPTIONSWIRED). R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
 phase only** (BOARD §2); React and Swift stay paused. **Read first:** this page, then [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md),
 then the task you take. The Swift precedent this phase copies is
 [EXP-022](../phase-18-code-export-v2/EXP-022-THE-SAME-GRAPH-IN-SWIFT.md) §7–§9.
@@ -181,8 +181,9 @@ The questions as scoped:
 | R4 | Must it open by double-clicking `index.html`? | **No: any static server** (`npx serve`, `python3 -m http.server`, every web host). Chrome refuses ES modules from a double-clicked file (other browsers to be measured in HTX-001). | Yes: a second, bundled copy of `app.js` beside the readable modules. |
 | R5 | Which first after HTX-003: the backend (HiveClip, web apps) or the game bridge (AC5)? | **The backend**: HiveClip is the app he named. | The game bridge first. |
 | R7 (asked 2026-11-04, session 9) | HTX-006's last line: the same menu bridge on a copy of one of your games. Which game, and may I? | **ThreadSpace's** (its menu is plain HTML today, `public/index.html`; it has a drive, `tools/run-all.sh`) | The Dig's. Neither: the small game in `htx-006/` is enough. |
-| R8 (asked 2026-11-04, session 12) | 38 nodes in four templates come from kits (the game kit's race track, aliens and answer pad; the lesson kit's panels). A kit node is the kit author's own React component, so plain files cannot draw it without React. What should the HTML export do with them? | **Leave them out, named** (as now): the export stays React-free, and a kit that wants to travel writes a plain version later. | Carry React (about 140 KB) in the folder only when a kit is used, and mount each kit node in a box, as the React export's kit bridge does. |
-| R9 (asked 2026-11-04, session 13) | In the app, a press on a button inside a clickable panel runs only the button's chain. In both exports it runs the panel's too (P134-S13-CLICKBUBBLES): on planning's block sheet, Save also closes the sheet. 45 such places in the templates. The fix touches the React export, whose lane is paused. Fix it now? | **Yes, now, in the plan and both printers, counted apart** (as R6): the plan says per press whether the app stops it, each printer adds the stop. | Later, with the React lane; or HTML only, which the desks would then read as a difference from React. |
+| R8 (asked 2026-11-04, session 12; **ruled 2026-11-04: the second, "A little React just to run the kits is totally justifiable. We're not religious about HTML only, it's just nice to be like Svelte and compile to pure HTML"**, built in session 13) | 38 nodes in four templates come from kits (the game kit's race track, aliens and answer pad; the lesson kit's panels). A kit node is the kit author's own React component, so plain files cannot draw it without React. What should the HTML export do with them? | **Leave them out, named** (as now): the export stays React-free, and a kit that wants to travel writes a plain version later. | Carry React (about 140 KB) in the folder only when a kit is used, and mount each kit node in a box, as the React export's kit bridge does. |
+| R9 (asked 2026-11-04, session 13; **ruled the same day: "Yes please fix it that drives me nuts"**, fixed in session 13) | In the app, a press on a button inside a clickable panel runs only the button's chain. In both exports it runs the panel's too (P134-S13-CLICKBUBBLES): on planning's block sheet, Save also closes the sheet. 45 such places in the templates. The fix touches the React export, whose lane is paused. Fix it now? | **Yes, now, in the plan and both printers, counted apart** (as R6): the plan says per press whether the app stops it, each printer adds the stop. | Later, with the React lane; or HTML only, which the desks would then read as a difference from React. |
+| R10 (asked 2026-11-04, session 14; **ruled the same day: "Only where it matters"**, built in session 14) | R9's fix stops the click on every wired Click, as the app does, so all 910 wired Clicks in the templates and HiveClip carry `event.stopPropagation()`, and only about 120 of those change anything: the rest have nothing above them that listens. Should the export print the stop only where something above could hear the click? | **Only where it matters**: a wired Click above it in its component, or a placement under one; kept everywhere in an app that draws a kit, and where a component is reached in a way the plan does not follow. | Everywhere, as built: update the ~160 assertions that read the old handler text. |
 | R6 (asked 2026-11-04, session 7) | In both exported todo apps you cannot open a task: press one and nothing happens (`htx-004/side-by-side.png`, top row). It is the shared plan both exports read, and 180 wires across the templates have the same shape. Fix it now, or after the phase? | **After HTX-005 to HTX-007, as shared plan work counted apart** (Swift S6's ruling). Three of the ten sessions are left, one per remaining task. | Fix it now, in session 8, and let the phase run past ten. Hand it to the React lane when it reopens. |
 
 ## 10. Sessions
@@ -874,7 +875,7 @@ plan's HTTP URL on a wire, in both exports.
 3,878 hand-written lines across its five files, against session 8's table's 2,896, and 8 generated libs); 3 new specs (26
 tests), 2 desks (Condition, Link) and a Glow Desk copy.
 
-### Session 13 — the printer's own gaps 54 → 38: all that is left needs R8 (2026-11-04, Opus 5.5)
+### Session 13 — the printer's own gaps 54 → 38 → 0 (R8 and R9 ruled and built) (2026-11-04, Opus 5.5)
 
 **Asked by Richard:** "Continue phase 134 please, let's keep pushing and see how many gaps we can close." Measured first
 (`census/own.ts`): 54, as session 12 left it. **After: 38, every one a kit node (R8).** HiveClip has none of the
@@ -900,8 +901,115 @@ also closes in both exports), marketplace 4, landing-pages 1, HiveClip 0. The fi
 React lane is paused), so it waits. **My E1 expected two calls; three is React's** (Close bubbles to the backdrop).
 
 **Left of the printer's own: 38, all kit nodes** (rocket-school 12, star-class 12, digital-bricks-training 8,
-nightbook 6). R8 is the only thing between the HTML printer and zero.
+nightbook 6). R8 was the only thing between the HTML printer and zero (ruled and built later this session, below).
+
+**R9 fixed the same session** (Richard: "Yes please fix it that drives me nuts"): the plan says where the running app
+keeps a click (`clickStops`, `clickStopsOf`: Block Pointer Events, else Click Bubbling Never, else on Automatic a Click
+with a connection; Always lets it through), and both printers stop it there, before the node's own chain (React
+`event.stopPropagation()` first in the handler, HTML the same in the listener); a Never node with no Click of its own
+gets a click that only stops. The style layer no longer calls the two ports "not carried". Graded on a Click Desk
+(`tests/a-click-stays-where-it-is-used.test.ts`: a wired card holding a wired button, plain words, Never words, Always
+words with their own Click, and a clickable inner group) pressed by one hand in all three arms (`click:<words>`, now a
+step of the runtime arm too): the running app reads the prediction at every press, the React and HTML exports read what
+the app reads; 1 mutant killed. It covers the 45 nested places and the 18 nodes authors set to Never (the sheets and
+cards of planning, marketplace and landing-pages), which neither export honoured. Swift is not changed and not measured
+(its taps have their own precedence).
+
+**R8 built the same session** (Richard chose to carry React for kits): a kit node is drawn by its kit's own code
+through the React export's bridge. `lib/kits.js` is `kits.ts` `runtimeFile()` with its types out (generated, the 11th
+such file: `window.Noodl.defineModule`, the node object, `KitNode`) plus `mountKitNode(l, parent, before, type, params,
+signals, values)`, a `display: contents` box rendered by `ReactDOM.createRoot` and again whenever what `params()` reads
+changes. React is React 19's two global builds the running app's deploy loads (`noodl-viewer-react/static/shared-react19`,
+186 KB, copied into `dist/react19` by `build.mjs`, read by `src/emit/html/reactGlobals.ts`), written to `lib/vendor/` and
+loaded by `index.html` before the app, **only in an app that draws a kit node** (todo-list carries none). One module per
+kit, `kits/<dir>.js`, loads the bridge and then the kit's script as written (`noodl_modules/<dir>/<main>`), the React
+export's import order. The printer copies React's `renderCustom` (authored values on declared ports, a wired port takes
+the wire, signals as chains, read value outputs into their rows). Children placed inside a kit node are not drawn yet (0
+in the corpus, named if one appears). Graded on the React export's own kit desk (`fixtures/kit-signals`, GAM-017) in both
+arms, read by the kit's own elements (`cells`): React reads the prediction, HTML what React reads, at every press; 1 mutant
+killed; the four kit templates draw every kit node, and rocket-school loads in jsdom with the game kit's own script
+(`tests/html-the-kits.test.ts`, 11). **The printer's own gaps: 0 in every template and HiveClip.** Not yet seen in a real
+browser: a kit page (the race track) wants a Chrome look, with HTX-007's drive.
 
 **Cost:** 1 session (13th). Printer +~150 hand-written lines (`printComponent.ts` 2,632 → 2,783; the five files 4,042),
 2 more generated libs (`lib/drag.js`, `lib/repeat.js`: 10 in all), the arms taught a pointer and a wait, 1 new spec
 (16 tests), a Beat Desk copy.
+
+### Session 14 — R9's suite, R10, and the URL on a wire (2026-11-04, Opus 5.5)
+
+**Asked by Richard:** "Can we continue with the next session then please." Measured first: the printer's own gaps **0**
+(`census/own.ts` on the working tree; the saved `own-after-s13.txt` still read 38, written before R8 was built), and
+session 13's code **built but not committed**.
+
+**Where the handoff was wrong.** It said session 13's suite was 172 of 181 suites green with only the known reds. That
+reading was taken before R9: the whole suite on session 13's tree was **58 of 183 suites red, 191 tests** (`jest --json`,
+2026-11-04 22:07). 162 of the 191 read a click handler's text, which R9 had changed on every wired Click
+(`onClick={(event) => { event.stopPropagation(); … }}`); the rest were the five known suites (SENDSIGNAL ×2, SIGNINERROR,
+STUDIOSOCKET, PARAMFLOOR) and four of R8's and R9's own (below). Session 13 ran that suite twice (21:02, 21:27) and both
+runs exited 1; a background wrapper printed "exit 1" and reported 0, and the handoff was written from the earlier reading.
+
+**R10, asked and ruled ("Only where it matters"), built.** Measured before asking: of 910 wired Clicks in the templates
+and HiveClip, 46 sit under another wired Click in their own component and 74 more only through where their component is
+placed (almost all planning); **790 stops changed nothing**. `narrowClickStops` (plan.ts, run once over the project after
+every component is planned) keeps a stop from `clickStopsOf` only where something above could hear the click: a wired
+Click above it in its component, a placed component's slot it sits in when that component wires a Click, or its
+component placed under one, followed through every placement (an instance, a For Each row, a Router's page, a Page
+Stack's page; a cycle answers no). A popup is drawn at the top (`popup-dialog.ts` and the export's host listen for Escape
+only), and a Navigate names a page and places nothing. Kept everywhere, to stay safe, in an app that draws a kit (its React
+component may listen on the document) and for a component named any other way. Stops printed: **917 → 343** (planning
+96 → 69, marketplace 98 → 4, landing-pages 29 → 3, todo-list 94 → 0; the four kit apps keep theirs). Graded: the Click Desk
+still reads the same in the running app, the React export and the HTML export at every press (C2–C4), the printed page
+holds exactly the three stops the rule predicts (C1b), and a new desk places a component under a wired card as an
+instance and as a For Each row and once where nothing listens (C6: kept, kept, dropped; the running app's rule names all
+three, the control).
+
+**R8's and R9's own reds, fixed:** html-a-drag E1 had pinned the bug (two closes for one press), now one as the app;
+gam-017's regex read the old handler text; popups' AboutDialog kept its stop until a popup was placed at the top;
+html-the-backend D1 bundled the four kit apps without the kit scripts the writer copies (the `landed` rule of
+`html-the-kits.test.ts`). The corpus golden (`hls001`) moved **1** hash line, `kit-signals/src/pages/Home.tsx` (the kit
+app's Fire button stops its click), counted before it was regenerated (R9 alone: most of the corpus; R10: 3; with a Page
+Stack followed: 1). P134-S13-CLICKBUBBLES closed; P134-S14-CLICKNOISE filed and fixed.
+
+**The plan's HTTP URL on a wire (P134-S14-URLWIRED), shared by both exports.** EXP-011 §8.4 put every wired configuration
+input out of scope in one sentence. That holds for the inputs that rebuild the port set (method, timeout, the string
+lists, the body type, the auth preset, a mapping path) and not for the URL's value: the path inputs are made from the URL
+the editor holds (`updatePorts` reads `parameters.url`), and the request reads the wire's latest value when it is sent
+(`buildUrl` over `_internal.url`). So the URL is now a value like a header's: the request module takes `params.url`, the
+call site hands over the wire's value (a variable through its snapshot), a placeholder the editor made from the authored
+URL is filled in the wired one as `buildUrl` fills it, and the runtime's two failures come with it in its order and its
+words: not text (`http/input-not-text`, printed only when the wire is not typed `string`) and blank or absent
+(`http/no-url`). The HTML export carries the React export's `src/api/http.ts` as it is, so both have it. Graded by
+running the emitted function against a stubbed `fetch` with the sentences read out of `httpnode.ts` (37 tests in
+`http-request.test.ts`, 8 new); the other configuration inputs still refuse. HiveClip: its 10 wired-URL refusals and the
+3 reads they took with them are gone (every one a String Format, `{url}/projects?token={token}` and the like).
+
+**What the URL uncovered: the HTML printer had never printed a request (P134-S14-HTTPSTEP).** Re-measured after the URL:
+HiveClip had **5** of the printer's own gaps, "a http-call step, which the HTML target does not print yet" (a timer's
+tick, a component's signal input). "The printer's own: 0" had been true only because the plan refused every request a
+chain ran first: every one in the corpus was HiveClip's. Now printed, copied from React's `http-call` (P134-HTX001-
+PRINTERDECIDES): the module awaited in a `try`, the answer kept where something outside the chain reads it, a 2xx runs Done,
+any other writes the Error row, raises `http/error-status` with the status and runs Failure; nothing back raises the
+module's own code; a request's outputs read as React reads them (`http-out`: Error the message, the answer's own
+properties, an Output Field a key of `fields`). Graded on a **Request Desk** (`tests/html-a-request.test.ts`: a Variable
+`base` into a String Format into the URL, Load, Break, Load) in all three arms with one hand on `fake-parse-backend.js`
+(an `/engine/projects` route; its `fetch` now answers `statusText`, `headers` and `json()`, and the runtime arm's `fetch`
+is the fake too, with the runtime's own String Format and HTTP Request registered): the running app reads the prediction
+at every press, the React and HTML exports read what it reads, every arm asked `/engine/projects` then `/nowhere/projects`;
+1 mutant killed (a URL read once, at the first press, asks the old address again). Found on the way and filed, shared:
+**P134-S14-HTTPRAISEWORDS** — for a non-2xx answer the running app raises "The server answered 404 Not Found" with
+`{ url, status }`, both exports "HTTP 404: Not Found" with `{ status }` (the Error output agrees in all three).
+
+**Block Pointer Events said again (P134-S14-BLOCKTOUCH).** R9 spent `blockTouch` with `clickBubbling`, so a node set to
+Block Pointer Events reported nothing; the running app stops all sixteen pointer events there and the exports only the
+click. Both exports now say so (`BLOCK_TOUCH_NOTE`: the style layer's note, the HTML printer's loss; the census counts it
+shared). The parameter ledger: 10 `clickBubbling` ports classified `gated` (they reach where something above listens),
+the floor moved by exactly those 10 (1236 → 1226), so the gate reads PARAMFLOOR's own +3 and nothing else.
+
+**HiveClip after this session:** the printer's own **0** (with requests printed); the plan's refusals **87 → 68**. Next in
+its list: 2 requests whose Fetch "is never fired by a translatable trigger" (Projects, Settings), 7 Settings Option logic
+nodes, 4 EngineFeed outputs not lifted, 13 For Each lists fed by a Function (shared, as React's).
+
+**Cost:** 1 session (14th). Plan +~120 lines (`narrowClickStops`, the URL), `emitApp.ts` +~20, the HTML printer +~60 (the
+request step and its read), 2 new specs (`html-a-request` 6, the click spec 8 with C1b and C6), 8 new tests in
+`http-request.test.ts`; the fake backend, the runtime arm and two older specs taught the request; 4 of R8's and R9's own
+reds fixed; the corpus golden moved 1 line.

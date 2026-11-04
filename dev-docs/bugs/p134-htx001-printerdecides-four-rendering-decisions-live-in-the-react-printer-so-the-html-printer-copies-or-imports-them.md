@@ -91,8 +91,17 @@ into a query the export does not keep is no step (P18-S116-QUERYFETCH, `expandAc
 (`onClose?.(action)` and its chain after it only when there is one, POPUPS-TARGET), with `onClose` among the callbacks
 when `plan.closesPopup`; and the Drag X / Count reads as the getter in a Condition's dependencies (`effectDeps`).
 Forty-seven copied in all. The two machines (`lib/drag.js`, `lib/repeat.js`) are React's own text with the types out and
-the hook cut off, not copies.
+the hook cut off, not copies. Then two more for R8 and R9: a kit node's props (`renderCustom`: an authored value on a declared port
+only, a wired port takes the wire, signals as chains, read value outputs into their rows) and where a click stops (that
+one moved INTO the plan, `clickStops`, so both printers read it rather than either deciding). Forty-eight copied, one
+moved into the plan.
 
+
+**Session 14 (2026-11-04) copied two more**, in `printComponent.ts`: an HTTP Request's step (`http-call`: the module awaited
+in a `try`, the answer row where read outside the chain, the `ok` test inverted when there is no Done chain, the Error row,
+`http/error-status` with `{ status }`, the module's code in the `catch`) and its read (`http-out`: Error the message, the
+answer's own properties, an Output Field a key of `fields`). Fifty copied in all. Where a click stops stayed in the plan, and
+R10 narrowed it there (`narrowClickStops`), so neither printer decides it.
 **What a fix needs:** the plan carries each answer as data (`tagOf[nodeId]`, a `mountedKeeps` flag beside the Mounted
 binding, the merged page declarations, the removed ids), and the three printers read it. AC4's ledger (HTX-005) is
 where a drift would show.

@@ -1,11 +1,13 @@
 ---
 id: P134-S13-CLICKBUBBLES
 title: "export: a press on an element whose Click is wired, inside another whose Click is wired, runs both chains in the React and HTML exports, where the running app stops the click at the first (FH-015 slice 2, Click Bubbling \"auto\"), so planning's Save on the block sheet also runs the sheet's backdrop close"
-status: open
+status: fixed
+commit: ae7a3e99d
 severity: medium
 area: export / the React printer's `onClick` (`packages/nodegx-export/src/emit/component.ts`), copied by the HTML printer (`src/emit/html/printComponent.ts` `listenFor`); neither reads `clickBubbling` or the runtime's rule (`packages/noodl-viewer-react/src/pointerlisteners.ts` `stopsClickPropagation`)
 found: P134 session 13, 2026-11-04, grading Close Popup on landing-pages' CaseStudy in jsdom
 evidence: packages/nodegx-export/tests/html-a-drag.test.ts §E E1 (three calls of onClose for two presses, pinned as React's)
+regression: packages/nodegx-export/tests/a-click-stays-where-it-is-used.test.ts
 ---
 
 The running app stops a click where it is used: with Click Bubbling on its default ("auto"), an element whose Click port is
@@ -31,3 +33,8 @@ whether the runtime would stop the click (the node's `clickBubbling`, else "auto
 the handler (React `event.stopPropagation()`, HTML the listener's `event.stopPropagation()`). The React lane is paused
 (BOARD §2), so it waits for the order: do both together, or an HTML-only fix that the desks would then grade as a
 difference from React.
+
+**Fixed** (R9, Richard 2026-11-04: "Yes please fix it that drives me nuts"; built in session 13, committed with session
+14 as ae7a3e99d): the plan says where the running app keeps a click (`clickStopsOf`) and both printers stop it there; R10
+(session 14) prints the stop only where something above could hear it (`narrowClickStops`, P134-S14-CLICKNOISE). Graded on
+the Click Desk in the running app, the React export and the HTML export, press by press; E1 now reads one close, as the app.
