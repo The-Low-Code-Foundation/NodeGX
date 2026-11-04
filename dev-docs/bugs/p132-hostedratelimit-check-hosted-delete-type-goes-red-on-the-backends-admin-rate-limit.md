@@ -33,3 +33,8 @@ The same family as s3's note in the phase memory: adding one backend read to `lo
 **To do:** count the backend's admin requests on its side over one `check:hosted` run (the limiter's key and window),
 then either space the gate's sections or give the test backend a higher burst. Lowering Studio's reads is the wrong
 fix: a person never makes 100 admin calls in a second.
+
+**s14 (2026-11-04), a second shape:** on BWF-011's tree, red twice in a row. The first red was the rate-limit toast
+again. The second had no rate-limit toast (the toast still showed an earlier option-set message), and the type's row
+read "Note / on the backend": gone from the project, its table not yet gone (or not yet re-read) within the gate's
+10 s. BWF-011 changes nothing on the Data tab, but this shape has **not** been run at HEAD: it is recorded, not explained.

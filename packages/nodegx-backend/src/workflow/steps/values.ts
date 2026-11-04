@@ -369,7 +369,9 @@ export const VALUE_LANGUAGE: ValueLanguageSpec = {
     {
       form: '$path',
       example: { $path: 'previous.result.total' },
-      description: 'Read a dotted path out of the run scope. An unresolvable path is `undefined`, not an error.'
+      description:
+        'Read a dotted path out of the run scope. An unresolvable path is `undefined`, not an error. A list is walked ' +
+        'by position: `upstream.find.items.0.name` is the first found row\'s name, `-1` the last (P132 BWF-011).'
     },
     {
       form: '$literal',

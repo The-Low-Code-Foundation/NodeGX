@@ -1,5 +1,21 @@
 # P132 — next session
 
+**s14 (2026-11-04): BWF-011 built in Studio** ([the record](BWF-011-A-VALUE-COMPOSED-IN-ANY-SETTING.md#s14-2026-11-04-built-in-studio-the-editors-picker-open)),
+nodegx-studio `1114cb3`. Every text setting is a composer, words with value chips. A chip is refined in place
+(first, last, how many, each one's field, joined; a record's fields). It is saved as `$path`, the typed text, or
+`{ $fn: 'text' }`. Driven in the Electron app on Greenhouse: "Water " + the first plant's name + " today", no
+formula menu opened, the test's email said "Water Fern today". NodeGX catalog: a `$path` walks lists by position.
+**Next: BWF-012** (saved API calls), then 013. The editor's composer is still open (BWF-011's record).
+
+- 🔴 **A real press takes the focus before a menu's pick lands**: a control that saves on `focusout` must not be
+  one-shot. A gate's `.click()` never leaves the box; dispatch the `focusout` first, as `automations-drive.mjs` does now.
+- 🔴 `automations-drive.mjs --shots` writes into NodeGX's `dev-docs/tasks/phase-127-…/look/`, overwriting five tracked
+  PNGs: don't pass `--shots`, or put them back with `git show HEAD:<path> > <path>` after.
+- Asks for Richard: the chip's words (`items › #1 › name`, pathWords'); the panel is busier (*+ A value* under each
+  text setting).
+
+---
+
 **s13 (2026-11-04): BWF-010 built** ([the record](BWF-010-THE-TRIGGER-IS-THE-FIRST-STEP.md#s13-2026-11-04-built-ac1ac3-green)),
 nodegx-studio `26e602d`, P132-TRIGGERROWS fixed. One row per workflow; what starts it is the first card on its
 canvas, its settings on the right; a workflow nothing starts gets one from that card. Driven in the Electron app on a
