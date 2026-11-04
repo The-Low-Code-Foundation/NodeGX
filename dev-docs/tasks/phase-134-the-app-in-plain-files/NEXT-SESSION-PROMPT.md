@@ -1,30 +1,42 @@
 # Next session — Phase 134, the app in plain files
 
-**Written 2026-11-04 by session 9 (HTX-006 done: a NodeGX menu inside a three.js page).** Read [README.md](README.md) §10
-(sessions 1 to 9) first. Sessions used: 9 of at most 10, with one task left (HTX-007), one session.
+**Written 2026-11-04 by session 9 (HTX-006 done: a NodeGX menu inside a three.js page).** Read [README.md](README.md) §9
+and §10 (sessions 1 to 9) first. Sessions used: 9 of 10; Richard ruled R6 "now, first", so the phase runs past ten.
 
 ## Before anything
 
-1. **Three rulings wait on Richard (README §9).** R6: neither export can open a task (P134-HTX004-SELECTREFUSED, the
-   plan's); recommended after HTX-007, as shared plan work counted apart. R7 (new): HTX-006's last line, the same menu
-   bridge on a copy of one of his games; recommended ThreadSpace's. R4: static server or also a bundled copy; nothing
-   depends on it. If he has ruled R6 "fix it now", the place is `plan.ts` around 16716 (Set Variable) and 16530 (Global
-   Store Set) and the lifted outputs (`pendingLifted`, about 4574), then the whole package suite, graded with
-   `htx-004/drive.cjs` (D2 to D2back). If he has said yes to R7, that is a short drive: `htx-006/drive.cjs` is the
-   pattern, and the width changed on Studio's screen this time, not by a file write.
-2. **HTX-007 needs his OK to use a copy of HiveClip** (closed source; the copy stays on this machine). Without it, stop
-   and ask, in plain words, on one screen.
+1. **Richard ruled on 2026-11-04 (README §9).** R6 **"Now, first"**: fix P134-HTX004-SELECTREFUSED before anything else;
+   the phase runs past ten sessions, and that is said in §10, not hidden. R7 **ThreadSpace**. HiveClip **yes, on a copy**.
+   R4 (static server or also a bundled copy) is still open; nothing depends on it.
+2. **The order:** SELECTREFUSED (session 10), ThreadSpace's menu (HTX-006's last line, short), HTX-007 (HiveClip).
 3. **BOARD.** Lane 4 is reopened for this phase only (BOARD §2); React and Swift stay paused.
 4. **The box.** Suites and drives are heavy jobs: one at a time, `nice -n 19 … --runInBand`, busy-check by
    `ps -A -o pid,comm` (never `pgrep -f` in a wait loop). `grep` skips some `.ts` files as binary here: use
    `/usr/bin/grep -a`. Chrome from Claude's bash needs the sandbox off.
 
+## Then: SELECTREFUSED (R6), [the bug](../../bugs/p134-htx004-selectrefused-a-variable-set-from-a-placed-components-output-is-left-out-so-no-export-can-open-a-task.md)
+
+Neither export can open a task in todo-list: a Set Variable (or Global Store Set) whose value comes from a placed
+component's lifted output is left out by the plan. 180 wires across the templates have that shape. The place is
+`plan.ts` around 16716 (Set Variable) and 16530 (Global Store Set), and the lifted outputs (`pendingLifted`, about
+4574). `plan.ts` is the React lane's too, so run the **whole package suite** after (`nice -n 19 … --runInBand`), and the
+three graph ledgers. Grade it with `htx-004/drive.cjs` (D2 to D2back: the task opens in both exports and Back returns).
+Count the 180 again after: how many the fix reaches.
+
+## Then: ThreadSpace's menu (R7, HTX-006's last line)
+
+On a **copy** of `dev-docs/parked/threadspace/` (other sessions have many uncommitted edits in it: copy, never edit it in
+place). Build its pause or settings menu in NodeGX, export it with `--component` into the copy's `public/`, and change its
+width **on Studio's screen** this time (session 9 changed the file). `shasum` over the copy's own files equal before and
+after; its drive (`tools/run-all.sh`) green on the copy. `htx-006/drive.cjs` is the pattern.
+
 ## Then: HTX-007 ([task](HTX-007-HIVECLIP-OFF-NODEGX.md))
 
-HiveClip's `ui/` exported to plain files on a copy (`~/vscode_projects/hiveclip-plain/`, never the real repo), put where
-`shell/` reads `ui-dist/`, and `npm run check` in the copy's `shell/` passing on it as on the deploy. Then a stranger
-agent on a model that is not Claude (Mistral in Vibe, OWN-026's harness) makes one change Richard names, in the exported
-files. Start with `nodegx export --target html --dry-run <copy>/ui`: a refusal that blocks the window is the task.
+HiveClip's `ui/` exported to plain files on a copy (`~/vscode_projects/hiveclip-plain/`, never the real repo; Richard
+said yes), put where `shell/` reads `ui-dist/`, and `npm run check` in the copy's `shell/` passing on it as on the
+deploy. Then a stranger agent on a model that is not Claude (Mistral in Vibe, OWN-026's harness) makes one change
+Richard names, in the exported files. Start with `nodegx export --target html --dry-run <copy>/ui`: a refusal that
+blocks the window is the task.
 
 ## Known
 
@@ -48,7 +60,7 @@ files. Start with `nodegx export --target html --dry-run <copy>/ui`: a refusal t
 - Open rows: SELECTREFUSED, PROJECTSTAB, CLOUDARM, OPTIONSWIRED, TEXTKEEPS, BOXREMOUNT, PRINTERDECIDES (thirty-five
   copied decisions, four imported; add any new one there).
 
-## At the end (the phase's last session)
+## At the end
 
 Update README's state line and §10, the cost table (README §10 session 8's, with the final numbers), BOARD's lane 4
 line, and this file (closing the phase or saying what is left and whose it is). File every bug in `dev-docs/bugs/` (one

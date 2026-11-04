@@ -1,7 +1,7 @@
 # Phase 134 — The app in plain files
 
 **Scoped:** 2026-11-03, on Richard's ask ("Let's scope up the HTML export phase please, I think it'll be important").
-**State:** 🔵 HTX-001 to HTX-006 done (§10, session 9 of at most 10, 2026-11-04). A NodeGX settings menu runs inside a three.js page that is not NodeGX: exported with `--component`, widened, exported again, and the page's own files byte-identical before and after; its look in the game equal to its own app's on all 90 cells read (§10 session 9). The last line of HTX-006 (the same on a copy of ThreadSpace's or the Dig's menu, and the width changed on Studio's screen) waits on Richard (§9 R7). The HTML export is graded by P107's scenarios the way React and Swift are: on every scenario it plays, its trace equals the React export's, event for event; the 13 React plays and it does not are this printer's, named (a Log step, the streaming stores, On App Error with the parsers). Neither export can open a task (P134-HTX004-SELECTREFUSED, high, the plan's; §9 R6 still unanswered). **Next: HTX-007** (HiveClip off NodeGX), the last session. Options wait on the plan (P134-HTX003-OPTIONSWIRED). R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
+**State:** 🔵 HTX-001 to HTX-006 done (§10, session 9 of at most 10, 2026-11-04). A NodeGX settings menu runs inside a three.js page that is not NodeGX: exported with `--component`, widened, exported again, and the page's own files byte-identical before and after; its look in the game equal to its own app's on all 90 cells read (§10 session 9). Ruled 2026-11-04 (§9): R6 "now, first" (the phase runs past ten), R7 ThreadSpace, HiveClip on a copy. The HTML export is graded by P107's scenarios the way React and Swift are: on every scenario it plays, its trace equals the React export's, event for event; the 13 React plays and it does not are this printer's, named (a Log step, the streaming stores, On App Error with the parsers). Neither export can open a task (P134-HTX004-SELECTREFUSED, high, the plan's; §9 R6 still unanswered). **Next: P134-HTX004-SELECTREFUSED** (R6, in the plan), then HTX-006's ThreadSpace line, then HTX-007. Options wait on the plan (P134-HTX003-OPTIONSWIRED). R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
 phase only** (BOARD §2); React and Swift stay paused. **Read first:** this page, then [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md),
 then the task you take. The Swift precedent this phase copies is
 [EXP-022](../phase-18-code-export-v2/EXP-022-THE-SAME-GRAPH-IN-SWIFT.md) §7–§9.
@@ -162,6 +162,14 @@ what it did not write.
 - **R5: "Backend, toward HiveClip"** (recommended): HTX-004 before HTX-006.
 - **R4 not asked**: the recommendation (any static server) stands until HTX-001 measures double-click and he says
   otherwise.
+
+**Ruled 2026-11-04** (session 9, on one screen):
+
+- **R6: "Now, first"** (not the recommended "after HTX-007"). The next session fixes SELECTREFUSED in the plan before
+  HTX-007, and the phase runs past ten sessions; the overrun is counted and said, not hidden.
+- **R7: "ThreadSpace"** (recommended): HTX-006's last line on a copy of ThreadSpace's menu, the width changed on
+  Studio's screen.
+- **HiveClip: "Yes, on a copy"** (recommended): HTX-007 may use `~/vscode_projects/hiveclip-plain/`, on this machine only.
 
 The questions as scoped:
 
