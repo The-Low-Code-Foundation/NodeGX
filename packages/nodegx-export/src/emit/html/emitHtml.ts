@@ -55,6 +55,21 @@ export interface EmittedHtmlApp {
   files: Record<string, string>;
   copies: Array<{ from: string; to: string }>;
   preflight: HtmlPreflight;
+  /** HTX-006. Every printed part: what `emitHtmlComponent` picks one from. */
+  parts: HtmlPart[];
+}
+
+/** HTX-006. A printed component, as `--component` names it. */
+export interface HtmlPart {
+  /** The component's path in the project (`Menu/Settings`). */
+  path: string;
+  /** Its module, relative to the output root, and the function it exports. */
+  file: string;
+  mount: string;
+  /** A logic component: it draws nothing. */
+  logic: boolean;
+  /** A page the Router lists. */
+  page: boolean;
 }
 
 const escapeHtml = (s: string): string => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -74,6 +89,7 @@ export function emitHtmlApp(ir: ExportIR, catalog: Catalog): EmittedHtmlApp {
   for (const plan of project.plans) if (plan.file) moduleByLegacy.set(plan.legacyPath, { file: `${plan.file.dir}/${plan.file.fileBase}.js`, mount: mountNameOf(plan) });
 
   const losses: HtmlLoss[] = [];
+  const parts: HtmlPart[] = [];
   const components: string[] = [];
   const logic: string[] = [];
   const stylesheets: string[] = [];
@@ -96,6 +112,7 @@ export function emitHtmlApp(ir: ExportIR, catalog: Catalog): EmittedHtmlApp {
       columnsOf: (name) => (ir.project.collections.find((c) => c.name === name)?.columns ?? []).map((c) => c.name)
     });
     const base = `${plan.file.dir}/${plan.file.fileBase}`;
+    parts.push({ path: plan.path, file: `${base}.js`, mount: printed.mount, logic: plan.hook === true, page: plan.role === 'page' });
     files[`${base}.js`] = printed.js;
     Object.assign(files, printed.functions);
     usesStates ||= printed.usesStates;
@@ -184,7 +201,200 @@ export function emitHtmlApp(ir: ExportIR, catalog: Catalog): EmittedHtmlApp {
   const copies = emitKits(ir, new Set()).copies.map((c) => ({ from: c.from, to: c.to.replace(/^public\//, '') }));
   copies.sort((a, b) => (a.to < b.to ? -1 : a.to > b.to ? 1 : 0));
 
-  return { files: Object.fromEntries(Object.entries(files).sort(([a], [b]) => (a < b ? -1 : 1))), copies, preflight };
+  return { files: Object.fromEntries(Object.entries(files).sort(([a], [b]) => (a < b ? -1 : 1))), copies, preflight, parts };
+}
+
+/** HTX-006. What `--component` writes: one part and what it needs, and the files a host page reads. */
+export interface EmittedHtmlComponent {
+  files: Record<string, string>;
+  copies: Array<{ from: string; to: string }>;
+  /** The part's path in the project, and the entry a host page imports: `<Name>.js`, `<Name>.css`. */
+  component: string;
+  entry: { js: string; css: string; mount: string };
+  /** What did not come across, for the parts written only (the plan's refusals and this printer's losses). */
+  preflight: HtmlPreflight;
+}
+
+export type HtmlComponentChoice = { ok: true; part: HtmlPart } | { ok: false; reason: string };
+
+/**
+ * The part `name` names: its path (`Menu/Settings`, a leading `/` allowed) or, when only one component has it, its last
+ * name (`Settings`). Case counts. A page can be one; a logic component cannot, since it draws nothing to mount.
+ */
+export function chooseHtmlPart(parts: HtmlPart[], name: string): HtmlComponentChoice {
+  const wanted = name.replace(/^\/+/, '');
+  const drawn = parts.filter((p) => !p.logic);
+  const byPath = parts.find((p) => p.path === wanted);
+  const byLast = drawn.filter((p) => p.path.split('/').pop() === wanted);
+  const found = byPath ?? (byLast.length === 1 ? byLast[0] : undefined);
+  const list = drawn.map((p) => `"${p.path}"`).join(', ');
+  if (found?.logic) return { ok: false, reason: `"${found.path}" is a logic component: it draws nothing, so there is nothing to mount in a page.` };
+  if (found) return { ok: true, part: found };
+  if (byLast.length > 1) return { ok: false, reason: `"${name}" is the name of ${byLast.length} components: ${byLast.map((p) => `"${p.path}"`).join(', ')}. Give its path.` };
+  return { ok: false, reason: `The project has no component "${name}". The components it can export: ${list || 'none'}.` };
+}
+
+/**
+ * HTX-006. `nodegx export --target html --component <name>`: the part, the parts it places, their CSS, and the `lib/`
+ * files they import, with no `index.html` and no router. It is the whole export's own files (`emitHtmlApp`), the same
+ * text, taken by what the part's module imports; so a part exported alone and in its app is the same file.
+ *
+ * Two files are new, at the folder's top, named after the part: `<Name>.js`, the one module a host page imports, and
+ * `<Name>.css`, the one stylesheet it links. The entry puts the part in a box of its own (`display: contents`, so it lays
+ * out as if it were not there) whose class the tokens and the floor are scoped to: the project's custom properties, its
+ * font and its colour stop at the part, and the page's body is not touched.
+ */
+export function emitHtmlComponent(ir: ExportIR, catalog: Catalog, name: string): EmittedHtmlComponent | { refused: string } {
+  const whole = emitHtmlApp(ir, catalog);
+  const choice = chooseHtmlPart(whole.parts, name);
+  if (choice.ok === false) return { refused: choice.reason };
+  const part = choice.part;
+  const symbol = part.mount.replace(/^mount/, '');
+  const entryJs = `${symbol}.js`;
+  const entryCss = `${symbol}.css`;
+  if (entryJs in whole.files) return { refused: `"${part.path}" would write its entry over ${entryJs}, a file of the app's own.` };
+
+  // What the part's module imports, and what those import: the closure of relative imports, read off the printed text.
+  const taken = new Set<string>();
+  const queue = [part.file];
+  while (queue.length > 0) {
+    const file = queue.shift()!;
+    if (taken.has(file) || !(file in whole.files)) continue;
+    taken.add(file);
+    const dir = file.split('/').slice(0, -1);
+    for (const m of whole.files[file].matchAll(/(?:from|import)\s*\(?\s*'(\.{1,2}\/[^']+)'/g)) queue.push(resolveRelative(dir, m[1]));
+  }
+  const files: Record<string, string> = {};
+  const sheets: string[] = [];
+  for (const file of [...taken].sort()) {
+    files[file] = whole.files[file];
+    const css = file.replace(/\.js$/, '.css');
+    if (css in whole.files) {
+      files[css] = whole.files[css];
+      sheets.push(css);
+    }
+  }
+
+  const scope = `nodegx-${symbol}`;
+  const tokens = tokensCss(ir).replace(/^:root \{/m, `.${scope} {`);
+  const fontSheets = moduleStylesheetLinks(ir)
+    .split('\n')
+    .map((l) => /href="([^"]+)"/.exec(l)?.[1])
+    .filter((h): h is string => h !== undefined)
+    .map((h) => h.replace(/^\//, '').replace(/&amp;/g, '&'));
+  // The cut, in a sheet of its own because it must come before the part's sheets: the page's own rules stop at the box
+  // (`all: initial` on the box, `all: revert` inside, each one class strong, so the part's classes, later, still win).
+  const floorCss = `styles/${symbol}.floor.css`;
+  if (floorCss in whole.files) return { refused: `"${part.path}" would write its floor over ${floorCss}, a file of the app's own.` };
+  files[floorCss] = [
+    `/* @nodegx:generated by \`nodegx export --target html --component\` — where the page's own styles stop, for ${part.path}. */`,
+    '',
+    `/* The box: nothing the page sets reaches in by inheritance (its font, its colour, its letter spacing). The page's */`,
+    `/* rules that name an element (every p, every button) stop here too: a rule with an id or a class in it is stronger. */`,
+    `.${scope} {`,
+    '  all: initial;',
+    '  font-family: var(--font-sans);',
+    '  color: var(--foreground);',
+    '}',
+    `.${scope} :where(*),`,
+    `.${scope} :where(*)::before,`,
+    `.${scope} :where(*)::after {`,
+    '  all: revert;',
+    '}',
+    '',
+    `/* The floor the whole export puts on the body (styles/base.css), on the box instead. */`,
+    `.${scope} :where(*),`,
+    `.${scope} :where(*)::before,`,
+    `.${scope} :where(*)::after {`,
+    '  box-sizing: border-box;',
+    '}',
+    `.${scope} :where(button, input, select, textarea) {`,
+    '  font: inherit;',
+    '}',
+    `.${scope} :where(textarea) {`,
+    '  resize: none;',
+    '}',
+    ''
+  ].join('\n');
+  files[entryCss] = [
+    `/* @nodegx:generated by \`nodegx export --target html --component\` — ${part.path}, the one stylesheet to link. */`,
+    ...fontSheets.map((h) => `@import url(${js(h)});`),
+    `@import url(${js(floorCss)});`,
+    ...sheets.sort().map((h) => `@import url(${js(h)});`),
+    '',
+    `/* The project's design tokens, on the part's own box only: they stop where it stops. */`,
+    tokens.replace(/^\/\* @nodegx:generated \(scaffold\) \*\/\n/, '').trimEnd(),
+    ''
+  ].join('\n');
+
+  const p = whole.preflight;
+  const within = (c: string) => [...taken].some((f) => whole.parts.some((wp) => wp.file === f && wp.path === c));
+  const preflight: HtmlPreflight = {
+    appName: p.appName,
+    components: whole.parts.filter((wp) => !wp.logic && taken.has(wp.file)).map((wp) => wp.mount),
+    logic: whole.parts.filter((wp) => wp.logic && taken.has(wp.file)).map((wp) => wp.path),
+    planRefusals: p.planRefusals.filter((r) => within(r.component)),
+    carried: [],
+    htmlLosses: p.htmlLosses.filter((l) => within(l.component))
+  };
+  const leftOut = [...preflight.planRefusals.map((r) => `\`${r.component}\` "${r.name}" — ${r.reason}`), ...preflight.htmlLosses.map((l) => `\`${l.component}\`${l.label ? ` "${l.label}"` : ''} — ${l.what}`)];
+  files[entryJs] = partEntryJs(part, symbol, scope, entryCss, leftOut);
+
+  // The fonts the project's modules carry: copied as the whole export copies them.
+  const copies = fontSheets.length > 0 ? whole.copies : [];
+  return { files: Object.fromEntries(Object.entries(files).sort(([a], [b]) => (a < b ? -1 : 1))), copies, component: part.path, entry: { js: entryJs, css: entryCss, mount: part.mount }, preflight };
+}
+
+function resolveRelative(dir: string[], spec: string): string {
+  const out = [...dir];
+  for (const seg of spec.split('/')) {
+    if (seg === '.' || seg === '') continue;
+    if (seg === '..') out.pop();
+    else out.push(seg);
+  }
+  return out.join('/');
+}
+
+/** `<Name>.js`: the part in its scoped box, and how a page uses it. */
+function partEntryJs(part: HtmlPart, symbol: string, scope: string, css: string, leftOut: string[]): string {
+  return [
+    `// @nodegx:generated by \`nodegx export --target html --component\` — ${part.path}, for a page that is not NodeGX.`,
+    '//',
+    `// Link ${css} once, import this, and mount the part where it goes:`,
+    '//',
+    `//   <link rel="stylesheet" href="${css}" />`,
+    `//   import { ${part.mount} } from './${symbol}.js';`,
+    `//   const part = ${part.mount}(element, { /* its inputs */ });`,
+    '//   part.update({ /* inputs that changed */ });',
+    '//   part.outputs.<port>.subscribe((value) => { … });   // each output, by the name it has in NodeGX',
+    '//   part.destroy();',
+    '//',
+    "// A value output's subscriber is called with each new value (`.peek()` reads the last one); a signal output's, on",
+    '// each pulse. Every file this export wrote is listed in nodegx-export.json: export again and only those change.',
+    ...(leftOut.length > 0 ? ['//', `// What did not come across (${leftOut.length}):`, ...leftOut.map((l) => `//   - ${l}`)] : []),
+    `import { ${part.mount} as mountPart } from './${part.file}';`,
+    '',
+    '/**',
+    ` * Draws ${part.path} into \`element\` (before \`before\`, when given), in a box of its own: the box lays out as if it were`,
+    ` * not there (\`display: contents\`), and its class (\`${scope}\`) is where ${css}'s tokens apply and the page's own styles stop.`,
+    ' */',
+    `export function ${part.mount}(element, inputs = {}, before) {`,
+    "  const box = document.createElement('div');",
+    `  box.className = ${js(scope)};`,
+    "  box.style.display = 'contents';",
+    '  element.insertBefore(box, before ?? null);',
+    '  const part = mountPart(box, inputs);',
+    '  return {',
+    '    update: part.update,',
+    '    outputs: part.outputs,',
+    '    destroy() {',
+    '      part.destroy();',
+    '      box.remove();',
+    '    }',
+    '  };',
+    '}',
+    ''
+  ].join('\n');
 }
 
 /** The app's Variables: one value each, which every page and component reads and writes (React's `stores/variables.ts`). */

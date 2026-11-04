@@ -72,7 +72,9 @@ lanes, the backend and HiveClip before the game bridge. Seven tasks; **HTX-001 �
 sessions, 11-04: the checkbox as the runtime's; its Chrome drive moved to HTX-004), HTX-004 ✅ (7 of 10, 11-04: todo-list in
 Chrome on a real backend, the HTML export equal to the React export at every step; neither export can open a task, the
 plan's, filed and R6 asked), HTX-005 ✅ (8 of 10, 11-04: the ledger line; on every scenario it plays, the HTML export's
-trace equals React's; the 13 React plays and it does not are this printer's, named), HTX-006 next**; hard stop at 10 sessions;
+trace equals React's; the 13 React plays and it does not are this printer's, named), HTX-006 ✅ (9 of 10, 11-04: a NodeGX
+menu inside a three.js page, `--component` and its manifest; widened and exported again, the page's own files
+byte-identical; on one of Richard's games it waits on his R7), HTX-007 next**; hard stop at 10 sessions;
 [P134 README](tasks/phase-134-the-app-in-plain-files/README.md). React and Swift stay paused.
 
 | release | what is in it | state 2026-10-23 |

@@ -69,6 +69,12 @@ in its own async body). Imported, made `export` in `component.ts` (React's outpu
 `queryHasEffect`, `queryParamsLiteral`, `wiredWhereExpr`. Thirty-two copied in all. The Function file's `Noodl`
 (the client's, with each named Variable over the app's) is the React wrapper's too.
 
+**HTX-006 session 9 (2026-11-04) copied three more**, for the Slider (`drawRange` in `printComponent.ts`): the element
+(`renderNode`'s `role === 'range'`: an `<input type="range">` with the node's class, its typed-in Min, Max and Step), the
+controlled change chain for a slider (`changeAttrs` with the `control-event` form `number`: the row from
+`Number(value)`, then its Changed; React's `onChange` on a range is the DOM's `input`), and the uncontrolled slider's
+typed-in Value (`defaultValue`). Thirty-five copied in all.
+
 **What a fix needs:** the plan carries each answer as data (`tagOf[nodeId]`, a `mountedKeeps` flag beside the Mounted
 binding, the merged page declarations, the removed ids), and the three printers read it. AC4's ledger (HTX-005) is
 where a drift would show.

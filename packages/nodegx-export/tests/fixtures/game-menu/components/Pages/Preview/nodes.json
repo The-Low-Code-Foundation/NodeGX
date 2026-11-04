@@ -1,0 +1,54 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "d6a10000-0000-4000-8000-000000000602",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Preview",
+      "children": [
+        "stage"
+      ],
+      "parameters": {
+        "title": "Game menu",
+        "urlPath": "preview"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "stage",
+      "type": "Group",
+      "label": "Stage",
+      "parent": "page",
+      "children": [
+        "menu"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "alignItems": "center",
+        "justifyContent": "center",
+        "paddingTop": "var(--space-8)",
+        "paddingBottom": "var(--space-8)",
+        "backgroundColor": "var(--muted)"
+      },
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "menu",
+      "type": "/Menu/Settings",
+      "label": "Settings menu",
+      "parent": "stage",
+      "parameters": {
+        "volume": 0.8
+      },
+      "x": 40,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "page"
+  ]
+}

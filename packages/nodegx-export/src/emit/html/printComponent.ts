@@ -143,6 +143,21 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   const stateNames = new Set(plan.stateVars.map((s) => s.name));
   const valueProps = plan.props.map((p) => p.name);
   const callbackProps = new Set([...plan.outputProps.map((o) => o.prop), ...plan.liftedOutputProps.map((o) => o.prop)]);
+  /**
+   * HTX-006. What the component sends out, as a page that is not NodeGX reads it: `outputs.<port>` (the port's name as
+   * written), a `value` for a value output (its last value, `subscribe` for each one after) and a `signal` for a signal
+   * output (`subscribe` for each pulse). The parent's callbacks in `inputs` are called first, as before.
+   */
+  const outPort = new Map<string, { port: string; kind: 'value' | 'signal' }>([
+    ...plan.outputProps.map((o) => [o.prop, { port: o.port, kind: 'signal' as const }] as const),
+    ...plan.liftedOutputProps.map((o) => [o.prop, { port: o.port, kind: 'value' as const }] as const)
+  ]);
+  const sendOut = (prop: string, arg: string): string => {
+    const out = outPort.get(prop);
+    const call = `if (${member('given', prop)}) ${member('given', prop)}(${arg});`;
+    if (out === undefined) return call;
+    return `${call} ${member('outputs', out.port)}.${out.kind === 'signal' ? 'emit()' : `set(${arg})`};`;
+  };
   const stateByName = new Map(plan.stateVars.map((v) => [v.name, v]));
   const stateBySetter = new Map(plan.stateVars.map((v) => [v.setterName, v]));
   const fnByNode = plan.jsFunctions;
@@ -211,7 +226,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     for (const c of plan.childrenOf[id] ?? []) walk(c);
   };
   if (plan.rootId) walk(plan.rootId);
-  const styled = order.filter((id) => ['page', 'group', 'text', 'button', 'input', 'checkbox'].includes(plan.roleOf[id]));
+  const styled = order.filter((id) => ['page', 'group', 'text', 'button', 'input', 'checkbox', 'range'].includes(plan.roleOf[id]));
   const declsOf = new Map<string, Decl[]>();
   const roleCssOf = new Map<string, ReturnType<typeof computeRoleCss>>();
   for (const id of styled) {
@@ -477,7 +492,9 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         return announced?.inputId === e.inputId ? announced.code : undefined;
       // A control's own value, read inside its own change listener (React's `event.target.checked`).
       case 'control-event':
-        return controlled?.controlId === e.controlId && e.form === 'checked' ? controlled.code : undefined;
+        // HTX-006. A slider's, as a number (React's `Number(event.target.value)`).
+        if (controlled?.controlId !== e.controlId) return undefined;
+        return e.form === 'number' ? `Number(${controlled.code})` : e.form === 'checked' ? controlled.code : undefined;
       case 'row-relay':
         return relayed?.repeaterId === e.repeaterId ? relayed.read(e.input) : 'undefined';
       // HTX-004. Who is signed in: `lib/session.js`'s value, React's `useSession()` (one per component).
@@ -783,7 +800,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       }
       case 'output-signal':
         if (!callbackProps.has(a.prop)) throw new Unprinted(`a signal out through ${a.prop}, which this component does not declare`);
-        return one(`if (${member('given', a.prop)}) ${member('given', a.prop)}();`);
+        return one(sendOut(a.prop, ''));
       case 'state-set': {
         const row = stateByName.get(a.name);
         if (!row) throw new Unprinted(`a write to ${a.name}, a value the plan does not keep`);
@@ -999,7 +1016,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         continue;
       }
       // A text field's Changed runs from its typing, with its own text (drawn with the field).
-      if (port === 'onChange' && (plan.roleOf[id] === 'input' || plan.roleOf[id] === 'checkbox')) continue;
+      if (port === 'onChange' && (plan.roleOf[id] === 'input' || plan.roleOf[id] === 'checkbox' || plan.roleOf[id] === 'range')) continue;
       // P18-S128-FIELDSET. A text field's On Enter is its Enter key.
       if (port === 'onEnter' && plan.roleOf[id] === 'input') {
         const body = chain(id, port, list, `${pad}  `);
@@ -1062,7 +1079,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         continue;
       }
       const writes = lifts.get(lift.prop) ?? [];
-      writes.push(lift.forward ? `if (${member('given', lift.setterName)}) ${member('given', lift.setterName)}(value);` : `${member('state', row!.name)}.set(value);`);
+      writes.push(lift.forward ? sendOut(lift.setterName, 'value') : `${member('state', row!.name)}.set(value);`);
       lifts.set(lift.prop, writes);
     }
     for (const [prop, writes] of lifts) fixed.push(`${key(prop)}: function (value) {\n${writes.map((w) => `${pad}    ${w}`).join('\n')}\n${pad}  }`);
@@ -1339,6 +1356,42 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     return out;
   };
 
+  /**
+   * HTX-006. A Slider, as the React printer draws it (`component.ts` `renderNode`'s `role === 'range'` and `changeAttrs`;
+   * copied, P134-HTX001-PRINTERDECIDES): an `<input type="range">` with the node's class, its typed-in Min, Max and Step
+   * (set before the value, which the browser keeps between them). With a state row the slider shows the row, and a
+   * person's drag writes the row as a number, then runs its Changed chain; with none, it keeps its own place from its
+   * typed-in Value, and the drag runs the chain only. React's `onChange` on a range is the DOM's `input`: every step.
+   */
+  const drawRange = (id: string, node: NodeIR, bound: Record<string, BindingSource>, parent: string, before: string | undefined, pad: string): string[] => {
+    const out: string[] = [elLine(id, 'input', parent, undefined, before, pad)];
+    const box = local(id);
+    out.push(`${pad}${box}.type = 'range';`);
+    for (const param of ['min', 'max', 'step']) {
+      if (bound[param]) lose(id, `its ${param[0].toUpperCase()}${param.slice(1)} follows a wire, which the HTML target does not print yet`);
+      const v = literalParam(node, param);
+      if (typeof v === 'number' || (typeof v === 'string' && v !== '')) out.push(`${pad}${box}.${param} = ${js(String(v))};`);
+    }
+    out.push(...enabledLines(id, node, bound, pad, box));
+    const row = plan.stateVars.find((v) => v.originNodeId === id && v.origin === 'control');
+    if (row) {
+      // Its place is a value: the slider shows it whenever it changes (its wire, a drag).
+      out.push(`${pad}l.run(function () {`, `${pad}  const place = String(${member('state', row.name)}.get());`, `${pad}  if (${box}.value !== place) ${box}.value = place;`, `${pad}});`);
+    } else {
+      const start = literalParam(node, 'value');
+      if (typeof start === 'number' || (typeof start === 'string' && start !== '')) out.push(`${pad}${box}.value = ${js(String(start))};`);
+    }
+    const own = fieldChainOf(id);
+    if (row || own.length > 0) {
+      controlled = { controlId: id, code: `${box}.value` };
+      const body = own.length > 0 ? chain(id, 'Changed', own, `${pad}  `) : [];
+      controlled = undefined;
+      out.push(`${pad}${box}.addEventListener('input', function () {`, ...(row ? [`${pad}  ${member('state', row.name)}.set(Number(${box}.value));`] : []), ...(body ?? []), `${pad}});`);
+    }
+    out.push(...listen(id, box, pad, {}));
+    return out;
+  };
+
   const drawNode = (id: string, role: string, node: NodeIR, bound: Record<string, BindingSource>, parent: string, before: string | undefined, pad: string): string[] => {
     const out: string[] = [];
     const extra = (handled: string[]) => {
@@ -1445,6 +1498,9 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     } else if (role === 'checkbox') {
       out.push(...drawCheckbox(id, node, bound, parent, before, pad));
       extra(['label', 'checked', 'enabled']);
+    } else if (role === 'range') {
+      out.push(...drawRange(id, node, bound, parent, before, pad));
+      extra(['value', 'min', 'max', 'step', 'enabled']);
     } else if (role === 'instance') {
       const target = ctx.project.byLegacyPath.get(node.type);
       const module = ctx.moduleOf(node.type);
@@ -1526,7 +1582,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       `  l.watch(function () {`,
       `    return [${v}];`,
       `  }, function (value) {`,
-      `    if (${member('given', push.prop)}) ${member('given', push.prop)}(value);`,
+      `    ${sendOut(push.prop, 'value')}`,
       `  });`
     );
   }
@@ -1860,6 +1916,8 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
 
   const lines: string[] = [];
   if (usesSession) useImport('lib/session.js', 'followSession');
+  const outRows = [...outPort.values()];
+  for (const o of outRows) imports.core.add(o.kind);
   lines.push(`// @nodegx:generated by \`nodegx export --target html\` — ${plan.path}.`);
   if (imports.core.size) lines.push(`import { ${[...imports.core].sort().join(', ')} } from '${relative(file.dir, 'lib/core.js')}';`);
   lines.push(`import { ${[...imports.dom].sort().join(', ')} } from '${relative(file.dir, 'lib/dom.js')}';`);
@@ -1883,6 +1941,10 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   lines.push(`export function ${mount}(element, inputs = {}, before) {`);
   lines.push('  const l = life();');
   lines.push('  const given = Object.assign({}, inputs);');
+  if (outRows.length) {
+    lines.push('  // What it sends out, for a page that is not NodeGX: `outputs.<port>.subscribe(…)`.');
+    lines.push(`  const outputs = { ${outRows.map((o) => `${key(o.port)}: ${o.kind}()`).join(', ')} };`);
+  }
   if (valueProps.length) lines.push(`  const input = { ${valueProps.map((p) => `${key(p)}: keep(inputs[${js(p)}])`).join(', ')} };`);
   if (state.length) lines.push('  const state = {', ...state, '  };');
   lines.push(...pulsesTaken);
@@ -1914,7 +1976,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     lines.push('      });');
   }
   lines.push('    },');
-  lines.push('    outputs: {},');
+  lines.push(outRows.length ? '    outputs,' : '    outputs: {},');
   lines.push('    destroy() {');
   lines.push('      l.destroy();');
   if (rootLocal && !rootIsConditional) lines.push(`      ${rootLocal}.remove();`);

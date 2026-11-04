@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d6a10000-0000-4000-8000-000000000603",
+  "name": "Settings",
+  "path": "/Menu/Settings",
+  "type": "component",
+  "modified": "2026-11-04T12:00:00.000Z",
+  "description": "The pause menu a game shows: how loud, and a way back in. In: volume (0 to 1). Out: volume as it is dragged, and resume when Resume is pressed."
+}

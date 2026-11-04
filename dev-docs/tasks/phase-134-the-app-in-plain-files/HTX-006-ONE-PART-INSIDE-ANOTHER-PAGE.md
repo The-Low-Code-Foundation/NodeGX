@@ -2,6 +2,9 @@
 
 **Phase:** [134](README.md). **AC:** AC5. **Sessions:** 1. **Needs:** HTX-001–003.
 
+**Status: ✅ done on its own page (session 9, 2026-11-04)**: README §10 session 9, [`htx-006/README.md`](htx-006/README.md).
+The last line (a copy of one of Richard's games, and the width changed on Studio's screen) waits on his R7.
+
 ## The sentence
 
 > "My game is three.js. Its pause menu is a NodeGX component. I made the menu wider in Studio, exported it again, and

@@ -1,7 +1,7 @@
 # Phase 134 — The app in plain files
 
 **Scoped:** 2026-11-03, on Richard's ask ("Let's scope up the HTML export phase please, I think it'll be important").
-**State:** 🔵 HTX-001 to HTX-005 done (§10, session 8 of at most 10, 2026-11-04). The HTML export is graded by P107's scenarios the way React and Swift are: on every scenario it plays, its trace equals the React export's, event for event; the 13 React plays and it does not are this printer's, named (a Log step, the streaming stores, On App Error with the parsers). Neither export can open a task (P134-HTX004-SELECTREFUSED, high, the plan's; §9 R6 still unanswered). **Next: HTX-006** (one part inside another page). Options wait on the plan (P134-HTX003-OPTIONSWIRED). R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
+**State:** 🔵 HTX-001 to HTX-006 done (§10, session 9 of at most 10, 2026-11-04). A NodeGX settings menu runs inside a three.js page that is not NodeGX: exported with `--component`, widened, exported again, and the page's own files byte-identical before and after; its look in the game equal to its own app's on all 90 cells read (§10 session 9). The last line of HTX-006 (the same on a copy of ThreadSpace's or the Dig's menu, and the width changed on Studio's screen) waits on Richard (§9 R7). The HTML export is graded by P107's scenarios the way React and Swift are: on every scenario it plays, its trace equals the React export's, event for event; the 13 React plays and it does not are this printer's, named (a Log step, the streaming stores, On App Error with the parsers). Neither export can open a task (P134-HTX004-SELECTREFUSED, high, the plan's; §9 R6 still unanswered). **Next: HTX-007** (HiveClip off NodeGX), the last session. Options wait on the plan (P134-HTX003-OPTIONSWIRED). R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
 phase only** (BOARD §2); React and Swift stay paused. **Read first:** this page, then [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md),
 then the task you take. The Swift precedent this phase copies is
 [EXP-022](../phase-18-code-export-v2/EXP-022-THE-SAME-GRAPH-IN-SWIFT.md) §7–§9.
@@ -172,6 +172,7 @@ The questions as scoped:
 | R3 | When? | **HTX-001 now (one session, it measures the cost), the rest after Beta** (BOARD §2, lanes 9 and 2 first). | All of it now as lane 4 reopened beside Beta. After Beta entirely. |
 | R4 | Must it open by double-clicking `index.html`? | **No: any static server** (`npx serve`, `python3 -m http.server`, every web host). Chrome refuses ES modules from a double-clicked file (other browsers to be measured in HTX-001). | Yes: a second, bundled copy of `app.js` beside the readable modules. |
 | R5 | Which first after HTX-003: the backend (HiveClip, web apps) or the game bridge (AC5)? | **The backend**: HiveClip is the app he named. | The game bridge first. |
+| R7 (asked 2026-11-04, session 9) | HTX-006's last line: the same menu bridge on a copy of one of your games. Which game, and may I? | **ThreadSpace's** (its menu is plain HTML today, `public/index.html`; it has a drive, `tools/run-all.sh`) | The Dig's. Neither: the small game in `htx-006/` is enough. |
 | R6 (asked 2026-11-04, session 7) | In both exported todo apps you cannot open a task: press one and nothing happens (`htx-004/side-by-side.png`, top row). It is the shared plan both exports read, and 180 wires across the templates have the same shape. Fix it now, or after the phase? | **After HTX-005 to HTX-007, as shared plan work counted apart** (Swift S6's ruling). Three of the ten sessions are left, one per remaining task. | Fix it now, in session 8, and let the phase run past ten. Hand it to the React lane when it reopens. |
 
 ## 10. Sessions
@@ -646,3 +647,70 @@ from the React printer and four imported (P134-HTX001-PRINTERDECIDES); none has 
 
 **Checked:** the four HTML specs, the three graph ledgers and `tsc --noEmit` on the package: 7 suites, 99 passed, 4
 skipped (Swift's build rows). The whole package suite was not run: no source line changed.
+
+### Session 9 — HTX-006, one part inside another page (2026-11-04, Opus 5.5)
+
+**Result: AC5 met on HTX-006's own page.** A settings menu built in NodeGX (`tests/fixtures/game-menu`: a volume slider
+and a Resume button; in `volume`, out `volume` and `resume`) runs inside a small three.js game that is not NodeGX
+([`htx-006/`](htx-006/), its own account in [`htx-006/README.md`](htx-006/README.md)). Driven in Chrome
+(`htx-006/drive.cjs`, real clicks and keys): Pause mounts the menu at the game's volume; the slider moves the game's
+volume through `outputs.volume`; Resume reaches the game through `outputs.resume` and the menu is gone; Escape brings it
+back at the new volume. The panel's width changed from 280 to 420 px in the project's file and exported again: **one
+file written** (`components/Settings.css`), six unchanged, **`shasum` over the game's own six files equal before and
+after**, and the menu 420 px wide in the game. A line added by hand to an exported file: the next export exits 3,
+names the file, and writes nothing (every file in the folder byte-identical).
+
+**What `--component` writes** (`emitHtmlComponent` in `emitHtml.ts`, `writePart.ts`):
+
+- The whole export's own files for the part, the same bytes (the closure of what its module imports): its module and
+  stylesheet, the components it places, `lib/core.js`, `lib/dom.js`, and whatever else it imports. No `index.html`, no
+  router.
+- `<Name>.js`, the entry a page imports: it puts the part in a box of its own (`display: contents`, so it lays out as
+  if it were not there) with the class `nodegx-<Name>`.
+- `<Name>.css`, the one stylesheet a page links: it imports `styles/<Name>.floor.css` first, then the part's sheets,
+  then the project's tokens on the box, not on `:root`.
+- `styles/<Name>.floor.css`, the cut: `all: initial` on the box (then the token font and colour), and `all: revert` on
+  everything inside it, one class strong and before the part's sheets, so the part's own classes still win and the
+  page's element rules (`p`, `button`) stop at the box. A page rule with an id or a class in it is stronger, and still
+  reaches in: said in the file.
+- `nodegx-export.json`: every file written, with its SHA-256. A re-export writes what changed, removes what it wrote
+  last time and no longer writes (and a folder it emptied), and refuses by name, writing nothing, when a file it wrote
+  was changed since, when a file it would write is there and not its own (a game's own `lib/core.js`), or when the
+  folder holds another part's export.
+
+**Decided: outputs.** Every printed component's `outputs` was an empty object. It now holds one entry per output, by the
+port's name as written in NodeGX: a `value` from `lib/core.js` for a value output (`peek()` the last value,
+`subscribe` each new one) and a `signal` for a signal output (`subscribe` each pulse). Both have `subscribe`, so a page
+writes `menu.outputs.resume.subscribe(…)` whichever it is. The NodeGX parent's callbacks in `inputs` are called first,
+as before. This changes every printed component's file (the whole HTML suite and the ledger re-run green).
+
+**Measured at mount:** the slider's value output sends 0 (the slider's own start), then 0.8 (its input), React's order.
+The parent's callback hears both; the page subscribes after the mount returns, so it hears 0.8. Whether the running app
+sends the 0 was not measured.
+
+**Added to the printer: the Slider** (`drawRange`), copied from React's (an `<input type="range">` with its class, its
+Min, Max and Step before its value; a drag writes the row as a number, then its Changed; React's `onChange` on a range is
+the DOM's `input`). The HTML printer had not drawn one. PRINTERDECIDES: thirty-five copied decisions now.
+
+**The look, measured** (18 computed properties on each of the menu's 5 elements, `htx-006/compare.txt`): the menu in
+the game against the same menu in its own app (the whole HTML export's Preview page), **0 of 90 differ**; after the
+widening, 5 differ, every one a width. **The control**: the same reading with the cut's `@import` taken out for one
+load, against the same build, **30 of 90 differ** (the game's Courier on all five, its capitals and letter spacing, its
+border on Resume). So the zero is a reading that can see a leak.
+
+**Said plainly:**
+
+- **The Studio step was the file Studio writes, not Studio's screen.** The drive changes the one parameter in
+  `Menu/Settings/nodes.json`. The task's last line (the same on a copy of ThreadSpace's or the Dig's menu) waits on
+  Richard (R7), and the width change on Studio's screen goes with it.
+- **Resume wears the browser's grey outset border** in the game and in its own HTML app alike; React prints the same
+  bare `<button>`. Not measured against the running app.
+- **Found nothing to file.** The slider was coverage the preflight already named ("a range node is not drawn").
+
+**Checked:** `tests/html-one-part.test.ts` (18: the files, the bytes, the scoping, the outputs in jsdom, the manifest's
+seven rules, the name, the args); the four HTML specs and the ledger; the four specs that export every fixture (the new
+fixture among them); the six CLI specs; `tsc --noEmit` on the package: 16 suites, 864 passed, 7 skipped (Swift's
+builds). The whole package suite was not run: `plan.ts` was not touched.
+
+**Cost:** the HTML printer's hand-written lines 2,896 → 3,168 (`printComponent.ts` +62 for the slider and the outputs,
+`emitHtml.ts` +210 for the part), and `write/writePart.ts` 145 new. Sessions: 9 of 10.
