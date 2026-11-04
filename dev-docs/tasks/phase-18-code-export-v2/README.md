@@ -77,6 +77,16 @@ one `swift build` and one `swift test` for every played scenario, [exp-022/s5](e
 > Error, outside EXP-022 §7's cut), 46 on the same harness's limits. React's line reads 11 of 85 on 2026-10-22 (the pin,
 > session 139); the 9 between them are all in the Swift printer's 13.
 
+**The same line on the HTML export** (P134 HTX-005; `npx jest tests/node-spec-graph-html.test.ts`, in jsdom, a few
+seconds, in the package suite; [P134 §10 session 8](../phase-134-the-app-in-plain-files/README.md)):
+
+> **GRAPH SCENARIOS: 2 of 86 conform on the HTML export** — 2026-11-04, P134 HTX-005. **5 played**: 2 conform, 3 differ
+> as declared (C6/G1, C7, C8), **each with the very trace the React export reads**, event for event. **81 did not play**:
+> 22 on the plan's verdict (the same 22 as React's, in the same words), 13 on the HTML printer's (a Log step; State
+> History, Optimistic Update and Action Dispatcher; On App Error and the parsers), 46 on the same harness's limits.
+> React's line reads 15 of 86 the same day (18 played; the 86th scenario is OWN-034's, outside on the plan,
+> P134-HTX005-LEDGERPIN); the 13 between them are all the HTML printer's 13, as Swift's were at S5.
+
 **🔴 There is a second number and it must never again drive priority.** The corpus audit
 (`coverage-audit.ts` over ~40 old test projects) reads **85.00%**, or **93.38%** over components a
 route can reach. Both are true and both are about *those projects*, not about NodeGX. Keep the

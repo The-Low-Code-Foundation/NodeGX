@@ -56,11 +56,12 @@ describe('the verdicts: what the Swift export can play, and whose limit the rest
 
   // EXP-022 S7. The stores carried (Global Store, State History, Optimistic Update, Action Dispatcher): 13 → 4.
   // EXP-022 S9. On App Error and the parsers carried: 4 → 0. The Swift printer leaves no scenario outside.
-  test('V1 the split, pinned: 18 playable; 21 outside on the plan, 0 on the Swift printer, 46 on the harness', () => {
+  // P134-HTX005-LEDGERPIN: OWN-034's t01 scenario (012c5236a) is outside on the plan: 85 → 86, 21 → 22.
+  test('V1 the split, pinned: 18 playable; 22 outside on the plan, 0 on the Swift printer, 46 on the harness', () => {
     expect({ of: verdicts.length, playable: verdicts.length - outside.length, plan: plan.length, swiftPrinter: swiftPrinter.length, harness: harness.length }).toEqual({
-      of: 85,
+      of: 86,
       playable: 18,
-      plan: 21,
+      plan: 22,
       swiftPrinter: 0,
       harness: 46
     });
@@ -146,7 +147,7 @@ describe('the play: one package, one swift test', () => {
     // eslint-disable-next-line no-console
     console.log(`P18 ledger (Swift): ${line.conforming} of ${line.of} graph scenarios conform on the Swift export — ${line.played} played (${line.conforming} conform, ${line.declaredDifferent} differ as declared, ${line.knownRows} known rows, ${line.failing} fail on filed rows); ${line.outsideExporter} outside on the exporter's verdict (${line.outsideExporter - line.outsideSwiftPrinter} the plan's, ${line.outsideSwiftPrinter} the Swift printer's), ${line.outsideHarness} on this harness's limits`);
     expect(r.results.filter((x) => x.status === 'refused')).toEqual([]);
-    expect(line).toEqual({ of: 85, played: 18, conforming: 15, declaredDifferent: 3, knownRows: 0, failing: 0, outsideExporter: 21, outsideSwiftPrinter: 0, outsideHarness: 46 });
+    expect(line).toEqual({ of: 86, played: 18, conforming: 15, declaredDifferent: 3, knownRows: 0, failing: 0, outsideExporter: 22, outsideSwiftPrinter: 0, outsideHarness: 46 });
   });
 
   built('B2 the claim: on every scenario both exports play, the Swift app\'s trace equals the React export\'s, event for event', () => {

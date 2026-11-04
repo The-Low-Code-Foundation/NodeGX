@@ -1,7 +1,7 @@
 # Phase 134 — The app in plain files
 
 **Scoped:** 2026-11-03, on Richard's ask ("Let's scope up the HTML export phase please, I think it'll be important").
-**State:** 🔵 HTX-001 to HTX-004 done (§10, session 7 of at most 10, 2026-11-04). todo-list in Chrome on a real backend, three arms: the HTML export equals the React export at every step, request for request, and all three agree on sign in, add, close, reload and sign out. Neither export can open a task: the plan refuses a Variable set from a placed component's output (P134-HTX004-SELECTREFUSED, high, 180 wires across the templates). **Next: HTX-005** (the plain-JS `GraphTarget`, the ledger line), unless Richard rules SELECTREFUSED first (§9 R6). Options wait on the plan: all 39 in the templates are left out of every export (P134-HTX003-OPTIONSWIRED). R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
+**State:** 🔵 HTX-001 to HTX-005 done (§10, session 8 of at most 10, 2026-11-04). The HTML export is graded by P107's scenarios the way React and Swift are: on every scenario it plays, its trace equals the React export's, event for event; the 13 React plays and it does not are this printer's, named (a Log step, the streaming stores, On App Error with the parsers). Neither export can open a task (P134-HTX004-SELECTREFUSED, high, the plan's; §9 R6 still unanswered). **Next: HTX-006** (one part inside another page). Options wait on the plan (P134-HTX003-OPTIONSWIRED). R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
 phase only** (BOARD §2); React and Swift stay paused. **Read first:** this page, then [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md),
 then the task you take. The Swift precedent this phase copies is
 [EXP-022](../phase-18-code-export-v2/EXP-022-THE-SAME-GRAPH-IN-SWIFT.md) §7–§9.
@@ -575,3 +575,74 @@ is a field, not a text, and an action's ✓ opens a note dialog too. Both were f
 **Cost, so far:** 7 sessions (HTX-004 took two, as session 6 said). The printer is 2,896 hand-written lines
 (`printComponent` 2,011, `emitHtml` 306, `libJs` 322, `client` 257). The drive, outside the package: 274 lines
 (`drive.cjs`), plus S6's backend harness copied as it was.
+
+
+### Session 8 — HTX-005, graded the same way (2026-11-04, Opus 5.5)
+
+**Result: AC4 met.** P107's graph scenarios play on the HTML export through the same runner, projection and settle rule
+as React's and Swift's, and the line is on P18's ledger beside theirs
+([P18 README](../phase-18-code-export-v2/README.md), "The same line on the HTML export"):
+
+```
+P18 ledger (HTML): 2 of 86 graph scenarios conform on the HTML export — 5 played (2 conform, 3 differ as declared,
+0 known rows, 0 fail on filed rows); 35 outside on the exporter's verdict (22 the plan's, 13 the HTML printer's),
+46 on this harness's limits
+```
+
+In plain words: of the scenarios the test rig can run against an export at all (40), the HTML export plays 5, and on
+every one its trace is the React export's, event for event. Three of those differ from the running app by design
+(C6/G1, C7, C8, as on React and Swift). The 22 the plan refuses are React's 22, in the same words. The 13 React plays
+and the HTML export does not are all this printer's, in three families, every one named by the preflight:
+
+| family | scenarios | what is not printed | the carry, when someone takes it |
+|---|---|---|---|
+| a Log step | 1 (C10) | `log(level, message)`, React's `lib/util.ts` | the function as React's own source (one more generated lib); Swift's S5 did it in-session |
+| the streaming stores | 8 (t02 ×4, t03 ×2, t04 ×2) | State History, State Snapshot, Optimistic Update, Action Dispatcher: their steps, values and nodes | React's `lib/history`, `lib/actions` as their own source over `lib/core.js`; Swift S7 took a session |
+| On App Error and the parsers | 4 (t07) | the error channel's outputs and `parseLib`'s calls | the error channel is carried since HTX-004; the parsers are React's `parseLib`; Swift S9 took a session |
+
+**How it is graded** (`packages/nodegx-export/tests/helpers/html-graph-target.ts`, 314 lines): React's shape, not
+Swift's. The output is JavaScript, so it runs in this process, step by step: each scenario's `Probe.js` and its imports
+joined by esbuild from the export's own files, mounted in a fresh jsdom window (a store's module state starts empty, as a
+page load does), a press is a click on the printed button, a `set` is the printed `update()`, and the world's clock and
+random source are the window's own `Date.now` and `Math.random`. The three bounds are Swift's: the harness's limits read
+off React's `canPlay`, the plan's own notes, and what `preflight.htmlLosses` names. A lifted output whose push the
+printer does not print is the reach's edge; when that leaves a scenario nothing to observe, the verdict is the
+printer's, not the plan's.
+
+**Predicted wrong, said plainly.** The first play read C2 failed: two presses before a settle reached the Value Changed
+as one. That was my harness, not the export: the core runs queued effects on a microtask, and nothing ran between the
+two clicks, which no browser does (it runs what one click queued before the next) and React's target does not do either
+(one `act` per step). The target now runs the core's `flushSync` (exported by `lib/core.js`) after each press and each
+`set`; C2 conforms and every played trace equals React's. M3 I predicted would move all five traces; it moves three (below).
+
+**Graded:** `tests/node-spec-graph-html.test.ts`, 10 rows, all in the package suite (about 3 s of play): V1–V4 the
+verdicts (the split, the plan's words equal to React's, the 13 by family, nothing played that React does not), B1 the
+line, B2 every played trace equal to React's, B3 the three declared differences, and three mutants on the printed files
+(never the printer, so no peer's suite reads one; each must change a file or its row is red):
+
+| mutant | measured |
+|---|---|
+| M1 Value Changed's chain adds 2 | killed: C2 fails, C8's trace differs from React's |
+| M2 its same-value guard taken out | **equivalent**, as predicted: the `watch` it sits in already runs only when its value moved (the fourth such guard, after HTX-002's three) |
+| M3 a lifted output not sent at mount | killed: C2 fails, C6 and C7 differ. C8 cannot see it (its presses come before the first settle, so the mount's value is overwritten unread), nor the store (its key starts undefined, which a settle never records) |
+
+**Found and fixed:** `P134-HTX005-LEDGERPIN` (low). OWN-034's commit 012c5236a (2026-10-30) added an 86th graph scenario,
+outside on the plan, and nobody moved the pins: React's ledger row had read red since, and Swift's V1 too. Both pins read
+86 and 22 now; the HTML pin is written against the same count. Swift's B1 pin was moved to match but not run (it needs
+`NODEGX_SWIFT_BUILD=1`).
+
+**The cost beside React's and Swift's (EXP-022 S5's table, measured today):**
+
+| | React | Swift | HTML |
+|---|---|---|---|
+| sessions | 140 when EXP-022 counted (P18, now paused) | 9 of 12 | 8 of 10 |
+| printer | `component.ts` 8,867 lines + 32 runtime helpers (15,897) | 4,077 lines | 2,896 hand-written lines + 5 generated libs (React's own source, types out) |
+| graph scenarios played, and equal to React's trace | 18 | 18 (S9) | 5, each React's trace |
+| lines moved into shared cores | — | 0 | 0 (four `component.ts` functions exported, its output unchanged) |
+
+The plan (`plan.ts`, 23,768 lines) is built by React's sessions and read by both other printers. This session changed
+no printer line: the target, its test and two pins. **Where the claim leaks**, as before: thirty-two decisions copied
+from the React printer and four imported (P134-HTX001-PRINTERDECIDES); none has changed behaviour on a played scenario.
+
+**Checked:** the four HTML specs, the three graph ledgers and `tsc --noEmit` on the package: 7 suites, 99 passed, 4
+skipped (Swift's build rows). The whole package suite was not run: no source line changed.

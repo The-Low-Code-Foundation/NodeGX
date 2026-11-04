@@ -75,7 +75,8 @@ describe('NSP-008 on the export', () => {
     // s108 §78 part 2: t03's two clock-free Optimistic Update scenarios play and pass — the harness now installs the
     // world's seeded Math.random too, so a generated Transaction Id is the same id on both sides; t03's third advances a clock
     // s139 (EXP-011 §109): a Subscribe's untyped key lifts through a component's output, and one more t01 scenario plays and passes.
-    expect(line).toEqual({ of: 85, played: 18, conforming: 15, declaredDifferent: 3, knownRows: 0, failing: 0, outsideExporter: 21, outsideHarness: 46 }); // s106 §77: t04 S1 and S3 play and pass; EXP-022 S9: t07's four conform (PARSERAISE)
+    // P134-HTX005-LEDGERPIN: OWN-034's t01 scenario (012c5236a, a Function fed by Subscribes on two keys) is outside on the exporter's verdict: 85 → 86, 21 → 22
+    expect(line).toEqual({ of: 86, played: 18, conforming: 15, declaredDifferent: 3, knownRows: 0, failing: 0, outsideExporter: 22, outsideHarness: 46 }); // s106 §77: t04 S1 and S3 play and pass; EXP-022 S9: t07's four conform (PARSERAISE)
   });
 
   test('C2 — two values in one frame are both delivered: the emitted Counter → Value Changed → Counter reads 3, as the runtime does', () => {
