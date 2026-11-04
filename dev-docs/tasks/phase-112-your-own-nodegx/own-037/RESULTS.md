@@ -58,6 +58,8 @@ nodegx to build my first project". Seal: 23 paths outside the round, all its own
 `/tmp/glimmer-probe` …), moved into `left-in-tmp/` by the audit; one Chrome sandbox hit. Its shell ran `pkill -f
 'glimmer-'` several times. That matches its own process names only, but the fence doesn't stop signals.
 
+| va (Vibe 1) | 12:37 | **no questions: built the whole game** ("Abyssal Lamp", `apps/sub-cave`), **all of it in NodeGX nodes**: a D-pad moves the sub 40 px per tap, clamped to the cave, the headlamp turns toward the last direction, 8 creatures placed in % of the cave width, an `Air Ns` countdown and bar, a win when all 8 are collected, "Out of air…", best score in `localStorage`, "Dive again". `docs/CHECKLIST.md` lines all passed in fresh headless drives; `render_report` 0 errors. A world that doesn't move by itself: nothing drifts, the sub moves only on a tap. One sitting, 92 steps, judge DONE. Seal clean. Its transcript never names 8576, 8771 or 8782 (one match, inside a hook id's hash) | 25 | 2.14 |
+
 ### Turn 2
 
 - **vb (Vibe 2), Richard's answers** (`msg/vb-2.txt`, 2026-11-04 ~12:05, word for word): me and my kids; *"Calm and a
