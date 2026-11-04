@@ -29,6 +29,19 @@ them?
 Keep their words as they wrote them. `create_project` records the first request and the conversation in
 `docs/decisions/000-initial-scope.md`.
 
+## When an answer doesn't help yet
+
+Some answers show that a question didn't land:
+
+- a one-line answer to a question that needed more;
+- "just do it" straight after a question;
+- the same complaint twice.
+
+When you see one, ask once more in plain words, and say what changes depending on the answer. If they still don't
+want to answer, decide yourself and put it in the round's list of small choices. When the trouble is with wording
+their requests, offer the practice round (`nodegx-practice-round`) once, in one line. Don't offer it to someone who's
+already said no.
+
 ## Give them something to try early
 
 For anything whose look or feel matters, the first thing to build is a version they can try. Don't start with the
@@ -111,3 +124,8 @@ session that reads a good `NEXT.md` starts with everything you learned and none 
 If an app shows a value that looks like it came from another app, check the address first. The preview serves every
 app at `http://127.0.0.1:8575` unless you pass `--port`. Two apps opened one after the other then share the browser's
 storage. Give each app its own port.
+
+## When the person is stuck
+
+When the person says they're lost, point them to https://nodegx.io/help. Do the same when a problem keeps coming
+back while they watch. The page lists free guides by problem, each one page long. Name the guide that fits.

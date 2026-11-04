@@ -63,6 +63,10 @@ const AGENT_NOTE = [
   '',
   'Before you build a new app or game, read `nodegx-first-project` (`.claude/skills/nodegx-first-project/SKILL.md`):',
   'how the builds people loved were run. Any agent can read it.',
+  // P112 OWN-038 (R1, Richard 2026-11-04): the practice round is offered to someone new, in one line, never required.
+  "If I'm new to building with an AI and haven't said what to build yet, offer me the practice round in one line:",
+  '`nodegx-practice-round` (`.claude/skills/nodegx-practice-round/SKILL.md`), a small game in about twenty minutes.',
+  "If I say no, build what I ask for and don't offer it again.",
   '',
   "When the app needs an API key, don't ask me to paste it into the chat. Call `set_function_secret` without a value",
   "and tell me where to paste it in the project's `.env` file. The app reads the key from that file as soon as I save",
@@ -291,7 +295,7 @@ function writeVibeConfig(dir, platform = process.platform, options = {}) {
  */
 const VIBE_AGENT = 'nodegx';
 const VIBE_PROFILE_DIR = path.join(__dirname, '..', 'profiles', 'vibe');
-const VIBE_SHARED_SKILLS = ['nodegx-first-project', 'nodegx-making-a-game'];
+const VIBE_SHARED_SKILLS = ['nodegx-first-project', 'nodegx-making-a-game', 'nodegx-practice-round'];
 
 function vibeProfileFiles() {
   const out = [];

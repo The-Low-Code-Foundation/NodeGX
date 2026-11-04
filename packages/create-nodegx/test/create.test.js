@@ -85,6 +85,7 @@ test('P112 OWN-007 (R3): the folder gets the editor brief as a project skill, na
     path.join('.claude', 'skills', 'nodegx-first-project', 'SKILL.md'),
     path.join('.claude', 'skills', 'nodegx-making-a-game', 'SKILL.md'),
     path.join('.claude', 'skills', 'nodegx-making-a-game', 'traps.md'),
+    path.join('.claude', 'skills', 'nodegx-practice-round', 'SKILL.md'),
     path.join('.claude', 'skills', 'nodegx-your-own-backend-editor', 'SKILL.md'),
     path.join('.claude', 'skills', 'nodegx-your-own-editor', 'SKILL.md')
   ]);
@@ -155,6 +156,49 @@ test('P112 OWN-036: the folder gets what our builds learned, as two skills the a
   }
 });
 
+test('P112 OWN-038: all three kits write the practice round, and each folder note offers it once to someone new', () => {
+  const plain = path.join(tmp(), 'my-apps');
+  assert.equal(spawnSync(process.execPath, [BIN, plain], { encoding: 'utf8' }).status, 0);
+  const home = tmp();
+  const cline = path.join(tmp(), 'my-apps');
+  assert.equal(spawnSync(process.execPath, [BIN, cline, '--cline'], { encoding: 'utf8', env: clineEnv(home) }).status, 0);
+  const vibe = path.join(tmp(), 'my-apps');
+  assert.equal(spawnSync(process.execPath, [BIN, vibe, '--vibe'], { encoding: 'utf8' }).status, 0);
+  const core = fs.readFileSync(path.join(__dirname, '..', 'profiles', 'core', 'skills', 'nodegx-practice-round', 'SKILL.md'), 'utf8');
+  for (const file of [
+    path.join(plain, '.claude', 'skills', 'nodegx-practice-round', 'SKILL.md'),
+    path.join(cline, '.claude', 'skills', 'nodegx-practice-round', 'SKILL.md'),
+    path.join(vibe, '.vibe', 'skills', 'nodegx-practice-round', 'SKILL.md')
+  ]) assert.equal(fs.readFileSync(file, 'utf8'), core, file);
+  // a project skill by its frontmatter, the name matching its folder; no task ids in published text (PLY-001 AC2)
+  assert.match(core, /^---\nname: nodegx-practice-round\ndescription: "[^"]*LOAD when/);
+  assert.doesNotMatch(core, /P\d+-|OWN-|TPL-|CCN-|ISL-|PLY-|CAS-|HST-|dev-docs|vscode_projects/);
+  // R7/R11: the offer line ships as written; the six stops; R3: never "no holes"; R2: the sheet is theirs, saved on a yes
+  assert.match(core, /Twenty minutes and you'll go Super Saiyan level 2\./);
+  const stops = core.match(/^### \d\. .*$/gm);
+  assert.deepEqual(stops.map((h) => h.slice(4, 6)), ['1.', '2.', '3.', '4.', '5.', '6.']);
+  assert.match(core, /Never tell them an app has no holes/);
+  assert.match(core, /Save it only after they say yes/);
+  // the person's skills folder, measured per harness: Claude Code ~/.claude/skills; Cline 3.0.71 and Vibe 3.0.4 ~/.agents/skills
+  assert.match(core, /`~\/\.claude\/skills\/my-way-of-building\/SKILL\.md`/);
+  assert.match(core, /`~\/\.agents\/skills\/my-way-of-building\/SKILL\.md`/);
+  // R4: help is a page, and the skill never offers the call
+  assert.match(core, /https:\/\/nodegx\.io\/help/);
+  assert.doesNotMatch(core, /Richard|book a call|calendar/i);
+  // the notes: one line each, naming the skill where that harness reads it
+  for (const [dir, folder] of [[plain, '.claude'], [cline, '.claude'], [vibe, '.vibe']]) {
+    const notes = fs.readFileSync(path.join(dir, 'AGENTS.md'), 'utf8');
+    assert.ok(notes.includes(`\`nodegx-practice-round\` (\`${folder}/skills/nodegx-practice-round/SKILL.md\`)`), dir);
+    assert.match(notes, /If I say no, build what I ask for and don't offer it again\./);
+  }
+  // R1: the first-project guide names the signs of trouble, offers the round once, and points the stuck to the page
+  const first = fs.readFileSync(path.join(plain, '.claude', 'skills', 'nodegx-first-project', 'SKILL.md'), 'utf8');
+  assert.ok(first.includes('\n## When an answer doesn\'t help yet\n'));
+  assert.match(first, /offer the practice round \(`nodegx-practice-round`\) once, in one line/);
+  assert.match(first, /point them to https:\/\/nodegx\.io\/help/);
+  assert.doesNotMatch(first, /Richard/);
+});
+
 test("P112 OWN-007: a person's own skill file is never replaced", () => {
   const dir = tmp();
   const skill = path.join(dir, '.claude', 'skills', 'nodegx-your-own-editor', 'SKILL.md');
@@ -165,6 +209,7 @@ test("P112 OWN-007: a person's own skill file is never replaced", () => {
     path.join('.claude', 'skills', 'nodegx-first-project', 'SKILL.md'),
     path.join('.claude', 'skills', 'nodegx-making-a-game', 'SKILL.md'),
     path.join('.claude', 'skills', 'nodegx-making-a-game', 'traps.md'),
+    path.join('.claude', 'skills', 'nodegx-practice-round', 'SKILL.md'),
     path.join('.claude', 'skills', 'nodegx-your-own-backend-editor', 'SKILL.md')
   ]);
   assert.equal(fs.readFileSync(skill, 'utf8'), 'mine\n');
@@ -352,10 +397,11 @@ test('P112 OWN-037 (R1): a Vibe folder carries the two first-project guides, the
   assert.equal(spawnSync(process.execPath, [BIN, dir, '--vibe'], { encoding: 'utf8' }).status, 0);
   // the guides are the core kit's own files, byte for byte, where Vibe lists a project's skills
   const core = path.join(__dirname, '..', 'profiles', 'core', 'skills');
-  for (const rel of ['nodegx-first-project/SKILL.md', 'nodegx-making-a-game/SKILL.md', 'nodegx-making-a-game/traps.md']) {
+  // (OWN-038: and the practice round beside them)
+  for (const rel of ['nodegx-first-project/SKILL.md', 'nodegx-making-a-game/SKILL.md', 'nodegx-making-a-game/traps.md', 'nodegx-practice-round/SKILL.md']) {
     assert.equal(fs.readFileSync(path.join(dir, '.vibe', 'skills', rel), 'utf8'), fs.readFileSync(path.join(core, rel), 'utf8'), rel);
   }
-  // only those two: the editor skills stay Claude's
+  // only those: the editor skills stay Claude's
   assert.ok(!fs.existsSync(path.join(dir, '.vibe', 'skills', 'nodegx-your-own-editor')));
   const notes = fs.readFileSync(path.join(dir, 'AGENTS.md'), 'utf8');
   // the core note's exception, word for word but the skill's folder

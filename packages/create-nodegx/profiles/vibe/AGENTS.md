@@ -6,6 +6,10 @@ separate web server or hand-written HTML and JavaScript instead: that would be a
 The one exception is a game whose world moves on its own (3D, a canvas game, physics): write that world as plain
 code, and read the skill `nodegx-making-a-game` (`.vibe/skills/nodegx-making-a-game/SKILL.md`) first.
 
+If I'm new to building with an AI and haven't said what to build yet, offer me the practice round in one line:
+`nodegx-practice-round` (`.vibe/skills/nodegx-practice-round/SKILL.md`), a small game in about twenty minutes.
+If I say no, build what I ask for and don't offer it again.
+
 ## How to build it — a process, written down as you go
 
 When I ask for a new app or game, your first reply is only your questions, all in one message: the ones the skill
