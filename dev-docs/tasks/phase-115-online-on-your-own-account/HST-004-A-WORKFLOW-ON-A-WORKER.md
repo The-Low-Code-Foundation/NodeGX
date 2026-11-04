@@ -1,6 +1,6 @@
 # HST-004 — A workflow on a Worker, no VM
 
-**Opened 2026-10-07.** **Depends on HST-002, P107 (server-side nodes).** **Status: 🟡 session 2 built the deploy and the page → cloud function path, measured locally on workerd 2026-11-04; the deploy waits on Richard's `wrangler login` (§7.5).** Kind: experiment.
+**Opened 2026-10-07.** **Depends on HST-002, P107 (server-side nodes).** **Status: 🟡 deployed to Richard's account 2026-11-04 (session 3, §8); AC1 waits on the `MAILCHIMP_KEY` secret, which only Richard can set (§8.4).** Kind: experiment.
 
 ## 1. The person sentence
 
@@ -48,7 +48,7 @@ Cloudflare account: the deploy and the console readings are session 2's, on his.
 |---|---|
 | `../fixtures/b-newsletter/nodegx.automations.json` | Fixture B's server half: `subscribe` (validate the email → Call an API with a Bearer secret `MAILCHIMP_KEY` → return) and `daily-digest` on a schedule trigger at 08:00. Hand-written against the value language's own spec (`body.email`, `trigger.firedAt`, `previous.status`), **not** written by the MCP as HST-002 asks: the stand-in's address is a literal 127.0.0.1 |
 | `src/worker.ts` | The Worker: `WorkflowEngine`, `CompositeStepExecutor` and `buildRunPayload` imported from `packages/nodegx-backend/src` unchanged; the project's automations file bundled at deploy; `_noodl_get_secret` read from the Worker's secret bindings; a run-history stub (`createLogger()` may answer null); `POST /workflows/<id>`; the Worker's cron fires the project's schedule triggers |
-| `src/http-over-fetch.ts` | Node's `http.request` over `fetch`, swapped in at bundle time (`[alias]`) so the API step's own code runs (why: §6.2) |
+| `src/http-over-fetch.ts` | Node's `http.request` over `fetch`, swapped in at bundle time (`[alias]`) so the API step's own code runs (why: §6.2). **Deleted in session 3**: the step is given a transport (§8.3) |
 | `src/functions-probe.ts`, `wrangler.functions.toml` | The cloud-function interpreter (`CloudRunner`) on workerd, two functions |
 | `stand-in.mjs` | A stand-in Mailchimp on :8799 that logs the path, the Authorization header and the body |
 
@@ -179,3 +179,53 @@ Then: Subscribe from his phone (MUST lines 1–5), read the stand-in's log in th
 hst-stand-in → Logs) or `npx wrangler tail hst-stand-in`, compare the fingerprint, and read it again on day 2 after
 08:00 UTC (MUST line 6). The secret is set before the deploy that reads it, but the Worker must exist first:
 if `secret put` asks to create it, say yes.
+
+## 8. Session 3 — 2026-11-04 (Opus 5.5): on Richard's account, and the API step's transport
+
+Richard had run `wrangler login` (account *Richard.digitalbricks@gmail.com's Account*, OAuth, `workers (write)`).
+
+### 8.1 Deployed
+
+| Worker | address | what |
+|---|---|---|
+| `hst-stand-in` | https://hst-stand-in.richard-digitalbricks.workers.dev | 1.33 KiB. Answers `{"id":"member-1","status":"subscribed"}` (one probe `GET /ping` from this session is in its log) |
+| `hst-spike-worker` | https://hst-spike-worker.richard-digitalbricks.workers.dev | 2.46 MB / 547.5 KB gzipped, 76 assets (the page), cron `0 8 * * *`. Redeployed after §8.2, version `110b52ab` |
+
+`build.mjs` with the stand-in's address restored the same 2 wires BUNDLEDROPS drops, and aimed both files at it.
+
+### 8.2 Measured, before the secret
+
+| # | reading | result |
+|---|---|---|
+| 1 | `GET /` | ✅ 200 `text/html`; `env.js` has the empty endpoint |
+| 2 | `POST /functions/subscribe` with an email | ✅ 400 *The newsletter is not set up yet: its MAILCHIMP_KEY secret is missing.*: the function's own failure Response, nothing sent |
+| 3 | `POST /functions/subscribe` `{}` | ✅ 400 `function/bad-request`, `email` named |
+| 4 | `POST /workflows/daily-digest` | ✅ 500, step `send`: *there is no Secret called "MAILCHIMP_KEY"*, before any fetch |
+| 5 | The stand-in key (`.dev.vars`, 30 chars) in `public/`, `dist-deploy/`, `src/`, `../fixtures/` | ✅ 0 files |
+| 6 | **The 1042 question** | ⏳ not measurable yet: every path stops at the missing secret before it fetches |
+
+### 8.3 P115-HST004-HTTPLOOKUP fixed (`ef3f7388a`)
+
+`steps/httpTransport.ts`: `nodeHttpTransport` (the default; `lookup` is the guard) and `fetchHttpTransport`
+(`redirect: 'manual'`). The step keeps the redirect loop, the key dropped across origins and `checkLiteralHost`
+before every hop; `CompositeStepExecutorDeps.httpTransport` is how a host chooses. The Worker passes the fetch one; the
+`[alias]` and the shim are gone. Session 1's control (§6.1 row 6) on `wrangler dev`, the local stand-in: **without a
+transport** the step still fails with *The options.lookup option is not implemented*; **with `fetchHttpTransport`**,
+`success`, and the stand-in got the email and `Bearer <the .dev.vars key>` (compared in full, true twice). Jest:
+`tests/p115-hst004-http-transport.test.ts` runs both transports through `CompositeStepExecutor` (JSON, body, same- and
+cross-origin redirect, the cap, a literal private address refused before the transport is asked, with a control) and
+BWF-006's suite beside it, 27/27.
+
+### 8.4 What is left for AC1
+
+The classifier refuses this session's `wrangler secret put` (*Secret-Store Writes*) even with Richard's OK in the chat;
+only a permission rule or Richard's own terminal gets past it (§8.3's fix needs no secret, so it went first). In `spike-worker/`, the command that reuses the
+`.dev.vars` stand-in key, so `node fingerprint.mjs` matches the stand-in's log exactly:
+
+```
+grep '^MAILCHIMP_KEY=' .dev.vars | cut -d= -f2- | tr -d '\n' | npx wrangler secret put MAILCHIMP_KEY
+```
+
+Then, no redeploy needed (a secret is live on the next request): `POST /functions/subscribe`, `npx wrangler tail
+hst-stand-in` (or the dashboard's Logs), the fingerprint against `node fingerprint.mjs`, the page on his phone (MUST
+1–5), and line 6 after 08:00 UTC on 2026-11-05.
