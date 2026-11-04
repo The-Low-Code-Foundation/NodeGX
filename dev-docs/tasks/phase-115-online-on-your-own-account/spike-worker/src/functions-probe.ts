@@ -59,13 +59,17 @@ export default {
     const name = u.pathname.replace(/^\/functions\//, '');
     useFifoImmediate(u.searchParams.get('fifo') === '1');
     const t0 = Date.now();
+    let flagBefore: unknown;
     try {
       const r = await ready(u.searchParams.get('fresh') === '1');
+      // WARMRUNNER diagnosis: the runtime's "an update is already scheduled" flag, read before this run.
+      flagBefore = (r as any).runtime?.updateScheduled;
+      if (u.searchParams.get('unstick') === '1') (r as any).runtime.updateScheduled = false;
       const out: any = await r.run(name, { body: '{}', headers: { origin: 'https://app.example' } } as any, { timeoutMs: 4000 });
-      return Response.json({ name, ms: Date.now() - t0, statusCode: out.statusCode, body: out.body });
+      return Response.json({ name, ms: Date.now() - t0, flagBefore, statusCode: out.statusCode, body: out.body });
     } catch (e) {
       loadError = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
-      return Response.json({ name, ms: Date.now() - t0, error: loadError, stack: e instanceof Error ? e.stack?.split('\n').slice(0, 6) : null }, { status: 500 });
+      return Response.json({ name, ms: Date.now() - t0, flagBefore, error: loadError, stack: e instanceof Error ? e.stack?.split('\n').slice(0, 6) : null }, { status: 500 });
     }
   }
 };

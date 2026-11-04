@@ -11,8 +11,8 @@
  *   - the doors: `POST /workflows/<id>` (the spike's; how a browser calls a workflow is a finding), the Worker's
  *     cron, which fires the project's schedule triggers, and (session 2) `POST /functions/<name>`, the door the exported
  *     page's Cloud Function node calls: the project's cloud functions, built by the editor's own bundler (build.mjs),
- *     run by the cloud runtime's CloudRunner the way `HttpServer.runFunction` runs them, one runner per request
- *     (P115-HST004-WARMRUNNER).
+ *     run by the cloud runtime's CloudRunner the way `HttpServer.runFunction` runs them: one runner per isolate,
+ *     loaded on the first call and reused (P115-HST004-WARMRUNNER fixed; a fresh one cost 11–32 ms CPU a call).
  */
 import { WorkflowEngine } from '@backend/workflow/WorkflowEngine';
 import { CompositeStepExecutor } from '@backend/workflow/steps/CompositeStepExecutor';
@@ -71,12 +71,28 @@ const json = (v: unknown, status = 200) =>
  * `POST /functions/<name>`, as the backend answers it: the JSON body handed on as a string with the headers verbatim,
  * and the Response node's status and body sent back unchanged (the client reads `{ result }` or `{ error }` from it).
  */
+/**
+ * One runner per isolate, as the backend keeps one per process. A failed load is not kept, so the next call retries.
+ * Built at startup (registering every node type is synchronous), so it is paid from the startup allowance (1 s CPU)
+ * rather than the first call's (10 ms on Free); the bundle is loaded on the first call (its `setData` uses timers,
+ * which a Worker's global scope refuses).
+ */
+const runner0 = new CloudRunner({});
+let runnerReady: Promise<CloudRunner> | null = null;
+function warmRunner(): Promise<CloudRunner> {
+  if (!runnerReady) {
+    const r = runner0;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    runnerReady = r.load(functionsBundle as any).then(() => r);
+    runnerReady.catch(() => (runnerReady = null));
+  }
+  return runnerReady;
+}
+
 async function runFunction(name: string, req: Request): Promise<Response> {
   if (req.method !== 'POST') return json({ error: 'POST to run it' }, 405);
   const body = await req.json().catch(() => ({}));
-  const runner = new CloudRunner({});
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await runner.load(functionsBundle as any);
+  const runner = await warmRunner();
   const headers: Record<string, string> = {};
   req.headers.forEach((v, k) => (headers[k] = v));
   try {
