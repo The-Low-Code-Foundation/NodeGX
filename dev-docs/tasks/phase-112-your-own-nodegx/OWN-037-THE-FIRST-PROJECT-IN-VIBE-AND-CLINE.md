@@ -1,6 +1,6 @@
 # OWN-037 — The first project, in Mistral Vibe and in Cline
 
-**Phase:** [112](README.md). **Opened:** 2026-11-04 by Richard. **Status:** ✅ AC1–AC4 (2026-11-04, s1). AC5 owed: Vibe's AC2 in the next lockstep cut; the site line.
+**Phase:** [112](README.md). **Opened:** 2026-11-04 by Richard. **Status:** ✅ AC1–AC4 (2026-11-04, s1). AC5 owed: Vibe's AC2 in the next lockstep cut (then the site's "next release" line).
 
 > "Can we scope a task to try it out on Vibe and see if we can help it the same way please? And Cline?"
 > — Richard, 2026-11-04, after create-nodegx 0.2.9 shipped the [OWN-036](OWN-036-THE-FIRST-PROJECT-KIT.md) guides.
@@ -137,3 +137,8 @@ reads clearly.
   **AC5 owed:** (1) the next lockstep cut carries `22333b7fe` (create-nodegx-vibe); (2) nodegx.io/first-project/ gains
   a Vibe and Cline line with the honesty section (one build per cell, Richard judged, the turn-2 difference). The site
   push deploys, so it needs Richard's go.
+- **2026-11-04, s1: the site section is LIVE** (Richard: *"please add the results to the page we published today"*).
+  nodegx.io/first-project/#other-assistants: a table of the four builds with his words, the costs, the honesty line,
+  and "the Vibe kit … gets them in its next release". Only `first-project/index.html` was rebuilt (build.py's `wrap`)
+  and rsynced. nodegx-web had another session's uncommitted changelog/start edits, which stay local. Live md5 = local;
+  the neighbours answer 200. nodegx-web commit on its own branch of history. **When the Vibe cut ships, change that line.**
