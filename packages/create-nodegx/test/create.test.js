@@ -332,7 +332,7 @@ test('P112 OWN-019: the Vibe kit writes only Vibe files — its AGENTS.md, the N
   // R31 as ruled in s3 (one session, taught): a written process in one session, handing over through the app's
   // docs/NEXT.md only when it must; the lab and a person carry on with nothing but "continue". The lab reads NEXT.md's
   // first line to know when to stop.
-  assert.match(notes, /You build the whole app in this session, by a process/);
+  assert.match(notes, /you build the\swhole app in this session, by a process/);
   assert.match(notes, /`\^# Next session`/);
   assert.match(notes, /write `docs\/NEXT\.md` as `# Done`/);
   assert.match(notes, /about 100 tool calls/);
@@ -345,6 +345,26 @@ test('P112 OWN-019: the Vibe kit writes only Vibe files — its AGENTS.md, the N
   }
   assert.match(run.stdout, /&& vibe \(Vibe 2\.x: vibe --legacy-harness\)/);
   assert.match(run.stdout, /type \/clear, then "continue"/);
+});
+
+test('P112 OWN-037 (R1): a Vibe folder carries the two first-project guides, the game exception, and asks first', () => {
+  const dir = path.join(tmp(), 'my-apps');
+  assert.equal(spawnSync(process.execPath, [BIN, dir, '--vibe'], { encoding: 'utf8' }).status, 0);
+  // the guides are the core kit's own files, byte for byte, where Vibe lists a project's skills
+  const core = path.join(__dirname, '..', 'profiles', 'core', 'skills');
+  for (const rel of ['nodegx-first-project/SKILL.md', 'nodegx-making-a-game/SKILL.md', 'nodegx-making-a-game/traps.md']) {
+    assert.equal(fs.readFileSync(path.join(dir, '.vibe', 'skills', rel), 'utf8'), fs.readFileSync(path.join(core, rel), 'utf8'), rel);
+  }
+  // only those two: the editor skills stay Claude's
+  assert.ok(!fs.existsSync(path.join(dir, '.vibe', 'skills', 'nodegx-your-own-editor')));
+  const notes = fs.readFileSync(path.join(dir, 'AGENTS.md'), 'utf8');
+  // the core note's exception, word for word but the skill's folder
+  const exception = AGENT_NOTE.match(/The one exception is[\s\S]*?first\./)[0].replace('.claude/skills', '.vibe/skills');
+  assert.ok(notes.includes(exception), 'the game exception');
+  // R1: the guide's "ask once" wins the first exchange; the process keeps the build
+  assert.match(notes, /your first reply is only your questions, all in one message/);
+  assert.match(notes, /`nodegx-first-project` \(`\.vibe\/skills\/nodegx-first-project\/SKILL\.md`\)/);
+  assert.ok(notes.indexOf('your first reply is only your questions') < notes.indexOf('by a process: plan in notes'));
 });
 
 test("P112 OWN-019: the Vibe kit never replaces a person's own files", () => {

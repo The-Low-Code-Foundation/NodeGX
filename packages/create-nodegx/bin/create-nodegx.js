@@ -291,6 +291,7 @@ function writeVibeConfig(dir, platform = process.platform, options = {}) {
  */
 const VIBE_AGENT = 'nodegx';
 const VIBE_PROFILE_DIR = path.join(__dirname, '..', 'profiles', 'vibe');
+const VIBE_SHARED_SKILLS = ['nodegx-first-project', 'nodegx-making-a-game'];
 
 function vibeProfileFiles() {
   const out = [];
@@ -303,7 +304,13 @@ function vibeProfileFiles() {
   };
   walk('');
   // `agents/…` and `skills/…` belong under `.vibe/`; AGENTS.md sits in the folder itself.
-  return out.sort().map((rel) => ({ from: path.join(VIBE_PROFILE_DIR, rel), to: rel === 'AGENTS.md' ? rel : path.join('.vibe', rel) }));
+  const own = out.map((rel) => ({ from: path.join(VIBE_PROFILE_DIR, rel), to: rel === 'AGENTS.md' ? rel : path.join('.vibe', rel) }));
+  // P112 OWN-037 (R1, Richard 2026-11-04): the two OWN-036 guides reach a Vibe folder too, from the core kit's own
+  // files (one copy of each), under `.vibe/skills/` where Vibe lists a project's skills.
+  const shared = coreSkillFiles()
+    .filter((f) => VIBE_SHARED_SKILLS.includes(f.to.split(path.sep)[2]))
+    .map((f) => ({ from: f.from, to: path.join('.vibe', path.relative('.claude', f.to)) }));
+  return [...own, ...shared].sort((a, b) => a.to.localeCompare(b.to));
 }
 
 function writeVibeProfile(dir) {

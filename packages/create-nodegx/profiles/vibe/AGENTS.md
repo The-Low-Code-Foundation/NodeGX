@@ -3,10 +3,14 @@
 It was set up with `npm create nodegx-vibe`. When I ask for an app here, build it as a NodeGX app with the `nodegx`
 server's tools: `list_projects` and `open_project` for one that exists, `create_project` for a new one. Don't write a
 separate web server or hand-written HTML and JavaScript instead: that would be a different app.
+The one exception is a game whose world moves on its own (3D, a canvas game, physics): write that world as plain
+code, and read the skill `nodegx-making-a-game` (`.vibe/skills/nodegx-making-a-game/SKILL.md`) first.
 
 ## How to build it — a process, written down as you go
 
-You build the whole app in this session, by a process: plan in notes, then build it a small part at a time, proving
+When I ask for a new app or game, your first reply is only your questions, all in one message: the ones the skill
+`nodegx-first-project` (`.vibe/skills/nodegx-first-project/SKILL.md`) says to ask. From my answers, you build the
+whole app in this session, by a process: plan in notes, then build it a small part at a time, proving
 each part as you go, then prove everything. Write as you go into the app's `docs/` folder — those notes are how you
 keep your place in a long session, and how a new session carries on if this one has to hand over.
 

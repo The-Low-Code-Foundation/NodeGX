@@ -1,7 +1,6 @@
 # OWN-037 — The first project, in Mistral Vibe and in Cline
 
-**Phase:** [112](README.md). **Opened:** 2026-11-04 by Richard. **Status:** 📋 scoped; nothing run. Three rulings
-below (§6) come before the first round.
+**Phase:** [112](README.md). **Opened:** 2026-11-04 by Richard. **Status:** 🔨 s1 — rulings in (§6, 2026-11-04); AC1 the probe.
 
 > "Can we scope a task to try it out on Vibe and see if we can help it the same way please? And Cline?"
 > — Richard, 2026-11-04, after create-nodegx 0.2.9 shipped the [OWN-036](OWN-036-THE-FIRST-PROJECT-KIT.md) guides.
@@ -99,6 +98,14 @@ reads clearly.
 - **R3 — Game first (4 builds), or both briefs now (8 builds)?** Recommendation: game first. Each build is one
   more for Richard to play.
 
+**Ruled 2026-11-04 (Richard, one screen, the questions as asked):**
+
+- R1, *"which one should win in the guided Vibe build?"* → **"Ask first, then build"**: one sentence in the Vibe
+  note; the first reply asks the guide's questions, the note's process runs the build.
+- R2, *"which model should run the two Cline builds?"* → **DeepSeek V4.1 Flash**. ClinePass lists it today as
+  `cline-pass/deepseek-v4.1-flash-1017`.
+- R3, *"how many builds will you play this round?"* → **game only, 4 builds**.
+
 ## 7. Not in it
 
 - OpenCode. The same ClinePass models would run in it; it can join once Cline reads clearly.
@@ -108,3 +115,14 @@ reads clearly.
 ## Log
 
 - **2026-11-04: scoped** from the 0.2.9 tarballs (above) and the lab records named in §4. Nothing run.
+- **2026-11-04, s1: rulings in (§6); AC2 built, NOT released.** `create-nodegx --vibe` writes `nodegx-first-project`
+  and `nodegx-making-a-game` (+ `traps.md`) into `.vibe/skills/` from the core kit's own files (one copy of each). The
+  Vibe note gains the core note's game exception (its path `.vibe/skills/…`), and R1's sentence: *"When I ask for a
+  new app or game, your first reply is only your questions, all in one message: the ones the skill
+  `nodegx-first-project` … says to ask. From my answers, you build the whole app in this session, by a process"*.
+  Test `P112 OWN-037 (R1)`: 41/41; two mutants (no shared skills; the ask sentence reworded) both turn it red.
+  🔴 **A cut before AC4 must leave this out, or AC4 must pass first.** Lab kits (`/Users/Shared/nodegx-lab/kits/`):
+  `OWN037-REG-0.2.9` (V-a, C-b: create-nodegx 0.2.9 + mcp 0.2.9 + preview 0.2.8, from the registry; there is no
+  preview 0.2.9), `OWN037-VB` (V-b: the checkout's create-nodegx, which differs from 0.2.9 by AC2 alone, measured by
+  `diff -r`), `OWN037-CA-create028-mcp029` (C-a: create-nodegx 0.2.8 with the 0.2.9 server, so both Cline arms run one
+  server; mcp 0.2.8 → 0.2.9 changed `noodl-mcp.cjs` and the backend CLI).
