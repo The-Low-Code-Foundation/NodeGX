@@ -1,95 +1,80 @@
-# Threadspace — s4: Richard plays s3, then the five undriven rows, cadet mode, the wire
+# Threadspace — s7: Richard plays the animations, then the next ship (or the next room)
 
-**Written 2026-10-22 at the end of s3.** Read, in order: this file; `README.md` (what is built, the controls, the
-architecture, the NodeGX and network plan). Verify a claim here by measuring it, not by trusting it.
+**Written 2026-10-30 at the end of s6.** Read, in order: this file; `README.md` (the s6 section is the animations, s5 the
+shipyard, the s4 table the game before it). Verify a claim here by measuring it, not by trusting it. s4, s5 and s6 are
+**uncommitted** at the time of writing unless Richard asked for a commit: check `git status dev-docs/parked/threadspace` first.
 
 ## Where it stands
 
-s1 built the prototype (standalone three.js, no bundler). s2 fixed the spawn wall (TS-S2-SHELLFACE). **s3 took Richard's
-first real play** (2026-10-22: *"actually a really fucking cool game"*) and his ten points, all done:
+Richard drove the shipyard at the start of s6; his verdict is in PLY-009 verbatim (*"FTL meets the SIMs… designing the ship
+is a joy. That has to be a core feature"*). Then: *"maybe some animations would be cool, like getting into the airlock and
+alarms going off… open the wren's cockpit and jump in… the hanger opens… ask to dock first, the hangar doors open… fly at
+least to the door and let the animation take over and land you back in the hangar safely."*
 
-| # | Richard's point | s3 | evidence |
-|---|---|---|---|
-| M1 | inside, W is sometimes forwards, sometimes sideways | a sign error in the walk's rotation (TS-S3-WALKAXES) | smoke: 32 steps × headings, worst dot 1.0 (s2 code: −1) |
-| M2 | a third-person view behind the Wren | **V** toggles a chase view, the Wren and the helm | smoke: camera behind and above, body drawn; shots `08b-wren-chase`, `l3` below |
-| M3 | cargo only on a space walk? | the Kestrel always scooped within 45 m (nobody knew); now the Wren scoops what she flies through, and a **Tractor beam** upgrade (800 cr) pulls from 250 m with a visible beam; pods are courses Vex flies to; the Meridian core still needs hands | smoke: Wren scoop, core left; stock Kestrel leaves a pod at 200 m, tractor takes it in 2.6 s |
-| M4 | NPC approach slows forever | proportional throttle never arrives (TS-S3-CRAWL); braking curve | 700 m → dockable: 54.7 s → 15.3 s |
-| M5 | no shields / hull / danger on contacts | bars under every ship's bracket, a threat word vs what you are in, a target card, a Contacts list on the Nav tab | smoke: threat words on the Rooks; shot `l5` (Carrion: DEADLY in the Wren) |
-| M6 | can't target for the NPC gunner | Dag fires on **your target**, else the nearest threat; "DAG" over what he is shooting | smoke |
-| M7 | click things in 3D like Eve | with the mouse free, a click on a mark selects it (hostile → target, place → course); the captain's chair never takes the mouse (drag orbits); T aims at the crosshair first | smoke: a real pointer event in the chair |
-| G1 | "inside a cube" | the sky was a 2048×1024 picture on a sphere: texel lattice + pole fan (TS-S3-SKYGRID); now a nebula from direction, baked per sector to a cube map at infinity, 7,000 round stars, a sun | shots `03-tactical`, `l2` |
-| G2 | holes and gaps inside | side-room doorways opened onto 1.5–2 m of space; black ceilings; bare windows (TS-S3-HOLES). Passages, lit ribbed ceilings, framed glass, a 6 m concourse | smoke + boarding probes (s2 code: null) |
-| G3 | ships look shitty | lofted chamfered plated hulls (convex, see README), lit windows, plumes that grow with speed, a turning station ring, a segmented gate | shots `02b-turret`, `l3-helm-chase`, `l5-carrion` |
+s6 built all of it (README s6 has the detail):
 
-Shots are in `shots/` (gitignored: on this machine only; `l1`–`l6` are s3's look pass, re-shoot with a drive).
+- `src/sequence.mjs`: `Sequence` (tracks that set state from k, events, camera shots, `skip()` lands where the full run
+  lands) and `Tweens`. Phase `scene` plays one; E or Tab skips.
+- `src/cinematics.mjs`: `airlockOut`, `airlockIn`, `launchSequence`, `landSequence`, each ending in the old verb.
+- The Kestrel: the stern is a plate with the bay's mouth cut in it, a split blast door, beacons, a ladder, a turntable;
+  the airlock's outer door and the hull's hatch move. The Wren's outer wing panels fold (`foldWings`), her canopy hinges.
+- Coming home: E within 1.2 km calls the bay, fly within 70 m astern of the door and the bay's guidance lands her.
+- `?cine=0` turns the animations off (the old suites run that way).
 
-**Readings (2026-10-22, end of s3, each drive run alone at `nice 19` against `node server.mjs --port 8795`):**
+**Readings (2026-10-30, each drive alone at `nice 19`, after a quiet minute with no headless Chrome using CPU):**
 
 | drive | reading |
 |---|---|
-| `tests/smoke.json` | **37 / 37**, exit 0 |
-| `tests/boarding.json` | **18 / 18**, exit 0 |
-| `tests/eva.json` | **11 / 11**, exit 0 |
+| `sh tools/run-all.sh`: smoke, boarding, eva, command (`?cine=0`), sequences | **38/38, 20/20, 12/12, 27/27, 31/31** |
+| `tests/shipyard.json` | **15/15** (the Wren check now passes on her folded span, 7.3 m against the 8 m door, and the test asserts it) |
+| `tests/refit.json` | **7/7** |
 
-**s3b, the same day — Richard on his Mac: smooth until he boarded the hauler, then unplayable.** Two bugs, both fixed:
-TS-S3-BOARDFPS (19 point lights in the scene, the Kestrel's 12 burning out of sight; the hauler's outside drawn behind its
-own walls: software GL 2.5 fps aboard → 8.5, walking is 8.3) and TS-S3-BOARDRAY (every boarding ray cast in the ship's
-frame into the world: **no rifle shot had ever landed**, defenders saw through walls; the drive's check passed on a miss).
+## Rulings owed by Richard (one line each)
 
-`sh tools/run-all.sh` runs all three on :8793. The two new probes (WALKAXES, HOLES) were each run once against s2's
-`walk.mjs` / `interiors.mjs` in a scratch copy and **failed there**, then passed on s3's.
+1. **Play the animations** (`npm start`, new captain, walk to the airlock or the bay, E). Too long? Which ones does he
+   want to skip by default after the first time? Does the bay guidance take over at the right distance (70 m)?
+2. **TS-S5-WRENBAY, decided by default in s6:** her outer wing panels fold up. Keep it, or a smaller Wren / a belly bay?
+3. **TS-S5-TURRETWALL**: the turret pod's wall comes 0.23 m through her starboard flank. Widen her, or move the pod inboard?
+4. **Commit s4 + s5 + s6?** (s4 has been uncommitted since 2026-10-22; PLY-003 waits on it.)
+5. The cutaway as a game mode (his "FTL meets the SIMs"): what would he play in it?
 
-**Not observed (all of it needs Richard's screen):** how any of it feels with a mouse and a real GPU (the chase spring,
-V, the click radius of 22 px, the drag-orbit); the sky at its real-GPU bake size (1024 a face: headless bakes 128, so every
-shot's nebula is blurrier than his) and whether the nebula is now too bright or still too faint (gain 1.6–1.7); the bake's
-cost on a sector jump (six passes + PMREM, inside the 1.7 s fade); the frame rate aboard on his GPU after s3b (software GL only); the threat words' calibration (a rough
-time-to-kill ratio, `game.threatOf`); sound.
+## Next, in order (an agent can do these alone)
 
-## What s3 settled
+1. **The other ships as models**, starting with the Wren (`fighter`) declared like the Kestrel; the shipyard needs a model
+   picker (`?model=`). Her fold hinge (x ±3.3) and folded span then become her settings, and the Kestrel's Wren check reads
+   her design.
+2. **Rooms as geometry, not only colour** (s5's next step 2, still open).
+3. **PLY-009's lineup** and **an agent's read of the declaration** (s5's steps 3 and 4).
+4. Animation polish, not urgent: shot 4 of the launch frames the Wren leaving but not the Kestrel's doors closing behind
+   her; the airlock-out picture as the doors open is only stars (the camera is already past the door frame); the cockpit
+   shots show none of the Wren's own nose.
+5. From s4, still open: HUD labels overlapping (the BAY DOOR and KESTREL labels sit on each other when you are astern).
 
-- 🔴 **A check that a probe "hit something within 3 m" passed on an empty view.** `debug.see()` reports a miss as
-  `Infinity`, JSON sends it as `null`, `null < 3` is true. Ask `typeof d === 'number'`. **Run every new check once against
-  the code it fixes**; it must fail there.
-- 🔴 **A check with an `||` escape tests nothing.** "an aimed shot lands" expected `after < before || before === 60`; a fresh
-  defender has 60 hp, so every miss passed for three sessions while no shot ever landed (TS-S3-BOARDRAY).
-- 🔴 **Never add a `PointLight` to a room**: call `Interior.light` and let the pool shine it (`lights.mjs`).
-- 🔴 **Placing the Kestrel with `debug.go` after an undock puts her straight below the dock** (she undocks 220 m above it),
-  and `lookAt` along a vertical line is degenerate: the autopilot check read 25.7 s, nearly all of it a turn. Start her
-  level, nose on (the check does).
-- 🔴 **A new window frame put two mullions and a console screen in the helm's view.** The helm's eye is now just behind the
-  glass (z −33.15). Any change to the bridge room: re-shoot the helm.
-- **Hulls are lofts kept convex**, so a camera inside one (the helm, a boarder) sees out through all of it; the Kestrel's
-  shell loft is still on `SHELL_LAYER` for the walking camera.
-- s1/s2, still true: entities + seats + controllers; interiors in the host's frame; threads are the float precision fix;
-  software GL runs ~8–10 fps (dt clamp 0.1); `stats()` cannot see the view — look at every shot and gate views on `see()`.
+## Not observed (needs Richard's screen)
 
-## Next, in order
-
-**Rulings owed by Richard (one line each):**
-1. Played s3? Do the ten land, and what broke or bored him next? Fix that first.
-2. M7: clicking is in. Does he still want the panel as the main way to command, or more in the 3D view (orders on a
-   right-click, a radial menu)?
-3. The name ("Threadspace" is a working title); where it lives (`dev-docs/parked/` or its own repo); NodeGX now or later.
-
-**An agent can do alone:**
-1. **Drive the five rows still built-but-undriven** (README table): courier / capture / raid turn-in; `setPaint` recolouring
-   all three hulls (check it on the new `MeshStandardMaterial`s); `hire('moss')` and the marine on a boarding; `canClaim` →
-   `claimSector`; the Wren lost.
-2. **The panel's tabs overflow**: with a mission count, "WIRE" is cut off at 380 px (shot `07-drift`). Wrap or shorten.
-3. **HUD labels overlap** when contacts line up (shot `l4`: the hauler and the gate's labels on top of each other).
-4. **The Guild hauler's boarding rooms sit across its containers**, which are boxes that are not convex with the rooms; board
-   her and look (no drive boards the hauler).
-5. **Cadet mode** (README §For the girls); **the wire** against a NodeGX backend (`net.mjs`); music.
+- The animations on a real GPU and with sound: the klaxon, hiss, servos and roar (`sfx.cue`) have never been heard by
+  anyone; a drive has no ears.
+- How the bay call feels to fly: a drive teleports the Wren to 54 m; nobody has flown her to the door by hand.
 
 ## How to run and drive
 
 ```
 cd dev-docs/parked/threadspace
-npm start                                   # :8787, opens the browser
+npm start                                   # :8787; the game at /, the shipyard at /shipyard.html
 node server.mjs --port 8795 &               # for drives
-nice -n 19 node tools/drive.mjs http://127.0.0.1:8795/ tests/smoke.json shots
-sh tools/run-all.sh                         # all three on :8793, exit 1 on any FAIL
+nice -n 19 node tools/drive.mjs http://127.0.0.1:8795/ tests/sequences.json shots
+nice -n 19 sh tools/run-all.sh              # everything above on :8793; exit 1 on any FAIL
 ```
 
-`window.__game` is the game; `__game.debug.{use, phase, go, credits, killHostiles, assist, stats, see}` are the drive's
-shortcuts. Tear the server and Chrome down when a drive ends (shared box).
+One headless Chrome at a time on this box (peers' lifesim and triage drives count); tear the server down when a drive ends.
+
+## What s6 settled
+
+- 🔴 **A timeline that fires events before tracks breaks on a slow frame.** The frame that crossed both the end of the climb
+  and "sit in her seat" ran the event first, then the climb's last step placed your body in the wrong frame: you rode out
+  standing in space 27 m behind her. Every check passed; only the picture showed it. Events and tracks now run in time
+  order, and a check measures your distance from her seat.
+- 🔴 **A hand-over that ends against a wall is a defect even when every state check passes**: the landing put you 1.5 m
+  from her flank, and the use point was out of reach. Look at the picture of the first frame a person gets back.
+- **An alarm is a colour on the room's existing lights, never a new light** (the pool of 8 holds). A lamp panel baked
+  into the room can't change colour; the two alarmed rooms' panels are their own meshes.

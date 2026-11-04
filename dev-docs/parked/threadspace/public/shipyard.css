@@ -1,0 +1,85 @@
+/* The shipyard: the game's tokens and buttons (style.css), its own layout. The panel is built from the model's declaration. */
+#yard { display: grid; grid-template-columns: 1fr var(--panel-w); height: 100%; }
+#yard-stage { position: relative; min-width: 0; background: #000; }
+#yard-view { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+#yard-view.grab { cursor: grabbing; }
+#yard-view.over { cursor: pointer; }
+#yard-view.handle { cursor: move; }
+#yard-bar { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; pointer-events: none; }
+#yard-bar > * { pointer-events: auto; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; background: rgba(14, 16, 19, 0.85); }
+.seg button { border: 0; border-radius: 0; background: transparent; padding: 6px 12px; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button.on { background: var(--accent); color: #06121f; font-weight: 600; }
+.bar-field { display: inline-flex; gap: 6px; align-items: center; background: rgba(14, 16, 19, 0.85); border: 1px solid var(--line); border-radius: 7px; padding: 4px 10px; color: var(--muted); }
+#yard-bar select, .yard-row select { font: inherit; color: var(--text); background: var(--panel-3); border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; }
+#yard-eye { background: rgba(14, 16, 19, 0.85); }
+#yard-tip { position: absolute; pointer-events: none; background: rgba(10, 12, 16, 0.9); border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; font-size: 12px; white-space: nowrap; transform: translate(12px, 12px); }
+#yard-hint { position: absolute; left: 12px; bottom: 12px; color: var(--muted); font-size: 12px; background: rgba(10, 12, 16, 0.7); border-radius: 6px; padding: 5px 10px; pointer-events: none; }
+
+#yard-panel { display: flex; flex-direction: column; min-height: 0; background: var(--panel); border-left: 1px solid var(--line); }
+#yard-head { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+#yard-head .brand { display: flex; gap: 8px; align-items: center; font-weight: 700; letter-spacing: 0.08em; }
+#yard-head .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--warn); box-shadow: 0 0 8px var(--warn); }
+#yard-status.dirty { color: var(--warn); }
+#yard-status.saved { color: var(--good); }
+#yard-actions { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+a.button { font: inherit; font-size: 12px; color: var(--text); background: var(--panel-3); border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px; text-decoration: none; }
+a.button:hover { border-color: var(--accent); }
+#yard-body { overflow-y: auto; padding: 4px 0 40px; flex: 1; }
+
+.yard-card { margin: 10px 14px; padding: 10px 12px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; }
+.yard-card h3 { margin: 0 0 6px; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 600; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.yard-card.point { border-color: var(--accent); }
+.yard-card.point .what { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.check { display: grid; grid-template-columns: 18px 1fr; gap: 2px 6px; padding: 4px 0; cursor: default; }
+.check .mark { font-weight: 700; }
+.check.ok .mark { color: var(--good); }
+.check.bad .mark { color: var(--bad); }
+.check.warn .mark { color: var(--warn); }
+.check .detail { grid-column: 2; color: var(--muted); font-size: 12px; }
+.check.clickable { cursor: pointer; }
+.check.clickable:hover .label { color: var(--accent); }
+.change { display: grid; grid-template-columns: 1fr auto; gap: 6px; align-items: center; padding: 3px 0; font-size: 12px; }
+.change .from { color: var(--muted); text-decoration: line-through; }
+.change button { padding: 1px 7px; }
+
+details.group { border-top: 1px solid var(--line); }
+details.group > summary { list-style: none; cursor: pointer; padding: 9px 14px; display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+details.group > summary::-webkit-details-marker { display: none; }
+details.group > summary .count { color: var(--muted); font-weight: 400; font-size: 12px; }
+details.group > summary .count.changed { color: var(--warn); }
+details.group[open] > summary { color: var(--accent); }
+.scope-head { padding: 14px 14px 4px; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+
+.yard-row { display: grid; grid-template-columns: 112px 1fr; gap: 8px; align-items: center; padding: 5px 14px; }
+.yard-row.lit { background: rgba(88, 176, 255, 0.07); }
+.yard-row .name { display: flex; gap: 5px; align-items: center; color: var(--muted); font-size: 12px; cursor: default; user-select: none; }
+.yard-row .name .mod { width: 6px; height: 6px; border-radius: 50%; background: transparent; flex: none; }
+.yard-row.changed .name { color: var(--text); }
+.yard-row.changed .name .mod { background: var(--warn); }
+.yard-row .ctl { display: flex; gap: 8px; align-items: center; min-width: 0; }
+.yard-row input[type='range'] { flex: 1; min-width: 0; accent-color: var(--accent); }
+.yard-row .val { font-family: var(--mono); font-size: 12px; min-width: 58px; text-align: right; color: var(--text); background: transparent; border: 1px solid transparent; border-radius: 4px; padding: 1px 3px; }
+.yard-row .val:hover, .yard-row .val:focus { border-color: var(--line); outline: none; }
+.yard-row input[type='color'] { width: 34px; height: 24px; padding: 0; border: 1px solid var(--line); border-radius: 5px; background: none; cursor: pointer; }
+.yard-row input[type='text'] { flex: 1; min-width: 0; font: inherit; color: var(--text); background: var(--panel-3); border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; }
+.yard-row .hex { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.stepper { display: inline-flex; align-items: center; gap: 0; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.stepper button { border: 0; border-radius: 0; padding: 2px 10px; }
+.stepper span { min-width: 30px; text-align: center; font-family: var(--mono); }
+.toggle { position: relative; width: 34px; height: 20px; border-radius: 10px; background: var(--panel-3); border: 1px solid var(--line); cursor: pointer; flex: none; }
+.toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--muted); transition: left 0.12s; }
+.toggle.on { background: var(--accent); border-color: var(--accent); }
+.toggle.on::after { left: 16px; background: #06121f; }
+.help { grid-column: 2; color: var(--muted); font-size: 11px; margin-top: -3px; }
+.yard-foot { padding: 14px; color: var(--muted); font-size: 11px; }
+.yard-foot code { font-family: var(--mono); color: var(--text); }
+.gate-row { display: flex; justify-content: space-between; font-size: 12px; padding: 2px 0; }
+.gate-row.bad { color: var(--bad); }
+
+@media (max-width: 760px) {
+  #yard { grid-template-columns: 1fr; grid-template-rows: 55vh 1fr; }
+  #yard-panel { border-left: 0; border-top: 1px solid var(--line); }
+  #yard-hint { display: none; }
+}

@@ -9,7 +9,9 @@
     "prestart": "node tools/ensure-installed.mjs",
     "start": "node server.mjs --open",
     "serve": "node server.mjs",
-    "drive": "node tools/drive.mjs http://127.0.0.1:8787/ tests/smoke.json shots"
+    "drive": "node tools/drive.mjs http://127.0.0.1:8787/ tests/smoke.json shots",
+    "site": "node tools/site.mjs build",
+    "site:check": "node tools/site.mjs check"
   },
   "dependencies": {
     "three": "^0.186.1"

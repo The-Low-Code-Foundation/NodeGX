@@ -1,0 +1,15 @@
+{
+  "values": {
+    "beam": 19.9,
+    "noseLength": 16,
+    "mastHeight": 6.7,
+    "wingSpan": 24.6,
+    "wingRoot": 16,
+    "sweep": -5,
+    "dihedral": 12,
+    "drives": 4,
+    "driveSize": 2.7,
+    "plume": 10
+  },
+  "savedAt": "2026-10-30T07:22:24.717Z"
+}

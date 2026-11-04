@@ -7,9 +7,12 @@ node server.mjs --port $PORT > shots/server.log 2>&1 &
 SERVER=$!
 sleep 1
 FAILED=0
-for t in smoke boarding eva; do
+# The game's own suites take the instant hand-overs between seats (?cine=0); `sequences` drives the animations.
+for t in smoke boarding eva command sequences; do
   echo "== $t"
-  node tools/drive.mjs "http://127.0.0.1:$PORT/" "tests/$t.json" shots > "shots/$t.log" 2>&1 || FAILED=1
+  Q="?cine=0"
+  [ "$t" = sequences ] && Q=""
+  node tools/drive.mjs "http://127.0.0.1:$PORT/$Q" "tests/$t.json" shots > "shots/$t.log" 2>&1 || FAILED=1
   grep -E "PASS|FAIL|saw:|exception" "shots/$t.log"
 done
 kill $SERVER

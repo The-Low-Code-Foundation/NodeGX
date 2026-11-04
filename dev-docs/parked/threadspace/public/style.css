@@ -34,6 +34,9 @@ button.small { padding: 3px 8px; font-size: 12px; }
 #banner.bad { color: var(--bad); border-color: var(--bad); }
 #banner.good { color: var(--good); border-color: var(--good); }
 #banner.warn { color: var(--warn); border-color: var(--warn); }
+/* The suit's visor (s6): the helmet's rim and a faint tint while you look out of it. */
+#visor { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.4s; background: radial-gradient(ellipse 78% 72% at 50% 48%, transparent 62%, rgba(20, 30, 44, 0.55) 80%, rgba(6, 9, 14, 0.95) 100%), linear-gradient(rgba(120, 170, 220, 0.05), rgba(120, 170, 220, 0.02)); }
+#visor.on { opacity: 1; }
 #fade { position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; transition: opacity 0.35s; }
 #fade.on { opacity: 1; }
 .screen { position: absolute; inset: 0; display: grid; place-items: center; background: radial-gradient(ellipse at 50% 40%, #121a2a 0%, #05070c 70%); }
@@ -98,3 +101,40 @@ select { font: inherit; background: var(--panel-3); color: var(--text); border: 
 .hint { font-size: 12px; color: var(--muted); font-style: italic; }
 .price { font-family: var(--mono); }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+
+/* The command map's card: a battle menu over the bottom left of the view (command.mjs). */
+#cmdcard { position: absolute; left: 14px; bottom: 34px; width: min(560px, calc(100% - 28px)); max-height: calc(100% - 90px); overflow-y: auto; background: rgba(10, 13, 18, 0.94); border: 2px solid #3a4a5e; border-radius: 10px; box-shadow: 0 0 0 4px rgba(10, 13, 18, 0.6), 0 10px 30px rgba(0, 0, 0, 0.5); padding: 10px 12px; font-family: var(--mono); font-size: 12px; }
+#cmdcard[hidden] { display: none; }
+.cc-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; border-bottom: 1px solid var(--line); padding-bottom: 6px; margin-bottom: 6px; }
+.cc-head b { font-size: 14px; letter-spacing: 0.06em; color: var(--text); }
+.cc-sub { color: var(--muted); font-size: 11px; margin-top: 2px; }
+.cc-time { display: flex; gap: 6px; }
+.cc-actors { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+.cc-ask { background: #e8ecf2; color: #10141a; border-radius: 6px; padding: 7px 10px; font-weight: 700; letter-spacing: 0.04em; margin-bottom: 8px; border: 2px solid #8a9ab0; }
+.cc-verbs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
+.cc-verb { text-align: left; font-family: var(--mono); font-size: 12px; padding: 8px 10px; background: var(--panel-2); border: 2px solid var(--line); text-transform: uppercase; letter-spacing: 0.04em; display: flex; flex-direction: column; position: relative; padding-left: 24px; }
+.cc-verb.on { border-color: var(--good); color: var(--good); }
+.cc-verb i { text-transform: none; letter-spacing: 0; font-size: 10px; color: var(--muted); font-style: italic; }
+.cc-cur { position: absolute; left: 8px; top: 8px; color: var(--good); }
+.cc-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
+.cc-row > i { color: var(--warn); font-size: 11px; }
+.cc-lbl { color: var(--muted); text-transform: uppercase; font-size: 10px; letter-spacing: 0.08em; margin-right: 4px; }
+.cc-plan { border-top: 1px solid var(--line); padding-top: 6px; }
+.cc-now { color: var(--good); margin: 3px 0 4px; }
+.cc-step { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; color: var(--text); border-bottom: 1px dashed var(--line); }
+.cc-step.on { color: var(--good); }
+.cc-prize { background: rgba(255, 179, 71, 0.08); border: 1px solid var(--warn); border-radius: 6px; padding: 6px; }
+.card.warnc { border-color: var(--warn); }
+.stats { display: grid; grid-template-columns: 82px 1fr 18px; gap: 1px 8px; align-items: center; font-family: var(--mono); font-size: 11px; color: var(--muted); margin: 6px 0 2px; }
+.stats .bar { margin: 0; height: 5px; }
+.stats .bar i { background: #5a6474; }
+.stats .bar.good i { background: var(--good); }
+.stats span.on { color: var(--good); }
+.stats span:nth-child(3n) { text-align: right; }
+.card .d.fx { color: #b7c3d3; font-style: normal; }
+.face { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 2px; border: 1px solid #ffffff44; }
+.card .t { flex-wrap: wrap; }
+.look-row { margin-bottom: 8px; }
+.look-row .d { margin-bottom: 4px; }
+.row.wrap { flex-wrap: wrap; gap: 4px; }
+input.name { font: inherit; width: 100%; background: var(--panel-3); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; }

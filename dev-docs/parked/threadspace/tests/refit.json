@@ -1,0 +1,19 @@
+[
+  { "node": ["-e", "const fs=require('fs');const f='public/ships/kestrel.json';if(fs.existsSync(f))fs.copyFileSync(f,f+'.drive-backup');'ok'"] },
+  { "wait": 2500 },
+  { "eval": "!!document.getElementById('btn-yard') && !document.getElementById('title').hidden", "label": "the title screen has a Shipyard button", "expect": "r => r === true" },
+  { "clickSel": "#btn-new" },
+  { "wait": 3000 },
+  { "eval": "__game.closeWardrobe?.(); __game.panel.tab = 'ship'; __game.panel.refresh(); [...document.querySelectorAll('#panel button')].some((b) => /Open the shipyard/.test(b.textContent))", "label": "the Ship tab has a way into the shipyard", "expect": "r => r === true" },
+  { "eval": "JSON.stringify({ w: __game.player.obj.userData.sections[4].w, waiting: !!__game.designWaiting })", "label": "she starts as the model is declared", "expect": "r => r.w === 17 && !r.waiting" },
+  { "eval": "fetch('/api/design/kestrel', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ values: { beam: 21, paint: '#7a2e2e', name: 'REFIT' } }) }).then((r) => r.json()).then((j) => j.ok)", "label": "the shipyard's save (the same request it sends)", "expect": "r => r === true" },
+  { "eval": "__game.checkDesign().then(() => JSON.stringify({ waiting: __game.designWaiting, card: [...document.querySelectorAll('#panel button')].some((b) => /Refit her now/.test(b.textContent)), banner: document.getElementById('banner').textContent }))", "label": "coming back to the game's tab, the new design is offered", "expect": "r => r.waiting && r.card && /SHIPYARD/.test(r.banner)" },
+  { "eval": "[...document.querySelectorAll('#panel button')].find((b) => /Refit her now/.test(b.textContent)).click(); 1" },
+  { "wait": 3000 },
+  { "eval": "JSON.stringify({ w: __game.player.obj.userData.sections[4].w, paint: __game.state.paint, hull: '#' + __game.player.obj.userData.hullMat.color.getHexString(), waiting: __game.designWaiting, phase: __game.phase })", "label": "Refit her now rebuilds her to the design: 21 m beam, the design's paint", "expect": "r => Math.abs(r.w - 21) < 0.01 && r.paint === '#7a2e2e' && !r.waiting && r.phase === 'walk'" },
+  { "eval": "__game.setPaint('#2f6f4e'); fetch('/api/design/kestrel', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ values: { beam: 19, paint: '#7a2e2e' } }) }).then(() => __game.checkDesign()).then(() => (__game.refit(), new Promise((r) => setTimeout(r, 2500)))).then(() => JSON.stringify({ w: __game.player.obj.userData.sections[4].w, paint: __game.state.paint }))", "label": "once the captain paints her at a yard, a refit keeps that paint and takes the rest", "expect": "r => Math.abs(r.w - 19) < 0.01 && r.paint === '#2f6f4e'" },
+  { "eval": "__game.closeWardrobe?.(); window.cam = (x, y, z, tx, ty, tz) => { __game.setPhase('helm'); __game.controller = { frame() {}, placeCamera(c) { const p = __game.player.obj; c.position.copy(p.localToWorld(new (p.position.constructor)(x, y, z))); c.lookAt(p.localToWorld(new (p.position.constructor)(tx, ty, tz))); } }; return 1; }; cam(66, 24, -56, 0, -1, 2)" },
+  { "wait": 2000 },
+  { "shot": "r01-refitted.png" },
+  { "node": ["-e", "const fs=require('fs');const f='public/ships/kestrel.json';if(fs.existsSync(f+'.drive-backup')){fs.renameSync(f+'.drive-backup',f);'restored'}else{fs.rmSync(f,{force:true});'removed'}"] }
+]

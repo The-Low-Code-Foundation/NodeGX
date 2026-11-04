@@ -4,6 +4,7 @@
 import * as THREE from 'three';
 import { SECTORS, STATIONS, SHIPS, FACTIONS } from './data.mjs';
 import * as M from './ships.mjs';
+import { station, derelict, asteroidField } from './scenery.mjs';
 import { mulberry, rand, UP, forwardOf } from './util.mjs';
 
 export class Entity {
@@ -105,38 +106,22 @@ export class World {
     });
     if (S.station) {
       const st = STATIONS[S.station];
-      const g = M.station({ faction: st.faction, seed: S.seed });
+      const g = station({ faction: st.faction, seed: S.seed });
       g.position.set(600, 0, -400);
       const e = this.add(new Entity('station', g, { side: st.faction, hittable: false, radius: 200, name: st.name.toUpperCase() }));
       e.station = st;
       this.station = e;
     }
-    // Rocks: an instanced field in a thick disc, none within 400 m of the centre or the station.
+    // Rocks: an instanced field in a thick disc, none within 400 m of the station (scenery.mjs).
     const count = S.asteroids;
     if (count) {
-      const geo = M.asteroid(rnd, 1).geometry;
-      const mesh = new THREE.InstancedMesh(geo, M.asteroid(rnd, 1).material, count);
-      const m = new THREE.Matrix4();
-      const q = new THREE.Quaternion();
-      const p = new THREE.Vector3();
-      const s = new THREE.Vector3();
-      this.rocks = [];
-      for (let i = 0; i < count; i++) {
-        const a = rnd() * Math.PI * 2;
-        const r = 500 + rnd() * 2200;
-        p.set(Math.cos(a) * r, (rnd() - 0.5) * 500, Math.sin(a) * r);
-        if (this.station && p.distanceTo(this.station.obj.position) < 400) p.y += 500;
-        const size = 6 + rnd() * rnd() * 60;
-        s.setScalar(size);
-        q.setFromEuler(new THREE.Euler(rnd() * 6, rnd() * 6, rnd() * 6));
-        mesh.setMatrixAt(i, m.compose(p, q, s));
-        this.rocks.push({ pos: p.clone(), r: size });
-      }
-      this.scene.add(mesh);
-      this.asteroids = mesh;
+      const field = asteroidField(rnd, count, { avoid: this.station ? [{ pos: this.station.obj.position, r: 400 }] : [], kind: id });
+      this.rocks = field.userData.rocks;
+      this.scene.add(field);
+      this.asteroids = field;
     }
     if (S.derelict) {
-      const g = M.derelict();
+      const g = derelict();
       g.position.set(-900, 120, 700);
       const e = this.add(new Entity('derelict', g, { side: 'none', hittable: false, radius: 60, name: 'MERIDIAN (DERELICT)' }));
       this.derelict = e;
@@ -209,6 +194,7 @@ export class World {
       if (e.kind === 'gate') e.obj.userData.disc.material.opacity = 0.22 + 0.1 * Math.sin(this.time * 2 + e.obj.position.x);
       if (e.obj.userData.plumes) M.setThrust(e.obj, Math.min(1.2, e.speed / (e.cls?.speed?.[1] ?? 60)));
       if (e.obj.userData.spinner) e.obj.userData.spinner.rotation.y += dt * 0.025;
+      e.obj.userData.tick?.(dt, this.time);
       if (e.hitFlash > 0) e.hitFlash = Math.max(0, e.hitFlash - dt * 4);
     }
   }

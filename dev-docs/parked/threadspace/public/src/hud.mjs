@@ -9,6 +9,7 @@ import { O2_SECONDS } from './controllers/eva.mjs';
 
 const C = { green: '#39d27a', amber: '#ffb347', blue: '#58b0ff', red: '#ff5540', purple: '#b48cff', dim: '#8a93a3', white: '#e6e9ee', panel: 'rgba(14,16,19,0.8)' };
 const _v = new THREE.Vector3();
+const _w = new THREE.Vector3();
 
 export class Hud {
   constructor(canvas) {
@@ -49,9 +50,10 @@ export class Hud {
       g.fillStyle = `rgba(255,50,24,${(game.flash * 0.4).toFixed(3)})`;
       g.fillRect(0, 0, W, H);
     }
+    if (game.command.open) return this.map(game);
     if (p === 'walk' || p === 'dock') this.dot();
     else if (p === 'board') this.boarding(game);
-    else if (p === 'helm' || p === 'fighter' || p === 'turret' || p === 'eva' || p === 'tactical') this.space(game);
+    else if (p === 'helm' || p === 'fighter' || p === 'turret' || p === 'eva') this.space(game);
     if (p === 'jump') return;
     if (game.hacking) this.progress(game.hacking.k, 'HACKING THE AIRLOCK', C.amber);
   }
@@ -168,6 +170,14 @@ export class Hud {
     const body = game.playerBody();
     const eye = game.camera.position;
     const phase = game.phase;
+    // s6: the Kestrel's bay door, when you can call for it (amber) or have (green, with how far).
+    if (phase === 'fighter' && game.cinematics && (game.bay.requested || game.canRequestBay())) {
+      const p = this.project(game, game.bayMouth());
+      const col = game.bay.requested ? C.green : C.amber;
+      this.diamond(p.x, p.y, 10, col);
+      if (game.bay.requested) this.diamond(p.x, p.y, 5, col, true);
+      if (p.ahead) this.label(p.x + 16, p.y, game.bay.requested ? `BAY DOOR ${Math.round(game.bayDistance())} m` : 'KESTREL BAY · E TO CALL', col);
+    }
     // Marks on everything that matters, nearest last so its label wins.
     const marks = [];
     for (const e of game.world.entities) {
@@ -293,9 +303,161 @@ export class Hud {
     if (game.warn) this.label(W / 2, 26, game.warn, C.amber, 'center');
     else if (!game.input.locked && phase !== 'tactical') this.label(W / 2, 26, 'CLICK THE VIEW TO TAKE THE STICK · CLICK A MARK TO SELECT IT', C.dim, 'center');
     if (game.beams?.length) this.label(W / 2, 64, `TRACTOR · ${game.beams.length} POD${game.beams.length > 1 ? 'S' : ''} COMING IN`, C.amber, 'center');
-    const help = { helm: 'mouse or arrows steer · W S throttle · T target · V view · E stand up · J jump at a gate · Tab tactical', fighter: 'mouse or arrows fly · A D roll · W S throttle · Space fire · T target · V view · fly through a pod to scoop it · E land astern', turret: 'mouse aims · click or Space fires · T target · E climb down', eva: 'W S A D R F thrust · Shift burn · mouse look · E grab / airlock', tactical: 'click a contact: target it (Dag fires) or set a course (Vex flies) · drag orbits · wheel zooms · T next target · Tab back' }[phase];
+    const help = { helm: 'mouse or arrows steer · W S throttle · T target · V view · E stand up · J jump at a gate · Tab pause and command', fighter: 'mouse or arrows fly · A D roll · W S throttle · Space fire · T target · V view · fly through a pod to scoop it · E land astern · Tab command', turret: 'mouse aims · click or Space fires · T target · E climb down · Tab command', eva: 'W S A D R F thrust · Shift burn · mouse look · V view · E grab / airlock · Tab command (have the Kestrel pick you up)' }[phase];
     if (help) this.label(W / 2, H - 10, help, C.dim, 'center');
     if (game.dockPrompt) this.label(W / 2, 46, game.dockPrompt, C.green, 'center');
+  }
+
+  /** The command map: every contact with its name and a stalk to the plane, the reach of a picked hostile's guns, each
+   *  of your ships' plans as numbered legs, and where you are. Marks are clickable (`pick`). */
+  map(game) {
+    const { g, W, H } = this;
+    const cmd = game.command;
+    const planeY = cmd.planeY();
+    const eye = game.camera.position;
+    const sel = cmd.sel;
+    const ents = game.world.entities.filter((e) => e.alive && !(e === game.fighterEnt && !game.fighterOut));
+    const draw = [];
+    for (const e of ents) {
+      const d = e.obj.position.distanceTo(eye);
+      if (e.kind === 'pod' && d > 4000) continue;
+      let color = C.dim;
+      if (e.kind === 'station') color = C.blue;
+      else if (e.kind === 'gate') color = C.purple;
+      else if (e.kind === 'pod') color = C.amber;
+      else if (e === game.player || e.side === 'player') color = C.green;
+      else if (game.hostile('player', e.side) && e.hittable) color = C.red;
+      else if (FACTIONS[e.side]) color = FACTIONS[e.side].color;
+      draw.push({ e, d, color });
+    }
+    draw.sort((a, b) => b.d - a.d);
+    // The reach of the picked hostile's guns, on the plane.
+    if (sel && sel !== 'you' && sel.alive && game.hostile('player', sel.side)) {
+      const reach = sel.kind === 'corvette' ? 900 : sel.kind === 'pirate' ? 650 : 0;
+      if (reach) this.ring(game, sel.obj.position.x, planeY, sel.obj.position.z, reach, 'rgba(255,85,64,0.45)');
+    }
+    // The Kestrel's turret reach and the suit range round her.
+    this.ring(game, game.player.obj.position.x, planeY, game.player.obj.position.z, 800, 'rgba(57,210,122,0.25)');
+    for (const m of draw) {
+      const e = m.e;
+      const p = this.project(game, e.obj.position);
+      const foot = this.project(game, _v.set(e.obj.position.x, planeY, e.obj.position.z).clone());
+      if (!p.ahead) continue;
+      if (foot.ahead) {
+        g.strokeStyle = m.color + '66';
+        g.lineWidth = 1;
+        g.beginPath();
+        g.moveTo(p.x, p.y);
+        g.lineTo(foot.x, foot.y);
+        g.stroke();
+        g.fillStyle = m.color + '88';
+        g.fillRect(foot.x - 2, foot.y - 1, 4, 2);
+      }
+      const big = ['station', 'gate', 'derelict', 'corvette', 'freighter', 'follower', 'frigate'].includes(e.kind);
+      const s = e.kind === 'pod' ? 4 : big ? 9 : 6;
+      if (e.kind === 'station' || e.kind === 'gate' || e.kind === 'derelict') this.diamond(p.x, p.y, s, m.color);
+      else if (e.kind === 'pod') this.diamond(p.x, p.y, s, m.color, true);
+      else this.bracket(p.x, p.y, s, m.color);
+      if (e === sel) {
+        g.strokeStyle = C.white;
+        g.lineWidth = 2;
+        g.beginPath();
+        g.arc(p.x, p.y, s + 8, 0, Math.PI * 2);
+        g.stroke();
+      }
+      if (game.target === e) this.bracket(p.x, p.y, s + 5, C.amber);
+      // Which way she is heading.
+      if (e.speed > 1) {
+        const ahead = this.project(game, e.obj.position.clone().addScaledVector(e.forward(new THREE.Vector3()), Math.min(400, e.speed * 6)));
+        if (ahead.ahead) {
+          g.strokeStyle = m.color;
+          g.lineWidth = 1;
+          g.beginPath();
+          g.moveTo(p.x, p.y);
+          g.lineTo(ahead.x, ahead.y);
+          g.stroke();
+        }
+      }
+      const name = e === game.player ? 'KESTREL' : e.name;
+      const tag = game.wontShoot(e) && game.hostile('player', e.side) ? ' · SPARED' : e.hullMax && e.side !== 'none' && e.hittable ? ` · ${Math.round((100 * e.hull) / e.hullMax)}%` : '';
+      if (e.kind !== 'pod' || m.d < 1500 || e === sel) this.label(p.x + s + 5, p.y - 2, name + tag, e === sel ? C.white : m.color);
+      if (e === game.player) this.label(p.x + s + 5, p.y + 11, game.helmStatus ?? '', C.green);
+      else if (e.kind === 'follower') this.label(p.x + s + 5, p.y + 11, e.status ?? '', C.green);
+      else if (e === game.gunnerOn) this.label(p.x + s + 5, p.y + 11, `${(game.crewName(game.crewAt('turret')) ?? 'gunner').toUpperCase()} FIRING`, C.amber);
+      this.marks.push({ e, x: p.x, y: p.y, r: s + 10 });
+    }
+    // Crew out in suits.
+    for (const t of game.transfers) {
+      const p = this.project(game, t.pos);
+      if (!p.ahead) continue;
+      this.diamond(p.x, p.y, 4, C.white, true);
+      this.label(p.x + 8, p.y, `${t.name.toUpperCase()} · SUIT`, C.white);
+    }
+    // Where you are, if not in the Kestrel.
+    if (!game.aboardKestrel()) {
+      const p = this.project(game, game.youAt());
+      if (p.ahead) {
+        g.strokeStyle = C.white;
+        g.lineWidth = 2;
+        g.beginPath();
+        g.moveTo(p.x, p.y - 16);
+        g.lineTo(p.x - 7, p.y - 26);
+        g.lineTo(p.x + 7, p.y - 26);
+        g.closePath();
+        g.stroke();
+        this.label(p.x, p.y - 34, 'YOU', C.white, 'center');
+        this.marks.push({ e: 'you', x: p.x, y: p.y - 20, r: 14 });
+      }
+    }
+    // Every plan as legs: from the ship to each step's place, numbered.
+    for (const a of game.command.actors()) {
+      const steps = game.orders.plan(a.id).steps;
+      let from = this.project(game, a.ent.obj.position);
+      steps.forEach((st, i) => {
+        const at = st.target === 'you' ? game.youAt() : st.target?.obj?.position;
+        if (!at) return;
+        const to = this.project(game, at);
+        if (!from.ahead || !to.ahead) return (from = to);
+        g.strokeStyle = a.id === game.command.actor ? C.green : 'rgba(57,210,122,0.5)';
+        g.setLineDash([6, 5]);
+        g.lineWidth = 1.5;
+        g.beginPath();
+        g.moveTo(from.x, from.y);
+        g.lineTo(to.x, to.y);
+        g.stroke();
+        g.setLineDash([]);
+        g.fillStyle = C.panel;
+        g.beginPath();
+        g.arc((from.x + to.x) / 2, (from.y + to.y) / 2, 8, 0, Math.PI * 2);
+        g.fill();
+        this.label((from.x + to.x) / 2, (from.y + to.y) / 2 + 1, String(i + 1), C.green, 'center');
+        from = to;
+      });
+    }
+    g.textAlign = 'center';
+    this.label(W / 2, 22, cmd.paused ? '❚❚  PAUSED — P RUNS THE GAME · TAB GOES BACK' : '▶  RUNNING — P PAUSES · TAB GOES BACK', cmd.paused ? C.amber : C.green, 'center');
+    this.label(W / 2, H - 10, 'click a contact for orders · drag to orbit · wheel zooms · W A S D pan', C.dim, 'center');
+  }
+
+  /** A circle on the plane, drawn through the camera. */
+  ring(game, x, y, z, r, color) {
+    const g = this.g;
+    g.strokeStyle = color;
+    g.lineWidth = 1.2;
+    g.beginPath();
+    let pen = false;
+    for (let i = 0; i <= 64; i++) {
+      const a = (i / 64) * Math.PI * 2;
+      const p = this.project(game, _w.set(x + Math.cos(a) * r, y, z + Math.sin(a) * r));
+      if (!p.ahead) {
+        pen = false;
+        continue;
+      }
+      if (pen) g.lineTo(p.x, p.y);
+      else g.moveTo(p.x, p.y);
+      pen = true;
+    }
+    g.stroke();
   }
 
   /** The target's card, top right of the view: what she is, what she has left, how dangerous, who is shooting her. */
@@ -343,8 +505,10 @@ export class Hud {
     const bw = clamp(W * 0.16, 90, 200);
     this.bar(18, H - 34, bw, 8, b.hp / 100, b.hp < 30 ? C.red : C.green, 'YOU', `${Math.max(0, Math.round(b.hp))}`);
     this.bar(W - 18 - bw, H - 34, bw, 8, 1 - b.defendersLeft() / Math.max(1, b.defenders.length), C.red, 'DEFENDERS', `${b.defendersLeft()} left`);
+    const vm = game.viewmodel;
+    if (vm) this.bar(W / 2 - bw / 2, H - 34, bw, 8, vm.reloading ? 0 : vm.ammo / vm.magSize, vm.reloading || vm.ammo < 6 ? C.amber : C.blue, 'RIFLE', vm.reloading ? 'RELOADING' : `${vm.ammo} / ${vm.magSize}`);
     if (b.seizing > 0) this.progress(b.seizing, 'SEIZING THE BRIDGE', C.green);
     this.label(W / 2, 26, `BOARDING ${b.ship.name}`, C.amber, 'center');
-    this.label(W / 2, H - 10, 'W A S D move · mouse aims · click or Space fires · E at the bridge console seizes her · E at the airlock leaves', C.dim, 'center');
+    this.label(W / 2, H - 10, 'W A S D move · mouse aims · click or Space fires · R reloads · V view · E at the bridge console seizes her · E at the airlock leaves · Tab map', C.dim, 'center');
   }
 }

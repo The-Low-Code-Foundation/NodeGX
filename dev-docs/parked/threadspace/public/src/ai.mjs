@@ -1,5 +1,6 @@
 // The other hands: Rook raiders that hunt the nearest thing of yours, the corvette's turrets, the hauler on
-// its lane, your own crew flying the Kestrel and manning her turret, and captured ships that follow you.
+// its lane, your own crew flying the Kestrel's plan and manning her turret, captured ships flying theirs, and crew
+// crossing between ships in suits.
 
 import * as THREE from 'three';
 import { Flight } from './controllers/fly.mjs';
@@ -122,7 +123,7 @@ export class AI {
     }
   }
 
-  turrets(e, prey, dt, { every, damage, speed, range }) {
+  turrets(e, prey, dt, { every, damage, speed, range, spread = 0.015 }) {
     const g = this.game;
     e.cool = (e.cool ?? 0) - dt;
     this.leadPoint(e.obj.position, prey, speed);
@@ -133,7 +134,7 @@ export class AI {
       aimTurret(t, e.obj, _lead, dt, 2.5);
       if (canFire) {
         const tip = t.pitch.localToWorld(t.tip.clone());
-        const dir = _lead.clone().sub(tip).normalize().add(new THREE.Vector3(rand(-1, 1), rand(-1, 1), rand(-1, 1)).multiplyScalar(0.015)).normalize();
+        const dir = _lead.clone().sub(tip).normalize().add(new THREE.Vector3(rand(-1, 1), rand(-1, 1), rand(-1, 1)).multiplyScalar(spread)).normalize();
         g.combat.fire(e.side, tip, dir, { damage, speed, range, len: 7, width: 0.45, owner: e, sound: 'turbolaser', camera: g.camera });
       }
     }
@@ -149,47 +150,95 @@ export class AI {
     if (e.flight.toward(to, dt, { stop: 60 }) < 80) e.leg = (e.leg + 1) % e.route.length;
   }
 
-  /** A ship of your fleet: keeps station off the Kestrel's quarter, shoots Rooks it can see. */
+  /** A ship of your fleet: flies her plan (orders.mjs; "follow" keeps station off the Kestrel's quarter) and shoots
+   *  under her stance, as well as the one crew member aboard can manage both. Nobody aboard: she drifts. */
   follower(e, dt) {
     const g = this.game;
     e.flight ??= new Flight(e, e.cls);
+    const f = g.state.fleet.find((x) => x.id === e.fleetId);
+    if (!f?.crew) {
+      e.flight.throttle = 0;
+      e.speed = 0;
+      e.vel.multiplyScalar(Math.max(0, 1 - dt * 0.5));
+      e.obj.position.addScaledVector(e.vel, dt);
+      e.status = 'adrift · nobody aboard';
+      return;
+    }
+    const fx = g.crewEffect(f.crew, 'prize');
     const k = g.player.obj;
     const slot = new THREE.Vector3(e.slot === 1 ? 120 : -120, -20, 90).applyQuaternion(k.quaternion).add(k.position);
-    e.flight.toward(slot, dt, { stop: 20, brake: 3 });
+    e.status = g.orders.drive(e.fleetId, e, e.flight, dt, fx.skill, { slot });
     if (e.obj.userData.turrets?.length) {
-      const prey = this.preyFor(e);
-      if (prey && prey.obj.position.distanceTo(e.obj.position) < 900) this.turrets(e, prey, dt, { every: 0.9, damage: 26, speed: 400, range: 900 });
+      const prey = g.orders.prey(e.fleetId, e, 900, { prefer: g.target });
+      if (prey) this.turrets(e, prey, dt, { every: 0.9 / fx.rate, damage: 26, speed: 400, range: 900, spread: fx.spread });
     }
   }
 
-  /** Your own crew. Vex at the helm flies the nav target or holds; Dag at the turret shoots your target, or the nearest Rook. */
+  /** Your own crew. Whoever has the helm flies the Kestrel's plan (orders.mjs); whoever has the turret shoots under her
+   *  stance, as well as their gunnery allows (game.crewEffect: spread, swing, how soon they open up, how far they lead). */
   crew(dt) {
     const g = this.game;
     const k = g.player;
     const f = g.helmFlight;
-    if (g.crewAt('helm') && g.phase !== 'helm') {
-      if (g.nav && g.nav.alive !== false) f.toward(g.navPoint(), dt, { stop: g.navStop(g.nav) });
-      else f.hold(dt);
-    } else if (g.phase !== 'helm') {
+    const pilot = g.crewAt('helm');
+    k.evade = 0;
+    if (g.phase === 'helm') g.helmStatus = 'you have the helm';
+    else if (pilot) {
+      const fx = g.crewEffect(pilot, 'helm');
+      g.helmStatus = `${g.crewName(pilot)}: ${g.orders.drive('kestrel', k, f, dt, fx.skill)}`;
+      k.evade = fx.evade;
+    } else {
       f.hold(dt); // nobody at the helm: she coasts to a stop
+      g.helmStatus = g.orders.current('kestrel') ? 'nobody at the helm: she holds' : 'holding';
     }
-    if (g.crewAt('turret') && g.phase !== 'turret') {
+    const gunner = g.crewAt('turret');
+    if (gunner && g.phase !== 'turret') {
+      const fx = g.crewEffect(gunner, 'turret');
       const t = k.obj.userData.turret;
       g.turretCool = (g.turretCool ?? 0) - dt;
-      // Your target first, when it is in her reach; the nearest threat otherwise.
-      const tg = g.target;
-      const mine = tg?.alive && g.hostile('player', tg.side) && tg.obj.position.distanceTo(k.obj.position) < 800 ? tg : null;
-      const prey = mine ?? this.preyFor(k);
-      g.gunnerOn = prey && prey.obj.position.distanceTo(k.obj.position) < 800 ? prey : null;
-      if (g.gunnerOn) {
+      const prey = g.orders.prey('kestrel', k, 800, { prefer: g.target });
+      if (prey !== g.gunnerOn) {
+        g.gunnerOn = prey;
+        g.turretAcquire = fx.react;
+      }
+      g.turretAcquire = Math.max(0, (g.turretAcquire ?? 0) - dt);
+      if (prey) {
         this.leadPoint(k.obj.position, prey, 460);
-        aimTurret(t, k.obj, _lead, dt, 3);
-        if (g.turretCool <= 0) {
+        _lead.lerp(prey.obj.position, 1 - fx.lead); // a green gunner leads short
+        const off = aimTurret(t, k.obj, _lead, dt, fx.swing);
+        if (g.turretCool <= 0 && g.turretAcquire <= 0 && off < 0.12) {
           g.turretCool = g.ship.turretEvery;
-          g.fireTurret(_lead);
+          g.fireTurret(_lead, fx.spread);
         }
       }
     } else g.gunnerOn = null;
+  }
+
+  /** Crew crossing between ships in suits: out of one airlock, a burn across, in at the other. */
+  transfers(dt) {
+    const g = this.game;
+    for (const t of [...g.transfers]) {
+      const to = t.to;
+      if (!to.alive) {
+        g.transferDone(t, false);
+        continue;
+      }
+      to.obj.updateMatrixWorld();
+      const dest = to.obj.localToWorld(to.obj.userData.airlock.clone().add(t.into));
+      _to.copy(dest).sub(t.pos);
+      const d = _to.length();
+      if (d < 3) {
+        g.transferDone(t, true);
+        continue;
+      }
+      // Burn toward the door, brake to match the ship's drift on the last stretch.
+      const want = _to.normalize().multiplyScalar(Math.min(32, Math.sqrt(2 * 9 * d))).add(to.vel);
+      t.vel.lerp(want, Math.min(1, dt * 1.6));
+      t.pos.addScaledVector(t.vel, dt);
+      t.mesh.position.copy(t.pos);
+      t.mesh.lookAt(dest);
+      t.mesh.userData.tick?.(dt);
+    }
   }
 }
 
@@ -199,8 +248,16 @@ export function aimTurret(t, host, worldPoint, dt, rate) {
   const wantYaw = Math.atan2(-local.x, -local.z);
   const flat = Math.hypot(local.x, local.z);
   const wantPitch = Math.atan2(local.y - t.pitch.position.y, flat);
+  const pitch = Math.max(-0.2, Math.min(1.2, wantPitch));
   t.yaw.rotation.y = approach(t.yaw.rotation.y, wantYaw, rate * dt);
-  t.pitch.rotation.x = approach(t.pitch.rotation.x, Math.max(-0.2, Math.min(1.2, wantPitch)), rate * dt);
+  t.pitch.rotation.x = approach(t.pitch.rotation.x, pitch, rate * dt);
+  return Math.abs(wrap(wantYaw - t.yaw.rotation.y)) + Math.abs(pitch - t.pitch.rotation.x); // how far off it still is
+}
+
+function wrap(d) {
+  while (d > Math.PI) d -= Math.PI * 2;
+  while (d < -Math.PI) d += Math.PI * 2;
+  return d;
 }
 
 function approach(a, b, max) {

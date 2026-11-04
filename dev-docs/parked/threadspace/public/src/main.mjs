@@ -7,6 +7,7 @@ const btnContinue = document.getElementById('btn-continue');
 btnContinue.hidden = !game.hasSave();
 btnContinue.addEventListener('click', () => game.load());
 document.getElementById('btn-new').addEventListener('click', () => game.newGame());
+document.getElementById('btn-yard').addEventListener('click', () => (location.href = '/shipyard.html'));
 game.frame();
 
 // For the drive and the console: shortcuts past the walking.
@@ -29,14 +30,21 @@ game.debug = {
   stats: () => game.stats(),
   /** What the camera's centre ray lands on, through the camera's own layers: the one check that reads the view.
    *  stats() cannot see a wall in your face (2026-10-22: the drive was green while the spawn looked at the hull). */
-  see: () => {
-    game.controller.placeCamera(game.camera);
+  see: ({ pitch = 0 } = {}) => {
+    if (game.command.open) game.command.placeCamera(game.camera);
+    else game.controller.placeCamera(game.camera);
     game.camera.updateMatrixWorld();
     const dir = game.camera.getWorldDirection(new THREE.Vector3());
+    // `pitch` tilts the ray down (positive) or up from the view's centre, about the camera's own right.
+    if (pitch) dir.applyAxisAngle(new THREE.Vector3(1, 0, 0).applyQuaternion(game.camera.quaternion), -pitch);
     const rc = new THREE.Raycaster(game.camera.getWorldPosition(new THREE.Vector3()), dir, 0, 1000);
     rc.layers.mask = game.camera.layers.mask;
     rc.camera = game.camera; // sprites (the engines' halos) need it
-    const hit = rc.intersectObjects(game.scene.children, true).find((h) => h.object.visible && h.object.material && !h.object.isSprite && !h.object.isPoints && !(h.object.material.side === THREE.FrontSide && h.face && h.face.normal.clone().transformDirection(h.object.matrixWorld).dot(dir) > 0));
+    const shown = (o) => {
+      for (; o; o = o.parent) if (!o.visible) return false;
+      return true;
+    };
+    const hit = rc.intersectObjects(game.scene.children, true).find((h) => shown(h.object) && h.object.material && !(h.object.material.transparent && h.object.material.opacity < 0.3) && !h.object.isSprite && !h.object.isPoints && !(h.object.material.side === THREE.FrontSide && h.face && h.face.normal.clone().transformDirection(h.object.matrixWorld).dot(dir) > 0));
     if (!hit) return { dist: Infinity, color: null, geo: null };
     const p = hit.object.geometry.parameters ?? {};
     return { dist: Math.round(hit.distance * 100) / 100, color: '#' + (hit.object.material.color?.getHexString() ?? ''), geo: hit.object.geometry.type, size: [p.width, p.height, p.depth].filter((v) => v !== undefined) };

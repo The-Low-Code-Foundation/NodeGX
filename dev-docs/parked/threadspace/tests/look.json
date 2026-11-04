@@ -1,0 +1,19 @@
+[
+  { "wait": 1500 },
+  { "clickSel": "#btn-new" },
+  { "wait": 2500 },
+  { "eval": "__game.closeWardrobe(); window.cam = (x, y, z, tx, ty, tz) => { __game.setPhase('helm'); __game.controller = { frame() {}, placeCamera(c) { c.position.set(x, y, z); c.lookAt(tx, ty, tz); } }; return 1; }; 1" },
+  { "eval": "cam(1100, 260, 300, 600, 40, -400)" },
+  { "wait": 1500 },
+  { "shot": "l01-haven.png" },
+  { "eval": "__game.enterSector('drift'); cam(200, 120, -150, 600, 0, -400)" },
+  { "wait": 1800 },
+  { "shot": "l02-hollow.png" },
+  { "eval": "cam(-300, 60, 300, 600, 0, -800)" },
+  { "wait": 1200 },
+  { "shot": "l03-drift-rocks.png" },
+  { "eval": "__game.enterSector('cinder'); cam(-820, 160, 770, -900, 120, 700)" },
+  { "wait": 1800 },
+  { "shot": "l04-meridian.png" },
+  { "eval": "JSON.stringify(__game.stats())", "label": "the scenery built in all three sectors without an exception", "expect": "r => r.sector === 'cinder' && r.entities > 5" }
+]

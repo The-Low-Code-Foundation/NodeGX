@@ -53,6 +53,102 @@ export class Sfx {
     else this.boom(now, 0.3 * v * Math.min(1.5, size / 16));
   }
 
+  /** The bay's and the airlock's sounds, heard where you are (not by distance): `klaxon` whoops `n` times, `hiss` is
+   *  air going (or, `rise`, coming back) over `dur` seconds, `servo` a door's motor, `clunk` a door seating, `chime`
+   *  the comms, `roar` the Wren's drive spooling up. s6. */
+  cue(kind, { dur = 1, n = 3, rise = false, vol = 1 } = {}) {
+    if (!this.on || !this.ctx || this.ctx.state !== 'running') return;
+    const t = this.ctx.currentTime;
+    if (kind === 'klaxon') {
+      for (let i = 0; i < n; i++) {
+        const t0 = t + i * 0.9;
+        const o = this.ctx.createOscillator();
+        o.type = 'square';
+        o.frequency.setValueAtTime(380, t0);
+        o.frequency.linearRampToValueAtTime(720, t0 + 0.55);
+        const f = this.ctx.createBiquadFilter();
+        f.type = 'lowpass';
+        f.frequency.value = 1800;
+        const g = this.ctx.createGain();
+        g.gain.setValueAtTime(0, t0);
+        g.gain.linearRampToValueAtTime(0.05 * vol, t0 + 0.04);
+        g.gain.setValueAtTime(0.05 * vol, t0 + 0.55);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.75);
+        o.connect(f).connect(g).connect(this.out);
+        o.start(t0);
+        o.stop(t0 + 0.8);
+      }
+    } else if (kind === 'hiss') {
+      const s = this.ctx.createBufferSource();
+      s.buffer = this.noise;
+      s.loop = true;
+      const f = this.ctx.createBiquadFilter();
+      f.type = 'highpass';
+      f.frequency.value = 1400;
+      const g = this.ctx.createGain();
+      const top = 0.16 * vol;
+      if (rise) {
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(top, t + dur * 0.8);
+        g.gain.linearRampToValueAtTime(0.0001, t + dur);
+      } else {
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.linearRampToValueAtTime(top, t + 0.15);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      }
+      s.connect(f).connect(g).connect(this.out);
+      s.start(t);
+      s.stop(t + dur + 0.05);
+    } else if (kind === 'servo') {
+      const o = this.ctx.createOscillator();
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(70, t);
+      o.frequency.linearRampToValueAtTime(95, t + dur * 0.5);
+      o.frequency.linearRampToValueAtTime(60, t + dur);
+      const f = this.ctx.createBiquadFilter();
+      f.type = 'lowpass';
+      f.frequency.value = 420;
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.07 * vol, t + 0.12);
+      g.gain.setValueAtTime(0.07 * vol, t + dur - 0.15);
+      g.gain.linearRampToValueAtTime(0.0001, t + dur);
+      o.connect(f).connect(g).connect(this.out);
+      o.start(t);
+      o.stop(t + dur + 0.05);
+    } else if (kind === 'clunk') this.thud(t, 0.32 * vol);
+    else if (kind === 'chime') {
+      [880, 1320].forEach((hz, i) => {
+        const o = this.ctx.createOscillator();
+        o.type = 'sine';
+        o.frequency.value = hz;
+        const g = this.ctx.createGain();
+        const t0 = t + i * 0.12;
+        g.gain.setValueAtTime(0, t0);
+        g.gain.linearRampToValueAtTime(0.06 * vol, t0 + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.4);
+        o.connect(g).connect(this.out);
+        o.start(t0);
+        o.stop(t0 + 0.45);
+      });
+    } else if (kind === 'roar') {
+      const s = this.ctx.createBufferSource();
+      s.buffer = this.noise;
+      s.loop = true;
+      const f = this.ctx.createBiquadFilter();
+      f.type = 'lowpass';
+      f.frequency.setValueAtTime(120, t);
+      f.frequency.exponentialRampToValueAtTime(900, t + dur * 0.7);
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.22 * vol, t + dur * 0.6);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      s.connect(f).connect(g).connect(this.out);
+      s.start(t);
+      s.stop(t + dur + 0.05);
+    }
+  }
+
   /** A falling tone through a low-pass: the "pew". `wobble` Hz adds the TIE's warble. */
   blaster(t, type, f0, f1, dur, vol, wobble = 0) {
     const o = this.ctx.createOscillator();

@@ -54,17 +54,39 @@ export const UPGRADES = [
   { id: 'rifle2', name: 'Boarding rifle II', cost: 1200, blurb: 'Your rifle hits for 45 instead of 25.', apply: (s) => (s.rifleDamage = 45) },
   { id: 'armour', name: 'Boarding armour', cost: 1400, blurb: 'You and your crew take half the hits when boarding.', apply: (s) => (s.armour = 0.5) }
 ];
+/** A new Wren when the old one is wreckage. */
+export const WREN_COST = 1500;
 
 export const PAINTS = ['#9aa3ad', '#d8d2c2', '#3d5a80', '#7a2e2e', '#2f6f4e', '#5b4a8a', '#1e2228', '#c98b2a'];
 export const ENGINE_COLORS = ['#58b0ff', '#ff8c42', '#b48cff', '#39d27a', '#ff5540', '#ffffff'];
 
+/** What a crew member is good at, 1–10. Each works at one post, and the post reads one stat (see `game.crewEffect`). */
+export const STATS = [
+  { id: 'pilot', name: 'Piloting', post: 'helm', blurb: 'At the helm: how fast she swings onto a course and how late she brakes; under fire, a share of the bolts she slips.' },
+  { id: 'gunnery', name: 'Gunnery', post: 'turret', blurb: 'On the turret: how tight the shots group, how fast the gun swings, how soon she opens fire on a new target.' },
+  { id: 'engineering', name: 'Engineering', post: 'engine', blurb: 'In the engine room: how fast the shields come back, and patching the hull between fights.' },
+  { id: 'combat', name: 'Combat', post: 'party', blurb: 'In your boarding party: how often she hits, how hard, how much she can take.' }
+];
+/** The posts aboard the Kestrel, and how many each takes. `prize:<fleet id>` (flying a captured ship) is a post too. */
+export const POSTS = [
+  { id: 'helm', name: 'Helm', max: 1 },
+  { id: 'turret', name: 'Turret', max: 1 },
+  { id: 'engine', name: 'Engines', max: 1 },
+  { id: 'party', name: 'Boarding party', max: 2 },
+  { id: 'idle', name: 'Off duty', max: 99 }
+];
+
 export const CREW = [
-  { id: 'vex', name: 'Vex', role: 'pilot', skill: 'Flies the Kestrel. Holds a course, brings her to a stop, never scratches the paint.', fps: 60 },
-  { id: 'dag', name: 'Dag', role: 'gunner', skill: 'Mans the turret. Leads a Rook by habit.', fps: 80 }
+  { id: 'vex', name: 'Vex', role: 'pilot', stats: { pilot: 7, gunnery: 3, engineering: 4, combat: 3 }, skill: 'Flies the Kestrel. Holds a course, brings her to a stop, never scratches the paint.', look: { skin: 2, hair: 3, hairStyle: 'bun', face: 'calm', shirt: 2, pants: 0, accent: 0 } },
+  { id: 'dag', name: 'Dag', role: 'gunner', stats: { pilot: 3, gunnery: 6, engineering: 3, combat: 5 }, skill: 'Mans the turret. Leads a Rook by habit, and swears at the ones he misses.', look: { skin: 4, hair: 0, hairStyle: 'buzz', face: 'beard', shirt: 3, pants: 1, accent: 3 } }
 ];
 export const HIRE = [
-  { id: 'ilse', name: 'Ilse', role: 'gunner', skill: 'Ex-Concord gunnery. Second turret seat once you have one.', fps: 90, cost: 1200, at: 'haven' },
-  { id: 'moss', name: 'Moss', role: 'marine', skill: 'Boards with you. Follows, shoots, swears.', fps: 110, cost: 1800, at: 'hollow' }
+  { id: 'ilse', name: 'Ilse', role: 'gunner', stats: { pilot: 3, gunnery: 9, engineering: 2, combat: 4 }, skill: 'Ex-Concord gunnery. Groups her shots inside a hand’s width at a kilometre.', cost: 1400, at: 'haven', look: { skin: 0, hair: 1, hairStyle: 'short', face: 'stern', shirt: 6, pants: 0, accent: 1 } },
+  { id: 'bram', name: 'Bram', role: 'engineer', stats: { pilot: 4, gunnery: 3, engineering: 8, combat: 3 }, skill: 'Talks to drives. Shields come back faster with him below, and he patches the hull between fights.', cost: 900, at: 'haven', look: { skin: 3, hair: 4, hairStyle: 'cap', face: 'grin', shirt: 5, pants: 2, accent: 2 } },
+  { id: 'tavi', name: 'Tavi', role: 'deckhand', stats: { pilot: 5, gunnery: 5, engineering: 5, combat: 5 }, skill: 'A bit of everything, cheap, keen. Will take any post.', cost: 600, at: 'haven', look: { skin: 5, hair: 6, hairStyle: 'mohawk', face: 'freckles', shirt: 4, pants: 1, accent: 4 } },
+  { id: 'moss', name: 'Moss', role: 'marine', stats: { pilot: 2, gunnery: 5, engineering: 2, combat: 9 }, skill: 'Boards with you. Follows, shoots, swears.', cost: 1800, at: 'hollow', post: 'party', look: { skin: 6, hair: 0, hairStyle: 'bald', face: 'scar', shirt: 7, pants: 3, accent: 5 } },
+  { id: 'juno', name: 'Juno', role: 'pilot', stats: { pilot: 9, gunnery: 4, engineering: 3, combat: 2 }, skill: 'Ran blockades for the Rooks. Turns a frigate like a fighter and slips half of what is thrown at her.', cost: 1500, at: 'hollow', look: { skin: 1, hair: 5, hairStyle: 'long', face: 'grin', shirt: 1, pants: 2, accent: 6 } },
+  { id: 'kesh', name: 'Kesh', role: 'gunner', stats: { pilot: 2, gunnery: 7, engineering: 4, combat: 6 }, skill: 'Ex-Rook turret hand. Quick on the trigger, good in a corridor too.', cost: 1100, at: 'hollow', look: { skin: 3, hair: 7, hairStyle: 'short', face: 'stern', shirt: 7, pants: 3, accent: 3 } }
 ];
 
 export const MISSIONS = {

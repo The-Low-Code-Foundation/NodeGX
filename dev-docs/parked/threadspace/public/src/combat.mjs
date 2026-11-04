@@ -75,6 +75,13 @@ export class Combat {
           }
           if (!inside) continue;
         }
+        // A good pilot at the helm slips a share of what is thrown at her (game.crewEffect, Piloting); a bolt she slipped
+        // passes her by for good, not just this step.
+        if (b.slipped === e) continue;
+        if (e.evade && Math.random() < e.evade) {
+          b.slipped = e;
+          continue;
+        }
         e.damage(b.damage, _near.clone(), b.side, b.owner);
         this.burst(_near.clone(), e.kind === 'pirate' || e.kind === 'fighter' ? 2.5 : 4, { shards: 3, camera });
         hit = true;

@@ -11,7 +11,7 @@ import { box, cyl, at, glow, mulberry } from './util.mjs';
  *  hides a shell only from inside a convex one, which is why every loft here is kept convex: widths and heights
  *  change by ever smaller steps toward the ends, so the helm's eye inside the bow sees out through all of it. */
 export const SHELL_LAYER = 1;
-const shell = (m) => (m.layers.set(SHELL_LAYER), m);
+export const shell = (m) => (m.layers.set(SHELL_LAYER), m);
 
 // --- materials ------------------------------------------------------------------------------------------------
 
@@ -54,12 +54,12 @@ function plating() {
 export function metal(color, { plated = true, rough = 0.55, metalness = 0.35 } = {}) {
   return new THREE.MeshStandardMaterial({ color, map: plated ? plating() : null, roughness: rough, metalness, flatShading: true });
 }
-const DARK = new THREE.MeshStandardMaterial({ color: '#23272e', roughness: 0.6, metalness: 0.5, flatShading: true });
-const TRIM = new THREE.MeshStandardMaterial({ color: '#3a414d', roughness: 0.5, metalness: 0.5, flatShading: true });
-const GLASS = new THREE.MeshStandardMaterial({ color: '#0e1a2a', roughness: 0.12, metalness: 0.9, emissive: '#0a1626', flatShading: true });
+export const DARK = new THREE.MeshStandardMaterial({ color: '#23272e', roughness: 0.6, metalness: 0.5, flatShading: true });
+export const TRIM = new THREE.MeshStandardMaterial({ color: '#3a414d', roughness: 0.5, metalness: 0.5, flatShading: true });
+export const GLASS = new THREE.MeshStandardMaterial({ color: '#0e1a2a', roughness: 0.12, metalness: 0.9, emissive: '#0a1626', flatShading: true });
 
 let _halo;
-function haloTexture() {
+export function haloTexture() {
   if (_halo) return _halo;
   const c = document.createElement('canvas');
   c.width = c.height = 64;
@@ -76,17 +76,21 @@ function haloTexture() {
 // --- shapes ---------------------------------------------------------------------------------------------------
 
 /** A hull lofted along z through cross-sections {z, w, h, y?, x?, c?}: each an octagon, a rectangle with its corners
- *  cut by `c` of the smaller half-side. Sections in increasing z. Flat-shaded, plating tiled every `uv` metres. */
-export function loft(sections, material, { uv = 10, chamfer = 0.32 } = {}) {
+ *  cut by `c` of the smaller half-side. Sections in increasing z. Flat-shaded, plating tiled every `uv` metres.
+ *  `material` may be a list, with `faces` naming which one each of the octagon's eight faces wears, going round from the
+ *  upper starboard chamfer: [0] upper-starboard, [1] top, [2] upper-port, [3] port side, [4] lower-port, [5] belly,
+ *  [6] lower-starboard, [7] starboard side. The end caps wear `cap`. That is how a hull is two-tone in one mesh. */
+export function loft(sections, material, { uv = 10, chamfer = 0.32, faces = null, cap: capIndex = 0, ends = [true, true] } = {}) {
+  const multi = Array.isArray(material);
   const rings = sections.map((s) => {
     const a = s.w / 2, b = s.h / 2, c = Math.min(a, b) * (s.c ?? chamfer), x = s.x ?? 0, y = s.y ?? 0;
     return [[a, b - c], [a - c, b], [-(a - c), b], [-a, b - c], [-a, -(b - c)], [-(a - c), -b], [a - c, -b], [a, -(b - c)]].map(([px, py]) => new THREE.Vector3(x + px, y + py, s.z));
   });
-  const pos = [];
-  const uvs = [];
-  const tri = (p, q, r, tp, tq, tr) => {
-    pos.push(p.x, p.y, p.z, q.x, q.y, q.z, r.x, r.y, r.z);
-    uvs.push(...tp, ...tq, ...tr);
+  const buckets = multi ? material.map(() => ({ pos: [], uvs: [] })) : [{ pos: [], uvs: [] }];
+  const tri = (bi, p, q, r, tp, tq, tr) => {
+    const B = buckets[multi ? bi : 0];
+    B.pos.push(p.x, p.y, p.z, q.x, q.y, q.z, r.x, r.y, r.z);
+    B.uvs.push(...tp, ...tq, ...tr);
   };
   for (let i = 0; i < rings.length - 1; i++) {
     const A = rings[i], B = rings[i + 1];
@@ -94,9 +98,10 @@ export function loft(sections, material, { uv = 10, chamfer = 0.32 } = {}) {
     for (let k = 0; k < 8; k++) us.push(us[k] + A[k].distanceTo(A[(k + 1) % 8]));
     for (let k = 0; k < 8; k++) {
       const k2 = (k + 1) % 8;
+      const f = faces ? faces[k] : 0;
       const u0 = us[k] / uv, u1 = us[k + 1] / uv, v0 = A[k].z / uv, v1 = B[k].z / uv;
-      tri(A[k], A[k2], B[k2], [u0, v0], [u1, v0], [u1, v1]);
-      tri(A[k], B[k2], B[k], [u0, v0], [u1, v1], [u0, v1]);
+      tri(f, A[k], A[k2], B[k2], [u0, v0], [u1, v0], [u1, v1]);
+      tri(f, A[k], B[k2], B[k], [u0, v0], [u1, v1], [u0, v1]);
     }
   }
   const cap = (R, out) => {
@@ -104,21 +109,30 @@ export function loft(sections, material, { uv = 10, chamfer = 0.32 } = {}) {
     for (let k = 0; k < 8; k++) {
       const k2 = (k + 1) % 8;
       const t = (p) => [p.x / uv, p.y / uv];
-      if (out > 0) tri(c, R[k], R[k2], t(c), t(R[k]), t(R[k2]));
-      else tri(c, R[k2], R[k], t(c), t(R[k2]), t(R[k]));
+      if (out > 0) tri(capIndex, c, R[k], R[k2], t(c), t(R[k]), t(R[k2]));
+      else tri(capIndex, c, R[k2], R[k], t(c), t(R[k2]), t(R[k]));
     }
   };
-  cap(rings[0], -1);
-  cap(rings[rings.length - 1], 1);
+  if (ends[0]) cap(rings[0], -1);
+  if (ends[1]) cap(rings[rings.length - 1], 1);
   const geo = new THREE.BufferGeometry();
+  const pos = buckets.flatMap((b) => b.pos);
   geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  geo.setAttribute('uv', new THREE.Float32BufferAttribute(buckets.flatMap((b) => b.uvs), 2));
+  if (multi) {
+    let start = 0;
+    buckets.forEach((b, i) => {
+      const n = b.pos.length / 3;
+      if (n) geo.addGroup(start, n, i);
+      start += n;
+    });
+  }
   geo.computeVertexNormals();
   return new THREE.Mesh(geo, material);
 }
 
 /** A wing: a slab tapering from a root chord at `x0` to a tip chord at `x1`, swept by `sweep` metres. */
-function wing(x0, x1, root, tip, sweep, thick, material, { y = 0, z = 0, dihedral = 0 } = {}) {
+export function wing(x0, x1, root, tip, sweep, thick, material, { y = 0, z = 0, dihedral = 0 } = {}) {
   const s = Math.sign(x1 - x0) || 1;
   const g = new THREE.Group();
   const span = Math.abs(x1 - x0);
@@ -145,7 +159,7 @@ function wing(x0, x1, root, tip, sweep, thick, material, { y = 0, z = 0, dihedra
 }
 
 /** An engine: a bell, a glowing throat, a halo, and a plume behind it that the world scales with the ship's speed. */
-function engine(g, x, y, z, r, engMat, plumeMat, { len = 1.6 } = {}) {
+export function engine(g, x, y, z, r, engMat, plumeMat, { len = 1.6, plume: plumeLen = 6 } = {}) {
   g.add(at(cyl(r * 0.85, r, len, DARK, 12), x, y, z + len / 2, Math.PI / 2));
   g.add(at(cyl(r * 0.7, r * 0.7, 0.1, engMat, 12), x, y, z + len + 0.02, Math.PI / 2));
   const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTexture(), color: engMat.color, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
@@ -153,8 +167,8 @@ function engine(g, x, y, z, r, engMat, plumeMat, { len = 1.6 } = {}) {
   halo.position.set(x, y, z + len + 0.3);
   g.add(halo);
   g.userData.halos.push(halo);
-  const plume = new THREE.Mesh(new THREE.ConeGeometry(r * 0.62, r * 6, 12, 1, true), plumeMat);
-  plume.geometry.translate(0, r * 3, 0); // the cone's wide base at the origin, its tip r·6 up
+  const plume = new THREE.Mesh(new THREE.ConeGeometry(r * 0.62, r * plumeLen, 12, 1, true), plumeMat);
+  plume.geometry.translate(0, (r * plumeLen) / 2, 0); // the cone's wide base at the origin, its tip r·plumeLen up
   plume.geometry.rotateX(Math.PI / 2); // up becomes astern (+z)
   plume.position.set(x, y, z + len + 0.05);
   g.add(plume);
@@ -167,7 +181,7 @@ function plumeMaterial(color) {
 }
 
 /** A loft's half-width at `z`, between its sections: where its flat side is. */
-function halfWidthAt(sections, z) {
+export function halfWidthAt(sections, z) {
   for (let i = 0; i < sections.length - 1; i++) {
     const a = sections[i], b = sections[i + 1];
     if (z >= a.z && z <= b.z) return (a.w + ((z - a.z) / (b.z - a.z)) * (b.w - a.w)) / 2;
@@ -176,11 +190,11 @@ function halfWidthAt(sections, z) {
 }
 
 /** A row of lit windows along a hull's flat side (`side` ±1), set into the loft's surface: glowing slits, some dark. */
-function windows(g, sections, side, y, z0, z1, { step = 1.6, color = '#ffd9a0', seed = 1, w = 0.9 } = {}) {
+export function windows(g, sections, side, y, z0, z1, { step = 1.6, color = '#ffd9a0', seed = 1, w = 0.9, lit = 0.8 } = {}) {
   const r = mulberry(seed);
   const m = glow(color);
   for (let z = z0; z <= z1; z += step) {
-    if (r() < 0.2) continue;
+    if (r() < 1 - lit) continue; // at lit 0.8 the same windows stay dark as before it was a setting
     g.add(at(box(0.08, 0.35, w, m), side * (halfWidthAt(sections, z) + 0.02), y, z));
   }
 }
@@ -204,7 +218,7 @@ export function setThrust(obj, k) {
   u.plumeMat.opacity = 0.12 + 0.3 * Math.min(1, k);
 }
 
-function base(engineColor) {
+export function base(engineColor) {
   const g = new THREE.Group();
   g.userData.halos = [];
   g.userData.plumes = [];
@@ -215,73 +229,8 @@ function base(engineColor) {
 
 // --- the ships ------------------------------------------------------------------------------------------------
 
-/** The Kestrel: a long plated hull with the bridge in her bow, a turret on her spine, swept wings with nacelles, a
- *  fighter bay astern between two drives. The rooms (interiors.mjs, x ±8.1, y −2..1.1, z −33.5..34) sit inside her
- *  main loft, which is the shell. */
-export function frigate({ paint = '#9aa3ad', engine: engineColor = '#58b0ff' } = {}) {
-  const g = base(engineColor);
-  const hullMat = metal(paint);
-  g.userData.hullMat = hullMat;
-  const { engMat, plumeMat } = g.userData;
-  const HULL = [
-    { z: -48, w: 3, h: 2, y: -1.3 },
-    { z: -40, w: 9, h: 5, y: -0.5 },
-    { z: -34, w: 12, h: 7, y: 0 },
-    { z: -20, w: 15, h: 9, y: 0.5 },
-    { z: 0, w: 17, h: 9.5, y: 0.5 },
-    { z: 20, w: 18, h: 9, y: 0.3 },
-    { z: 36, w: 17, h: 8, y: 0 }
-  ];
-  g.add(shell(loft(HULL, hullMat, { uv: 12 })));
-  // The bridge's glass: a dark band round the bow's brow, over the room's window line.
-  g.add(at(loft([{ z: -36, w: 8.4, h: 1.4, c: 0.4 }, { z: -27, w: 10.6, h: 1.8, c: 0.4 }], GLASS, { uv: 4 }), 0, 2.9, 0));
-  // A raised spine down her back with the turret on it, and a sensor mast aft of it.
-  g.add(loft([{ z: -18, w: 2, h: 1, y: 5.2 }, { z: -12, w: 5, h: 1.8, y: 5.4 }, { z: 14, w: 5, h: 1.8, y: 5.1 }, { z: 26, w: 2.4, h: 1, y: 4.4 }], TRIM, { uv: 6 }));
-  g.add(loft([{ z: 4, w: 0.6, h: 0.6, y: 6.5 }, { z: 6, w: 1.2, h: 4, y: 8 }, { z: 10, w: 1.2, h: 3, y: 7.4 }, { z: 12, w: 0.6, h: 0.6, y: 6.5 }], TRIM, { uv: 4 }));
-  g.add(at(box(0.15, 3, 0.15, DARK), 0, 11, 8));
-  // A keel along her belly, and the prow under the helm's eye line, so the helm sees her nose ahead of it.
-  g.add(loft([{ z: -30, w: 1, h: 0.6, y: -4.1 }, { z: -20, w: 4, h: 1.4, y: -4.4 }, { z: 26, w: 4, h: 1.4, y: -4.6 }, { z: 34, w: 2, h: 0.8, y: -4.3 }], TRIM, { uv: 6 }));
-  g.add(at(cyl(0.12, 0.5, 6, TRIM, 6), 0, -2.2, -50.5, -Math.PI / 2));
-  g.add(at(box(0.4, 0.4, 0.6, glow('#ff5540')), 0, -2.2, -53.6)); // the running light on the nose
-  for (const s of [-1, 1]) {
-    g.add(wing(s * 8.2, s * 17, 18, 8, 7, 1.3, hullMat, { y: -1.2, z: 13 }));
-    g.add(loft([{ z: 4, w: 2.2, h: 2.2, x: s * 16.5, y: -1 }, { z: 7, w: 3.4, h: 3.4, x: s * 16.5, y: -1 }, { z: 21, w: 3.4, h: 3.4, x: s * 16.5, y: -1 }, { z: 23, w: 2.8, h: 2.8, x: s * 16.5, y: -1 }], hullMat, { uv: 6 }));
-    engine(g, s * 16.5, -1, 23, 1.2, engMat, plumeMat, { len: 0.8 });
-    engine(g, s * 6, 1.2, 36, 1.9, engMat, plumeMat);
-    windows(g, HULL, s, 0.2, -18, 14, { seed: s > 0 ? 3 : 4 });
-    g.add(at(box(0.5, 0.5, 0.5, glow(s > 0 ? '#39d27a' : '#ff5540')), s * 21.5, -1.2, 18)); // wingtip lights
-  }
-  // The bay door between the drives, ringed in amber.
-  g.add(at(box(8, 4, 0.2, DARK), 0, -1.5, 36.05));
-  g.add(at(box(8.4, 0.18, 0.1, glow('#ffb347')), 0, 0.6, 36.15));
-  // The port airlock's door, lit.
-  const side = -halfWidthAt(HULL, -6);
-  g.add(at(box(0.12, 2.6, 2.2, DARK), side - 0.04, -0.6, -6));
-  g.add(at(box(0.08, 0.2, 2.2, glow('#ffb347')), side - 0.08, 0.8, -6));
-  // The turret: a yaw ring on the spine with a pitching block and twin barrels. Aimed by the gunner or by you.
-  const turret = new THREE.Group();
-  const yaw = new THREE.Group();
-  yaw.add(at(cyl(2.2, 2.5, 1, DARK, 12), 0, 0.5, 0));
-  const pitch = new THREE.Group();
-  pitch.position.set(0, 1.4, 0);
-  pitch.add(loft([{ z: -1.4, w: 2.2, h: 1, c: 0.4 }, { z: -0.6, w: 2.8, h: 1.5, c: 0.4 }, { z: 1.4, w: 2.8, h: 1.5, c: 0.4 }], TRIM, { uv: 3 }));
-  for (const s of [-1, 1]) {
-    pitch.add(at(cyl(0.2, 0.24, 4.2, DARK, 8), s * 0.7, 0.1, -3.2, Math.PI / 2));
-    pitch.add(at(cyl(0.3, 0.3, 0.5, DARK, 8), s * 0.7, 0.1, -5.1, Math.PI / 2));
-  }
-  yaw.add(pitch);
-  turret.add(yaw);
-  turret.position.set(0, 6.2, -8);
-  g.add(turret);
-  g.userData.turret = { group: turret, yaw, pitch, tip: new THREE.Vector3(0, 0.1, -5.5) };
-  g.userData.turretEye = new THREE.Vector3(0, 2.4, 2.6); // where the gunner's eyes are, in the pitch frame
-  g.userData.airlock = new THREE.Vector3(-7.5, 0, -6); // the port airlock: EVA out of here, back in here
-  g.userData.bayExit = new THREE.Vector3(0, -1.5, 41); // the fighter appears here, flying astern
-  g.userData.bayLand = new THREE.Vector3(0, -1.5, 62); // land from here
-  g.userData.lights = [];
-  for (const [x, z] of [[-6, -20], [6, -20], [-7, 10], [7, 10]]) g.add(at(box(0.5, 0.5, 0.5, glow('#ffd9a0')), x, 5.3, z));
-  return g;
-}
+// The Kestrel is a model now: her parts, her settings and her builder are in models/kestrel.mjs, which the game and the
+// shipyard both call (2026-10-29).
 
 const ROOK_HULL = metal('#5a2b28', { rough: 0.6 });
 const ROOK_FIN = metal('#3a1c1c', { plated: false, rough: 0.7 });
@@ -302,17 +251,56 @@ export function fighter({ rook = false, paint = '#d8d2c2', engine: engineColor =
   ], hullMat, { uv: 4 });
   const canopy = loft([{ z: -2.6, w: 0.5, h: 0.3, y: 0.75 }, { z: -1.4, w: 1.3, h: 0.9, y: 0.95 }, { z: 0.4, w: 1.3, h: 0.8, y: 0.95 }, { z: 1.4, w: 0.8, h: 0.4, y: 0.8 }], rook ? ROOK_GLASS : GLASS, { uv: 2 });
   body.userData.cockpitHidden = canopy.userData.cockpitHidden = true;
-  g.add(body, canopy);
-  for (const s of [-1, 1]) {
-    g.add(wing(s * 1.0, s * 5.6, 3.6, 1.4, rook ? -0.6 : 1.4, 0.28, hullMat, { y: rook ? 0 : -0.3, z: 0.8, dihedral: rook ? 0 : -0.1 }));
-    g.add(at(cyl(0.16, 0.2, 3.6, DARK, 8), s * 5.4, rook ? 0 : -0.75, -0.2, Math.PI / 2)); // cannons
-    g.add(at(box(0.3, 0.3, 0.3, glow(rook ? '#ff5540' : '#39d27a')), s * 5.7, rook ? 0 : -0.7, 1.6));
-    if (rook) g.add(at(loft([{ z: -0.4, w: 0.25, h: 1.4 }, { z: 2.4, w: 0.25, h: 4.6 }, { z: 3.0, w: 0.25, h: 4.2 }], ROOK_FIN, { uv: 3 }), s * 6, 0, 0)); // the Rooks hang fins off the wingtips
+  g.add(body);
+  // The Wren's canopy lifts on a hinge at its back (openCanopy), so you can climb in. s6.
+  const hinge = new THREE.Group();
+  hinge.position.set(0, 0.85, 1.3);
+  canopy.position.set(0, -0.85, -1.3);
+  hinge.add(canopy);
+  g.add(hinge);
+  g.userData.canopyHinge = hinge;
+  if (rook) {
+    for (const s of [-1, 1]) {
+      g.add(wing(s * 1.0, s * 5.6, 3.6, 1.4, -0.6, 0.28, hullMat, { y: 0, z: 0.8 }));
+      g.add(at(cyl(0.16, 0.2, 3.6, DARK, 8), s * 5.4, 0, -0.2, Math.PI / 2)); // cannons
+      g.add(at(box(0.3, 0.3, 0.3, glow('#ff5540')), s * 5.7, 0, 1.6));
+      g.add(at(loft([{ z: -0.4, w: 0.25, h: 1.4 }, { z: 2.4, w: 0.25, h: 4.6 }, { z: 3.0, w: 0.25, h: 4.2 }], ROOK_FIN, { uv: 3 }), s * 6, 0, 0)); // the Rooks hang fins off the wingtips
+    }
+  } else {
+    // The Wren's wings fold: each outer panel, with its cannon and its light, hinges up at mid-span (foldWings), so
+    // she is 7.6 m across, not 11.7, and goes through the Kestrel's 8 m bay door (TS-S5-WRENBAY). s6.
+    const FOLD = 3.3, DIH = -0.1;
+    g.userData.wingFolds = [];
+    for (const s of [-1, 1]) {
+      g.add(wing(s * 1.0, s * FOLD, 3.6, 2.5, 0.7, 0.28, hullMat, { y: -0.3, z: 0.8, dihedral: DIH }));
+      const pivot = new THREE.Group();
+      pivot.position.set(s * FOLD, -0.3 + (FOLD - 1) * Math.sin(DIH), 0.8 + 0.7);
+      const outer = wing(0, s * (5.6 - FOLD), 2.5, 1.4, 0.7, 0.2, hullMat, { dihedral: DIH });
+      pivot.add(outer);
+      const rel = (x, y, z) => [x - pivot.position.x, y - pivot.position.y, z - pivot.position.z];
+      pivot.add(at(cyl(0.16, 0.2, 3.6, DARK, 8), ...rel(s * 5.4, -0.75, -0.2), Math.PI / 2)); // cannons
+      pivot.add(at(box(0.3, 0.3, 0.3, glow('#39d27a')), ...rel(s * 5.7, -0.7, 1.6)));
+      pivot.userData.side = s;
+      g.add(pivot);
+      g.userData.wingFolds.push(pivot);
+    }
   }
   engine(g, 0, 0, 3.4, 0.75, engMat, plumeMat, { len: 0.5 });
   g.userData.muzzles = [new THREE.Vector3(-5.4, rook ? 0 : -0.75, -2.2), new THREE.Vector3(5.4, rook ? 0 : -0.75, -2.2)];
   g.userData.eye = new THREE.Vector3(0, 1.25, -0.6);
   return g;
+}
+
+/** The Wren's outer wing panels: 0 spread for flight, 1 folded up over her for the bay. */
+export function foldWings(g, k) {
+  for (const p of g.userData.wingFolds ?? []) p.rotation.z = p.userData.side * k * 1.62;
+  g.userData.folded = k;
+}
+
+/** The Wren's canopy: 0 shut, 1 lifted on its hinge. */
+export function openCanopy(g, k) {
+  const h = g.userData.canopyHinge;
+  if (h) h.rotation.x = k * 0.62;
 }
 
 /** A Rook corvette: a fat plated hull with a bridge tower, sponsons, a turret fore and aft, a belly airlock to hack.
@@ -387,58 +375,6 @@ export function freighter() {
   return g;
 }
 
-/** A station: a slowly turning ring of lit windows round a stacked hub, spokes, solar wings, and the docking arm
- *  above the hub. The docking point is the end of the arm. */
-export function station({ faction = 'concord', seed = 1 } = {}) {
-  const g = new THREE.Group();
-  const rook = faction === 'rooks';
-  const main = metal(rook ? '#4a3432' : '#7a828e', { rough: 0.6 });
-  const dark = metal(rook ? '#2e2222' : '#3c434e', { rough: 0.6 });
-  const light = rook ? '#ff8c42' : '#9fd4ff';
-  const rand = mulberry(seed);
-  // The ring turns about the hub; everything else holds still, so the dock stays where the ship parks.
-  const ring = new THREE.Group();
-  ring.add(at(new THREE.Mesh(new THREE.TorusGeometry(150, 14, 10, 48), main), 0, 0, 0, Math.PI / 2));
-  ring.add(at(new THREE.Mesh(new THREE.TorusGeometry(150, 15, 4, 48), dark), 0, 0, 0, Math.PI / 2));
-  for (let i = 0; i < 140; i++) {
-    const a = rand() * Math.PI * 2;
-    const y = (rand() - 0.5) * 14;
-    ring.add(at(box(2.6, 1, 0.5, glow(rand() < 0.15 ? '#ffd9a0' : light)), Math.cos(a) * 164.2, y, Math.sin(a) * 164.2, 0, -a + Math.PI / 2));
-  }
-  for (let i = 0; i < 4; i++) {
-    const a = (i / 4) * Math.PI * 2;
-    ring.add(at(box(7, 7, 110, dark), Math.cos(a) * 92, 0, Math.sin(a) * 92, 0, -a + Math.PI / 2));
-  }
-  g.add(ring);
-  g.userData.spinner = ring;
-  // The hub: a stack of drums, wide in the middle.
-  g.add(at(cyl(26, 30, 30, main, 16), 0, 0, 0));
-  g.add(at(cyl(48, 48, 14, dark, 24), 0, 0, 0));
-  g.add(at(cyl(20, 26, 30, main, 16), 0, -30, 0));
-  g.add(at(cyl(10, 20, 20, dark, 16), 0, -55, 0));
-  g.add(at(cyl(30, 26, 26, main, 16), 0, 28, 0));
-  for (let i = 0; i < 24; i++) {
-    const a = (i / 24) * Math.PI * 2;
-    g.add(at(box(4, 1.2, 0.4, glow(light)), Math.cos(a) * 48.3, 3 * ((i % 2) * 2 - 1), Math.sin(a) * 48.3, 0, -a + Math.PI / 2));
-  }
-  // Solar wings off the bottom drum.
-  const panel = new THREE.MeshStandardMaterial({ color: '#1a2a4a', roughness: 0.3, metalness: 0.8, emissive: '#050a14' });
-  for (const s of [-1, 1]) {
-    g.add(at(box(140, 0.6, 3, dark), s * 95, -30, 0));
-    for (let k = 0; k < 4; k++) g.add(at(box(28, 0.4, 40, panel), s * (50 + k * 31), -30, 0));
-  }
-  // A dish on the top drum.
-  g.add(at(new THREE.Mesh(new THREE.SphereGeometry(14, 16, 8, 0, Math.PI * 2, 0, Math.PI / 3), dark), 22, 48, 10, -2.2, 0, 0.4));
-  // The docking arm: out of the plane, so a frigate parks above the ring and the concourse looks down on it.
-  g.add(at(box(10, 60, 10, dark), 0, 75, 0));
-  for (let y = 50; y < 104; y += 9) g.add(at(box(10.4, 0.6, 10.4, glow(light)), 0, y, 0));
-  g.add(at(cyl(14, 14, 6, glow(light), 16), 0, 108, 0));
-  g.userData.dock = new THREE.Vector3(0, 130, 0); // park here
-  g.userData.dockRadius = 110;
-  g.userData.light = light;
-  return g;
-}
-
 /** A thread gate: a segmented ring with lit nodes round a disc of pale, breathing light. Fly into it and press J. */
 export function gate() {
   const g = new THREE.Group();
@@ -459,23 +395,6 @@ export function gate() {
   return g;
 }
 
-/** A dead ship: a hull torn in two, no lights, drifting. The Meridian's data core sits in its wound. */
-export function derelict() {
-  const g = new THREE.Group();
-  const m = metal('#454850', { rough: 0.8, metalness: 0.2 });
-  const fore = loft([{ z: -40, w: 3, h: 2 }, { z: -30, w: 11, h: 8 }, { z: -6, w: 14, h: 9 }, { z: -3, w: 12, h: 8, c: 0.1 }], m, { uv: 10 });
-  fore.rotation.set(0.1, 0, 0.3);
-  const aft = loft([{ z: 9, w: 12, h: 8, c: 0.1 }, { z: 12, w: 14, h: 9 }, { z: 32, w: 13, h: 8 }, { z: 36, w: 8, h: 5 }], m, { uv: 10 });
-  aft.position.set(4, -3, 0);
-  aft.rotation.set(-0.2, 0.15, -0.4);
-  g.add(fore, aft);
-  g.add(at(box(2, 6, 10, DARK), -2, 0, 2, 0.4, 0.3, 0.2)); // the broken spine
-  for (let i = 0; i < 6; i++) g.add(at(box(0.5, 0.5, 4 + i, DARK), -3 + i * 1.3, -1 + (i % 3), 4, i * 0.4, i * 0.7, 0)); // torn frames
-  g.add(at(cyl(2, 2, 1, DARK), 4, -3, 37, Math.PI / 2));
-  g.userData.nameplate = 'MERIDIAN';
-  return g;
-}
-
 /** A cargo pod or a data core: a small spinning octahedron with a light in it. */
 export function pod({ core = false } = {}) {
   const g = new THREE.Group();
@@ -486,17 +405,6 @@ export function pod({ core = false } = {}) {
   g.add(halo);
   g.userData.spin = core ? 1.4 : 0.6;
   return g;
-}
-
-export function asteroid(rand, size) {
-  const geo = new THREE.IcosahedronGeometry(size, 1);
-  const p = geo.attributes.position;
-  for (let i = 0; i < p.count; i++) {
-    const k = 0.75 + rand() * 0.5;
-    p.setXYZ(i, p.getX(i) * k, p.getY(i) * k, p.getZ(i) * k);
-  }
-  geo.computeVertexNormals();
-  return new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: ['#5a5f66', '#6b5a4a', '#4a4f58'][Math.floor(rand() * 3)], roughness: 0.95, metalness: 0.05, flatShading: true }));
 }
 
 /** A floating name over a hull, for the HUD to read; nothing is drawn here. */

@@ -18,6 +18,9 @@ const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '
 
 const server = http.createServer((req, res) => {
   const url = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+  // The shipyard saves a design here: POST /api/design/<id> { values } → public/ships/<id>.json, which the game reads.
+  const design = /^\/api\/design\/([a-z0-9-]{1,40})$/.exec(url);
+  if (design && req.method === 'POST') return saveDesign(design[1], req, res);
   for (const [prefix, dir] of MOUNTS) {
     if (!url.startsWith(prefix)) continue;
     let file = path.join(dir, url.slice(prefix.length));
@@ -31,6 +34,29 @@ const server = http.createServer((req, res) => {
   res.writeHead(404);
   res.end('not found');
 });
+function saveDesign(id, req, res) {
+  let body = '';
+  req.on('data', (c) => {
+    body += c;
+    if (body.length > 200_000) req.destroy();
+  });
+  req.on('end', () => {
+    try {
+      const { values } = JSON.parse(body);
+      if (!values || typeof values !== 'object' || Array.isArray(values)) throw new Error('no values');
+      const dir = path.join(here, 'public/ships');
+      fs.mkdirSync(dir, { recursive: true });
+      const file = path.join(dir, `${id}.json`);
+      fs.writeFileSync(file, JSON.stringify({ values, savedAt: new Date().toISOString() }, null, 2) + '\n');
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, file: path.relative(here, file) }));
+    } catch (e) {
+      res.writeHead(400, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ ok: false, error: String(e.message ?? e) }));
+    }
+  });
+}
+
 server.listen(port, '127.0.0.1', () => {
   const url = `http://127.0.0.1:${port}/`;
   console.log(`threadspace at ${url}`);

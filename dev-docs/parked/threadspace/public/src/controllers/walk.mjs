@@ -117,10 +117,48 @@ export class Walker {
     return best;
   }
 
-  /** Places `camera` in the world from the host's frame. */
-  placeCamera(camera, host) {
+  /** Places `camera` in the world from the host's frame: at your eyes, or (`third`) over your shoulder, pulled in
+   *  wherever a wall or the ceiling would come between the camera and your head. It looks the way you look, so the
+   *  crosshair is where your eyes point either way. */
+  placeCamera(camera, host, third = false) {
     host.updateMatrixWorld();
-    camera.position.copy(this.eye(_v)).applyMatrix4(host.matrixWorld);
+    const eye = this.eye(_v);
+    if (third) {
+      const q = this.quat();
+      const want = new THREE.Vector3(0.7, 0.35, 2.7).applyQuaternion(q).add(eye);
+      want.y = Math.min(want.y, this.pos.y + (this.interior.ceiling ?? 3) - 0.3);
+      eye.lerp(want, this.reach(eye, want));
+    }
+    camera.position.copy(eye).applyMatrix4(host.matrixWorld);
     camera.quaternion.copy(host.getWorldQuaternion(new THREE.Quaternion())).multiply(this.quat());
   }
+
+  /** How far (0–1) along the line from `a` to `b` before a collider, less a hand's width. */
+  reach(a, b) {
+    const d = new THREE.Vector3().subVectors(b, a);
+    const len = d.length();
+    let t = 1;
+    for (const c of this.interior.colliders) {
+      const hit = slab(a, d, c.min, c.max);
+      if (hit !== null && hit < t) t = hit;
+    }
+    return Math.max(0, t - 0.2 / Math.max(len, 1e-3));
+  }
+}
+
+/** Where a ray from `o` along `d` (0..1 of it) first enters the box, or null. */
+function slab(o, d, min, max) {
+  let t0 = 0, t1 = 1;
+  for (const k of ['x', 'y', 'z']) {
+    if (Math.abs(d[k]) < 1e-9) {
+      if (o[k] < min[k] || o[k] > max[k]) return null;
+      continue;
+    }
+    let a = (min[k] - o[k]) / d[k], b = (max[k] - o[k]) / d[k];
+    if (a > b) [a, b] = [b, a];
+    t0 = Math.max(t0, a);
+    t1 = Math.min(t1, b);
+    if (t0 > t1) return null;
+  }
+  return t0 > 0 ? t0 : null;
 }

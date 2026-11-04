@@ -21,19 +21,22 @@ cd dev-docs/parked/threadspace
 npm start            # installs three.js on first run, serves on :8787, opens the browser
 ```
 
-Click **New captain**. Click the view to take the mouse (Esc gives it back; the **Release mouse**
+Click **New captain**: you start at your locker, dressing your captain (name, skin, hair, eyes, face, jacket, trim; the locker in
+your quarters does it again later). **Tab, from anywhere, pauses the game and opens the command map** (below). Click the view to take the mouse (Esc gives it back; the **Release mouse**
 button on the Ship tab does too). With the mouse free, a click on a mark in the view **selects** it instead: a hostile
 becomes the target (Dag, on the turret, fires on it), anything you can fly to becomes the course (Vex flies it). The
 captain's chair never takes the mouse: it is the click-to-command seat.
 
 | where | keys |
 |---|---|
-| walking | W A S D · mouse looks · **E** uses what you face · Tab is the captain's chair |
+| anywhere | **Tab** pauses and opens the command map (Tab, Esc or E goes back exactly where you were) · **P** runs or pauses with the map open · **V** third person / your own eyes |
+| the command map | click a contact: "What will Vex do?" — pick who (the Kestrel, or a crewed ship of your fleet), a move (fly to, dock, jump, scoop, attack, keep away, pick me up, follow, hold), a weapons stance for that step (fire at will, return fire, fire on her only, hold fire), then **Do it now** or **Then, after that** (a chain). Spare a hostile so no gun of yours fires on her. Drag orbits, wheel zooms, W A S D pans |
+| walking | W A S D · mouse looks · **E** uses what you face · the captain's chair opens the map running |
 | the helm / the Wren | mouse or arrows steer · A D roll · W S throttle (or the wheel) · Space / click fires (Wren) · T targets what is under the crosshair, else the next one · **V** chase view / cockpit · E stands up / lands · **J** jumps a thread or docks when in range · the Wren scoops any pod she flies through |
 | the turret | mouse aims · click or Space fires · T target · E climbs down |
 | the captain's chair (Tab) | click a contact: target it or set a course · drag orbits · wheel zooms · T next target · Tab or E back |
 | space walk | W S A D forward/back/sideways · R F up/down · Shift burns · mouse looks · E grabs a pod, goes back in at the Kestrel's airlock, or hacks another hull's airlock |
-| boarding | W A S D · mouse aims · click or Space fires · hold E at the bridge console to seize her · E at the airlock leaves |
+| boarding | W A S D · mouse aims · click or Space fires (24 rounds) · **R** reloads · hold E at the bridge console to seize her · E at the airlock leaves |
 
 **The loop, in one sitting (10–15 min):** walk to the helm, fly to Haven Station (J to dock), take the
 bounty, buy medicine, undock, J at the gate to the Drift, walk aft to the bay, E into the Wren, kill
@@ -70,14 +73,126 @@ Meridian's data core, dock back at Haven and turn it all in.
 | Sound: synthesised blasters, turbolasers, booms, hits (from the X-wing demo) | `sfx.mjs` | built |
 | The look (s3): lofted, chamfered, plated hulls with lit windows and plumes that grow with speed; a nebula sky per sector baked to a cube map at infinity, 7,000 round stars, a sun; framed windows, passages between rooms, lit ceilings | `ships.mjs` `loft`, `space.mjs`, `interiors.mjs` | read from the shots |
 
+## s4 (2026-10-22): Richard's eight
+
+| # | Richard | built | where |
+|---|---|---|---|
+| 1 | people like people; customise yours; third person | Minecraft-proportioned blocky people (crew, civilian, EVA suit, Rook armour), pixel faces, real elbows and knees, poses (idle, walk/run, sit, console, aim, float, dead, wave); the locker; V wherever you walk, board or space-walk | `people.mjs`, `game.mjs` `dressAvatar` `openWardrobe`, `walk.mjs` `placeCamera(…, third)` |
+| 2 | interiors you can recognise | panelled walls and plated decks as textures in metres, a lit sign over every door, consoles with screens; the bridge's wraparound helm, side stations and command dais; the turret's ladder and hatch; the airlock's suits and hazard stripes; your bunk, locker and desk; a new engine room with a reactor; the hold's racks and crane; the bay's marked pad and blast door; the Rook ship grimmer; the concourse with signed kiosks and people. Each room baked to a few dozen meshes | `interiors.mjs`, `decor.mjs` |
+| 3 | a taken ship waits for crew to cross over | a kept prize is adrift until someone suits up, goes out of the Kestrel's airlock and jets across (within 1 km), visible in space; recall them the same way; a prize left adrift stays in its sector | `game.mjs` `keepShip` `sendCrew` `recallCrew`, `ai.mjs` `transfers` `follower` |
+| 4 | pause, the map, orders, chains; gunner sparing; the Wren | the command map and its card; plans of chained steps with a stance each; the capture target spared by default; no gun fires on the hull you hack or board; the Wren dying ejects you (or strands you aboard) instead of killing you; a new Wren from a yard; "come and pick me up" | `command.mjs`, `orders.mjs`, `game.mjs` `wrenLost` `buyWren` |
+| 5 | crew stats | Piloting, Gunnery, Engineering, Combat (1–10); four posts (helm, turret, engines, boarding party), each reading one stat, and the Crew tab says what it comes to in numbers; four new hires (Bram, Tavi at Haven; Juno, Kesh at the Hollow) | `data.mjs` `STATS` `POSTS` `HIRE`, `game.mjs` `crewEffect`, `panel.mjs` `crewCard` |
+| 6 | a gun with animations | a first-person rifle drawn in its own pass (never sinks into a wall): sway, walk bob, recoil, muzzle flash, a 1.6 s reload (R, or by itself when empty), equip; defenders and your boarding party hold rifles and aim | `people.mjs` `Viewmodel` `rifle`, `game.mjs` (the second render pass) |
+| 7 | the nose floats ahead of the window | an inner bow deck the bridge sees, hidden from outside by the hull (TS-S4-NOSE) | `ships.mjs` `frigate` |
+| 8 | stations, asteroids, derelicts | Haven: a lathed hub, a windowed habitat ring with spokes, solar wings, radiators, blinkers, shuttles; Rook's Hollow built into a big rock with a lit cave mouth; seven rock shapes per sector palette with gravel; the Meridian torn open with ribs, cables, embers, a distress beacon and a debris field | `scenery.mjs` |
+
 **Not built:** planetary landing (ruled out for now), multiplayer of any kind (see below), the second
 turret seat Ilse's blurb promises, quarters customisation beyond a bed, ship switching to a fleet ship
 mid-job, music.
 
+## s5 (2026-10-29): the Shipyard, a model says what you can change
+
+Richard: *"the interior and exterior are still too basic. This is where NodeGX could come in… no matter what we code, we
+build in ways to expose parameters to the user and let the user tweak… a ship editor prototype sandbox… you don't build a
+three.js app with NodeGX nodes, the 3D game is still going to be a lot of javascript, BUT the code is baked with NodeGX
+ethos."* This is PLY-009's step 0 ([phase 126](../../tasks/phase-126-the-play-kit/PLY-009-A-MODEL-SAYS-WHAT-YOU-CAN-CHANGE.md)),
+built on the game's own ship rather than an extracted copy.
+
+**Open it:** the **Shipyard** button on the title screen, **Open the shipyard ↗** on the Ship tab (and in a station's yard),
+or **http://127.0.0.1:8787/shipyard.html**. Save there, come back to the game's tab, and the Ship tab offers **Refit her
+now** (it saves and reloads like Continue: you are back aboard in the same sector). The shipyard's colours win unless the
+captain has painted her at a station's paint shop; then that paint stays and the rest of the design changes. (s5's first
+cut had no way in from the game, and the game read the design only at load: Richard, *"I can start a new game and edit my
+captain, but not the ship."* `tests/refit.json` drives the way in, the refit and the paint rule.) If Save says the server
+predates the shipyard, stop `npm start` and start it again: the save endpoint is new.
+
+- **The Kestrel is a model** (`src/models/kestrel.mjs`): 28 named parts (20 outside, 8 rooms) and 79 settings, each with a
+  type, a default, a range, a unit and the parts it shapes. `build(values)` makes her; the game and the shipyard call the
+  same function, so what the shipyard shows is what the game flies. Her old `frigate()` is gone from `ships.mjs`.
+- **The shipyard is built from the declaration** (`src/shipyard.mjs` knows nothing about a Kestrel). Every control in its
+  panel comes from `model.settings`; add a setting there and it appears. Click a part to point at it: it is outlined and the
+  card lists the settings that shape it. Amber **handles** on the stage are settings made physical (beam, height, nose,
+  wing tip, mast, turret): drag one and the value follows, clamped to its range. **Outside**, **Cutaway** (the decks with
+  the ceilings off; click a room) and **Stand inside** (ten places the crew stand). Undo, redo, reset, a "changed from the
+  model" list with a revert on each row.
+- **Checks run on every change**, so a person can't break the game without seeing it: the rooms fit inside the hull, the
+  airlock reaches the hull, the drives sit on the stern, the nacelles stand clear, the Wren fits through the bay door.
+  Clicking a failing check points at the part.
+- **Save** writes only the values that differ from the defaults to `public/ships/kestrel.json` (`server.mjs`
+  `POST /api/design/kestrel`). The game reads it when it starts (`src/models/designs.mjs`); a new captain's paint comes from
+  it, and a saved game keeps the paint chosen at the paint shop. `?design=default` in the game's URL ignores the file.
+- **The gate PLY-009 asked for:** "Check that every setting changes the picture" renders each setting at its two extremes
+  from fixed angles and counts the pixels that differ. A setting that changes nothing is inert, and an inert setting
+  teaches a person a lie.
+- **Less basic, as settings:** a three-tone hull (her back lighter, her belly darker, one shell mesh: `loft` takes a
+  material per octagon face), armour plates down her flanks, copper radiator fins aft, surface detail (vents, hatches,
+  conduits, sensor domes, antennas; seeded, so a layout can be kept), a livery stripe, her name on both flanks, up to
+  three rows of windows, two to four main drives. Inside, every room's walls, deck, accent strip and lamps, and the
+  ship's trim, brightness, floor strips and ceiling ribs.
+- **Found by the checks on the ship as drawn:** the turret pod's wall comes 0.23 m through her starboard flank
+  (TS-S5-TURRETWALL), and the Wren is 11.7 m across against an 8 m bay door (TS-S5-WRENBAY). Both wait on Richard's choice.
+
+## s6 (2026-10-29/30): the animations between seats
+
+Richard, after driving the shipyard (his verdict is in PLY-009): *"maybe some animations would be cool, like getting into
+the airlock and alarms going off… an animation to open the wren's cockpit and jump in and it closes and alarms go off and
+the hanger opens and you go out… when you approach the kestrel you have to ask to dock first, the hangar doors open, you
+have to fly at least to the door and let the animation take over and land you back in the hangar safely and the alarms go
+off and you get out."*
+
+- **Out through the airlock** (9 s): you walk to the middle of the airlock and the inner door comes down; a blink and you
+  are suited, the visor's rim round the view; the klaxon, red lamps, the hiss and mist streaming to the door,
+  "DEPRESSURISING 3·2·1"; the outer door and the hull's own hatch lift, and you drift out into the space walk.
+- **Back in** (8 s): you glide in, the doors shut, the air comes back under amber, a chime and "PRESSURE NOMINAL", the
+  helmet off, the inner door up.
+- **Launch** (14 s, four shots): the canopy lifts on its hinge, a ladder comes out, you climb and drop into the seat, the
+  canopy seals. The bay's klaxon and spinning beacons, the Wren's outer wing panels fold up, the blast door parts and her
+  stern door opens through a real hole in the hull (the stern is now a plate with the bay's mouth cut out). Through her
+  canopy she lifts and slides out, her wings spread, and from off her quarter the doors close behind her.
+- **Coming home:** within 1.2 km, **E calls the Kestrel**. Whoever has the helm answers, the bay vents, its lamps flash and
+  the doors open; the HUD marks **BAY DOOR · N m**. Fly to the door (within 70 m astern of it) and **the bay's guidance
+  takes her**: lines her up, folds her wings, slides her in over the pad, sets her down, shuts the doors, brings the air
+  back, and a turntable turns her nose to the door. You climb out and down, and stand facing into the bay with
+  **E Climb into the Wren** on offer. Fly more than 1.6 km off and the bay closes again.
+- **E (or Tab) skips** any of them and lands in exactly the state the full run ends in: each animation is a `Sequence`
+  (`src/sequence.mjs`) of tracks that only *set* state from k (0→1), so a skip runs every track left to its end, and each
+  ends in the verb the old instant hand-over used (`setPhase('eva')`, `launch()`, `land()`). `?cine=0` turns them off;
+  the old suites run that way.
+- **TS-S5-WRENBAY, decided by default:** the Wren's outer wing panels fold up (7.3 m folded against the 8 m door), so the
+  shipyard's Wren check passes. Richard can still choose a smaller Wren or a belly bay.
+- **The alarm is in the rooms, not a new light:** a room's lamp specs and its ceiling panels turn red, amber or green;
+  the light pool is still 8.
+
+**Found by s6's first drive and fixed:**
+
+- 🔴 **An event and a track crossing in one slow frame ran in the wrong order.** The timeline fired every event due, then
+  ran every track: the frame that crossed 3.6 s fired "attach to the Wren, sit in her seat", and then the climb's last
+  step put your body at its bay-frame coordinates while it was already her child. You rode out 27 m behind her, standing
+  in space (s10's picture; no check failed). Now the tracks catch up to each event's time before it fires, and
+  `tests/sequences.json` checks you are in her seat as she leaves.
+- The landing put you 1.5 m from her flank facing it (the picture was a grey wall), and 4.5 m from her use point, so E
+  beside her did nothing: the reach is now 4.8 m and you face into the bay.
+- The vent mist drew as hard white squares (a bare `PointsMaterial`); the beacon beams read as sheets of orange paper (a
+  flat additive cone; now faded along the beam); the high bay shot looked through a pipe and two gas bottles.
+
+## On nodegx.io (2026-11-04)
+
+The game is live at `nodegx.io/threadspace/`, with a card on `nodegx.io/demos/`. That folder is a COPY: after any change
+here, `npm run site:check` says whether the live one is stale (and which files), and `npm run site` rebuilds it into
+`nodegx-web/site/threadspace` and prints the push. Built by `tools/build-static.mjs`: root paths made relative, only the four three.js files the game
+imports, and each page marked `<html data-static>`, so the shipyard keeps a saved design in the visitor's browser
+(`src/models/store.mjs`) instead of posting to `server.mjs`. It ships `public/ships/kestrel.json` as it stands, so visitors
+fly Richard's 2026-10-30 design. Rebuild and re-push the folder after any change here. Measured on the copy served from a
+subfolder by a plain file server: smoke 38/38; the shipyard drive the same as on `npm start` (TS-S7-YARDSAVE).
+
 ## Tests
 
 ```
-sh tools/run-all.sh        # smoke (37 checks), boarding (18), eva (11); exit 1 on any FAIL
+sh tools/run-all.sh        # smoke (38 checks), boarding (20), eva (12), command (27) with ?cine=0, then sequences (31,
+                           # the animations on); exit 1 on any FAIL
+node tools/drive.mjs http://127.0.0.1:8795/ tests/look.json shots   # the scenery: four screenshots, one check
+node tools/drive.mjs http://127.0.0.1:8795/shipyard.html tests/shipyard.json shots   # the shipyard, the save, the game reading it, the gate
+node tools/drive.mjs http://127.0.0.1:8795/ tests/refit.json shots            # the way in from the game, Refit her now, the paint rule
 ```
 
 Each drive runs the real page in headless Chrome on software GL and gates on `__game.stats()` and, where
@@ -96,9 +211,15 @@ TS-S3-HOLES check passed on the broken code). Every new check was run once again
 `public/src/`:
 
 - **`game.mjs`** — one state machine over the *seats*. `phase` is where you are: `walk`, `helm`,
-  `turret`, `tactical`, `fighter`, `eva`, `board`, `dock`, `jump`. Each phase has a controller with
+  `turret`, `tactical` (the chair: the command map, running), `fighter`, `eva`, `board`, `dock`, `jump`, `wardrobe`, `scene` (an
+  animation is playing: `game.cine`). The
+  command map is an overlay, not a phase: the seat under it keeps its state and gets no input while it is open. Each phase has a controller with
   `frame(input, dt)` and `placeCamera(camera)`. Everything else in the file is the universe ticking:
   missions, standing, trade, the fleet's jobs, docking, jumping, the save.
+- **`sequence.mjs`** — `Sequence` (a timeline of tracks, events and camera shots; `skip()` lands where the full run
+  lands) and `Tweens` (things that move while you play on, like the bay doors after you call).
+- **`cinematics.mjs`** — the four animations: `airlockOut`, `airlockIn`, `launchSequence`, `landSequence`, all in the
+  Kestrel's frame, so a ship under way carries them.
 - **`world.mjs`** — `Entity` (a thing with a place, a hull, a side) and `World` (the sector: builds it
   from `data.mjs` + a seed, tears it down on a jump).
 - **`interiors.mjs`** — rooms built in the *host's* frame (the ship's, the station's). A bridge inside a
@@ -106,8 +227,15 @@ TS-S3-HOLES check passed on the broken code). Every new check was run once again
   frame. Walls are colliders; seats and doors are *interactables* the walk controller offers with E.
   Exterior hulls are invisible from inside (back-face culling), so a window is just a gap in an interior
   wall.
-- **`controllers/`** — `walk` (circle-vs-box sliding), `fly` (pitch/yaw/roll/throttle, also the
-  autopilot's hands), `turret`, `eva`, `board` (walk + rifle + defenders), `tactical` (orbit).
+- **`controllers/`** — `walk` (circle-vs-box sliding; the over-the-shoulder camera pulled in by the walls), `fly`
+  (pitch/yaw/roll/throttle, also the autopilot's hands, which take the pilot's turn rate and braking), `turret`, `eva`,
+  `board` (walk + rifle + defenders + your boarding party).
+- **`orders.mjs`** — plans: for each of your ships a list of steps (a move and an optional weapons stance), flown by `drive`
+  and shot by `prey`; the spared set. **`command.mjs`** — the command map (pause, camera, the card). The card is DOM over
+  state and verbs, like the panel: the NodeGX seam.
+- **`people.mjs`** — the blocky people, their poses, the rifle and the first-person viewmodel. **`decor.mjs`** — wall and deck
+  textures, signs, screens, `bake` (merges a room's still meshes per material). **`scenery.mjs`** — stations, the asteroid
+  fields, the derelict, each merged into a handful of meshes, their lamps blinking in one Points cloud.
 - **`ai.mjs`** — raiders, the corvette, the hauler, followers, and your own crew.
 - **`combat.mjs`** — a pool of bolts, each stepped and tested against every live entity not on its
   side (coarse sphere, then the hull's box in its own frame).
