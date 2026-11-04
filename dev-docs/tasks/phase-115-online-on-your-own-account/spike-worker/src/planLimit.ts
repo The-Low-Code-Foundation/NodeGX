@@ -29,7 +29,8 @@ export interface PlanLimitEnv {
 }
 
 type Code = '1102' | '1027';
-type Sent = { via: 'cloudflare' | 'resend' | 'none'; ok: boolean; error?: string };
+/** `id` is the sender's own id for the email (Resend's dashboard, or Cloudflare's messageId), to trace a delivery. */
+type Sent = { via: 'cloudflare' | 'resend' | 'none'; ok: boolean; id?: string; error?: string };
 
 const KEEP_MS = 3 * 24 * 60 * 60 * 1000;
 const toldInThisIsolate = new Set<string>();
@@ -67,8 +68,8 @@ export function planLimitEmail(code: Code, site: string, fn: string, at: Date): 
 async function send(env: PlanLimitEnv, mail: { subject: string; text: string }): Promise<Sent> {
   if (env.ALERT_EMAIL && env.ALERT_FROM && env.ALERT_TO) {
     try {
-      await env.ALERT_EMAIL.send({ from: { email: env.ALERT_FROM, name: 'NodeGX' }, to: env.ALERT_TO, ...mail });
-      return { via: 'cloudflare', ok: true };
+      const result = await env.ALERT_EMAIL.send({ from: { email: env.ALERT_FROM, name: 'NodeGX' }, to: env.ALERT_TO, ...mail });
+      return { via: 'cloudflare', ok: true, id: result?.messageId };
     } catch (e) {
       const err = e as { code?: string; message?: string };
       return { via: 'cloudflare', ok: false, error: `${err.code ?? 'error'}: ${err.message ?? String(e)}` };
@@ -80,7 +81,8 @@ async function send(env: PlanLimitEnv, mail: { subject: string; text: string }):
       headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ from: 'NodeGX <onboarding@resend.dev>', to: [env.ALERT_TO], ...mail })
     }).catch((e) => ({ ok: false, status: 0, text: async () => String(e) }) as const);
-    if (answer.ok) return { via: 'resend', ok: true };
+    // Resend's 200 means accepted, not delivered: the id is what its dashboard (Emails) shows the delivery under.
+    if (answer.ok) return { via: 'resend', ok: true, id: ((await answer.json().catch(() => ({}))) as { id?: string }).id };
     return { via: 'resend', ok: false, error: `${answer.status}: ${(await answer.text()).slice(0, 200)}` };
   }
   return { via: 'none', ok: false, error: 'no sender is set up (ALERT_EMAIL + ALERT_FROM + ALERT_TO, or RESEND_API_KEY + ALERT_TO)' };
