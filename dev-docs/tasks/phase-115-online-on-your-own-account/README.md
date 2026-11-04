@@ -1,7 +1,7 @@
 # Phase 115 — Online, on your own account
 
 **Scoped:** 2026-10-07, at HEAD `d8a9f0069`, from a conversation with Richard that started as the story of an
-ex-client and ended as a research question. **Status: 📋 SCOPED AND PARKED.** Richard: *"we'll come back to it after
+ex-client and ended as a research question. **Status: 🟢 UNPARKED 2026-11-04 by Richard (BOARD lane 10): §12.** Was: 📋 SCOPED AND PARKED. Richard: *"we'll come back to it after
 phase 107 and our Swift runtime experiment phase"* (P110). Nothing here is built. **Prefix: `HST`.**
 **2026-10-12: HST-005's VM route is taken forward by P112 [OWN-016](../phase-112-your-own-nodegx/OWN-016-SHIP-IT.md)**
 (P112 R18), for the npm kit: a deploy folder plus the backend on a VM the person owns. Read OWN-016 before building
@@ -209,3 +209,20 @@ Plain text, so they can be copied.
 - Cloudflare Registrar `.com`: https://www.cloudflare.com/application-services/products/registrar/buy-com-domains and https://domainoffer.net/tld/com/cloudflare
 - Hetzner cost-optimised tier and its availability: https://www.bitdoze.com/hetzner-cloud-cost-optimized-plans and https://www.vincentschmalbach.com/hetzner-cheap-cloud-unavailable-price-increases/
 - Anthropic connectors directory: https://claude.com/docs/connectors/directory
+
+## 12. Unparked, and the sessions since
+
+**2026-11-04, Richard:** *"Let's kick it off and lift the park. If this can go out with the Beta, it'd be a nice
+addition."* The question he asked first: how many sessions to prove a NodeGX full-stack app on Cloudflare Pages and
+Workers. The answer given: about 2 for the narrow proof, 6–7 for full stack on D1 + R2. The order since then is
+Cloudflare-first (shape B, then C on D1), ahead of the VM rows; the twelve-run comparison (HST-008) waits for both.
+
+| session | date | what | where |
+|---|---|---|---|
+| 1 | 2026-11-04 | The backend's own workflow engine on workerd, locally: a workflow carrying a secret, a schedule trigger, the cloud-function interpreter, and the HTML export served by the same Worker. Two defects filed (HTTPLOOKUP, WARMRUNNER) | [HST-004 §6](HST-004-A-WORKFLOW-ON-A-WORKER.md#6-session-1--2026-11-04-opus-55-the-backends-own-engine-on-workerd-locally) |
+
+**The estimate after session 1:** the narrow proof stays at 2 (session 2 deploys it on Richard's account and puts a
+cloud function behind the page's form). Full stack moves to **7–8**: a cloud function's code nodes cannot run on a
+Worker (`new Function` is refused) and have to be printed before deploy, about one more session, on top of D1 for
+records and users, R2 for files, and Durable Objects if realtime is needed.
+

@@ -1,0 +1,28 @@
+---
+id: P115-HST004-WARMRUNNER
+title: "cloud runtime: on a Cloudflare Worker a CloudRunner answers its first request and refuses every later one as unauthenticated"
+status: open
+severity: medium
+area: cloud runtime / CloudRunner (`packages/noodl-viewer-cloud/src/index.ts` `run`), on workerd only
+found: P115 HST-004 session 1, 2026-11-04, the functions probe under `wrangler dev`
+evidence: dev-docs/tasks/phase-115-online-on-your-own-account/HST-004-A-WORKFLOW-ON-A-WORKER.md §6
+kit: core
+---
+
+A cloud function whose Request node has *Allow Unauthenticated* on answers correctly the first time a Worker runs it
+(`echo` → `{"out":"https://app.example"}`, 27 ms), then every later request on the same `CloudRunner` fails with
+*Unauthenticated requests not accepted*: the parameter is no longer applied when `sendRequest` runs. A new
+`CloudRunner` per request answers every time (6–7 ms each, measured four times). On Node the same graph through one
+runner answers every time: `tests/def022-request-origin.test.ts` 15/15 at HEAD, including "two requests through one
+runner".
+
+Unmeasured guess at the cause: the runtime's update is scheduled with `setImmediate` (`requestUpdate`, index.ts:122)
+and de-duplicated by a "scheduled" flag; workerd drops a callback still pending when the first request ends, so the
+flag stays set and the second request's parameters are never applied. A FIFO `setImmediate` did not change it, which
+fits a dropped callback rather than an ordering one.
+
+Reproduce: `spike-worker`, `npx wrangler dev -c wrangler.functions.toml --port 8788`, `curl :8788/functions/echo`
+twice; then `?fresh=1` twice.
+
+Fix: confirm the cause first (log the flag at the second `run`). A Worker host can build a runner per request today
+(the cost measured above); the runtime fix would be to clear a stale schedule at the start of `run`.

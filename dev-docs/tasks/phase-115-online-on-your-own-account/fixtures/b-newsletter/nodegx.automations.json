@@ -1,0 +1,105 @@
+{
+  "version": 1,
+  "workflows": [
+    {
+      "id": "subscribe",
+      "name": "Subscribe a reader",
+      "entry": "check",
+      "concurrency": 1,
+      "steps": [
+        {
+          "id": "check",
+          "name": "The form gave an email",
+          "kind": "validate",
+          "params": {
+            "rules": [
+              {
+                "path": "body.email",
+                "type": "string",
+                "message": "The form arrived without an email."
+              }
+            ]
+          },
+          "next": [
+            "send"
+          ]
+        },
+        {
+          "id": "send",
+          "name": "Add them to the newsletter list",
+          "kind": "http-request",
+          "params": {
+            "url": "http://127.0.0.1:8799/3.0/lists/readers/members",
+            "method": "POST",
+            "bodyType": "json",
+            "body": {
+              "email_address": {
+                "$path": "body.email"
+              },
+              "status": "subscribed"
+            },
+            "authType": "bearer",
+            "authSecret": "MAILCHIMP_KEY"
+          },
+          "next": [
+            "done"
+          ]
+        },
+        {
+          "id": "done",
+          "name": "Say it worked",
+          "kind": "return",
+          "params": {
+            "value": {
+              "subscribed": true,
+              "status": {
+                "$path": "previous.status"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "daily-digest",
+      "name": "Send the daily digest",
+      "entry": "send",
+      "concurrency": 1,
+      "steps": [
+        {
+          "id": "send",
+          "name": "Ask the list to send today's digest",
+          "kind": "http-request",
+          "params": {
+            "url": "http://127.0.0.1:8799/3.0/campaigns/digest/send",
+            "method": "POST",
+            "bodyType": "json",
+            "body": {
+              "firedAt": {
+                "$path": "trigger.firedAt"
+              }
+            },
+            "authType": "bearer",
+            "authSecret": "MAILCHIMP_KEY"
+          }
+        }
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "id": "trg_digest_daily",
+      "type": "schedule",
+      "name": "Every day at 08:00",
+      "enabled": true,
+      "target": {
+        "kind": "workflow",
+        "name": "daily-digest"
+      },
+      "schedule": {
+        "cron": "0 8 * * *",
+        "missedFirePolicy": "skip"
+      }
+    }
+  ]
+}

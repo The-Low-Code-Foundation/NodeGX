@@ -1,0 +1,12 @@
+{
+  "name": "hst-spike-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "wrangler deploy --dry-run --outdir dist"
+  },
+  "devDependencies": {
+    "wrangler": "^4.157.0"
+  }
+}

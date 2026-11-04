@@ -1,0 +1,18 @@
+name = "hst-spike-worker"
+main = "src/worker.ts"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
+
+# The project's schedule triggers, as Worker crons. A real target writes this list from nodegx.automations.json.
+[triggers]
+crons = ["0 8 * * *"]
+
+# The HTTP step through fetch (see src/http-over-fetch.ts for why this is a shim, not an edit).
+[alias]
+"http" = "./src/http-over-fetch.ts"
+"https" = "./src/http-over-fetch.ts"
+
+# The front end: the HTML export, served by the same Worker (one origin, one deploy). The Worker runs first only for its doors.
+[assets]
+directory = "./public"
+run_worker_first = ["/workflows/*"]

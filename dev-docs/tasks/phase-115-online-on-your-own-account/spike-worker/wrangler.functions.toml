@@ -1,0 +1,4 @@
+name = "hst-functions-probe"
+main = "src/functions-probe.ts"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
