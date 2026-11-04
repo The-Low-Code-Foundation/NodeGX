@@ -452,6 +452,13 @@ refusal (a probe burning ~4 s of CPU, removed after) through the page's own clie
 2. `ALERT_TO` set to that Gmail address: **`via: resend, ok: true`** (17:11:26 UTC), today's note in KV, so no
    second email today.
 
+3. **Arrived** (Richard, 2026-11-04): in neither Inbox nor Spam. Gmail filed it only under **All Mail**. So the
+   Resend route works end to end, but its shared test sender (`onboarding@resend.dev`) is not a sender a builder's
+   inbox trusts: an alert that lands where nobody looks fails its one job. For the product, the builder's own domain
+   (verified at Resend, or on Cloudflare for route 1) is the sender to aim for. The setup should also tell them to
+   look under All Mail for the first one and mark it "not spam / important". The log line now carries the sender's id
+   (`d76bd8ed3`) so a delivery can be traced in Resend's dashboard.
+
 Fixed on the way: a day's note used to be written when no sender was set up yet (`via: none`), which would have
 silenced that day's email after the builder set one up. Now only a sent email is remembered.
 

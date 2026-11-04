@@ -39,7 +39,7 @@ never ahead of lanes 9, 2 and 3. Earlier prompts are in git history (`git log --
    pre-paid with a stubbed fetch.
 3b. ✅ Refusal alerts built and SENT (HST-004 §10.5): a real 1102 → the page's sentence → report → Resend emailed
    Richard's Gmail (17:11 UTC 11-04; Resend without a domain only sends to the sign-up address). `ALERT_TO` lives in
-   the working copy only (public repo): keep it there when deploying. ⏳ Richard to confirm the email arrived.
+   the working copy only (public repo): keep it there when deploying. ✅ It arrived, but Gmail filed it under All Mail only (not Inbox, not Spam): the shared test sender is not trusted. The product should aim for the builder's own domain as sender.
    The real Free cut-off measured is ~2 s of CPU per call, so §9's 10–35 ms spikes are far from it.
 4. BUNDLEDROPS (high) belongs to the cloud-deploy owner, not this phase, but it blocks every MCP-written cloud function
    that wires an HTTP Request's body or auth. Before anyone fixes it: measure the editor's own Deploy button with a
