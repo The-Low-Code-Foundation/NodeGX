@@ -1,28 +1,33 @@
 # Next session — Phase 134, the app in plain files
 
-**Written 2026-11-04 by session 10 (SELECTREFUSED fixed in the plan: a task opens in both exports).** Read
-[README.md](README.md) §9 and §10 (sessions 1 to 10) first. Sessions used: 10; Richard ruled R6 "now, first", so the
-phase runs past ten, and §10 says so.
+**Written 2026-11-04 by session 11 (the HTML export's reach measured; the printer's own gaps 346 → 166).** Read
+[README.md](README.md) §9 and §10 (sessions 1 to 11) first. Sessions used: 11 (past ten by R6, and by Richard's ask of
+session 11: "if nobody can export any kind of complex app or game, we're in trouble").
 
 ## Before anything
 
-1. **Richard's rulings (README §9):** R6 done (session 10). R7 **ThreadSpace**. HiveClip **yes, on a copy**. R4 (static
-   server or also a bundled copy) is still open; nothing depends on it.
-2. **The order:** ThreadSpace's menu (HTX-006's last line, short), then HTX-007 (HiveClip).
+1. **Measure where it stands:** `cd packages/nodegx-export && nice -n 19 npx ts-node --transpile-only -O
+   '{"module":"commonjs"}' ../../dev-docs/tasks/phase-134-the-app-in-plain-files/census/own.ts` (the printer's own gaps per
+   app, beside the shared and the plan's). `census-after-s11` is in `census/own-after-s11.txt`. `hive.ts` breaks down
+   HiveClip; `kinds.ts` every loss kind.
+2. **Rulings:** R4 still open, nothing depends on it. R7 ThreadSpace, HiveClip on a copy: both stand, and wait behind
+   the order below.
 3. **BOARD.** Lane 4 is reopened for this phase only (BOARD §2); React and Swift stay paused.
 4. **The box.** Suites and drives are heavy jobs: one at a time, `nice -n 19 … --runInBand`, busy-check by
    `ps -A -o pid,comm` (never `pgrep -f` in a wait loop). `grep` skips some `.ts` files as binary here: use
-   `/usr/bin/grep -a`. Chrome from Claude's bash needs the sandbox off.
-5. **The package suite is not all green, and four of its red causes are not this phase's** (filed open, session 10):
-   P134-S10-SENDSIGNAL (ISL-006 and marketplace's typecheck), P134-S10-SIGNINERROR (the-sign-in-with §C, 9 rows),
-   P134-S10-STUDIOSOCKET (hls006), P134-S10-PARAMFLOOR (parameter-coverage). Anything else red is new: look at it.
+   `/usr/bin/grep -a`. Chrome from Claude's bash needs the sandbox off. The shell is zsh: a list in `$F` does not split.
+5. **Four reds in the package suite are not this phase's** (filed open, session 10): P134-S10-SENDSIGNAL,
+   P134-S10-SIGNINERROR, P134-S10-STUDIOSOCKET, P134-S10-PARAMFLOOR. Anything else red is new: look at it.
 
-## Then: ThreadSpace's menu (R7, HTX-006's last line)
+## The order (Richard, session 11: "let's do that and see how far it gets us")
 
-On a **copy** of `dev-docs/parked/threadspace/` (other sessions have many uncommitted edits in it: copy, never edit it in
-place). Build its pause or settings menu in NodeGX, export it with `--component` into the copy's `public/`, and change its
-width **on Studio's screen** this time (session 9 changed the file). `shasum` over the copy's own files equal before and
-after; its drive (`tools/run-all.sh`) green on the copy. `htx-006/drive.cjs` is the pattern.
+1. **The rest of the printer's own gaps** (README §10 session 11, "Left"): custom kit nodes (38), a Condition that tests
+   again on every change (31), Functions with script files (30), External Link, Drag (HiveClip's cover), the value kinds,
+   the video's play and pause. The pattern for each: copy the React printer's way, grade on a desk against React's arm
+   (or the runtime's rule), one mutant. `tests/helpers/skeleton.js` reads a page the same way in both arms.
+2. **The plan's HTTP URL on a wire** (shared with React): HiveClip's 13, how its window reaches the engine. It blocks
+   HTX-007 in both exports; it is plan work, counted apart as R6's was.
+3. **HTX-007** (below), then ThreadSpace's menu (R7).
 
 ## Then: HTX-007 ([task](HTX-007-HIVECLIP-OFF-NODEGX.md))
 

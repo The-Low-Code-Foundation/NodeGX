@@ -75,8 +75,11 @@ plan's, filed and R6 asked), HTX-005 ✅ (8 of 10, 11-04: the ledger line; on ev
 trace equals React's; the 13 React plays and it does not are this printer's, named), HTX-006 ✅ (9 of 10, 11-04: a NodeGX
 menu inside a three.js page, `--component` and its manifest; widened and exported again, the page's own files
 byte-identical), SELECTREFUSED ✅ (10, 11-04, Richard's R6: a task opens in both exports; todo-list's drive equal in all
-three arms at all 12 steps; 80 of the 180 template wires compile, 3 before), then ThreadSpace's menu, HTX-007 on a
-HiveClip copy**; past the 10-session stop by Richard's ruling, said in the README;
+three arms at all 12 steps; 80 of the 180 template wires compile, 3 before), session 11 (11-04, Richard: *"if nobody can
+export any kind of complex app or game, we're in trouble"*: reach measured on every template and HiveClip — only small
+apps came out whole; the printer's own gaps 346 → 166, the shared plan's ~1,700 untouched), then the rest of the
+printer's own gaps, the plan's HTTP URL on a wire (HiveClip's engine calls), HTX-007 on a HiveClip copy, ThreadSpace's
+menu**; past the 10-session stop by Richard's rulings, said in the README;
 [P134 README](tasks/phase-134-the-app-in-plain-files/README.md). React and Swift stay paused.
 
 | release | what is in it | state 2026-10-23 |

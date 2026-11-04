@@ -1,0 +1,47 @@
+┌─────────┬────────────────────────────────┬─────────┬────────┬──────┐
+│ (index) │ app                            │ htmlOwn │ shared │ plan │
+├─────────┼────────────────────────────────┼─────────┼────────┼──────┤
+│ 0       │ 'bot-garden'                   │ 47      │ 21     │ 250  │
+│ 1       │ 'digital-bricks-training'      │ 8       │ 62     │ 273  │
+│ 2       │ 'digital-bricks-training-demo' │ 1       │ 26     │ 145  │
+│ 3       │ 'gram'                         │ 0       │ 112    │ 58   │
+│ 4       │ 'landing-pages'                │ 3       │ 31     │ 20   │
+│ 5       │ 'learn-with-simple-rick'       │ 0       │ 0      │ 0    │
+│ 6       │ 'marketplace'                  │ 5       │ 103    │ 54   │
+│ 7       │ 'members-area'                 │ 8       │ 71     │ 64   │
+│ 8       │ 'nightbook'                    │ 9       │ 39     │ 329  │
+│ 9       │ 'pixel-game'                   │ 0       │ 3      │ 37   │
+│ 10      │ 'planning'                     │ 3       │ 257    │ 69   │
+│ 11      │ 'planning-demo'                │ 0       │ 247    │ 90   │
+│ 12      │ 'rocket-school'                │ 27      │ 14     │ 86   │
+│ 13      │ 'star-class'                   │ 27      │ 14     │ 84   │
+│ 14      │ 'story-engine'                 │ 0       │ 3      │ 14   │
+│ 15      │ 'todo-list'                    │ 0       │ 29     │ 78   │
+│ 16      │ 'todo-list-demo'               │ 0       │ 19     │ 76   │
+│ 17      │ 'ui'                           │ 10      │ 143    │ 87   │
+└─────────┴────────────────────────────────┴─────────┴────────┴──────┘
+total own 148
+  38 a custom node is not drawn by the HTML target yet
+  31 N × a Condition that tests again on every change (HTX-N), not printed by the HTML target yet
+  30 the Function "…" uses script files, which the HTML target does not carry yet
+   5 its onClick runs a external-link step, which the HTML target does not print yet; the chain is left out whole
+   5 a drag node is not drawn by the HTML target yet
+   4 its text reads a record-out value, which the HTML target does not print yet
+   4 its text reads a jsfun-out value, which the HTML target does not print yet
+   4 its State is wired from a jsfun-out value, which the HTML target does not print yet
+   3 its signal input "…" runs a Fetch of a query the plan does not keep; the chain is left out whole
+   2 N × a streaming node, not printed by the HTML target yet
+   2 its signal input "…" runs a stream-action step, which the HTML target does not print yet; the chain is left ou
+   2 its onClick runs a popup-close step, which the HTML target does not print yet; the chain is left out whole
+   2 its ticked inputs runs a record-fetch step, which the HTML target does not print yet; the chain is left out wh
+   2 its Did Mount runs a record-fetch step, which the HTML target does not print yet; the chain is left out whole
+   2 its onClick runs a Set Variable of "…" from a outcome-error value, which the HTML target does not print yet; t
+   2 the value it sends out through onLeftChanged reads a animate-out value, which the HTML target does not print y
+   2 its signal input "…" runs a Set Variable of "…" from a animate-out value, which the HTML target does not print
+   2 its label reads a util-call value, which the HTML target does not print yet
+   1 a For Each not drawn: its items read a state-get value, which the HTML target does not print yet
+   1 a For Each not drawn: its items read a prop value, which the HTML target does not print yet
+   1 its onEnter runs a Set Variable of "…" from a outcome-error value, which the HTML target does not print yet; t
+   1 its onPlay is not carried by the HTML target yet
+   1 its onPause is not carried by the HTML target yet
+   1 its color reads a util-call value, which the HTML target does not print yet

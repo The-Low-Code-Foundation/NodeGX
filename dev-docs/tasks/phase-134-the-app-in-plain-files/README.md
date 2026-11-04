@@ -1,7 +1,7 @@
 # Phase 134 — The app in plain files
 
 **Scoped:** 2026-11-03, on Richard's ask ("Let's scope up the HTML export phase please, I think it'll be important").
-**State:** 🔵 HTX-001 to HTX-006 done, and SELECTREFUSED (§10, session 10, 2026-11-04). A NodeGX settings menu runs inside a three.js page that is not NodeGX: exported with `--component`, widened, exported again, and the page's own files byte-identical before and after; its look in the game equal to its own app's on all 90 cells read (§10 session 9). Ruled 2026-11-04 (§9): R6 "now, first" (the phase runs past ten), R7 ThreadSpace, HiveClip on a copy. The HTML export is graded by P107's scenarios the way React and Swift are: on every scenario it plays, its trace equals the React export's, event for event; the 13 React plays and it does not are this printer's, named (a Log step, the streaming stores, On App Error with the parsers). **Session 10 (past ten, by R6): SELECTREFUSED fixed in the plan** — a task opens in both exports, and todo-list's Chrome drive reads the same in the running app, the React export and the HTML export at all 12 steps; 80 of the 180 template wires compile (3 before). **Next: HTX-006's ThreadSpace line** (R7, on a copy), then HTX-007. Options wait on the plan (P134-HTX003-OPTIONSWIRED). R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
+**State:** 🔵 HTX-001 to HTX-006 done, and SELECTREFUSED (§10, session 10, 2026-11-04). A NodeGX settings menu runs inside a three.js page that is not NodeGX: exported with `--component`, widened, exported again, and the page's own files byte-identical before and after; its look in the game equal to its own app's on all 90 cells read (§10 session 9). Ruled 2026-11-04 (§9): R6 "now, first" (the phase runs past ten), R7 ThreadSpace, HiveClip on a copy. The HTML export is graded by P107's scenarios the way React and Swift are: on every scenario it plays, its trace equals the React export's, event for event; the 13 React plays and it does not are this printer's, named (a Log step, the streaming stores, On App Error with the parsers). **Session 10 (past ten, by R6): SELECTREFUSED fixed in the plan** — a task opens in both exports, and todo-list's Chrome drive reads the same in the running app, the React export and the HTML export at all 12 steps; 80 of the 180 template wires compile (3 before). **Session 11 (Richard: "if nobody can export any kind of complex app or game, we're in trouble"):** measured reach on every template and HiveClip, then closed most of the printer's own gaps, 346 → 166 (Image, Video, Icon, Columns, slots, pages with parameters, Navigate To Path, `Component.Object`, Delay); the shared plan's ~1,700 untouched. **Next:** the rest of the printer's own (§10 session 11), then the plan's HTTP URL on a wire (HiveClip's engine calls), then HTX-007; ThreadSpace's line after. Options wait on the plan (P134-HTX003-OPTIONSWIRED). R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
 phase only** (BOARD §2); React and Swift stay paused. **Read first:** this page, then [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md),
 then the task you take. The Swift precedent this phase copies is
 [EXP-022](../phase-18-code-export-v2/EXP-022-THE-SAME-GRAPH-IN-SWIFT.md) §7–§9.
@@ -784,3 +784,47 @@ After the fixes, every row red for a cause of mine or session 9's is green, and 
 
 **Cost:** `plan.ts` +184 −5; the React printer +35 −2; the HTML printer +65 −8; Swift +4; the spec 248 lines new.
 Sessions: 10, past the stop of ten by Richard's R6.
+
+### Session 11 — how far the HTML export reaches, and the printer's own gaps closed (2026-11-04, Opus 5.5)
+
+**Asked by Richard:** "Are we at the point where most of the apps a person could build in NodeGX could come out as plain
+HTML? … If nobody can export any kind of complex app or game, we're in trouble." Measured first, on all 17 templates and
+HiveClip's `ui/` (`census/`, run from `packages/nodegx-export`): **no**. Only the small apps came out whole; 562 of 968
+template components had at least one gap. Two kinds of gap, counted apart:
+
+- **The HTML printer's own** (what React draws and HTML did not): **346 → 166 this session.**
+- **The shared plan's** (React's export has the same holes): about 1,700 across the templates, 87 in HiveClip. Untouched
+  here. Its biggest rows: a For Each fed by a Function's output (96, 14 apps), a Function fed by a Function, two wires into
+  one input, an HTTP request whose URL comes over a wire (13 in HiveClip: how its window reaches the engine).
+
+The ~900 "its X is not carried" style losses (a label's colour, `alignX`, `clickBubbling`) are shared too: React carries
+none of them (checked by name against React's notes, 15 of 15 on the new roles).
+
+**Drawn now, each graded:**
+
+| what | how it is graded | spec |
+|---|---|---|
+| Image, Video, Icon (font, sprite, picture), Columns with breakpoints | the Element Desk exported both ways, each page in jsdom (React's under StrictMode), read element by element (`helpers/skeleton.js`, shared by both arms): equal at every step but three stated differences; the Columns' CSS React's word for word; 2 mutants killed | `html-the-elements.test.ts` |
+| children placed inside a component's slot | the React work's own `slot-desk`, the same way | same, §C |
+| pages with parameters (`/member/{memberId}`), the query, Open In New Tab, a page parameter read, Navigate To Path | the Navigate Desk against a prediction from the runtime's `getRelativeURL` and `page-inputs.ts`; 1 mutant killed | `html-navigate-with-parameters.test.ts` |
+| a Function reading `Component.Object` | the Component Desk React was graded on against the runtime: the HTML export reads what React reads at all 13 readings; 1 mutant killed | `html-a-function-reads-its-component.test.ts` |
+| Delay (Start, Restart, Stop, their four outcomes) | the Delay Desk, React's arm graded against a prediction first, then HTML equal to React; it caught Restart's Done not running | `html-a-delay-counts-down.test.ts` |
+
+**Decided here, said plainly:** a project path in an Image, a Video or an icon stays relative to `index.html` (React makes
+it root-absolute because its page sits at a route; this page's route is after `#`, so the app works from any folder). A
+page is drawn again on every navigation, as the runtime makes a new page when the parameters differ (`_takeKeptPage`).
+Two new generated library files, made like the other five and checked against their source: `lib/componentScope.js`,
+`lib/timer.js`.
+
+**Not graded:** a Delay's countdown stopped when its part goes is checked in the printed code only. The census's "own"
+filter is by sentence, four shared kinds left out; a gap of a kind not yet seen would count as own.
+
+**Left of the printer's own (166):** custom kit nodes 38 (bot-garden, digital-bricks), a Condition that tests again on
+every change 31, Functions with script files 30 (rocket-school, star-class), External Link 5, Drag 5 (HiveClip's cover),
+a few value kinds (a record's output, a Function's output read in the drawing, a utility call), the video's play and
+pause events, streaming nodes.
+
+**HiveClip after this session:** 10 of the printer's own left (Drag 5, a utility call 3, play/pause 2); the window still
+cannot reach the engine, and that is the plan's (the HTTP URL on a wire).
+
+**Cost:** 1 session (11th). Printer +~330 lines, `lib/dom.js` and the router +~80, 4 new specs (31 tests), 4 desks.
