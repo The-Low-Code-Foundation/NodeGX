@@ -283,6 +283,11 @@ export function coerce(type: RequestParamType, value: unknown): Coerced {
  * - **A default beats `required`.** If both are declared, the default is used
  *   and the request is not refused: `required` means "the caller must supply
  *   it", and declaring a fallback is saying they need not.
+ * - **A blank string does not supply a Required field** (P115-HST004-BLANKREQUIRED).
+ *   A form's empty text box sends `""`, and "Required" in every form language
+ *   (HTML's `required` included) refuses it: `""` or only spaces is the same
+ *   `missing` as an absent field (or takes its default). An optional field
+ *   keeps its `""`.
  */
 export function applyRequestContract(
   specs: RequestParamSpec[],
@@ -298,8 +303,9 @@ export function applyRequestContract(
 
   for (const spec of specs) {
     const supplied = body[spec.name];
+    const blankForRequired = spec.required && typeof supplied === 'string' && supplied.trim() === '';
 
-    if (supplied === undefined || supplied === null) {
+    if (supplied === undefined || supplied === null || blankForRequired) {
       if (spec.default !== undefined) {
         // The default goes through the same door as a supplied value, so
         // `pdef-total: "0"` on a `number` parameter arrives as `0` and a default

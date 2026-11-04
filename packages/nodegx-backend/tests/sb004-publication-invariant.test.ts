@@ -991,10 +991,16 @@ describe('SB-004 §7 — an unprovisioned setup token fails CLOSED', () => {
 
     // Every shape of guess, including the empty string — which is what an
     // unprovisioned secret would look like if it yielded one instead of failing.
-    for (const setupToken of [SETUP_TOKEN, '', 'anything']) {
+    for (const setupToken of [SETUP_TOKEN, 'anything']) {
       const res = await client.post('/functions/claimSite', { setupToken }, headers);
       expect(res.json).toEqual({ error: 'This site cannot be claimed.' });
     }
+    // P115-HST004-BLANKREQUIRED: `setupToken` is Required, and a blank string no longer supplies a Required field,
+    // so the empty guess is refused by the contract (400, the field named) before the function's comparison runs.
+    // Still refused, still no admin and no row (below): closed one step earlier.
+    const empty = await client.post<{ code: string }>('/functions/claimSite', { setupToken: '' }, headers);
+    expect(empty.status).toBe(400);
+    expect(empty.json.code).toBe('function/bad-request');
 
     const roles = await client.get<{ roles: Array<{ name: string }> }>('/admin/roles', adminHeaders(dataDir));
     expect(roles.json.roles.map((r) => r.name)).not.toContain('admin');
