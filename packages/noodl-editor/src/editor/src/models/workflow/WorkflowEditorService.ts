@@ -19,6 +19,11 @@ import { WorkflowDocument } from './WorkflowDocument';
 
 import type { WorkflowRef } from './types';
 
+/** Empty the canvas's selection, and with it the Properties panel. */
+function clearStepSelection() {
+  (NodeGraphContextTmp.nodeGraph as { clearSelection?: () => void } | undefined)?.clearSelection?.();
+}
+
 export enum WorkflowEditorEvent {
   /** The open workflow changed (including to none). */
   documentChanged = 'documentChanged',
@@ -58,6 +63,9 @@ export class WorkflowEditorService extends Model {
   }
 
   adopt(document: WorkflowDocument) {
+    // P132-STALESTEPPANEL: the step on the Properties panel belongs to the graph being replaced. Left there, a change
+    // typed into it edits a disposed document and is lost; `switchToComponent` clears it only when given a node.
+    if (this._document) clearStepSelection();
     this._document?.dispose();
     // WFA-006: a descent points back at the workflow it came from, and that
     // workflow is about to be replaced. The pointer is cleared here rather than
@@ -80,6 +88,7 @@ export class WorkflowEditorService extends Model {
   /** Leave the workflow canvas. Does not save — that is always deliberate. */
   close() {
     if (!this._document) return;
+    clearStepSelection(); // P132-STALESTEPPANEL, as in `adopt`
     this._document.off(this);
     this._document.dispose();
     this._document = null;
@@ -87,3 +96,6 @@ export class WorkflowEditorService extends Model {
     this.notifyListeners(WorkflowEditorEvent.documentChanged, { document: null });
   }
 }
+
+// P132 BWF-013: a Run a workflow step's *Open the piece* opens it through this service, the canvas's one owner.
+WorkflowDocument.openWorkflow = (ref) => WorkflowEditorService.instance.open(ref);

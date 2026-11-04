@@ -171,7 +171,13 @@ export const CONNECTED_ROW_POLICY: Record<string, ConnectedRowPolicy> = {
   WorkflowFunctionRefType: {
     kind: 'deferred',
     reason: 'One port naming a cloud function, drawn as a row that also resolves what the name points at.'
-  }
+  },
+  // P132 BWF-013: a workflow step's settings take no wire (its graph connects signals only), as the two above.
+  WorkflowPieceType: {
+    kind: 'deferred',
+    reason: 'One port naming the workflow a Run a workflow step runs, picked by name from the backend’s workflows.'
+  },
+  WorkflowKeyValuesType: { kind: 'deferred', reason: 'One port holding named values (a piece’s send, a call’s headers).' }
 };
 
 /**
@@ -202,7 +208,9 @@ export const DEFERRED_ROW_CLASSES: readonly string[] = [
   'WorkflowCasesType',
   'WorkflowConditionType',
   'WorkflowFunctionRefType',
+  'WorkflowKeyValuesType',
   'WorkflowParamsType',
+  'WorkflowPieceType',
   'WorkflowTransformType',
   'WorkflowValidateType',
   'WorkflowValueType'

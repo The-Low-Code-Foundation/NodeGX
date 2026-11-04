@@ -75,7 +75,9 @@ export type WidgetId =
   | 'workflowValidate'
   | 'workflowBackoff'
   | 'workflowTriggerInfo'
-  | 'workflowFunctionRef';
+  | 'workflowFunctionRef'
+  | 'workflowPiece'
+  | 'workflowKeyValues';
 
 /** A port as the dispatch reads it: only its `type`, after `editAsType`. */
 export interface WidgetPortLike {
@@ -147,7 +149,10 @@ export const WIDGET_RULES: readonly { widget: WidgetId; test: (type: EditType) =
   { widget: 'workflowValidate', test: named('workflow-validate') },
   { widget: 'workflowBackoff', test: named('workflow-backoff') },
   { widget: 'workflowTriggerInfo', test: named('workflow-trigger-info') },
-  { widget: 'workflowFunctionRef', test: named('workflow-function-ref') }
+  { widget: 'workflowFunctionRef', test: named('workflow-function-ref') },
+  // P132 BWF-013: a Run a workflow step's piece, and named values (its `send`, Call an API's query and headers).
+  { widget: 'workflowPiece', test: named('workflow-piece') },
+  { widget: 'workflowKeyValues', test: named('workflow-key-values') }
 ];
 
 /** The row a port gets, or `undefined` when it gets none (a signal, a `*`, an unknown type). */

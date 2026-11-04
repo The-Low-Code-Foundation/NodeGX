@@ -33,6 +33,7 @@ import type { NodeLibraryData, NodeLibraryDataNodeType } from '@noodl-models/nod
 import { WIRE_TYPE_ERROR } from '../../views/nodegrapheditor/canvas/CanvasTheme';
 import type { StepKindCatalog, StepKindSpec, StepParamSpec } from './types';
 import {
+  CONTROL_KEY_VALUES,
   CONTROL_TRANSFORM_OUTPUT,
   GROUP_PARAMS,
   GROUP_ROUTES,
@@ -45,6 +46,7 @@ import {
   PORT_TYPE_CONDITION,
   PORT_TYPE_FOR_CONTROL,
   PORT_TYPE_FUNCTION_REF,
+  PORT_TYPE_KEY_VALUES,
   PORT_TYPE_PARAMS,
   PORT_TYPE_PATH,
   PORT_TYPE_TRANSFORM,
@@ -96,7 +98,11 @@ export {
   CONTROL_TRANSFORM_OUTPUT,
   PORT_TYPE_VALIDATE,
   CONTROL_VALIDATE_RULES,
-  PORT_TYPE_FOR_CONTROL
+  PORT_TYPE_FOR_CONTROL,
+  PORT_TYPE_WORKFLOW_REF,
+  CONTROL_WORKFLOW,
+  PORT_TYPE_KEY_VALUES,
+  CONTROL_KEY_VALUES
 } from './workflowPorts';
 
 /**
@@ -140,6 +146,10 @@ function portTypeForParam(param: StepParamSpec, catalog?: StepKindCatalog): unkn
   // CWF-005: a served `control` name wins over the type, when this editor has a
   // port type for it. An unrecognised name falls through on purpose — see
   // PORT_TYPE_FOR_CONTROL.
+  // P132 BWF-013: named values carry the scope roots their value pickers read, so they are not in that `{ name }` table.
+  if (param.control === CONTROL_KEY_VALUES && param.type === 'object') {
+    return { name: PORT_TYPE_KEY_VALUES, scope: scopeRoots(catalog) };
+  }
   const bespoke = param.control ? PORT_TYPE_FOR_CONTROL[param.control] : undefined;
   if (bespoke) return { name: bespoke };
 

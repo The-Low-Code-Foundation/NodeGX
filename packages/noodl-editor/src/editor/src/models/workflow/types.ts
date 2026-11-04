@@ -35,7 +35,9 @@ export type StepKind =
   | 'filter'
   | 'sort'
   | 'deduplicate'
-  | 'split';
+  | 'split'
+  /** P132 BWF-013: runs another workflow (a reusable piece) and hands on its answer. */
+  | 'run-workflow';
 
 /** A param's declared type, which is what picks a property-editor control. */
 export type StepParamType =

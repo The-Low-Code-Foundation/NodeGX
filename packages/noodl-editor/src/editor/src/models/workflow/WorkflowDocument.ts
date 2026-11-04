@@ -57,12 +57,14 @@ import {
   fetchTableColumns,
   fetchWorkflow,
   readWorkflowSample,
+  listWorkflowDefinitions,
   saveWorkflow
 } from './WorkflowBackendClient';
 import { WorkflowComponentModel } from './WorkflowComponentModel';
 import { WorkflowGraphModel } from './WorkflowGraphModel';
 import { layoutWorkflow } from './workflowLayout';
 import { itemSources, pathWords, readSources, stepsOfRun, type ReadSource, type RunStep } from './workflowSources';
+import { bodyNames, pieceChoices, pieceOf, PIECE_KIND, runTitle, type PieceChoices } from './workflowPieces';
 import {
   buildWorkflowNodeLibrary,
   isRoutePort,
@@ -173,6 +175,8 @@ function givenName(node: NodeGraphNode): string | undefined {
   const label = node.label;
   if (!label || typeof label !== 'string') return undefined;
   if (label === node.id || label === node.type?.labelForNode?.(node)) return undefined;
+  // P132 BWF-013: "Run <piece>" is worked out from the piece's name, not given (`derivedTitle`).
+  if (label === node.derivedTitle) return undefined;
   return label;
 }
 
@@ -269,6 +273,10 @@ export class WorkflowDocument extends Model {
       const descent = this.descentActionFor(id);
       if (descent) actions.push(descent);
 
+      // P132 BWF-013: a Run a workflow step opens its piece, as a Call Function step opens its function.
+      const piece = this.pieceOfStep(id);
+      if (piece?.there) actions.push({ label: `Open "${piece.name}"`, onClick: () => void this.openPiece(id) });
+
       // CWF-004 S6: and, when there is nothing to descend INTO, the way to make
       // one. Its label names the function it will create, because a menu entry
       // that mints a component should say what the component will be called.
@@ -293,7 +301,7 @@ export class WorkflowDocument extends Model {
     // The double-click gesture, contributed the same way the context menu
     // actions are: the canvas asks the graph, and the knowledge of what a step
     // points at stays here.
-    this.graph.doubleClickProvider = (nodeId: string) => this.descendInto(nodeId);
+    this.graph.doubleClickProvider = (nodeId: string) => this.openPieceOf(nodeId) || this.descendInto(nodeId);
   }
 
   /* ------------------------------------------------------------------------ */
@@ -821,6 +829,8 @@ export class WorkflowDocument extends Model {
     // said nothing reads as a glitch. A backend that cannot answer leaves
     // `known: false` and the cards say "cannot check".
     await document.refreshResolution().catch(() => undefined);
+    // P132 BWF-013: and its workflows, so a Run a workflow card arrives titled by its piece's name.
+    await document.refreshPieces();
 
     return document;
   }
@@ -1060,6 +1070,11 @@ export class WorkflowDocument extends Model {
 
     this.setRefWarning(node, resolution);
 
+    // P132 BWF-013: an unnamed Run a workflow step is titled by its piece's name, as Studio's card is.
+    if (kind === PIECE_KIND) {
+      node.setDerivedTitle(runTitle(pieceOf({ kind, params: node.parameters }), (id) => this.workflowName(id)) ?? undefined);
+    }
+
     if (kind === 'switch') {
       node.setDynamicPorts(switchRoutePorts(node));
     }
@@ -1225,8 +1240,125 @@ export class WorkflowDocument extends Model {
     this.notifyListeners('dirtyChanged', { dirty: false });
     // P132 BWF-008: `project` says whether the project's file has it too, so the panel never says less or more
     this.notifyListeners('saved', { definition: saved, project });
+    void this.refreshPieces();
     return saved;
   }
+
+  /* ------------------------------------------------------------------------ */
+  /* P132 BWF-013 — a reusable piece is a workflow others run                  */
+  /* ------------------------------------------------------------------------ */
+
+  /** This backend's workflows and triggers: null until `refreshPieces` lands (the Workflow row says it is reading). */
+  private pieceWorld: { workflows: WorkflowDefinition[]; triggers: TriggerDef[] } | null = null;
+
+  /**
+   * Read this backend's workflows and triggers: what a Run a workflow step can run, by name, and which are pieces.
+   * On open and after a save; `piecesChanged` when it lands. Never throws: an unreadable backend leaves the row
+   * saying it is reading, and the cards titled by id.
+   */
+  async refreshPieces(): Promise<void> {
+    try {
+      const [defs, triggers] = await Promise.all([
+        listWorkflowDefinitions(),
+        listTriggers(this.ref.backendId).catch(() => [] as TriggerDef[])
+      ]);
+      const mine = defs.find((b) => b.backendId === this.ref.backendId);
+      if (!mine || mine.error) return;
+      this.adoptPieceWorld(mine.workflows || [], triggers);
+    } catch {
+      /* the row keeps saying it is reading */
+    }
+  }
+
+  /** Take the backend's workflows and triggers rather than asking (the pure half, as `adoptDeployedFunctions`). */
+  adoptPieceWorld(workflows: WorkflowDefinition[], triggers: TriggerDef[]): void {
+    this.pieceWorld = { workflows, triggers };
+    this.refreshAllChrome();
+    NodeGraphContextTmp.nodeGraph?.repaint();
+    this.notifyListeners('piecesChanged', {});
+  }
+
+  /** A workflow's name on this backend, or undefined when it is not one (or not read yet). */
+  workflowName(id: string): string | undefined {
+    if (id === this.definition.id) return this.component.displayName;
+    const w = this.pieceWorld?.workflows.find((x) => x.id === id);
+    return w ? w.name || w.id : undefined;
+  }
+
+  /** The backend's workflows with THIS one as the canvas has it (a ring check must see an unsaved Run step). */
+  private workflowsNow(): WorkflowDefinition[] {
+    const others = (this.pieceWorld?.workflows || []).filter((w) => w.id !== this.definition.id);
+    return [...others, { ...this.definition, ...this.toInput() } as WorkflowDefinition];
+  }
+
+  /** What the Workflow row of a Run a workflow step offers, or null until the backend's workflows are read. */
+  pieceChoices(stepId: string): PieceChoices | null {
+    if (!this.pieceWorld) return null;
+    const node = this.graph.findNodeWithId(stepId);
+    return pieceChoices(this.workflowsNow(), this.pieceWorld.triggers, this.definition.id, node?.parameters?.workflow);
+  }
+
+  /** The piece a Run a workflow step names: its id, name, whether it is on this backend, the names it reads. */
+  pieceOfStep(stepId: string): { id: string; name: string; there: boolean; asks: string[] } | null {
+    const node = this.graph.findNodeWithId(stepId);
+    if (!node || kindFromTypeName(node.typename) !== PIECE_KIND) return null;
+    const id = pieceOf({ kind: PIECE_KIND, params: node.parameters });
+    if (!id) return null;
+    const def = id === this.definition.id ? null : this.pieceWorld?.workflows.find((w) => w.id === id);
+    return { id, name: this.workflowName(id) || id, there: !!def, asks: bodyNames(def) };
+  }
+
+  /** The double-click on a Run a workflow step: open its piece. False for any other step (not our gesture). */
+  private openPieceOf(stepId: string): boolean {
+    const piece = this.pieceOfStep(stepId);
+    if (!piece) return false;
+    if (!piece.there) {
+      ToastLayer.showInfo(`There is no workflow "${piece.id}" on ${this.ref.backendName}. Choose one in the step's Workflow row.`, {
+        title: `Cannot open "${piece.name}"`,
+        id: 'bwf013-open-piece'
+      });
+      return true;
+    }
+    void this.openPiece(stepId);
+    return true;
+  }
+
+  /**
+   * Switch the canvas to the piece a Run a workflow step runs (BWF-013 Build 4), saving this workflow first when it
+   * has unsaved changes: opening another workflow replaces this document, and a change lost on a press that only
+   * looked is the worst outcome. The toast offers the way back, as Studio's *Back* does.
+   */
+  async openPiece(stepId: string): Promise<boolean> {
+    const piece = this.pieceOfStep(stepId);
+    const opener = WorkflowDocument.openWorkflow;
+    if (!piece?.there || !opener) return false;
+    const parent: WorkflowRef = { ...this.ref, id: this.definition.id, name: this.component.displayName };
+    if (this.isDirty) {
+      try {
+        await this.save();
+      } catch (e) {
+        ToastLayer.showWarning(`${parent.name} could not be saved, so it stays open: ${e instanceof Error ? e.message : String(e)}`, {
+          title: `Not opened: "${piece.name}"`,
+          id: 'bwf013-open-piece'
+        });
+        return false;
+      }
+    }
+    const def = this.pieceWorld?.workflows.find((w) => w.id === piece.id);
+    await opener({ ...this.ref, id: piece.id, name: piece.name, stepCount: def?.steps?.length ?? 0 });
+    ToastLayer.showInfo(`${piece.name} is a reusable piece: a change here reaches every workflow that runs it.`, {
+      title: `Opened "${piece.name}" from "${parent.name}"`,
+      id: 'bwf013-open-piece',
+      actions: [{ label: `Back to "${parent.name}"`, onClick: () => void opener(parent) }]
+    });
+    return true;
+  }
+
+  /**
+   * How a document opens another workflow on the canvas: set by `WorkflowEditorService`, which owns the canvas (the
+   * service imports this module, so this one does not import it back).
+   */
+  static openWorkflow: ((ref: WorkflowRef) => Promise<unknown>) | null = null;
 
   /* ------------------------------------------------------------------------ */
   /* P132 BWF-008 item 3 — what a step can read, as field trees               */

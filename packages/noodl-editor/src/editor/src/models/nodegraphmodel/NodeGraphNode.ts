@@ -128,7 +128,7 @@ export class NodeGraphNode extends Model {
 
   /** Get the label of the node */
   public get label() {
-    if (!this._label) return this.type.labelForNode(this);
+    if (!this._label) return this.derivedTitle ?? this.type.labelForNode(this);
     return this._label;
   }
 
@@ -150,6 +150,23 @@ export class NodeGraphNode extends Model {
    * which is otherwise the same slot on the card but *is* saved.
    */
   public runtimeSubLabel?: string;
+
+  /**
+   * P132 BWF-013: a title worked out by whoever owns the graph, shown while the author has typed none: a workflow's
+   * Run a workflow step is titled "Run <piece>", the piece's NAME, which lives in another workflow and so in no node
+   * type (`usePortAsLabel` can only show the id). An author's own label wins over it.
+   *
+   * **Never persisted**, like `runtimeSubLabel`: not in `toJSON`. Its own event, not `labelChanged`, because a
+   * workflow document reads `labelChanged` as the author renaming the step.
+   */
+  public derivedTitle?: string;
+
+  /** Set the derived title. `undefined` clears it. */
+  setDerivedTitle(title: string | undefined) {
+    if (this.derivedTitle === title) return;
+    this.derivedTitle = title;
+    this.notifyListeners('derivedTitleChanged');
+  }
 
   /** Set the runtime sub-label. `undefined` clears it. */
   setRuntimeSubLabel(subLabel: string | undefined) {

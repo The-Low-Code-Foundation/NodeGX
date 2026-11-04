@@ -214,3 +214,50 @@ Run step lit the piece's three steps and named TriggerTest.
   step's whole answer (`pathWords` drops one `result`, the function's own is the second). Correct, wordy.
 - Asks for Richard: a moved function step is SAID to be given what the piece is sent, not refused; the bar names steps
   by their card numbers.
+
+## s19 (2026-11-04): Build 4 (the NodeGX editor draws `run-workflow`) built, driven in the dev editor
+
+Measured in s18, confirmed here: the editor knew neither served control (`workflow`, `key-values`), so *Workflow* was a
+text box holding the piece's id and *Send* the JSON editor. Built (NodeGX, this commit):
+
+- **The card says "Run <piece>"** by the piece's NAME (`workflowPieces.runTitle`, Studio's `stepTitle`). The name lives
+  in another workflow, so no node type can say it (`usePortAsLabel` shows the id, and the library is JSON-copied, so
+  no function survives): `NodeGraphNode.derivedTitle`, never persisted, set by the document in `refreshNodeChrome`,
+  its own `derivedTitleChanged` event (the canvas relayouts on it; `labelChanged` would mark the workflow unsaved).
+  `givenName` keeps it out of the file. An author's own label still wins.
+- **The Workflow row** (`WorkflowPieceRow`, port type `workflow-piece`): the backend's workflows by name, *Reusable
+  pieces* first, then *Workflows something starts*; the workflow being edited in neither; one that runs it shown as
+  "azdazd (it runs Plant round)", disabled. An id not on the backend stays shown and is said. *Open the piece ↗*.
+- **Send as named values** (`workflow-key-values`, the param-mapping rows writing ONE param's object), with the names
+  the piece reads (`body.<name>`, `bodyNames`) one press away (*+ plant*). Call an API's `query` and `headers` get the
+  same rows (type `object`); its `body` (type `any`) keeps the value control. A `send` that is not named values (a
+  `$path` to an object, a formula) is drawn as one value, never rewritten.
+- **Opening the piece**: the row's button, a double-click on the card, the card's menu (*Open "Find thirsty
+  plants"*). An unsaved workflow is saved first (a refused save says why and stays); the toast offers *Back to
+  "Plant round"*. The document reads the backend's workflows and triggers on open and after a save (`refreshPieces`).
+- Rules ported from Studio's `automations.mjs` into `models/workflow/workflowPieces.ts` (pure): `pieceOf`, `pieceIds`,
+  `wouldRing`, `bodyNames`, `runnersOf`, `pieceChoices`, `isNamedValues`, `namedValuesWords`. Change both or neither.
+
+**Driven** in the dev editor on a Greenhouse copy (seeded *Find thirsty plants* reading `body.plant`, *Plant round*
+running it, `azdazd` running *Plant round*), backend from Backend Services, removed by id after (census 21 = 21):
+the card read **Run Find thirsty plants** on open and the panel header "It starts at Run Find thirsty plants"; the row
+offered the pieces by name with `azdazd (it runs Plant round)` disabled; *+ plant*, "Fern", Save: "Saved to the backend
+and to nodegx.automations.json", the file's step `{"workflow":"find-thirsty","send":{"plant":"Fern"}}` with **no
+`name`**; *Run & pin*: the piece ran as its own run (`parentExecutionId` set) given `body.plant = "Fern"` and answered
+`{checked: 0, changed: 0}`, which Plant round returned. *Open the piece ↗* and a double-click both opened it; *Back*
+returned. Shots `look/bwf013-s19-1..4`.
+
+🔴 **P132-STALESTEPPANEL** (found by the drive, filed, fixed): opening another workflow, from the list too, left the last
+workflow's step on the Properties panel, editable, over a disposed graph. `switchToComponent` clears the selection only
+when given a node; `WorkflowEditorService.adopt`/`close` now clear it. Driven: the panel said "No node selected".
+🔴 My first words for an empty `send` said "Find thirsty plants reads nothing it is given yet" beside *+ plant*: the
+empty hint now names what the piece reads.
+
+Gates: editor jest 24 suites, 307 tests green (workflow, local-backend, bmg-012, fb-018, fb-022, cmg-008/009; the new
+`p132-bwf013-pieces` 18 and `p132-stalesteppanel` 3; a mutant removing the clear in `adopt` goes red); `tsc -p
+packages/noodl-editor` 0. FB-018's connected-row policy names both new rows `deferred` (a workflow step's settings take
+no wire). Not run: the Electron `test:ci` (`tests/workflow/*` read neither changed control).
+
+**Not done (next):** AC3's agent round (`list_backend_workflows` should say who runs a piece first). Making a piece from
+selected steps in the EDITOR is not in the task. The seeded `ui` positions overlapped cards (the drive's seed, not
+the product).

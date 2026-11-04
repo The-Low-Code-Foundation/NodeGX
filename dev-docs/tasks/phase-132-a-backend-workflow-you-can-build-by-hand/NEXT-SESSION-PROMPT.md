@@ -1,5 +1,33 @@
 # P132 — next session
 
+**s19 (2026-11-04): BWF-013 Build 4 built in the NodeGX editor; driven in the dev editor on a Greenhouse copy.**
+- A Run a workflow card says **Run <piece>** by name (`NodeGraphNode.derivedTitle`, never saved); its *Workflow* row
+  picks the piece by name (pieces first, a ring shown and disabled, *Open the piece ↗*); *Send* is named values with
+  the names the piece reads one press away. Double-click and the card's menu open the piece too; the toast offers
+  *Back*. Call an API's query and headers got the same named-values rows. Pure rules: `models/workflow/workflowPieces.ts`
+  (ported from Studio's `automations.mjs`: change both or neither).
+  [The record](BWF-013-A-REUSABLE-PIECE-IS-A-WORKFLOW-OTHERS-RUN.md#s19-2026-11-04-build-4-the-nodegx-editor-draws-run-workflow-built-driven-in-the-dev-editor).
+- **P132-STALESTEPPANEL** filed and fixed: opening another workflow left the old step on the Properties panel, editing
+  a disposed graph (from the Workflows list too, not only from a piece).
+- Gates: editor jest 24 suites / 307 green, `tsc` 0. Electron `test:ci` not run.
+
+**Next, in this order:**
+1. **AC3's agent round**: first make `list_backend_workflows` (noodl-mcp) say who runs each piece and what it reads
+   (`runnersOf`, `bodyNames`), or the agent can only grep. Then an agent asked to reuse steps across two workflows
+   writes `run-workflow` (copy [agent-round-bwf012.mjs](agent-round-bwf012.mjs)). A ring refused with both names is
+   already the engine's (s16).
+2. Then BWF-008's AC2 crossing and the s11 list below, then BWF-009, the test.
+
+- 🔴 **The dev stack died once mid-session with nothing in its log** (between 17:01 and 18:00, not my `dev:stop`): if
+  CDP stops answering, check `ps` before reading it as a crash of yours, and relaunch; the backend restarts on open.
+  My closing `dev:stop` reported 27 processes: a peer's day-old Electron (76832) was gone afterwards, cause unproven.
+- 🔴 **A canvas press after *Back* misses**: the canvas re-lays out when a workflow reopens. Shoot and find the card
+  again before pressing it (s19's first double-click hit empty canvas).
+- Drive seed for pieces: [editor-seed-bwf013.py](editor-seed-bwf013.py) (two pieces, one ring through `azdazd`).
+- Asks for Richard: none new.
+
+---
+
 **s18 (2026-11-04): BWF-013 Build 3 built in Studio (*Make a reusable piece*); AC2 green in the Electron app by presses.**
 - nodegx-studio `2d11ca5`: shift-press steps on a workflow's canvas (the step picked first is chosen too), a bar
   "Steps 4 and 5 chosen" with *Make a reusable piece* or, when they cannot be one, why in words. The steps move into a

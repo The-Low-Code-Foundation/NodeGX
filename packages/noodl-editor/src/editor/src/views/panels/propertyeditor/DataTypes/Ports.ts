@@ -88,7 +88,9 @@ import {
   WorkflowCasesType,
   WorkflowConditionType,
   WorkflowFunctionRefType,
+  WorkflowKeyValuesType,
   WorkflowParamsType,
+  WorkflowPieceType,
   WorkflowTransformType,
   WorkflowTriggerInfoType,
   WorkflowValidateType,
@@ -1371,7 +1373,9 @@ export class Ports extends View {
     workflowValidate: WorkflowValidateType,
     workflowBackoff: WorkflowBackoffType,
     workflowTriggerInfo: WorkflowTriggerInfoType,
-    workflowFunctionRef: WorkflowFunctionRefType
+    workflowFunctionRef: WorkflowFunctionRefType,
+    workflowPiece: WorkflowPieceType,
+    workflowKeyValues: WorkflowKeyValuesType
   };
 
   viewClassForPort(p) {
