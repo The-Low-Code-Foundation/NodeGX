@@ -33,8 +33,8 @@
 
 import type { NodeIR } from '../../ir/types';
 import type { CatalogIndex } from '../../catalog';
-import { INPUT_PULSE_TS_TYPE, type QueryPlan, type BindingSource, type ComponentPlan, type HandlerAction, type JsFunctionPlan, type ProjectPlan, type ValueExpr } from '../../analyze/plan';
-import { computeNodeStyle, computeRoleCss, CONTENT_ATTR_ORDER, CONTENT_PARAMS, iconSourceOf, WIRED_STYLE_SINKS, type Decl, type StyleRole } from '../style';
+import { INPUT_PULSE_TS_TYPE, STREAM_NODES, type QueryPlan, type BindingSource, type ComponentPlan, type HandlerAction, type JsFunctionPlan, type ProjectPlan, type ValueExpr } from '../../analyze/plan';
+import { computeNodeStyle, computeRoleCss, CONTENT_ATTR_ORDER, CONTENT_PARAMS, DRAG_OWN_PORTS, iconSourceOf, WIRED_STYLE_SINKS, type Decl, type StyleRole } from '../style';
 import { assignClassNames, camelCase, isReservedWord, lowerFirst, type ClassCandidate } from '../naming';
 // 🔴 A decision the React printer holds, not the plan (P134-HTX001-PRINTERDECIDES): which element a node's `as` names.
 import { authoredTag, PRESET_MARKERS } from '../component';
@@ -158,12 +158,14 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   const nodeById = new Map(nodes.map((n) => [n.id, n]));
   const losses: HtmlLoss[] = [];
   const lose = (nodeId: string, what: string) => losses.push({ component: plan.path, nodeId, label: nodeById.get(nodeId)?.authoredLabel, what });
-  const imports = { core: new Set<string>(), dom: new Set<string>(['life']), router: new Set<string>(), run: new Set<string>(), states: new Set<string>(), timer: new Set<string>(), util: new Set<string>(), animate: new Set<string>() };
+  const imports = { core: new Set<string>(), dom: new Set<string>(['life']), router: new Set<string>(), run: new Set<string>(), states: new Set<string>(), timer: new Set<string>(), util: new Set<string>(), animate: new Set<string>(), drag: new Set<string>(), repeat: new Set<string>() };
   const childImports = new Map<string, Set<string>>();
   const machineByNode = new Map(plan.statesMachines.map((m) => [m.nodeId, m]));
   const stateNames = new Set(plan.stateVars.map((s) => s.name));
   const valueProps = plan.props.map((p) => p.name);
   const callbackProps = new Set([...plan.outputProps.map((o) => o.prop), ...plan.liftedOutputProps.map((o) => o.prop)]);
+  // POPUPS-TARGET. A component with a Close Popup takes its host's close, as React's declares `onClose`.
+  if (plan.closesPopup) callbackProps.add('onClose');
   /**
    * HTX-006. What the component sends out, as a page that is not NodeGX reads it: `outputs.<port>` (the port's name as
    * written), a `value` for a value output (its last value, `subscribe` for each one after) and a `signal` for a signal
@@ -329,6 +331,14 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
 
   const taken = new Set(['session', 'followSession', 'raiseAppError', 'filterValue', 'variables', 'input', 'state', 'given', 'element', 'inputs', 'before', 'l', 'into', 'at', 'item', 'index', 'row', 'batch', 'life', 'el', 'show', 'truthy', 'keep', 'bindText', 'bindAttr', 'bindStyle', 'media', 'when', 'place', 'list', 'navigate', 'openInNewTab', 'pageParam', 'value', 'derived', 'functionNode', 'runFunction', 'tickedArrival', 'pulse', mount]);
   for (const a of plan.animations) taken.add(a.local);
+  // EXP-011 §63. A Drag's handle is named as React names its `useDrag` handle; `dragNode` is the lib's.
+  taken.add('dragNode');
+  for (const d of plan.drags) taken.add(d.local);
+  // GAM-013, the same for a Repeat's `useRepeat` handle (the one streaming node this printer prints, session 13).
+  taken.add('repeatNode');
+  const repeats = plan.streams.filter((st) => STREAM_NODES[st.type]?.lib === 'repeat');
+  const repeatLocals = new Set(repeats.map((st) => st.local));
+  for (const st of repeats) taken.add(st.local);
   // A store's module is imported under its own name (React's `import { desk } from '../stores/desk'`): no local takes it.
   for (const st of ctx.project.stores) if (st.deferred === undefined) taken.add(st.exportName);
   /** A fresh local name, `base` or `base2`, `base3`… */
@@ -582,6 +592,15 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       // EXP-011 §49. An Animate To Value's Current Value: the number it last published.
       case 'animate-out':
         return animated.has(e.local) ? `${e.local}.get()` : undefined;
+      // EXP-011 §63. A Drag's Drag X/Y or Delta X/Y: a live getter off its handle, as React reads it, and a value read
+      // in the drawing is drawn again whenever the Drag moves.
+      case 'drag-out': {
+        const h = dragHandle(e.nodeId);
+        return h === undefined ? undefined : `${h.local}.${e.field}`;
+      }
+      // GAM-013. A Repeat's Count: a live getter on its handle, as React reads it.
+      case 'stream-out':
+        return repeatLocals.has(e.local) ? `${e.local}.${e.field}` : undefined;
       // EXP-011 §43, as React reads it: a Record's column, its row anywhere, the Fetch's own answer inside the Done chain.
       case 'record-out': {
         const read = plan.recordReads.find((r) => r.nodeId === e.nodeId);
@@ -840,7 +859,10 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
        */
       case 'query-fetch': {
         const q = plan.queries.find((x) => x.nodeId === a.nodeId);
-        if (q === undefined) throw new Unprinted('a Fetch of a query the plan does not keep');
+        // P18-S116-QUERYFETCH, React's rule (copied, P134-HTX001-PRINTERDECIDES; session 13): a Fetch into a query the export
+        // does not keep (nothing it draws reads the rows) asks for nothing anyone sees, so it is no step; the rest of the
+        // chain prints. The query's own row in the report says why it is not kept.
+        if (q === undefined) return one(`// the Fetch of "${nodeById.get(a.nodeId)?.authoredLabel ?? a.nodeId}": nothing here reads its rows, so it asks for nothing (as in the React export).`);
         return one(`void ${queryCall(q, a.values, scope)}.then(${member('state', q.stateName)}.set);`);
       }
       /**
@@ -1168,6 +1190,24 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         const ref = fieldRefs.get(a.inputId)!;
         return one(`if (${ref}.current) ${ref}.current.${a.focus ? 'focus' : 'blur'}();`);
       }
+      case 'stream-action':
+        // GAM-013. A Repeat's Start or Stop: one call on the handle, as React prints it. Other streaming nodes are not printed.
+        if (!repeatLocals.has(a.local)) throw new Unprinted('a stream-action step, which the HTML target does not print yet');
+        return one(`${a.local}.${a.verb}();`);
+      case 'popup-close': {
+        // POPUPS-TARGET, React's `onClose?.(action)` (copied, P134-HTX001-PRINTERDECIDES; session 13): the close the host
+        // that showed this component as a popup hands it; its chain after, only when there is one. Nothing when it is
+        // drawn as a plain part, as in the React export.
+        const arg = a.action === undefined ? '' : js(a.action);
+        if (a.then.length === 0) return one(`if (given.onClose) given.onClose(${arg});`);
+        return { lines: [`${pad}if (given.onClose) {`, `${pad}  given.onClose(${arg});`, ...block(a.then, pad + '  ', scope), `${pad}}`], scope };
+      }
+      case 'drag-snap': {
+        // EXP-011 §63. One call on the handle; Done is the node's own listener, handed to it once.
+        const h = dragHandle(a.nodeId);
+        if (h === undefined) throw new Unprinted('a snap on a Drag the plan does not keep');
+        return one(`${h.local}.snapTo(${js(a.axis)});`);
+      }
       case 'states-go': {
         const m = machineByNode.get(a.nodeId);
         if (!m) throw new Unprinted('a States move on a States node the plan does not keep');
@@ -1252,7 +1292,10 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         case 'state-get':
         case 'store-get':
         case 'store-key-get':
-        case 'session-get': {
+        case 'session-get':
+        // EXP-011 §63 and §58, as React's `effectDeps`: the getter's value, never the handle.
+        case 'drag-out':
+        case 'stream-out': {
           const v = expr(e);
           if (v === undefined) return false;
           if (!deps.includes(v)) deps.push(v);
@@ -1290,6 +1333,92 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     const body = chain(id, port, list, pad + '  ');
     if (body === undefined) return undefined;
     return ['function () {', ...before.map((b) => `${pad}  ${b}`), ...body, `${pad}}`].join('\n');
+  };
+
+  /*
+   * EXP-011 §63, a Drag: React's `useDrag` (`dragLib.ts`, copied, P134-HTX001-PRINTERDECIDES) as `dragNode` over the same
+   * machine (`lib/drag.js`). React calls the hook above its effects and hands it the wrapper by a ref; here the wrapper
+   * is made with the handle, before anything reads its Drag X, and the drawing puts it where the Drag sits. Its options
+   * are read again whenever what they read changes (React reads them on every render); its three listeners and Done
+   * are its chains. Made the first time anything asks for it: the drawing, a read, a snap.
+   */
+  const dragLines: string[] = [];
+  const dragHandles = new Map<string, { el: string; local: string } | null>();
+  const DRAG_LISTENER_PORTS = { onStart: 'Drag Started', onMove: 'Drag Moved', onEnd: 'Drag Ended', done: 'Done' } as const;
+  const dragHandle = (nodeId: string): { el: string; local: string } | undefined => {
+    const known = dragHandles.get(nodeId);
+    if (known !== undefined) return known ?? undefined;
+    const d = plan.drags.find((x) => x.nodeId === nodeId);
+    if (d === undefined) {
+      dragHandles.set(nodeId, null);
+      return undefined;
+    }
+    const handle = { el: fresh(`${d.local}Element`), local: d.local };
+    // Set before its options and chains print: a Drag Moved chain that reads its own Drag X asks for it again.
+    dragHandles.set(nodeId, handle);
+    const options: string[] = [];
+    for (const o of d.options) {
+      const v = expr(o.expr);
+      if (v === undefined) {
+        lose(nodeId, `its ${o.key} reads ${describe(o.expr)}, which the HTML target does not print yet; the node's own default stands`);
+        continue;
+      }
+      options.push(`${key(o.key)}: ${v}`);
+    }
+    const listeners: string[] = [];
+    for (const [port, name] of Object.entries(DRAG_LISTENER_PORTS) as Array<[keyof typeof DRAG_LISTENER_PORTS, string]>) {
+      const list = d.listeners[port];
+      if (list === undefined) continue;
+      const cb = callback(nodeId, name, list, '    ');
+      if (cb !== undefined) listeners.push(`    ${port}: ${cb}`);
+    }
+    // The plan's own drops, which the React export leaves out the same way (its in-code markers).
+    for (const drop of d.drops) lose(nodeId, `${drop.subject} is left out by the plan, as in the React export: ${drop.reason}`);
+    imports.drag.add('dragNode');
+    const source = `{ label: ${js(d.label)}, nodeId: ${js(d.nodeId)}, componentName: ${js(plan.legacyPath)} }`;
+    dragLines.push(
+      `  // ${d.comment}`,
+      `  const ${handle.el} = document.createElement('div');`,
+      `  const ${d.local} = dragNode(l, ${handle.el}, ${source}, function () {`,
+      `    return { ${options.join(', ')} };`,
+      listeners.length > 0 ? `  }, {\n${listeners.join(',\n')}\n  });` : '  });'
+    );
+    return handle;
+  };
+
+  /*
+   * GAM-013, a Repeat: React's `useRepeat` (`repeatLib.ts`, copied, P134-HTX001-PRINTERDECIDES; session 13) as
+   * `repeatNode` over the same beat (`lib/repeat.js`), after the States machines as React's streaming hooks come after
+   * its `useStates`. The Interval is read again whenever what it reads changes; Tick and the outcomes are its chains.
+   */
+  const repeatLines: string[] = [];
+  const printRepeats = (): void => {
+    for (const st of repeats) {
+      const options: string[] = [];
+      for (const c of st.config) {
+        const v = expr(c.expr);
+        if (v === undefined) {
+          lose(st.nodeId, `its ${c.port} reads ${describe(c.expr)}, which the HTML target does not print yet; it keeps its last value`);
+          continue;
+        }
+        options.push(`${key(c.port)}: ${v}`);
+      }
+      const listeners: string[] = [];
+      for (const port of STREAM_NODES[st.type].signals) {
+        const list = st.listeners[port];
+        if (list === undefined) continue;
+        const cb = callback(st.nodeId, port, list, '    ');
+        if (cb !== undefined) listeners.push(`    ${key(port)}: ${cb}`);
+      }
+      imports.repeat.add('repeatNode');
+      const source = `{ label: ${js(st.label)}, nodeId: ${js(st.nodeId)}, componentName: ${js(plan.legacyPath)} }`;
+      repeatLines.push(
+        `  // ${st.comment}`,
+        `  const ${st.local} = repeatNode(l, ${source}, function () {`,
+        `    return { ${options.join(', ')} };`,
+        listeners.length > 0 ? `  }, {\n${listeners.join(',\n')}\n  });` : '  });'
+      );
+    }
   };
 
   /** The node signals a DOM event carries (the React printer's `EVENT_ATTRS`, as DOM event names). */
@@ -1517,7 +1646,10 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     if (!rep || !target || !module || target.hook || items === undefined || rep.mapping === null) {
       const why = !rep?.templatePath
         ? 'it repeats no component'
-        : rep.mapping === null
+        : // P134 s13: asked before the items, which it was not (two rows read "its items read a prop" for a row the plan skips).
+          !target?.file || !module
+          ? `its row ${rep.templatePath} exports no component (${target?.skipReason ?? 'no plan'}), as in the React export`
+          : rep.mapping === null
           ? 'its mapping script is more than a list of names'
           : rep.itemsQueryId
             ? 'its items are a backend query the plan does not keep'
@@ -1954,6 +2086,19 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       }
       importMount(module.file, module.mount);
       out.push(`${pad}const ${local(id)} = ${placeCall(module.mount, parent, placementArgs(node, target, pad), before, pad)};`);
+    } else if (role === 'drag') {
+      // EXP-011 §63. The wrapper made with its handle (above), put where the Drag sits, its child drawn inside it, as
+      // React draws `<div ref={card.ref} style={card.style} {...card.handlers}>`.
+      const h = dragHandle(id);
+      if (h === undefined) {
+        lose(id, 'a Drag the plan does not keep is not drawn');
+        return [`${pad}// ${node.authoredLabel ?? id}: a Drag, not drawn by this export (see EXPORT-PREFLIGHT.md).`];
+      }
+      outerOf.set(id, h.el);
+      // Emptied first: under a Mounted that turns off and on again, the child is drawn afresh, as React mounts it afresh.
+      out.push(`${pad}${h.el}.textContent = '';`, `${pad}${parent}.insertBefore(${h.el}, ${before ?? 'null'});`);
+      for (const child of plan.childrenOf[id] ?? []) out.push(...draw(child, h.el, undefined, pad));
+      extra([...DRAG_OWN_PORTS]);
     } else if (role === 'slot') {
       // EXP-011 §51. Where the children placed inside this component go: the placing component draws them here.
       out.push(`${pad}if (given.children) given.children(${parent}, ${before ?? 'undefined'}); // the children placed inside it, drawn here`);
@@ -2367,7 +2512,8 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   ];
   for (const [field, what] of UNPRINTED) {
     const v = plan[field] as unknown;
-    const count = Array.isArray(v) ? v.length : v && typeof v === 'object' ? Object.keys(v).length : 0;
+    // Session 13: a Repeat is printed (above); the other streaming nodes are not yet.
+    const count = field === 'streams' ? plan.streams.length - repeats.length : Array.isArray(v) ? v.length : v && typeof v === 'object' ? Object.keys(v).length : 0;
     if (count > 0) lose(plan.rootId ?? '', `${count} × ${what}, not printed by the HTML target yet`);
   }
   /*
@@ -2409,6 +2555,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       else follows.push(`  // ${nodeById.get(m.nodeId)?.authoredLabel ?? m.local}: in the state its wired value names.`, '  l.watch(function () {', `    return [${v}];`, '  }, function (named) {', `    ${m.local}.follow(named);`, '  });');
     }
   }
+  printRepeats();
 
   // The Expressions it reads, as functions of their inputs (the React printer's wrapper, its types taken out).
   for (const def of usedFunctions.values()) if (def.kind === 'expression') moduleHead.push(...expressionJs(def), '');
@@ -2475,6 +2622,8 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   if (imports.timer.size) lines.push(`import { ${[...imports.timer].sort().join(', ')} } from '${relative(file.dir, 'lib/timer.js')}';`);
   if (imports.animate.size) lines.push(`import { ${[...imports.animate].sort().join(', ')} } from '${relative(file.dir, 'lib/animate.js')}';`);
   if (imports.util.size) lines.push(`import { ${[...imports.util].sort().join(', ')} } from '${relative(file.dir, 'lib/util.js')}';`);
+  if (imports.repeat.size) lines.push(`import { ${[...imports.repeat].sort().join(', ')} } from '${relative(file.dir, 'lib/repeat.js')}';`);
+  if (imports.drag.size) lines.push(`import { ${[...imports.drag].sort().join(', ')} } from '${relative(file.dir, 'lib/drag.js')}';`);
   for (const [mod, names] of [...childImports].sort(([a], [b]) => a.localeCompare(b))) lines.push(`import { ${[...names].sort().join(', ')} } from '${relative(file.dir, mod)}';`);
   if (variableImports.size) lines.push(`import * as variables from '${relative(file.dir, 'variables.js')}';`);
   for (const st of [...storeImports].sort()) lines.push(`import { ${st} } from '${relative(file.dir, `stores/${st}.js`)}';`);
@@ -2506,7 +2655,9 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   lines.push(...keyLines);
   lines.push(...fieldLines);
   lines.push(...nodeLines);
+  lines.push(...dragLines);
   lines.push(...machines);
+  lines.push(...repeatLines);
   lines.push('');
   lines.push(...hookLines);
   lines.push(...logic);

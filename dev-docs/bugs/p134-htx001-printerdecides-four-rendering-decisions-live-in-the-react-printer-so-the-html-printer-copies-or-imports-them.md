@@ -83,6 +83,16 @@ the util call's argument order (a String Mapper's table second); Animate To Valu
 effects, as `l.watch` and `l.add`); and a Function's `Scripts` bound inside its try. Forty-two copied in all. The script
 loader is React's own text with its types stripped, not a copy.
 
+**Session 13 (2026-11-04) copied five more**, in `printComponent.ts`: a Drag's hook and wrapper (`useDrag` called above the
+render with the options read again, the listeners inline, and `<div ref style handlers>` with no class around the first
+child; here the handle and its element are made above the drawing and the drawing puts the element where the Drag sits);
+a Repeat's hook (`useRepeat` after the States machines, the Interval read again, Tick and the outcomes inline); a Fetch
+into a query the export does not keep is no step (P18-S116-QUERYFETCH, `expandActions`); a Close Popup is the host's close
+(`onClose?.(action)` and its chain after it only when there is one, POPUPS-TARGET), with `onClose` among the callbacks
+when `plan.closesPopup`; and the Drag X / Count reads as the getter in a Condition's dependencies (`effectDeps`).
+Forty-seven copied in all. The two machines (`lib/drag.js`, `lib/repeat.js`) are React's own text with the types out and
+the hook cut off, not copies.
+
 **What a fix needs:** the plan carries each answer as data (`tagOf[nodeId]`, a `mountedKeeps` flag beside the Mounted
 binding, the merged page declarations, the removed ids), and the three printers read it. AC4's ledger (HTX-005) is
 where a drift would show.

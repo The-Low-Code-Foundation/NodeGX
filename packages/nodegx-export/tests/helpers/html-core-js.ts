@@ -325,6 +325,306 @@ export function htmlUtilJsModule(): string {
   ].join('\n');
 }
 
+/**
+ * P134 session 13. The React export's Drag (`dragLib.ts`, EXP-011 §63: drag.ts, Drag.tsx and react-draggable 4.5.0
+ * transcribed) as the HTML export's `lib/drag.js`: the machine, its types out, the `useDrag` hook cut off. In its place
+ * `dragNode(l, el, source, options, listeners)` does what the hook's six effects and its render do, on the wrapper
+ * element the page draws: the same state object, the same handlers, the same order. The machine is shared, not copied.
+ */
+export function htmlDragJs(): string {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { dragLibSource } = require('../../src/emit/dragLib') as { dragLibSource: () => string };
+  const full = dragLibSource();
+  const reactImport = /^import \{ useEffect, useRef, useState,[^\n]*\} from 'react';\n/m;
+  if (!reactImport.test(full)) throw new Error("dragLib no longer imports React as it did: the HTML export's copy must be cut again");
+  const src = before(full, 'export function useDrag(')
+    .replace(reactImport, "import { untracked, value } from './core.js';\n")
+    .replace("from './animate';", "from './animate.js';")
+    .replace("from './errors';", "from './errors.js';");
+  const plain = [
+    '',
+    '// ---- in a plain page -------------------------------------------------------------------------------',
+    '',
+    '/**',
+    " * A Drag node in a plain page: the machine above, on `el`, the wrapper element the page draws around the node's first",
+    " * child. `options()` reads the node's inputs (a value it reads makes them read again, as React draws again);",
+    ' * `listeners` are its signal outputs. Drag X/Y and Delta X/Y are getters over the live values, read through a value',
+    ' * that changes whenever the machine moves, so what the page draws from them is drawn again (React draws again on',
+    " * `setTick`). Everything stops with the part's life `l`.",
+    ' */',
+    'export function dragNode(l, el, source, options, listeners) {',
+    '  const tick = value(0);',
+    '  const ref = { current: el };',
+    '  const first = untracked(options);',
+    '  const startX = startOf(first.startX);',
+    '  const startY = startOf(first.startY);',
+    '  const s = {',
+    '    source,',
+    '    ref,',
+    '    latest: { options: first, listeners: listeners || {} },',
+    '    committed: { x: startX, y: startY },',
+    '    live: { x: startX, y: startY },',
+    '    slack: { x: 0, y: 0 },',
+    '    draggableDragging: false,',
+    '    values: { x: startX, y: startY, deltaX: 0, deltaY: 0 },',
+    '    coreDragging: false,',
+    '    lastX: NaN,',
+    '    lastY: NaN,',
+    '    touchIdentifier: null,',
+    '    dragEvents: MOUSE,',
+    '    snapTarget: { x: 0, y: 0 },',
+    '    snapDuration: { x: 300, y: 300 },',
+    '    snapRuns: { x: null, y: null },',
+    '    rerender: function () {',
+    '      tick.set(tick.peek() + 1);',
+    '    },',
+    '    onDocMove: function (event) {',
+    '      handleDrag(s, event);',
+    '    },',
+    '    onDocStop: function (event) {',
+    '      handleDragStop(s, event);',
+    '    },',
+    '    onTouchStart: function (event) {',
+    '      s.dragEvents = TOUCH;',
+    '      handleDragStart(s, event);',
+    '    }',
+    '  };',
+    '',
+    "  // The render: the inputs read again, and the wrapper moved. Controlled, so the live position shows only while",
+    '  // dragging, and only on the axes that drag; `fit-content` keeps the wrapper the child\'s box.',
+    "  el.style.width = 'fit-content';",
+    "  el.style.height = 'fit-content';",
+    '  l.run(function () {',
+    '    tick.get();',
+    '    const o = options();',
+    '    s.latest = { options: o, listeners: listeners || {} };',
+    '    const transformX = canDragX(o) && s.draggableDragging ? s.live.x : s.committed.x;',
+    '    const transformY = canDragY(o) && s.draggableDragging ? s.live.y : s.committed.y;',
+    "    el.style.transform = 'translate(' + transformX + 'px,' + transformY + 'px)';",
+    '  });',
+    '',
+    '  // The three handlers react-draggable puts on the dragged element, and the native touchstart (passive: false, so the',
+    "  // drag can stop the scroll). When the part goes: every listener off, the selection hack undone, both snaps stopped.",
+    "  el.addEventListener('mousedown', function (event) {",
+    '    s.dragEvents = MOUSE;',
+    '    handleDragStart(s, event);',
+    '  });',
+    "  el.addEventListener('mouseup', function (event) {",
+    '    s.dragEvents = MOUSE;',
+    '    handleDragStop(s, event);',
+    '  });',
+    "  el.addEventListener('touchend', function (event) {",
+    '    s.dragEvents = TOUCH;',
+    '    handleDragStop(s, event);',
+    '  });',
+    "  el.addEventListener('touchstart', s.onTouchStart, { passive: false });",
+    '  l.add(function () {',
+    '    const ownerDocument = el.ownerDocument;',
+    "    ownerDocument.removeEventListener('mousemove', s.onDocMove);",
+    "    ownerDocument.removeEventListener('touchmove', s.onDocMove);",
+    "    ownerDocument.removeEventListener('mouseup', s.onDocStop);",
+    "    ownerDocument.removeEventListener('touchend', s.onDocStop);",
+    "    el.removeEventListener('touchstart', s.onTouchStart);",
+    '    scheduleRemoveUserSelectStyles(ownerDocument);',
+    '    stopSnapTimers(s);',
+    '  });',
+    '',
+    '  // A changed Start Drag X/Y is adopted raw, reported, and its delta is the difference (componentDidUpdate).',
+    '  let prevStart = null;',
+    '  l.watch(',
+    '    function () {',
+    '      const o = options();',
+    '      return [o.startX, o.startY];',
+    '    },',
+    '    function (x, y) {',
+    '      const prev = prevStart;',
+    '      prevStart = { x: x, y: y };',
+    '      if (prev === null) return;',
+    '      let changed = false;',
+    '      if (prev.x !== x) {',
+    '        s.committed.x = x;',
+    '        s.live.x = x;',
+    '        s.values.x = x;',
+    '        s.values.deltaX = x - prev.x;',
+    '        changed = true;',
+    '      }',
+    '      if (prev.y !== y) {',
+    '        s.committed.y = y;',
+    '        s.live.y = y;',
+    '        s.values.y = y;',
+    '        s.values.deltaY = y - prev.y;',
+    '        changed = true;',
+    '      }',
+    '      if (changed) s.rerender();',
+    '    }',
+    '  );',
+    '',
+    '  // The four snap setters, run on arrival: the Value through readSnapCoordinate, the Duration stored raw.',
+    '  const arrive = function (axis, v) {',
+    '    const coordinate = readSnapCoordinate(v);',
+    '    if (coordinate === undefined) return;',
+    '    if (Number.isNaN(coordinate)) {',
+    '      raiseAppError({',
+    "        code: 'drag/snap-position-not-a-number',",
+    "        message: 'Snap To Position ' + axis.toUpperCase() + ' \\u2014 Value cannot be read as a number (got ' + JSON.stringify(v) + '), so the snap position is unchanged.',",
+    '        nodeId: source.nodeId,',
+    '        componentName: source.componentName,',
+    "        nodeType: 'Drag'",
+    '      });',
+    '      return;',
+    '    }',
+    '    s.snapTarget[axis] = coordinate;',
+    '  };',
+    '  l.watch(',
+    '    function () {',
+    '      return [options().snapX];',
+    '    },',
+    '    function (v) {',
+    "      arrive('x', v);",
+    '    }',
+    '  );',
+    '  l.watch(',
+    '    function () {',
+    '      return [options().snapY];',
+    '    },',
+    '    function (v) {',
+    "      arrive('y', v);",
+    '    }',
+    '  );',
+    '  l.watch(',
+    '    function () {',
+    '      const o = options();',
+    "      return ['snapXDuration' in o, o.snapXDuration];",
+    '    },',
+    '    function (has, v) {',
+    '      if (has) s.snapDuration.x = v;',
+    '    }',
+    '  );',
+    '  l.watch(',
+    '    function () {',
+    '      const o = options();',
+    "      return ['snapYDuration' in o, o.snapYDuration];",
+    '    },',
+    '    function (has, v) {',
+    '      if (has) s.snapDuration.y = v;',
+    '    }',
+    '  );',
+    '',
+    '  return {',
+    '    get x() {',
+    '      tick.get();',
+    '      return s.values.x;',
+    '    },',
+    '    get y() {',
+    '      tick.get();',
+    '      return s.values.y;',
+    '    },',
+    '    get deltaX() {',
+    '      tick.get();',
+    '      return s.values.deltaX;',
+    '    },',
+    '    get deltaY() {',
+    '      tick.get();',
+    '      return s.values.deltaY;',
+    '    },',
+    '    snapTo: function (axis) {',
+    '      snapTo(s, axis);',
+    '    }',
+    '  };',
+    '}',
+    ''
+  ].join('\n');
+  return plainJs("// Generated by the export, the same in every app: the Drag node, as the running app drags.\n" + src + plain);
+}
+
+export function htmlDragJsModule(): string {
+  return [
+    '/**',
+    " * P134 session 13. The React export's `drag.ts` as the HTML export's `lib/drag.js`: types out, the hook cut off, and",
+    ' * `dragNode` doing what the hook did, on the element the page draws.',
+    ' *',
+    ' * 🔴 Generated, never edited: `tests/helpers/html-core-js.ts` makes it from `dragLibSource()`.',
+    ' * `tests/html-a-drag.test.ts` makes it again and fails when the two differ.',
+    ' *',
+    ' * @module emit/html/dragJs',
+    ' */',
+    '',
+    `export const DRAG_JS = ${JSON.stringify(htmlDragJs())};`,
+    ''
+  ].join('\n');
+}
+
+/**
+ * P134 session 13. The React export's Repeat (`repeatLib.ts`, GAM-013: the viewer's `repeat.ts` over `reportOutcome`) as
+ * the HTML export's `lib/repeat.js`: the beat (`createRepeatBeat`, already free of React), its types out, the `useRepeat`
+ * hook cut off. In its place `repeatNode(l, source, options, listeners)` hosts one beat for the part's life, as the hook
+ * hosts one per mount: the Interval set whenever what it reads changes, Count read through a value that changes when the
+ * beat publishes, the beat disposed when the part goes.
+ */
+export function htmlRepeatJs(): string {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { repeatLibSource } = require('../../src/emit/repeatLib') as { repeatLibSource: () => string };
+  const full = repeatLibSource();
+  const reactImport = "import { useEffect, useReducer, useRef } from 'react';\n";
+  if (!full.includes(reactImport)) throw new Error("repeatLib no longer imports React as it did: the HTML export's copy must be cut again");
+  const src = before(full, 'export function useRepeat(').replace(reactImport, "import { value } from './core.js';\n").replace("from './errors';", "from './errors.js';");
+  const plain = [
+    '',
+    '// ---- in a plain page -------------------------------------------------------------------------------',
+    '',
+    '/**',
+    " * A Repeat node in a plain page: one beat for the part's life `l`. `options()` reads its Interval (set again whenever",
+    " * what it reads changes; undefined runs no setter); `listeners` are Tick and the outcomes. Count is read through a value",
+    ' * that changes whenever the beat publishes, so what the page draws from it is drawn again.',
+    ' */',
+    'export function repeatNode(l, source, options, listeners) {',
+    '  const published = value(0);',
+    '  const beat = createRepeatBeat(source, browserClock, function () {',
+    '    published.set(published.peek() + 1);',
+    '  });',
+    '  beat.setListeners(listeners || {});',
+    '  l.run(function () {',
+    '    const interval = options().interval;',
+    '    if (interval !== undefined) beat.setIntervalInput(interval);',
+    '  });',
+    '  l.add(function () {',
+    '    beat.dispose();',
+    '  });',
+    '  return {',
+    '    start: function () {',
+    '      beat.start();',
+    '    },',
+    '    stop: function () {',
+    '      beat.stop();',
+    '    },',
+    '    get count() {',
+    '      published.get();',
+    '      return beat.count;',
+    '    }',
+    '  };',
+    '}',
+    ''
+  ].join('\n');
+  return plainJs("// Generated by the export, the same in every app: the Repeat node's beat, as the running app beats.\n" + src + plain);
+}
+
+export function htmlRepeatJsModule(): string {
+  return [
+    '/**',
+    " * P134 session 13. The React export's `repeat.ts` as the HTML export's `lib/repeat.js`: types out, the hook cut off,",
+    ' * and `repeatNode` hosting the beat for the part.',
+    ' *',
+    ' * 🔴 Generated, never edited: `tests/helpers/html-core-js.ts` makes it from `repeatLibSource()`.',
+    ' * `tests/html-a-drag.test.ts` makes it again and fails when the two differ.',
+    ' *',
+    ' * @module emit/html/repeatJs',
+    ' */',
+    '',
+    `export const REPEAT_JS = ${JSON.stringify(htmlRepeatJs())};`,
+    ''
+  ].join('\n');
+}
+
 if (require.main === module) {
   fs.writeFileSync(path.join(__dirname, '..', '..', 'src', 'emit', 'html', 'coreJs.ts'), htmlCoreJsModule());
   fs.writeFileSync(path.join(__dirname, '..', '..', 'src', 'emit', 'html', 'functionRunJs.ts'), htmlFunctionRunJsModule());
@@ -333,4 +633,6 @@ if (require.main === module) {
   fs.writeFileSync(path.join(__dirname, '..', '..', 'src', 'emit', 'html', 'componentScopeJs.ts'), htmlComponentScopeJsModule());
   fs.writeFileSync(path.join(__dirname, '..', '..', 'src', 'emit', 'html', 'timerJs.ts'), htmlTimerJsModule());
   fs.writeFileSync(path.join(__dirname, '..', '..', 'src', 'emit', 'html', 'utilJs.ts'), htmlUtilJsModule());
+  fs.writeFileSync(path.join(__dirname, '..', '..', 'src', 'emit', 'html', 'dragJs.ts'), htmlDragJsModule());
+  fs.writeFileSync(path.join(__dirname, '..', '..', 'src', 'emit', 'html', 'repeatJs.ts'), htmlRepeatJsModule());
 }

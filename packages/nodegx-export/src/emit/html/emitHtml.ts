@@ -31,6 +31,8 @@ import { CORE_JS } from './coreJs';
 import { FUNCTION_RUN_JS } from './functionRunJs';
 import { COMPONENT_SCOPE_JS } from './componentScopeJs';
 import { TIMER_JS } from './timerJs';
+import { DRAG_JS } from './dragJs';
+import { REPEAT_JS } from './repeatJs';
 import { UTIL_JS } from './utilJs';
 import { projectScriptsFiles } from './projectScripts';
 import { PERSIST_STORE_JS } from './persistStoreJs';
@@ -164,6 +166,15 @@ export function emitHtmlApp(ir: ExportIR, catalog: Catalog): EmittedHtmlApp {
     files['lib/states.js'] = STATES_JS;
     files['lib/animate.js'] = ANIMATE_JS;
   }
+  // EXP-011 §63. A Drag: its machine, the snap tween's engine, and the error channel its one error rides.
+  const usesDrag = Object.values(files).some((text) => /from '(?:\.\.\/|\.\/)+lib\/drag\.js'/.test(text));
+  // GAM-013. A Repeat: its beat, and the same error channel (an unusable Interval raises before Failure).
+  const usesRepeat = Object.values(files).some((text) => /from '(?:\.\.\/|\.\/)+lib\/repeat\.js'/.test(text));
+  if (usesRepeat) files['lib/repeat.js'] = REPEAT_JS;
+  if (usesDrag) {
+    files['lib/drag.js'] = DRAG_JS;
+    files['lib/animate.js'] = ANIMATE_JS;
+  }
   // EXP-011 §49. An Animate To Value moves on the same engine a States move eases along.
   if (Object.values(files).some((text) => /from '(?:\.\.\/|\.\/)+lib\/animate\.js'/.test(text))) files['lib/animate.js'] = ANIMATE_JS;
   if (project.variables.length > 0) files['variables.js'] = variablesJs(project.variables);
@@ -173,6 +184,8 @@ export function emitHtmlApp(ir: ExportIR, catalog: Catalog): EmittedHtmlApp {
   // types taken out (`client.ts`), written only where a component calls into it.
   const usesClient = Object.values(files).some((text) => /from '(?:\.\.\/|\.\/)+(?:api\/|lib\/(?:session|errors|noodl)\.js')/.test(text));
   if (usesClient) Object.assign(files, clientFilesEsm(reactFiles));
+  // EXP-011 §63, GAM-013. A Drag or a Repeat alone needs only the error channel its errors ride, the React export's own `errors.ts`.
+  else if (usesDrag || usesRepeat) files['lib/errors.js'] = clientFilesEsm(reactFiles)['lib/errors.js'];
   files['app.js'] = appJs(pages, moduleByLegacy, start?.urlPath ?? '/');
   const fontLinks = moduleStylesheetLinks(ir).replace(/href="\//g, 'href="');
   files['index.html'] = [

@@ -1,37 +1,41 @@
 # Next session — Phase 134, the app in plain files
 
-**Written 2026-11-04 by session 12 (the printer's own gaps 148 → 54).** Read [README.md](README.md) §9 and §10 (sessions 1
-to 12) first. Sessions used: 12 (past ten by R6, and by Richard's asks of sessions 11 and 12: "reduce the gaps again and
-see how many problems it knocks out").
+**Written 2026-11-04 by session 13 (the printer's own gaps 54 → 38, all 38 kit nodes waiting on R8).** Read
+[README.md](README.md) §9 and §10 (sessions 1 to 13) first. Sessions used: 13 (past ten by R6, and by Richard's asks of
+sessions 11 to 13: "let's keep pushing and see how many gaps we can close").
 
 ## Before anything
 
 1. **Measure where it stands:** `cd packages/nodegx-export && nice -n 19 npx ts-node --transpile-only -O
    '{"module":"commonjs"}' ../../dev-docs/tasks/phase-134-the-app-in-plain-files/census/own.ts` (the printer's own gaps per
-   app, beside the shared and the plan's). After session 12: `census/own-after-s12.txt` (54; session 11's is `own-after-s11.txt`). `hive.ts` breaks down
-   HiveClip; `kinds.ts` every loss kind.
-2. **Rulings:** **R8 asked in session 12** (README §9): the 38 kit nodes are React components by their authors; leave
-   them out, named (recommended), or carry React for them. Until he answers they stay named losses. R4 still open,
+   app, beside the shared and the plan's). After session 13: `census/own-after-s13.txt` (38, every one a kit node; 12's and
+   11's beside it). `hive.ts` breaks down HiveClip; `kinds.ts` every loss kind.
+2. **Rulings:** **R8 asked in session 12** (README §9), and now the only thing between the HTML printer and zero of its
+   own: the 38 kit nodes are React components by their authors; leave them out, named (recommended), or carry React for
+   them. Until he answers they stay named losses. If he picks "carry React", that is the next build (the React export's
+   kit bridge, a box per kit node). R4 still open,
    nothing depends on it. R7 ThreadSpace, HiveClip on a copy: both stand, and wait behind the order below.
 3. **BOARD.** Lane 4 is reopened for this phase only (BOARD §2); React and Swift stay paused.
 4. **The box.** Suites and drives are heavy jobs: one at a time, `nice -n 19 … --runInBand`, busy-check by
    `ps -A -o pid,comm` (never `pgrep -f` in a wait loop). `grep` skips some `.ts` files as binary here: use
    `/usr/bin/grep -a`. Chrome from Claude's bash needs the sandbox off. The shell is zsh: a list in `$F` does not split.
 5. **Four reds in the package suite are not this phase's** (filed open, session 10): P134-S10-SENDSIGNAL,
-   P134-S10-SIGNINERROR, P134-S10-STUDIOSOCKET, P134-S10-PARAMFLOOR. Anything else red is new: look at it.
+   P134-S10-SIGNINERROR, P134-S10-STUDIOSOCKET, P134-S10-PARAMFLOOR. Anything else red is new: look at it. Session 13's
+   suite: 172 of 181 suites green, the 5 red ones those rows exactly (4 more went red only because the laptop slept
+   mid-run, and passed alone, 86 of 86).
 
-## The order (Richard, sessions 11 and 12: "reduce the gaps again and see how many problems it knocks out")
+## The order (Richard, sessions 11 to 13: "keep pushing and see how many gaps we can close")
 
-1. **The rest of the printer's own** (README §10 session 12, "Left"): **Drag** (HiveClip's cover, its last 5: React's
-   `drag.ts` is a 637-line hook with a ref, a style and six effects; carry its core as a generated lib, write the hook
-   as `l.watch`es, grade on React's `drag.test.ts` fixture), the streaming nodes (bot-garden), Popup close (needs the
-   popup slot), the nightbook query Fetch (measure whose first). And **owed from session 12: a backend desk for a
-   Record's Fetch and its columns** (members-area's shape; copy HTX-004's Record Desk and `htmlBackendArm`).
-   The pattern for each: copy the React printer's way, grade on a desk against React's arm (or the runtime's rule),
-   one mutant.
+1. **The printer's own is done but R8** (README §10 session 13). Two owed, both small: **a backend desk for a Record's
+   Fetch and its columns** (session 12's; members-area's shape; copy HTX-004's Record Desk and `htmlBackendArm`), and
+   **R9** (README §9, asked in session 13): P134-S13-CLICKBUBBLES, a wired Click inside a wired Click runs both in both
+   exports where the app stops at the first (reach 45, planning's block sheet the most of it). Recommended: fix it in
+   the plan and both printers now, counted apart, as R6 was; an HTML-only fix would make the desks read a difference
+   from React.
 2. **The plan's HTTP URL on a wire** (shared with React): HiveClip's 13, how its window reaches the engine. It blocks
    HTX-007 in both exports; it is plan work, counted apart as R6's was.
-3. **HTX-007** (below), then ThreadSpace's menu (R7).
+3. **HTX-007** (below), then ThreadSpace's menu (R7). HTX-007's drive is also the first time the Drag runs on a real
+   layout (session 13 graded it in jsdom with the sizes React's own §B gives).
 
 ## Then: HTX-007 ([task](HTX-007-HIVECLIP-OFF-NODEGX.md))
 
@@ -43,6 +47,13 @@ blocks the window is the task.
 
 ## Known
 
+- **Session 13's carriers**: a Drag is `dragNode(l, el, source, options, listeners)` (`lib/drag.js`, React's `drag.ts`
+  with `useDrag` cut off; the handle and its `div` made above the drawing by `dragHandle` in `printComponent.ts`, the
+  drawing inserts the element); a Repeat is `repeatNode(l, source, options, listeners)` (`lib/repeat.js`, `printRepeats`,
+  after the States machines). Both libs are generated (`htmlDragJs`, `htmlRepeatJs` in `tests/helpers/html-core-js.ts`)
+  and need `lib/errors.js`, which a Drag- or Repeat-only app gets alone (not the whole client). The arms take
+  `mouse:<down|move|up>:<x>:<y>` and `wait:<ms>` steps and a `dragLayout` (`tests/helpers/drag-steps.js`, shared). A Close
+  Popup is `given.onClose`; a Fetch into an unkept query prints a comment, no step. Spec: `html-a-drag.test.ts` (16).
 - **Session 12's carriers**: a re-tested Condition is an `l.watch` over its test's reads (`conditionDeps`, React's
   `effectDeps`), never the answer; script files are `lib/projectScripts.js` (React's loader, types stripped at export
   time), `lib/projectScriptFiles.js` and `project-scripts/<path>.js` (`src/emit/html/projectScripts.ts`); an Animate To

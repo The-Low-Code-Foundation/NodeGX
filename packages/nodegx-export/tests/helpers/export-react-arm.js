@@ -26,6 +26,9 @@
  *
  * P134 session 11. `skeleton: true` (with `settled`) ends every reading with what the page draws, element by element
  * (`skeleton.js`), as the HTML export's spec reads its own page.
+ *
+ * P134 session 13. With `settled`, the steps `mouse:<down|move|up>:<x>:<y>` and `wait:<ms>` (`drag-steps.js`, the HTML
+ * arm's too), each in an async act; `dragLayout: { wrapper, parent }` sizes the dragged element and its parent first.
  */
 
 const fs = require('fs');
@@ -37,6 +40,7 @@ const esbuild = require(require.resolve('esbuild', { paths: [ROOT] }));
 const { JSDOM } = require(require.resolve('jsdom', { paths: [ROOT] }));
 const { createFakeBackend } = require('./fake-parse-backend');
 const { skeleton: readSkeleton } = require('./skeleton');
+const { DRAG_STEP, WAIT_STEP, sizeDragLayout, dragStep, readDrag } = require('./drag-steps');
 console.log = (...args) => process.stderr.write(args.map(String).join(' ') + '\n');
 
 const HARNESS = `
@@ -69,6 +73,17 @@ w.__ticks = async (n: number) => {
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
   }
+};
+// P134 session 13. Anything the arm does to the page (a pointer step), in an async act; and time passing, in one.
+w.__actSettled = async (fn: () => void) => {
+  await act(async () => {
+    fn();
+  });
+};
+w.__waitSettled = async (ms: number) => {
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, ms));
+  });
 };
 w.__mountSettled = async () => {
   const root = createRoot(document.getElementById('root')!);
@@ -134,7 +149,7 @@ function bundle(dir, env = false) {
  * each inside an act, after the mount and after every step, as the runtime arm lets frames run: a zero timer the page
  * started has fired before the reading.
  */
-async function runSettled({ dir, scenarios, fields, ticks, backend, storage, allowErrors, skeleton }) {
+async function runSettled({ dir, scenarios, fields, ticks, backend, storage, allowErrors, skeleton, dragLayout }) {
   const code = bundle(dir, backend !== undefined);
   const out = [];
   const requests = [];
@@ -157,15 +172,20 @@ async function runSettled({ dir, scenarios, fields, ticks, backend, storage, all
     w.console.error = (...args) => errors.push(args.map(String).join(' '));
     // An async act waits on a task React enqueues through a MessageChannel, which jsdom's window does not have.
     w.MessageChannel = globalThis.MessageChannel;
+    if (dragLayout !== undefined) sizeDragLayout(w, dragLayout);
     w.eval(code);
     await w.__mountSettled();
     if (ticks) await w.__ticks(ticks);
     const stored = () => (storage === undefined ? [] : storage.keys.map((key) => `storage=${w.localStorage.getItem(key)}`));
-    const read = () => [...w.__read(), ...(fields ? w.__fields() : []), ...stored(), ...(skeleton ? readSkeleton(w.document.getElementById('root')) : [])];
+    const read = () => [...w.__read(), ...(fields ? w.__fields() : []), ...stored(), ...(skeleton ? readSkeleton(w.document.getElementById('root')) : []), ...(dragLayout !== undefined ? [readDrag(w)] : [])];
     const readings = [read()];
     for (const label of presses) {
       const step = STEP.exec(label);
+      const pointer = DRAG_STEP.exec(label);
+      const wait = WAIT_STEP.exec(label);
       if (step) await w.__stepSettled(step[1], step[2], step[3] ?? '');
+      else if (pointer) await w.__actSettled(() => dragStep(w, pointer[1], pointer[2], pointer[3]));
+      else if (wait) await w.__waitSettled(Number(wait[1]));
       else await w.__pressSettled(label);
       if (ticks) await w.__ticks(ticks);
       readings.push(read());
