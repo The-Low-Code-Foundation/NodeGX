@@ -2,7 +2,7 @@
 
 Lab: `~/vscode_projects/fp-lab/{a,b,c,d}/my-apps` (`lab.mjs`; which arm has which kit is in `ARMS.json`). Claude Code
 2.1.317, `claude-opus-5-5`, `--permission-mode auto`, sealed by `arm.mjs`. Richard sees the arms as App 1 (a), App 2
-(c), Game 1 (b), Game 2 (d), and is not told which kit each has. That blindness is partial: arm d's first reply names
+(c), Game 1 (b), Game 2 (d), and later App 3 (e), Game 3 (f), and is not told which kit each has. That blindness is partial: arm d's first reply names
 "this project's rules".
 
 ## Turn 1 (2026-11-03, 21:5x, all four in parallel; each got its brief word for word)
@@ -103,3 +103,20 @@ Unblinded (ARMS.json): **new kit = App 1 (a) and Game 2 (d); old kit = App 2 (c)
 Owed by the reading: (1) App 1's desktop look: the first-project skill says "copy the genre" for games only; a line
 about a phone-first app still looking deliberate at desktop width is a candidate, not yet measured; (2) App 1's
 background-preview spend: a line saying "hand over the start command, don't babysit the server" is a candidate.
+
+## Claude alone (arms e and f), 2026-11-04
+
+Richard, asked what the report may claim: run "Claude alone" first. Two more sealed arms (`arm.mjs e|f`): an empty
+folder with `git init`, no NodeGX server (an empty MCP config written beside the script), no skills; the probe listed
+Claude Code's built-in skills only and "none" for MCP. Their brief is the same words without "use nodegx"
+(`msg/app-bare.txt`, `msg/game-bare.txt`): *"I'm building my first project. …"*.
+
+| arm | brief | what came back | turns | min | $ |
+|---|---|---|---|---|---|
+| e | app | **no questions: built it** as one HTML page published as a claude.ai Artifact with a shared data store. 3 votes each, owner starts the winner, "We've finished it", shelf with stars. Says it could not test as a second person. Members join by being invited as Editors to the Artifact, each with a claude.ai account | 10 | 3.3 | 1.07 |
+| f | game | **no questions: built it**, "Lumen Dive", one HTML file, also published as an Artifact. Random cave each dive, lamp follows the mouse, lanternfish dart from the lamp, refills from vents, a 600 m "queen". "I haven't played it myself" | 6 | 6.1 | 1.28 |
+
+🔴 Both arms published to Richard's claude.ai account (private links): the Artifact tool is a Claude Code built-in, and
+the seal keeps out settings, MCP and skills, not built-in tools. That is what a stranger's Claude Code does too, so it
+stays in the measurement; it is noted because it wrote outside the lab folder. Kit arms a–d did not reach for it.
+

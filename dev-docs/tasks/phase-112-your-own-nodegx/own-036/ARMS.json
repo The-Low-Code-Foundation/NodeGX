@@ -17,6 +17,15 @@
   "d": {
    "brief": "game",
    "kit": "new"
+  },
+  "e": {
+   "brief": "app-bare",
+   "kit": "none"
+  },
+  "f": {
+   "brief": "game-bare",
+   "kit": "none"
   }
- }
+ },
+ "bare_added": "2026-11-04"
 }
