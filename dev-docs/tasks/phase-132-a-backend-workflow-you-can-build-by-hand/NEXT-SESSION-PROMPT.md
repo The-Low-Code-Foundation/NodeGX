@@ -1,5 +1,30 @@
 # P132 — next session
 
+**s12 (2026-11-03/04): Richard re-walked the Backend tab** ("It's still confusing AF"; his eight points verbatim in the
+[README](README.md#richards-re-walk-verbatim-2026-11-03-studio-on-greenhouse-screenshot-of-call-an-apis-query-with-a-formula-open)).
+Four were bugs, fixed in nodegx-studio `d4c72c0` (P132-FXMENUWORDS, -BRANCHROWSCROSS, -RECORDSTEPREFUSED,
+-TYPEDISTEXT; gates check:automations 133/133 with `NODEGX_REPO`, check:editor 262/262, check:hosted 46/46,
+check:app 67/67). He ruled three new things before the Beta (R6–R8). **Four tasks added, in this order:**
+
+1. **[BWF-010](BWF-010-THE-TRIGGER-IS-THE-FIRST-STEP.md) — the trigger is the first card on its workflow's canvas**, one
+   list row per workflow (P132-TRIGGERROWS, `launch: beta`). His first and loudest point. Studio only.
+2. **[BWF-011](BWF-011-A-VALUE-COMPOSED-IN-ANY-SETTING.md) — a value composed in any setting** (R8). No engine change:
+   `getPath` already walks `items.0.name`, the formulas have `text`/`first`/`pick`/`join`.
+3. **[BWF-012](BWF-012-SAVED-API-CALLS.md) — saved API calls** (R7): engine, file, Studio, agent.
+4. **[BWF-013](BWF-013-A-REUSABLE-PIECE-IS-A-WORKFLOW-OTHERS-RUN.md) — a reusable piece is a workflow others run** (R6,
+   reverses "sub-workflows" in Not taking): a `run-workflow` kind, *New piece*, select steps → *Make a reusable piece*.
+5. Then the s11 list below (BWF-008's AC2 crossing, route words, HIDDENPANELCHURN), then BWF-009, the test.
+
+🔴 s12: the drive only ever added record steps to workflows a table change starts, so `record: ''` (refused) was never
+met. A new step's starting form needs a drive line for EACH way a workflow can start. Second case of the same family
+as FILTERNOCONDITION: if a third kind meets it, make the add save an unfinished step with a warning instead.
+🔴 Studio asked a table's columns from the backend's copy of the workflow, which an agent-written workflow is not in
+yet: read the project's file first (fixed in `d4c72c0`).
+
+---
+
+## From s11 (still true)
+
 **BWF-008 item 3 is done** (s11, 2026-11-03, [the record](BWF-008-THE-NODEGX-EDITOR-EDITS-THEM-TOO.md#s11-2026-11-03-item-3s-field-trees-built-and-driven-in-the-editor)).
 The editor's value picker draws what a step can read as field trees, BWF-003's model ported to
 `models/workflow/workflowSources.ts` (a port, not shared: Studio's page cannot import a NodeGX module without a kit
