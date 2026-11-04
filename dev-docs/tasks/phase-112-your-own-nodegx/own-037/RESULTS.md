@@ -60,6 +60,14 @@ nodegx to build my first project". Seal: 23 paths outside the round, all its own
 
 | va (Vibe 1) | 12:37 | **no questions: built the whole game** ("Abyssal Lamp", `apps/sub-cave`), **all of it in NodeGX nodes**: a D-pad moves the sub 40 px per tap, clamped to the cave, the headlamp turns toward the last direction, 8 creatures placed in % of the cave width, an `Air Ns` countdown and bar, a win when all 8 are collected, "Out of air…", best score in `localStorage`, "Dive again". `docs/CHECKLIST.md` lines all passed in fresh headless drives; `render_report` 0 errors. A world that doesn't move by itself: nothing drifts, the sub moves only on a tap. One sitting, 92 steps, judge DONE. Seal clean. Its transcript never names 8576, 8771 or 8782 (one match, inside a hook id's hash) | 25 | 2.14 |
 
+| ca (Cline 2) | 13:02 | **no questions: built the whole game** ("abyss-diver") **in a NodeGX project** (`create_project`, 172 `call_tool`, 9 `find_tools`, 5 `list_examples`, 2 `get_example`), its moving dive in `scripts/diveEngine.js` driven from the graph. Home → Dive → Run over; drag/tap-anywhere and arrow keys to steer (no on-screen pad); a 300 m floor; best score in `localStorage`, guarded so that a shallower run doesn't overwrite it. `validate_project` 0/0/0 (81 nodes); `render_report` both viewports clean but for 3 warnings it names; a 16-step drive to an air-out ending. Its last message spends most of itself on one defect (creature shells stacked, not concentric: absolute children anchor top-left, fixed with `(S − s)/2` margins), then asks three things *after* building: sign off the plan (`create_project` records `agreed: false`, so it left `docs/` as skeletons), whether the 300 m floor is a win, and whether to add a thumb pad. 218 iterations, judge MORE. Seal: 5 outside paths, all `/tmp/sub-crop*.png`; no other arm's port named | 41 | 0.39 |
+
+**Turn 1 across the four:** of the two arms carrying the guides, Vibe asked first (7 questions, the guide's 4 + 3).
+Cline read both guides and then built without asking. Neither arm without the guides asked: both built a whole
+game. Where the moving world lives: vb canvas code (on a 2nd server, launched from a NodeGX shell); cb plain code
+entirely (no NodeGX project); va all in nodes (tap-to-move, nothing moves by itself); ca a NodeGX project with a
+script engine.
+
 ### Turn 2
 
 - **vb (Vibe 2), Richard's answers** (`msg/vb-2.txt`, 2026-11-04 ~12:05, word for word): me and my kids; *"Calm and a
