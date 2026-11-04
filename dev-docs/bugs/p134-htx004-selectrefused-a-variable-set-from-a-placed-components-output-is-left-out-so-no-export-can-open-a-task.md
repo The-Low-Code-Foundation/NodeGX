@@ -2,6 +2,7 @@
 id: P134-HTX004-SELECTREFUSED
 title: "export plan: a Set Variable whose value comes from a placed component's output is left out, so neither export can open a task in todo-list"
 status: fixed
+commit: 7aabd5acf
 severity: high
 area: the export plan (`packages/nodegx-export/src/analyze/plan.ts`, the Set Variable and Global Store Set actions, ~16530 and ~16716; the lifted value outputs, `pendingLifted`, ~4574); shared by the React and HTML exports
 found: P134 HTX-004 session 7, 2026-11-04, the Chrome drive of todo-list on three fresh backends

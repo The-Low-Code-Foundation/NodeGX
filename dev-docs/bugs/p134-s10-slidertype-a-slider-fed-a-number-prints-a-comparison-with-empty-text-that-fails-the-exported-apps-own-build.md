@@ -2,6 +2,7 @@
 id: P134-S10-SLIDERTYPE
 title: "React export: a Slider whose value is wired from a number prints `arrival === ''` on a number, TS2367, so the exported app's own build fails (game-menu's Settings)"
 status: fixed
+commit: 7aabd5acf
 severity: high
 area: the React printer's graph-path sync for a slider (`packages/nodegx-export/src/emit/component.ts`, `plan.syncEffects`, `coerce: 'slider'`)
 found: P134 session 10, 2026-11-04, the whole nodegx-export suite in band (typecheck-emitted, game-menu)

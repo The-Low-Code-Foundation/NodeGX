@@ -2,6 +2,7 @@
 id: P134-S10-SCREENREAD
 title: "HTML export: a Screen Resolution's width, height or ratio is not printed, so todo-list's \"One pane or two?\" is left out and a phone shows the list and the open task side by side"
 status: fixed
+commit: 7aabd5acf
 severity: high
 area: the HTML printer (`packages/nodegx-export/src/emit/html/printComponent.ts`, `expr`, the `screen-out` read)
 found: P134 session 10, 2026-11-04, the HTX-004 Chrome drive after SELECTREFUSED's fix let "One pane or two?" through the plan

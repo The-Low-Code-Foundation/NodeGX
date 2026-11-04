@@ -2,6 +2,7 @@
 id: P134-S10-LISTENWORD
 title: "hls006: the HTML printer's own helper was called `listen`, so `...listen(id, …)` read as a new socket and the listener gate was red"
 status: fixed
+commit: 7aabd5acf
 severity: low
 area: `packages/nodegx-export/src/emit/html/printComponent.ts`; the gate `tests/hls006-every-listener.test.ts`
 found: P134 session 10, 2026-11-04, the whole nodegx-export suite in band
