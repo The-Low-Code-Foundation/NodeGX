@@ -31,6 +31,8 @@ import { CORE_JS } from './coreJs';
 import { FUNCTION_RUN_JS } from './functionRunJs';
 import { COMPONENT_SCOPE_JS } from './componentScopeJs';
 import { TIMER_JS } from './timerJs';
+import { UTIL_JS } from './utilJs';
+import { projectScriptsFiles } from './projectScripts';
 import { PERSIST_STORE_JS } from './persistStoreJs';
 import { ANIMATE_JS, STATES_JS } from './statesJs';
 import { DOM_JS, ROUTER_JS } from './libJs';
@@ -155,10 +157,15 @@ export function emitHtmlApp(ir: ExportIR, catalog: Catalog): EmittedHtmlApp {
   if (Object.keys(files).some((f) => f.startsWith('functions/'))) files['lib/functionRun.js'] = FUNCTION_RUN_JS;
   if (Object.values(files).some((text) => text.includes("/lib/componentScope.js'") || text.includes("from './lib/componentScope.js'"))) files['lib/componentScope.js'] = COMPONENT_SCOPE_JS;
   if (Object.values(files).some((text) => /from '(?:\.\.\/|\.\/)+lib\/timer\.js'/.test(text))) files['lib/timer.js'] = TIMER_JS;
+  if (Object.values(files).some((text) => /from '(?:\.\.\/|\.\/)+lib\/util\.js'/.test(text))) files['lib/util.js'] = UTIL_JS;
+  // P134 s12. A Function whose Uses lists a script file: the loader, the registry, and every file in the project once.
+  if (Object.values(files).some((text) => /from '(?:\.\.\/|\.\/)+lib\/projectScriptFiles\.js'/.test(text))) Object.assign(files, projectScriptsFiles(ir.project.scripts ?? []));
   if (usesStates) {
     files['lib/states.js'] = STATES_JS;
     files['lib/animate.js'] = ANIMATE_JS;
   }
+  // EXP-011 §49. An Animate To Value moves on the same engine a States move eases along.
+  if (Object.values(files).some((text) => /from '(?:\.\.\/|\.\/)+lib\/animate\.js'/.test(text))) files['lib/animate.js'] = ANIMATE_JS;
   if (project.variables.length > 0) files['variables.js'] = variablesJs(project.variables);
   for (const st of project.stores) if (st.deferred === undefined) files[`stores/${st.exportName}.js`] = storeJs(st);
   if (project.stores.some((st) => st.deferred === undefined && st.persist !== undefined)) files['lib/persistStore.js'] = PERSIST_STORE_JS;

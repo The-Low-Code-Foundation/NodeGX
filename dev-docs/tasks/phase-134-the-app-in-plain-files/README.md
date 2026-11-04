@@ -1,7 +1,7 @@
 # Phase 134 — The app in plain files
 
 **Scoped:** 2026-11-03, on Richard's ask ("Let's scope up the HTML export phase please, I think it'll be important").
-**State:** 🔵 HTX-001 to HTX-006 done, and SELECTREFUSED (§10, session 10, 2026-11-04). A NodeGX settings menu runs inside a three.js page that is not NodeGX: exported with `--component`, widened, exported again, and the page's own files byte-identical before and after; its look in the game equal to its own app's on all 90 cells read (§10 session 9). Ruled 2026-11-04 (§9): R6 "now, first" (the phase runs past ten), R7 ThreadSpace, HiveClip on a copy. The HTML export is graded by P107's scenarios the way React and Swift are: on every scenario it plays, its trace equals the React export's, event for event; the 13 React plays and it does not are this printer's, named (a Log step, the streaming stores, On App Error with the parsers). **Session 10 (past ten, by R6): SELECTREFUSED fixed in the plan** — a task opens in both exports, and todo-list's Chrome drive reads the same in the running app, the React export and the HTML export at all 12 steps; 80 of the 180 template wires compile (3 before). **Session 11 (Richard: "if nobody can export any kind of complex app or game, we're in trouble"):** measured reach on every template and HiveClip, then closed most of the printer's own gaps, 346 → 166 (Image, Video, Icon, Columns, slots, pages with parameters, Navigate To Path, `Component.Object`, Delay); the shared plan's ~1,700 untouched. **Next:** the rest of the printer's own (§10 session 11), then the plan's HTTP URL on a wire (HiveClip's engine calls), then HTX-007; ThreadSpace's line after. Options wait on the plan (P134-HTX003-OPTIONSWIRED). R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
+**State:** 🔵 HTX-001 to HTX-006 done, and SELECTREFUSED (§10, session 10, 2026-11-04). A NodeGX settings menu runs inside a three.js page that is not NodeGX: exported with `--component`, widened, exported again, and the page's own files byte-identical before and after; its look in the game equal to its own app's on all 90 cells read (§10 session 9). Ruled 2026-11-04 (§9): R6 "now, first" (the phase runs past ten), R7 ThreadSpace, HiveClip on a copy. The HTML export is graded by P107's scenarios the way React and Swift are: on every scenario it plays, its trace equals the React export's, event for event; the 13 React plays and it does not are this printer's, named (a Log step, the streaming stores, On App Error with the parsers). **Session 10 (past ten, by R6): SELECTREFUSED fixed in the plan** — a task opens in both exports, and todo-list's Chrome drive reads the same in the running app, the React export and the HTML export at all 12 steps; 80 of the 180 template wires compile (3 before). **Session 11 (Richard: "if nobody can export any kind of complex app or game, we're in trouble"):** measured reach on every template and HiveClip, then closed most of the printer's own gaps, 346 → 166 (Image, Video, Icon, Columns, slots, pages with parameters, Navigate To Path, `Component.Object`, Delay); the shared plan's ~1,700 untouched. **Session 12:** the printer's own 148 → 54 (a Condition that tests again 31, script files 30, Animate To Value 12, a Record's Fetch 8, External Link 5, Boolean To String 3, a sign-in's Error 3; the video's Play and Pause measured shared), each graded on a desk against React or the runtime but the Record Fetch (a backend desk owed); 38 of the 54 are kit nodes, React components by their authors (R8 asked). **Next:** R8's answer, Drag (HiveClip's last 5), then the plan's HTTP URL on a wire (HiveClip's engine calls), then HTX-007; ThreadSpace's line after. Options wait on the plan (P134-HTX003-OPTIONSWIRED). R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
 phase only** (BOARD §2); React and Swift stay paused. **Read first:** this page, then [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md),
 then the task you take. The Swift precedent this phase copies is
 [EXP-022](../phase-18-code-export-v2/EXP-022-THE-SAME-GRAPH-IN-SWIFT.md) §7–§9.
@@ -181,6 +181,7 @@ The questions as scoped:
 | R4 | Must it open by double-clicking `index.html`? | **No: any static server** (`npx serve`, `python3 -m http.server`, every web host). Chrome refuses ES modules from a double-clicked file (other browsers to be measured in HTX-001). | Yes: a second, bundled copy of `app.js` beside the readable modules. |
 | R5 | Which first after HTX-003: the backend (HiveClip, web apps) or the game bridge (AC5)? | **The backend**: HiveClip is the app he named. | The game bridge first. |
 | R7 (asked 2026-11-04, session 9) | HTX-006's last line: the same menu bridge on a copy of one of your games. Which game, and may I? | **ThreadSpace's** (its menu is plain HTML today, `public/index.html`; it has a drive, `tools/run-all.sh`) | The Dig's. Neither: the small game in `htx-006/` is enough. |
+| R8 (asked 2026-11-04, session 12) | 38 nodes in four templates come from kits (the game kit's race track, aliens and answer pad; the lesson kit's panels). A kit node is the kit author's own React component, so plain files cannot draw it without React. What should the HTML export do with them? | **Leave them out, named** (as now): the export stays React-free, and a kit that wants to travel writes a plain version later. | Carry React (about 140 KB) in the folder only when a kit is used, and mount each kit node in a box, as the React export's kit bridge does. |
 | R6 (asked 2026-11-04, session 7) | In both exported todo apps you cannot open a task: press one and nothing happens (`htx-004/side-by-side.png`, top row). It is the shared plan both exports read, and 180 wires across the templates have the same shape. Fix it now, or after the phase? | **After HTX-005 to HTX-007, as shared plan work counted apart** (Swift S6's ruling). Three of the ten sessions are left, one per remaining task. | Fix it now, in session 8, and let the phase run past ten. Hand it to the React lane when it reopens. |
 
 ## 10. Sessions
@@ -828,3 +829,46 @@ pause events, streaming nodes.
 cannot reach the engine, and that is the plan's (the HTTP URL on a wire).
 
 **Cost:** 1 session (11th). Printer +~330 lines, `lib/dom.js` and the router +~80, 4 new specs (31 tests), 4 desks.
+
+### Session 12 — the printer's own gaps again, 148 → 54 (2026-11-04, Opus 5.5)
+
+**Asked by Richard:** "continue the phase 134 HTML export push, to reduce the gaps again and see how many problems it
+knocks out." Measured first (`census/own.ts`): 148, as session 11 left it. **After: 54**, of which 38 are one kind that
+needs a ruling (R8, §9). Work took it to 56; the last 2 (a video's Play and Pause) moved to shared once measured:
+React drops them too ("has no DOM event equivalent"), so they were never this printer's (`census/own.ts`'s filter says so).
+
+**Printed now, each graded:**
+
+| what | reach | how it is graded | spec |
+|---|---|---|---|
+| a Condition that tests again on every change (LOGIC-TARGET §10) | 31 (bot-garden, rocket-school, star-class) | the Condition Desk (both template shapes: an input moving a States node, a value running a counting Function) in the runtime's own nodes, the React export and the HTML export, press by press: HTML equal to React at all 8 readings; React equal to the runtime but at 3 cells both exports hold, filed (TEXTKEEPS, HIDDENRUNS, new); "true again with a new value runs the arm again" in all three; 1 mutant killed (watching the answer, not the reads) | `html-a-condition-tests-again.test.ts` |
+| a Function's script files (P109 ISL-005) | 30 (bot-garden) | React's own ISL-005 assertions on React's own fixture (`scripts-desk`), the exported modules run as they are: both pages compute what the files say, a file change reaches both, one instance per app, a file that throws runs none of the body, the loader against the runtime's `ScriptFiles` (cycle, remembered failure); 1 mutant killed (`Scripts` bound outside the try) | `html-script-files.test.ts` |
+| Animate To Value (EXP-011 §49), and the Expressions and States reading it | 12 (rocket-school's and star-class's Countdown bar) | the React work's Glow Desk (page at Home, Duration 0): HTML equal to React cell for cell before a tween runs a frame, every other cell equal at every step, then at the target with "arrived" | `html-the-small-kinds.test.ts` §A |
+| the small utilities (Boolean To String) | 3 (HiveClip's labels) | `lib/util.js` = React's `util.ts` types out (generated, the 8th such file); `booleanToString` equal to React's on 12 values; HiveClip's three printed | same, §B |
+| External Link (DEF-016, EXP-011 §14) | 5 (marketplace, landing-pages) | a Link Desk in jsdom against the runtime's rules: a new tab `noopener,noreferrer`, an empty link never asked and "No link to open", `_self` bare, Done after each; the activation read before the call; 1 mutant killed (the empty-link guard) | same, §C |
+| a Record's Fetch and its columns (EXP-011 §43) | 8 (members-area) | the census and the printed code only: **a backend desk is owed** | — |
+| a failed sign-in's Error read in its Failure chain (EXP-011 §24) | 3 (planning) | the census and the printed code only (the same `const` React binds) | — |
+
+A Record that follows the app's copy of its record, or is bound by its Id, is named, not dropped (none in the templates or
+HiveClip: no React page there calls `subscribeRecord`, measured).
+
+**Filed:** P134-S12-HIDDENRUNS (low, shared by every export): a part under a parent that is not mounted runs its logic in
+the running app (its Condition tests, its Function counts) and in no export, so it shows a fresh state when it is shown.
+**I predicted that cell wrong** ("lit 0"; the runtime said "lit 2"): the runtime's instance lives while it is not drawn.
+
+**Left of the printer's own (54):**
+
+- **38 kit nodes** (rocket-school 12, star-class 12, digital-bricks-training 8, nightbook 6): a kit's node is the
+  author's own React component (`game-kit/index.js`, 528 KB: `useState`, `useEffect`, `useLayoutEffect`). Plain files
+  cannot draw it without React. **R8 asked.**
+- Drag 5 (HiveClip's cover): React's `drag.ts` is a 637-line hook (a ref, a style, six effects); a session of its own.
+- the streaming nodes 4 (bot-garden), a Fetch of a query the plan does not keep 3 (nightbook; whose, not measured),
+  Popup close 2 (landing-pages; the popup slot is not printed yet), two For Each item reads.
+
+**HiveClip after this session:** 5 of the printer's own left (Drag). Its window still cannot reach the engine: the
+plan's HTTP URL on a wire, in both exports.
+
+**Cost:** 1 session (12th). Printer +~310 hand-written lines (`printComponent.ts` 2,411 → 2,632, `projectScripts.ts` 79),
+1 more generated lib (`lib/util.js`), the script loader made from React's source at export time (the HTML printer is now
+3,878 hand-written lines across its five files, against session 8's table's 2,896, and 8 generated libs); 3 new specs (26
+tests), 2 desks (Condition, Link) and a Glow Desk copy.

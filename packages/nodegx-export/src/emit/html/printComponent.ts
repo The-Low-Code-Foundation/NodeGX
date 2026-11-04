@@ -40,6 +40,7 @@ import { assignClassNames, camelCase, isReservedWord, lowerFirst, type ClassCand
 import { authoredTag, PRESET_MARKERS } from '../component';
 // 🔴 HTX-004, the same: the query's call, its wired `where`, when it asks, and the code each verb raises its failure under.
 import { API_CALL_ERROR_CODES, queryHasEffect, queryParamsLiteral, wiredWhereExpr } from '../component';
+import { UTIL_HELPERS } from '../utilLib';
 
 export interface HtmlLoss {
   component: string;
@@ -157,7 +158,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   const nodeById = new Map(nodes.map((n) => [n.id, n]));
   const losses: HtmlLoss[] = [];
   const lose = (nodeId: string, what: string) => losses.push({ component: plan.path, nodeId, label: nodeById.get(nodeId)?.authoredLabel, what });
-  const imports = { core: new Set<string>(), dom: new Set<string>(['life']), router: new Set<string>(), run: new Set<string>(), states: new Set<string>(), timer: new Set<string>() };
+  const imports = { core: new Set<string>(), dom: new Set<string>(['life']), router: new Set<string>(), run: new Set<string>(), states: new Set<string>(), timer: new Set<string>(), util: new Set<string>(), animate: new Set<string>() };
   const childImports = new Map<string, Set<string>>();
   const machineByNode = new Map(plan.statesMachines.map((m) => [m.nodeId, m]));
   const stateNames = new Set(plan.stateVars.map((s) => s.name));
@@ -203,6 +204,8 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   const memoOf = new Map<string, string>();
   /** P134 session 10. The Screen Resolution nodes this component reads, by their local: each kept once per part. */
   const screenLocals = new Set<string>();
+  /** EXP-011 §49. Each Animate To Value's number, a value this component keeps (printed with the logic, read anywhere). */
+  const animated = new Set(plan.animations.map((a) => a.local));
   /** The app's Variables this component reads or writes: imported from `variables.js`. */
   const variableImports = new Set<string>();
   const variable = (name: string): string | undefined => {
@@ -325,6 +328,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   // ---- names ---------------------------------------------------------------------------------------------------
 
   const taken = new Set(['session', 'followSession', 'raiseAppError', 'filterValue', 'variables', 'input', 'state', 'given', 'element', 'inputs', 'before', 'l', 'into', 'at', 'item', 'index', 'row', 'batch', 'life', 'el', 'show', 'truthy', 'keep', 'bindText', 'bindAttr', 'bindStyle', 'media', 'when', 'place', 'list', 'navigate', 'openInNewTab', 'pageParam', 'value', 'derived', 'functionNode', 'runFunction', 'tickedArrival', 'pulse', mount]);
+  for (const a of plan.animations) taken.add(a.local);
   // A store's module is imported under its own name (React's `import { desk } from '../stores/desk'`): no local takes it.
   for (const st of ctx.project.stores) if (st.deferred === undefined) taken.add(st.exportName);
   /** A fresh local name, `base` or `base2`, `base3`… */
@@ -373,7 +377,6 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         if (plan.tickedRuns.find((t) => t.nodeId === def.nodeId)?.atLoad) nodeLines.push(`  let ${names.loaded} = false;`);
       }
       if (def.noodl !== undefined && !noodlCarried(def)) lose(def.nodeId, `the Function "${def.fnName}" reads Noodl (${[...def.noodl.members, ...def.noodl.variables].join(', ')}), which this export does not carry`);
-      if (def.scripts?.length) lose(def.nodeId, `the Function "${def.fnName}" uses script files, which the HTML target does not carry yet`);
     }
     return names;
   };
@@ -502,6 +505,19 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         if (e.field === 'value') return member(`${m.local}.get().values`, e.name ?? '');
         return undefined;
       }
+      /*
+       * EXP-011 Tier 2.7, as the React printer calls it (`component.ts`, copied, P134-HTX001-PRINTERDECIDES): one helper of
+       * `lib/util.js` (React's `util.ts`, its types out) over the arguments, a String Mapper's table second. A Color Blend
+       * that keeps what it last showed, and the parsers, are not printed yet.
+       */
+      case 'util-call': {
+        if (e.kept !== undefined || !(UTIL_HELPERS as readonly string[]).includes(e.fn)) return undefined;
+        const args = e.args.map((a) => expr(a, scope));
+        if (args.some((a) => a === undefined)) return undefined;
+        if (e.cases !== undefined) args.splice(1, 0, `{ ${e.cases.map((c) => `${js(c.from)}: ${c.to === undefined ? 'undefined' : js(c.to)}`).join(', ')} }`);
+        imports.util.add(e.fn);
+        return `${e.fn}(${args.join(', ')})`;
+      }
       case 'not': {
         const inner = expr(e.operand, scope);
         if (inner === undefined) return undefined;
@@ -563,6 +579,22 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         if (e.viaState !== undefined) return stateByName.has(e.viaState) ? maybe(`${member('state', e.viaState)}.get()`, field) : undefined;
         return scope.declared.has(names.answerLocal) ? member(names.answerLocal, field) : undefined;
       }
+      // EXP-011 §49. An Animate To Value's Current Value: the number it last published.
+      case 'animate-out':
+        return animated.has(e.local) ? `${e.local}.get()` : undefined;
+      // EXP-011 §43, as React reads it: a Record's column, its row anywhere, the Fetch's own answer inside the Done chain.
+      case 'record-out': {
+        const read = plan.recordReads.find((r) => r.nodeId === e.nodeId);
+        if (read === undefined) return undefined;
+        if (e.output === 'error') return e.viaState !== undefined ? (stateByName.has(e.viaState) ? `${member('state', e.viaState)}.get()` : undefined) : scope.declared.has(read.messageLocal) ? read.messageLocal : undefined;
+        const field = e.output.slice('prop-'.length);
+        if (e.viaState !== undefined) return stateByName.has(e.viaState) ? maybe(`${member('state', e.viaState)}.get()`, field) : undefined;
+        return scope.declared.has(read.answerLocal) ? member(read.answerLocal, field) : undefined;
+      }
+      // EXP-011 §24, as React reads it: a failed step's Error, its row anywhere, the failure arm's own `const` inside it.
+      case 'outcome-error':
+        if (e.viaState !== undefined) return stateByName.has(e.viaState) ? `${member('state', e.viaState)}.get()` : undefined;
+        return scope.declared.has(e.local.split('.')[0]) ? e.local : undefined;
       // HTX-004. A query's rows: the row it last answered, in a chain as in the drawing.
       case 'query-get':
         return plan.queries.some((q) => q.stateName === e.stateName) ? `${member('state', e.stateName)}.get()` : undefined;
@@ -771,7 +803,8 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       `${inner}const ${message} = error instanceof Error ? error.message : String(error);`,
       `${inner}${member('state', a.errorState)}.set(${message});`,
       `${inner}${raiseLine(a.nodeId, API_CALL_ERROR_CODES[nodeById.get(a.nodeId)?.type ?? ''] ?? 'outcome/unspecified-failure', message)}`,
-      ...block(a.failThen, inner, scope),
+      // EXP-011 §24: the failure chain reads the Error as this arm's own message (React's same `const`).
+      ...block(a.failThen, inner, { ...scope, declared: new Set([...scope.declared, message]) }),
       `${pad}}`
     ];
   };
@@ -856,6 +889,82 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
           ],
           scope
         };
+      }
+      /*
+       * EXP-011 §43, a Record's Fetch, as the React printer prints it (`component.ts` `record-fetch`, copied,
+       * P134-HTX001-PRINTERDECIDES): the Id read once and refused empty ("Missing Id."), the answer written to the row, the
+       * Done chain; the Error row, the error channel and the Failure chain in the catch.
+       */
+      case 'record-fetch': {
+        const read = plan.recordReads.find((r) => r.nodeId === a.nodeId);
+        if (read === undefined || !stateByName.has(a.errorState)) throw new Unprinted('a Record Fetch the plan does not keep');
+        if (a.materialize !== undefined && !stateByName.has(a.materialize)) throw new Unprinted("a Record Fetch whose row the plan does not keep");
+        const id = expr(a.id, scope);
+        if (id === undefined) throw new Unprinted(`a Record Fetch whose Id reads ${describe(a.id)}, which the HTML target does not print yet`);
+        scope.awaits.used = true;
+        useImport(`api/${read.moduleBase}.js`, a.fnName);
+        const inner = `${pad}  `;
+        const idLocal = read.idLocal;
+        const done: Scope = { ...scope, declared: new Set([...scope.declared, read.answerLocal]) };
+        const failed: Scope = { ...scope, declared: new Set([...scope.declared, read.messageLocal]) };
+        return {
+          lines: [
+            `${pad}try {`,
+            `${inner}const ${idLocal} = ${a.coerceId === 'string' ? `String(${id} ?? '')` : id};`,
+            ...(a.id.kind === 'literal' ? [] : [`${inner}if (${idLocal} === undefined || ${idLocal} === null || ${idLocal} === '') throw new Error('Missing Id.');`]),
+            `${inner}const ${read.answerLocal} = await ${a.fnName}(${idLocal});`,
+            ...(a.materialize !== undefined ? [`${inner}${member('state', a.materialize)}.set(${read.answerLocal});`] : []),
+            ...block(a.then, inner, done),
+            `${pad}} catch (error) {`,
+            `${inner}const ${read.messageLocal} = error instanceof Error ? error.message : String(error);`,
+            `${inner}${member('state', a.errorState)}.set(${read.messageLocal});`,
+            `${inner}${raiseLine(a.nodeId, 'record/storage-op-failed', read.messageLocal)}`,
+            ...block(a.failThen, inner, failed),
+            `${pad}}`
+          ],
+          scope
+        };
+      }
+      /*
+       * External Link, as the React printer prints it (`component.ts` `external-link`, DEF-016 and EXP-011 §14, copied,
+       * P134-HTX001-PRINTERDECIDES): an empty link refused before the browser is touched (`window.open('')` opens a blank
+       * tab); for a new tab the user activation read BEFORE the call (the call consumes it), `=== false` the only "blocked";
+       * the Error message bound once in the failure arm, which re-tests the link to tell the two failures apart.
+       */
+      case 'external-link': {
+        const link = expr(a.link, scope);
+        if (link === undefined) throw new Unprinted(`an External Link to ${describe(a.link)}, which the HTML target does not print yet`);
+        if (a.errorState !== undefined && !stateByName.has(a.errorState)) throw new Unprinted('an External Link whose Error row the plan does not keep');
+        const inner = `${pad}  `;
+        const ref = a.guardLink ? a.local : link;
+        const openCall = `window.open(${ref}, '${a.newTab ? '_blank' : '_self'}', '${a.newTab ? 'noopener,noreferrer' : ''}')`;
+        const guard = a.guardLink ? `${a.local} !== undefined && ${a.local} !== null && ${a.local} !== ''` : undefined;
+        const NO_LINK = "'No link to open'";
+        const BLOCKED = "'The browser blocked opening a new tab'";
+        const hasFailure = a.guardLink || a.newTab;
+        const message = a.guardLink && a.newTab ? `${a.local} === undefined || ${a.local} === null || ${a.local} === '' ? ${NO_LINK} : ${BLOCKED}` : a.guardLink ? NO_LINK : BLOCKED;
+        const readsMessage = a.errorLocal !== undefined && a.failThen.length > 0;
+        const failed: Scope = readsMessage ? { ...scope, declared: new Set([...scope.declared, a.errorLocal!]) } : scope;
+        const errorWrite = !hasFailure
+          ? []
+          : [
+              ...(readsMessage ? [`${inner}const ${a.errorLocal} = ${message};`] : []),
+              ...(a.errorState === undefined ? [] : [`${inner}${member('state', a.errorState)}.set(${readsMessage ? a.errorLocal : message});`])
+            ];
+        const failBody = [...errorWrite, ...block(a.failThen, inner, failed)];
+        const thenBody = block(a.then, inner, scope);
+        const noChains = thenBody.length === 0 && failBody.length === 0;
+        const opened = a.newTab ? [guard, noChains ? openCall : `(${openCall}, !${a.blockedLocal})`].filter(Boolean).join(' && ') : (guard ?? '');
+        const lines: string[] = [];
+        if (a.guardLink) lines.push(`${pad}const ${a.local} = ${link};`);
+        if (a.newTab && !noChains) lines.push(`${pad}const ${a.blockedLocal} = navigator.userActivation?.isActive === false;`);
+        const selfCall = a.newTab ? [] : [`${inner}${openCall};`];
+        if (opened === '') lines.push(`${pad}${openCall};`, ...thenBody.map((l) => l.slice(2)));
+        else if (noChains) lines.push(a.newTab ? `${pad}${opened};` : `${pad}if (${opened}) ${openCall};`);
+        else if (failBody.length === 0) lines.push(`${pad}if (${opened}) {`, ...selfCall, ...thenBody, `${pad}}`);
+        else if (thenBody.length === 0 && a.newTab) lines.push(`${pad}if (!(${opened})) {`, ...failBody, `${pad}}`);
+        else lines.push(`${pad}if (${opened}) {`, ...selfCall, ...thenBody, `${pad}} else {`, ...failBody, `${pad}}`);
+        return { lines, scope };
       }
       case 'navigate': {
         const path = ctx.routeOf(a.to);
@@ -1126,6 +1235,41 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     }
     body.push(`${inner}${set}(${code});`, ...chainLines(code, inner));
     return [`${pad}if (${ref}.current !== document.activeElement) {`, ...body, `${pad}}`];
+  };
+
+  /**
+   * The values a re-tested Condition watches: the leaf reads its test makes, as the React printer's `effectDeps` lists
+   * them (a prop, a state row, a store key), never the answer. Undefined for a read of a kind not listed here yet.
+   */
+  const conditionDeps = (cond: ValueExpr): string[] | undefined => {
+    const deps: string[] = [];
+    const walk = (e: ValueExpr): boolean => {
+      switch (e.kind) {
+        case 'literal':
+        case 'undefined':
+          return true;
+        case 'prop':
+        case 'state-get':
+        case 'store-get':
+        case 'store-key-get':
+        case 'session-get': {
+          const v = expr(e);
+          if (v === undefined) return false;
+          if (!deps.includes(v)) deps.push(v);
+          return true;
+        }
+        case 'not':
+        case 'truthy':
+          return walk(e.operand);
+        case 'logical':
+          return e.operands.every(walk);
+        case 'format':
+          return e.parts.every((p) => typeof p === 'string' || walk(p));
+        default:
+          return false;
+      }
+    };
+    return walk(cond) ? deps : undefined;
   };
 
   /** A chain from its start (a press, a callback, an effect), or undefined and a named loss: never half a chain. */
@@ -1876,6 +2020,51 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     importMount(module.file, module.mount);
     hookLines.push(`  // ${node.authoredLabel ?? id} (${node.type}): a logic component, run where the graph places it.`, `  const ${local(id)} = ${placeCall(module.mount, 'null', placementArgs(node, target, '  '), undefined, '  ')};`);
   }
+  /*
+   * EXP-011 §49, an Animate To Value: React's `useAnimatedValue` (`animateLib.ts`, copied, P134-HTX001-PRINTERDECIDES) over
+   * the same engine (`lib/animate.js`): made once with the target it starts from, its number a value, and whenever the
+   * target, the duration or the delay changes, those set and the tween sent towards the target (At Target Value when it
+   * settles); stopped when the part goes. Before the effects that read it, as React's hook comes before them.
+   */
+  for (const anim of plan.animations) {
+    const target = expr(anim.target);
+    const duration = expr(anim.duration);
+    const delay = expr(anim.delay);
+    if (target === undefined || duration === undefined || delay === undefined) {
+      lose(anim.nodeId, `its ${target === undefined ? 'Target Value' : duration === undefined ? 'Duration' : 'Delay'} reads a value the HTML target does not print yet; it stays at 0`);
+      imports.dom.add('keep');
+      nodeLines.push(`  const ${anim.local} = keep(0); // ${anim.comment} Not moved by this export (see EXPORT-PREFLIGHT.md).`);
+      continue;
+    }
+    const arrive = anim.arrive !== undefined ? callback(anim.nodeId, 'At Target Value', anim.arrive, '    ') : undefined;
+    const engine = fresh(`${anim.local}Engine`);
+    imports.animate.add('createAnimatedValue').add('animateTo').add('stopRun').add('eases');
+    imports.core.add('untracked');
+    imports.dom.add('keep');
+    nodeLines.push(
+      `  // ${anim.comment}`,
+      `  const ${engine} = createAnimatedValue(untracked(function () {`,
+      `    return ${target};`,
+      `  }), 300, 0, eases[${js(anim.ease)}]);`,
+      `  const ${anim.local} = keep(${engine}.current);`
+    );
+    logic.push(
+      `  // ${anim.comment.replace(/\.$/, '')}: sent towards its target whenever the target, the duration or the delay changes.`,
+      '  l.watch(function () {',
+      `    return [${target}, ${duration}, ${delay}];`,
+      '  }, function (target, duration, delay) {',
+      `    ${engine}.run.duration = duration;`,
+      `    ${engine}.run.delay = delay;`,
+      `    ${engine}.ease = eases[${js(anim.ease)}];`,
+      `    animateTo(${engine}, target, function (now) {`,
+      `      ${anim.local}.set(now);`,
+      `    }${arrive !== undefined ? `, ${arrive}` : ''});`,
+      '  });',
+      '  l.add(function () {',
+      `    stopRun(${engine}.run);`,
+      '  });'
+    );
+  }
   // A value this component sends out: now, and again whenever it changes (React's push effect, CONTROLLED-STATE-TARGET §3.5).
   for (const push of plan.pushEffects) {
     const v = expr(push.expr);
@@ -1980,6 +2169,22 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       ...body,
       '  });'
     );
+  }
+  /*
+   * A Condition with "run on change" ticked (LOGIC-TARGET §10): it tests again whenever a value arrives on its Condition
+   * and runs one arm. The React printer's effect, keyed on the reads the condition makes (its `effectDeps`), not on the
+   * test's answer: a new value that tests the same still runs the arm again, as the running node does.
+   */
+  for (const be of plan.branchEffects) {
+    const action = be.action as Extract<HandlerAction, { kind: 'branch' }>;
+    const deps = conditionDeps(action.cond);
+    if (deps === undefined) {
+      lose(be.nodeId, `its Condition reads ${describe(action.cond)}, which the HTML target does not print yet`);
+      continue;
+    }
+    const body = chain(be.nodeId, 'Condition, tested again', [action], '    ');
+    if (body === undefined) continue;
+    logic.push(`  // ${be.comment}`, '  l.watch(function () {', `    return [${deps.join(', ')}];`, '  }, function () {', ...body, '  });');
   }
   // A Value Changed: its chain runs whenever its Input becomes a different value, the first arrival too (EXP-011 §39).
   for (const vc of plan.valueChangedEffects) {
@@ -2155,7 +2360,6 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
 
   // What this printer reads in the plan and does not print yet: each a named loss, never a silent drop.
   const UNPRINTED: Array<[keyof ComponentPlan, string]> = [
-    ['branchEffects', 'a Condition that tests again on every change (HTX-002)'],
     ['receivers', 'an Event Receiver'],
     ['streams', 'a streaming node'],
     ['styleSheets', 'a CSS Definition'],
@@ -2166,6 +2370,13 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     const count = Array.isArray(v) ? v.length : v && typeof v === 'object' ? Object.keys(v).length : 0;
     if (count > 0) lose(plan.rootId ?? '', `${count} × ${what}, not printed by the HTML target yet`);
   }
+  /*
+   * P18-S111-RECORDLIVE and P18-S113-IDBINDREAD: a Record that follows the app's one copy of its record, or is bound by its
+   * Id with Fetch unwired. React subscribes; this printer does not yet, so each is named (none in the templates or
+   * HiveClip on 2026-11-04, measured: no React page there calls `subscribeRecord`).
+   */
+  for (const read of plan.recordReads) if (read.live && !read.binds) lose(read.nodeId, 'its row follows the app’s copy of the record ("Record properties" ticked), which the HTML target does not print yet');
+  for (const effect of plan.recordEffects) if (effect.action.kind === 'record-fetch' && effect.held) lose(effect.nodeId, 'it is bound to a record by its Id (Fetch unwired), which the HTML target does not print yet');
   // A States node: its machine (the React export's own, `lib/states.js`), its signal outputs' chains, its wired State.
   const machines: string[] = [];
   const follows: string[] = [];
@@ -2262,6 +2473,8 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   if (imports.states.size) lines.push(`import { ${[...imports.states].sort().join(', ')} } from '${relative(file.dir, 'lib/states.js')}';`);
   if (usesComponentScope) lines.push(`import { createComponentScope } from '${relative(file.dir, 'lib/componentScope.js')}';`);
   if (imports.timer.size) lines.push(`import { ${[...imports.timer].sort().join(', ')} } from '${relative(file.dir, 'lib/timer.js')}';`);
+  if (imports.animate.size) lines.push(`import { ${[...imports.animate].sort().join(', ')} } from '${relative(file.dir, 'lib/animate.js')}';`);
+  if (imports.util.size) lines.push(`import { ${[...imports.util].sort().join(', ')} } from '${relative(file.dir, 'lib/util.js')}';`);
   for (const [mod, names] of [...childImports].sort(([a], [b]) => a.localeCompare(b))) lines.push(`import { ${[...names].sort().join(', ')} } from '${relative(file.dir, mod)}';`);
   if (variableImports.size) lines.push(`import * as variables from '${relative(file.dir, 'variables.js')}';`);
   for (const st of [...storeImports].sort()) lines.push(`import { ${st} } from '${relative(file.dir, `stores/${st}.js`)}';`);
@@ -2348,6 +2561,13 @@ export function functionFileJs(component: string, def: JsFunctionPlan, path = ''
     if (pairs.length === 0) noodl.push('  const Noodl = noodl;');
     else noodl.push('  const Noodl = {', ...(backend ? ['    ...noodl,'] : []), '    Variables: {', pairs.join(',\n'), '    }', '  };');
   }
+  /*
+   * P109 ISL-005 AC7, as the React printer binds it (`component.ts` `jsWrapperLines`, copied, P134-HTX001-PRINTERDECIDES):
+   * the files its Uses lists, from the one registry, inside the try, so a file that fails runs none of the body.
+   */
+  const scripts = def.scripts ?? [];
+  if (scripts.length > 0) head.push(`import { projectScripts } from '${relative(dir, 'lib/projectScriptFiles.js')}';`);
+  const scriptsLine = scripts.length > 0 ? [`    const Scripts = { ${scripts.map((u) => `${key(u.alias)}: projectScripts.load(${JSON.stringify(u.path)})`).join(', ')} };`] : [];
   return [
     `// @nodegx:generated by \`nodegx export --target html\` — the Function node "${def.fnName}" (node ${def.nodeId}) of ${component}.`,
     '// The body is as it was written in NodeGX. It reads `Inputs`, writes `Outputs`, and keeps what it puts on `this`.',
@@ -2357,6 +2577,7 @@ export function functionFileJs(component: string, def: JsFunctionPlan, path = ''
     `export ${awaits ? 'async ' : ''}function ${def.fnName}(Inputs, Outputs = ${signals}, self = {}, Component) {`,
     ...noodl,
     '  try {',
+    ...scriptsLine,
     `    ${awaits ? 'await (async ' : '('}function () {`,
     ...def.body.split('\n'),
     '    }).call(self);',

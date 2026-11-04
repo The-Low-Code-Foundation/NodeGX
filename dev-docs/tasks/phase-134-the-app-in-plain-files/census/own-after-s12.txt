@@ -1,0 +1,31 @@
+┌─────────┬────────────────────────────────┬─────────┬────────┬──────┐
+│ (index) │ app                            │ htmlOwn │ shared │ plan │
+├─────────┼────────────────────────────────┼─────────┼────────┼──────┤
+│ 0       │ 'bot-garden'                   │ 4       │ 21     │ 250  │
+│ 1       │ 'digital-bricks-training'      │ 8       │ 62     │ 273  │
+│ 2       │ 'digital-bricks-training-demo' │ 1       │ 26     │ 145  │
+│ 3       │ 'gram'                         │ 0       │ 112    │ 58   │
+│ 4       │ 'landing-pages'                │ 2       │ 31     │ 20   │
+│ 5       │ 'learn-with-simple-rick'       │ 0       │ 0      │ 0    │
+│ 6       │ 'marketplace'                  │ 1       │ 103    │ 54   │
+│ 7       │ 'members-area'                 │ 0       │ 71     │ 64   │
+│ 8       │ 'nightbook'                    │ 9       │ 39     │ 329  │
+│ 9       │ 'pixel-game'                   │ 0       │ 3      │ 37   │
+│ 10      │ 'planning'                     │ 0       │ 257    │ 69   │
+│ 11      │ 'planning-demo'                │ 0       │ 247    │ 90   │
+│ 12      │ 'rocket-school'                │ 12      │ 14     │ 86   │
+│ 13      │ 'star-class'                   │ 12      │ 14     │ 84   │
+│ 14      │ 'story-engine'                 │ 0       │ 3      │ 14   │
+│ 15      │ 'todo-list'                    │ 0       │ 29     │ 78   │
+│ 16      │ 'todo-list-demo'               │ 0       │ 19     │ 76   │
+│ 17      │ 'ui'                           │ 5       │ 145    │ 87   │
+└─────────┴────────────────────────────────┴─────────┴────────┴──────┘
+total own 54
+  38 a custom node is not drawn by the HTML target yet
+   5 a drag node is not drawn by the HTML target yet
+   3 its signal input "…" runs a Fetch of a query the plan does not keep; the chain is left out whole
+   2 N × a streaming node, not printed by the HTML target yet
+   2 its signal input "…" runs a stream-action step, which the HTML target does not print yet; the chain is left ou
+   2 its onClick runs a popup-close step, which the HTML target does not print yet; the chain is left out whole
+   1 a For Each not drawn: its items read a state-get value, which the HTML target does not print yet
+   1 a For Each not drawn: its items read a prop value, which the HTML target does not print yet

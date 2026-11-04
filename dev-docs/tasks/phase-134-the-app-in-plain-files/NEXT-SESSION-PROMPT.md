@@ -1,17 +1,18 @@
 # Next session — Phase 134, the app in plain files
 
-**Written 2026-11-04 by session 11 (the HTML export's reach measured; the printer's own gaps 346 → 166).** Read
-[README.md](README.md) §9 and §10 (sessions 1 to 11) first. Sessions used: 11 (past ten by R6, and by Richard's ask of
-session 11: "if nobody can export any kind of complex app or game, we're in trouble").
+**Written 2026-11-04 by session 12 (the printer's own gaps 148 → 54).** Read [README.md](README.md) §9 and §10 (sessions 1
+to 12) first. Sessions used: 12 (past ten by R6, and by Richard's asks of sessions 11 and 12: "reduce the gaps again and
+see how many problems it knocks out").
 
 ## Before anything
 
 1. **Measure where it stands:** `cd packages/nodegx-export && nice -n 19 npx ts-node --transpile-only -O
    '{"module":"commonjs"}' ../../dev-docs/tasks/phase-134-the-app-in-plain-files/census/own.ts` (the printer's own gaps per
-   app, beside the shared and the plan's). `census-after-s11` is in `census/own-after-s11.txt`. `hive.ts` breaks down
+   app, beside the shared and the plan's). After session 12: `census/own-after-s12.txt` (54; session 11's is `own-after-s11.txt`). `hive.ts` breaks down
    HiveClip; `kinds.ts` every loss kind.
-2. **Rulings:** R4 still open, nothing depends on it. R7 ThreadSpace, HiveClip on a copy: both stand, and wait behind
-   the order below.
+2. **Rulings:** **R8 asked in session 12** (README §9): the 38 kit nodes are React components by their authors; leave
+   them out, named (recommended), or carry React for them. Until he answers they stay named losses. R4 still open,
+   nothing depends on it. R7 ThreadSpace, HiveClip on a copy: both stand, and wait behind the order below.
 3. **BOARD.** Lane 4 is reopened for this phase only (BOARD §2); React and Swift stay paused.
 4. **The box.** Suites and drives are heavy jobs: one at a time, `nice -n 19 … --runInBand`, busy-check by
    `ps -A -o pid,comm` (never `pgrep -f` in a wait loop). `grep` skips some `.ts` files as binary here: use
@@ -19,12 +20,15 @@ session 11: "if nobody can export any kind of complex app or game, we're in trou
 5. **Four reds in the package suite are not this phase's** (filed open, session 10): P134-S10-SENDSIGNAL,
    P134-S10-SIGNINERROR, P134-S10-STUDIOSOCKET, P134-S10-PARAMFLOOR. Anything else red is new: look at it.
 
-## The order (Richard, session 11: "let's do that and see how far it gets us")
+## The order (Richard, sessions 11 and 12: "reduce the gaps again and see how many problems it knocks out")
 
-1. **The rest of the printer's own gaps** (README §10 session 11, "Left"): custom kit nodes (38), a Condition that tests
-   again on every change (31), Functions with script files (30), External Link, Drag (HiveClip's cover), the value kinds,
-   the video's play and pause. The pattern for each: copy the React printer's way, grade on a desk against React's arm
-   (or the runtime's rule), one mutant. `tests/helpers/skeleton.js` reads a page the same way in both arms.
+1. **The rest of the printer's own** (README §10 session 12, "Left"): **Drag** (HiveClip's cover, its last 5: React's
+   `drag.ts` is a 637-line hook with a ref, a style and six effects; carry its core as a generated lib, write the hook
+   as `l.watch`es, grade on React's `drag.test.ts` fixture), the streaming nodes (bot-garden), Popup close (needs the
+   popup slot), the nightbook query Fetch (measure whose first). And **owed from session 12: a backend desk for a
+   Record's Fetch and its columns** (members-area's shape; copy HTX-004's Record Desk and `htmlBackendArm`).
+   The pattern for each: copy the React printer's way, grade on a desk against React's arm (or the runtime's rule),
+   one mutant.
 2. **The plan's HTTP URL on a wire** (shared with React): HiveClip's 13, how its window reaches the engine. It blocks
    HTX-007 in both exports; it is plan work, counted apart as R6's was.
 3. **HTX-007** (below), then ThreadSpace's menu (R7).
@@ -39,6 +43,14 @@ blocks the window is the task.
 
 ## Known
 
+- **Session 12's carriers**: a re-tested Condition is an `l.watch` over its test's reads (`conditionDeps`, React's
+  `effectDeps`), never the answer; script files are `lib/projectScripts.js` (React's loader, types stripped at export
+  time), `lib/projectScriptFiles.js` and `project-scripts/<path>.js` (`src/emit/html/projectScripts.ts`); an Animate To
+  Value is `createAnimatedValue` + `keep` + an `l.watch` (`lib/animate.js`, written whenever a part imports it);
+  `lib/util.js` is the 8th generated lib. Specs: `html-a-condition-tests-again`, `html-script-files`,
+  `html-the-small-kinds`.
+- **The arms and time**: the React arm reads before an animation frame runs; the HTML arm waits for two readings to
+  agree, so frames run. Grade a tween at Duration 0 and only where neither arm is mid-tween (§A of the small-kinds spec).
 - **`--component` (HTX-006)**: `nodegx export --target html --component <name> <project> --out-dir <folder>` writes the
   part, the box entry `<Name>.js`, the one stylesheet `<Name>.css`, the cut `styles/<Name>.floor.css`, and
   `nodegx-export.json`. Spec: `tests/html-one-part.test.ts`. Writer: `src/write/writePart.ts`.
@@ -62,7 +74,7 @@ blocks the window is the task.
 - `bin/` runs `dist/`, which is stale: run the CLI from source with
   `npx ts-node --transpile-only -O '{"module":"commonjs"}' src/cli/main.ts export …` in `packages/nodegx-export`.
 - Headless Chrome lays out at 500 px when asked for 390 by window size: use CDP device metrics or a 390 px iframe.
-- Open rows: PROJECTSTAB, CLOUDARM, OPTIONSWIRED, TEXTKEEPS, BOXREMOUNT, PRINTERDECIDES (thirty-five
+- Open rows: PROJECTSTAB, CLOUDARM, OPTIONSWIRED, TEXTKEEPS, BOXREMOUNT, HIDDENRUNS (new, s12), PRINTERDECIDES (thirty-five
   copied decisions, four imported; add any new one there).
 
 ## At the end

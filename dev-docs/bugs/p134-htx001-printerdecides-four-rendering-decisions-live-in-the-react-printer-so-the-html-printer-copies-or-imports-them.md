@@ -75,6 +75,14 @@ controlled change chain for a slider (`changeAttrs` with the `control-event` for
 `Number(value)`, then its Changed; React's `onChange` on a range is the DOM's `input`), and the uncontrolled slider's
 typed-in Value (`defaultValue`). Thirty-five copied in all.
 
+**Session 12 (2026-11-04) copied seven more**, in `printComponent.ts`: a re-tested Condition's dependency list
+(`conditionDeps`, React's `effectDeps` for the leaf reads it meets); External Link's statement whole (the empty-link guard,
+the activation read before the call, the Error message chosen once); a Record Fetch's statement (the Id read once, "Missing
+Id.", `record/storage-op-failed`); an api call's failure arm binding `<errorState>Message` for its Failure chain to read;
+the util call's argument order (a String Mapper's table second); Animate To Value's hook (`useAnimatedValue`'s two
+effects, as `l.watch` and `l.add`); and a Function's `Scripts` bound inside its try. Forty-two copied in all. The script
+loader is React's own text with its types stripped, not a copy.
+
 **What a fix needs:** the plan carries each answer as data (`tagOf[nodeId]`, a `mountedKeeps` flag beside the Mounted
 binding, the merged page declarations, the removed ids), and the three printers read it. AC4's ledger (HTX-005) is
 where a drift would show.

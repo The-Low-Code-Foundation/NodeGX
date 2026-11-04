@@ -77,9 +77,10 @@ menu inside a three.js page, `--component` and its manifest; widened and exporte
 byte-identical), SELECTREFUSED ✅ (10, 11-04, Richard's R6: a task opens in both exports; todo-list's drive equal in all
 three arms at all 12 steps; 80 of the 180 template wires compile, 3 before), session 11 (11-04, Richard: *"if nobody can
 export any kind of complex app or game, we're in trouble"*: reach measured on every template and HiveClip — only small
-apps came out whole; the printer's own gaps 346 → 166, the shared plan's ~1,700 untouched), then the rest of the
-printer's own gaps, the plan's HTTP URL on a wire (HiveClip's engine calls), HTX-007 on a HiveClip copy, ThreadSpace's
-menu**; past the 10-session stop by Richard's rulings, said in the README;
+apps came out whole; the printer's own gaps 346 → 166, the shared plan's ~1,700 untouched), session 12 (11-04: the
+printer's own 148 → 54 — a re-tested Condition, script files, Animate To Value, External Link, a Record's Fetch; 38 of
+the 54 are kit nodes, React components by their authors, R8 asked), then Drag (HiveClip's last 5), the plan's HTTP URL
+on a wire (HiveClip's engine calls), HTX-007 on a HiveClip copy, ThreadSpace's menu**; past the 10-session stop by Richard's rulings, said in the README;
 [P134 README](tasks/phase-134-the-app-in-plain-files/README.md). React and Swift stay paused.
 
 | release | what is in it | state 2026-10-23 |
