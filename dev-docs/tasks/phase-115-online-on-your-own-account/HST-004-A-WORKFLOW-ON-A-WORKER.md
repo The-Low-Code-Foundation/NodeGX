@@ -302,3 +302,78 @@ Six different emails each time, each arriving at the stand-in as its own (no car
 call answered `ok`, including those over 10 ms; Cloudflare's page does not say how strictly 1102 is applied, so
 "over 10 ms answered today" is not a promise. **Left:** a real call's 4–15 ms is the HTTP Request node's path, and an
 isolate's first call 25–27 ms is `setData`; both are the next places to cut if 10 ms is to hold for every call.
+
+## 9. Session 4 — 2026-11-04 (Opus 5.5): where a function call's CPU goes, and a warm-up at startup
+
+The open question from §8.8: a real call cost 4–15 ms CPU and an isolate's first 25–27 against Free's 10 ms. All
+numbers below are `wrangler tail --format json` `cpuTime` on the deploy unless marked Node. The probes were temporary
+doors on `hst-spike-worker`, removed before the last deploy (`dcd1c3ef`).
+
+### 9.1 What Cloudflare's own page says
+
+*"Each isolate has some built-in flexibility to allow for cases where your Worker infrequently runs over the configured
+limit"*; one that *"starts hitting the limit consistently"* is terminated (1102). Waiting on `fetch()` does not count.
+Startup has its own limit: 1 s to evaluate the global scope (error 10021 past it). (developers.cloudflare.com/workers/platform/limits, read 2026-11-04.)
+
+### 9.2 Cloudflare is not the cost
+
+| door (no NodeGX code) | warm | first calls on a new version |
+|---|---|---|
+| echo the body | **0 ms** (40 of 40 after warm-up) | 3–10 |
+| a bare `fetch` to the stand-in Worker | **1 ms** | 7–8 |
+| allocate 200 KiB of short-lived objects (one call's garbage, measured on Node) | **1 ms** median, 1 of 30 ≥ 10 | 8–13 |
+| allocate 1000 KiB | 4 ms median, 2 of 30 ≥ 10 | 9–15 |
+
+So allocation and GC do not explain the spikes (a refused `subscribe` allocates ~166 KiB on Node and spiked far more
+often than the 200 KiB door, same isolates, interleaved).
+
+### 9.3 The spikes are cold isolates
+
+Interleaved on one version (40 rounds each): a two-node cloud function (Request → Response) had 6 of 40 calls ≥ 10 ms
+(max 35) and a refused `subscribe` 9 of 40 (max 23), **all in the first ~15 rounds**. The echo door's own first calls
+(0 9 4 4 10 …) show about six isolates starting. After that, both functions answered at **1–2 ms**. Each isolate pays
+loading the bundle and V8 compiling the interpreter's code the first time it runs; a site with dozens of users mostly
+meets isolates that are cold, so for it that IS the typical call.
+
+Node agrees on the shape (first call 8–10 ms, warm 0.3–1.5 ms; `--single-threaded` changes nothing) and is 3–6× cheaper.
+The interpreter's work has no single hot spot (first call: the graph's update 2.2 ms, building the component 1.2 ms,
+`setData` 0.4 ms, the rest spread).
+
+### 9.4 A warm-up at startup (in the spike Worker, no runtime change)
+
+`src/worker.ts` now loads the bundle and runs every function at startup, from the 1 s allowance. The global scope
+refuses timers and I/O, so for the warm-up only `setImmediate` becomes a microtask, `setTimeout` a no-op, `fetch`
+answers a canned 200 and a Secret reads a dummy; all are put back at the first request (`leaveStartup`), not when the
+warm-up settles, because a left-over update may still call `setImmediate` during startup. The body comes from each
+Request node's declared fields (`params`, `ptype-*`), so it passes validation for any project. Each answer carries
+`x-warmed-at-startup: yes|no|pending`.
+
+| deploy | two-node fn | refused `subscribe` | real `subscribe`, right after the deploy | startup |
+|---|---|---|---|---|
+| no warm-up (`f8709f09`, `4b406fa8`) | 6/40 ≥ 10, max 35 | 9/40, max 23 | 6/20, max 33 | 53–89 ms |
+| warm-up, 1 run (`1891e6c1`, `28f6f0b1`) | **0/40, max 9** | **2/40** (the first two) | 7/20, max 17 | 53–115 ms |
+| warm-up, 20 runs (`dcd1c3ef`, live) | — | 1/8 | 4/20, max 18 | 140 ms |
+
+Node: the first real call 9.8 → 1.7–2.7 ms; 0 requests leave the Worker during the warm-up. The digest workflow
+(the cron's path) runs `success` on the warmed version (15:12:59 UTC, by hand).
+
+**Read honestly:** the warm-up removes the bundle load and halves the worst call (33 → 17–18), and the simple paths fit.
+A real call on a fresh isolate still reaches 10–18 ms in about one call in five for its first ~20 calls; 20 warm runs
+are not distinguishable from one at n = 20. The left-over is the real path's first uses per isolate (the bare fetch
+door's own first calls are 7–8 ms), which a stubbed `fetch` cannot pre-pay.
+
+### 9.5 Over the whole day: Free answered every call
+
+337 function calls on the tail today, **52 at or over 10 ms (max 35), all 337 `ok`, 0 `exceededCpu`**. That is the
+"infrequently runs over" case, and it held under bursts of 20–40 calls on fresh isolates. It is not a promise: the
+flexibility has no published number. For R6 this means: one Worker on Free is fine for a small site as measured; the
+warm-up is worth carrying into the deploy target (HST-003) because it costs nothing on a call.
+
+### 9.6 Instruments (for the next CPU question)
+
+- Node reproduces the shape, not the size: use it to find WHAT, the tail to find HOW MUCH.
+- workerd's inspector profiler (via `wrangler dev --inspector-port`) is useless for CPU: it counts time awaiting
+  `req.json()` as samples (785 ms over ten calls of 7–10 ms wall). Its websocket also refuses a client without an
+  `Origin` header (`Origin: https://devtools.devprod.cloudflare.dev` works).
+- `wrangler dev`'s local observability (`/cdn-cgi/local/explorer/api/local/observability/query`) has no CPU time.
+- The stand-in received the probe's bare fetches (`{"probe":true,…}`) and ~90 `cpu-*@example.com` subscriptions today.

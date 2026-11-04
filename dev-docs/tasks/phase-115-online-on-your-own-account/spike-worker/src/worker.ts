@@ -12,7 +12,8 @@
  *     cron, which fires the project's schedule triggers, and (session 2) `POST /functions/<name>`, the door the exported
  *     page's Cloud Function node calls: the project's cloud functions, built by the editor's own bundler (build.mjs),
  *     run by the cloud runtime's CloudRunner the way `HttpServer.runFunction` runs them: one runner per isolate,
- *     loaded on the first call and reused (P115-HST004-WARMRUNNER fixed; a fresh one cost 11–32 ms CPU a call).
+ *     reused (P115-HST004-WARMRUNNER fixed; a fresh one cost 11–32 ms CPU a call), loaded and run once at startup
+ *     (HST-004 §9: an isolate's first calls cost 10–35 ms otherwise). `x-warmed-at-startup` on each answer says so.
  */
 import { WorkflowEngine } from '@backend/workflow/WorkflowEngine';
 import { CompositeStepExecutor } from '@backend/workflow/steps/CompositeStepExecutor';
@@ -72,13 +73,95 @@ const json = (v: unknown, status = 200) =>
  * and the Response node's status and body sent back unchanged (the client reads `{ result }` or `{ error }` from it).
  */
 /**
- * One runner per isolate, as the backend keeps one per process. A failed load is not kept, so the next call retries.
- * Built at startup (registering every node type is synchronous), so it is paid from the startup allowance (1 s CPU)
- * rather than the first call's (10 ms on Free); the bundle is loaded on the first call (its `setData` uses timers,
- * which a Worker's global scope refuses).
+ * One runner per isolate, as the backend keeps one per process, built, loaded and run once at startup (below), so all
+ * of it is paid from the startup allowance (1 s CPU) rather than from the first calls' 10 ms each. If the warm-up
+ * fails, the bundle is loaded on the first call instead; a failed load is not kept, so the next call retries.
  */
 const runner0 = new CloudRunner({});
 let runnerReady: Promise<CloudRunner> | null = null;
+
+type BundleNode = { type: string; parameters?: Record<string, unknown> };
+type BundleComponent = { name: string; nodes: BundleNode[] };
+
+/** A body every declared field of a function's Request node accepts: what one warm-up run sends. */
+function warmUpBody(c: BundleComponent): Record<string, unknown> {
+  const p = c.nodes.find((n) => n.type === 'noodl.cloud.request')?.parameters ?? {};
+  const body: Record<string, unknown> = {};
+  for (const f of String(p.params ?? '').split(',').map((s) => s.trim()).filter(Boolean)) {
+    const t = p[`ptype-${f}`];
+    body[f] = t === 'number' ? 0 : t === 'boolean' ? false : t === 'array' ? [] : t === 'object' ? {} : 'warm-up@example.com';
+  }
+  return body;
+}
+
+/**
+ * Warm the runner at STARTUP, from the 1 s startup allowance instead of the first calls' 10 ms each: load the bundle
+ * and run every function once. Measured on the deploy (HST-004 §9): a cold isolate's first cloud calls cost 10–35 ms
+ * (loading the bundle, then V8 compiling the interpreter's code the first time it runs); a warm one 1–2 ms.
+ *
+ * A Worker's global scope refuses timers and I/O, so for the warm-up only: timers become microtasks (a run's own
+ * timeout and the HTTP node's abort timer become no-ops), `fetch` answers a canned 200 without leaving the Worker,
+ * and any Secret reads a dummy value. All of it is put back before the first request.
+ */
+const WARM_RUNS = 20;
+function warmAtStartup(): Promise<CloudRunner> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const g = globalThis as any;
+  const saved = { si: g.setImmediate, st: g.setTimeout, ct: g.clearTimeout, fetch: g.fetch, secret: g._noodl_get_secret };
+  g.setImmediate = (f: (...a: unknown[]) => void, ...a: unknown[]) => queueMicrotask(() => f(...a));
+  g.setTimeout = () => 0;
+  g.clearTimeout = () => {};
+  g.fetch = async () => new Response('{}', { status: 200, headers: { 'content-type': 'application/json' } });
+  g._noodl_get_secret = () => ({ found: true, value: 'warm-up' });
+  const restore = () => {
+    g.setImmediate = saved.si;
+    g.setTimeout = saved.st;
+    g.clearTimeout = saved.ct;
+    g.fetch = saved.fetch;
+    g._noodl_get_secret = saved.secret;
+  };
+  const components = (functionsBundle as unknown as { components: BundleComponent[] }).components;
+  // Put back at the first request, not when the warm-up settles: a microtask the warm-up leaves behind (the runtime's
+  // next update) may still call `setImmediate` during startup, where the real one throws.
+  restoreAtFirstRequest = restore;
+  return (
+    runner0
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .load(functionsBundle as any)
+      .then(async () => {
+        // WARM_RUNS, not one: V8 compiles a function to faster code only after it has run a number of times, so one
+        // run pays the load and first compile but leaves an isolate's next ~10 real calls at 8–17 ms (HST-004 §9).
+        for (let i = 0; i < WARM_RUNS; i++) {
+          for (const c of components) {
+            await runner0
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              .run(c.name.replace(/^\/#__cloud__\//, ''), { body: JSON.stringify(warmUpBody(c)), headers: {} } as any)
+              .catch(() => null);
+          }
+        }
+      })
+      .then(() => runner0)
+  );
+}
+let restoreAtFirstRequest: (() => void) | null = null;
+/** The first request puts back what the warm-up replaced (timers, fetch, the secret reader), before `install(env)`. */
+function leaveStartup(): void {
+  if (!restoreAtFirstRequest) return;
+  restoreAtFirstRequest();
+  restoreAtFirstRequest = null;
+}
+let warmedAtStartup: 'pending' | 'yes' | 'no' = 'pending';
+try {
+  runnerReady = warmAtStartup();
+  runnerReady.then(
+    () => (warmedAtStartup = 'yes'),
+    () => ((warmedAtStartup = 'no'), (runnerReady = null))
+  );
+} catch {
+  warmedAtStartup = 'no';
+  runnerReady = null;
+}
+
 function warmRunner(): Promise<CloudRunner> {
   if (!runnerReady) {
     const r = runner0;
@@ -98,7 +181,7 @@ async function runFunction(name: string, req: Request): Promise<Response> {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const out: any = await runner.run(name, { body: JSON.stringify(body), headers } as any, { timeoutMs: 10000 });
-    return new Response(out.body, { status: out.statusCode, headers: { 'content-type': 'application/json' } });
+    return new Response(out.body, { status: out.statusCode, headers: { 'content-type': 'application/json', 'x-warmed-at-startup': warmedAtStartup } });
   } catch (e) {
     // As WorkflowRunner answers them: a body the Request node's declared contract refuses is the caller's 400 (CWF-014),
     // a graph that never reached a Response is a 504, anything else is a 500.
@@ -113,6 +196,7 @@ async function runFunction(name: string, req: Request): Promise<Response> {
 
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
+    leaveStartup();
     install(env);
     const url = new URL(req.url);
     const fn = /^\/functions\/([^/]+)$/.exec(url.pathname);
@@ -131,6 +215,7 @@ export default {
   },
 
   async scheduled(event: ScheduledController, env: Env): Promise<void> {
+    leaveStartup();
     install(env);
     for (const t of file.triggers || []) {
       if (t.type !== 'schedule' || t.enabled === false || t.schedule?.cron !== event.cron) continue;
