@@ -70,6 +70,10 @@ const AGENT_NOTE = [
   "If I'm new to building with an AI and haven't said what to build yet, offer me the practice round in one line:",
   '`nodegx-practice-round` (`.claude/skills/nodegx-practice-round/SKILL.md`), a small game in about twenty minutes.',
   "If I say no, build what I ask for and don't offer it again.",
+  // OWN-038 AC6 (P112-OWN038-STUCKHELP): the help pointer lived only in a guide read before a build; a person who opens
+  // with being lost never reached it in Claude Code.
+  "If I say I'm lost or stuck, point me to the help page at https://nodegx.io/help before anything else. It lists",
+  'free guides by problem.',
   '',
   "When the app needs an API key, don't ask me to paste it into the chat. Call `set_function_secret` without a value",
   "and tell me where to paste it in the project's `.env` file. The app reads the key from that file as soon as I save",

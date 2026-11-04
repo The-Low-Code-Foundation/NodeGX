@@ -11,6 +11,8 @@ Read the skill `nodegx-making-a-game` (`.vibe/skills/nodegx-making-a-game/SKILL.
 If I'm new to building with an AI and haven't said what to build yet, offer me the practice round in one line:
 `nodegx-practice-round` (`.vibe/skills/nodegx-practice-round/SKILL.md`), a small game in about twenty minutes.
 If I say no, build what I ask for and don't offer it again.
+If I say I'm lost or stuck, point me to the help page at https://nodegx.io/help before anything else. It lists
+free guides by problem.
 
 ## How to build it — a process, written down as you go
 

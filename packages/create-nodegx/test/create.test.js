@@ -151,6 +151,8 @@ test('P112 OWN-036: the folder gets what our builds learned, as two skills the a
   assert.match(AGENT_NOTE, /The one exception is a game whose world moves on its own/);
   // OWN-038 (Richard 2026-11-04, P112-OWN037-SECONDSERVER): that world is one plain page, never a second server
   assert.match(AGENT_NOTE, /plain-code page in its own folder that opens by itself\. Don't make a NodeGX app open it from a second server/);
+  // OWN-038 AC6 (P112-OWN038-STUCKHELP): a person who opens with being lost is pointed to the help page from the note itself
+  assert.match(AGENT_NOTE, /If I say I'm lost or stuck, point me to the help page at https:\/\/nodegx\.io\/help before anything else/);
   // P130: the skill carries knowledge, never an obligation; its spine is the loop with the person.
   const first = fs.readFileSync(path.join(dir, '.claude', 'skills', 'nodegx-first-project', 'SKILL.md'), 'utf8');
   for (const heading of ['## Ask once, then build', '## The app arrives in rounds', "## Don't build what nobody asked for yet", '## Which parts are NodeGX']) {
@@ -192,6 +194,9 @@ test('P112 OWN-038: all three kits write the practice round, and each folder not
     const notes = fs.readFileSync(path.join(dir, 'AGENTS.md'), 'utf8');
     assert.ok(notes.includes(`\`nodegx-practice-round\` (\`${folder}/skills/nodegx-practice-round/SKILL.md\`)`), dir);
     assert.match(notes, /If I say no, build what I ask for and don't offer it again\./);
+    // AC6 (P112-OWN038-STUCKHELP): the stuck are pointed to the page from the note, not only from a guide read before a build
+    assert.match(notes, /If I say I'm lost or stuck, point me to the help page at https:\/\/nodegx\.io\/help before anything else\./, dir);
+    assert.doesNotMatch(notes, /book a call|calendar/i, dir);
   }
   // R1: the first-project guide names the signs of trouble, offers the round once, and points the stuck to the page
   const first = fs.readFileSync(path.join(plain, '.claude', 'skills', 'nodegx-first-project', 'SKILL.md'), 'utf8');
