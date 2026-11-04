@@ -1,6 +1,6 @@
 # HST-004 — A workflow on a Worker, no VM
 
-**Opened 2026-10-07.** **Depends on HST-002, P107 (server-side nodes).** **Status: 🟡 session 1 done 2026-11-04 (local, on workerd); the deploy on Richard's account is next.** Kind: experiment.
+**Opened 2026-10-07.** **Depends on HST-002, P107 (server-side nodes).** **Status: 🟡 session 2 built the deploy and the page → cloud function path, measured locally on workerd 2026-11-04; the deploy waits on Richard's `wrangler login` (§7.5).** Kind: experiment.
 
 ## 1. The person sentence
 
@@ -109,3 +109,73 @@ Filed as **P115-HST004-WARMRUNNER**. A runner per request works and costs about 
    from the exported page's form.
 4. After BWF-012 lands: the transport in `http.ts` (P115-HST004-HTTPLOOKUP), and the shim deleted.
 
+
+## 7. Session 2 — 2026-11-04 (Opus 5.5): a real project's page and cloud function on the same Worker, ready to deploy
+
+Wrangler was not logged in (`wrangler whoami`: *You are not authenticated*), so §6.6 step 1 is still Richard's, and
+everything below was built for that deploy and measured locally under `wrangler dev` 4.157 (workerd). Session 1's files
+were committed first (`5693c836f`); they had been left uncommitted.
+
+### 7.1 What was built
+
+| file | what |
+|---|---|
+| `fixtures/b-newsletter/` | **Fixture B as a NodeGX project the MCP wrote** (HST-002's method): `create_project`, then `create_component` / `update_component`, 0 errors. One page (an email field, Subscribe, a line for each outcome) whose Cloud Function node calls `subscribe`; the cloud function `subscribe` is Request (`email`, required, string) → Secret `MAILCHIMP_KEY` → HTTP Request (POST, JSON body, Bearer) → Response, and a failure Response on each path that can fail. **No code node**, so §6.4's last row does not bite. `MUST.md` is the online list (6 lines). The automations file from session 1 sits beside it, unchanged |
+| `spike-worker/build.mjs` | Builds the cloud functions with the editor's own bundler (`packages/noodl-mcp/dist/cloud-bundle.cjs`, the one Deploy and `deploy_cloud_functions` run) into `dist-local/`, or with `https://<host>` into `dist-deploy/` with the automations, every `127.0.0.1:8799` aimed at the public stand-in. Carries the BUNDLEDROPS shim (§7.3) |
+| `spike-worker/export-page.mjs` | The page as plain HTML into `public/`, from a copy, with the two deploy-time edits of §7.4 |
+| `src/worker.ts` | A third door, `POST /functions/<name>`: the bundle into a fresh `CloudRunner` per request (WARMRUNNER), the body and headers handed on as `HttpServer.runFunction` does, the Response node's status and body sent back unchanged; a contract refusal is a 400 and a timeout a 504, as `WorkflowRunner` answers them |
+| `src/stand-in-worker.ts`, `wrangler.stand-in.toml` | The public stand-in Mailchimp: a second Worker that answers 200 and logs method, path, body and a **fingerprint** of the Authorization header (length + 12 hex of SHA-256), never the header. `fingerprint.mjs` prints the expected one from `.dev.vars` |
+| `wrangler.toml` | `global_fetch_strictly_public` (a Worker fetching another Worker on the same account is refused with error 1042 without it, [Cloudflare's errors page](https://developers.cloudflare.com/workers/observability/errors/); not yet measured on a deploy), `[observability]` on, `/functions/*` runs the Worker first |
+| `package.json` | `deploy:stand-in`, and `deploy` with `--alias` for both bundled files (measured: the alias wins over the tsconfig path, 2 public addresses and 0 local ones in the dry-run bundle) |
+
+### 7.2 Measured (local, workerd)
+
+| # | reading | result |
+|---|---|---|
+| 1 | The Worker with the engine, the cloud runtime and the page | ✅ 2.46 MB, 547 KB gzipped (free tier: 3 MB); the stand-in Worker 1.3 KB |
+| 2 | The project's cloud bundle | ✅ built by the editor's bundler, `failures: []`, 2.5 KB; ❌ **2 of its 10 wires missing** (§7.3) |
+| 3 | `POST /functions/subscribe` `{"email":"ada@example.com"}`, before the shim | ⚠️ `200 {"result":{"subscribed":true,"status":200}}`, but the stand-in got `{"status":"subscribed"}`: **no email, no Authorization**, 4 calls of 4 |
+| 4 | The same, with the shim | ✅ 200; the stand-in got `{"email_address":"ada@example.com","status":"subscribed"}` and the Bearer key (fingerprint `len 37`, matching); a second call through the same Worker answers too (fresh runner each time) |
+| 5 | `{}` | ✅ 400 `function/bad-request`, *"email" is required*, field named; nothing reached the stand-in |
+| 6 | The key in any answer, in `public/` | ✅ 0, 0 |
+| 7 | The page's own files from the Worker | ✅ 11 modules 200 `text/javascript`; `/` serves `index.html`. **Not opened in a browser** (Chrome hangs in this sandbox): the phone is the reading, on the deploy |
+| 8 | The cron `0 8 * * *` beside the new door | ✅ the digest call arrived with the key |
+
+### 7.3 The bundler drops the wires that carry the secret (P115-HST004-BUNDLEDROPS, high)
+
+On disk, `components/__cloud__/subscribe/connections.json` has 10 wires; the bundle has 8. The two lost are the only
+two into the HTTP Request's runtime-made ports: `pm-email → body-email_address` and `value → auth-authToken`. A wire
+into a Response node's runtime-made port survives. The function then calls the API without the email or the key and
+still answers success. Likely cause, read and not measured: `exportComponent` drops a wire `getConnectionHealth`
+calls an error, and `net.noodl.HTTP` has no editor-side port adapter (Request and Response have
+`CloudDynamicPortsAdapter`), so a process with no viewer never has its `body-*` / `auth-*` ports. This is not
+Cloudflare's: the same bundle is what a NodeGX backend is sent. **Not measured: the editor's Deploy button with a
+viewer running, and a browser export with the same wiring.** The spike's `build.mjs` restores the lost wires from the
+project's own file and prints which.
+
+### 7.4 How a page reaches its own Worker (for the deploy target, HST-003)
+
+- The exporter prints a real client only when the project declares a backend (`metadata.cloudservices` with an
+  endpoint and an app id). Without one, every Cloud Function node is a stub that fails *"No cloud services defined in
+  this project."*, as the interpreter does. A page on a Worker has no backend address to declare, so the deploy has to
+  supply one.
+- `env.js` overrides the endpoint, and an **empty** endpoint is what "this origin" needs: `'/'` would make
+  `${ENDPOINT}/functions/x` into `//functions/x`, a protocol-relative URL to a host named `functions`. So a Cloudflare
+  target writes `VITE_NODEGX_ENDPOINT: ''`; that is what `export-page.mjs` does, on a copy, without touching the project.
+
+### 7.5 The deploy, in order (§6.6 steps 1–2, ready to run)
+
+```
+cd dev-docs/tasks/phase-115-online-on-your-own-account/spike-worker
+npx wrangler login                       # Richard: a browser page on his screen
+npm run deploy:stand-in                  # → https://hst-stand-in.<subdomain>.workers.dev
+node build.mjs https://hst-stand-in.<subdomain>.workers.dev
+node export-page.mjs
+npx wrangler secret put MAILCHIMP_KEY    # Richard types a key (any text: the stand-in only fingerprints it)
+npm run deploy                           # → https://hst-spike-worker.<subdomain>.workers.dev
+```
+
+Then: Subscribe from his phone (MUST lines 1–5), read the stand-in's log in the dashboard (Workers & Pages →
+hst-stand-in → Logs) or `npx wrangler tail hst-stand-in`, compare the fingerprint, and read it again on day 2 after
+08:00 UTC (MUST line 6). The secret is set before the deploy that reads it, but the Worker must exist first:
+if `secret put` asks to create it, say yes.

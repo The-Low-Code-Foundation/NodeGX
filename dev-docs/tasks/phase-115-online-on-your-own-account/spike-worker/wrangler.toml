@@ -1,7 +1,9 @@
 name = "hst-spike-worker"
 main = "src/worker.ts"
 compatibility_date = "2026-10-01"
-compatibility_flags = ["nodejs_compat"]
+# global_fetch_strictly_public: the API step may call another Worker on the same account (the stand-in); without it,
+# Cloudflare refuses a Worker-to-Worker fetch with error 1042.
+compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
 
 # The project's schedule triggers, as Worker crons. A real target writes this list from nodegx.automations.json.
 [triggers]
@@ -15,4 +17,8 @@ crons = ["0 8 * * *"]
 # The front end: the HTML export, served by the same Worker (one origin, one deploy). The Worker runs first only for its doors.
 [assets]
 directory = "./public"
-run_worker_first = ["/workflows/*"]
+run_worker_first = ["/workflows/*", "/functions/*"]
+
+# Every run's console line kept in the dashboard (Workers & Pages → hst-spike-worker → Logs).
+[observability]
+enabled = true

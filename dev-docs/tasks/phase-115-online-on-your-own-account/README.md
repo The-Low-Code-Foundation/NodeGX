@@ -220,6 +220,7 @@ Cloudflare-first (shape B, then C on D1), ahead of the VM rows; the twelve-run c
 | session | date | what | where |
 |---|---|---|---|
 | 1 | 2026-11-04 | The backend's own workflow engine on workerd, locally: a workflow carrying a secret, a schedule trigger, the cloud-function interpreter, and the HTML export served by the same Worker. Two defects filed (HTTPLOOKUP, WARMRUNNER) | [HST-004 §6](HST-004-A-WORKFLOW-ON-A-WORKER.md#6-session-1--2026-11-04-opus-55-the-backends-own-engine-on-workerd-locally) |
+| 2 | 2026-11-04 | Fixture B written by the MCP (a page, a cloud function `subscribe` with a Secret and an HTTP Request, no code node); the page and `/functions/<name>` on the same Worker, measured on workerd: the email and the key reach the stand-in, a missing email is a 400, the cron still fires. The editor's cloud bundler drops the wires into the HTTP Request's body and auth (BUNDLEDROPS, high; shimmed in the spike). The deploy is scripted and waits on Richard's `wrangler login` | [HST-004 §7](HST-004-A-WORKFLOW-ON-A-WORKER.md#7-session-2--2026-11-04-opus-55-a-real-projects-page-and-cloud-function-on-the-same-worker-ready-to-deploy) |
 
 **The estimate after session 1:** the narrow proof stays at 2 (session 2 deploys it on Richard's account and puts a
 cloud function behind the page's form). Full stack moves to **7–8**: a cloud function's code nodes cannot run on a

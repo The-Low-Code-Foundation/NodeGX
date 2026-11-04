@@ -31,6 +31,9 @@
       ],
       "@noodl/runtime/*": [
         "../../../../packages/noodl-runtime/*"
+      ],
+      "project-functions": [
+        "./dist-local/cloud-bundle.json"
       ]
     }
   }

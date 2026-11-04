@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "7e2bb158-f5d5-52ca-8dea-0be85a84e2bf",
+  "name": "subscribe",
+  "path": "/#__cloud__/subscribe",
+  "type": "cloud",
+  "created": "2026-11-04T10:25:23.005Z",
+  "modified": "2026-11-04T10:25:29.837Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Adds the email the page sent to the newsletter list, with the list's API key read from the project's secrets on the server, so the key never reaches the browser."
+}

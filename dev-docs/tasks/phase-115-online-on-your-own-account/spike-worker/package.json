@@ -3,8 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
-    "build": "wrangler deploy --dry-run --outdir dist"
+    "dev": "node build.mjs && wrangler dev",
+    "build": "wrangler deploy --dry-run --outdir dist",
+    "deploy:stand-in": "wrangler deploy -c wrangler.stand-in.toml",
+    "deploy": "wrangler deploy --alias project-automations:./dist-deploy/nodegx.automations.json --alias project-functions:./dist-deploy/cloud-bundle.json"
   },
   "devDependencies": {
     "wrangler": "^4.157.0"
