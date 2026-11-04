@@ -148,3 +148,69 @@ What the drive found (fixed in `fc1bc86`):
   reuse steps writes `run-workflow`) can run now: `list_backend_workflows` does not yet say who runs a piece.
 - Asks for Richard: a workflow nothing starts now lists as a reusable piece (his `qzdzqzzq`); a new Run a workflow
   step starts on the FIRST piece in the file, not the newest.
+
+## s18 (2026-11-04): Build 3 (*Make a reusable piece*) built; AC2 green in the Electron app by presses
+
+nodegx-studio `2d11ca5`. Studio only, no engine change.
+
+**Choosing.** A shift-press on a step's card chooses it (dashed outline); the step picked before the first shift-press
+is chosen too, so "press one, shift-press another" chooses both. A plain press, Esc, *Clear* or opening another
+workflow leaves the choice. The canvas hint says "Shift-press steps to make a reusable piece of them." A bar under the
+workflow's buttons: "Steps 4 and 5 chosen" (the numbers on their cards: two unnamed steps running one function have
+the same title), *Make a reusable piece*, *Clear*, and when they cannot be one piece, why, in words, the button off.
+
+**When they can be one piece** (`automations.mjs pieceFrom`, pure, throws the sentence):
+- one way in: one chosen step that the start, or a step outside them, leads to ("These steps have 2 ways in: …");
+- at most one way out, the plain next of their only last step ("These steps have 2 ways out: “Branch (IF)” leads on to
+  … and … on Yes. A piece comes back to one place."; a single way out on one side only is refused too: after a piece,
+  what comes next always runs);
+- no Return or Stop among them ("… ends the whole workflow: in a piece it would end only the piece");
+- no step after them reads a moved step other than the last ("only the answer of its last step, … comes back out"),
+  and no Merge after them (it collects by step name).
+
+**What *Make it* writes** (the piece first, then the workflow, each through `saveAutoWf`):
+- the piece: the chosen steps, entry the way-in step, then a Return of `upstream.<last>` (none when the last step has
+  sides: the engine answers with it). No trigger.
+- each value the moved steps read from before them (`body.*`, `trigger.*`, `upstream.<outside>.*`, the way-in step's
+  `previous.*`) is sent by name, one name per path, named by its last part (`upstream.x.items.0.name` → `name`;
+  `result` and positions skipped; a clash gets `_2`). Inside the piece each reads `body.<name>`. A Validate rule's
+  `path` (a plain string, not a `$path`) is rewritten the same. What a step reads without saying is made explicit
+  first: a list kind's `items` (the catalog's `previous.items` default), a Return's value.
+- the workflow: one *Run <piece>* step where the moved steps were (in the file's place of the way-in step, every wire
+  into it moved to the Run step, its `next` the way out). After it, `upstream.<last>…` reads `upstream.<run>.result…`
+  and the next step's `previous…` reads `previous.result…`, so the workflow answers what it did.
+- The form's note says what moves, what is sent, and that a moved function step is given what the piece is sent, not
+  what started the workflow (a call-function's request body is the run payload + params + previous: inside a piece
+  that payload is the piece's). Said, not refused.
+
+**Gates.** check:automations unit lines 181/181 (19 for `pieceFrom`: TriggerTest's two steps, the Return that said
+nothing, every refusal named, sends and their rewrites through formulas, `$literal` and Validate paths, a filter's
+unsaid items and the step after it); two mutants red (drop the `previous.result` rewrite: 179/181; send nothing:
+177/181). The Chrome drive 209/209 with `NODEGX_REPO` (a Build 3 block of 9: a four-step workflow answering "HELLO
+KITCHEN", a Return chosen refused in words, picked + shift-pressed chosen, the form's note, the piece and the runner in
+the file, the same answer after), 100/100 on the kit (not graded there). check:editor 262/262, check:app 67/67,
+check:hosted 46/46 (45/46 on the first run: *Delete type*, P132-HOSTEDRATELIMIT, its toast a leftover; green on re-run).
+
+**AC2 in the Electron app** ([greenhouse-drive-bwf013-ac2.mjs](greenhouse-drive-bwf013-ac2.mjs), presses, a
+shift-press is a press with modifier 8): TriggerTest tested on a Plant, its Return's output `{"returned":true,"value":
+{"result":{"checked":1,"changed":0}}}`. Transform + Branch shift-pressed: "These steps have 2 ways out …", Make off;
+Clear. call-function-2 pressed, call-function shift-pressed: "Steps 4 and 5 chosen"; *Make a reusable piece*, "Check
+twice", *Make it*. The file: `check-twice` = the two function steps and a Return of `upstream.call-function`, no
+trigger; TriggerTest = transform, branch (its Always now on `run-workflow`), `run-workflow` → `first`, whose value is
+now `previous.result`. The backend has both. Tested again: the same output, a number in it (the Return's input shows
+the piece's wrapped answer, `{result: {result: …}, run}`: the rewrite is what kept it the same). *Open that run* on the
+Run step lit the piece's three steps and named TriggerTest.
+
+🔴 The drive's first version compared `rec.output` before and after: the run record HAS no `output` (its keys:
+`id, workflowId, …, steps, kind`), so "the same answer" was `null === null` and passed. The Return step's recorded
+`outputData` is the answer; the drive now also asserts a number is in it.
+
+**Not done (next):**
+- Build 4: the NodeGX editor draws `run-workflow` (`control: 'workflow'` is new to it, NOT CHECKED). Making a piece
+  from a selection in the editor is not in the task.
+- AC3's agent round: an agent asked to reuse steps across two workflows writes `run-workflow`.
+  `list_backend_workflows` does not yet say who runs a piece.
+- A piece's answer read after it says "result › checked · from Run Check twice" when the piece returned a function
+  step's whole answer (`pathWords` drops one `result`, the function's own is the second). Correct, wordy.
+- Asks for Richard: a moved function step is SAID to be given what the piece is sent, not refused; the bar names steps
+  by their card numbers.

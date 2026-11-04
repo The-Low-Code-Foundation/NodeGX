@@ -1,5 +1,40 @@
 # P132 — next session
 
+**s18 (2026-11-04): BWF-013 Build 3 built in Studio (*Make a reusable piece*); AC2 green in the Electron app by presses.**
+- nodegx-studio `2d11ca5`: shift-press steps on a workflow's canvas (the step picked first is chosen too), a bar
+  "Steps 4 and 5 chosen" with *Make a reusable piece* or, when they cannot be one, why in words. The steps move into a
+  new piece ending in a Return of their last step's answer; one *Run <piece>* step takes their place, sending what they
+  read from before them; what read the last step after them reads the piece's answer. `automations.mjs pieceFrom`
+  (pure). [The record](BWF-013-A-REUSABLE-PIECE-IS-A-WORKFLOW-OTHERS-RUN.md#s18-2026-11-04-build-3-make-a-reusable-piece-built-ac2-green-in-the-electron-app-by-presses).
+- AC2 ([greenhouse-drive-bwf013-ac2.mjs](greenhouse-drive-bwf013-ac2.mjs)): TriggerTest's two Check thirst steps made
+  into "Check twice"; its test answered `{checked: 1, changed: 0}` before and after.
+- Gates: check:automations 181/181 + drive 209/209 (`NODEGX_REPO`), 100/100 on the kit; check:editor 262/262;
+  check:app 67/67; check:hosted 46/46 (45/46 once: P132-HOSTEDRATELIMIT, green on re-run).
+
+**Next, in this order:**
+1. **Build 4: the NodeGX editor draws `run-workflow`.** Measured, not driven: `workflowNodeLibrary.ts portTypeForParam`
+   maps a served `control` only through `PORT_TYPE_FOR_CONTROL` (`workflowPorts.ts:194`: retry-backoff, transform
+   output, validate rules); an unknown control falls through to the param's TYPE. So the editor shows `workflow`
+   (type string) as a text box holding the piece's id, and `send` (type object, control `key-values`) as whatever
+   `object` gives. Wanted: the piece picked by name (pieces first, rings not offered: port Studio's `wouldRing`), the
+   card titled "Run <piece>" (s10's `usePortAsLabel` pattern), `send` as named values, and opening the piece.
+   Drive it in the editor on a Greenhouse copy (`editor-drive.cjs`, s9's recipe below).
+2. **AC3's agent round**: an agent asked to reuse steps across two workflows writes `run-workflow`. First make
+   `list_backend_workflows` say who runs a piece (MCP), or the agent can only grep.
+3. Then BWF-008's AC2 crossing and the s11 list below, then BWF-009, the test.
+
+- 🔴 **A "same before and after" check needs a value in it**: the run record has no `output` field, so comparing
+  `rec.output` compared `null` with `null` and passed. The answer is the Return step's `outputData`; assert a number
+  (or the expected text) is in it before comparing.
+- 🔴 A comment written as `// …` at the end of an attribute in an `h(...)` call comments out the rest of that line
+  (the card's `style`): `node --check` on the extracted module caught it. Use `/* … */` mid-line.
+- 🔴 A Chrome-gate shift-press is `el.dispatchEvent(new MouseEvent('click', { bubbles: true, shiftKey: true }))`; in
+  the Electron drive, `Input.dispatchMouseEvent` with `modifiers: 8` on move, press and release.
+- Asks for Richard: a moved function step is SAID ("it is given what the piece is sent"), not refused; the bar names
+  the chosen steps by their card numbers (two unnamed steps running one function share a title).
+
+---
+
 **s17 (2026-11-04): BWF-013 Build 2 built in Studio; AC1 green in the Electron app by presses.**
 - nodegx-studio `c60dee2` + `fc1bc86`: *Reusable pieces* = the workflows no trigger starts, with *New* (a name and a first
   step), each row saying who runs it; cloud functions under *Made by the agent*. A *Run a workflow* step: the piece by
