@@ -151,9 +151,20 @@ describe('§C todo-list, S2\'s work list', () => {
   const BACKEND = /a api-call action|a query-fetch action|session-get expression|query-get expression|a record query|reads Noodl/;
   const REACT_TOO = /the plan feeds it no items, so the React export does not draw its rows either/;
 
-  it('C1 of the 334 things S1 read and did not print, S2 left 44 (39 the backend); with S3\'s backend, 5 are left, each undrawn in React too', () => {
-    expect(losses).toHaveLength(5);
-    expect(losses.filter((l) => !REACT_TOO.test(l))).toEqual([]);
+  /**
+   * P134 session 10 (P134-HTX004-SELECTREFUSED, in the plan): todo-list's six ways of opening something, View's toggle and
+   * the routine's day pick compile now, each run one commit late (`LiftedPulseChainPlan`), and "One pane or two?" with
+   * them; the Swift lane is paused (BOARD §2), so its printer names those 15, as the HTML printer named the Screen
+   * Resolution until it read one.
+   */
+  const LATE = /runs a chain one commit late, after the value it lifts lands, which the Swift target does not print yet/;
+  const ONE_PANE = /a Screen Resolution, not printed by the Swift target yet|is computed from a jsfun-out expression, which the Swift target does not print yet/;
+
+  it('C1 of the 334 things S1 read and did not print, S2 left 44 (39 the backend); with S3\'s backend, 5 are left, each undrawn in React too; since P134 session 10, 15 more the plan now hands it', () => {
+    expect(losses).toHaveLength(20);
+    expect(losses.filter((l) => REACT_TOO.test(l))).toHaveLength(5);
+    expect(losses.filter((l) => LATE.test(l))).toHaveLength(8);
+    expect(losses.filter((l) => ONE_PANE.test(l))).toHaveLength(7);
     expect(losses.filter((l) => BACKEND.test(l))).toEqual([]);
   });
 
@@ -162,7 +173,9 @@ describe('§C todo-list, S2\'s work list', () => {
     const fns = Object.keys(todo.files).filter((f) => f.includes('/Scripts/functions/'));
     // 65 since EXP-022 S6: Write history's "Remember it, to extend next time" was refused (two record Ids into one input,
     // P18-EXP022-S4-ADDREFUSED) and is carried now, read at each run from the write whose Done runs it.
-    expect(fns).toHaveLength(65);
+    // 68 since P134 session 10: "One pane or two?", "Pick or unpick a day" and "Open it, or close it again" compile
+    // (their inputs read placed components' values, P134-HTX004-SELECTREFUSED).
+    expect(fns).toHaveLength(68);
     expect(fns).toContain('Sources/TodoListKit/Scripts/functions/Logic/Write history/Remember_it_to_extend_next_time.js');
     // S2 carried four and ran none of them; the two that run only in chains behind the session (the link's task and its
     // Today) run since S3, behind `session.read("authenticated")`, where the React export runs them.

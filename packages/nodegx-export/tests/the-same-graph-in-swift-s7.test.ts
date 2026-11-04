@@ -169,13 +169,13 @@ describe('§C the printer: the 9 store scenarios, printed whole', () => {
 });
 
 describe('§D todo-list does not move; the templates with a Global Store carry it', () => {
-  it('D1 todo-list carries no store, no history or action library and no core (its only store module is the Variables, which Swift keeps itself); 96 things left out, as at S6 (91 the plan\'s, 5 the Swift printer\'s)', () => {
+  it('D1 todo-list carries no store, no history or action library and no core (its only store module is the Variables, which Swift keeps itself); 99 things left out (79 the plan\'s, 20 the Swift printer\'s: S6\'s 96 were 91 and 5, and P134 session 10 moved 12 refusals out of the plan and 15 losses into the paused Swift printer)', () => {
     const ir = parseProject(path.join(TEMPLATES, 'todo-list'), catalog);
     const swift = emitSwiftApp(ir, catalog);
     const names = clientModulesJs(emitApp(ir, catalog).files).map((m) => m.name);
     expect(names.filter((n) => /^stores\/|^lib\/(history|actions)$|^nodegx-core$/.test(n))).toEqual([]);
     expect(Object.keys(swift.files).filter((f) => f.endsWith('/Stores.swift'))).toEqual([]);
-    expect({ plan: swift.preflight.planRefusals.length, swiftPrinter: swift.preflight.swiftLosses.length }).toEqual({ plan: 91, swiftPrinter: 5 });
+    expect({ plan: swift.preflight.planRefusals.length, swiftPrinter: swift.preflight.swiftLosses.length }).toEqual({ plan: 79, swiftPrinter: 20 });
   });
 
   it('D2 bot-garden, rocket-school and star-class carry their Global Store and the core, and a view reads it through `Stores`', () => {

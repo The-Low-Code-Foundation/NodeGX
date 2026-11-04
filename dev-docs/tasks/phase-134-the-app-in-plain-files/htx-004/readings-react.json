@@ -1,16 +1,16 @@
 {
  "arm": "react",
  "seeded": {
-  "mot": "dd96f1c7-93b7-46d8-83f0-4647bed7f5a9",
-  "vat": "07d28988-dff2-4a75-aab7-83be26b904a8",
-  "notes": "adbff84e-5022-4cec-b00f-6ca6a6b1bfb0",
-  "domain": "4dd65528-4d8f-4281-86cc-abd24ff39299",
-  "routine": "9e6101ce-38d4-444f-bf7f-fb6c4bcbdc35"
+  "mot": "b6d9996f-f806-40b9-b60e-7f5014705a35",
+  "vat": "d52753ba-d844-4396-a212-d555ae35d1cf",
+  "notes": "cf8f02ef-126c-430b-9648-7b2eb060ec08",
+  "domain": "595af8e7-9201-4b1e-b586-6e788f1d9da0",
+  "routine": "c00f3fbf-7390-4139-9204-5b7412a3ee6a"
  },
  "steps": [
   {
    "step": "D0",
-   "at": "2026-11-04T09:25:23.946Z",
+   "at": "2026-11-04T10:41:02.037Z",
    "texts": [
     "☾",
     "☼",
@@ -35,7 +35,7 @@
   },
   {
    "step": "D1",
-   "at": "2026-11-04T09:25:28.271Z",
+   "at": "2026-11-04T10:41:06.447Z",
    "texts": [
     "Todo list",
     "List (3)",
@@ -58,8 +58,7 @@
     "3",
     "Write the release notes",
     "✓",
-    "Add",
-    "Select a task, or something that repeats, to see its details."
+    "Add"
    ],
    "buttons": [
     "List (3)",
@@ -87,19 +86,19 @@
     "POST /login 200",
     "OPTIONS /classes/Task 204",
     "POST /classes/Task 200",
-    "OPTIONS /classes/MoneyItem 204",
     "OPTIONS /classes/Action 204",
-    "OPTIONS /classes/MoneyMark 204",
-    "OPTIONS /classes/BalanceReading 204",
+    "OPTIONS /classes/MoneyItem 204",
     "OPTIONS /classes/Event 204",
-    "POST /classes/MoneyItem 200",
-    "OPTIONS /classes/Routine 204",
-    "POST /classes/BalanceReading 200",
+    "OPTIONS /classes/BalanceReading 204",
     "POST /classes/Action 200",
+    "OPTIONS /classes/MoneyMark 204",
+    "OPTIONS /classes/Routine 204",
+    "POST /classes/MoneyItem 200",
+    "POST /classes/Event 200",
+    "POST /classes/BalanceReading 200",
     "POST /classes/MoneyMark 200",
     "OPTIONS /classes/RoutineCheck 204",
     "POST /classes/Routine 200",
-    "POST /classes/Event 200",
     "OPTIONS /classes/Project 204",
     "POST /classes/RoutineCheck 200",
     "POST /classes/Project 200"
@@ -107,7 +106,7 @@
   },
   {
    "step": "D2",
-   "at": "2026-11-04T09:25:30.845Z",
+   "at": "2026-11-04T10:41:09.025Z",
    "texts": [
     "Todo list",
     "List (3)",
@@ -119,19 +118,20 @@
     "🔔",
     "☾",
     "☼",
+    "← Back",
+    "#1 of 3 · added just now",
+    "Deadline",
+    "Close task",
+    "Next actions",
     "1",
-    "Book the van in for its MOT",
-    "Next: Ring the garage",
     "✓",
-    "2",
-    "Chase the accountant about VAT",
-    "Due today",
+    "≡",
     "✓",
-    "3",
-    "Write the release notes",
-    "✓",
+    "≡",
     "Add",
-    "Select a task, or something that repeats, to see its details."
+    "History",
+    "Add note",
+    "Today 10:41 · Added the task"
    ],
    "buttons": [
     "List (3)",
@@ -143,22 +143,36 @@
     "🔔",
     "☾",
     "☼",
+    "← Back",
+    "Close task",
     "✓",
+    "≡",
     "✓",
-    "✓",
-    "Add"
+    "≡",
+    "Add",
+    "Add note"
    ],
    "fields": [
-    "text::Add a task (it goes in at #4)"
+    "text::Task title",
+    "text::Next action",
+    "text::Next action",
+    "text::Add a next action",
+    "text::Add a note"
    ],
-   "values": [],
+   "values": [
+    "Book the van in for its MOT",
+    "Ring the garage",
+    "Find the logbook"
+   ],
    "path": "/todo",
    "opened": true,
-   "requests": []
+   "requests": [
+    "POST /classes/Event 200"
+   ]
   },
   {
    "step": "D2tickdialog",
-   "at": "2026-11-04T09:25:32.438Z",
+   "at": "2026-11-04T10:41:10.616Z",
    "texts": [
     "Todo list",
     "List (3)",
@@ -170,19 +184,25 @@
     "🔔",
     "☾",
     "☼",
+    "← Back",
+    "#1 of 3 · added just now",
+    "Deadline",
+    "Close task",
+    "Next actions",
     "1",
-    "Book the van in for its MOT",
-    "Next: Ring the garage",
     "✓",
-    "2",
-    "Chase the accountant about VAT",
-    "Due today",
+    "≡",
     "✓",
-    "3",
-    "Write the release notes",
-    "✓",
+    "≡",
     "Add",
-    "Select a task, or something that repeats, to see its details."
+    "History",
+    "Add note",
+    "Today 10:41 · Added the task",
+    "Ring the garage",
+    "What happened?",
+    "A line is enough.",
+    "Cancel",
+    "Tick off"
    ],
    "buttons": [
     "List (3)",
@@ -194,22 +214,37 @@
     "🔔",
     "☾",
     "☼",
+    "← Back",
+    "Close task",
     "✓",
+    "≡",
     "✓",
-    "✓",
-    "Add"
+    "≡",
+    "Add",
+    "Add note",
+    "Cancel",
+    "Tick off"
    ],
    "fields": [
-    "text::Add a task (it goes in at #4)"
+    "text::Task title",
+    "text::Next action",
+    "text::Next action",
+    "text::Add a next action",
+    "text::Add a note",
+    "text::What happened?"
    ],
-   "values": [],
+   "values": [
+    "Book the van in for its MOT",
+    "Ring the garage",
+    "Find the logbook"
+   ],
    "path": "/todo",
-   "ticked": "no title",
+   "ticked": "pressed 2",
    "requests": []
   },
   {
    "step": "D2tick",
-   "at": "2026-11-04T09:25:36.993Z",
+   "at": "2026-11-04T10:41:15.249Z",
    "texts": [
     "Todo list",
     "List (3)",
@@ -221,19 +256,22 @@
     "🔔",
     "☾",
     "☼",
-    "1",
-    "Book the van in for its MOT",
-    "Next: Ring the garage",
+    "← Back",
+    "#1 of 3 · added just now",
+    "Deadline",
+    "Close task",
+    "Next actions",
     "✓",
-    "2",
-    "Chase the accountant about VAT",
-    "Due today",
+    "≡",
+    "Done: Booked for Thursday.",
     "✓",
-    "3",
-    "Write the release notes",
-    "✓",
+    "≡",
     "Add",
-    "Select a task, or something that repeats, to see its details."
+    "History",
+    "Add note",
+    "Today 11:41 · Ticked off “Ring the garage”",
+    "Booked for Thursday.",
+    "Today 10:41 · Added the task"
    ],
    "buttons": [
     "List (3)",
@@ -245,25 +283,47 @@
     "🔔",
     "☾",
     "☼",
+    "← Back",
+    "Close task",
     "✓",
+    "≡",
     "✓",
-    "✓",
-    "Add"
+    "≡",
+    "Add",
+    "Add note"
    ],
    "fields": [
-    "text::Add a task (it goes in at #4)"
+    "text::Task title",
+    "text::Next action",
+    "text::Next action",
+    "text::Add a next action",
+    "text::Add a note"
    ],
-   "values": [],
+   "values": [
+    "Book the van in for its MOT",
+    "Ring the garage",
+    "Find the logbook"
+   ],
    "path": "/todo",
-   "ok": null,
-   "noted": false,
-   "okPressed": false,
+   "ok": "Tick off",
+   "noted": true,
+   "okPressed": true,
    "pressedAgain": false,
-   "requests": []
+   "requests": [
+    "OPTIONS /classes/Action/b69f8508-be7b-4b42-9e56-f724a36d2634 204",
+    "PUT /classes/Action/b69f8508-be7b-4b42-9e56-f724a36d2634 200",
+    "POST /classes/Event 201",
+    "POST /classes/Task 200",
+    "POST /classes/Action 200",
+    "POST /classes/Event 200",
+    "POST /classes/Routine 200",
+    "POST /classes/RoutineCheck 200",
+    "POST /classes/Event 200"
+   ]
   },
   {
    "step": "D2back",
-   "at": "2026-11-04T09:25:39.051Z",
+   "at": "2026-11-04T10:41:17.360Z",
    "texts": [
     "Todo list",
     "List (3)",
@@ -277,7 +337,6 @@
     "☼",
     "1",
     "Book the van in for its MOT",
-    "Next: Ring the garage",
     "✓",
     "2",
     "Chase the accountant about VAT",
@@ -286,8 +345,7 @@
     "3",
     "Write the release notes",
     "✓",
-    "Add",
-    "Select a task, or something that repeats, to see its details."
+    "Add"
    ],
    "buttons": [
     "List (3)",
@@ -309,12 +367,12 @@
    ],
    "values": [],
    "path": "/todo",
-   "back": false,
+   "back": true,
    "requests": []
   },
   {
    "step": "D3",
-   "at": "2026-11-04T09:25:42.754Z",
+   "at": "2026-11-04T10:41:21.059Z",
    "texts": [
     "Todo list",
     "List (4)",
@@ -328,7 +386,6 @@
     "☼",
     "1",
     "Book the van in for its MOT",
-    "Next: Ring the garage",
     "✓",
     "2",
     "Chase the accountant about VAT",
@@ -340,8 +397,7 @@
     "4",
     "Pick up the dry cleaning",
     "✓",
-    "Add",
-    "Select a task, or something that repeats, to see its details."
+    "Add"
    ],
    "buttons": [
     "List (4)",
@@ -390,7 +446,7 @@
   },
   {
    "step": "D4dialog",
-   "at": "2026-11-04T09:25:44.307Z",
+   "at": "2026-11-04T10:41:22.644Z",
    "texts": [
     "Todo list",
     "List (4)",
@@ -404,7 +460,6 @@
     "☼",
     "1",
     "Book the van in for its MOT",
-    "Next: Ring the garage",
     "✓",
     "2",
     "Chase the accountant about VAT",
@@ -417,7 +472,6 @@
     "Pick up the dry cleaning",
     "✓",
     "Add",
-    "Select a task, or something that repeats, to see its details.",
     "Write the release notes",
     "What happened?",
     "Every task keeps a record. One line is enough, even “not needed, dropping it”.",
@@ -453,7 +507,7 @@
   },
   {
    "step": "D4",
-   "at": "2026-11-04T09:25:48.938Z",
+   "at": "2026-11-04T10:41:27.262Z",
    "texts": [
     "Todo list",
     "List (3)",
@@ -467,7 +521,6 @@
     "☼",
     "1",
     "Book the van in for its MOT",
-    "Next: Ring the garage",
     "✓",
     "2",
     "Chase the accountant about VAT",
@@ -476,8 +529,7 @@
     "3",
     "Pick up the dry cleaning",
     "✓",
-    "Add",
-    "Select a task, or something that repeats, to see its details."
+    "Add"
    ],
    "buttons": [
     "List (3)",
@@ -504,8 +556,8 @@
    "okPressed": true,
    "pressedAgain": false,
    "requests": [
-    "OPTIONS /classes/Task/adbff84e-5022-4cec-b00f-6ca6a6b1bfb0 204",
-    "PUT /classes/Task/adbff84e-5022-4cec-b00f-6ca6a6b1bfb0 200",
+    "OPTIONS /classes/Task/cf8f02ef-126c-430b-9648-7b2eb060ec08 204",
+    "PUT /classes/Task/cf8f02ef-126c-430b-9648-7b2eb060ec08 200",
     "POST /classes/Event 201",
     "POST /classes/Task 200",
     "POST /classes/Action 200",
@@ -516,7 +568,7 @@
   },
   {
    "step": "D5",
-   "at": "2026-11-04T09:25:54.027Z",
+   "at": "2026-11-04T10:41:32.337Z",
    "texts": [
     "Todo list",
     "List (3)",
@@ -530,7 +582,6 @@
     "☼",
     "1",
     "Book the van in for its MOT",
-    "Next: Ring the garage",
     "✓",
     "2",
     "Chase the accountant about VAT",
@@ -539,8 +590,7 @@
     "3",
     "Pick up the dry cleaning",
     "✓",
-    "Add",
-    "Select a task, or something that repeats, to see its details."
+    "Add"
    ],
    "buttons": [
     "List (3)",
@@ -565,18 +615,18 @@
    "requests": [
     "POST /classes/Task 200",
     "POST /classes/Action 200",
+    "POST /classes/MoneyItem 200",
+    "POST /classes/MoneyMark 200",
     "POST /classes/Event 200",
     "POST /classes/Routine 200",
     "POST /classes/RoutineCheck 200",
-    "POST /classes/MoneyItem 200",
-    "POST /classes/Project 200",
-    "POST /classes/MoneyMark 200",
-    "POST /classes/BalanceReading 200"
+    "POST /classes/BalanceReading 200",
+    "POST /classes/Project 200"
    ]
   },
   {
    "step": "D6",
-   "at": "2026-11-04T09:25:56.595Z",
+   "at": "2026-11-04T10:41:34.906Z",
    "texts": [
     "☾",
     "☼",
@@ -604,7 +654,7 @@
   },
   {
    "step": "D6relaunch",
-   "at": "2026-11-04T09:26:00.174Z",
+   "at": "2026-11-04T10:41:38.468Z",
    "texts": [
     "☾",
     "☼",

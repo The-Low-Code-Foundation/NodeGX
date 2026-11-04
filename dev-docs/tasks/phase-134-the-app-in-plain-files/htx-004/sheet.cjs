@@ -5,7 +5,7 @@ const sharp = require('/Users/richardosborne/vscode_projects/OpenNoodl/node_modu
 
 const X = __dirname;
 const ARMS = [['runtime', 'the running app (Chrome)'], ['react', 'the React export (Chrome)'], ['html', 'the HTML export (Chrome, plain files)']];
-const ROWS = [['D2', 'the MOT pressed: its summary opens in the running app only'], ['D3', 'after adding "Pick up the dry cleaning"'], ['D4', 'after a note and "Close task" on the release notes']];
+const ROWS = [['D2', 'the MOT pressed: its summary opens, in all three since session 10 (SELECTREFUSED fixed)'], ['D3', 'after adding "Pick up the dry cleaning"'], ['D4', 'after a note and "Close task" on the release notes']];
 const W = 390, H = 844, PAD = 16, HEAD = 40;
 
 async function main() {

@@ -1012,6 +1012,10 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
     // "take" is handed on one update after it is sent: the values lifted with it arrive first, as the running app delivers them.
     effectsBefore.push(`.onChange(of: ${ident(pulse.stateName)}) { _, sent in ${ident(pulse.delivered.name)} = sent }`);
   }
+  // P134-HTX004-SELECTREFUSED. A placed component's signal whose chain runs one commit late (Swift's lane is paused, BOARD §2).
+  for (const late of plan.liftedPulseChains) {
+    lose(late.nodeId, `its "${late.port}" runs a chain one commit late, after the value it lifts lands, which the Swift target does not print yet`);
+  }
   // Graph-path syncs (CONTROLLED-STATE §3.4): a wired value into a field or a Variable, with the input setter's coercion;
   // undefined abstains, and Changed never fires.
   // The queries that ask as they are made, or again when a wired filter value changes (P18-S115/S116), before the seeds.

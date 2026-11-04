@@ -363,10 +363,12 @@ describe('§D todo-list', () => {
   const TODO = path.join(__dirname, '..', '..', '..', 'templates', 'todo-list');
   const todo = emitHtmlApp(parseProject(TODO, catalog), catalog);
 
-  it('D1 every one of its 36 logic components prints, and 63 Function bodies travel, each in its own file', () => {
+  it('D1 every one of its 36 logic components prints, and 66 Function bodies travel, each in its own file', () => {
     expect(todo.preflight.logic).toHaveLength(36);
-    // 59 in HTX-002; HTX-004 adds the four that read Noodl or await (the minute clock's wake among them).
-    expect(Object.keys(todo.files).filter((f) => f.startsWith('functions/'))).toHaveLength(63);
+    // 59 in HTX-002; HTX-004 adds the four that read Noodl or await (the minute clock's wake among them); session 10 the
+    // three whose inputs read a placed component's value ("One pane or two?", "Pick or unpick a day", "Open it, or close
+    // it again", P134-HTX004-SELECTREFUSED).
+    expect(Object.keys(todo.files).filter((f) => f.startsWith('functions/'))).toHaveLength(66);
   });
 
   it('D2 what is left out is named, and none of it is a logic component or a Function it could not place', () => {

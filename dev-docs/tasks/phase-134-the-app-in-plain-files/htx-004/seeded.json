@@ -3,10 +3,10 @@
  "password": "a long enough password",
  "base": "http://127.0.0.1:8644",
  "ids": {
-  "mot": "7bf48c47-e14a-4d80-a596-4892a8198965",
-  "vat": "1325f3bf-e104-4604-a509-0b781ac28649",
-  "notes": "59bb08a8-c3a2-4870-931e-fcdd9c0437b6",
-  "domain": "21b76e9a-3d8f-4c0b-a72a-fa0d5ddcf2f6",
-  "routine": "66e07502-c009-4dd8-8bd1-6660641cd452"
+  "mot": "77139154-8078-4d42-a09b-5417625788be",
+  "vat": "9b524a47-a597-42a3-89b4-8fe3bdc3f18e",
+  "notes": "33142c81-cf62-40b7-9720-bd2a4d59df96",
+  "domain": "00824c5e-e908-4679-8e42-7354b3f69076",
+  "routine": "718a906d-f55b-418e-99ba-e17f43bc29fa"
  }
 }

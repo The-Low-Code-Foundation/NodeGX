@@ -339,6 +339,25 @@
     "@notes": "cc6d73f239d835c19135b398720a621dd0befd5e44db9a2de5fffe7f000b6949",
     "@report": "841da39a4a713bf2ec0096076e0ff27f9965368340f70834bd60e6d43ab18d7c"
   },
+  "game-menu": {
+    "EXPORT-REPORT.md": "80302e36f3374d2c694490a5faddb10eafbc43135a8073b32c223179f5e83679",
+    "README.md": "4beda355b96fe44aec614f276467e2f8505adb27f0fa6ea41e1157a51c36ae4a",
+    "index.html": "94d0c9cc62ab04b25b51d851758b31cb99608e7c23952695c2bb3109bdf42fd8",
+    "package.json": "94df9ca3ccb4a20b00d102b8b8ebeef1bc7a57853bc98bbc9d5c22b813247fea",
+    "src/App.tsx": "807be641553015e650331a8eb20cde8bc6bb1fc5a97b9c5eedcd2cea26981f3e",
+    "src/components/Settings.module.css": "470d4df2d263ad47f286aeafae5701b89a256929da71135e219b62dc859fd4c3",
+    "src/components/Settings.tsx": "577601142e7d043b4367a80dc364c782827e3b084fa3538ad29f151367dce71e",
+    "src/main.tsx": "505969740deeb6eafacd9c9f802c287fe2dcbd3a1db237b5ebfcae8696dc4cd8",
+    "src/pages/Preview.module.css": "07199e20f6609427422185773abcb28b36bb07e07a2103b58e2139b96206916e",
+    "src/pages/Preview.tsx": "94df3762e3c0c24c77058bb0e5f3ff2fb33bc94f1e48b5ce3a55106e56391cea",
+    "src/styles/base.css": "a7fedcfbf358a263efb02c615f0a02195dd746c98ab9e0e707846c031bffd551",
+    "src/styles/tokens.css": "1cd99a5d0e047105d2c8c580714fffd54a1595937eacc76d52a3e1fca0c18d1b",
+    "tsconfig.json": "806e550db96d029916e3bb987b52bdd1949070d364935879aa061247e2e68697",
+    "vite.config.ts": "5e32fff72c88e7cc96093232e933c431b6d9e09776df60da3144bd38d3d6625d",
+    "@copies": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "@notes": "78c8b1046854d72bbd217ff4ab61c29dee12b222538225eba90b7eff99937fe2",
+    "@report": "4efe07b9b448519ae91c9ab5492b81ddf464e532e8fa0629c69e0ef56795ff13"
+  },
   "gate-desk": {
     "EXPORT-REPORT.md": "8bcdc22bae65165276ea0aba5db57b1f0a545312c905d13361d5d14d9038a80e",
     "README.md": "77c4a38fc2b1f70e8ecd584313456e7dfdb86a178f9a1b859435684c5c8d4459",

@@ -422,7 +422,11 @@ describe('HLS-001 AC3 — emitApp over the corpus is byte-identical', () => {
     // Still 63 on 2026-10-19 (P18-S126-INSIGNAL, session 127): a signal input's prop is the pulse pair the parent passes.
     // Predicted by emitting every fixture with the base's `src` and the tree's: batch-desk's Notify.tsx alone (its `Do`
     // type). The red run named exactly that key; regenerated, that one hash moved.
-    expect(corpusProjects().length).toBe(64);
+    // 64 → 65 on 2026-11-04 (P134 session 10): `game-menu`, HTX-006's settings menu, added in session 9 without its block
+    // (the row read red from 0a280a140). Predicted before regenerating: no byte moves (the byte row was green on the red
+    // run, with session 10's plan change in the tree), plus game-menu's entries. Regenerated: 0 lines out, 19 in. Then the
+    // slider's arrival typed `unknown` (game-menu's TS2367): predicted game-menu's Settings.tsx alone; its one hash moved.
+    expect(corpusProjects().length).toBe(65);
     expect(Object.keys(golden).sort()).toEqual(corpusProjects());
   });
 

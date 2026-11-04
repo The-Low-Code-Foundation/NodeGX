@@ -40,6 +40,9 @@ describe('P134 HTX-001: story-engine as plain files', () => {
       // HTX-002: the logic component, its Function in a file of its own, the runner, and the app's Variables.
       'components/Source.js',
       'functions/components/Source/Which_story_is_being_read.js',
+      // Session 10 (P134-HTX004-SELECTREFUSED): the two whose inputs read a placed component's value compile now.
+      'functions/pages/Read/The_passage_you_are_in.js',
+      'functions/pages/Remix/Read_what_was_pasted.js',
       'index.html',
       'lib/animate.js',
       'lib/core.js',
@@ -93,8 +96,15 @@ describe('P134 HTX-001: story-engine as plain files', () => {
         '  }, function (into, at, l) {'
       ].join('\n')
     );
-    // The Restart press runs a chain the plan refuses: the button draws, its press does nothing, and the preflight says why.
-    expect(read).toContain('// Nothing is wired to this press.');
+    // The Restart press: until session 10 its chain was refused (the reader's start is the placed Source's value,
+    // P134-HTX004-SELECTREFUSED); now it reads the row Source lifts it into, at the press, and empties the reader's hands.
+    expect(read).toContain(
+      [
+        "  rdRestart.addEventListener('click', function () {",
+        '    variables.storyAt.set(state.theStoryBeingReadFirstId.get());',
+        '    variables.storyCarrying.set(EDIT_WHAT_THE_READER_ALREADY_CARRIES_IF_ANYTHING);'
+      ].join('\n')
+    );
     // A Text whose Tag is span is a span; one with none is a p, as the React export draws it.
     expect(read).toContain("const rdEyebrow = el(rdHead, 'span', 'ReadPage-rdEyebrow', 'An interactive story');");
     expect(read).toContain("const rdSourceLine = el(rdHead, 'p', 'ReadPage-rdSourceLine');");
@@ -168,7 +178,8 @@ describe('P134 HTX-001: story-engine as plain files', () => {
     expect(p.logic).toEqual(['Story/Source']);
     // The same plan refusals the Swift preflight counts (EXP-022 S1: 21), less the one this target prints: the shell's
     // CSS Definition, in styles/app.css, listed apart so the preflight never calls a printed node left out (HTX-004).
-    expect(p.planRefusals).toHaveLength(20);
+    // 14 since session 10: six read the placed Source's or Paster's value and compile (P134-HTX004-SELECTREFUSED).
+    expect(p.planRefusals).toHaveLength(14);
     expect(p.carried.map((c) => `${c.component} ${c.name}`)).toEqual(['App The page — the ground, the hover, the paste box']);
     expect(p.planRefusals.some((r) => r.name === 'The page — the ground, the hover, the paste box')).toBe(false);
     expect(app.files['EXPORT-PREFLIGHT.md']).toContain('## Carried here, though the React export leaves it out (1)');

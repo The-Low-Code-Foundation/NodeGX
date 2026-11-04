@@ -313,7 +313,8 @@ describe('§E the templates, where the code was read', () => {
     const rows = fileOf(tpl('todo-list'), /components\/TaskRows\.tsx$/);
     expect(rows).toMatch(/onOpenRowsChanged\?\.\(\(?buildTheRowsOut\?\.openRows/);
     const page = fileOf(tpl('todo-list'), /pages\/Todo\.tsx$/);
-    expect(page).toMatch(/<TaskList\n(?: {20}[^\n]*\n)*? {20}rows=\{openRows\}/);
+    // P134 session 10: any depth — "One pane or two?" compiles now, and its Mounted wraps the list one level further in.
+    expect(page).toMatch(/<TaskList\n(?: +[^\n]*\n)*? +rows=\{openRows\}/);
   });
 
   it('E2 a component whose only root is a logic placement is a logic component: a hook that calls the other', () => {

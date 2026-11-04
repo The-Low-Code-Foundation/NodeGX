@@ -64,7 +64,7 @@ the templates there are 180 such wires.
   tab's Functions call `Noodl.Records` beyond `query`, which neither export's client carries
   (P134-HTX004-PROJECTSTAB, medium, filed).
 - **Both exports show the empty detail card under the list** at phone width ("Select a task, …"). The cause is "One
-  pane or two?", refused by the same root as SELECTREFUSED.
+  pane or two?", refused by the same root as SELECTREFUSED. (Session 10: fixed with it; one pane in all three.)
 - Row grips (⠿) and the custom date picker are drawn by the running app only (README §10's undrawn list).
 
 ## What I predicted wrong
@@ -73,6 +73,30 @@ Nothing in the graded columns. Two of my readers were wrong before the drive was
 field, so the first reading found no "Ring the garage". And a ✓ on an action opens the same note dialog as a task's
 ✓, so the first tick sent nothing. Both are fixed in `drive.cjs` (field values are read; `answerDialog` answers both
 dialogs), and the run above is the third.
+
+## Session 10: SELECTREFUSED fixed, driven again
+
+The plan was fixed in session 10 (README §10). The React and HTML arms were built and driven again, each on its own
+fresh backend (`S4_ARMS=react,html`). The runtime arm's readings are session 7's, kept: the running app did not change.
+`compare.py` now reads **`html==react yes; all three: seen same, writes same` at all 12 steps**, with no console error
+in any arm. `side-by-side.png` was redrawn from the new shots.
+
+| step | session 7, both exports | session 10, both exports (= the running app) |
+|---|---|---|
+| D2 the MOT | nothing opens | its summary on its own page at 390 px, "← Back", one request, as the runtime |
+| D2tick | nothing to press | the note dialog; "Tick off": `PUT /classes/Action/<id> 200`, `POST /classes/Event 201`, 8 requests in all, as the runtime |
+| D2back | (the list) | the list again |
+| D4 close | (closed, by a different row press) | `PUT /classes/Task/<id> 200`, `Event 201`; `List (3)`, `Done (2)` |
+
+It took three runs. On the first, the task opened but both exports drew both panes: "One pane or two?" reads a placed
+component's value as a Function input, which the first cut left out. On the second, React equalled the runtime and the
+HTML export still drew two panes: its printer could not read a Screen Resolution (P134-S10-SCREENREAD, fixed). The
+third is the table above. There was one more thing between runs: View's `toggle` runs a Function whose input is View's
+own `projectId`, and the first cut ran it at the press. The sweep now follows a Function's inputs too.
+
+Still drawn by the running app only, in every run: the row grips (⠿), the task's Deadline date field, and "Also keep
+track of projects and money" (PROJECTSTAB). The first two are the plan's "a Function fed by another Function" refusal
+(the Date picker's Value, "Drag a row by its grip to move it"), in both exports.
 
 ## Re-running
 

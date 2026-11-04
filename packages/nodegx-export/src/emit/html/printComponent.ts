@@ -181,6 +181,8 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   /** Lines inside the mount, before the drawing: the kept nodes, the render runs. */
   const nodeLines: string[] = [];
   const memoOf = new Map<string, string>();
+  /** P134 session 10. The Screen Resolution nodes this component reads, by their local: each kept once per part. */
+  const screenLocals = new Set<string>();
   /** The app's Variables this component reads or writes: imported from `variables.js`. */
   const variableImports = new Set<string>();
   const variable = (name: string): string | undefined => {
@@ -521,6 +523,32 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       case 'static-rows':
         // The authored rows, a constant above the component (STATIC-DATA-TARGET §3): `allowEditOnly`, so nothing changes them.
         return plan.staticData.some((d) => d.constName === e.constName) ? e.constName : undefined;
+      case 'screen-out': {
+        /*
+         * P134 session 10. Screen Resolution, as the React export's `lib/screen.ts` reads it: the window in CSS pixels, read
+         * when the part is made and again on every resize, the listener removed when the part goes. Found once SELECTREFUSED
+         * let todo-list's "One pane or two?" through: its width was the one input this printer could not read.
+         */
+        if (!screenLocals.has(e.local)) {
+          screenLocals.add(e.local);
+          imports.dom.add('keep');
+          const label = nodeById.get(e.nodeId)?.authoredLabel ?? e.nodeId;
+          const resize = fresh(`${e.local}Resize`);
+          const read = '{ width: window.innerWidth, height: window.innerHeight, aspectRatio: window.innerWidth / window.innerHeight }';
+          nodeLines.push(
+            `  // "${label}" (Screen Resolution): the window's size in CSS pixels, read now and again on every resize.`,
+            `  const ${e.local} = keep(${read});`,
+            `  const ${resize} = function () {`,
+            `    ${e.local}.set(${read});`,
+            '  };',
+            `  window.addEventListener('resize', ${resize});`,
+            '  l.add(function () {',
+            `    window.removeEventListener('resize', ${resize});`,
+            '  });'
+          );
+        }
+        return `${e.local}.get().${e.field}`;
+      }
       case 'jsfun-out': {
         const def = fnByNode[e.nodeId];
         if (!def || def.kind === 'visual') return undefined;
@@ -998,7 +1026,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
    * mounts, children first: the React printer's gated mount effect, with the part's own life in place of its ref.
    */
   const partMounts: string[][] = [];
-  const listen = (id: string, local: string, pad: string, known: Record<string, string>): string[] => {
+  const listenFor = (id: string, local: string, pad: string, known: Record<string, string>): string[] => {
     const out: string[] = [];
     for (const [port, list] of Object.entries(plan.handlers[id] ?? {})) {
       if (port === 'didMount') {
@@ -1352,7 +1380,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       controlled = undefined;
       out.push(`${pad}${box}.addEventListener('change', function () {`, ...(row ? [`${pad}  ${member('state', row.name)}.set(${box}.checked);`] : []), ...(body ?? []), `${pad}});`);
     }
-    out.push(...listen(id, box, pad, {}));
+    out.push(...listenFor(id, box, pad, {}));
     return out;
   };
 
@@ -1388,7 +1416,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       controlled = undefined;
       out.push(`${pad}${box}.addEventListener('input', function () {`, ...(row ? [`${pad}  ${member('state', row.name)}.set(Number(${box}.value));`] : []), ...(body ?? []), `${pad}});`);
     }
-    out.push(...listen(id, box, pad, {}));
+    out.push(...listenFor(id, box, pad, {}));
     return out;
   };
 
@@ -1421,7 +1449,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     if (role === 'page' || role === 'group') {
       out.push(elLine(id, tagOf(id, node, role), parent, undefined, before, pad));
       for (const child of plan.childrenOf[id] ?? []) out.push(...draw(child, local(id), undefined, pad));
-      out.push(...listen(id, local(id), pad, { onClick: 'click' }));
+      out.push(...listenFor(id, local(id), pad, { onClick: 'click' }));
       extra([]);
     } else if (role === 'text') {
       const text = bound.text ? binding(id, 'text', bound.text) : undefined;
@@ -1437,7 +1465,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
           out.push(`${pad}bindStyle(l, ${local(id)}, 'color', function () { return ${c}; });`);
         }
       }
-      out.push(...listen(id, local(id), pad, { onClick: 'click' }));
+      out.push(...listenFor(id, local(id), pad, { onClick: 'click' }));
       extra(['text', 'color']);
     } else if (role === 'button') {
       const label = bound.label ? binding(id, 'label', bound.label) : undefined;
@@ -1449,7 +1477,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       }
       out.push(...enabledLines(id, node, bound, pad));
       if (!plan.handlers[id]?.onClick) out.push(`${pad}// Nothing is wired to this press.`);
-      out.push(...listen(id, local(id), pad, { onClick: 'click' }));
+      out.push(...listenFor(id, local(id), pad, { onClick: 'click' }));
       extra(['label', 'enabled']);
     } else if (role === 'input') {
       const tag = tagOf(id, node, role);
@@ -1493,7 +1521,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         announced = undefined;
         out.push(`${pad}${local(id)}.addEventListener('input', function () {`, ...(row ? [`${pad}  ${member('state', row.name)}.set(${local(id)}.value);`] : []), ...(body ?? []), `${pad}});`);
       }
-      out.push(...listen(id, local(id), pad, {}));
+      out.push(...listenFor(id, local(id), pad, {}));
       extra(['placeholder', 'value', 'enabled']);
     } else if (role === 'checkbox') {
       out.push(...drawCheckbox(id, node, bound, parent, before, pad));
@@ -1696,6 +1724,31 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       `    const pulse = ${read}.get();`,
       `    if (pulse === undefined || pulse.taken.current === pulse.sent) return;`,
       `    pulse.taken.current = pulse.sent;`,
+      ...body,
+      `  });`
+    );
+  }
+  /*
+   * P134-HTX004-SELECTREFUSED. A placed component's signal whose chain reads a value that component lifts: the press counts,
+   * the count is handed on one update later, and the chain runs on the handed-on count, once per pulse, reading the value
+   * sent with it — the React printer's two effects.
+   */
+  for (const late of plan.liftedPulseChains) {
+    const label = nodeById.get(late.nodeId)?.authoredLabel ?? late.nodeId;
+    const body = chain(late.nodeId, `"${late.port}"`, late.actions, '    ');
+    if (body === undefined) continue;
+    logic.push(
+      `  // "${late.port}" from ${label} runs its chain one update after it is sent: the values it lifts arrive first, as the running app delivers them.`,
+      `  l.watch(function () {`,
+      `    return [${member('state', late.sent.name)}.get()];`,
+      `  }, function (sent) {`,
+      `    ${member('state', late.delivered.name)}.set(sent);`,
+      `  });`,
+      `  l.watch(function () {`,
+      `    return [${member('state', late.delivered.name)}.get()];`,
+      `  }, function (delivered) {`,
+      `    if (${late.takenLocal}.current === delivered) return;`,
+      `    ${late.takenLocal}.current = delivered;`,
       ...body,
       `  });`
     );
@@ -1903,7 +1956,11 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     imports.dom.add('keep');
     imports.core.add('batch');
   }
-  const pulsesTaken = plan.instancePulses.map((p) => `  const ${p.takenLocal} = { current: 0 }; // how many "${p.port}" pulses ${nodeById.get(p.nodeId)?.authoredLabel ?? p.nodeId} has acted on`);
+  const pulsesTaken = [
+    ...plan.instancePulses.map((p) => `  const ${p.takenLocal} = { current: 0 }; // how many "${p.port}" pulses ${nodeById.get(p.nodeId)?.authoredLabel ?? p.nodeId} has acted on`),
+    // P134-HTX004-SELECTREFUSED. How many of a placed component's pulses its late chain has run for.
+    ...plan.liftedPulseChains.map((c) => `  const ${c.takenLocal} = { current: 0 }; // how many "${c.port}" pulses from ${nodeById.get(c.nodeId)?.authoredLabel ?? c.nodeId} the chain has run for`)
+  ];
 
   // Each Function it runs, in its own file: the body as written, in the wrapper every export gives it (EXP-019).
   const fnImports: string[] = [];

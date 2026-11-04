@@ -1077,6 +1077,8 @@ export function emitComponent(
     ...plan.receivers.flatMap((r) => r.actions),
     // P18-S126-INSIGNAL. A signal input's chain earns imports and references exactly as a handler's does.
     ...plan.inputPulses.flatMap((p) => p.actions),
+    // P134-HTX004-SELECTREFUSED. A placed component's signal run one commit late is a chain like any other.
+    ...plan.liftedPulseChains.flatMap((c) => c.actions),
     // A reactive Condition's branch earns imports, `navigate` and state references exactly as a
     // handler's does — it just runs from an effect instead of an event (LOGIC-TARGET §10).
     ...plan.branchEffects.map((e) => e.action),
@@ -1409,6 +1411,11 @@ export function emitComponent(
   }
   // P18-S127-SIBLINGVALUE. A delivered count is read by the instance's prop and written by its effect.
   for (const pulse of plan.instancePulses) if (pulse.delivered !== undefined) referencedStateNames.add(pulse.delivered.name);
+  // P134-HTX004-SELECTREFUSED. A late chain's two counts: the press writes one, its effects the other.
+  for (const late of plan.liftedPulseChains) {
+    referencedStateNames.add(late.sent.name);
+    referencedStateNames.add(late.delivered.name);
+  }
   const referencedStateVars = plan.stateVars.filter((v) => referencedStateNames.has(v.name));
   /** P18-S111-RECORDLIVE. Each live Record whose row this component holds, with that row's state var. */
   const liveRecordRows = plan.recordReads.flatMap((read) => {
@@ -4751,6 +4758,8 @@ export function emitComponent(
       plan.inputPulses.length > 0 ||
       // P18-S127-SIBLINGVALUE. A delivered count follows the count sent from an effect.
       plan.instancePulses.some((p) => p.delivered !== undefined) ||
+      // P134-HTX004-SELECTREFUSED. A placed component's signal run one commit late is two effects.
+      plan.liftedPulseChains.length > 0 ||
       // EXP-011 §43, P18-S113-IDBINDREAD. A Record with Fetch unwired is a bind keyed on its Id.
       recordBinds.length > 0 ||
       // P18-S111-RECORDLIVE. A live Record's row subscribes to the client's copy of its record.
@@ -4774,7 +4783,7 @@ export function emitComponent(
   if (memoJsIds.size > 0) reactImports.push('useMemo');
   if (combinedLifted.size > 0) reactImports.push('useCallback');
   // EXP-011 §39. The timer handle and the last value seen both live in refs.
-  if (delayRefs.size > 0 || plan.valueChangedEffects.length > 0 || usedKeptLocals.size > 0 || pulsedRunIds.size > 0 || plan.tickedRuns.length > 0 || plan.instancePulses.length > 0 || fieldRefs.size > 0) reactImports.push('useRef');
+  if (delayRefs.size > 0 || plan.valueChangedEffects.length > 0 || usedKeptLocals.size > 0 || pulsedRunIds.size > 0 || plan.tickedRuns.length > 0 || plan.instancePulses.length > 0 || plan.liftedPulseChains.length > 0 || fieldRefs.size > 0) reactImports.push('useRef');
   // P18-S128-FIELDSET. A Cleared mark's reset is an effect.
   if ([...fieldClearedLocals.keys()].some((id) => fieldSetSources.get(id)?.kind !== 'literal') && !reactImports.includes('useEffect')) reactImports.push('useEffect');
   // EXP-011 §53. A task template's mount effect and its once-guard (StrictMode mounts twice; startTask pulses once).
@@ -7508,6 +7517,8 @@ export function emitComponent(
   for (const effect of plan.valueChangedEffects) body.push(`  const ${effect.lastLocal} = useRef<unknown>(undefined);`);
   // P18-S126-INSIGNAL. The count each placed component has acted on, kept here so it outlives the child's unmount.
   for (const pulse of plan.instancePulses) body.push(`  const ${pulse.takenLocal} = useRef(0);`);
+  // P134-HTX004-SELECTREFUSED. The count a late chain has acted on.
+  for (const late of plan.liftedPulseChains) body.push(`  const ${late.takenLocal} = useRef(0);`);
   // Session 139. A lifted port with two rows to write: one stable callback (setters never change; a forwarded output
   // callback is a prop, so it is a dependency — the parent's is a setter or a callback like this one, stable too).
   for (const { local, calls, deps, tsType } of combinedLifted.values()) {
@@ -7827,7 +7838,9 @@ export function emitComponent(
       body.push(
         '  // Graph-path sync (slider): abstain on empty, clamp to [min, max] — Changed never fires.',
         '  useEffect(() => {',
-        `    const arrival = ${src};`,
+        // P134 session 10. `unknown`: a value typed number still arrives as '' from a field, and `=== ''` on a number is
+        // TS2367 in the emitted app's own build (game-menu's Settings, HTX-006).
+        `    const arrival: unknown = ${src};`,
         "    if (arrival === undefined || arrival === null || arrival === '') return;",
         '    const next = Number(arrival);',
         '    if (!Number.isFinite(next)) return;',
@@ -8061,6 +8074,26 @@ export function emitComponent(
       `    ${pair}.taken.current = ${pair}.sent;`,
       ...effectBody(pulse.actions, 4),
       `  }, [${pair}?.sent]);`,
+      ''
+    );
+  }
+  /*
+   * P134-HTX004-SELECTREFUSED. A placed component's signal whose chain reads a value that component lifts: the press counts,
+   * the count is handed on one commit later (after the child's push of the value, a child's effects running before its
+   * parent's), and the chain runs from an effect on the handed-on count, once per pulse, reading the value sent with it.
+   */
+  for (const late of plan.liftedPulseChains) {
+    const label = commentSafe(nodeById.get(late.nodeId)?.authoredLabel ?? late.nodeId);
+    body.push(
+      `  // "${commentSafe(late.port)}" from ${label} runs its chain one commit after it is sent: the values it lifts arrive first, as the running app delivers them.`,
+      '  useEffect(() => {',
+      `    ${late.delivered.setterName}(${late.sent.name});`,
+      `  }, [${late.sent.name}]);`,
+      '  useEffect(() => {',
+      `    if (${late.takenLocal}.current === ${late.delivered.name}) return;`,
+      `    ${late.takenLocal}.current = ${late.delivered.name};`,
+      ...effectBody(late.actions, 4),
+      `  }, [${late.delivered.name}]);`,
       ''
     );
   }

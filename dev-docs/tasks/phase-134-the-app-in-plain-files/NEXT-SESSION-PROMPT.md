@@ -1,27 +1,21 @@
 # Next session — Phase 134, the app in plain files
 
-**Written 2026-11-04 by session 9 (HTX-006 done: a NodeGX menu inside a three.js page).** Read [README.md](README.md) §9
-and §10 (sessions 1 to 9) first. Sessions used: 9 of 10; Richard ruled R6 "now, first", so the phase runs past ten.
+**Written 2026-11-04 by session 10 (SELECTREFUSED fixed in the plan: a task opens in both exports).** Read
+[README.md](README.md) §9 and §10 (sessions 1 to 10) first. Sessions used: 10; Richard ruled R6 "now, first", so the
+phase runs past ten, and §10 says so.
 
 ## Before anything
 
-1. **Richard ruled on 2026-11-04 (README §9).** R6 **"Now, first"**: fix P134-HTX004-SELECTREFUSED before anything else;
-   the phase runs past ten sessions, and that is said in §10, not hidden. R7 **ThreadSpace**. HiveClip **yes, on a copy**.
-   R4 (static server or also a bundled copy) is still open; nothing depends on it.
-2. **The order:** SELECTREFUSED (session 10), ThreadSpace's menu (HTX-006's last line, short), HTX-007 (HiveClip).
+1. **Richard's rulings (README §9):** R6 done (session 10). R7 **ThreadSpace**. HiveClip **yes, on a copy**. R4 (static
+   server or also a bundled copy) is still open; nothing depends on it.
+2. **The order:** ThreadSpace's menu (HTX-006's last line, short), then HTX-007 (HiveClip).
 3. **BOARD.** Lane 4 is reopened for this phase only (BOARD §2); React and Swift stay paused.
 4. **The box.** Suites and drives are heavy jobs: one at a time, `nice -n 19 … --runInBand`, busy-check by
    `ps -A -o pid,comm` (never `pgrep -f` in a wait loop). `grep` skips some `.ts` files as binary here: use
    `/usr/bin/grep -a`. Chrome from Claude's bash needs the sandbox off.
-
-## Then: SELECTREFUSED (R6), [the bug](../../bugs/p134-htx004-selectrefused-a-variable-set-from-a-placed-components-output-is-left-out-so-no-export-can-open-a-task.md)
-
-Neither export can open a task in todo-list: a Set Variable (or Global Store Set) whose value comes from a placed
-component's lifted output is left out by the plan. 180 wires across the templates have that shape. The place is
-`plan.ts` around 16716 (Set Variable) and 16530 (Global Store Set), and the lifted outputs (`pendingLifted`, about
-4574). `plan.ts` is the React lane's too, so run the **whole package suite** after (`nice -n 19 … --runInBand`), and the
-three graph ledgers. Grade it with `htx-004/drive.cjs` (D2 to D2back: the task opens in both exports and Back returns).
-Count the 180 again after: how many the fix reaches.
+5. **The package suite is not all green, and four of its red causes are not this phase's** (filed open, session 10):
+   P134-S10-SENDSIGNAL (ISL-006 and marketplace's typecheck), P134-S10-SIGNINERROR (the-sign-in-with §C, 9 rows),
+   P134-S10-STUDIOSOCKET (hls006), P134-S10-PARAMFLOOR (parameter-coverage). Anything else red is new: look at it.
 
 ## Then: ThreadSpace's menu (R7, HTX-006's last line)
 
@@ -43,6 +37,12 @@ blocks the window is the task.
 - **`--component` (HTX-006)**: `nodegx export --target html --component <name> <project> --out-dir <folder>` writes the
   part, the box entry `<Name>.js`, the one stylesheet `<Name>.css`, the cut `styles/<Name>.floor.css`, and
   `nodegx-export.json`. Spec: `tests/html-one-part.test.ts`. Writer: `src/write/writePart.ts`.
+- **A placed component's value, read by a chain (session 10):** the row it lifts into; a chain its own signal runs is
+  run one commit late (`LiftedPulseChainPlan`, `plan.liftedPulseChains`; React two effects, HTML two `l.watch`).
+  Spec: `tests/a-value-sent-with-its-signal.test.ts` (the Select Desk). A child that does not lift the port refuses the
+  read by name; about 37 template wires stand there, each its child's feed, and 63 under "two wires feed its Value
+  input" (EXP-011 §90).
+- **The HTML printer reads a Screen Resolution** (session 10, SCREENREAD).
 - **Every printed component's `outputs` is filled now**: a `value` per value output and a `signal` per signal output, by
   the port's name. A NodeGX parent's callbacks are called first, as before.
 - **The ledger** (`tests/node-spec-graph-html.test.ts`): 5 played, each React's trace; the 13 React plays and HTML does
@@ -57,7 +57,7 @@ blocks the window is the task.
 - `bin/` runs `dist/`, which is stale: run the CLI from source with
   `npx ts-node --transpile-only -O '{"module":"commonjs"}' src/cli/main.ts export …` in `packages/nodegx-export`.
 - Headless Chrome lays out at 500 px when asked for 390 by window size: use CDP device metrics or a 390 px iframe.
-- Open rows: SELECTREFUSED, PROJECTSTAB, CLOUDARM, OPTIONSWIRED, TEXTKEEPS, BOXREMOUNT, PRINTERDECIDES (thirty-five
+- Open rows: PROJECTSTAB, CLOUDARM, OPTIONSWIRED, TEXTKEEPS, BOXREMOUNT, PRINTERDECIDES (thirty-five
   copied decisions, four imported; add any new one there).
 
 ## At the end

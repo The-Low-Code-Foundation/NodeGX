@@ -36,6 +36,9 @@ describe('EXP-022 S1: story-engine as a Swift package', () => {
       `${kit}/Logic/SourceLogic.swift`,
       `${kit}/Router.swift`,
       `${kit}/Scripts.swift`,
+      // P134 session 10 (P134-HTX004-SELECTREFUSED): the two whose inputs read a placed component's value compile now.
+      `${kit}/Scripts/functions/Pages/Read/The_passage_you_are_in.js`,
+      `${kit}/Scripts/functions/Pages/Remix/Read_what_was_pasted.js`,
       `${kit}/Scripts/functions/Story/Source/Which_story_is_being_read.js`,
       `${kit}/Scripts/nodegx-host.js`,
       `${kit}/Support.swift`,
@@ -72,8 +75,8 @@ describe('EXP-022 S1: story-engine as a Swift package', () => {
     expect(read).toContain('router.go(.remix)');
     expect(read).toContain('@State var whatThePageHasToSayInWords: String = "reading"');
     expect(read).toContain('if JS.truthy(Self.WHAT_THE_PAGE_HAS_TO_SAY_IN_WORDS_STATES[whatThePageHasToSayInWords]?["note"]) {');
-    // The Restart press runs a refused chain: the button draws, its press does nothing, and the preflight says why.
-    expect(read).toContain('// Nothing is wired to this press.');
+    // The Restart press: refused until P134 session 10 (the start is the placed Source's value); now read at the press.
+    expect(read).toContain('  func rdRestartPressed() {\n    variables.storyAt = theStoryBeingReadFirstId\n');
     const passage = app.files[`${kit}/Views/PassageView.swift`];
     // A bound color replaces the static one (SwiftUI's innermost foregroundStyle wins).
     expect(passage).toContain('.foregroundStyle(Theme.color(JS.show(Self.READING_AN_ENDING_OR_A_PASSAGE_THAT_IS_NOT_THERE_STATES[readingAnEndingOrAPassageThatIsNotThere]?["tone"])) ?? Color.primary)');
@@ -104,8 +107,11 @@ describe('EXP-022 S1: story-engine as a Swift package', () => {
     // What the Swift printer read and does not print yet, by name.
     const losses = p.swiftLosses.map((l) => `${l.component} ${l.nodeId} ${l.what}`);
     // S2 prints the logic component and the store read S1 named; what is left is the For Each React leaves undrawn too.
+    // P134 session 10: two chains the plan now compiles run one commit late, which this paused printer names (BOARD §2).
     expect(losses).toEqual([
-      "Pages/Read rdChoices the For Each's rows are not drawn: the plan feeds it no items, so the React export does not draw its rows either"
+      'Pages/Read rdSrc its "ready" runs a chain one commit late, after the value it lifts lands, which the Swift target does not print yet',
+      "Pages/Read rdChoices the For Each's rows are not drawn: the plan feeds it no items, so the React export does not draw its rows either",
+      'Pages/Remix rxPaster its "play" runs a chain one commit late, after the value it lifts lands, which the Swift target does not print yet'
     ]);
     expect(app.files[`${kit}/Views/ReadPageView.swift`]).toContain('SidebarView(things: variables.storyCarrying)');
     // CSS a phone has no counterpart for: the project's stylesheet classes.

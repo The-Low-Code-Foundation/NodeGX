@@ -3355,6 +3355,29 @@ export interface InstancePulsePlan {
 /** P18-S126-INSIGNAL. The TypeScript type of a signal input's prop, the pair the parent passes. */
 export const INPUT_PULSE_TS_TYPE = '{ sent: number; taken: { current: number } }';
 
+/**
+ * P134-HTX004-SELECTREFUSED. A placed component's signal whose chains read a value that same component lifts (todo-list's
+ * Task list: `open` with `taskId`, into Set Variable "Select from the list"). The runtime hands the value before the signal,
+ * so the chain reads the pressed row's id. In the export a lifted value reaches this component from the child's push
+ * effect, after the press, so a chain run in the press would read the value before (the row pressed last time, or
+ * `undefined`). The press adds one to `sent`; an effect hands the count on to `delivered` (the child's push lands in the
+ * same commit, a parent's effects running after its children's); the chain runs from an effect on `delivered`, once per
+ * pulse (`takenLocal`, a ref), reading the value sent with it. P18-S127-SIBLINGVALUE's delivered count, one hop further:
+ * there the count is handed to a placed component, here to this component's own chain.
+ */
+export interface LiftedPulseChainPlan {
+  nodeId: string;
+  port: string;
+  /** The count the press adds to (a `counter` row). */
+  sent: { name: string; setterName: string };
+  /** The count as the chain sees it, one commit after `sent` (a `counter` row). */
+  delivered: { name: string; setterName: string };
+  /** The ref holding the count the chain has acted on. */
+  takenLocal: string;
+  /** Every chain the signal runs, in wire order, as the handler held them. */
+  actions: HandlerAction[];
+}
+
 export interface ReceiverPlan {
   nodeId: string;
   channelName: string;
@@ -4426,6 +4449,8 @@ export interface ComponentPlan {
   inputPulses: InputPulsePlan[];
   /** P18-S126-INSIGNAL. One count per placed component's signal input a sender here attached to. */
   instancePulses: InstancePulsePlan[];
+  /** P134-HTX004-SELECTREFUSED. One per placed component's signal whose chains read a value it lifts: run one commit late. */
+  liftedPulseChains: LiftedPulseChainPlan[];
   /** Popup slots this component renders, registration order — earned by attachment (§2). */
   popups: PopupSlotPlan[];
   /** True when a translated Close Popup attached — the component declares `onClose` (§4). */
@@ -4591,6 +4616,11 @@ export interface ComponentPlan {
      * the Parse question set it places): the lifted row is pushed on, a pass-through lift, decided once the child's lift is.
      */
     intoOutputs?: { prop: string; tsType: string };
+    /**
+     * P134-HTX004-SELECTREFUSED. The sink is a read in a chain (a Set Variable's Value): the row was allocated when the
+     * chain compiled (`row`), and only the child's callback is owed. A child that does not lift it refuses the read.
+     */
+    intoRead?: { row: string };
   }>;
   dispositions: Record<string, Disposition>;
   /** Dropped wires, unhandled constructs — EXP-004's report feed. Nothing silently dropped. */
@@ -4733,6 +4763,8 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
   const byLegacyNow = (legacy: string) => plannedByLegacy.get(legacy);
   /** Session 139. Per component, the pulses `liftInto` found would arrive without their value (`PlanExclusions.pulses`). */
   const liftedPulseRefusals = new Map<string, Map<string, string>>();
+  /** P134-HTX004-SELECTREFUSED. Per component, the reads `liftInto` found the placed component does not lift (`PlanExclusions.reads`). */
+  const liftedReadRefusals = new Map<string, Map<string, string>>();
   const liftInto = (plan: ComponentPlan) => {
     const liftedVarByKey = new Map<string, string>();
     const liftedOf = (pending: ComponentPlan['pendingLifted'][number]) =>
@@ -4750,7 +4782,7 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
     const sourceKeyOf = (pending: ComponentPlan['pendingLifted'][number]) => `${pending.instanceId}:${pending.port}`;
     const feedsOfSink = new Map<string, Array<ComponentPlan['pendingLifted'][number]>>();
     for (const pending of plan.pendingLifted) {
-      if (liftedOf(pending) === undefined || pending.intoItems === true) continue;
+      if (liftedOf(pending) === undefined || pending.intoItems === true || pending.intoRead !== undefined) continue;
       feedsOfSink.set(sinkKeyOf(pending), [...(feedsOfSink.get(sinkKeyOf(pending)) ?? []), pending]);
     }
     /** Session 139. The row each multi-fed input reads, by sink. */
@@ -4765,7 +4797,26 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
       unliftedIntoOutput.set(sinkKeyOf(pending), `instance output "${pending.port}" is not lifted by ${pending.targetLegacy} — its feed defers there`);
     }
     const outputsSaidUnlifted = new Set<string>();
+    /*
+     * P134-HTX004-SELECTREFUSED. A chain's read of a placed component's value: its row exists, the callback that writes it
+     * is owed. First, so any other sink of the same value reads the same row. Not lifted, the read is refused next plan.
+     */
     for (const pending of plan.pendingLifted) {
+      if (pending.intoRead === undefined) continue;
+      const lifted = liftedOf(pending);
+      if (lifted === undefined) {
+        const refusals = liftedReadRefusals.get(plan.legacyPath) ?? new Map<string, string>();
+        refusals.set(`${pending.instanceId}\u0000${pending.port}`, `instance output "${pending.port}" is not lifted by ${pending.targetLegacy} — its feed defers there`);
+        liftedReadRefusals.set(plan.legacyPath, refusals);
+        continue;
+      }
+      const callbacks = (plan.instanceLifted[pending.instanceId] = plan.instanceLifted[pending.instanceId] ?? []);
+      const setterName = setterNameOf(pending.intoRead.row);
+      if (!callbacks.some((c) => c.prop === lifted.prop && c.setterName === setterName)) callbacks.push({ prop: lifted.prop, setterName });
+      liftedVarByKey.set(sourceKeyOf(pending), pending.intoRead.row);
+    }
+    for (const pending of plan.pendingLifted) {
+      if (pending.intoRead !== undefined) continue;
       const unliftedSibling = pending.intoOutputs !== undefined ? unliftedIntoOutput.get(sinkKeyOf(pending)) : undefined;
       const lifted = unliftedSibling === undefined ? liftedOf(pending) : undefined;
       // EXP-011 §108. Into a repeater's items, a lifted value typed as something other than a list draws nothing.
@@ -4951,11 +5002,13 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
       const planned = plannedByLegacy.get(legacy)!;
       const component = ir.components.find((c) => `/${c.path}` === legacy)!;
       const found = unreachedTriggersOf(planned, component);
-      const known = exclusionsOf.get(legacy) ?? { owners: new Map(), mounts: new Map(), rows: new Map(), pulses: new Map() };
+      const known = exclusionsOf.get(legacy) ?? { owners: new Map(), mounts: new Map(), rows: new Map(), pulses: new Map(), reads: new Map() };
       let fresh = false;
       // Session 139. The value wires the lift pass dropped between two placed components refuse their pulses.
       for (const [key, reason] of liftedPulseRefusals.get(legacy) ?? []) found.pulses.set(key, reason);
-      for (const key of ['owners', 'mounts', 'rows', 'pulses'] as const) {
+      // P134-HTX004-SELECTREFUSED. A chain's read of a value the placed component does not lift is refused by name.
+      for (const [key, reason] of liftedReadRefusals.get(legacy) ?? []) found.reads.set(key, reason);
+      for (const key of ['owners', 'mounts', 'rows', 'pulses', 'reads'] as const) {
         for (const [id, reason] of found[key]) {
           if (known[key].has(id)) continue;
           known[key].set(id, reason);
@@ -5060,6 +5113,11 @@ export interface PlanExclusions {
    * value before the pulse (rocket-school's `app` then `write`); the export would run the pulse on a stale value.
    */
   pulses: Map<string, string>;
+  /**
+   * P134-HTX004-SELECTREFUSED. A placed component's value output a chain here reads, where that component does not lift
+   * it: by `<instance id>\u0000<port>`. The read is refused by name in the next plan, as a feed of the same output is.
+   */
+  reads: Map<string, string>;
 }
 
 /**
@@ -5160,7 +5218,7 @@ export function rowlessReasonOf(plan: ComponentPlan, repeaterId: string): string
  * finished plan: its handlers, its bindings after the lift phase, and every action list it carries.
  */
 export function unreachedTriggersOf(plan: ComponentPlan, component: ComponentIR): PlanExclusions {
-  const found: PlanExclusions = { owners: new Map(), mounts: new Map(), rows: new Map(), pulses: new Map() };
+  const found: PlanExclusions = { owners: new Map(), mounts: new Map(), rows: new Map(), pulses: new Map(), reads: new Map() };
   if (plan.file === null) return found;
   const nodeById = new Map(component.nodes.map((n) => [n.id, n]));
   const labelOf = (nodeId: string) => {
@@ -5270,7 +5328,7 @@ function planComponent(
   /** EXP-011 §53. The components on a template cycle (a task that runs itself). */
   templateCycle: ReadonlySet<string>,
   /** P18-S122-DEADROW, P18-S123-UNDRAWNTRIGGER. The triggers a first plan of this component found never run. */
-  excluded: PlanExclusions = { owners: new Map(), mounts: new Map(), rows: new Map(), pulses: new Map() }
+  excluded: PlanExclusions = { owners: new Map(), mounts: new Map(), rows: new Map(), pulses: new Map(), reads: new Map() }
 ): ComponentPlan {
   const nodeById = new Map(component.nodes.map((n) => [n.id, n]));
   const dispositions: Record<string, Disposition> = {};
@@ -5320,6 +5378,7 @@ function planComponent(
     receivers: [],
     inputPulses: [],
     instancePulses: [],
+    liftedPulseChains: [],
     popups: [],
     closesPopup: false,
     queries: [],
@@ -9839,6 +9898,8 @@ function planComponent(
     return { input, templatePath, declared };
   };
 
+  /** P134-HTX004-SELECTREFUSED. A placed component's value read by a chain, by `<instance id>\u0000<port>`: the row it reads. */
+  const liftedReads = new Map<string, { row: string; instanceId: string; port: string; targetLegacy: string }>();
   const resolveExpr = (fromNode: NodeIR | undefined, fromProperty: string, ctx: ResolveCtx): ValueExpr | null => {
     if (!fromNode) return null;
     /**
@@ -9866,6 +9927,41 @@ function planComponent(
         return null;
       }
       return { kind: 'row-relay', repeaterId: fromNode.id, output, input: relayed.input, tsType: relayed.declared };
+    }
+    /*
+     * P134-HTX004-SELECTREFUSED. A drawn placed component's value output, read by a chain: the row the component lifts it
+     * into (CONTROLLED-STATE-TARGET §4d's parent side), as an element's binding reads it. Allocated here, owed its callback
+     * only if something kept reads it (the sweep at the end of the plan), and refused by name next plan if the component
+     * does not lift it (`liftInto`). A chain its own signal runs is moved to an effect one commit late, so it reads the
+     * value sent with the pulse (`LiftedPulseChainPlan`). A Function's or an Expression's standing input is not a chain
+     * read, and stays refused as before.
+     */
+    if (plan.roleOf[fromNode.id] === 'instance' && rendered.has(fromNode.id)) {
+      const targetIR = ir.components.find((tc) => `/${tc.path}` === fromNode.type);
+      const vp = targetIR === undefined ? undefined : componentOutputInterface(targetIR).valueProps.find((v) => v.port === fromProperty);
+      if (vp !== undefined) {
+        const key = `${fromNode.id}\u0000${fromProperty}`;
+        const refused = excluded.reads.get(key);
+        if (refused !== undefined) {
+          ctx.defer = refused;
+          return null;
+        }
+        let read = liftedReads.get(key);
+        if (read === undefined) {
+          const row = allocStateVar(
+            `${fromNode.authoredLabel ?? fromNode.type.split('/').pop() ?? 'instance'} ${fromProperty}`,
+            `${fromProperty}Lifted`,
+            `${vp.tsType} | undefined`,
+            null,
+            fromNode.id,
+            'lifted',
+            `Lifted from ${fromNode.type}'s value output "${fromProperty}" — undefined until the child's mount push (CONTROLLED-STATE-TARGET §4d), read by a chain (P134-HTX004-SELECTREFUSED).`
+          );
+          read = { row: row.name, instanceId: fromNode.id, port: fromProperty, targetLegacy: fromNode.type };
+          liftedReads.set(key, read);
+        }
+        return { kind: 'state-get', name: read.row, maybeUndefined: true };
+      }
     }
     if (LIST_PRODUCERS.has(fromNode.type) && fromProperty === 'items') return listReadOf(fromNode, ctx);
     // EXP-011 §56. A transform's Count is its derived list's length — current whenever the list is.
@@ -22810,6 +22906,89 @@ function planComponent(
    * is ruled on, so a placed component whose every sender was refused (a logic component's Done, a Set Variable's Done)
    * would keep a count nothing adds to. Its row and its prop go; the wires keep their refusals.
    */
+  /*
+   * P134-HTX004-SELECTREFUSED. A placed component's value read by a chain (`resolveExpr`) is earned by what kept it: a row
+   * no kept action or binding reads (a question asked and its answer thrown away, a chain refused further on) goes. A row
+   * kept is owed the child's callback (`liftInto`, `intoRead`). And a handler on that same component's signal that reads
+   * it runs one commit late, from an effect, so it reads the value sent with the pulse (`LiftedPulseChainPlan`).
+   */
+  if (liftedReads.size > 0) {
+    /**
+     * The rows a value reads, through the Functions and Expressions it runs or reads: their inputs are resolved once, on
+     * the Function's plan (`jsFunctions`), not in the action — View's `toggle` runs "Open it, or close it again", whose `id`
+     * is View's own `projectId`.
+     */
+    const statesReadIn = (root: unknown): Set<string> => {
+      const names = new Set<string>();
+      const seen = new Set<unknown>();
+      const visit = (value: unknown): void => {
+        if (value === null || typeof value !== 'object' || seen.has(value)) return;
+        seen.add(value);
+        if (Array.isArray(value)) return value.forEach(visit);
+        const v = value as { kind?: unknown; name?: unknown; nodeId?: unknown };
+        if (v.kind === 'state-get' && typeof v.name === 'string') names.add(v.name);
+        if (typeof v.kind === 'string' && v.kind.startsWith('jsfun') && typeof v.nodeId === 'string') visit(plan.jsFunctions[v.nodeId]?.inputs);
+        for (const child of Object.values(value)) visit(child);
+      };
+      visit(root);
+      return names;
+    };
+    const keptReads = statesReadIn(Object.entries(plan).filter(([key]) => key !== 'stateVars').map(([, value]) => value));
+    for (const read of liftedReads.values()) {
+      if (!keptReads.has(read.row)) {
+        plan.stateVars = plan.stateVars.filter((v) => v.name !== read.row);
+        continue;
+      }
+      const wire = component.connections.find((c) => c.fromId === read.instanceId && c.fromProperty === read.port);
+      plan.pendingLifted.push({
+        connectionKey: wire?.key ?? `${read.instanceId}.${read.port}`,
+        instanceId: read.instanceId,
+        targetLegacy: read.targetLegacy,
+        port: read.port,
+        toNodeId: wire?.toId ?? read.instanceId,
+        toProperty: wire?.toProperty ?? read.port,
+        intoRead: { row: read.row }
+      });
+    }
+    for (const [nodeId, byPort] of Object.entries(plan.handlers)) {
+      const node = nodeById.get(nodeId);
+      if (node === undefined || plan.roleOf[nodeId] !== 'instance') continue;
+      const ownRows = new Set([...liftedReads.values()].filter((r) => r.instanceId === nodeId && keptReads.has(r.row)).map((r) => r.row));
+      if (ownRows.size === 0) continue;
+      const signals = instanceSignalOutputs(node);
+      for (const [port, actions] of Object.entries(byPort)) {
+        if (!signals.has(port)) continue;
+        const reads = statesReadIn(actions);
+        if (![...ownRows].some((row) => reads.has(row))) continue;
+        if (!actionsValidIn(actions, { kind: 'render' })) {
+          const reason = `its chain reads ${node.authoredLabel ?? node.type}'s own value, which arrives after the "${port}" signal, so it runs one commit late from an effect, and it reads values that only exist inside a handler`;
+          delete byPort[port];
+          for (const wire of component.connections) {
+            if (wire.fromId !== nodeId || wire.fromProperty !== port) continue;
+            dispositions[wire.toId] = { kind: 'deferred', to: 'EXP-003', reason };
+            notes.push(wireNote(wire, reason));
+          }
+          continue;
+        }
+        const label = `${node.authoredLabel ?? 'instance'} ${port}`;
+        const sent = allocStateVar(`${label} sent`, `${port}Sent`, 'number', 0, nodeId, 'counter', `How many times "${port}" on the placed ${node.type} ${nodeId} has been signalled — its chain reads a value the component lifts, so it runs one commit later (P134-HTX004-SELECTREFUSED).`);
+        const delivered = allocStateVar(`${label} delivered`, `${port}Delivered`, 'number', 0, nodeId, 'counter', `"${port}" as its chain sees it: the count, one commit after it is sent, so the values lifted with it have landed (P134-HTX004-SELECTREFUSED).`);
+        const base = `${sent.name.replace(/Sent$/, '')}Taken`;
+        let takenLocal = base;
+        for (let n = 2; stateNameTaken(takenLocal); n++) takenLocal = `${base}${n}`;
+        usedStateVarNames.add(takenLocal);
+        plan.liftedPulseChains.push({
+          nodeId,
+          port,
+          sent: { name: sent.name, setterName: sent.setterName },
+          delivered: { name: delivered.name, setterName: delivered.setterName },
+          takenLocal,
+          actions
+        });
+        byPort[port] = [{ kind: 'state-set', name: sent.name, op: 'inc' }];
+      }
+    }
+  }
   if (instancePulseVars.size > 0) {
     const pulsed = new Set<string>();
     const seen = new Set<unknown>();

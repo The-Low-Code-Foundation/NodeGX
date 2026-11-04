@@ -1,7 +1,7 @@
 # Phase 134 — The app in plain files
 
 **Scoped:** 2026-11-03, on Richard's ask ("Let's scope up the HTML export phase please, I think it'll be important").
-**State:** 🔵 HTX-001 to HTX-006 done (§10, session 9 of at most 10, 2026-11-04). A NodeGX settings menu runs inside a three.js page that is not NodeGX: exported with `--component`, widened, exported again, and the page's own files byte-identical before and after; its look in the game equal to its own app's on all 90 cells read (§10 session 9). Ruled 2026-11-04 (§9): R6 "now, first" (the phase runs past ten), R7 ThreadSpace, HiveClip on a copy. The HTML export is graded by P107's scenarios the way React and Swift are: on every scenario it plays, its trace equals the React export's, event for event; the 13 React plays and it does not are this printer's, named (a Log step, the streaming stores, On App Error with the parsers). Neither export can open a task (P134-HTX004-SELECTREFUSED, high, the plan's; §9 R6 still unanswered). **Next: P134-HTX004-SELECTREFUSED** (R6, in the plan), then HTX-006's ThreadSpace line, then HTX-007. Options wait on the plan (P134-HTX003-OPTIONSWIRED). R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
+**State:** 🔵 HTX-001 to HTX-006 done, and SELECTREFUSED (§10, session 10, 2026-11-04). A NodeGX settings menu runs inside a three.js page that is not NodeGX: exported with `--component`, widened, exported again, and the page's own files byte-identical before and after; its look in the game equal to its own app's on all 90 cells read (§10 session 9). Ruled 2026-11-04 (§9): R6 "now, first" (the phase runs past ten), R7 ThreadSpace, HiveClip on a copy. The HTML export is graded by P107's scenarios the way React and Swift are: on every scenario it plays, its trace equals the React export's, event for event; the 13 React plays and it does not are this printer's, named (a Log step, the streaming stores, On App Error with the parsers). **Session 10 (past ten, by R6): SELECTREFUSED fixed in the plan** — a task opens in both exports, and todo-list's Chrome drive reads the same in the running app, the React export and the HTML export at all 12 steps; 80 of the 180 template wires compile (3 before). **Next: HTX-006's ThreadSpace line** (R7, on a copy), then HTX-007. Options wait on the plan (P134-HTX003-OPTIONSWIRED). R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
 phase only** (BOARD §2); React and Swift stay paused. **Read first:** this page, then [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md),
 then the task you take. The Swift precedent this phase copies is
 [EXP-022](../phase-18-code-export-v2/EXP-022-THE-SAME-GRAPH-IN-SWIFT.md) §7–§9.
@@ -722,3 +722,65 @@ builds). The whole package suite was not run: `plan.ts` was not touched.
 
 **Cost:** the HTML printer's hand-written lines 2,896 → 3,168 (`printComponent.ts` +62 for the slider and the outputs,
 `emitHtml.ts` +210 for the part), and `write/writePart.ts` 145 new. Sessions: 9 of 10.
+
+### Session 10 — SELECTREFUSED, in the plan (2026-11-04, Opus 5.5)
+
+**Result: a task opens in both exports, and todo-list's drive reads the same in all three arms at all 12 steps.** Richard
+ruled R6 "now, first", so this session was the plan, not HTX-007. Driven again in Chrome (`htx-004/drive.cjs`, a fresh
+backend per arm): at 390 px, pressing "Book the van in for its MOT" opens its summary on its own page; ticking "Ring the
+garage" sends `PUT /classes/Action/<id> 200` and `POST /classes/Event 201`; "← Back" returns; closing the release notes
+sends its two writes. `compare.py`: **`html==react yes; all three: seen same, writes same`** on every step, no console
+error in any arm ([`htx-004/README.md`](htx-004/README.md) "Session 10", the redrawn `side-by-side.png`).
+
+**What changed in the plan** (`plan.ts`, both exports read it):
+
+- A drawn placed component's value output, read by a chain, is the row the component lifts it into, as an element's
+  binding already read it (`resolveExpr`). Kept only where something kept reads it; the child's callback is owed it
+  (`liftInto`, `intoRead`). A component that does not lift the port refuses the read by name in the next plan ("instance
+  output "id" is not lifted by /Commands/Add routine — its feed defers there"), through the re-plan loop's new
+  `reads` exclusion.
+- **A chain the same component's signal runs is run one commit late** (`LiftedPulseChainPlan`). The runtime hands the
+  value before the signal; the export's value arrives from the child's push effect, after the press, so a chain run in
+  the press read the row pressed last time. The press counts; an effect hands the count on (the child's push lands in
+  the same commit, a parent's effects running after its children's); the chain runs from an effect on the handed-on
+  count, once per pulse. P18-S127-SIBLINGVALUE's delivered count, one hop further. A Function a handler runs counts: its
+  inputs are read through (View's `toggle` runs "Open it, or close it again" with View's own `projectId`).
+- A Function's or an Expression's input reads the same row ("One pane or two?" reads "The selected task"'s `found`).
+
+**The printers:** React prints the late chain as two effects and a ref; HTML as two `l.watch` and a `{ current }`.
+Swift names it, 15 losses on todo-list (its lane is paused). **The HTML printer now reads a Screen Resolution**
+(P134-S10-SCREENREAD, high, fixed): hidden until "One pane or two?" compiled, it left the phone drawing both panes.
+
+**Reach on the 180** (the census of session 7, run on HEAD's `src` and the tree's): at HEAD 3 compiled, 177 were refused
+(106 "the value wire has no statically known source"). Now **80 compile**, none keeps that sentence, about 37 name the
+child that does not lift the value, and **63 stay under "two wires feed its Value input"** (EXP-011 §90, its own rule).
+todo-list's plan refusals 94 → 82.
+
+**Graded:** `tests/a-value-sent-with-its-signal.test.ts` (16): the Select Desk (the Sibling Desk, its Shower unwired,
+"Select" on the page from the Picker's `picked` and `chose`), predicted first in `htx-004/EXPECTED-SELECT.md`, equal on
+the runtime's own nodes, React under StrictMode and the HTML export in jsdom at every step; its last Pick A is the step
+that tells (the value before it was "task c"). **Mutant:** the chain run in the press reads one behind in **both**
+exports and turns A2, A3 and A4 red; the control stays green. Plus the plan on the desk and on todo-list, the emitted
+code, typecheck, and todo-list's Screen Resolution.
+
+**The whole package suite, in band:** 171 suites, 27 tests red on the first run. Mine, moved with the reason written
+beside each pin: todo-list's and story-engine's counts in the HTML and Swift specs (more compiles: story-engine's Restart
+press works now), and a regex that fixed the list's indent. **Session 9's, fixed here:** game-menu's React export did not
+typecheck (`arrival === ''` on a number, P134-S10-SLIDERTYPE, high: a slider fed a number made an app that would not
+build), its corpus golden block was missing (hls001: 19 lines in, none out), and the printer's helper called `listen`
+read as a socket (P134-S10-LISTENWORD). Session 9's "the four specs that export every fixture" did not include
+those rows. **Not this phase's, filed open:** P134-S10-SENDSIGNAL (`Outputs.x.send()` now a signal on the runtime's side:
+ISL-006 and marketplace's typecheck), P134-S10-SIGNINERROR (the runtime's Sign In With, 9 rows),
+P134-S10-STUDIOSOCKET (noodl-mcp's studio proxy, unenrolled since 10-25), P134-S10-PARAMFLOOR (the parameter ledger, +3).
+After the fixes, every row red for a cause of mine or session 9's is green, and so are the three graph ledgers; hls006 and the-templates-typecheck stay red, each on one of the four filed open.
+
+**Said plainly:**
+
+- **The runtime arm's readings in the drive are session 7's**, kept: only the two exports were driven again.
+- **Still drawn by the running app only:** the row grips, the Deadline date field (both the plan's "a Function fed by
+  another Function"), and "Also keep track of projects and money" (PROJECTSTAB).
+- **A Did Mount or an effect that reads a lifted value** reads it as the row holds it then (undefined before the child's
+  first push). None of the templates' newly compiled chains is one; not measured beyond that.
+
+**Cost:** `plan.ts` +184 −5; the React printer +35 −2; the HTML printer +65 −8; Swift +4; the spec 248 lines new.
+Sessions: 10, past the stop of ten by Richard's R6.
