@@ -1,7 +1,7 @@
 # OWN-036 — The first project: what our builds learned, in the folder a stranger's Claude opens
 
-**Phase:** [112](README.md). **Opened:** 2026-11-03 by Richard. **Status:** 🟡 s1. The skills and note are written, and AC5 passed on 2026-11-04. Still owed: AC3's
-`traps.md` copy pass, the first harvest triage, and the release cut.
+**Phase:** [112](README.md). **Opened:** 2026-11-03 by Richard. **Status:** 🟡 s1. On npm since create-nodegx 0.2.9 (2026-11-04); AC5 passed; the report is live at
+nodegx.io/first-project/. Still owed: AC3's `traps.md` copy pass.
 
 > "I just want to make sure that someone today with a brand new Claude subscription and no previously created projects
 > at all, who says 'let's use nodegx to build my first project', would be greeted with the combined knowledge of all of
@@ -130,3 +130,13 @@ is cut. Every rule says how far it reaches (the camera rule now says *by itself*
   candidate skill lines, not yet measured: a phone-first app should still look deliberate at desktop width; hand
   over the start command instead of keeping a preview alive inside the turn (that cost the new-kit app arm ~2 h of
   wake-ups).
+- **s1, 2026-11-04: Claude alone, the report, the release.** Richard: run "Claude alone" before any claim. Arms e
+  and f (no NodeGX, no skills) built without asking. Richard on the app: *"a pretty sad prototype"*; on the game:
+  *"no endgame. So disappointing"*. RESULTS.md has the six-way table. The page **nodegx.io/first-project/** is live
+  (nodegx-web 7413b3d, plus a wording commit), with the three games under `/lab/first-project/` and a homepage card.
+  The dry run of the deploy deleted nothing and changed no other page. Lumen Dive is served with one added
+  `[hidden]` rule, and the page says so. **create-nodegx, create-nodegx-vibe and create-nodegx-cline 0.2.9 are
+  published** (b4cdbe0d2, pushed; Richard's OTP). Registry shasums equal the packed tarballs, and `npm create
+  nodegx@0.2.9` writes the four skills and pins mcp 0.2.9. The harvest gate's first triage covered 108 entries: 2
+  taken, 10 duplicate, 21 private, 75 general-no. Filed on the way: PREVIEWSHAREDORIGIN, BASEURLSLASH,
+  DEPLOYPREVIEWS. Fixed on the way: MCPPIN, BUILDAPPREGEX (40/40).

@@ -28,6 +28,10 @@ built project in the vscode projects folder contribute new versions to the npm p
 `prepublishOnly` for a publish from the folder. Either refuses while an entry from the last 14 days is unconsidered,
 unless `KIT_HARVEST_SKIP` says why.
 
+🔴 **Triage last, after the cut's own edits.** An entry counts as new again when its file changes. The 0.2.9 cut
+marked every bug first and then closed two of them, and Richard's publish stopped on those two (2026-11-04). Run
+`--gate` once more after the release commit, before you hand over the publish command.
+
 ## What goes in
 
 A lesson goes in when **all** of these hold:
