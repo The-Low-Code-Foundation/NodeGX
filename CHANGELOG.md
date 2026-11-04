@@ -17,6 +17,35 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
+## create-nodegx 0.2.10 · 2026-11-04
+
+**If you're new to building with an AI, your agent can now take you through a practice round first.**
+
+This release is `create-nodegx`, `create-nodegx-vibe` and `create-nodegx-cline` at 0.2.10. `npm create nodegx` still
+sets up `@nodegx/mcp` 0.2.9. The other packages stay at their versions.
+
+### New
+
+- **A practice round, if you want one.** Your agent offers it in one line when you're new. You build a small game
+  together in about twenty minutes. It stops six times to show you how to get the best out of it. If you say no,
+  it builds what you asked for.
+- **A sheet about how you like to work.** At the end of the round, you and your agent write it together. After you
+  say yes, it's saved in your own skills folder. Your next project reads it from there.
+- **A help page.** When you're stuck, your agent points you to [nodegx.io/help](https://nodegx.io/help/). It lists
+  free guides by problem.
+- **The guides reach Mistral Vibe.** A Vibe folder now gets the first-project guide, the game guide and the practice
+  round.
+
+### Changed
+
+- **The first-project guide notices when a question didn't land.** It asks once more in plain words, and says what
+  changes depending on your answer.
+
+### Good to know
+
+- Claude Code reads your sheet from `~/.claude/skills/`. Cline and Mistral Vibe read it from `~/.agents/skills/`.
+- We're now trying the practice round with beginners.
+
 ## create-nodegx 0.2.9 · 2026-11-04
 
 **Before your agent builds a first app or game, it reads what our best builds learned.**
