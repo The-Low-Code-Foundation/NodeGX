@@ -155,3 +155,44 @@ Seen and filed: **P132-HIDDENPANELCHURN**. With a workflow open, the hidden Comp
 29,904 portal childList + 3,204 input attribute mutations, none inside the new list). Cause unfound.
 
 Not done: a filter's item drawn in the app (Greenhouse has no filter; the spec covers it); AC2's crossing.
+
+## s21 (2026-11-04): AC2's crossing driven in both apps; P132-EDITORBLINDTOSTUDIO fixed
+
+**Measured by reading first.** Studio and the editor share ONE backend per project: both keep backends in
+`~/.noodl/backends`, the project names its backend in `metadata.cloudservices`, and the app that opens second adopts the
+running one (Studio's `startFor` reads the runtime record; it answered `phase: adopted`, the editor's pid). Both write
+`nodegx.automations.json`. Studio's `serve.mjs` watches the folder and its page takes the write in (STU-002). The
+editor's `ProjectFileWatcher` dropped that file (components, the three project-level files and scripts only), so a
+Studio change reached the Workflows panel only on Refresh and an open canvas never; its next Save put the old
+definition back over Studio's. Filed and fixed as
+[P132-EDITORBLINDTOSTUDIO](../../bugs/p132-editorblindtostudio-a-workflow-changed-in-studio-never-reaches-an-open-editor-and-the-editors-next-save-puts-the-old-one-back.md).
+
+**Built (NodeGX):** `decide.ts isAutomationsFile`, the watcher's fifth callback `onAutomationsChanged`, wired in
+`EditorPage`; `WorkflowEditorService.automationsFileChanged` (the panel re-reads on `automationsChanged`; the open
+workflow compared by the backend's `updatedAt`, a save in flight waited for through `WorkflowDocument.settled()`); the
+decision pure in `models/workflow/workflowOutsideChange.ts` (unchanged / reload / ask / gone).
+
+**Driven** ([crossing-studio.mjs](crossing-studio.mjs) for Studio's presses on CDP 9461, `editor-press.sh` for the
+editor's on 9222), one Greenhouse copy, its backend made by Studio's `attachNewBackend` (Backend Services has no *Add
+backend* any more: *Find a backend* lists every backend on the machine) and started by the editor on reopen:
+
+1. **Studio → editor.** *When a plant is watered* open in the editor (2 steps). In Studio, *Add a step after* *Mark
+   the plant watered* → Return. The editor: "Redrawn from the backend", the list "3 steps", the canvas Mark → Then →
+   Return, Save not lit (`look/bwf008-s21-1-studio-change-redrawn-in-editor.png`).
+2. **Editor → Studio.** The Return renamed in the editor, Save: "Saved to the backend and to
+   nodegx.automations.json", **no** "Redrawn" toast (the editor's own echo is ignored). Studio: "nodegx.automations.json
+   changed outside Studio — redrawn", its card "Say the plant is watered".
+3. **Both at once.** An unsaved rename in the editor, then Studio renames Mark: "Changed in two places", the editor's
+   unsaved name kept, nothing redrawn (`look/bwf008-s21-2-changed-in-two-places.png`). *Take theirs*: Studio's "Mark it
+   watered" drawn, the unsaved name gone (`…-3-took-theirs.png`). 🔴 The first run found the warning **stayed up**
+   after *Take theirs*, still offering it: it now closes with the press (`ToastLayer.hideActivity(id)`), re-driven
+   after a restart of both apps.
+
+Gates: `tests-unit/workflow/p132-bwf008-outside-change.test.ts` 9/9 (mutants: the watcher not reporting the file → 1
+red; no wait for a save in flight → 1 red); workflow, watcher (rel-009b, fld-009, isl-005), local-backend and bmg-012
+suites 21 / 251 green; `tsc -p packages/noodl-editor --noEmit` 0. Census of `~/.noodl/backends` 21 before = 21 after;
+the peers' five Electron processes alive after both `dev:stop`s.
+
+**AC2 green.** Not covered: a change to the FILE only (git pull, hand edit) is not on the backend, so the canvas has
+nothing newer to redraw; the panel's drift line says the two differ. BWF-008's last open item is AC4's one spec per
+point, which s9–s21 each added.

@@ -1,5 +1,33 @@
 # P132 — next session
 
+**s21 (2026-11-04): BWF-008 AC2's crossing green, in both apps on one Greenhouse copy.**
+- **P132-EDITORBLINDTOSTUDIO** (high, `launch: beta`) filed and fixed: the editor's file watcher dropped
+  `nodegx.automations.json`, so a Studio change never reached an open canvas and the editor's next Save put the old
+  steps back. Now the panel re-reads, an open workflow is redrawn when the backend's `updatedAt` is newer and nothing
+  is unsaved, and with unsaved edits it asks (*Take theirs*; Save keeps mine).
+  [The record](BWF-008-THE-NODEGX-EDITOR-EDITS-THEM-TOO.md#s21-2026-11-04-ac2s-crossing-driven-in-both-apps-p132-editorblindtostudio-fixed).
+- Spec `tests-unit/workflow/p132-bwf008-outside-change.test.ts` 9/9 (two mutants red); 21 suites / 251 green; `tsc` 0.
+  Electron `test:ci` not run.
+
+**Next, in this order:**
+1. **Studio reads the served route words** (catalog 1.9.0) before its own `ROUTE_WORDS` (s11 list item 2 below).
+2. **P132-HIDDENPANELCHURN** measured first (s11 list item 3).
+3. **BWF-009, the test** (README's order). Richard's re-walk is the real grade of 010–013.
+
+- 🔴 **Studio and the editor share ONE backend** when both open a project: both keep backends in `~/.noodl/backends`
+  (the editor has no override), and the second app ADOPTS the running one. A two-app drive must NOT set
+  `NODEGX_BACKENDS_DIR` for Studio. Recipe: seed with `editor-seed-bwf013.py`, `attachNewBackend` from Studio's
+  `lib/backend.mjs` (no env) binds and makes it, open the copy in the editor (it starts it), then launch Studio
+  (`--remote-debugging-port=9461`); drive Studio with [crossing-studio.mjs](crossing-studio.mjs), the editor with
+  `editor-press.sh`. Delete the backend by id after; census before and after.
+- 🔴 **Backend Services has no *Add backend* now**: *Find a backend* opens a list of every backend on the machine.
+  And a project bound from outside while open is NOT taken in by the panel: reopen the project.
+- 🔴 **A canvas card's title is not in the DOM** (drawn on the canvas): `editor-press.sh at "<card title>"` finds
+  nothing; press it by position from a fitted shot. A DOM text check of a wrapped title also misses (`Mark it\nwatered`).
+- Asks for Richard: none new.
+
+---
+
 **s20 (2026-11-04): BWF-013 AC3 green; every BWF-013 AC is green.**
 - The MCP's `list_backend_workflows` answers `pieces` (`{ id, name, runBy, reads, startedBy }`), the rules in the
   engine's `pieces.ts` (`runnersOf`, `bodyNames`: Studio's and the editor's ports are twins, change all three).

@@ -80,6 +80,22 @@ export function projectLevelFileFromRelativePath(relativePath: string): ProjectL
 }
 
 /**
+ * P132 BWF-008 AC2 — the project's workflows and triggers file, which Studio and the agent write too. Not a
+ * project-level file in the saver's sense (`ProjectModel` never holds it: the Workflows panel reads it, and the
+ * backend), so it is its own question, not a fourth `ProjectLevelFile`.
+ *
+ *   "nodegx.automations.json"      → true
+ *   "nodegx.automations.json.tmp"  → false   (a writer's staging file)
+ *   "sub/nodegx.automations.json"  → false
+ */
+export const AUTOMATIONS_FILE = 'nodegx.automations.json';
+export function isAutomationsFile(relativePath: string): boolean {
+  if (!relativePath) return false;
+  const parts = relativePath.replace(/\\/g, '/').split('/').filter(Boolean);
+  return parts.length === 1 && parts[0] === AUTOMATIONS_FILE;
+}
+
+/**
  * P109 ISL-005 — `scripts/engine/world.js` → `engine/world.js`; `null` for anything else (a temp
  * file mid-write, a non-`.js` file, a dot folder).
  */

@@ -141,6 +141,8 @@ export function WorkflowsPanel() {
     setDirty(service.document?.isDirty ?? false);
   });
   useEventListener(service, WorkflowEditorEvent.dirtyChanged, () => setDirty(service.document?.isDirty ?? false));
+  // P132 BWF-008 AC2: Studio, the agent or a git pull wrote nodegx.automations.json (the file watcher)
+  useEventListener(service, WorkflowEditorEvent.automationsChanged, () => refresh());
   useEventListener(service, WorkflowEditorEvent.saved, (args: { project?: ProjectFileNote | null }) => {
     setStatus(savedSentence(args?.project ?? null));
     refresh();

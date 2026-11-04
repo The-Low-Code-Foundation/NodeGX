@@ -1234,7 +1234,11 @@ export class WorkflowDocument extends Model {
    * was.
    */
   async save(): Promise<WorkflowDefinition> {
-    const { workflow: saved, project } = await saveWorkflow(this.ref.backendId, this.toInput());
+    const writing = saveWorkflow(this.ref.backendId, this.toInput());
+    this._saving = writing.catch(() => undefined);
+    const { workflow: saved, project } = await writing.finally(() => {
+      this._saving = null;
+    });
     this.definition = saved;
     this._dirty = false;
     this.notifyListeners('dirtyChanged', { dirty: false });
@@ -1242,6 +1246,14 @@ export class WorkflowDocument extends Model {
     this.notifyListeners('saved', { definition: saved, project });
     void this.refreshPieces();
     return saved;
+  }
+
+  /** P132 BWF-008 AC2: a save on its way to the backend and the file, so a watcher event it causes waits for it. */
+  private _saving: Promise<unknown> | null = null;
+
+  /** Resolves once no save of this document is in flight. */
+  async settled(): Promise<void> {
+    while (this._saving) await this._saving;
   }
 
   /* ------------------------------------------------------------------------ */

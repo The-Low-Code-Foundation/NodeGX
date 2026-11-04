@@ -33,10 +33,10 @@
  * @module noodl-editor/services/ProjectFileWatcher
  */
 
-import { componentPathFromRelativePath, projectLevelFileFromRelativePath, scriptPathFromRelativePath } from './decide';
+import { componentPathFromRelativePath, isAutomationsFile, projectLevelFileFromRelativePath, scriptPathFromRelativePath } from './decide';
 import type { ProjectLevelFile } from './decide';
 
-export { componentPathFromRelativePath, projectLevelFileFromRelativePath, scriptPathFromRelativePath, decideComponentReload } from './decide';
+export { componentPathFromRelativePath, isAutomationsFile, projectLevelFileFromRelativePath, scriptPathFromRelativePath, decideComponentReload } from './decide';
 export type { ReloadDecision, ProjectLevelFile } from './decide';
 
 /** The subset of `fs.FSWatcher` this needs. */
@@ -90,6 +90,8 @@ export class ProjectFileWatcher {
   private pendingProjectLevel = new Set<ProjectLevelFile>();
   /** P109 ISL-005 — script paths (`engine/world.js`) changed in this window. */
   private pendingScripts = new Set<string>();
+  /** P132 BWF-008 AC2 — `nodegx.automations.json` changed in this window (Studio's save, the agent's, a git pull). */
+  private pendingAutomations = false;
   private timer: unknown = null;
 
   private readonly debounceMs: number;
@@ -120,7 +122,8 @@ export class ProjectFileWatcher {
     directory: string,
     onComponentsChanged: (componentPaths: string[]) => void,
     onProjectLevelChanged?: (files: ProjectLevelFile[]) => void,
-    onScriptsChanged?: (scriptPaths: string[]) => void
+    onScriptsChanged?: (scriptPaths: string[]) => void,
+    onAutomationsChanged?: () => void
   ): void {
     this.stop();
 
@@ -131,7 +134,9 @@ export class ProjectFileWatcher {
       // an agent writing `nodegx.project.json`.
       const projectLevelFile = componentPath === null ? projectLevelFileFromRelativePath(relativePath) : null;
       const scriptPath = componentPath === null && projectLevelFile === null ? scriptPathFromRelativePath(relativePath) : null;
-      if (componentPath === null && projectLevelFile === null && scriptPath === null) return;
+      const automations = componentPath === null && projectLevelFile === null && scriptPath === null && isAutomationsFile(relativePath);
+      if (componentPath === null && projectLevelFile === null && scriptPath === null && !automations) return;
+      if (automations) this.pendingAutomations = true;
 
       if (componentPath !== null) this.pending.add(componentPath);
       if (projectLevelFile !== null) this.pendingProjectLevel.add(projectLevelFile);
@@ -143,12 +148,15 @@ export class ProjectFileWatcher {
         const batch = Array.from(this.pending);
         const projectLevelBatch = Array.from(this.pendingProjectLevel);
         const scriptBatch = Array.from(this.pendingScripts);
+        const automationsChanged = this.pendingAutomations;
         this.pending.clear();
         this.pendingProjectLevel.clear();
         this.pendingScripts.clear();
+        this.pendingAutomations = false;
         if (batch.length > 0) onComponentsChanged(batch);
         if (projectLevelBatch.length > 0 && onProjectLevelChanged) onProjectLevelChanged(projectLevelBatch);
         if (scriptBatch.length > 0 && onScriptsChanged) onScriptsChanged(scriptBatch);
+        if (automationsChanged && onAutomationsChanged) onAutomationsChanged();
       }, this.debounceMs);
     });
   }
@@ -162,6 +170,7 @@ export class ProjectFileWatcher {
     this.pending.clear();
     this.pendingProjectLevel.clear();
     this.pendingScripts.clear();
+    this.pendingAutomations = false;
     if (this.handle) {
       try {
         this.handle.close();
