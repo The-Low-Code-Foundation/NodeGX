@@ -196,3 +196,21 @@ the peers' five Electron processes alive after both `dev:stop`s.
 **AC2 green.** Not covered: a change to the FILE only (git pull, hand edit) is not on the backend, so the canvas has
 nothing newer to redraw; the panel's drift line says the two differ. BWF-008's last open item is AC4's one spec per
 point, which s9–s21 each added.
+
+## s22 (2026-11-04): Studio speaks the served route words; P132-HIDDENPANELCHURN fixed
+
+**Route words from one place.** Studio's `stepPorts` and `pieceFrom` take the kind's served route `displayName`
+(catalog 1.9.0) first; its own `ROUTE_WORDS` table speaks only for a backend older than that (nodegx-studio
+`0dbd922`). The served words equal the table today, so the drive serves the If's Yes as "When it holds" (a wrapped
+`fetch`) and grades the wire says it; with Studio's served words dropped (the mutant) the wire said Yes and the line was
+red. check:automations 185/185 + drive 210/210 with `NODEGX_REPO`, 101/101 on the kit; hosted 46/46, editor 262/262,
+app 67/67. The editor already read them (s10).
+
+**P132-HIDDENPANELCHURN** was not the workflow's: with only a page open, `warningsChanged` fired ~480 times a second.
+The Components panel re-renders on it and reads page names through `readNameList`, which cleared its (absent) warning
+on every read, and the clear announced a change. Fixed in `WarningsModel.setWarning` (a set that changes nothing says
+nothing). In the dev editor: 0 DOM changes in 2 s after the fix, with a page open and with a workflow open and a step
+picked (were ~28,000). [The record](../../bugs/p132-hiddenpanelchurn-the-hidden-components-panel-and-the-dialog-layer-rewrite-the-dom-15000-times-a-second-while-a-workflow-is-open.md).
+Spec `tests-unit/workflow/p132-hiddenpanelchurn.test.ts` 6/6 (HEAD red on 4); 46 suites / 1,046 green around warnings
+and workflows; `tsc` 0. Electron `test:ci` not run. It may also be why canvas presses sometimes missed in s9–s21 drives
+(unproven).

@@ -20,6 +20,15 @@ interface Warnings {
   };
 }
 
+/** Two warnings that say the same thing (a fresh object built from the same problem). Unsayable ones differ. */
+function sameWarning(a: unknown, b: unknown): boolean {
+  try {
+    return JSON.stringify(a) === JSON.stringify(b);
+  } catch {
+    return false;
+  }
+}
+
 export class WarningsModel extends Model {
   public static instance = new WarningsModel();
 
@@ -35,13 +44,23 @@ export class WarningsModel extends Model {
     });
   }
 
+  /**
+   * P132-HIDDENPANELCHURN: a set that changes nothing says nothing. `readNameList` clears its warning on every read,
+   * and the Components panel reads page info (so names) on every `warningsChanged`: when a clear of a warning that was
+   * not there still announced a change, the two fed each other once per `setTimeout(1)`, ~480 times a second, for as
+   * long as a project was open (the panel, the top bar and every mounted dialog re-rendering each time).
+   * The same object set again still announces: its owner may have changed it in place.
+   */
   public setWarning(ref, warning) {
     var w = this.getWarningsForRef(ref, warning !== undefined);
     if (!warning) {
-      if (w) delete w[ref.key];
+      if (!w || w[ref.key] === undefined) return;
+      delete w[ref.key];
     } else {
       warning.level = warning.level || 'warning';
+      const had = w[ref.key];
       w[ref.key] = { ref: ref, warning: warning };
+      if (had && had.warning !== warning && sameWarning(had.warning, warning)) return;
     }
 
     this.scheduleNotifyChanged();
