@@ -1,0 +1,1 @@
+No thanks. Build me a tip calculator: I type the bill and how many people, and it shows what each person pays, with a tip I can pick (10, 15 or 20 percent).

@@ -1,0 +1,1 @@
+Before anyone else uses this app, check it with me. Where is each kind of data stored? Who can read it? What happens if someone opens the backend's address directly, without signing in? Show me how you checked each answer.

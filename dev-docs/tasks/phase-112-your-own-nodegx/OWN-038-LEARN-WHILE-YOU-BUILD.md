@@ -1,6 +1,6 @@
 # OWN-038: Learn while you build (a practice round, your own way of building, and a help page)
 
-**Phase:** [112](README.md). **Opened:** 2026-11-04 by Richard. **Status:** 🟡 s1: **on npm in create-nodegx, -vibe and -cline 0.2.10** (2026-11-04, Richard's publish; shasums equal the packed tarballs), nodegx.io/help and the changelog section LIVE, the email ready. AC1, AC2 and AC6's page ✅; AC3–AC5 (the probes, which spend) wait on his go; AC7 (Anna Malzy) next.
+**Phase:** [112](README.md). **Opened:** 2026-11-04 by Richard. **Status:** 🟡 s2: **AC1–AC6 ✅** (2026-11-04). The probes ran on both harnesses on 0.2.10 from npm ([own-038/RESULTS.md](own-038/RESULTS.md)). Two kit fixes are committed for the next cut: R14's game rule `943328f1d` and the stuck person's help pointer `ac9303f4a`. **AC7 (real beginners) is next.**
 
 > "What if the npm package and kit comes with a sort of 'tutorial mode' that offers the user to first engage in a
 > Claude discussion to learn our lessons about how to best construct a project and communicate with Claude, guide
@@ -107,6 +107,12 @@ before their real project pays the same cost.
 - **W3 → R11.** The skill is called `nodegx-practice-round`, and the R7 line ships as written.
 - **W4 → R12.** Anna Malzy, a beginner vibe coder, is the first tester. Richard will find one or two more, or ask in
   the NodeGX community. The November mailing (`nodegx-web/drafts/2026-11-kit/email.md`) asks beginners to reply.
+- **R13 (s2).** Asked: *"When should the first offer appear?"* Answer: **only when the person is new and hasn't
+  said what to build yet**, as built. Someone whose first message is a brief gets their app, and hears of the round
+  only if a sign of trouble shows later. The alternative, every first chat, was declined. AC4's zero stands.
+- **R14 (s2).** Asked: *"Where does a game's plain-code world go: one plain page, or inside the NodeGX app?"*
+  Answer: **one plain page** in its own folder that opens by itself, never opened from a NodeGX app on a second
+  server. Both games he kept were one plain page. Fixed in `943328f1d` (P112-OWN037-SECONDSERVER).
 
 ## Found while building the help page
 
@@ -136,16 +142,16 @@ lists it" is the proof still owed.
   `nodegx-first-project` name it. The package test covers it. A person's own files are never replaced.
 - **AC2.** No task ids in the shipped text (OWN-036 AC2's grep). The copy passes the content-authoring checks, with
   every flag fixed or listed here as a false alarm.
-- **AC3. Declining costs one reply.** A sealed arm whose scripted person says "no thanks, build me X" gets X built
+- ✅ **AC3. Declining costs one reply.** A sealed arm whose scripted person says "no thanks, build me X" gets X built
   with no tutorial step and no second offer.
-- **AC4. The R1 offer fires when it should, and only then.** One scripted person gives vague answers twice: Claude
+- ✅ **AC4. The R1 offer fires when it should, and only then.** One scripted person gives vague answers twice: Claude
   re-asks in plain words and offers the round **once**. A clear person on the same brief gets the offer **zero**
   times. The zero only counts alongside the arm where it fired. Run on Claude Code and on Cline with DeepSeek
   V4.1 Flash.
-- **AC5. The round finishes, and the sheet arrives where the next project sees it.** A scripted beginner gets
+- ✅ **AC5. The round finishes, and the sheet arrives where the next project sees it.** A scripted beginner gets
   through all six moments. After their yes, the sheet is saved, and a fresh session in a *different* folder lists
   it (a skills probe, as in OWN-036 AC1). Both harnesses.
-- **AC6. The help page is live and Claude sends people to it.** `nodegx.io/help` is deployed with the R4 order (free
+- ✅ **AC6. The help page is live and Claude sends people to it.** `nodegx.io/help` is deployed with the R4 order (free
   resources, then the one call). A stuck scripted person is pointed to the page, and Claude's reply never offers
   the call first.
 - **AC7. Real beginners (R5).** Two or three people Richard sends do the practice round, then build something of
@@ -205,3 +211,25 @@ lists it" is the proof still owed.
   `build.wrap` for that folder; the diff against live was the 0.2.10 section only), rsynced, 200, md5 equal live.
   The email draft says 0.2.10 for Vibe and that the round is in the kit; it still asks beginners to reply.
 
+- **s2, 2026-11-04. The two rulings (Opus 5.5).** R13: the first offer fires only for someone new who hasn't said
+  what to build, as built. R14: a game's world is one plain page. `943328f1d` puts R14 in the game guide and both
+  folder notes; package test 42/42; a mutant dropping the sentence turns two red; copy clean on
+  `written`/`closer`/`contract`/`opener` after one rewrite (the first draft chained its clauses). It ships in the next
+  kit cut, not 0.2.10. P112-OWN037-SECONDSERVER fixed; its behaviour is re-measured in a guided game round on that
+  release.
+- **s2 (the probes), 2026-11-04.** On Richard's go, both harnesses, five scripted people each, the kit from npm at
+  0.2.10. Full write-up in [own-038/RESULTS.md](own-038/RESULTS.md).
+  - **Claude Code** (`own-038/arm.mjs`, a HOME of its own per arm, so the sheet can't land in Richard's skills).
+    AC3 ✅, AC4 ✅ (vague: once, after the first vague answer; clear: zero across a 100+-step build), AC5 ✅ (all six
+    stops in order; the sheet saved on yes; a fresh session in another folder lists `my-way-of-building`, absent
+    before). AC6 ❌ → fixed: a stuck person was never pointed to the page, because the pointer lived only in a guide
+    read before a build (P112-OWN038-STUCKHELP, `ac9303f4a`). Re-measured on the fixed kit: the page first, no call.
+  - **Cline + DeepSeek V4.1 Flash** (`own-038/turn-cline.mjs`). AC3 ✅, AC4 ✅ on count (vague's one offer came at
+    turn 1, after the person had named an app: P112-OWN038-VAGUEOFFER, low, R13's call), AC6 ✅ (the page first),
+    AC5 ✅ for the sheet (a fresh Cline in another folder lists it; the control lists none). Two of its stops were
+    lost, probably the runner's fault: each Cline reply is a new chat, and only the sittings that opened the skill
+    followed it.
+  - **The API key in `.env` ran out of credit** at ≈ $14.85. Richard chose his subscription (`claude setup-token` →
+    `~/.nodegx/claude-oauth-token`). Spend: Claude Code ≈ $21.40 at list price, Cline ≈ $0.80.
+  - 🔴 Lab traps: `claude -p` holds its turn open while a preview it started runs (two turns sat over an hour, one
+    shared on the Wi-Fi); `total_cost_usd` on `--continue` is the session's running total.

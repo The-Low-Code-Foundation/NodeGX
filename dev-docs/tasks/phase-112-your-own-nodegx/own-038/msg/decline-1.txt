@@ -1,0 +1,1 @@
+Hi! I've never built an app with an AI before. I'd like to try making something with NodeGX.
