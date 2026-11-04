@@ -141,4 +141,4 @@ reads clearly.
   nodegx.io/first-project/#other-assistants: a table of the four builds with his words, the costs, the honesty line,
   and "the Vibe kit … gets them in its next release". Only `first-project/index.html` was rebuilt (build.py's `wrap`)
   and rsynced. nodegx-web had another session's uncommitted changelog/start edits, which stay local. Live md5 = local;
-  the neighbours answer 200. nodegx-web commit on its own branch of history. **When the Vibe cut ships, change that line.**
+  the neighbours answer 200. nodegx-web `a1c2310`. **When the Vibe cut ships, change that line.**
