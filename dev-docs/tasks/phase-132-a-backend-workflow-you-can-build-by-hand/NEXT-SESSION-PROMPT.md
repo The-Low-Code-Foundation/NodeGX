@@ -1,5 +1,37 @@
 # P132 — next session
 
+**s17 (2026-11-04): BWF-013 Build 2 built in Studio; AC1 green in the Electron app by presses.**
+- nodegx-studio `c60dee2` + `fc1bc86`: *Reusable pieces* = the workflows no trigger starts, with *New* (a name and a first
+  step), each row saying who runs it; cloud functions under *Made by the agent*. A *Run a workflow* step: the piece by
+  name (a ring shown, not offered), *What it sends the piece* per name the piece reads, *Open the piece ↗*, and after a
+  run *Open that run ↗* (the piece on that run, lit, naming its parent; Back returns). Only when the catalog says
+  `pieces` (1.11.0). [The record](BWF-013-A-REUSABLE-PIECE-IS-A-WORKFLOW-OTHERS-RUN.md#s17-2026-11-04-build-2-studio-built-ac1-green-in-the-electron-app-by-presses).
+- Driven by presses on a Greenhouse copy ([greenhouse-drive-bwf013.mjs](greenhouse-drive-bwf013.mjs)): Find thirsty
+  plants run from The morning check and When a plant is watered, both tested, each answer carrying its own `who`.
+- P132-STEPWORDSKIND filed and fixed (a value from an unnamed step said "from Call Function").
+
+**Next, in this order:**
+1. **BWF-013 Build 3: *Make a reusable piece*** from steps selected on the canvas (shift-press), one chain in, one way
+   out; they move into a new piece ending in a `return`, one *Run <piece>* step in their place, its `send` from the
+   values the moved steps read from before them (`readSources` / `upstreamOf`). Refused in words otherwise. Then AC2
+   (two steps of TriggerTest grouped, the test's result the same before and after) in Electron.
+2. Build 4: the NodeGX editor draws `run-workflow` (`control: 'workflow'` is new to it). Then AC3's agent round
+   (`list_backend_workflows` does not say who runs a piece yet).
+
+- 🔴 **A drive that continues a composed sentence presses near the box's END**, not its centre: after a first value,
+  the centre is that value's chip, and its press opens the chip's menu over *+ A value* (s17's first run "lost" the
+  second value that way; the page saved nothing because nothing was picked). The drive's `4 log` (saves, redraws,
+  focus, presses) is the instrument that told it.
+- 🔴 With pieces on, a workflow nothing starts lists under *Reusable pieces* (`#piecelist`), not `#autolist`: a drive
+  line that finds a workflow's row uses `.wfback .row[data-workflow=…]` (piece rows carry `data-workflow` too).
+  automations-drive.mjs was moved to that in s17 (29 lines).
+- check:hosted *Delete type* red twice this session = P132-HOSTEDRATELIMIT (the toast said the rate limit on the
+  second run; the first run's toast was a leftover from an earlier step). Not ours.
+- Asks for Richard: his `qzdzqzzq` on Greenhouse (a switch nothing starts) now lists as a reusable piece; a new *Run
+  a workflow* step starts on the first piece in the file, the person then picks.
+
+---
+
 **s16 (2026-11-04): BWF-012 driven in the Electron app, green; BWF-013's engine built.**
 - BWF-012 AC1 + AC2 by real presses on a Greenhouse copy ([greenhouse-drive-bwf012.mjs](greenhouse-drive-bwf012.mjs),
   [the record](BWF-012-SAVED-API-CALLS.md#s16-2026-11-04-ac1-and-ac2-green-in-the-electron-app-by-presses)). Three look

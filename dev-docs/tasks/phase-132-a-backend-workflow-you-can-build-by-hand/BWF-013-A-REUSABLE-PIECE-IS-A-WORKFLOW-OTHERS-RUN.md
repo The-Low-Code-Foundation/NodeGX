@@ -77,3 +77,74 @@ kind list in 2), moved, all green. `tsc --noEmit` clean. No MCP or editor test p
   runs a piece. AC3's agent round after Build 2.
 - Studio from the kit has none of it until a release carries catalog 1.11.0.
 - Rebuild `packages/nodegx-backend/dist` before a Studio drive (`npm run build`): not done this session.
+
+## s17 (2026-11-04): Build 2 (Studio) built; AC1 green in the Electron app by presses
+
+nodegx-studio `c60dee2` (Build 2) and `fc1bc86` (what the Electron drive found). Only when the catalog says `pieces`
+(1.11.0); an older backend keeps the old list, word for word (check:automations on the kit 100/100).
+
+**The list.** *Reusable pieces* is the workflows no trigger starts (a trigger starting a FUNCTION of the same name
+starts no workflow), each row "Run by “A” and “B” · n steps · last run…", with *New*. The cloud functions sit under
+them, headed *Made by the agent*. A workflow nothing starts is no longer listed under *Workflows*: R6 as ruled, so
+Richard's leftover `qzdzqzzq` (a switch, no trigger) on Greenhouse now lists as a piece no workflow runs.
+*Workflows* keeps its own *New*.
+
+**New piece** (`newAutoForm(e, { piece: true })`): a name and a first step, never what starts it; the note says how a
+piece is run. Made with no trigger, opened.
+
+**A Run a workflow step** (the catalog's kind, in the step menu as any kind is):
+- Added, it runs the first piece it can run without a ring (else any other workflow); the person picks by name
+  (`pieceField`, `control: 'workflow'`): pieces first, then *Workflows something starts*; this workflow is not
+  offered, and a workflow that runs this one is shown "(it runs <this>)" and disabled.
+- *What it sends the piece*: a composer per name the piece reads (`bodyNames`: `body.<name>` anywhere in its steps'
+  settings, never inside a `$literal`), then any other name sent; *Add a value* asks a name (letters, digits, `_`).
+- Its card: "Run <piece>", "a reusable piece", *Open the piece ↗* (Back returns to the step; Esc too).
+- After a run or test, its panel has *Open that run ↗*: the piece opens on THAT run (`selAuto.runId`, read by
+  `readAutoRun`), its steps lit, with "This run was started by <workflow>, at its step “…”. Open that run ↗" (the
+  record's `parentWorkflowId` / `parentExecutionId` / `parentStepId`). A failed piece's run is found in the step's
+  error ("(its run: …)", `runInFailure`).
+- After it, *What it can read* says the piece's answer by its names (`pieceAnswers`: its `return`'s value keys), and
+  `pathWords` drops `result` as for a function step.
+
+**Inside a piece**: its first card says "A reusable piece · nothing starts it on its own", then "Run by A and B" (each
+a press, opening that workflow), or "No workflow runs it yet"; *Add what starts it* stays (it then becomes a workflow).
+*What it can read* shows what it was given as the names its runners send (`readSources` `sent`), before any run.
+*Delete* says "It is run by “A” and “B”: that step fails once it is gone."
+
+**Gates.** check:automations 161/161 unit lines (pieces, runners, sent and read names, rings through a second piece,
+the run named in a failure, the reads); the Chrome drive 200/200 with `NODEGX_REPO` (a BWF-013 section of 36 lines:
+New, two runners each picking the piece and sending their room, both tested, Open that run and Back, the row, the
+ring refused at write with both ids, Delete's words), 100/100 on the kit (the section says it is not graded there).
+check:editor 262/262, check:app 67/67, check:hosted 45/46 (*Delete type*: P132-HOSTEDRATELIMIT, the admin rate limit,
+red at HEAD; this diff adds no backend call).
+
+**AC1 in the Electron app** ([greenhouse-drive-bwf013.mjs](greenhouse-drive-bwf013.mjs), presses): *New* →
+"Find thirsty plants", first step Check thirst, then a Return after it. *The morning check* (a time starts it) got
+*Run a workflow* from *Add a step at the start*; *When a plant is watered* (a Watering row starts it) from *Add a step
+after* its last step. Each picked the piece by name and sent `who`, typed after *Add a value*. The piece's Return
+composed by presses: "Checked " + [checked · from Run Cloud Functions/Check thirst] + " plants for " + [who · from what
+it was given]. Both tested from their test rows: "Checked 1 plants for the morning check", "Checked 1 plants for
+watering", each with the piece's run id. *Open that run* lit the piece's two steps from that run and named its parent;
+Back returned to the step, picked, its panel open. A ring probed inside the piece: the two runners "(it runs Find
+thirsty plants)" not offered; the probe step deleted, the piece as before.
+
+What the drive found (fixed in `fc1bc86`):
+- **P132-STEPWORDSKIND** (filed, fixed): a value from an unnamed step said "from Call Function" beside a card titled
+  "Run Cloud Functions/Check thirst". Since BWF-003, for every function step *New* makes. `stepTitle`, red on the
+  old `automations.mjs` (measured).
+- The first card ran its runner buttons together ("The morning checkWhen a plant is watered"): this session's own,
+  never shipped.
+- 🔴 Not a product defect, a drive one: the drive pressed the composer's CENTRE to type more words, and after a first
+  value the centre is that value's chip, whose press opens the chip's menu; *+ A value* sat under it, so the second
+  value and the words before it were never saved. The drive's log (`4 log`: every save the page sent, every panel
+  redraw, focus) showed `mousedown pill chip`. A drive that continues a composed sentence presses near the box's END,
+  where a person does.
+
+**Not done (next):**
+- Build 3: *Make a reusable piece* from selected steps (shift-press), one chain in and one way out, `send` from
+  `readSources`; refused in words otherwise.
+- Build 4: the NodeGX editor draws `run-workflow` (`control: 'workflow'` is new to it, NOT CHECKED).
+- AC2 (two steps of TriggerTest grouped, same test result) waits on Build 3. AC3's agent round (an agent asked to
+  reuse steps writes `run-workflow`) can run now: `list_backend_workflows` does not yet say who runs a piece.
+- Asks for Richard: a workflow nothing starts now lists as a reusable piece (his `qzdzqzzq`); a new Run a workflow
+  step starts on the FIRST piece in the file, not the newest.
