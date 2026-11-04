@@ -16,6 +16,12 @@
  * shows and hides, rows and nested parts in it).
  *
  * §D the cursor: a field whose text round-trips through state keeps the focus and the caret while a person types.
+ *
+ * §E a page, and Back.
+ *
+ * §F a checkbox (session 5): the Checkbox Desk (`helpers/checkbox-desk.ts`), the five shapes the templates wire their
+ * boxes in, ticked by hand, Checked and Unchecked, driven both ways, mounted by a value and placed, against the runtime's
+ * own Checkbox (`runtime-mounted-arm.js` mounts it now); and the three shapes the plan refuses, pinned to its words.
  */
 
 import { execFileSync } from 'child_process';
@@ -29,11 +35,12 @@ import { DOM_JS } from '../src/emit/html/libJs';
 import { htmlArm } from './helpers/export-html-arm';
 import { openHtmlExport } from './helpers/html-in-jsdom';
 import { writeFieldDesk } from './helpers/field-desk';
+import { withRefusedShapes, writeCheckboxDesk } from './helpers/checkbox-desk';
 import { writeDesk as writeRootDesk, type Desk } from './helpers/root-desk';
 
 const catalog = loadCatalog();
 
-const runtimeArm = (projects: Array<{ dir: string; scenarios: string[][]; fields?: boolean }>): string[][][][] => {
+const runtimeArm = (projects: Array<{ dir: string; scenarios: string[][]; fields?: boolean; boxes?: boolean }>): string[][][][] => {
   try {
     return JSON.parse(
       execFileSync(process.execPath, [path.join(__dirname, 'helpers', 'runtime-mounted-arm.js')], {
@@ -49,9 +56,9 @@ const runtimeArm = (projects: Array<{ dir: string; scenarios: string[][]; fields
     return projects.map((p) => p.scenarios.map(() => [[`the runtime arm threw: ${said}`]]));
   }
 };
-const htmlOf = async (dir: string, steps: string[], fields: boolean): Promise<string[][] | string> => {
+const htmlOf = async (dir: string, steps: string[], fields: boolean, boxes = false): Promise<string[][] | string> => {
   try {
-    return (await htmlArm(emitHtmlApp(parseProject(dir, catalog), catalog).files, [steps], { fields }))[0];
+    return (await htmlArm(emitHtmlApp(parseProject(dir, catalog), catalog).files, [steps], { fields, boxes }))[0];
   } catch (e) {
     return String(e);
   }
@@ -404,5 +411,108 @@ describe('§E a page, and Back', () => {
     } finally {
       page.close();
     }
+  });
+});
+
+/**
+ * §F. The Checkbox Desk, step by step in both arms: Done ticked and unticked by hand (its Changed counted), Checked and
+ * Unchecked (no Changed; a second Check changes nothing), Mirror following Done's Checked and ticked against it, Later
+ * mounted by Done and ticked, the bare box read by a Function on Save, the placed Toggle's box from its input and out
+ * through its outputs, the placed Days' Mon Checked and Unchecked by a Function run on the component's input.
+ */
+const BOX_STEPS = ['tick:Done', 'tick:Mirror', 'Uncheck', 'Check', 'Check', 'tick:Later', 'tick:Done', 'tick:Done', 'tick:#1', 'Save', 'tick:#1', 'tick:Email me', 'tick:Email me', 'Save', 'Drop mon', 'tick:Mon', 'Drop mon', 'Want mon', 'tick:Mon', 'Want mon'];
+const REFUSED_STEPS = ['Days none', 'Days mon', 'tick:Wed', 'Days none', 'tick:Quiet', 'tick:Named'];
+/** The HTML export does not draw Named (the plan leaves it out), so its arm takes every step but that one. */
+const REFUSED_HTML_STEPS = REFUSED_STEPS.filter((s) => s !== 'tick:Named');
+
+describe('§F a checkbox does what a person and the graph tell it, as the runtime\'s does (the Checkbox Desk, in jsdom)', () => {
+  const desk = writeCheckboxDesk().dir;
+  const refused = writeCheckboxDesk(withRefusedShapes).dir;
+  let runtime: string[][][] = [];
+  const html: Array<string[][] | string> = [];
+  beforeAll(async () => {
+    runtime = runtimeArm([
+      { dir: desk, scenarios: [BOX_STEPS], boxes: true },
+      { dir: refused, scenarios: [REFUSED_STEPS], boxes: true }
+    ]).map((p) => p[0]);
+    html.push(await htmlOf(desk, BOX_STEPS, false, true), await htmlOf(refused, REFUSED_HTML_STEPS, false, true));
+  }, 240000);
+
+  /*
+   * Two cells differ, and neither is the HTML printer's: the React export prints both the same way (measured on this desk,
+   * 2026-11-04). P134-HTX003-TEXTKEEPS: the bare box's Text, wired from a Function that has not run, keeps its own text
+   * in the runtime (here the default "Text") until Save, and is empty in every export (React's `?? ''`).
+   * P134-HTX003-BOXREMOUNT: Later has no state row (only its Changed is wired), so it is a box of its own in every export,
+   * and when Done brings it back it comes back unticked; the runtime's node outlives its element and keeps the tick.
+   */
+  const BARE = 5;
+  const SAVED = BOX_STEPS.indexOf('Save') + 1;
+  const BACK = 8; // the reading after Done brings Later back
+  const asExported = (readings: string[][]): string[][] =>
+    readings.map((r, i) => r.map((cell, c) => (c === BARE && i < SAVED && cell === 'Text' ? '' : i >= BACK && cell === '[Later]=on' ? '[Later]=off' : cell)));
+
+  it('F1 the desk: the HTML export reads exactly what the runtime reads, at every step, but the two cells every export holds', () => {
+    expect(runtime[0]).toHaveLength(BOX_STEPS.length + 1);
+    expect(html[0]).toEqual(asExported(runtime[0]));
+    // The two pins are exactly what they say: the runtime's own default text before Save, and Later ticked after it came back.
+    expect(runtime[0].slice(0, SAVED).map((r) => r[BARE])).toEqual(new Array(SAVED).fill('Text'));
+    expect(runtime[0].slice(BACK).every((r) => r.includes('[Later]=on'))).toBe(true);
+    expect(runtime[0][BACK - 2]).toContain('[Later]=on');
+    expect(html[0][BACK - 2]).toContain('[Later]=on');
+  });
+
+  it('F2 the desk graded what it names: a click counts once, Check and Uncheck count nothing, the wire wins on its next change, the placed box goes out', () => {
+    const d = html[0] as string[][];
+    const at = (step: number) => d[step + 1];
+    expect(at(0).slice(0, 4)).toEqual(['done ticked', '1', 'mirror ticked', '0']); // a click: one Changed; the mirror follows, silently
+    expect(at(1).slice(2, 4)).toEqual(['mirror open', '1']); // ticked against its wire, it holds its own
+    expect([at(2)[1], at(3)[1], at(4)[1]]).toEqual(['1', '1', '1']); // Uncheck, Check, Check: no Changed
+    expect(at(3)[2]).toBe('mirror ticked'); // the wire's next change wins
+    expect(at(9)[BARE]).toBe('bare ticked'); // the Function read the box at Save
+    expect([at(11)[6], at(11)[7], at(12)[6], at(12)[7]]).toEqual(['email off', '1', 'email on', '2']); // out through the outputs
+    // Days (planning's Settings sheet): the Function ticks Mon at load, unticks it on Drop mon, and a hand's tick holds
+    // until the input changes again.
+    const mon = d.map((r) => r.find((c) => c.startsWith('[Mon]=')));
+    expect(mon.slice(14)).toEqual(['[Mon]=on', '[Mon]=off', '[Mon]=on', '[Mon]=on', '[Mon]=on', '[Mon]=off', '[Mon]=off']);
+    expect(mon[0]).toBe('[Mon]=on');
+  });
+
+  it('F3 the shapes the plan refuses are the plan\'s, said in its words, and the HTML export draws what the plan keeps', () => {
+    const out = emitHtmlApp(parseProject(refused, catalog), catalog);
+    expect(out.preflight.htmlLosses).toEqual([]);
+    expect(out.preflight.planRefusals.map((r) => `${r.name}: ${r.reason}`)).toEqual([
+      'Box: its label is fed by Component Inputs — the value is not statically known, and the node is left out rather than drawn with a wrong one',
+      'Wed: trigger monFn.out-monOff is not a rendered element event or a receiver',
+      'Quiet in words: input "ticked" is fed by net.noodl.controls.checkbox — no statically known source in the emit vocabulary',
+      'Which days: its signal output "monOn" is consumed — author-signal pulses are not translated in this slice'
+    ]);
+    // What the runtime does with them, for the record: the Function ticks Wed at load and on Days mon, Quiet says its tick.
+    expect(runtime[1].map((r) => r[8])).toEqual(['wed ticked', 'wed open', 'wed ticked', 'wed open', 'wed open', 'wed open', 'wed open']);
+    // The export draws Wed and Quiet, and a click still ticks them; the Function's Check and Uncheck do not travel.
+    const d = html[1] as string[][];
+    expect(d.map((r) => r[8])).toEqual(['wed open', 'wed open', 'wed open', 'wed ticked', 'wed ticked', 'wed ticked']);
+    expect(d[5]).toContain('[Quiet]=on');
+  });
+
+  it('F4 what is printed: the box inside its label, the tick a value, the click writing the row then the chain', () => {
+    const home = emitHtmlApp(parseProject(desk, catalog), catalog).files['pages/Home.js'];
+    expect(home).toContain(
+      [
+        "  const doneBoxLabel = el(page, 'label', 'HomePage-doneBoxLabel');",
+        "  const doneBox = el(doneBoxLabel, 'input', 'HomePage-doneBox');",
+        "  doneBox.type = 'checkbox';",
+        "  doneBoxLabel.append('Done');",
+        '  l.run(function () {',
+        '    doneBox.checked = !!state.done.get();',
+        '  });',
+        "  doneBox.addEventListener('change', function () {",
+        '    state.done.set(doneBox.checked);',
+        '    state.doneChanges.set(state.doneChanges.peek() + 1);',
+        '  });'
+      ].join('\n')
+    );
+    const css = emitHtmlApp(parseProject(desk, catalog), catalog).files['pages/Home.css'];
+    expect(css).toContain('.HomePage-doneBoxLabel {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n}');
+    expect(css).toContain('.HomePage-doneBox:checked::before {\n  transform: scale(1);\n}');
   });
 });

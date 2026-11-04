@@ -17,6 +17,8 @@
 ## Done when
 
 - todo-list driven in Chrome against one fresh backend per arm (EXP-022 S4's rule): the runtime, the React export and
-  the HTML export; sign in, add, tick, delete, reload. The wire read from the backend's own request log, split by
+  the HTML export; sign in, add, tick, delete, open a task's page and come back, reload. (Open and back are HTX-003's
+  drive, moved here on 2026-11-04 because todo-list's lists are records; HTX-003's sentence is graded here: the list
+  right, the field keeping its cursor, nothing run twice.) The wire read from the backend's own request log, split by
   step. The three arms equal at every step, or the difference filed.
 - The two writes EXP-022 S6 fixed in both exports (add, and every dialog) work here too.

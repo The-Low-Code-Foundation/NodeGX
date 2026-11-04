@@ -52,6 +52,13 @@ carries) and its Static Data key (`id` when every row has a unique one), and `co
 (`defaultValue`, `maxLength`, `inputMode`, `enterKeyHint`, Enabled as `disabled`). Twenty in all. The field write is the
 largest: some forty lines that must keep React's every branch.
 
+**HTX-003 session 5 (2026-11-04) copied four more**, for the Checkbox (`drawCheckbox` in `printComponent.ts`): the
+element (`renderNode`'s `role === 'checkbox'`: an `<input type="checkbox">` with the node's class, inside a `<label>`
+with the label text after it when Use Label is on, the label's default "Label"), the companion class's name
+(`<class>Label`, deduplicated, as `component.ts` "Companion classes" names it), the controlled change chain for a box
+(`changeAttrs`: the row from the box's `checked`, then `changeHandlers`, then its Changed; React's `control-event`), and
+the uncontrolled box's typed-in Checked (`defaultChecked`). Twenty-four in all.
+
 **What a fix needs:** the plan carries each answer as data (`tagOf[nodeId]`, a `mountedKeeps` flag beside the Mounted
 binding, the merged page declarations, the removed ids), and the three printers read it. AC4's ledger (HTX-005) is
 where a drift would show.

@@ -10,24 +10,40 @@
  *
  * `storage: { keys, seeds? }` is the runtime arm's (P18 session 139): before scenario i the browser's storage holds
  * `seeds[i]`, as a reload would leave it, and every reading ends with `storage=<text, or null>` for each key.
+ *
+ * P134 HTX-003 (session 5). `boxes` appends each checkbox, `[name]=on|off` in document order (its label's text, or `#1`,
+ * `#2`… unlabelled: the runtime arm's `boxNames`), and a step `tick:<name>` clicks it as a person does.
  */
 
 import { openHtmlExport, type HtmlPage } from './html-in-jsdom';
 
 export interface HtmlArmOptions {
   fields?: boolean;
+  boxes?: boolean;
   storage?: { keys: string[]; seeds?: Array<Record<string, string>> };
 }
+
+const FIELDS = 'input:not([type="checkbox"]), textarea';
+
+/** Each checkbox and its name: the text of the `<label>` naming it (its `for`, or the one it sits in), else `#1`, `#2`…. */
+const boxNames = (doc: any): Array<{ el: any; name: string }> => {
+  let bare = 0;
+  return ([...doc.querySelectorAll('input[type="checkbox"]')] as any[]).map((el) => {
+    const label = (el.id ? doc.querySelector(`label[for="${el.id}"]`) : null) ?? el.closest('label');
+    return { el, name: label ? (label.textContent ?? '').trim() : `#${++bare}` };
+  });
+};
 
 const read = (page: HtmlPage, options: HtmlArmOptions): string[] => {
   const doc = page.document;
   const texts = [...doc.querySelectorAll('p')].map((p: any) => (p.textContent ?? '').trim());
   const stored = (options.storage?.keys ?? []).map((k) => `storage=${page.window.localStorage.getItem(k)}`);
-  if (options.fields !== true) return [...texts, ...stored];
-  const els = [...doc.querySelectorAll('input, textarea')] as any[];
+  const boxes = options.boxes === true ? boxNames(doc).map((b) => `[${b.name}]=${b.el.checked ? 'on' : 'off'}`) : [];
+  if (options.fields !== true) return [...texts, ...boxes, ...stored];
+  const els = [...doc.querySelectorAll(FIELDS)] as any[];
   const name = (el: any) => `[${el.getAttribute('placeholder') ?? ''}]`;
   const active = els.find((el) => el === doc.activeElement);
-  return [...texts, ...els.map((el) => `${name(el)}=${el.value}`), `focus=${active ? name(active) : 'none'}`, ...stored];
+  return [...texts, ...els.map((el) => `${name(el)}=${el.value}`), `focus=${active ? name(active) : 'none'}`, ...boxes, ...stored];
 };
 
 /** Waits until two readings in a row agree: the effects, and the timers a Function's run at load sets, have all run. */
@@ -45,9 +61,16 @@ async function settled(page: HtmlPage, options: HtmlArmOptions): Promise<void> {
 function step(page: HtmlPage, label: string): void {
   const w = page.window;
   const doc = page.document;
+  const ticked = /^tick:([\s\S]*)$/.exec(label);
+  if (ticked) {
+    const found = boxNames(doc).find((b) => b.name === ticked[1]);
+    if (!found) throw new Error(`no checkbox "${ticked[1]}"`);
+    found.el.click();
+    return;
+  }
   const typed = /^(type|enter):([^:]*)(?::([\s\S]*))?$/.exec(label);
   if (typed) {
-    const el = ([...doc.querySelectorAll('input, textarea')] as any[]).find((e) => (e.getAttribute('placeholder') ?? '') === typed[2]);
+    const el = ([...doc.querySelectorAll(FIELDS)] as any[]).find((e) => (e.getAttribute('placeholder') ?? '') === typed[2]);
     if (!el) throw new Error(`no field "${typed[2]}"`);
     if (typed[1] === 'enter') {
       el.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));

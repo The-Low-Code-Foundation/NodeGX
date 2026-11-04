@@ -11,6 +11,15 @@ Checkbox and Options (and Image, Icon, Columns, the next undrawn roles), each gr
 `runtime-mounted-arm.js` mounts it; the Chrome drive (add, tick, delete, open, back) waits on todo-list's backend
 (HTX-004), since its lists are records.
 
+**Session 2 of 2 (README §10 session 5, 2026-11-04): ✅ done**, but for the Chrome drive. The runtime arm mounts the
+viewer's own Checkbox; the HTML printer draws it (`drawCheckbox`, copied from React); the Checkbox Desk, the five shapes
+the templates wire their 24 boxes in, reads what the runtime reads at every step but two cells every export holds (filed:
+P134-HTX003-TEXTKEEPS, P134-HTX003-BOXREMOUNT). **Options reach nothing:** all 39 in the templates have wired items,
+which the plan leaves out of every export (P134-HTX003-OPTIONSWIRED), so the HTML printer does not draw them yet.
+**The Chrome drive (add, tick, delete, open, back) moved to [HTX-004](HTX-004-THE-BACKEND-THROUGH-THE-ONE-CLIENT.md)**,
+whose drive covers it: todo-list's lists are records. Image, Icon and Columns are printer coverage, not this task's
+four jobs: carried in the README's next-session list.
+
 ## The sentence
 
 > "I added three tasks, deleted the middle one, opened a task's page and came back. The list was right, the field I was

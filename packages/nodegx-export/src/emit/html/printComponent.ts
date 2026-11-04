@@ -197,7 +197,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     for (const c of plan.childrenOf[id] ?? []) walk(c);
   };
   if (plan.rootId) walk(plan.rootId);
-  const styled = order.filter((id) => ['page', 'group', 'text', 'button', 'input'].includes(plan.roleOf[id]));
+  const styled = order.filter((id) => ['page', 'group', 'text', 'button', 'input', 'checkbox'].includes(plan.roleOf[id]));
   const declsOf = new Map<string, Decl[]>();
   const roleCssOf = new Map<string, ReturnType<typeof computeRoleCss>>();
   for (const id of styled) {
@@ -219,19 +219,37 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     for (const name of unhandled) if (!NOT_STYLE.has(name)) lose(id, `its ${name} is not carried (no style the export knows for it)`);
     declsOf.set(id, decls);
     const roleCss = computeRoleCss(node, role, ctx.catalog, ctx.styles);
-    if (roleCss.wrapper) lose(id, `its ${roleCss.wrapper.role} wrapper is not drawn by the HTML target yet`);
+    // A checkbox's label wrapper is drawn (`drawNode`); the columns' query container is not yet.
+    if (roleCss.wrapper && roleCss.wrapper.role !== 'label') lose(id, `its ${roleCss.wrapper.role} wrapper is not drawn by the HTML target yet`);
     if (roleCss.containerQueries.length > 0) lose(id, 'its breakpoints are not carried by the HTML target yet');
     roleCssOf.set(id, roleCss);
   }
   const candidates: ClassCandidate[] = [];
   const classed: string[] = [];
   for (const id of styled) {
-    if (declsOf.get(id)!.length === 0 && roleCssOf.get(id)!.blocks.length === 0) continue;
+    if (declsOf.get(id)!.length === 0 && roleCssOf.get(id)!.blocks.length === 0 && roleCssOf.get(id)!.wrapper === undefined) continue;
     candidates.push({ nodeIds: [id], label: nodeById.get(id)!.authoredLabel, role: plan.roleOf[id] });
     classed.push(id);
   }
   const names = assignClassNames(candidates);
   const classOf = new Map(classed.map((id, i) => [id, `${file.symbol}-${names[i]}`]));
+  /*
+   * A control's label wrapper, named after the class it accompanies, as the React printer names it (`component.ts`
+   * "Companion classes", copied, P134-HTX001-PRINTERDECIDES): `<class>Label`, or `<class>Label2`… when that is taken.
+   */
+  const wrapperClassOf = new Map<string, string>();
+  {
+    const used = new Set(classOf.values());
+    for (const id of classed) {
+      if (roleCssOf.get(id)!.wrapper?.role !== 'label') continue;
+      const base = `${classOf.get(id)}Label`;
+      let name = base;
+      let n = 2;
+      while (used.has(name)) name = `${base}${n++}`;
+      used.add(name);
+      wrapperClassOf.set(id, name);
+    }
+  }
   const cssBlocks: string[] = [];
   for (const id of classed) {
     const cls = classOf.get(id)!;
@@ -239,6 +257,8 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     const body = declsOf.get(id)!.map((d) => `  ${d.prop}: ${d.value};`).join('\n');
     cssBlocks.push(`${label ? `/* ${label.replace(/\*\//g, '* /')} */\n` : ''}.${cls} {\n${body}\n}`);
     for (const block of roleCssOf.get(id)!.blocks) cssBlocks.push(`.${cls}${block.suffix} {\n${block.decls.map((d) => `  ${d.prop}: ${d.value};`).join('\n')}\n}`);
+    const wrapper = wrapperClassOf.get(id);
+    if (wrapper !== undefined) cssBlocks.push(`.${wrapper} {\n${roleCssOf.get(id)!.wrapper!.decls.map((d) => `  ${d.prop}: ${d.value};`).join('\n')}\n}`);
   }
   /** The class attribute: the node's own class, then what the author typed in CSS Class. */
   const classAttr = (id: string): string => {
@@ -341,6 +361,8 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
    * left in the element, or the text a Set, a Clear or the mount announcement writes. Anywhere else it has no value.
    */
   let announced: { inputId: string; code: string } | undefined;
+  /** P134 HTX-003. While a checkbox's change chain is printed, its `checked` is this code (the element's own). */
+  let controlled: { controlId: string; code: string } | undefined;
   /**
    * EXP-011 §100. While a For Each's row callback is printed, a read of that For Each's relayed value is what the row is
    * handed for the input the value passes through (the React printer's `rowRelayCode`).
@@ -432,6 +454,9 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         return storeKeyRead(e.storeName, e.key, scope);
       case 'input-text':
         return announced?.inputId === e.inputId ? announced.code : undefined;
+      // A control's own value, read inside its own change listener (React's `event.target.checked`).
+      case 'control-event':
+        return controlled?.controlId === e.controlId && e.form === 'checked' ? controlled.code : undefined;
       case 'row-relay':
         return relayed?.repeaterId === e.repeaterId ? relayed.read(e.input) : 'undefined';
       case 'static-rows':
@@ -756,7 +781,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         continue;
       }
       // A text field's Changed runs from its typing, with its own text (drawn with the field).
-      if (port === 'onChange' && plan.roleOf[id] === 'input') continue;
+      if (port === 'onChange' && (plan.roleOf[id] === 'input' || plan.roleOf[id] === 'checkbox')) continue;
       // P18-S128-FIELDSET. A text field's On Enter is its Enter key.
       if (port === 'onEnter' && plan.roleOf[id] === 'input') {
         const body = chain(id, port, list, `${pad}  `);
@@ -858,6 +883,8 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     return name;
   };
 
+  /** A node whose outermost element is not its own local (a labelled checkbox's `<label>`). */
+  const outerOf = new Map<string, string>();
   /** Lines that draw `id` into `parent` (before `before`, when given), with effects added to `l`. Returns the lines. */
   const draw = (id: string, parent: string, before: string | undefined, pad: string): string[] => {
     const role = plan.roleOf[id];
@@ -879,7 +906,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         partMounts.push([]);
         const inner = drawNode(id, role, node, bound, 'into', 'at', `${pad}  `);
         inner.push(...partMounts.pop()!);
-        const outer = role === 'instance' ? 'null' : local(id);
+        const outer = role === 'instance' ? 'null' : (outerOf.get(id) ?? local(id));
         return [
           `${pad}// ${node.authoredLabel ?? id}: on the page while its Mounted is true.`,
           `${pad}when(l, ${parent}, function () {`,
@@ -1017,15 +1044,72 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
    * P134-HTX001-PRINTERDECIDES): authored false is `disabled`; a wire is `disabled` while its value is not true, so a
    * source with no value yet (`!!undefined`) disables it, the runtime's own coercion.
    */
-  const enabledLines = (id: string, node: NodeIR, bound: Record<string, BindingSource>, pad: string): string[] => {
+  const enabledLines = (id: string, node: NodeIR, bound: Record<string, BindingSource>, pad: string, target = local(id)): string[] => {
     if (bound.enabled) {
       const v = binding(id, 'enabled', bound.enabled);
       if (v === undefined) return [];
       imports.dom.add('bindAttr');
       imports.dom.add('truthy');
-      return [`${pad}bindAttr(l, ${local(id)}, 'disabled', function () { return !truthy(${v}); });`];
+      return [`${pad}bindAttr(l, ${target}, 'disabled', function () { return !truthy(${v}); });`];
     }
-    return literalParam(node, 'enabled') === false ? [`${pad}${local(id)}.disabled = true;`] : [];
+    return literalParam(node, 'enabled') === false ? [`${pad}${target}.disabled = true;`] : [];
+  };
+
+  /**
+   * A Checkbox, as the React printer draws it (`component.ts` `renderNode`'s `role === 'checkbox'`, `changeAttrs`,
+   * CONTROLLED-STATE-TARGET §4c; copied, P134-HTX001-PRINTERDECIDES): an `<input type="checkbox">` with the node's class;
+   * with Use Label, inside a `<label>` with the wrapper class and the label's text after it. With a state row (the plan
+   * mints one when its Checked is wired, read, or Checked or Unchecked by a chain) the box shows the row, and a person's
+   * click writes the row, then runs the box's Changed chain reading the box; with none, the box keeps its own tick from
+   * its typed-in Checked, and the click runs the chain only.
+   */
+  const drawCheckbox = (id: string, node: NodeIR, bound: Record<string, BindingSource>, parent: string, before: string | undefined, pad: string): string[] => {
+    imports.dom.add('el');
+    const out: string[] = [];
+    const useLabel = (literalParam(node, 'useLabel') ?? (node.catalogRef ? ctx.catalog.inputDefault(node.catalogRef, 'useLabel') : undefined)) === true;
+    const cls = classAttr(id);
+    const at = (parentArg: string, tag: string, c: string | undefined, b: string | undefined) =>
+      `el(${[parentArg, js(tag), c ? js(c) : 'undefined', ...(b ? ['undefined', b] : [])].join(', ')})`;
+    const box = local(id);
+    // With a label, the label is what goes on and off the page (`draw`'s `when` returns it).
+    const label = useLabel ? fresh(`${box}Label`) : box;
+    if (useLabel) outerOf.set(id, label);
+    if (useLabel) {
+      out.push(`${pad}const ${label} = ${at(parent, 'label', wrapperClassOf.get(id), before)};`, `${pad}const ${box} = ${at(label, 'input', cls || undefined, undefined)};`);
+    } else {
+      out.push(`${pad}const ${box} = ${at(parent, 'input', cls || undefined, before)};`);
+    }
+    out.push(`${pad}${box}.type = 'checkbox';`);
+    if (useLabel) {
+      const v = bound.label ? binding(id, 'label', bound.label) : undefined;
+      if (v !== undefined) {
+        imports.dom.add('show');
+        const t = fresh(`${box}Text`);
+        out.push(`${pad}const ${t} = ${label}.appendChild(document.createTextNode(''));`, `${pad}l.run(function () {`, `${pad}  ${t}.data = show(${v});`, `${pad}});`);
+      } else {
+        const authored = literalParam(node, 'label') ?? (node.catalogRef ? ctx.catalog.inputDefault(node.catalogRef, 'label') : undefined);
+        out.push(`${pad}${label}.append(${js(String(authored ?? 'Label'))});`);
+      }
+    }
+    out.push(...enabledLines(id, node, bound, pad, box));
+    const row = plan.stateVars.find((v) => v.originNodeId === id && v.origin === 'control');
+    if (row) {
+      // The tick is a value: the box shows it whenever it changes (a Check, an Uncheck, its wire, a click).
+      out.push(`${pad}l.run(function () {`, `${pad}  ${box}.checked = !!${member('state', row.name)}.get();`, `${pad}});`);
+    } else if (literalParam(node, 'checked') === true) {
+      // No row: the box keeps its own tick, starting from its typed-in Checked (React's `defaultChecked`).
+      out.push(`${pad}${box}.checked = true;`);
+    }
+    // A person's click: the tick into its row, then the box's own Changed chain, reading the box.
+    const own = fieldChainOf(id);
+    if (row || own.length > 0) {
+      controlled = { controlId: id, code: `${box}.checked` };
+      const body = own.length > 0 ? chain(id, 'Changed', own, `${pad}  `) : [];
+      controlled = undefined;
+      out.push(`${pad}${box}.addEventListener('change', function () {`, ...(row ? [`${pad}  ${member('state', row.name)}.set(${box}.checked);`] : []), ...(body ?? []), `${pad}});`);
+    }
+    out.push(...listen(id, box, pad, {}));
+    return out;
   };
 
   const drawNode = (id: string, role: string, node: NodeIR, bound: Record<string, BindingSource>, parent: string, before: string | undefined, pad: string): string[] => {
@@ -1131,6 +1215,9 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       }
       out.push(...listen(id, local(id), pad, {}));
       extra(['placeholder', 'value', 'enabled']);
+    } else if (role === 'checkbox') {
+      out.push(...drawCheckbox(id, node, bound, parent, before, pad));
+      extra(['label', 'checked', 'enabled']);
     } else if (role === 'instance') {
       const target = ctx.project.byLegacyPath.get(node.type);
       const module = ctx.moduleOf(node.type);

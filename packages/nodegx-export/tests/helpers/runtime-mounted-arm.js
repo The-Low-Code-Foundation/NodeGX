@@ -30,6 +30,9 @@
  * P18 session 139 (EXP-021 AC4). `storage: { keys, seeds? }`, with `RUNTIME_ARM_URL` set: before scenario i the
  * localStorage is emptied and `seeds[i]` (key → text) written into it, and the Global Store manager (a singleton) is reset
  * with its state, as a reload would leave it; every reading ends with `storage=<text, or null>` for each key.
+ *
+ * P134 HTX-003 (session 5). `boxes: true` appends to every reading each checkbox, `[name]=on|off` in document order
+ * (`boxNames`: its label's text, or `#1`, `#2`… unlabelled), and a step `tick:<name>` clicks it as a person does.
  */
 
 const fs = require('fs');
@@ -90,6 +93,8 @@ const MODULES = [
   def(require(path.join(VIEWER, 'nodes', 'visual', 'text'))),
   def(require(path.join(VIEWER, 'nodes', 'controls', 'button'))),
   def(require(path.join(VIEWER, 'nodes', 'controls', 'text-input'))),
+  // P134 HTX-003 (session 5): the Checkbox Desk's boxes, the viewer's own Checkbox.
+  def(require(path.join(VIEWER, 'nodes', 'controls', 'checkbox'))),
   // P18 session 130 (EXP-011 §99): the Relay Desk's list, the viewer's own For Each over the runtime's own Static Data.
   def(require(path.join(LIB, 'nodes', 'std-library', 'data', 'staticdata'))),
   def(require(path.join(VIEWER, 'nodes', 'std-library', 'data', 'foreach'))),
@@ -154,9 +159,29 @@ async function frames(graph) {
   await graph.settle();
 }
 
+/**
+ * P134 HTX-003 (session 5). Each checkbox by its name, in document order: the text of the `<label>` that names it (its
+ * `for`, or the one it sits in), or `#1`, `#2`… for the unlabelled ones. The same rule in `export-html-arm.ts`.
+ */
+function boxNames(container) {
+  const boxes = [...container.querySelectorAll('input[type="checkbox"]')];
+  let bare = 0;
+  return boxes.map((el) => {
+    const label = (el.id ? container.querySelector(`label[for="${el.id}"]`) : null) ?? el.closest('label');
+    return { el, name: label ? (label.textContent ?? '').trim() : `#${++bare}` };
+  });
+}
+const boxReading = (container) => boxNames(container).map((b) => `[${b.name}]=${b.el.checked ? 'on' : 'off'}`);
+/** A person's click on the box: the browser flips it, then `click`, `input` and `change` (React's onChange reads the click). */
+function tickBox(container, name) {
+  const found = boxNames(container).find((b) => b.name === name);
+  if (!found) throw new Error(`no checkbox "${name}"`);
+  found.el.click();
+}
+
 /** P18 session 129. Each field's text by its placeholder, in document order, then which one holds focus. */
 function fieldReading(container) {
-  const els = [...container.querySelectorAll('input, textarea')];
+  const els = [...container.querySelectorAll('input:not([type="checkbox"]), textarea')];
   const name = (el) => `[${el.getAttribute('placeholder') ?? ''}]`;
   const active = els.find((el) => el === document.activeElement);
   return [...els.map((el) => `${name(el)}=${el.value}`), `focus=${active ? name(active) : 'none'}`];
@@ -164,7 +189,7 @@ function fieldReading(container) {
 
 /** P18 session 129. `type`: focus, write as a keystroke does, blur; `enter`: an Enter keydown. */
 function stepInField(container, verb, placeholder, text) {
-  const el = [...container.querySelectorAll('input, textarea')].find((e) => (e.getAttribute('placeholder') ?? '') === placeholder);
+  const el = [...container.querySelectorAll('input:not([type="checkbox"]), textarea')].find((e) => (e.getAttribute('placeholder') ?? '') === placeholder);
   if (!el) throw new Error(`no field "${placeholder}"`);
   if (verb === 'enter') {
     el.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
@@ -207,7 +232,7 @@ function installBackend(backend) {
   return fake;
 }
 
-async function run({ dir, scenarios, fields, backend, storage }) {
+async function run({ dir, scenarios, fields, boxes, backend, storage }) {
   const components = componentsOf(dir);
   const home = components.find((c) => c.name === '/Pages/Home');
   // The Home page's Page node is the router's; the arm draws the Page's one child, the page's Group.
@@ -249,6 +274,7 @@ async function run({ dir, scenarios, fields, backend, storage }) {
       return [
         ...texts.map((t) => t.text),
         ...(fields ? fieldReading(container) : []),
+        ...(boxes ? boxReading(container) : []),
         ...(storage === undefined ? [] : storage.keys.map((key) => `storage=${localStorage.getItem(key)}`))
       ];
     };
@@ -271,6 +297,15 @@ async function run({ dir, scenarios, fields, backend, storage }) {
     await settled();
     const readings = [read()];
     for (const label of presses) {
+      const ticked = /^tick:([\s\S]*)$/.exec(label);
+      if (ticked) {
+        await act(async () => {
+          tickBox(container, ticked[1]);
+        });
+        await settled();
+        readings.push(read());
+        continue;
+      }
       // The text may hold line breaks (a Text Area's lines, P18 session 140), so it is `[\s\S]*`, not `.*`.
       const typed = /^(type|enter):([^:]*)(?::([\s\S]*))?$/.exec(label);
       if (typed) {

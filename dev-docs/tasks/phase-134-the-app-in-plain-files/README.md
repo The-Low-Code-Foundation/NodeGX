@@ -1,7 +1,7 @@
 # Phase 134 — The app in plain files
 
 **Scoped:** 2026-11-03, on Richard's ask ("Let's scope up the HTML export phase please, I think it'll be important").
-**State:** 🔵 HTX-001 and HTX-002 done, HTX-003 half done (§10, session 4 of at most 10, 2026-11-03): a text field's Set, Clear, Focus, typing chain and mount announcement, a For Each over Static Data kept by its id, a Did Mount each time its part mounts, and nothing left running when a part or a page goes; eleven desks read exactly what the runtime reads. HTX-003's second session next (Checkbox, Options, Image, Icon, Columns; the runtime arm mounts none of them yet). R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
+**State:** 🔵 HTX-001, HTX-002 and HTX-003 done (§10, session 5 of at most 10, 2026-11-04): a checkbox ticked by a person, Checked and Unchecked by a chain or a Function, driven by a wire, mounted by a value and placed, as the runtime's own Checkbox does it, at every step but two cells every export holds (filed); before that, text fields, keyed lists, show and hide leak-free, and Back. Twelve desks read exactly what the runtime reads. HTX-003's Chrome drive is HTX-004's (todo-list's lists are records). **HTX-004 next.** Options wait on the plan: all 39 in the templates are left out of every export (P134-HTX003-OPTIONSWIRED). R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
 phase only** (BOARD §2); React and Swift stay paused. **Read first:** this page, then [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md),
 then the task you take. The Swift precedent this phase copies is
 [EXP-022](../phase-18-code-export-v2/EXP-022-THE-SAME-GRAPH-IN-SWIFT.md) §7–§9.
@@ -414,3 +414,50 @@ refresh on a page's address, and now Back, all graded.
 `emitHtml` 282, `libJs` 322. Lines moved out of React's helpers: 0. Tests: the new spec 408 lines. Six suites pass (109
 tests): the three HTML specs, the CLI, harness, deploy CLI. React's and Swift's output did not change (no file of theirs
 was touched).
+
+### Session 5 — HTX-003 finished: the checkbox (2026-11-04, Opus 5.5)
+
+**Result: a checkbox does what a person and the graph tell it, as the runtime's does.** The runtime arm mounts the
+viewer's own Checkbox now (`runtime-mounted-arm.js`: a `boxes` reading, `[name]=on|off` by its label, `#1` unlabelled,
+and a `tick:<name>` step that clicks it; `export-html-arm.ts` the same). The HTML printer draws it (`drawCheckbox`,
+copied from React, four decisions added to P134-HTX001-PRINTERDECIDES, twenty-four in all).
+
+**The desk** (`tests/helpers/checkbox-desk.ts`) is the five shapes the templates wire their 24 boxes in, measured first
+across `templates/`: Done (read out, its Changed counted, Check and Uncheck from presses), Mirror (Checked wired from
+Done's), Later (mounted while Done is ticked), a bare box read by a Function on Save (gram, nightbook), a placed Toggle
+whose box is its input and its outputs (marketplace), and a placed Days whose Function, run on the component's input,
+sends Check and Uncheck (planning's Settings sheet, seven boxes there, eleven in planning).
+
+**Graded** (`html-lists-fields-pages.test.ts` §F, 4 rows): the HTML export reads what the runtime reads at every one of
+21 readings, but two cells, and both are every export's, not the HTML printer's (the React export prints them the same):
+
+- **P134-HTX003-TEXTKEEPS:** a Text wired from a Function that has not run shows its own text in the runtime ("Text",
+  or what the author typed, measured both) and nothing in every export (React's `?? ''`). 16 template Texts have the
+  shape (6 Function-fed).
+- **P134-HTX003-BOXREMOUNT:** Later has no state row (only its Changed is wired), so in every export it is a box of its
+  own, and comes back unticked when Done mounts it again; the runtime's node keeps the tick.
+
+**Three shapes the plan refuses**, in every export, pinned in F3 to the plan's own words: a box whose label is a
+component input (marketplace's WayToggle shape: the box is left out), a box whose Checked only an Expression reads (no
+state row, so the Expression is deferred), and a Function **whose body keeps nothing**, run on a Variable's change, sending
+Check or Uncheck ("author-signal pulses are not translated in this slice"). Measured beside it: planning's own Function
+keeps what it last asked for (`this.`), and the plan carries that one's pulses, so planning's day boxes travel; the desk's
+Days copies planning's pattern for that reason.
+
+**Options reach nothing.** All 39 Options in the templates take their items over a wire, which the plan leaves out of
+every export (React draws 0 `<select>`). Printing them in the HTML printer waits on the plan: filed as
+P134-HTX003-OPTIONSWIRED (medium, the one finding here a person would notice first).
+
+**Mutants, four, all killed, two of them weakly said:** the click not writing the row (4 rows red), the tick not bound
+to the row (3), a box's Changed also sent through the generic listener (F3, by the loss it names, not by a double count),
+the chain run before the row (F4 only, by the printed text: a chain reads the box from its own element, so the order
+shows only when the chain reads something made from the row; behaviourally equivalent on this desk).
+
+**Across all templates:** 1,572 HTML losses (session 4: 1,548) = 24 checkboxes drawn now, plus 48 of their label's
+colour and size, which React drops and reports too. No checkbox is left undrawn. todo-list 88 → 87. planning's Settings
+sheet prints whole: seven boxes with their rows and the Function's pulses into them.
+
+**Cost, so far:** 5 sessions. The printer is 2,326 hand-written lines (session 4: 2,239): `printComponent` 1,722,
+`emitHtml` 282, `libJs` 322. Lines moved out of React's helpers: 0. Tests: the desk 252 lines, §F 110. 106 tests pass in
+five suites (the three HTML specs, the Field and Root desks' React specs, which share the runtime arm); React's and
+Swift's output did not change.
