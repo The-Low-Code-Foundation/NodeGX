@@ -35,8 +35,9 @@ never ahead of lanes 9, 2 and 3. Earlier prompts are in git history (`git log --
 4. BUNDLEDROPS (high) belongs to the cloud-deploy owner, not this phase, but it blocks every MCP-written cloud function
    that wires an HTTP Request's body or auth. Before anyone fixes it: measure the editor's own Deploy button with a
    viewer running, and a browser export with the same wiring (the bug file says how).
-5. After P132 BWF-012 is committed: the transport in `steps/http.ts` (P115-HST004-HTTPLOOKUP), and delete the
-   `http-over-fetch.ts` shim. **Check `git status` and the file's mtime first.**
+5. P132 BWF-012 is committed (`6e832e603`, 2026-11-04), so the transport in `steps/http.ts` (P115-HST004-HTTPLOOKUP)
+   can go in now, and the `http-over-fetch.ts` shim deleted. **Check `git status` and the file's mtime first** (lane 9
+   may have it open again), and re-run session 1's control (§6.1 row 6) before and after.
 6. Then HST-006 (records on D1) is the next real unknown for full stack.
 
 ## 4. Rulings owed (ask in plain words, recommendation first)
