@@ -248,7 +248,8 @@ test('P112 OWN-018: the allowed tools are exactly what the bootstrap server adve
   // Read off the checkout's manifest, so a tool added to bootstrap mode can't be left out of Vibe's permissions.
   const src = fs.readFileSync(path.join(__dirname, '..', '..', 'noodl-mcp', 'src', 'toolGroups.ts'), 'utf8');
   const names = (re) => src.match(re)[1].match(/'([a-z_]+)'/g).map((q) => q.slice(1, -1));
-  const bootstrap = names(/export const BOOTSTRAP_TOOLS\b.*?Object\.freeze\(\[([^\]]*)\]/s);
+  // Up to the list's own `]);`: a conditional spread inside it (`...(cond ? ['build_app'] : [])`) has a `]` of its own.
+  const bootstrap = names(/export const BOOTSTRAP_TOOLS\b.*?Object\.freeze\(\[(.*?)\]\);/s);
   const extra = names(/export const BOOTSTRAP_ADVERTISED\b.*?\[\.\.\.BOOTSTRAP_TOOLS,([^\]]*)\]/s);
   assert.deepEqual([...VIBE_ALLOWED_TOOLS].sort(), [...bootstrap, ...extra].sort());
 });

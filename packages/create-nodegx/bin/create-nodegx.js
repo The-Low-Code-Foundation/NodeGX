@@ -21,7 +21,7 @@ const path = require('path');
 
 /** The server this release sets up. `test/create.test.js` holds it equal to the checkout's `@nodegx/mcp` version. */
 const MCP_PACKAGE = '@nodegx/mcp';
-const MCP_VERSION = '0.2.8';
+const MCP_VERSION = '0.2.9';
 const PREVIEW_PACKAGE = '@nodegx/preview';
 const SERVER_NAME = 'nodegx';
 
@@ -218,7 +218,9 @@ function writeOpenCodeConfig(dir, platform = process.platform) {
  * - `thinking = "low"` is Vibe's spelling of `reasoning_effort: "none"`; "high" is Vibe's own default for Mistral's models.
  */
 const VIBE_CONFIG = path.join('.vibe', 'config.toml');
-const VIBE_ALLOWED_TOOLS = ['list_projects', 'open_project', 'create_project', 'list_examples', 'get_example', 'find_tools', 'call_tool'];
+// `build_app` is advertised only when NODEGX_LOCAL_MODEL is set (noodl-mcp toolGroups.ts BOOTSTRAP_TOOLS, OWN-031);
+// allowing it here is inert otherwise (P128-CREATENODEGX-BUILDAPPREGEX).
+const VIBE_ALLOWED_TOOLS = ['list_projects', 'open_project', 'create_project', 'list_examples', 'get_example', 'find_tools', 'call_tool', 'build_app'];
 
 /**
  * @param {{ profile?: 'vibe' }} [options] — the Vibe kit (`npm create nodegx-vibe`, OWN-019) adds `default_agent`, so

@@ -17,6 +17,30 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
+## create-nodegx 0.2.9 · 2026-11-04
+
+**Before your agent builds a first app or game, it reads what our best builds learned.**
+
+This release is `create-nodegx`, `create-nodegx-vibe` and `create-nodegx-cline` at 0.2.9. `npm create nodegx` now
+sets up `@nodegx/mcp` 0.2.9. The other packages stay at their versions.
+
+### New
+
+- **Every new project gets a first-project guide.** It asks you everything it needs in one message. It puts something
+  in your hands early, then improves the build in rounds from your notes.
+- **Every new project gets a game guide too.** It holds 91 traps from our own game builds, each with its fix. It also says how to test a game on
+  a phone-sized screen when nobody is watching.
+- **The folder note names both guides.** It also says that a game's moving world is plain code. Its menus and
+  settings can still be NodeGX.
+
+### Good to know
+
+- Claude Code reads the guides as skills. Other AI coders find them through the folder note.
+- We built one first project three ways: Claude Code on its own, on NodeGX, and on NodeGX with these guides. The
+  three games are at [nodegx.io/first-project](https://nodegx.io/first-project/).
+- In a Vibe folder, `build_app` no longer asks for permission. The server only offers it when you've set up a local
+  model.
+
 ## npm packages 0.2.9 · 2026-10-27
 
 **For the NodeGX extension in Claude Desktop: Studio and the app's render now start.**

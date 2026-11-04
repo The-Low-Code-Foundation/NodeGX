@@ -107,3 +107,7 @@ session that reads a good `NEXT.md` starts with everything you learned and none 
    can't.
 4. Drive the moment between two screens. A value cleared one step too late only shows there.
 5. After two failed fixes, write what you tried and what you saw into `NEXT.md`, and hand over.
+
+If an app shows a value that looks like it came from another app, check the address first. The preview serves every
+app at `http://127.0.0.1:8575` unless you pass `--port`. Two apps opened one after the other then share the browser's
+storage. Give each app its own port.
