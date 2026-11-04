@@ -13,6 +13,10 @@
 // unanswered ask ends the run (memory: a-stranger-agent-round-recipe), and the OS fence is the real seal.
 // VIBE_HOME is <root>/vibe, outside home/: it holds the user config (written here every round), the trust list and
 // Vibe's own session logs, so the old chat neither seeds the next round nor reaches the grader (as home/.cline in round.mjs).
+// --reply (OWN-037): the person answers in the same chat. <root> is an earlier round's; the request file is the reply,
+// sent with `-c` (Vibe's continue: the folder's most recent session, from the round's own VIBE_HOME). A relay after it
+// is what the kit's note tells a person to type after a hand-over: a NEW session saying "continue". Writes
+// turn-<n>.json, never round.json.
 // --tap <port>: a $0 mock (series.mjs --mock) — the built-in mistral provider is pointed at mock-model.mjs on that port.
 //
 // Writes into <root>: command.txt, sandbox.sb, sittings/<k>/{agent.jsonl,agent.stderr,out/export.json,exit},
@@ -48,7 +52,9 @@ const [rootArg, requestFile, ...rest] = process.argv.slice(2);
 const opt = (name, dflt) => { const i = rest.indexOf(name); return i >= 0 ? rest[i + 1] : dflt; };
 const ARM = opt('--arm', null);
 if (!rootArg || !requestFile || !['code', 'harness', 'nodegx'].includes(ARM)) throw new Error('usage: node round-vibe.mjs <root> <request-file> --arm code|harness|nodegx');
-if (fs.existsSync(rootArg)) throw new Error(`${rootArg} exists; a round starts from an empty folder`);
+const REPLY = rest.includes('--reply');
+if (!REPLY && fs.existsSync(rootArg)) throw new Error(`${rootArg} exists; a round starts from an empty folder`);
+if (REPLY && !fs.existsSync(path.join(rootArg, 'sittings.json'))) throw new Error(`--reply: ${rootArg} has no sittings.json`);
 if (!fs.existsSync(VIBE_BIN)) throw new Error(`no ${VIBE_BIN}`);
 let KIT_DIR = opt('--kit-dir', null);
 if (ARM === 'nodegx' && !KIT_DIR) {
@@ -132,7 +138,9 @@ const sh = (cmd, args, o = {}) => spawnSync('sandbox-exec', ['-f', path.join(roo
 
 // 1. The folder.
 const PROJ_CFG = path.join(APPS, '.vibe', 'config.toml');
-if (seed) {
+if (REPLY) {
+  // turn 1's folder, home and Vibe sessions as they are
+} else if (seed) {
   const s = path.resolve(seed);
   fs.cpSync(path.join(s, 'work', 'apps'), APPS, { recursive: true, verbatimSymlinks: true });
   fs.cpSync(path.join(s, 'home'), HOME, { recursive: true, verbatimSymlinks: true }); // backends, caches; the chat lives in <seed>/vibe
@@ -160,7 +168,7 @@ fs.writeFileSync(path.join(VIBE_HOME, 'config.toml'), ['# OWN-026 Mistral lab (h
   ...(kitHasModel ? [] : [`active_model = "${MODEL}"`]), 'enable_update_checks = false', 'enable_auto_update = false', '',
   ...(mockPort ? ['[[providers]]', 'name = "mistral"', `api_base = "http://127.0.0.1:${mockPort}/v1"`, 'api_key_env_var = "MISTRAL_API_KEY"', 'backend = "mistral"', ''] : []),
   ...(kitHasModel ? [] : MODEL_TOML), ''].join('\n'));
-if (ARM === 'nodegx') {
+if (ARM === 'nodegx' && !REPLY) {
   // the kit's server entry, from today's kit tarball: `npx -y @nodegx/mcp@<v> …` → `npx -y --package=<tgz> noodl-mcp …`
   const before = fs.readFileSync(PROJ_CFG, 'utf8');
   const m = before.match(/^\[\[mcp_servers\]\][\s\S]*?^args = (\[.*\])$/m);
@@ -200,15 +208,19 @@ let subagents = 0; // agents.spawn calls (audit)
 const t0 = Date.now();
 const timeoutS = Math.round(Number(opt('--timeout-min', 120)) * 60);
 const baseArgs = ['--auto-approve', '--trust', '--output', 'streaming', '--time-limit', String(timeoutS), ...DISABLED.flatMap((t) => ['--disabled-tools', t])];
-fs.writeFileSync(path.join(root, 'command.txt'),
+const prior = REPLY ? JSON.parse(fs.readFileSync(path.join(root, 'sittings.json'), 'utf8')) : [];
+const k0 = prior.length;
+(REPLY ? fs.appendFileSync : fs.writeFileSync)(path.join(root, 'command.txt'),
   `cd ${APPS} && sandbox-exec -f ${root}/sandbox.sb ${VIBE_BIN} -p "$(cat ${path.resolve(requestFile)})" ${baseArgs.join(' ')}${MAX_USD === null ? '' : ` --max-price <$${MAX_USD} − spent>`} --output-dir <sitting>/out\n` +
   `# arm ${ARM}; HOME=${HOME}; VIBE_HOME=${VIBE_HOME}; ${MODEL}; key ${mockPort ? 'mock' : keyName} as MISTRAL_API_KEY (never written); relay judge.txt → Haiku, MORE → a new sitting, up to ${N}\n`);
-for (let k = 1; k <= N + 1; k++) {
+for (let k = k0 + 1; k <= k0 + N + 1; k++) {
   const left = MAX_USD === null ? null : MAX_USD - vibeUsd;
   if (left !== null && left <= 0.01) break;
-  const s = await sitting(k, k === 1 ? request : request + CARRY_ON, left);
+  const first = k === k0 + 1;
+  const s = await sitting(k, first ? request : REPLY ? 'continue' : request + CARRY_ON, left, REPLY && first ? ['-c'] : []);
+  if (REPLY && first) s.resumed = '-c';
   sittings.push(s);
-  fs.writeFileSync(path.join(root, 'sittings.json'), JSON.stringify(sittings, null, 2) + '\n');
+  fs.writeFileSync(path.join(root, 'sittings.json'), JSON.stringify([...prior, ...sittings], null, 2) + '\n');
   console.log(`sitting ${k}: ${s.finish} ${s.seconds}s $${s.usd.toFixed(3)} (vibe $${s.vibeUsd}) judge ${s.judge ?? '—'}`);
   if (s.finish !== 'completed' || s.judge !== 'MORE') break;
 }
@@ -218,7 +230,7 @@ for (let k = 1; k <= N + 1; k++) {
 const s1 = sittings[0];
 // ...and no tool call either: a sitting the stall watch stopped has an export with usage null (Vibe 3 writes none on
 // SIGTERM), though it may have worked for an hour (t2-nodegx-c04: 260 calls, 2026-10-25) — that one is graded as it stands
-const s1Effects = s1 ? readJsonl(path.join(SITS, '1', 'agent.jsonl')).filter((l) => l.type === 'effect').length : 0;
+const s1Effects = s1 ? readJsonl(path.join(SITS, String(s1.k), 'agent.jsonl')).filter((l) => l.type === 'effect').length : 0;
 if (s1 && s1.finish !== 'completed' && !s1.tokens.input && !s1.tokens.cached && !s1.tokens.output && !s1Effects) {
   reap();
   fs.writeFileSync(path.join(root, 'infra-broken.txt'), `${s1.finish}: ${JSON.stringify(s1.error)}\n`);
@@ -231,14 +243,15 @@ const round = { arm: ARM, harness: `mistral-vibe ${VIBE_VERSION}`, model: MODEL,
   seed, request: path.resolve(requestFile), sittings: sittings.length, finish: sittings.at(-1).finish, judge: sittings.at(-1).judge,
   seconds: Math.round((Date.now() - t0) / 1000), tokens, usd: Number(usd.toFixed(3)), vibeUsd: Number(vibeUsd.toFixed(3)), maxUsd: MAX_USD,
   turns: sittings.reduce((t, x) => t + (x.iterations || 0), 0), audit: audit(), subagents, teardown };
-fs.writeFileSync(path.join(root, 'round.json'), JSON.stringify(round, null, 2) + '\n');
-console.log('round', JSON.stringify({ finish: round.finish, judge: round.judge, sittings: round.sittings, seconds: round.seconds, usd: round.usd, vibeUsd: round.vibeUsd, audit: round.audit }));
+const roundFile = REPLY ? `turn-${fs.readdirSync(root).filter((f) => /^turn-\d+\.json$/.test(f)).length + 2}.json` : 'round.json';
+fs.writeFileSync(path.join(root, roundFile), JSON.stringify({ ...round, ...(REPLY ? { reply: true, firstSitting: k0 + 1 } : {}) }, null, 2) + '\n');
+console.log(roundFile, JSON.stringify({ finish: round.finish, judge: round.judge, sittings: round.sittings, seconds: round.seconds, usd: round.usd, vibeUsd: round.vibeUsd, audit: round.audit }));
 
-function sitting(k, prompt, maxPrice) {
+function sitting(k, prompt, maxPrice, extra = []) {
   const dir = path.join(SITS, String(k));
   const out = path.join(dir, 'out');
   fs.mkdirSync(dir, { recursive: true });
-  const args = ['-f', path.join(root, 'sandbox.sb'), VIBE_BIN, '-p', prompt, ...baseArgs, ...(maxPrice === null ? [] : ['--max-price', maxPrice.toFixed(2)]), '--output-dir', out];
+  const args = ['-f', path.join(root, 'sandbox.sb'), VIBE_BIN, ...extra, '-p', prompt, ...baseArgs, ...(maxPrice === null ? [] : ['--max-price', maxPrice.toFixed(2)]), '--output-dir', out];
   const log = fs.createWriteStream(path.join(dir, 'agent.jsonl'));
   const err = fs.createWriteStream(path.join(dir, 'agent.stderr'));
   const child = spawn('sandbox-exec', args, { cwd: APPS, env: { ...env, PWD: APPS }, stdio: ['ignore', 'pipe', 'pipe'] });

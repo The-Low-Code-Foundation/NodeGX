@@ -13,6 +13,11 @@
 //   node round.mjs <root> <request-file> --arm code|harness|nodegx [--seed <earlier round root>] [--continues 2]
 //                  [--model cline-pass/deepseek-v4.1-flash] [--timeout-min 120] [--stall-min 30] [--tap <port>]
 //                  [--kit-version 0.2.5]
+// --reply (OWN-037): the person answers. <root> is an earlier round's (its folder and home as they are); the request
+// file is the person's reply. Cline 3.0.71 can't resume a chat headless: `--id` sets interactive mode and `--json`
+// then refuses ("JSON output mode requires a prompt argument", measured 2026-11-04, the binary's own check). So the
+// reply is a NEW chat whose prompt is the conversation so far as text — each of the person's messages and Cline's
+// last message of each turn, as a person's chat window shows them — then the reply. Writes turn-<n>.json, never round.json.
 // --seed (test 2): the earlier round's work/apps and home (backend data, caches) are copied in first; the folder is
 // what the person has on day N, and the request file is that day's change.
 //
@@ -35,7 +40,9 @@ const [rootArg, requestFile, ...rest] = process.argv.slice(2);
 const opt = (name, dflt) => { const i = rest.indexOf(name); return i >= 0 ? rest[i + 1] : dflt; };
 const ARM = opt('--arm', null);
 if (!rootArg || !requestFile || !['code', 'harness', 'nodegx'].includes(ARM)) throw new Error('usage: node round.mjs <root> <request-file> --arm code|harness|nodegx');
-if (fs.existsSync(rootArg)) throw new Error(`${rootArg} exists; a round starts from an empty folder`);
+const REPLY = rest.includes('--reply');
+if (!REPLY && fs.existsSync(rootArg)) throw new Error(`${rootArg} exists; a round starts from an empty folder`);
+if (REPLY && !fs.existsSync(path.join(rootArg, 'sittings.json'))) throw new Error(`--reply: ${rootArg} has no sittings.json`);
 const MODEL = opt('--model', 'cline-pass/deepseek-v4.1-flash');
 const KIT_V = opt('--kit-version', '0.2.5');
 // The learning loop (Richard, 2026-10-22; PLAN §8): a NodeGX round waits while <lab>/own026/HOLD-nodegx exists (a fix is
@@ -129,7 +136,9 @@ fs.writeFileSync(path.join(root, 'sandbox.sb'), sb);
 const sh = (cmd, args, o = {}) => spawnSync('sandbox-exec', ['-f', path.join(root, 'sandbox.sb'), cmd, ...args], { env, encoding: 'utf8', ...o });
 
 // 1. The folder.
-if (seed) {
+if (REPLY) {
+  // turn 1's folder, home and Cline data as they are
+} else if (seed) {
   const s = path.resolve(seed);
   fs.cpSync(path.join(s, 'work', 'apps'), APPS, { recursive: true, verbatimSymlinks: true });
   // the person's machine on day N: the backend's data and the agent's own caches came with it; never the old chat.
@@ -157,7 +166,7 @@ if (seed) {
 fs.mkdirSync(SETTINGS, { recursive: true });
 fs.writeFileSync(path.join(SETTINGS, 'global-settings.json'), JSON.stringify(globalSettings, null, 2) + '\n');
 writeSealPlugin(path.join(CLINE_DIR, 'plugins'), ALLOWED);
-if (ARM === 'nodegx') {
+if (ARM === 'nodegx' && !REPLY) {
   const mcpFile = JSON.parse(fs.readFileSync(env.CLINE_MCP_SETTINGS_PATH, 'utf8'));
   const entry = mcpFile.mcpServers.nodegx;
   const at = entry ? entry.args.findIndex((a) => /^@nodegx\/mcp@/.test(a)) : -1;
@@ -184,13 +193,32 @@ const CARRY_ON = '\n\n(Another session already started on this in this folder an
 const tokens = { input: 0, cached: 0, output: 0 };
 const sittings = [];
 const t0 = Date.now();
-fs.writeFileSync(path.join(root, 'command.txt'),
+const prior = REPLY ? JSON.parse(fs.readFileSync(path.join(root, 'sittings.json'), 'utf8')) : [];
+const k0 = prior.length;
+// the chat so far: per turn, the person's message (the sitting's `prompt`; turn 1's from round.json) and Cline's last words
+const chat = () => {
+  const said = [];
+  const r1 = JSON.parse(fs.readFileSync(path.join(root, 'round.json'), 'utf8'));
+  prior.forEach((x, i) => {
+    const mine = x.prompt ?? (i === 0 ? fs.readFileSync(r1.request, 'utf8').trim() : null);
+    if (mine && !x.relay) said.push(`Me:\n${mine}`);
+    const next = prior[i + 1];
+    if (x.last && (!next || !next.relay)) said.push(`You:\n${x.last}`);
+  });
+  return `(This continues our conversation in this folder. What we said so far:)\n\n${said.join('\n\n')}\n\n(My reply now:)\n\n${request}`;
+};
+const firstPrompt = REPLY ? chat() : request;
+(REPLY ? fs.appendFileSync : fs.writeFileSync)(path.join(root, 'command.txt'),
   `cd ${APPS} && sandbox-exec -f ${root}/sandbox.sb ${CLINE_BIN} --json -P cline-pass -m ${MODEL} -c ${APPS} --data-dir ${DATA} -t <s> --retries 5 "$(cat ${path.resolve(requestFile)})"\n` +
   `# arm ${ARM}; HOME=${HOME}; key from the repo .env as CLINE_API_KEY (never written); relay judge.txt → Haiku, MORE → a new sitting, up to ${N}\n`);
-for (let k = 1; k <= N + 1; k++) {
-  const s = await sitting(k, k === 1 ? request : request + CARRY_ON);
+for (let k = k0 + 1; k <= k0 + N + 1; k++) {
+  const prompt = k === k0 + 1 ? firstPrompt : firstPrompt + CARRY_ON;
+  const s = await sitting(k, prompt);
+  if (REPLY) s.prompt = k === k0 + 1 ? request : null;
+  if (k > k0 + 1) s.relay = true;
+  if (k === 1 || (REPLY && k === k0 + 1)) fs.writeFileSync(path.join(SITS, String(k), 'prompt.txt'), prompt + '\n');
   sittings.push(s);
-  fs.writeFileSync(path.join(root, 'sittings.json'), JSON.stringify(sittings, null, 2) + '\n');
+  fs.writeFileSync(path.join(root, 'sittings.json'), JSON.stringify([...prior, ...sittings], null, 2) + '\n');
   console.log(`sitting ${k}: ${s.finish} ${s.seconds}s $${s.usd.toFixed(3)} judge ${s.judge ?? '—'}`);
   if (s.finish !== 'completed' || s.judge !== 'MORE') break;
 }
@@ -199,8 +227,9 @@ const usd = tokens.input * PRICE.input / 1e6 + tokens.cached * PRICE.cached / 1e
 const round = { arm: ARM, model: MODEL, kit: ARM === 'nodegx' ? (KIT_DIR ? { dir: KIT_DIR, files: fs.readdirSync(KIT_DIR).filter((f) => f.endsWith('.tgz')) } : KIT_V) : null, seed, request: path.resolve(requestFile),
   sittings: sittings.length, finish: sittings.at(-1).finish, judge: sittings.at(-1).judge, seconds: Math.round((Date.now() - t0) / 1000),
   tokens, usdAtClinePassPrices: Number(usd.toFixed(3)), audit: audit(), teardown };
-fs.writeFileSync(path.join(root, 'round.json'), JSON.stringify(round, null, 2) + '\n');
-console.log('round', JSON.stringify({ finish: round.finish, judge: round.judge, sittings: round.sittings, seconds: round.seconds, usd: round.usdAtClinePassPrices, audit: round.audit }));
+const roundFile = REPLY ? `turn-${fs.readdirSync(root).filter((f) => /^turn-\d+\.json$/.test(f)).length + 2}.json` : 'round.json';
+fs.writeFileSync(path.join(root, roundFile), JSON.stringify({ ...round, ...(REPLY ? { reply: true, firstSitting: k0 + 1 } : {}) }, null, 2) + '\n');
+console.log(roundFile, JSON.stringify({ finish: round.finish, judge: round.judge, sittings: round.sittings, seconds: round.seconds, usd: round.usdAtClinePassPrices, audit: round.audit }));
 
 function sitting(k, prompt) {
   const dir = path.join(SITS, String(k));

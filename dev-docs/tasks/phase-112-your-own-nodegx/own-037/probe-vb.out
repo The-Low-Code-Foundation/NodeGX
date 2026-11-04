@@ -1,0 +1,4 @@
+sitting 1: completed 15s $0.022 (vibe $0.021509579999999997) judge MORE
+round.json {"finish":"completed","judge":"MORE","sittings":1,"seconds":17,"usd":0.022,"vibeUsd":0.022,"audit":"clean"}
+sitting 2: completed 6s $0.017 (vibe $0.01748382) judge MORE
+turn-2.json {"finish":"completed","judge":"MORE","sittings":1,"seconds":9,"usd":0.017,"vibeUsd":0.017,"audit":"clean"}
