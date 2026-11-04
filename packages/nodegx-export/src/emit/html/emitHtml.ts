@@ -29,6 +29,8 @@ import { emitApp } from '../emitApp';
 import { clientFilesEsm } from './client';
 import { CORE_JS } from './coreJs';
 import { FUNCTION_RUN_JS } from './functionRunJs';
+import { COMPONENT_SCOPE_JS } from './componentScopeJs';
+import { TIMER_JS } from './timerJs';
 import { PERSIST_STORE_JS } from './persistStoreJs';
 import { ANIMATE_JS, STATES_JS } from './statesJs';
 import { DOM_JS, ROUTER_JS } from './libJs';
@@ -151,6 +153,8 @@ export function emitHtmlApp(ir: ExportIR, catalog: Catalog): EmittedHtmlApp {
   files['lib/dom.js'] = DOM_JS;
   files['lib/router.js'] = ROUTER_JS;
   if (Object.keys(files).some((f) => f.startsWith('functions/'))) files['lib/functionRun.js'] = FUNCTION_RUN_JS;
+  if (Object.values(files).some((text) => text.includes("/lib/componentScope.js'") || text.includes("from './lib/componentScope.js'"))) files['lib/componentScope.js'] = COMPONENT_SCOPE_JS;
+  if (Object.values(files).some((text) => /from '(?:\.\.\/|\.\/)+lib\/timer\.js'/.test(text))) files['lib/timer.js'] = TIMER_JS;
   if (usesStates) {
     files['lib/states.js'] = STATES_JS;
     files['lib/animate.js'] = ANIMATE_JS;

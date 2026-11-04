@@ -23,6 +23,9 @@
  *
  * EXP-022 S3. `allowErrors: [text, …]` (with `settled`): a console error containing one of these is one the scenario
  * provokes on purpose (a refused write's raise); any other still fails the arm.
+ *
+ * P134 session 11. `skeleton: true` (with `settled`) ends every reading with what the page draws, element by element
+ * (`skeleton.js`), as the HTML export's spec reads its own page.
  */
 
 const fs = require('fs');
@@ -33,6 +36,7 @@ const ROOT = path.join(__dirname, '..', '..', '..', '..');
 const esbuild = require(require.resolve('esbuild', { paths: [ROOT] }));
 const { JSDOM } = require(require.resolve('jsdom', { paths: [ROOT] }));
 const { createFakeBackend } = require('./fake-parse-backend');
+const { skeleton: readSkeleton } = require('./skeleton');
 console.log = (...args) => process.stderr.write(args.map(String).join(' ') + '\n');
 
 const HARNESS = `
@@ -130,7 +134,7 @@ function bundle(dir, env = false) {
  * each inside an act, after the mount and after every step, as the runtime arm lets frames run: a zero timer the page
  * started has fired before the reading.
  */
-async function runSettled({ dir, scenarios, fields, ticks, backend, storage, allowErrors }) {
+async function runSettled({ dir, scenarios, fields, ticks, backend, storage, allowErrors, skeleton }) {
   const code = bundle(dir, backend !== undefined);
   const out = [];
   const requests = [];
@@ -157,7 +161,7 @@ async function runSettled({ dir, scenarios, fields, ticks, backend, storage, all
     await w.__mountSettled();
     if (ticks) await w.__ticks(ticks);
     const stored = () => (storage === undefined ? [] : storage.keys.map((key) => `storage=${w.localStorage.getItem(key)}`));
-    const read = () => [...w.__read(), ...(fields ? w.__fields() : []), ...stored()];
+    const read = () => [...w.__read(), ...(fields ? w.__fields() : []), ...stored(), ...(skeleton ? readSkeleton(w.document.getElementById('root')) : [])];
     const readings = [read()];
     for (const label of presses) {
       const step = STEP.exec(label);

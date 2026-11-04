@@ -34,7 +34,7 @@
 import type { NodeIR } from '../../ir/types';
 import type { CatalogIndex } from '../../catalog';
 import { INPUT_PULSE_TS_TYPE, type QueryPlan, type BindingSource, type ComponentPlan, type HandlerAction, type JsFunctionPlan, type ProjectPlan, type ValueExpr } from '../../analyze/plan';
-import { computeNodeStyle, computeRoleCss, WIRED_STYLE_SINKS, type Decl, type StyleRole } from '../style';
+import { computeNodeStyle, computeRoleCss, CONTENT_ATTR_ORDER, CONTENT_PARAMS, iconSourceOf, WIRED_STYLE_SINKS, type Decl, type StyleRole } from '../style';
 import { assignClassNames, camelCase, isReservedWord, lowerFirst, type ClassCandidate } from '../naming';
 // 🔴 A decision the React printer holds, not the plan (P134-HTX001-PRINTERDECIDES): which element a node's `as` names.
 import { authoredTag, PRESET_MARKERS } from '../component';
@@ -78,6 +78,22 @@ export interface PrintedComponent {
   losses: HtmlLoss[];
 }
 
+/** Every Delay step anywhere in the plan (a handler, an effect, a callback's chain): the handles the component keeps. */
+function collectDelays(plan: ComponentPlan): Array<{ nodeId: string; ref: string }> {
+  const out: Array<{ nodeId: string; ref: string }> = [];
+  const seen = new Set<object>();
+  const visit = (v: unknown): void => {
+    if (v === null || typeof v !== 'object' || seen.has(v)) return;
+    seen.add(v);
+    if (Array.isArray(v)) return v.forEach(visit);
+    const a = v as { kind?: unknown; nodeId?: unknown; ref?: unknown };
+    if (a.kind === 'delay' && typeof a.nodeId === 'string' && typeof a.ref === 'string') out.push({ nodeId: a.nodeId, ref: a.ref });
+    Object.values(v).forEach(visit);
+  };
+  visit(plan);
+  return out;
+}
+
 /** A chain step the HTML target does not print: the whole chain is then named as a loss, never half printed. */
 class Unprinted extends Error {}
 
@@ -96,7 +112,11 @@ interface Scope {
  * The element each role draws when the author chose none — the React printer's own table (`component.ts` `TAGS`),
  * copied for the roles this printer draws (P134-HTX001-PRINTERDECIDES).
  */
-const TAGS: Record<string, string> = { group: 'div', page: 'div', text: 'p', button: 'button', input: 'input' };
+const TAGS: Record<string, string> = { group: 'div', page: 'div', text: 'p', button: 'button', input: 'input', image: 'img', video: 'video', columns: 'div' };
+
+/** A media element's content attributes that are switches (the element's own property) and addresses. */
+const MEDIA_SWITCHES = new Set(['controls', 'autoPlay', 'muted', 'loop']);
+const MEDIA_ADDRESSES = new Set(['src', 'srcSet', 'poster']);
 
 /** Parameters the render handles itself, not style: never a loss. */
 const NOT_STYLE = new Set(['visible', 'mounted', 'cssClassName', ...PRESET_MARKERS]);
@@ -137,7 +157,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   const nodeById = new Map(nodes.map((n) => [n.id, n]));
   const losses: HtmlLoss[] = [];
   const lose = (nodeId: string, what: string) => losses.push({ component: plan.path, nodeId, label: nodeById.get(nodeId)?.authoredLabel, what });
-  const imports = { core: new Set<string>(), dom: new Set<string>(['life']), router: new Set<string>(), run: new Set<string>(), states: new Set<string>() };
+  const imports = { core: new Set<string>(), dom: new Set<string>(['life']), router: new Set<string>(), run: new Set<string>(), states: new Set<string>(), timer: new Set<string>() };
   const childImports = new Map<string, Set<string>>();
   const machineByNode = new Map(plan.statesMachines.map((m) => [m.nodeId, m]));
   const stateNames = new Set(plan.stateVars.map((s) => s.name));
@@ -228,7 +248,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     for (const c of plan.childrenOf[id] ?? []) walk(c);
   };
   if (plan.rootId) walk(plan.rootId);
-  const styled = order.filter((id) => ['page', 'group', 'text', 'button', 'input', 'checkbox', 'range'].includes(plan.roleOf[id]));
+  const styled = order.filter((id) => ['page', 'group', 'text', 'button', 'input', 'checkbox', 'range', 'image', 'video', 'icon', 'columns'].includes(plan.roleOf[id]));
   const declsOf = new Map<string, Decl[]>();
   const roleCssOf = new Map<string, ReturnType<typeof computeRoleCss>>();
   for (const id of styled) {
@@ -250,30 +270,30 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     for (const name of unhandled) if (!NOT_STYLE.has(name)) lose(id, `its ${name} is not carried (no style the export knows for it)`);
     declsOf.set(id, decls);
     const roleCss = computeRoleCss(node, role, ctx.catalog, ctx.styles);
-    // A checkbox's label wrapper is drawn (`drawNode`); the columns' query container is not yet.
-    if (roleCss.wrapper && roleCss.wrapper.role !== 'label') lose(id, `its ${roleCss.wrapper.role} wrapper is not drawn by the HTML target yet`);
-    if (roleCss.containerQueries.length > 0) lose(id, 'its breakpoints are not carried by the HTML target yet');
+    // A checkbox's label wrapper and a Columns' query container are drawn (`drawNode`), its breakpoints `@container` rules.
     roleCssOf.set(id, roleCss);
   }
   const candidates: ClassCandidate[] = [];
   const classed: string[] = [];
   for (const id of styled) {
-    if (declsOf.get(id)!.length === 0 && roleCssOf.get(id)!.blocks.length === 0 && roleCssOf.get(id)!.wrapper === undefined) continue;
+    if (declsOf.get(id)!.length === 0 && roleCssOf.get(id)!.blocks.length === 0 && roleCssOf.get(id)!.wrapper === undefined && roleCssOf.get(id)!.containerQueries.length === 0) continue;
     candidates.push({ nodeIds: [id], label: nodeById.get(id)!.authoredLabel, role: plan.roleOf[id] });
     classed.push(id);
   }
   const names = assignClassNames(candidates);
   const classOf = new Map(classed.map((id, i) => [id, `${file.symbol}-${names[i]}`]));
   /*
-   * A control's label wrapper, named after the class it accompanies, as the React printer names it (`component.ts`
-   * "Companion classes", copied, P134-HTX001-PRINTERDECIDES): `<class>Label`, or `<class>Label2`… when that is taken.
+   * A control's label wrapper and a Columns' query container, named after the class they accompany, as the React printer
+   * names them (`component.ts` "Companion classes", copied, P134-HTX001-PRINTERDECIDES): `<class>Label` or
+   * `<class>Container`, or `<class>Label2`… when that is taken.
    */
   const wrapperClassOf = new Map<string, string>();
   {
     const used = new Set(classOf.values());
     for (const id of classed) {
-      if (roleCssOf.get(id)!.wrapper?.role !== 'label') continue;
-      const base = `${classOf.get(id)}Label`;
+      const wrapper = roleCssOf.get(id)!.wrapper;
+      if (wrapper === undefined) continue;
+      const base = `${classOf.get(id)}${wrapper.role === 'label' ? 'Label' : 'Container'}`;
       let name = base;
       let n = 2;
       while (used.has(name)) name = `${base}${n++}`;
@@ -290,6 +310,8 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     for (const block of roleCssOf.get(id)!.blocks) cssBlocks.push(`.${cls}${block.suffix} {\n${block.decls.map((d) => `  ${d.prop}: ${d.value};`).join('\n')}\n}`);
     const wrapper = wrapperClassOf.get(id);
     if (wrapper !== undefined) cssBlocks.push(`.${wrapper} {\n${roleCssOf.get(id)!.wrapper!.decls.map((d) => `  ${d.prop}: ${d.value};`).join('\n')}\n}`);
+    // A Columns' breakpoints: its container's width, not the window's, as the runtime measures it (React's own blocks).
+    for (const query of roleCssOf.get(id)!.containerQueries) cssBlocks.push(`@container (max-width: ${query.maxWidth}) {\n  .${cls} {\n${query.decls.map((d) => `    ${d.prop}: ${d.value};`).join('\n')}\n  }\n}`);
   }
   /** The class attribute: the node's own class, then what the author typed in CSS Class. */
   const classAttr = (id: string): string => {
@@ -302,7 +324,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
 
   // ---- names ---------------------------------------------------------------------------------------------------
 
-  const taken = new Set(['session', 'followSession', 'raiseAppError', 'filterValue', 'variables', 'input', 'state', 'given', 'element', 'inputs', 'before', 'l', 'into', 'at', 'item', 'index', 'row', 'batch', 'life', 'el', 'show', 'truthy', 'keep', 'bindText', 'bindAttr', 'bindStyle', 'when', 'place', 'list', 'navigate', 'value', 'derived', 'functionNode', 'runFunction', 'tickedArrival', 'pulse', mount]);
+  const taken = new Set(['session', 'followSession', 'raiseAppError', 'filterValue', 'variables', 'input', 'state', 'given', 'element', 'inputs', 'before', 'l', 'into', 'at', 'item', 'index', 'row', 'batch', 'life', 'el', 'show', 'truthy', 'keep', 'bindText', 'bindAttr', 'bindStyle', 'media', 'when', 'place', 'list', 'navigate', 'openInNewTab', 'pageParam', 'value', 'derived', 'functionNode', 'runFunction', 'tickedArrival', 'pulse', mount]);
   // A store's module is imported under its own name (React's `import { desk } from '../stores/desk'`): no local takes it.
   for (const st of ctx.project.stores) if (st.deferred === undefined) taken.add(st.exportName);
   /** A fresh local name, `base` or `base2`, `base3`… */
@@ -319,6 +341,10 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   // A States node is one local, named as the React export names its `useStates` handle.
   for (const m of plan.statesMachines) taken.add(m.local);
   const fnNames = new Map<string, { base: string; node: string; held: string; loaded: string }>();
+  /** A Function here reads `Component.Object`: the instance keeps one `component` (`lib/componentScope.js`). */
+  let usesComponentScope = false;
+  taken.add('component');
+  taken.add('createComponentScope');
   /** A Function's names: its import (the wrapper's own name) and the locals that keep its node. */
   const useFunction = (def: JsFunctionPlan): { base: string; node: string; held: string; loaded: string } => {
     const known = fnNames.get(def.nodeId);
@@ -331,14 +357,22 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     if (def.kind === 'function') {
       if (keptNode(def.nodeId)) {
         imports.run.add('functionNode');
-        nodeLines.push(`  const ${names.node} = functionNode(${JSON.stringify(def.signals).replace(/"/g, "'")});`);
+        /*
+         * EXP-020 slice 2, as the React printer keeps it (`component.ts`, `useState(createComponentScope)`, copied,
+         * P134-HTX001-PRINTERDECIDES): a body that reads `Component.Object` is handed this instance's scope, one per
+         * mount and shared by the instance's Functions, carried on the kept node (`lib/componentScope.js`).
+         */
+        if (def.component && !usesComponentScope) {
+          usesComponentScope = true;
+          nodeLines.push("  const component = createComponentScope(); // this instance's `Component`: its `Object` is the record its Functions share");
+        }
+        nodeLines.push(`  const ${names.node} = functionNode(${JSON.stringify(def.signals).replace(/"/g, "'")}${def.component ? ', component' : ''});`);
       }
       if (tickedRunIds.has(def.nodeId)) {
         nodeLines.push(`  const ${names.held} = [];`);
         if (plan.tickedRuns.find((t) => t.nodeId === def.nodeId)?.atLoad) nodeLines.push(`  let ${names.loaded} = false;`);
       }
       if (def.noodl !== undefined && !noodlCarried(def)) lose(def.nodeId, `the Function "${def.fnName}" reads Noodl (${[...def.noodl.members, ...def.noodl.variables].join(', ')}), which this export does not carry`);
-      if (def.component) lose(def.nodeId, `the Function "${def.fnName}" reads Component.Object, which the HTML target does not hand it yet`);
       if (def.scripts?.length) lose(def.nodeId, `the Function "${def.fnName}" uses script files, which the HTML target does not carry yet`);
     }
     return names;
@@ -367,6 +401,17 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       Object.values(v).forEach(visit);
     };
     visit(plan);
+  }
+  /**
+   * EXP-011 §39, the React printer's (`component.ts` `delayRefs`, copied, P134-HTX001-PRINTERDECIDES): each Delay node's
+   * countdown is one handle the component keeps, `{ current }`, shared by its Start, Restart and Stop, and stopped when the
+   * component goes, so a countdown never finishes into a part that is gone.
+   */
+  const delayRefs = new Map<string, string>();
+  for (const a of collectDelays(plan)) {
+    if (delayRefs.has(a.nodeId)) continue;
+    delayRefs.set(a.nodeId, a.ref);
+    taken.add(a.ref);
   }
   const fieldRefs = new Map<string, string>();
   const fieldSetSources = new Map<string, ValueExpr>();
@@ -439,6 +484,11 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         return js(e.value);
       case 'undefined':
         return 'undefined';
+      case 'page-param':
+        // The query's value of that name first, then the path's (`lib/router.js`), as React's `query.get(k) ?? params.k`.
+        // The page is drawn again on every navigation, so a read in the drawing is the page's own.
+        imports.router.add('pageParam');
+        return `pageParam(${js(e.name)})`;
       case 'state-get':
         if (stateNames.has(e.name)) return `${member('state', e.name)}.get()`;
         if (plan.statesMachines.some((m) => m.local === e.name)) return `${e.name}.get().state`;
@@ -809,9 +859,102 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       }
       case 'navigate': {
         const path = ctx.routeOf(a.to);
-        if (path === undefined || a.pathParams.length > 0 || a.query.length > 0 || a.newTab) throw new Unprinted(`a navigate to ${a.to} with parameters or a new tab, which the HTML target does not carry yet`);
+        if (path === undefined) throw new Unprinted(`a navigate to ${a.to}, which is no page the app routes`);
+        /*
+         * The React printer's url (`component.ts` `case 'navigate'`, copied, P134-HTX001-PRINTERDECIDES): each braced
+         * segment filled from its value, every parameter the path does not name left over as the query (the runtime's
+         * `getRelativeURL`), each value through `encodeURIComponent(… ?? '')`, so a value not there yet is an empty segment
+         * that matches no page rather than a page about "undefined". React reads `?? ''` only where a value can be
+         * undefined; here it is read everywhere, which differs only for a null where React knows there is none.
+         */
+        const text = (t: string) => t.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$\{/g, '\\${');
+        const urlValue = (e: ValueExpr): string => {
+          // A typed-in value is encoded here, once, so the address reads as it will be: `/member/42`.
+          if (e.kind === 'literal') return text(encodeURIComponent(String(e.value)));
+          const v = expr(e, scope);
+          if (v === undefined) throw new Unprinted(`a navigate to ${a.to} reading ${describe(e)}, which the HTML target does not print yet`);
+          // A read stands as it is; anything else in brackets (`a || b ?? ''` does not parse).
+          return `\${encodeURIComponent(${/^[\w$.]+(?:\([^()]*\))?$/.test(v) ? v : `(${v})`} ?? '')}`;
+        };
+        let url = text(path);
+        for (const p of a.pathParams) url = url.replace(`{${text(p.name)}}`, urlValue(p.expr));
+        const q = a.query.map((p) => `${text(encodeURIComponent(p.name))}=${urlValue(p.expr)}`).join('&');
+        if (q !== '') url = `${url}?${q}`;
+        const literal = [...a.pathParams, ...a.query].every((p) => p.expr.kind === 'literal') ? js(url.replace(/\\([\\`$])/g, '$1')) : `\`${url}\``;
+        const call = a.newTab ? 'openInNewTab' : 'navigate';
+        imports.router.add(call);
+        return one(`${call}(${literal});`);
+      }
+      /*
+       * `Navigate To Path`, in the same tab, as the React printer prints it (`component.ts` `case 'navigate-path'`, copied,
+       * P134-HTX001-PRINTERDECIDES), and four things differ from a Navigate's, each the runtime's own
+       * (`navigate-to-path.ts`): a value fills its segment as `String(v)`, unencoded, and an unset one as ''; the query is
+       * the authored list, each value encoded; a value that may be unset or null is left out of the address, never sent as
+       * `name=`. Then its Done chain, then its Completed one: in the same tab it cannot fail.
+       */
+      case 'navigate-path': {
+        if (a.newTab) throw new Unprinted('a Navigate To Path in a new tab, which the HTML target does not print yet');
+        const text = (t: string) => t.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$\{/g, '\\${');
+        const read = (e: ValueExpr): string => {
+          const v = expr(e, scope);
+          if (v === undefined) throw new Unprinted(`a Navigate To Path reading ${describe(e)}, which the HTML target does not print yet`);
+          return /^[\w$.]+(?:\([^()]*\))?$/.test(v) ? v : `(${v})`;
+        };
+        let url = text(a.to);
+        for (const p of a.pathParams) url = url.replace(`{${text(p.name)}}`, p.expr.kind === 'literal' ? text(String(p.expr.value)) : `\${${read(p.expr)} ?? ''}`);
+        const lines: string[] = [];
+        const omittable = a.query.filter((q) => q.omittable);
+        if (omittable.length === 0) {
+          const q = a.query
+            .map((p) => `${text(encodeURIComponent(p.name))}=${p.expr.kind === 'literal' ? text(encodeURIComponent(String(p.expr.value))) : `\${encodeURIComponent(String(${read(p.expr)}))}`}`)
+            .join('&');
+          if (q !== '') url = `${url}?${q}`;
+          const plain = [...a.pathParams, ...a.query].every((p) => p.expr.kind === 'literal');
+          lines.push(`${pad}navigate(${plain ? js(url.replace(/\\([\\`$])/g, '$1')) : `\`${url}\``});`);
+        } else {
+          // Every value read once, in the authored order; an unset or null one left out (the runtime's own loop).
+          const pairs = a.query.map((p) => `[${js(encodeURIComponent(p.name))}, ${expr(p.expr, scope) ?? read(p.expr)}]`).join(', ');
+          lines.push(
+            `${pad}const ${a.queryLocal} = [];`,
+            `${pad}for (const [key, value] of [${pairs}]) {`,
+            `${pad}  if (value !== undefined && value !== null) ${a.queryLocal}.push(key + '=' + encodeURIComponent(String(value)));`,
+            `${pad}}`,
+            `${pad}navigate(\`${url}\${${a.queryLocal}.length > 0 ? '?' + ${a.queryLocal}.join('&') : ''}\`);`
+          );
+        }
         imports.router.add('navigate');
-        return one(`navigate(${js(path)});`);
+        lines.push(...block(a.then, pad, scope), ...block(a.completedThen, pad, scope));
+        return { lines, scope };
+      }
+      case 'delay': {
+        const later = (list: HandlerAction[]): string | undefined => {
+          if (list.length === 0) return undefined;
+          const own: Scope = { ...scope, declared: new Set(scope.declared), awaits: { used: false } };
+          const body = block(list, `${pad}  `, own);
+          return `${own.awaits.used ? 'async ' : ''}function () {\n${body.join('\n')}\n${pad}}`;
+        };
+        const callbacks: string[] = [];
+        if (a.verb !== 'stop') {
+          const started = later(a.startedThen);
+          const finished = later(a.finishedThen);
+          if (finished !== undefined) callbacks.push(started ?? 'undefined', finished);
+          else if (started !== undefined) callbacks.push(started);
+        }
+        const value = (e: ValueExpr): string => {
+          const v = expr(e, scope);
+          if (v === undefined) throw new Unprinted(`a Delay reading ${describe(e)}, which the HTML target does not print yet`);
+          return v;
+        };
+        const verb = a.verb === 'stop' ? 'stopDelay' : a.verb === 'start' ? 'startDelay' : 'restartDelay';
+        imports.timer.add(verb);
+        const call = a.verb === 'stop' ? `stopDelay(${a.ref})` : `${verb}(${[a.ref, value(a.startDelay), value(a.duration), ...callbacks].join(', ')})`;
+        // Restart cannot leave a countdown unchanged: its Done follows the call, as React prints it (`timer.ts`).
+        if (a.verb === 'restart') return { lines: [`${pad}${call};`, ...block(a.then, pad, scope)], scope };
+        const thenLines = block(a.then, `${pad}  `, scope);
+        const elseLines = block(a.unchangedThen, `${pad}  `, scope);
+        if (thenLines.length === 0 && elseLines.length === 0) return one(`${call};`);
+        if (thenLines.length === 0) return { lines: [`${pad}if (!${call}) {`, ...elseLines, `${pad}}`], scope };
+        return { lines: [`${pad}if (${call}) {`, ...thenLines, ...(elseLines.length ? [`${pad}} else {`, ...elseLines] : []), `${pad}}`], scope };
       }
       case 'store-set': {
         const target = variable(a.variableName);
@@ -845,7 +988,6 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         const def = fnByNode[a.nodeId];
         if (!def || def.kind !== 'function') throw new Unprinted(`a run of a ${def?.kind ?? 'missing'} node`);
         if (def.noodl !== undefined && !noodlCarried(def)) throw new Unprinted(`a run of "${def.fnName}", which reads Noodl (${[...def.noodl.members, ...def.noodl.variables].join(', ')}), which this export does not carry`);
-        if (def.component) throw new Unprinted(`a run of "${def.fnName}", which reads Component.Object`);
         const names = useFunction(def);
         const args = jsArgs(def, scope, a.inputsAtRun);
         if (args === undefined) throw new Unprinted(`a run of "${def.fnName}" whose inputs read a value the HTML target does not print yet`);
@@ -1111,7 +1253,17 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       lifts.set(lift.prop, writes);
     }
     for (const [prop, writes] of lifts) fixed.push(`${key(prop)}: function (value) {\n${writes.map((w) => `${pad}    ${w}`).join('\n')}\n${pad}  }`);
-    if (target.childSlot) lose(node.id, `${node.type} takes placed children, which the HTML target does not pass yet`);
+    /*
+     * EXP-011 §51, as the React printer passes them (`renderCore`'s instance, `{children}` at the marker, copied,
+     * P134-HTX001-PRINTERDECIDES): the children placed inside it are drawn by this component, into the element and at the
+     * place the placed component's slot names, when it calls `children(into, at)`. They read this component's values and
+     * end with its life, as React's JSX children are this component's.
+     */
+    if (target.childSlot) {
+      const kids = plan.childrenOf[node.id] ?? [];
+      const body = kids.flatMap((child) => draw(child, 'into', 'at', `${pad}    `));
+      fixed.push(`children: function (into, at) {\n${body.join('\n')}${body.length ? '\n' : ''}${pad}  }`);
+    }
     return { fixed, live };
   };
 
@@ -1420,6 +1572,116 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     return out;
   };
 
+  /**
+   * An Image or a Video, as the React printer draws it (`component.ts` `contentAttrs`, `CONTENT_PARAMS`, copied,
+   * P134-HTX001-PRINTERDECIDES): its element with its class, and each content attribute in React's order. A typed-in
+   * address is written as it is, and an empty one writes nothing (`src=""` would fetch the page again); a wired one is
+   * followed, and an empty value takes the attribute off (React's `mediaSrc`). The runtime makes a project path absolute
+   * because the running app's page sits at its route; this page stays at `index.html` (its route is after `#`), so a
+   * project path stays relative to it and the app works from any folder (`media` in `lib/dom.js`). A Video's switches
+   * (Controls, Autoplay, Muted, Loop) are the element's own properties, as React sets them.
+   */
+  const drawMedia = (id: string, node: NodeIR, bound: Record<string, BindingSource>, parent: string, before: string | undefined, pad: string): { lines: string[]; handled: string[] } => {
+    const role = plan.roleOf[id];
+    const out: string[] = [elLine(id, tagOf(id, node, role), parent, undefined, before, pad)];
+    const me = local(id);
+    const handled: string[] = [];
+    const ports = Object.entries(CONTENT_PARAMS[node.type] ?? {})
+      .filter(([, r]) => r.startsWith('attr:'))
+      .map(([param, r]) => ({ param, attr: r.slice('attr:'.length) }))
+      .sort((a, b) => CONTENT_ATTR_ORDER.indexOf(a.attr) - CONTENT_ATTR_ORDER.indexOf(b.attr));
+    for (const { param, attr } of ports) {
+      handled.push(param);
+      const isSwitch = MEDIA_SWITCHES.has(attr);
+      const isAddress = MEDIA_ADDRESSES.has(attr);
+      const dom = attr.toLowerCase();
+      const source = bound[param];
+      if (source) {
+        if (source.kind === 'computed' && source.expr.kind === 'undefined') continue;
+        const v = binding(id, param, source);
+        if (v === undefined) continue;
+        if (isSwitch) {
+          imports.dom.add('truthy');
+          out.push(`${pad}l.run(function () {`, `${pad}  ${me}.${attr === 'autoPlay' ? 'autoplay' : attr} = truthy(${v});`, `${pad}});`);
+        } else {
+          imports.dom.add('bindAttr');
+          if (isAddress) imports.dom.add('media');
+          out.push(`${pad}bindAttr(l, ${me}, ${js(dom)}, function () { return ${isAddress ? `media(${v})` : v}; });`);
+        }
+        continue;
+      }
+      const lit = literalParam(node, param);
+      if (lit === undefined) continue;
+      if (isSwitch) {
+        if (lit === true) out.push(`${pad}${me}.${attr === 'autoPlay' ? 'autoplay' : attr} = true;`);
+        continue;
+      }
+      if (isAddress && (lit === '' || lit === null)) continue;
+      out.push(`${pad}${me}.setAttribute(${js(dom)}, ${js(String(lit))});`);
+    }
+    out.push(...listenFor(id, me, pad, { onClick: 'click' }));
+    return { lines: out, handled };
+  };
+
+  /**
+   * An Icon, as the React printer draws it (`component.ts` `renderIcon`, copied, P134-HTX001-PRINTERDECIDES): an image
+   * source is an `<img>` (the runtime puts no empty test in front of it, so an empty one is an `<img>` with no address);
+   * a sprite an `<svg>` with a `<use>`; a font glyph a `<span>` with the set's classes and, for a set that is not one
+   * class per glyph, the glyph as its text; no source an empty `<span>` that still takes its size. A sprite's address in
+   * a kit loses its leading `/`, as the stylesheet links do, so it is read beside `index.html`.
+   */
+  const drawIcon = (id: string, node: NodeIR, parent: string, before: string | undefined, pad: string): string[] => {
+    imports.dom.add('el');
+    const source = iconSourceOf(node, ctx.catalog);
+    const me = local(id);
+    const cls = classAttr(id);
+    const at = before ?? 'undefined';
+    const out: string[] = [];
+    if (source.kind === 'image') {
+      out.push(`${pad}const ${me} = el(${parent}, 'img', ${cls ? js(cls) : 'undefined'}, undefined, ${at});`);
+      if (source.src !== '') out.push(`${pad}${me}.setAttribute('src', ${js(source.src)});`);
+      out.push(`${pad}${me}.setAttribute('alt', '');`);
+    } else if (source.kind === 'sprite') {
+      const url = source.url.replace(/^\/(?=noodl_modules\/)/, '');
+      out.push(
+        `${pad}const ${me} = ${parent}.insertBefore(document.createElementNS('http://www.w3.org/2000/svg', 'svg'), ${before ?? 'null'});`,
+        ...(cls ? [`${pad}${me}.setAttribute('class', ${js(cls)});`] : []),
+        `${pad}${me}.appendChild(document.createElementNS('http://www.w3.org/2000/svg', 'use')).setAttribute('href', ${js(`${url}#${source.symbolId}`)});`
+      );
+    } else if (source.kind === 'font') {
+      const classes = [cls, ...source.classes].filter((c) => c !== '').join(' ');
+      out.push(`${pad}const ${me} = el(${parent}, 'span', ${classes ? js(classes) : 'undefined'}, ${source.text !== undefined ? js(source.text) : 'undefined'}, ${at});`);
+    } else {
+      out.push(`${pad}const ${me} = el(${parent}, 'span', ${cls ? js(cls) : 'undefined'}, undefined, ${at});`);
+    }
+    out.push(...listenFor(id, me, pad, { onClick: 'click' }));
+    return out;
+  };
+
+  /**
+   * A Columns, as the React printer draws it (`component.ts` `renderCore`'s `role === 'columns'`, copied,
+   * P134-HTX001-PRINTERDECIDES): a grid of its children; with breakpoints, inside a container its `@container` rules read
+   * the width of, which is then what goes on and off the page.
+   */
+  const drawColumns = (id: string, node: NodeIR, parent: string, before: string | undefined, pad: string): string[] => {
+    imports.dom.add('el');
+    const out: string[] = [];
+    const wrapper = wrapperClassOf.get(id);
+    let into = parent;
+    let at = before;
+    if (wrapper !== undefined) {
+      const box = fresh(`${local(id)}Container`);
+      outerOf.set(id, box);
+      out.push(`${pad}const ${box} = el(${parent}, 'div', ${js(wrapper)}${before ? `, undefined, ${before}` : ''});`);
+      into = box;
+      at = undefined;
+    }
+    out.push(elLine(id, tagOf(id, node, 'columns'), into, undefined, at, pad));
+    for (const child of plan.childrenOf[id] ?? []) out.push(...draw(child, local(id), undefined, pad));
+    out.push(...listenFor(id, local(id), pad, { onClick: 'click' }));
+    return out;
+  };
+
   const drawNode = (id: string, role: string, node: NodeIR, bound: Record<string, BindingSource>, parent: string, before: string | undefined, pad: string): string[] => {
     const out: string[] = [];
     const extra = (handled: string[]) => {
@@ -1529,6 +1791,16 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     } else if (role === 'range') {
       out.push(...drawRange(id, node, bound, parent, before, pad));
       extra(['value', 'min', 'max', 'step', 'enabled']);
+    } else if (role === 'image' || role === 'video') {
+      const media = drawMedia(id, node, bound, parent, before, pad);
+      out.push(...media.lines);
+      extra(media.handled);
+    } else if (role === 'icon') {
+      out.push(...drawIcon(id, node, parent, before, pad));
+      extra([]);
+    } else if (role === 'columns') {
+      out.push(...drawColumns(id, node, parent, before, pad));
+      extra([]);
     } else if (role === 'instance') {
       const target = ctx.project.byLegacyPath.get(node.type);
       const module = ctx.moduleOf(node.type);
@@ -1538,6 +1810,9 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       }
       importMount(module.file, module.mount);
       out.push(`${pad}const ${local(id)} = ${placeCall(module.mount, parent, placementArgs(node, target, pad), before, pad)};`);
+    } else if (role === 'slot') {
+      // EXP-011 §51. Where the children placed inside this component go: the placing component draws them here.
+      out.push(`${pad}if (given.children) given.children(${parent}, ${before ?? 'undefined'}); // the children placed inside it, drawn here`);
     } else if (role === 'repeater') {
       out.push(...drawList(id, node, parent, before, pad));
     } else {
@@ -1554,6 +1829,10 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   // delivered: a Variable delivers on every write, the same value too (the Set Variable's forceChange); anything else, on a
   // change. React's `useRef` and its reset effect.
   const fieldLines: string[] = [];
+  for (const [nodeId, ref] of delayRefs) {
+    imports.timer.add('stopDelay');
+    fieldLines.push(`  const ${ref} = { current: null }; // the Delay "${nodeById.get(nodeId)?.authoredLabel ?? nodeId}"'s countdown, stopped when this part goes`, `  l.add(function () {`, `    stopDelay(${ref});`, `  });`);
+  }
   for (const [inputId, ref] of fieldRefs) fieldLines.push(`  const ${ref} = { current: null }; // the field "${nodeById.get(inputId)?.authoredLabel ?? inputId}", while it is on the page`);
   for (const [inputId, cleared] of fieldClearedLocals) {
     fieldLines.push(`  const ${cleared} = { current: false }; // a Clear has run since its Value was last delivered`);
@@ -1981,6 +2260,8 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   if (imports.run.size) lines.push(`import { ${[...imports.run].sort().join(', ')} } from '${relative(file.dir, 'lib/functionRun.js')}';`);
   if (imports.router.size) lines.push(`import { ${[...imports.router].sort().join(', ')} } from '${relative(file.dir, 'lib/router.js')}';`);
   if (imports.states.size) lines.push(`import { ${[...imports.states].sort().join(', ')} } from '${relative(file.dir, 'lib/states.js')}';`);
+  if (usesComponentScope) lines.push(`import { createComponentScope } from '${relative(file.dir, 'lib/componentScope.js')}';`);
+  if (imports.timer.size) lines.push(`import { ${[...imports.timer].sort().join(', ')} } from '${relative(file.dir, 'lib/timer.js')}';`);
   for (const [mod, names] of [...childImports].sort(([a], [b]) => a.localeCompare(b))) lines.push(`import { ${[...names].sort().join(', ')} } from '${relative(file.dir, mod)}';`);
   if (variableImports.size) lines.push(`import * as variables from '${relative(file.dir, 'variables.js')}';`);
   for (const st of [...storeImports].sort()) lines.push(`import { ${st} } from '${relative(file.dir, `stores/${st}.js`)}';`);
