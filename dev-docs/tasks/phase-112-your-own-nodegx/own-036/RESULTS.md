@@ -51,3 +51,55 @@ App 1 `cd ~/vscode_projects/fp-lab/a/my-apps && npx @nodegx/preview book-club --
 App 2 `cd ~/vscode_projects/fp-lab/c/my-apps && npx @nodegx/preview book-club --open --host 0.0.0.0` ·
 Game 1 `cd ~/vscode_projects/fp-lab/b/my-apps && npx @nodegx/preview deep-glow --open --host 0.0.0.0` ·
 Game 2 `http://192.168.1.58:8765` on the phone (or `http://127.0.0.1:8765`).
+
+## Richard plays all four (2026-11-04, ~01:30), word for word
+
+> **App 1:** It changed a bit since you previewed it to me. It was less shit. I can say the functionality is there and
+> working correctly. The profile at the top right showed as a JSON string instead of text. Arguably is looked a little
+> better styled, nicer colours and more friendly and fun like the brief. Nice font choice and emojis. Functionality
+> wise it's better over App 2 because it allows starting a vote with a specific time limit. Generally App 1 has a
+> better UX, but the UI is a bit childish and looks silly on desktop (which was arguably due to the brief saying it's
+> mobile first). Also the voting text has a JSON string printed out next to the voted user's name
+>
+> **App 2:** This one has a clean, simple design, and is mobile and desktop friendly from the start. The functionality
+> is there, but you're presented at app load with 'who are you' and 8 nameless people, which I guess is just for
+> testing but APp 1 had the functionality to add your name to the pile and started with nobody, which is more
+> credible. Other than that the app is clean but the UX is very basic.
+>
+> **Game 1:** It works fine, no sound which is sad and completing the game is fairly easy. The difficulty doesn't
+> appear to increase and getting air is a breeze. It becomes very repetetive after a while, which is ok for a
+> prototype just to get a feel for the mechanics but it deffo wasn't that fun to play
+>
+> **Game 2:** This is beautiful, amazing concept with the fish running away when there's light, switching off the
+> light to attract them, the help tips popping up, the ability to ping to find secret stuff, the sounds were
+> beautiful, it really got the concept in the brief of making me nostalgic for Echo the Dolphin. In a second prompt
+> I'd probably tell it to forget the submarine and just go for a freaking dolphin and then my life would be complete.
+> Very good suggesting that levels end and new levels start. It felt like for a one shot there was a lot to discover
+> and it was for sure as fun as a 'real' game. This one is a keeper, I'll get my kids to play it
+
+**App 1's two JSON strings are App 2's saved name, not App 1's code (measured).** Both apps keep "who is on this
+phone" in `localStorage['bookclub.member']`. App 2 writes `JSON.stringify({name, isOrganiser})`; App 1 writes and
+reads a bare name and puts it straight into the chip (`'Hi, ' + name`) and into each vote's `member`, which the vote
+row prints after 👍. `@nodegx/preview` serves every app at `http://127.0.0.1:8575` by default (`src/cli.ts:63`), so
+both apps were one origin in Richard's browser and shared that storage. Arm a's own drives show `Hi, Richard` and
+`👍 Richard` (17 and 6 hits in its transcript). Filed as P112-OWN036-PREVIEWSHAREDORIGIN: a stranger who previews two
+apps meets the same thing. A vote cast in App 1 that evening may carry the JSON string in its row.
+
+### AC5 verdict
+
+Unblinded (ARMS.json): **new kit = App 1 (a) and Game 2 (d); old kit = App 2 (c) and Game 1 (b).**
+
+- **Game: a clear win for the new kit.** Game 2 is "a keeper, I'll get my kids to play it"; Game 1 "deffo wasn't that
+  fun to play". The old-kit arm built straight away with no questions; the new-kit arm asked the six questions,
+  Richard answered them in one message, and the answers (Echo the Dolphin, no refills, air pockets, levels that end)
+  are what he praised. Cost: Game 2 $2.79 over two turns, Game 1 $2.63 in one.
+- **App: mixed, leaning new kit.** App 1 has "better UX" and better functionality (rounds with a time limit, starts
+  with nobody); App 2 has the cleaner design that works on desktop as well as phones. App 1 looks "childish and silly
+  on desktop". Its JSON strings were the lab's shared origin, see above. App 1 cost $10.06 to App 2's $4.53; part of
+  App 1's cost is keeping its own preview alive inside its turn for two hours.
+- **The kit passes AC5**: neither new-kit arm is the one he'd throw. This is one sample per brief, and it reads that
+  way: say "it helped on both briefs, a lot on the game", never "a boost" in general.
+
+Owed by the reading: (1) App 1's desktop look: the first-project skill says "copy the genre" for games only; a line
+about a phone-first app still looking deliberate at desktop width is a candidate, not yet measured; (2) App 1's
+background-preview spend: a line saying "hand over the start command, don't babysit the server" is a candidate.

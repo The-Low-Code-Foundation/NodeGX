@@ -1,7 +1,7 @@
 # OWN-036 — The first project: what our builds learned, in the folder a stranger's Claude opens
 
-**Phase:** [112](README.md). **Opened:** 2026-11-03 by Richard. **Status:** 🟡 s1 — skill and note written; the
-measurement (AC5) not run.
+**Phase:** [112](README.md). **Opened:** 2026-11-03 by Richard. **Status:** 🟡 s1. The skills and note are written, and AC5 passed on 2026-11-04. Still owed: AC3's
+`traps.md` copy pass, the first harvest triage, and the release cut.
 
 > "I just want to make sure that someone today with a brand new Claude subscription and no previously created projects
 > at all, who says 'let's use nodegx to build my first project', would be greeted with the combined knowledge of all of
@@ -121,3 +121,12 @@ is cut. Every rule says how far it reaches (the camera rule now says *by itself*
   Tested: package tests 38/40 (the two filed reds), the inbox → `--count` → `--mark` loop in a scratch ledger, `--gate`
   exits 1 on today's 92. The `/next` edit is in Richard's own `~/.claude/commands/next.md`, outside this repo; its
   backup is in that session's scratchpad.
+- **s1, 2026-11-04: AC5 ✅ passed (one sample per brief).** [own-036/RESULTS.md](own-036/RESULTS.md) has every
+  turn, cost and Richard's notes word for word. Game: the new-kit arm's *Glimmerdeep* is *"a keeper, I'll get my kids
+  to play it"*. The old-kit arm built without asking and *"deffo wasn't that fun to play"*. App: mixed, leaning new
+  kit. It had *"better UX"* and functionality, but it is *"childish and looks silly on desktop"*. The old-kit app was
+  cleaner and *"very basic"*. The new-kit app showed two JSON strings: they were the other app's saved name, because
+  every preview shares one address (filed P112-OWN036-PREVIEWSHAREDORIGIN). Spend $20.01 across the four arms. Two
+  candidate skill lines, not yet measured: a phone-first app should still look deliberate at desktop width; hand
+  over the start command instead of keeping a preview alive inside the turn (that cost the new-kit app arm ~2 h of
+  wake-ups).
