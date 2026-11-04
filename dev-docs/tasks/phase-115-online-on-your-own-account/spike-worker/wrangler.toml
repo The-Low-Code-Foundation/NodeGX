@@ -29,4 +29,4 @@ id = "31507653de7f45a09d54bfb44d116cd4"
 #   name = "ALERT_EMAIL"
 #   and ALERT_FROM = "alerts@<that domain>" below. Route 2 needs `wrangler secret put RESEND_API_KEY`.
 [vars]
-ALERT_TO = ""
+ALERT_TO = ""  # the builder's address: set it here before deploying, never commit it (this repo is public)

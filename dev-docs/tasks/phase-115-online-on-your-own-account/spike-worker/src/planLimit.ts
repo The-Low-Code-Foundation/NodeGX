@@ -106,9 +106,10 @@ export async function handlePlanLimit(req: Request, env: PlanLimitEnv, site: str
 
   const sent = await send(env, planLimitEmail(code, site, fn, at));
   console.log(JSON.stringify({ nodegxPlanLimit: code, fn, at: at.toISOString(), ...sent }));
-  // A failed send is not remembered in KV, so a later report tries again; this isolate does not retry it.
+  // Only a sent email is remembered in KV: a failed send, or no sender yet, leaves the day open, so a later report (after
+  // the builder sets a sender up) still emails. This isolate does not try again.
   toldInThisIsolate.add(key);
-  if (env.NODEGX_ALERTS && (sent.ok || sent.via === 'none')) {
+  if (env.NODEGX_ALERTS && sent.ok) {
     await env.NODEGX_ALERTS.put(key, JSON.stringify({ at: at.toISOString(), fn, via: sent.via }), { expirationTtl: 4 * 24 * 60 * 60 });
   }
   return new Response(null, { status: 204 });

@@ -440,6 +440,25 @@ for it. The page does see it, so:
 - **Cloudflare (a domain):** move a domain's DNS to Cloudflare, `npx wrangler email sending enable <domain>`, verify his
   address, uncomment the `[[send_email]]` binding, set `ALERT_FROM`/`ALERT_TO`, deploy.
 
+### 10.5 The email, sent (Richard's Resend key, 2026-11-04)
+
+Richard created a Resend key and set it from his terminal (`RESEND_API_KEY`), with `ALERT_TO` his own address. A real
+refusal (a probe burning ~4 s of CPU, removed after) through the page's own client:
+
+1. To his work address: **Resend 403**, *"You can only send testing emails to your own email address
+   (…gmail.com). To send emails to other recipients, please verify a domain at resend.com/domains"*. Without a
+   domain, Resend sends only to the address the account was **opened with**, not to any address of the builder's.
+   The Worker stored no note (a failed send leaves the day open), so the next report tried again.
+2. `ALERT_TO` set to that Gmail address: **`via: resend, ok: true`** (17:11:26 UTC), today's note in KV, so no
+   second email today.
+
+Fixed on the way: a day's note used to be written when no sender was set up yet (`via: none`), which would have
+silenced that day's email after the builder set one up. Now only a sent email is remembered.
+
+For a builder: the Resend route's `ALERT_TO` is **the address they signed up to Resend with**; any other needs a domain
+verified at Resend (DNS records at their registrar, Cloudflare not needed). `ALERT_TO` is committed empty: this repo
+is public, and the address is set in the working copy (or as a Worker secret) before deploying.
+
 🔴 `public/` was regenerated for `api/client.js` only, from the exporter's source, because rebuilding
 `packages/nodegx-export/dist` (what `export-page.mjs` runs) would have carried a peer's uncommitted HTML-printer work.
 Until `dist/` is rebuilt, `node export-page.mjs` prints the old client.
