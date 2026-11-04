@@ -304,8 +304,11 @@ describe('BAK-009 rate limiting over real sockets', () => {
     // P127-BKO006-CLOUDUSERNODE moved `data` by 1: `GET users/:id`, the read a User node's Fetch makes inside a cloud
     // function. It is `GET classes/_User/:id` under another path, behind the same `data` gate, so it spends the `data`
     // budget the record read spends. Counted — 19 → 20.
+    // P132 BWF-012 moved `admin` by 4: `GET admin/api-calls`, `GET`/`PUT`/`DELETE admin/api-calls/:id`, the saved API
+    // calls beside the workflow definitions. Admin-only edits a person makes one at a time from Studio or an agent's
+    // tool, nothing a page polls: left in the `admin` budget. Counted — 102 → 106.
     expect(counts).toEqual({
-      admin: 102,
+      admin: 106,
       auth: 19,
       data: 20,
       files: 4,

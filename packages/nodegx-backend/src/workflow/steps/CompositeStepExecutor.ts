@@ -28,6 +28,7 @@ import {
   FindRecordsStepExecutor,
   UpdateRecordStepExecutor
 } from './records';
+import type { ApiCallLookup } from '../apiCalls';
 import { HttpRequestStepExecutor } from './http';
 import { SendEmailStepExecutor } from './email';
 import { ReturnStepExecutor } from './returns';
@@ -37,6 +38,8 @@ import { ValidateStepExecutor } from './validate';
 
 export interface CompositeStepExecutorDeps {
   getRunner: () => WorkflowRunner | null;
+  /** P132 BWF-012: the backend's saved API calls, read when a step that uses one runs. */
+  getApiCall?: ApiCallLookup;
   /** Test hook: override individual kinds (used to stub function invocation). */
   overrides?: Partial<Record<StepKind, StepExecutor>>;
 }
@@ -66,7 +69,7 @@ export class CompositeStepExecutor implements StepExecutor {
       'update-record': new UpdateRecordStepExecutor(getRunner),
       'delete-record': new DeleteRecordStepExecutor(getRunner),
       'find-records': new FindRecordsStepExecutor(getRunner),
-      'http-request': new HttpRequestStepExecutor(),
+      'http-request': new HttpRequestStepExecutor(deps.getApiCall),
       'send-email': new SendEmailStepExecutor(),
       ...(deps.overrides || {})
     } as Record<StepKind, StepExecutor>;

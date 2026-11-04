@@ -32,6 +32,7 @@ import {
   diffAutomations
 } from '../../../nodegx-backend/src/automations/shape';
 import type { TriggerDef } from '../../../nodegx-backend/src/triggers/registry';
+import type { ApiCallDefinition } from '../../../nodegx-backend/src/workflow/apiCallTypes';
 import type { WorkflowDefinition } from '../../../nodegx-backend/src/workflow/types';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import { BackendClient, listBackends } from './client';
@@ -100,7 +101,10 @@ export async function automationsDriftOf(binding: ProjectBinding | undefined): P
     if (!(await client.isReachable())) return 'down' as const;
     const workflows = (await client.request('GET', '/admin/workflow-defs')).json as { workflows?: WorkflowDefinition[] };
     const triggers = (await client.request('GET', '/admin/triggers')).json as { triggers?: TriggerDef[] };
-    return automationsFromBackend(workflows?.workflows ?? [], triggers?.triggers ?? []);
+    // P132 BWF-012: saved API calls. An older backend has no such route (404): then they are not compared.
+    const calls = await client.request('GET', '/admin/api-calls', undefined, [404]);
+    const apiCalls = calls.status === 200 ? ((calls.json as { calls?: ApiCallDefinition[] })?.calls ?? []) : undefined;
+    return automationsFromBackend(workflows?.workflows ?? [], triggers?.triggers ?? [], apiCalls);
   })();
   let answer: ProjectAutomations | 'down' | 'timeout';
   try {

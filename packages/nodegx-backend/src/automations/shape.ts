@@ -12,6 +12,7 @@
 import * as path from 'path';
 
 import type { TriggerDef, TriggerInput } from '../triggers/registry';
+import type { ApiCallDefinition, ApiCallInput } from '../workflow/apiCallTypes';
 import type { WorkflowDefinition, WorkflowInput } from '../workflow/types';
 
 /** The project-root file. */
@@ -22,10 +23,19 @@ export type ProjectTrigger = Omit<TriggerInput, 'secret'> & { id: string };
 /** A workflow as the project keeps it: the write shape, with its id. */
 export type ProjectWorkflow = WorkflowInput & { id: string };
 
+/** P132 BWF-012: a saved API call as the project keeps it: no timestamps, never a key (only a Secret's name). */
+export type ProjectApiCall = ApiCallInput;
+
 export interface ProjectAutomations {
   version: 1;
   workflows: ProjectWorkflow[];
   triggers: ProjectTrigger[];
+  /**
+   * P132 BWF-012: saved API calls, used by name from `http-request` steps (`call`). Absent when there are none, so a
+   * project with none keeps the file an older backend reads. On a backend's side, absent = not asked (an older
+   * backend has no `/admin/api-calls`), and then not compared.
+   */
+  apiCalls?: ProjectApiCall[];
 }
 
 export function projectAutomationsPath(projectDir: string): string {
@@ -95,15 +105,31 @@ export function projectWorkflow(w: WorkflowDefinition | ProjectWorkflow): Projec
   }) as ProjectWorkflow;
 }
 
+/** A saved call in the form the project keeps: its own keys, in a fixed order, no timestamps. */
+export function projectApiCall(c: ApiCallDefinition | ProjectApiCall): ProjectApiCall {
+  return defined({
+    id: c.id,
+    name: c.name,
+    description: c.description,
+    params: c.params,
+    blanks: c.blanks && c.blanks.length ? c.blanks : undefined
+  }) as ProjectApiCall;
+}
+
 const byId = (a: { id: string }, b: { id: string }) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
 
-/** The file a backend's automations make, sorted by id so a diff shows decisions, not order. */
-export function automationsFromBackend(workflows: WorkflowDefinition[], triggers: TriggerDef[]): ProjectAutomations {
-  return {
+/**
+ * The file a backend's automations make, sorted by id so a diff shows decisions, not order. `apiCalls` undefined =
+ * not asked (BWF-012), and the result has no `apiCalls` to compare; an empty list is "the backend has none".
+ */
+export function automationsFromBackend(workflows: WorkflowDefinition[], triggers: TriggerDef[], apiCalls?: ApiCallDefinition[]): ProjectAutomations {
+  const out: ProjectAutomations = {
     version: 1,
     workflows: workflows.map(projectWorkflow).sort(byId),
     triggers: triggers.map(projectTrigger).sort(byId)
   };
+  if (apiCalls) out.apiCalls = apiCalls.map(projectApiCall).sort(byId);
+  return out;
 }
 
 /**
@@ -124,6 +150,7 @@ export function diffAutomations(project: ProjectAutomations, backend: ProjectAut
   };
   compare('workflow', project.workflows, backend.workflows, projectWorkflow);
   compare('trigger', project.triggers, backend.triggers, projectTrigger);
+  if (backend.apiCalls) compare('saved API call', project.apiCalls || [], backend.apiCalls, projectApiCall);
   return out;
 }
 

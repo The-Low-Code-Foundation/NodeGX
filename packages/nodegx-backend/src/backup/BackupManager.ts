@@ -110,7 +110,9 @@ const CONFIG_FILES = [
   'search.json',
   'files.json',
   'ops.json',
-  'views.json'
+  'views.json',
+  // P132 BWF-012: saved API calls travel with the workflows that use them.
+  'api-calls.json'
 ];
 /**
  * Folders captured whole, and replaced whole by a restore. ISL-039 added

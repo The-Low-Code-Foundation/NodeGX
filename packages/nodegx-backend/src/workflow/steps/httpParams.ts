@@ -84,8 +84,21 @@ function checkPairs(v: unknown, at: string, what: 'header' | 'query parameter', 
 /** Write-time check of an `http-request` step's params. */
 export function validateHttpRequestParams(p: Record<string, unknown>, at: string): string[] {
   const errors: string[] = [];
-  if (p.url === undefined || p.url === '') errors.push(`${at}: http-request needs a "url" — the address it calls`);
-  else if (typeof p.url === 'string') {
+  // P132 BWF-012: a step that uses a saved call takes its address (and the rest) from it, and fills its blanks.
+  const saved = p.call !== undefined;
+  if (saved) {
+    if (typeof p.call !== 'string' || !/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$/.test(p.call)) {
+      errors.push(`${at}.params.call must be the id of a saved API call`);
+    }
+    if (p.fill !== undefined && (!isPlainObject(p.fill) || isValue(p.fill))) {
+      errors.push(`${at}.params.fill must be { "<blank>": <value> }, each value a literal, a {"$path"} or a formula`);
+    }
+  } else if (p.fill !== undefined) {
+    errors.push(`${at}.params.fill fills a saved call's blanks: name the call in "call", or remove "fill"`);
+  }
+  if (p.url === undefined || p.url === '') {
+    if (!saved) errors.push(`${at}: http-request needs a "url" — the address it calls`);
+  } else if (typeof p.url === 'string') {
     let u: URL | undefined;
     try {
       u = new URL(p.url);
@@ -98,8 +111,9 @@ export function validateHttpRequestParams(p: Record<string, unknown>, at: string
     if (u && (u.username || u.password)) errors.push(`${at}.params.url carries a name and password. ${MOVE_IT}`);
   } else if (!isValue(p.url)) errors.push(`${at}.params.url must be an address, a value picked from the run, or a formula`);
 
-  const method = p.method === undefined ? 'GET' : p.method;
-  if (!(HTTP_METHODS as readonly unknown[]).includes(method)) errors.push(`${at}.params.method must be one of ${HTTP_METHODS.join(', ')}`);
+  // A saved call's step that names no method keeps the call's, which is checked with the call.
+  const method = p.method === undefined ? (saved ? undefined : 'GET') : p.method;
+  if (method !== undefined && !(HTTP_METHODS as readonly unknown[]).includes(method)) errors.push(`${at}.params.method must be one of ${HTTP_METHODS.join(', ')}`);
   if ((method === 'GET' || method === 'HEAD') && p.body !== undefined) {
     errors.push(`${at}: a ${method} request sends no body — choose POST, PUT or PATCH, or remove "body"`);
   }
@@ -110,7 +124,7 @@ export function validateHttpRequestParams(p: Record<string, unknown>, at: string
   checkPairs(p.headers, `${at}.params.headers`, 'header', errors);
   checkPairs(p.query, `${at}.params.query`, 'query parameter', errors);
 
-  for (const [name, v] of [['url', p.url], ['headers', p.headers], ['query', p.query], ['body', p.body]] as const) {
+  for (const [name, v] of [['url', p.url], ['headers', p.headers], ['query', p.query], ['body', p.body], ['fill', p.fill]] as const) {
     for (const s of literalStrings(v)) {
       const shape = keyShapeIn(s);
       if (shape) {

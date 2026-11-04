@@ -169,13 +169,16 @@ export function registerBackendReadTools(server: McpServer): void {
         'List the WF-001 workflow definitions on a running backend: multi-step, error-routed, cancellable ' +
         'server executions. Each shows its steps, entry, concurrency cap, and timeouts. This is how an agent ' +
         'sees what multi-step automation already exists before authoring more. (A "workflow" here is the WF-001 ' +
-        'engine artifact — distinct from a single cloud function.)',
+        'engine artifact — distinct from a single cloud function.) Also lists the SAVED API CALLS (`apiCalls`): an ' +
+        'http-request step uses one as `{"call": "<id>", "fill": {…}}`, never a copy of its settings.',
       inputSchema: { backendId: z.string().optional().describe('Which backend (omit if exactly one is running)') }
     },
     guarded(async ({ backendId }) => {
       const client = await requireBackend(backendId);
       const { json } = await client.request('GET', '/admin/workflow-defs');
-      return jsonResult(json);
+      // P132 BWF-012: an older backend has no saved calls (404), and says nothing about them.
+      const calls = await client.request('GET', '/admin/api-calls', undefined, [404]);
+      return jsonResult(calls.status === 200 ? { ...(json as object), apiCalls: (calls.json as { calls?: unknown[] }).calls ?? [], apiCallsUsedBy: (calls.json as { usedBy?: unknown }).usedBy ?? {} } : json);
     })
   );
 

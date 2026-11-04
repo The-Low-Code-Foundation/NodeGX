@@ -1289,6 +1289,11 @@ export class HttpServer {
         access: { kind: 'admin' },
         handler: (ctx) => adminWorkflows.stepKinds(ctx)
       },
+      // P132 BWF-012: saved API calls, beside the workflows that use them.
+      { method: 'GET', pattern: 'admin/api-calls', access: { kind: 'admin' }, handler: (ctx) => adminWorkflows.apiCallList(ctx) },
+      { method: 'GET', pattern: 'admin/api-calls/:id', access: { kind: 'admin' }, handler: (ctx) => adminWorkflows.apiCallGet(ctx) },
+      { method: 'PUT', pattern: 'admin/api-calls/:id', access: { kind: 'admin' }, handler: (ctx) => adminWorkflows.apiCallPut(ctx) },
+      { method: 'DELETE', pattern: 'admin/api-calls/:id', access: { kind: 'admin' }, handler: (ctx) => adminWorkflows.apiCallDelete(ctx) },
       {
         method: 'GET',
         pattern: 'admin/workflow-defs',

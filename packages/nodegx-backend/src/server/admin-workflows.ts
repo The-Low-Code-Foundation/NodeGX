@@ -11,6 +11,10 @@
  *   POST   /admin/workflow-defs/:id/run     run now (payload optional; P132 BWF-002: `as`, `stopAfter`, `test` for a test)
  *   POST   /admin/workflow-runs/:executionId/cancel   cancel an in-flight run
  *   GET    /admin/workflow-step-kinds       the WF-002 step-kind catalog
+ *   GET    /admin/api-calls                 P132 BWF-012: the saved API calls, and which workflows use each
+ *   GET    /admin/api-calls/:id             one saved call
+ *   PUT    /admin/api-calls/:id             create or replace one (refused if a workflow using it would have a blank unfilled)
+ *   DELETE /admin/api-calls/:id             delete one (refused while a workflow uses it, naming them)
  *
  * @module nodegx-backend/server/admin-workflows
  */
@@ -21,6 +25,8 @@ import type { WorkflowSubsystem } from '../workflow/WorkflowSubsystem';
 import type { RunTriggerContext } from '../workflow/WorkflowRunner';
 import { definitionWarnings } from '../workflow/definitionWarnings';
 import { WorkflowConfigError } from '../workflow/WorkflowRegistry';
+import { ApiCallConfigError } from '../workflow/ApiCallRegistry';
+import type { ApiCallDefinition, ApiCallInput } from '../workflow/apiCalls';
 import { buildRunPayload, spreadableBody } from '../workflow/runPayload';
 import { stepKindCatalog } from '../workflow/steps/kinds';
 import type { WorkflowDefinition, WorkflowInput, WorkflowRunResult } from '../workflow/types';
@@ -134,6 +140,19 @@ export interface WorkflowStartedResponse {
   started: true;
   executionId: string;
   workflowId: string;
+}
+
+/** `GET /admin/api-calls` (P132 BWF-012). */
+export interface ApiCallListResponse {
+  calls: ApiCallDefinition[];
+  /** By call id: the workflows that use it. A call no workflow uses is absent. */
+  usedBy: Record<string, string[]>;
+}
+
+/** `GET` / `PUT /admin/api-calls/:id`. */
+export interface ApiCallResponse {
+  call: ApiCallDefinition;
+  usedBy: string[];
 }
 
 export class AdminWorkflowRoutes {
@@ -289,6 +308,49 @@ export class AdminWorkflowRoutes {
     if (answered) return;
     if (!found || !result) throw new HttpError(404, `No workflow "${id}"`);
     sendJSON(ctx.res, 200, { run: result } satisfies WorkflowRunResponse);
+  }
+
+  apiCallList(ctx: RequestContext): void {
+    const wf = this.subsystem();
+    const calls = wf.apiCalls.list().sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+    const usedBy: Record<string, string[]> = {};
+    for (const c of calls) {
+      const users = wf.usersOfApiCall(c.id);
+      if (users.length) usedBy[c.id] = users;
+    }
+    sendJSON(ctx.res, 200, { calls, usedBy } satisfies ApiCallListResponse);
+  }
+
+  apiCallGet(ctx: RequestContext): void {
+    const wf = this.subsystem();
+    const call = wf.apiCalls.get(ctx.params.id);
+    if (!call) throw new HttpError(404, `No saved API call "${ctx.params.id}"`);
+    sendJSON(ctx.res, 200, { call, usedBy: wf.usersOfApiCall(call.id) } satisfies ApiCallResponse);
+  }
+
+  async apiCallPut(ctx: RequestContext): Promise<void> {
+    const body = (await readJSONBody(ctx.req)) as unknown as ApiCallInput;
+    const wf = this.subsystem();
+    const existed = !!wf.apiCalls.get(ctx.params.id);
+    try {
+      const call = wf.saveApiCall({ ...body, id: ctx.params.id });
+      sendJSON(ctx.res, existed ? 200 : 201, { call, usedBy: wf.usersOfApiCall(call.id) } satisfies ApiCallResponse);
+    } catch (e) {
+      if (e instanceof ApiCallConfigError) throw new HttpError(400, e.message);
+      throw e;
+    }
+  }
+
+  apiCallDelete(ctx: RequestContext): void {
+    let ok: boolean;
+    try {
+      ok = this.subsystem().deleteApiCall(ctx.params.id);
+    } catch (e) {
+      if (e instanceof ApiCallConfigError) throw new HttpError(409, e.message);
+      throw e;
+    }
+    if (!ok) throw new HttpError(404, `No saved API call "${ctx.params.id}"`);
+    sendJSON(ctx.res, 200, { deleted: true, id: ctx.params.id });
   }
 
   /** Cancel an in-flight run by its execution id. */

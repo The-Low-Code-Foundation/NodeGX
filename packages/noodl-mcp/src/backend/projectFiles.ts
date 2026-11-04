@@ -26,6 +26,7 @@ import { serializeV2File } from '@nodegx/project-contract/format';
 import {
   PROJECT_AUTOMATIONS_FILE,
   ProjectAutomations,
+  projectApiCall,
   projectTrigger,
   projectWorkflow
 } from '../../../nodegx-backend/src/automations/shape';
@@ -80,7 +81,7 @@ const byId = (a: { id: string }, b: { id: string }) => (a.id < b.id ? -1 : a.id 
  */
 export function patchAutomations(
   projectDir: string,
-  kind: 'workflow' | 'trigger',
+  kind: 'workflow' | 'trigger' | 'apiCall',
   id: string,
   stored: Record<string, unknown> | null
 ): { file: string; before: string | null } {
@@ -92,11 +93,17 @@ export function patchAutomations(
   if (kind === 'workflow') {
     const rest = current.workflows.filter((w) => w.id !== id);
     current.workflows = stored ? [...rest, projectWorkflow(stored as never)].sort(byId) : rest;
-  } else {
+  } else if (kind === 'trigger') {
     const rest = current.triggers.filter((t) => t.id !== id);
     current.triggers = stored ? [...rest, projectTrigger(stored as never)].sort(byId) : rest;
+  } else {
+    const rest = (current.apiCalls || []).filter((c) => c.id !== id);
+    current.apiCalls = stored ? [...rest, projectApiCall(stored as never)].sort(byId) : rest;
   }
-  writeAtomic(file, serializeV2File({ version: 1, workflows: current.workflows, triggers: current.triggers }, before));
+  // P132 BWF-012: the saved calls are kept, and written only when there are some (an older backend reads the file).
+  const out: ProjectAutomations = { version: 1, workflows: current.workflows, triggers: current.triggers };
+  if (current.apiCalls && current.apiCalls.length) out.apiCalls = current.apiCalls;
+  writeAtomic(file, serializeV2File(out, before));
   return { file, before };
 }
 

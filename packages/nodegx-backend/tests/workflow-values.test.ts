@@ -344,7 +344,7 @@ describe('WFA-003 the served spec describes the value language', () => {
     // (`filter`, `sort`, `deduplicate`, `split`) needed NO new language, which is
     // why four new kinds are not four bumps: a shape bump is for a shape change.
     // Bumping this line is the deliberate act the catalog's `version` is for.
-    expect(catalog.version).toBe('1.9.0');
+    expect(catalog.version).toBe('1.10.0'); // P132 BWF-012: saved API calls (call, fill, savedCalls)
   });
 
   it('marks every DSL param raw, and nothing else', () => {

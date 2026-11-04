@@ -152,7 +152,7 @@ import { isPlainObject, VALUE_LANGUAGE } from './values';
  * every editor did before. A dynamic route (a switch's case) has none: its
  * words are the case label the author typed.
  */
-export const STEP_KIND_CATALOG_VERSION = '1.9.0';
+export const STEP_KIND_CATALOG_VERSION = '1.10.0';
 
 export interface StepParamSpec {
   name: string;
@@ -1082,12 +1082,34 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
       'into a conversation goes to Secrets, not the file.',
     invokesFunction: false,
     params: [
+      {
+        name: 'call',
+        type: 'string',
+        displayName: 'Saved call',
+        control: 'saved-call',
+        description:
+          'P132 BWF-012: the id of a SAVED API call (GET /admin/api-calls, the MCP\'s list_backend_workflows `apiCalls`, ' +
+          'the project file\'s `apiCalls`). The step then needs no url: the saved call\'s settings are used as they are ' +
+          'when the step runs, so a change to the call reaches every workflow using it. Prefer this to copying a ' +
+          'saved call\'s address, headers or key into a step.'
+      },
+      {
+        name: 'fill',
+        type: 'object',
+        displayName: 'Fill in',
+        control: 'call-blanks',
+        description:
+          'With `call`: `{ "<blank>": <value> }`, one entry per blank the saved call names, each a literal, a `{"$path"}` ' +
+          'or a formula. Every blank must be filled. Any other setting the step gives (such as `timeoutMs`) is its own ' +
+          'and wins over the saved call\'s; `query` and `headers` are merged by name.'
+      },
       { name: 'method', type: 'enum', enums: [...HTTP_METHODS], default: 'GET', displayName: 'Method', description: 'GET reads; POST, PUT, PATCH and DELETE change something.' },
       {
         name: 'url',
         type: 'string',
         required: true,
         displayName: 'Address',
+        // not required with `call` (BWF-012): the saved call holds it
         description:
           'The whole address, https:// included. Text with values from the run is the `text` formula, e.g. ' +
           '`{"$fn": "text", "args": ["https://api.example.com/plants/", {"$path": "body.id"}]}`.'
@@ -1167,7 +1189,10 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
       'It may not call loopback, link-local (the cloud metadata address) or private network addresses, checked on ' +
         'the connection itself and on every redirect. A backend started with `--allow-private-http` may, for local ' +
         'development.',
-      "The key's value is cut out of the answer wherever it appears, so an API that echoes it does not put it in the run's record."
+      "The key's value is cut out of the answer wherever it appears, so an API that echoes it does not put it in the run's record.",
+      'A call used in more than one workflow is SAVED once (BWF-012): `{ id, name, params, blanks }` in the project file\'s ' +
+        '`apiCalls`, its blanks written in its params as `{"$path": "fill.<blank>"}`. A step uses it with `call` and ' +
+        '`fill` and nothing else; an unknown call or an unfilled blank is refused when the workflow is saved.'
     ]
   },
 
@@ -1448,6 +1473,11 @@ export interface StepKindCatalog {
    */
   testRuns?: boolean;
   /**
+   * P132 BWF-012: this backend keeps saved API calls (`/admin/api-calls`) and runs an `http-request` step's `call`.
+   * Absent on an older backend, which refuses a step with `call` and no address ("needs a url").
+   */
+  savedCalls?: boolean;
+  /**
    * P132 BWF-004: the closed formula set (`{"$fn": …}`), with each formula's words, sentence, typed args and what
    * it gives — what a formula picker offers and what an agent writes instead of a cloud function for a small sum.
    */
@@ -1466,6 +1496,7 @@ export function stepKindCatalog(): StepKindCatalog {
     validateLanguage: VALIDATE_LANGUAGE,
     migratedKinds: { ...MIGRATED_STEP_KINDS },
     testRuns: true,
+    savedCalls: true,
     formulaLanguage: FORMULA_LANGUAGE
   };
 }

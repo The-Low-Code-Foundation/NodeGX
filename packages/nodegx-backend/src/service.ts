@@ -505,7 +505,8 @@ export class BackendService {
       seedProjectAutomations({
         projectDir: this.options.projectDir,
         workflows: this.workflows.registry,
-        triggers: this.triggers.registry
+        triggers: this.triggers.registry,
+        apiCalls: this.workflows.apiCalls
       })
     );
     if (automationsNotice) {
@@ -1196,6 +1197,8 @@ export class BackendService {
       this.ops.reload();
       logger.configure({ level: this.ops.config.logging.level, format: this.ops.config.logging.format });
     });
+    // P132 BWF-012: the saved calls before the workflows that use them.
+    step('api-calls.json', () => this.workflows && this.workflows.apiCalls.reload());
     step('workflow-defs', () => this.workflows && this.workflows.registry.reload());
     return out;
   }

@@ -1198,8 +1198,10 @@ Request node.
 
 | Param | Default | Description |
 |---|---|---|
+| `call` | — | The id of a **saved API call** (BWF-012, below). The step then needs no `url`: the saved call's settings are used. |
+| `fill` | — | With `call`: `{ "<blank>": <value> }`, one entry per blank the saved call names. Every blank must be filled. |
 | `method` | `GET` | `GET`, `POST`, `PUT`, `PATCH`, `DELETE` or `HEAD`. A `GET` or `HEAD` takes no `body`. |
-| `url` | — (required) | The whole address, `https://` included. With values from the run, the `text` formula: `{"$fn": "text", "args": ["https://api.example.com/plants/", {"$path": "body.id"}]}`. |
+| `url` | — (required, unless `call`) | The whole address, `https://` included. With values from the run, the `text` formula: `{"$fn": "text", "args": ["https://api.example.com/plants/", {"$path": "body.id"}]}`. |
 | `query` | — | `{ "<name>": <value> }`, added as `?name=value`. |
 | `headers` | — | `{ "<name>": <value> }`. Never a key: see Authentication. |
 | `body` | — | What a `POST`, `PUT` or `PATCH` sends: `{ "<field>": <value> }` or any JSON. |
@@ -1239,6 +1241,44 @@ calling a service on your own machine while developing.
               "authType": "bearer", "authSecret": "EXAMPLE_API_KEY" },
   "onError": ["tellSomeone"] }
 ```
+
+#### Saved API calls
+
+*Saved API calls* (P132 BWF-012, ruling R7). A call used in more than one
+workflow is set up **once**, named, and kept in the project's
+`nodegx.automations.json` beside the workflows, in a list called `apiCalls`
+(on a backend: `GET /admin/api-calls`, `PUT` / `DELETE /admin/api-calls/:id`,
+and `apiCalls` in the MCP's `list_backend_workflows`). It holds what a *Call an
+API* step holds (address, method, query, headers, body, authentication by a
+Secret's **name**, never a key) and the **blanks** a workflow fills, each
+written in its settings as `{"$path": "fill.<blank>"}`:
+
+```jsonc
+// in nodegx.automations.json, "apiCalls": [ … ]
+{ "id": "weather", "name": "The weather in a city",
+  "params": { "url": "https://api.example.com/v1/forecast",
+              "query": { "city": { "$path": "fill.city" }, "units": "metric" },
+              "authType": "header", "authName": "X-API-Key", "authSecret": "WEATHER_KEY" },
+  "blanks": [{ "name": "city", "type": "text", "example": "Paris" }] }
+```
+
+A step uses it by its id and fills its blanks, and copies none of its settings:
+
+```jsonc
+{ "id": "ask", "kind": "http-request",
+  "params": { "call": "weather", "fill": { "city": { "$path": "body.city" } } } }
+```
+
+- The saved call is read **when the step runs**, so changing it (its address,
+  its key's Secret) changes every workflow that uses it, with no edit to any.
+- A saved call reads only its blanks: a `{"$path": "body.…"}` in one is refused,
+  because it would mean something different in each workflow.
+- Any other setting the step gives is its own and wins (`timeoutMs`, say);
+  `query` and `headers` are merged with the call's by name.
+- Refused when the workflow is saved: an unknown `call`, a blank left out of
+  `fill`, a `fill` entry for no blank. Refused on the call: a delete while a
+  workflow uses it, or a new blank its workflows do not fill (both name them).
+- The catalog says a backend has them: `savedCalls: true` (catalog 1.10.0).
 
 ---
 

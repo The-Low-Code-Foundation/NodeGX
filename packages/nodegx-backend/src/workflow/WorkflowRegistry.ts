@@ -19,6 +19,7 @@ import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 
+import { ApiCallLookup, validateCallUses } from './apiCalls';
 import { validateWorkflowDefinition } from './WorkflowEngine';
 import { migrateDefinition } from './steps/migrate';
 import type { WorkflowDefinition, WorkflowInput } from './types';
@@ -42,7 +43,11 @@ export class WorkflowRegistry {
   private readonly dir: string;
   private defs = new Map<string, WorkflowDefinition>();
 
-  constructor(private readonly dataDir: string) {
+  /**
+   * @param apiCalls P132 BWF-012: the saved calls a written workflow's steps are checked against (an unknown call, a
+   * blank left empty). Not on LOAD: a start never refuses over a call, the step that uses it fails by name instead.
+   */
+  constructor(private readonly dataDir: string, private readonly apiCalls?: ApiCallLookup) {
     this.dir = path.join(dataDir, DIR);
     this.load();
   }
@@ -95,7 +100,7 @@ export class WorkflowRegistry {
   reload(): void {
     let fresh: WorkflowRegistry;
     try {
-      fresh = new WorkflowRegistry(this.dataDir);
+      fresh = new WorkflowRegistry(this.dataDir, this.apiCalls);
     } catch (e) {
       fs.rmSync(this.dir, { recursive: true, force: true });
       for (const def of this.defs.values()) this.persist(def);
@@ -194,7 +199,7 @@ export class WorkflowRegistry {
     } catch (e) {
       return { errors: [e instanceof Error ? e.message : String(e)], definition: null };
     }
-    const errors = validateWorkflowDefinition(def);
+    const errors = this.writeErrors(def);
     // A definition that would be REFUSED is not one this backend would store, so
     // it is not offered as one. The caller's job then is to report the errors.
     return { errors, definition: errors.length ? null : def };
@@ -208,7 +213,7 @@ export class WorkflowRegistry {
   upsert(input: WorkflowInput): WorkflowDefinition {
     const def = this.normalize(input);
 
-    const errors = validateWorkflowDefinition(def);
+    const errors = this.writeErrors(def);
     if (errors.length) {
       throw new WorkflowConfigError(`Invalid workflow:\n${errors.map((e) => `  - ${e}`).join('\n')}`);
     }
@@ -216,6 +221,13 @@ export class WorkflowRegistry {
     this.persist(def);
     this.defs.set(def.id, def);
     return { ...def };
+  }
+
+  /** The write-time check: the definition's own rules, then its saved calls against this backend's. */
+  private writeErrors(def: WorkflowDefinition): string[] {
+    const errors = validateWorkflowDefinition(def);
+    if (!errors.length && this.apiCalls) errors.push(...validateCallUses(def, this.apiCalls));
+    return errors;
   }
 
   delete(id: string): boolean {

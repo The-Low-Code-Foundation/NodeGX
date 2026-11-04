@@ -70,6 +70,7 @@ export {
 // P127 BKO-001 — the project's workflows and triggers (nodegx.automations.json).
 export {
   PROJECT_AUTOMATIONS_FILE,
+  ProjectApiCall,
   ProjectAutomations,
   ProjectAutomationsError,
   ProjectAutomationsOutcome,
@@ -77,6 +78,7 @@ export {
   ProjectWorkflow,
   automationsFromBackend,
   describeProjectAutomationsOutcome,
+  projectApiCall,
   diffAutomations,
   projectAutomationsPath,
   projectTrigger,
@@ -85,6 +87,10 @@ export {
   seedProjectAutomations,
   validateProjectAutomations
 } from './automations/projectAutomations';
+// P132 BWF-012 — saved API calls.
+export { ApiCallRegistry, ApiCallConfigError } from './workflow/ApiCallRegistry';
+export type { ApiCallBlank, ApiCallDefinition, ApiCallInput, ApiCallLookup } from './workflow/apiCalls';
+export { blanksRead, callsUsedBy, mergeSavedCall, validateApiCall, validateCallUses } from './workflow/apiCalls';
 // WF-005 — triggers (schedule / webhook / db-change).
 export { SecretsStore, WEBHOOK_SECRETS_NAMESPACE } from './config/SecretsStore';
 export {

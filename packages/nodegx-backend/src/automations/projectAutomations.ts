@@ -42,12 +42,15 @@ import * as fs from 'fs';
 import type { TriggerInput, TriggerRegistry } from '../triggers/registry';
 import { validateTriggerDef, validateTriggerInput } from '../triggers/registry';
 import type { WorkflowRegistry } from '../workflow/WorkflowRegistry';
+import type { ApiCallRegistry } from '../workflow/ApiCallRegistry';
+import { validateApiCall, validateCallUses } from '../workflow/apiCalls';
 import { validateWorkflowDefinition } from '../workflow/WorkflowEngine';
 import { migrateDefinition } from '../workflow/steps/migrate';
 import type { WorkflowDefinition } from '../workflow/types';
 import {
   automationsFromBackend,
   diffAutomations as diffShapes,
+  ProjectApiCall,
   ProjectAutomations,
   projectAutomationsPath,
   ProjectTrigger,
@@ -86,14 +89,26 @@ export function validateProjectAutomations(raw: unknown): string[] {
   const file = raw as Record<string, unknown>;
   const errors: string[] = [];
   for (const key of Object.keys(file)) {
-    if (!['version', 'workflows', 'triggers'].includes(key)) errors.push(`unknown key "${key}"`);
+    if (!['version', 'workflows', 'triggers', 'apiCalls'].includes(key)) errors.push(`unknown key "${key}"`);
   }
   if (file.version !== 1) errors.push(`unsupported version ${JSON.stringify(file.version)}`);
   const workflows = file.workflows === undefined ? [] : file.workflows;
   const triggers = file.triggers === undefined ? [] : file.triggers;
   if (!Array.isArray(workflows)) errors.push('workflows must be an array');
   if (!Array.isArray(triggers)) errors.push('triggers must be an array');
+  const apiCalls = file.apiCalls === undefined ? [] : file.apiCalls;
+  if (!Array.isArray(apiCalls)) errors.push('apiCalls must be an array');
   if (errors.length) return errors;
+
+  // P132 BWF-012: the saved calls first, so a workflow's use of one is checked against the file's own list.
+  const calls = new Map<string, ProjectApiCall>();
+  for (const c of apiCalls as ProjectApiCall[]) {
+    const errs = validateApiCall(c);
+    errors.push(...errs);
+    if (errs.length || !c || typeof c.id !== 'string') continue;
+    if (calls.has(c.id)) errors.push(`duplicate saved API call id "${c.id}"`);
+    calls.set(c.id, c);
+  }
 
   const seen = new Set<string>();
   for (const w of workflows as ProjectWorkflow[]) {
@@ -106,7 +121,9 @@ export function validateProjectAutomations(raw: unknown): string[] {
     if (seen.has(`w:${w.id}`)) errors.push(`duplicate workflow id "${w.id}"`);
     seen.add(`w:${w.id}`);
     const def = { version: 1, createdAt: '', updatedAt: '', ...projectWorkflow(w) } as WorkflowDefinition;
-    for (const e of validateWorkflowDefinition(def)) errors.push(`${label}: ${e}`);
+    const own = validateWorkflowDefinition(def);
+    for (const e of own) errors.push(`${label}: ${e}`);
+    if (!own.length) for (const e of validateCallUses(def, (id) => calls.get(id) ?? null)) errors.push(`${label}: ${e}`);
   }
   const slugs = new Set<string>();
   for (const t of triggers as ProjectTrigger[]) {
@@ -161,7 +178,9 @@ export function readProjectAutomations(projectDir: string): ProjectAutomations |
     );
   }
   const p = parsed as Partial<ProjectAutomations>;
-  return { version: 1, workflows: p.workflows || [], triggers: p.triggers || [] };
+  const out: ProjectAutomations = { version: 1, workflows: p.workflows || [], triggers: p.triggers || [] };
+  if (p.apiCalls && p.apiCalls.length) out.apiCalls = p.apiCalls;
+  return out;
 }
 
 export type ProjectAutomationsOutcome =
@@ -174,6 +193,8 @@ export type ProjectAutomationsOutcome =
       file: string;
       workflows: string[];
       triggers: string[];
+      /** P132 BWF-012: the saved API calls loaded, before the workflows that use them. */
+      apiCalls: string[];
       /** Webhooks given a new secret here: the sender needs it (rotate to read one). */
       mintedWebhooks: string[];
       /** hmac-sha512 hooks left out: their secret is the sender's key and cannot be made up. */
@@ -191,6 +212,8 @@ export function seedProjectAutomations(args: {
   projectDir?: string | null;
   workflows: WorkflowRegistry;
   triggers: TriggerRegistry;
+  /** P132 BWF-012. Optional so a caller without saved calls (a test, an older composition) still seeds the rest. */
+  apiCalls?: ApiCallRegistry;
 }): ProjectAutomationsOutcome {
   if (!args.projectDir) return { status: 'no-project-dir' };
   const file = projectAutomationsPath(args.projectDir);
@@ -199,15 +222,23 @@ export function seedProjectAutomations(args: {
 
   const existingWorkflows = args.workflows.list();
   const existingTriggers = args.triggers.list();
-  if (existingWorkflows.length || existingTriggers.length) {
-    const backend = automationsFromBackend(existingWorkflows, existingTriggers);
+  const existingCalls = args.apiCalls ? args.apiCalls.list() : undefined;
+  if (existingWorkflows.length || existingTriggers.length || (existingCalls && existingCalls.length)) {
+    const backend = automationsFromBackend(existingWorkflows, existingTriggers, existingCalls);
     return { status: 'backend-has-its-own', file, differences: diffAutomations(project, backend) };
   }
+  if (project.apiCalls && project.apiCalls.length && !args.apiCalls) {
+    throw new ProjectAutomationsError('PROJECT_AUTOMATIONS_REFUSED', `${file} has saved API calls, and this backend was started without a place to keep them.`);
+  }
 
-  const added = { workflows: [] as string[], triggers: [] as string[] };
+  const added = { workflows: [] as string[], triggers: [] as string[], apiCalls: [] as string[] };
   const mintedWebhooks: string[] = [];
   const needsSenderKey: string[] = [];
   try {
+    for (const c of project.apiCalls || []) {
+      args.apiCalls!.upsert(c);
+      added.apiCalls.push(c.id);
+    }
     for (const w of project.workflows) {
       args.workflows.upsert(w);
       added.workflows.push(w.id);
@@ -224,6 +255,7 @@ export function seedProjectAutomations(args: {
   } catch (e) {
     for (const id of added.triggers) args.triggers.delete(id);
     for (const id of added.workflows) args.workflows.delete(id);
+    for (const id of added.apiCalls) args.apiCalls!.delete(id);
     throw new ProjectAutomationsError(
       'PROJECT_AUTOMATIONS_REFUSED',
       `${file} could not be loaded into this backend, so none of it was: ${e instanceof Error ? e.message : e}`
@@ -238,7 +270,8 @@ export function describeProjectAutomationsOutcome(outcome: ProjectAutomationsOut
     case 'applied': {
       const parts = [
         `[nodegx-backend] BKO-001: loaded the project's automations from ${outcome.file}: ` +
-          `${outcome.workflows.length} workflow(s), ${outcome.triggers.length} trigger(s).`
+          `${outcome.workflows.length} workflow(s), ${outcome.triggers.length} trigger(s)` +
+          (outcome.apiCalls.length ? `, ${outcome.apiCalls.length} saved API call(s).` : '.')
       ];
       if (outcome.mintedWebhooks.length) {
         parts.push(

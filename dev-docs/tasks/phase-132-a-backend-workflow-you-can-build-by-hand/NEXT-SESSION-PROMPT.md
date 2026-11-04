@@ -1,5 +1,34 @@
 # P132 — next session
 
+**s15 (2026-11-04): BWF-012 built** ([the record](BWF-012-SAVED-API-CALLS.md#s15-2026-11-04-built-engine-file-mcp-studio-ac1-and-ac2-green-in-chrome)),
+NodeGX (this commit) + nodegx-studio `60796d4`. A saved API call is Call an API's settings kept once in the file's
+`apiCalls`, its blanks `{"$path": "fill.<blank>"}`; a step uses it as `{ call, fill }`, read when the step runs.
+Backend `/admin/api-calls`, catalog **1.10.0** (`savedCalls`). Studio: *Save this call* on a step, saved calls by
+name in the step menu (Integrations), a *Saved API calls* list, the call's own form. AC1/AC2 green in Chrome
+(check:automations drive 167/167), AC3 green (an agent wrote `call: "weather"`, nothing copied, $1.41).
+
+**Next, in this order:**
+1. **Drive BWF-012 in Studio's Electron app on a Greenhouse copy** with real presses (copy
+   [greenhouse-drive-bwf011.mjs](greenhouse-drive-bwf011.mjs)): *Save this call* on a Call an API, the city ticked,
+   a second workflow picks it from the menu, the city typed, both tested, the address changed on the saved call.
+   The Chrome gate's `.click()` misses what a press does (s4, s14, and s15's focus miss below).
+2. Then **BWF-013** (a reusable piece is a workflow others run).
+
+- 🔴 **s15: the panel restores the focus BY POSITION after a redraw** (P132-FOCUSBYINDEX, filed). A Save that
+  removes its own box left the caret in another field, and `takeOutside` holds an outside change until a focused field
+  is left: the next workflow written from outside never drew (drive 144/145). Worked around (the box is left first).
+  If a drive line waits on a row that never comes, check `document.activeElement` first.
+- 🔴 The MCP's `patchAutomations` wrote only `version/workflows/triggers`: a new top-level key in
+  `nodegx.automations.json` must be added to EVERY writer (MCP `projectFiles.ts`, editor `project-automations.js`,
+  Studio `serve.mjs`), the s9 lesson again. MCP and Studio now keep `apiCalls`; the editor patches in place.
+- 🔴 A type the MCP imports from nodegx-backend must come from a module with no engine imports (`apiCallTypes.ts`,
+  not `apiCalls.ts`), or `tsc` in noodl-mcp walks into the engine (its 19 existing errors come that way from two
+  P128 tests).
+- The AC3 agent found the call by grepping the project, not through `list_backend_workflows`' `apiCalls`.
+- Asks for Richard: none new. The earlier ones below still stand.
+
+---
+
 **s14 (2026-11-04): BWF-011 built in Studio** ([the record](BWF-011-A-VALUE-COMPOSED-IN-ANY-SETTING.md#s14-2026-11-04-built-in-studio-the-editors-picker-open)),
 nodegx-studio `1114cb3`. Every text setting is a composer, words with value chips. A chip is refined in place
 (first, last, how many, each one's field, joined; a record's fields). It is saved as `$path`, the typed text, or

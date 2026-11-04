@@ -22,6 +22,7 @@
 import * as http from 'http';
 import * as https from 'https';
 
+import { ApiCallLookup, mergeSavedCall } from '../apiCalls';
 import type { StepExecContext, StepExecutor } from '../StepExecutor';
 import { StepExecutionError } from '../StepExecutor';
 import { HTTP_DEFAULT_TIMEOUT_MS, HTTP_MAX_TIMEOUT_MS } from './httpParams';
@@ -246,9 +247,29 @@ function parseBody(a: Answer): unknown {
   return a.text;
 }
 
+/**
+ * P132 BWF-012: a step that uses a saved call runs with the call's settings as they are NOW, its blanks filled from
+ * the step's `fill`, the step's own settings over them. Checked again here, not only at the save: a call can be
+ * changed after the workflow was (a blank added), and a backend loaded from a hand-edited folder never saw the check.
+ */
+function withSavedCall(ctx: StepExecContext, p: Record<string, unknown>, lookup: ApiCallLookup | undefined): Record<string, unknown> {
+  if (p.call === undefined) return p;
+  const id = String(p.call);
+  const saved = lookup ? lookup(id) : null;
+  if (!saved) throw new StepExecutionError(`Step "${ctx.step.id}": there is no saved API call "${id}" on this backend.`);
+  const fill = isPlainObject(p.fill) ? p.fill : {};
+  const empty = (saved.blanks || []).map((b) => b.name).filter((b) => fill[b] === undefined || fill[b] === null);
+  if (empty.length) {
+    throw new StepExecutionError(`Step "${ctx.step.id}": the saved call "${id}" was given nothing for ${empty.map((b) => `"${b}"`).join(', ')}.`);
+  }
+  return mergeSavedCall(saved, p);
+}
+
 export class HttpRequestStepExecutor implements StepExecutor {
+  constructor(private readonly getApiCall?: ApiCallLookup) {}
+
   async execute(ctx: StepExecContext): Promise<Record<string, unknown>> {
-    const p = resolvedParams(ctx);
+    const p = withSavedCall(ctx, resolvedParams(ctx), this.getApiCall);
     const timeoutMs = Math.min(
       typeof p.timeoutMs === 'number' && p.timeoutMs > 0 ? p.timeoutMs : HTTP_DEFAULT_TIMEOUT_MS,
       HTTP_MAX_TIMEOUT_MS
