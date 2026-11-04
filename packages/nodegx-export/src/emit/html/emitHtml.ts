@@ -25,6 +25,8 @@ import { type Catalog, CatalogIndex } from '../../catalog';
 import { planProject, type ProjectPlan } from '../../analyze/plan';
 import { baseCss, moduleStylesheetLinks, routedPages, tokensCss } from '../scaffold';
 import { emitKits } from '../kits';
+import { emitApp } from '../emitApp';
+import { clientFilesEsm } from './client';
 import { CORE_JS } from './coreJs';
 import { FUNCTION_RUN_JS } from './functionRunJs';
 import { PERSIST_STORE_JS } from './persistStoreJs';
@@ -71,6 +73,8 @@ export function emitHtmlApp(ir: ExportIR, catalog: Catalog): EmittedHtmlApp {
   const logic: string[] = [];
   const stylesheets: string[] = [];
   let usesStates = false;
+  // HTX-004. The React export's own files, read for its backend client (`client.ts`).
+  const reactFiles = emitApp(ir, catalog).files;
   for (const plan of project.plans) {
     if (!plan.file) continue;
     const component = ir.components.find((c) => c.path === plan.path)!;
@@ -82,7 +86,9 @@ export function emitHtmlApp(ir: ExportIR, catalog: Catalog): EmittedHtmlApp {
       moduleOf: (legacy) => moduleByLegacy.get(legacy),
       variableOf: (name) => project.variables.find((v) => v.name === name)?.exportName,
       storeOf: (name) => project.stores.find((st) => st.name === name && st.deferred === undefined)?.exportName,
-      routeOf
+      routeOf,
+      noodlClient: 'src/lib/noodl.ts' in reactFiles,
+      columnsOf: (name) => (ir.project.collections.find((c) => c.name === name)?.columns ?? []).map((c) => c.name)
     });
     const base = `${plan.file.dir}/${plan.file.fileBase}`;
     files[`${base}.js`] = printed.js;
@@ -129,6 +135,10 @@ export function emitHtmlApp(ir: ExportIR, catalog: Catalog): EmittedHtmlApp {
   if (project.variables.length > 0) files['variables.js'] = variablesJs(project.variables);
   for (const st of project.stores) if (st.deferred === undefined) files[`stores/${st.exportName}.js`] = storeJs(st);
   if (project.stores.some((st) => st.deferred === undefined && st.persist !== undefined)) files['lib/persistStore.js'] = PERSIST_STORE_JS;
+  // HTX-004. The backend client: the React export's own api modules, Noodl API and error channel, the same text, its
+  // types taken out (`client.ts`), written only where a component calls into it.
+  const usesClient = Object.values(files).some((text) => /from '(?:\.\.\/|\.\/)+(?:api\/|lib\/(?:session|errors|noodl)\.js')/.test(text));
+  if (usesClient) Object.assign(files, clientFilesEsm(reactFiles));
   files['app.js'] = appJs(pages, moduleByLegacy, start?.urlPath ?? '/');
   const fontLinks = moduleStylesheetLinks(ir).replace(/href="\//g, 'href="');
   files['index.html'] = [

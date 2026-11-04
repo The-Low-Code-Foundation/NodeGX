@@ -33,11 +33,13 @@
 
 import type { NodeIR } from '../../ir/types';
 import type { CatalogIndex } from '../../catalog';
-import { INPUT_PULSE_TS_TYPE, type BindingSource, type ComponentPlan, type HandlerAction, type JsFunctionPlan, type ProjectPlan, type ValueExpr } from '../../analyze/plan';
+import { INPUT_PULSE_TS_TYPE, type QueryPlan, type BindingSource, type ComponentPlan, type HandlerAction, type JsFunctionPlan, type ProjectPlan, type ValueExpr } from '../../analyze/plan';
 import { computeNodeStyle, computeRoleCss, WIRED_STYLE_SINKS, type Decl, type StyleRole } from '../style';
 import { assignClassNames, camelCase, isReservedWord, lowerFirst, type ClassCandidate } from '../naming';
 // 🔴 A decision the React printer holds, not the plan (P134-HTX001-PRINTERDECIDES): which element a node's `as` names.
 import { authoredTag, PRESET_MARKERS } from '../component';
+// 🔴 HTX-004, the same: the query's call, its wired `where`, when it asks, and the code each verb raises its failure under.
+import { API_CALL_ERROR_CODES, queryHasEffect, queryParamsLiteral, wiredWhereExpr } from '../component';
 
 export interface HtmlLoss {
   component: string;
@@ -59,6 +61,10 @@ export interface HtmlComponentContext {
   storeOf: (name: string) => string | undefined;
   /** A navigate action's `to` (a page's url path) → the router path it shows, or undefined for no such page. */
   routeOf: (urlPath: string) => string | undefined;
+  /** HTX-004. The React export writes `src/lib/noodl.ts`, so `lib/noodl.js` is carried: a body's Noodl members travel. */
+  noodlClient?: boolean;
+  /** HTX-004. A backend collection's declared columns, by its class name (the project's schema snapshot). */
+  columnsOf?: (collection: string) => string[];
 }
 
 export interface PrintedComponent {
@@ -82,6 +88,8 @@ interface Scope {
   pulses: Map<string, string>;
   /** The locals a chain has declared, shared by everything printed into one function body. */
   declared: Set<string>;
+  /** HTX-004. Something printed into this function body awaits (a record verb's answer): the body is then `async`. */
+  awaits: { used: boolean };
 }
 
 /**
@@ -145,6 +153,12 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     return def !== undefined && def.kind === 'function' && (def.pulsed === true || (def.host?.length ?? 0) > 0 || def.awaits === true);
   };
   const functions: Record<string, string> = {};
+  /**
+   * HTX-004. A body's Noodl is the client's (`lib/noodl.js`, the React export's own) with each Variable it names over the
+   * app's: carried where every Variable it names is kept, and the client exists for the members past `Variables`.
+   */
+  const noodlCarried = (def: JsFunctionPlan): boolean =>
+    def.noodl === undefined || (def.noodl.variables.every((v) => ctx.variableOf(v) !== undefined) && (def.noodl.members.every((m) => m === 'Variables') || ctx.noodlClient === true));
   /** The Functions this component calls, by node: the import, and each one's file. */
   const usedFunctions = new Map<string, JsFunctionPlan>();
   /** The module-level lines: an Expression's function. */
@@ -271,7 +285,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
 
   // ---- names ---------------------------------------------------------------------------------------------------
 
-  const taken = new Set(['variables', 'input', 'state', 'given', 'element', 'inputs', 'before', 'l', 'into', 'at', 'item', 'index', 'row', 'batch', 'life', 'el', 'show', 'truthy', 'keep', 'bindText', 'bindAttr', 'bindStyle', 'when', 'place', 'list', 'navigate', 'value', 'derived', 'functionNode', 'runFunction', 'tickedArrival', 'pulse', mount]);
+  const taken = new Set(['session', 'followSession', 'raiseAppError', 'filterValue', 'variables', 'input', 'state', 'given', 'element', 'inputs', 'before', 'l', 'into', 'at', 'item', 'index', 'row', 'batch', 'life', 'el', 'show', 'truthy', 'keep', 'bindText', 'bindAttr', 'bindStyle', 'when', 'place', 'list', 'navigate', 'value', 'derived', 'functionNode', 'runFunction', 'tickedArrival', 'pulse', mount]);
   // A store's module is imported under its own name (React's `import { desk } from '../stores/desk'`): no local takes it.
   for (const st of ctx.project.stores) if (st.deferred === undefined) taken.add(st.exportName);
   /** A fresh local name, `base` or `base2`, `base3`… */
@@ -306,7 +320,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         nodeLines.push(`  const ${names.held} = [];`);
         if (plan.tickedRuns.find((t) => t.nodeId === def.nodeId)?.atLoad) nodeLines.push(`  let ${names.loaded} = false;`);
       }
-      if (def.noodl !== undefined) lose(def.nodeId, `the Function "${def.fnName}" reads Noodl (${[...def.noodl.members, ...def.noodl.variables].join(', ')}), which the HTML target does not hand it yet (HTX-004)`);
+      if (def.noodl !== undefined && !noodlCarried(def)) lose(def.nodeId, `the Function "${def.fnName}" reads Noodl (${[...def.noodl.members, ...def.noodl.variables].join(', ')}), which this export does not carry`);
       if (def.component) lose(def.nodeId, `the Function "${def.fnName}" reads Component.Object, which the HTML target does not hand it yet`);
       if (def.scripts?.length) lose(def.nodeId, `the Function "${def.fnName}" uses script files, which the HTML target does not carry yet`);
     }
@@ -322,6 +336,8 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
    * keeps, in a second ref, whether a Clear has run since its Value was last delivered: the runtime's Set writes
    * `_internal.text`, which the Clear empties and the next delivery fills.
    */
+  /** HTX-004. Something here reads who is signed in: one `session` value for the component. */
+  let usesSession = false;
   const fieldActions: HandlerAction[] = [];
   {
     const seen = new Set<object>();
@@ -371,8 +387,13 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
 
   // ---- values ---------------------------------------------------------------------------------------------------
 
-  const TOP: Scope = { top: true, runs: new Map(), pulses: new Map(), declared: new Set() };
-  const chainScope = (): Scope => ({ top: false, runs: new Map(), pulses: new Map(), declared: new Set() });
+  const TOP: Scope = { top: true, runs: new Map(), pulses: new Map(), declared: new Set(), awaits: { used: false } };
+  const chainScope = (): Scope => ({ top: false, runs: new Map(), pulses: new Map(), declared: new Set(), awaits: { used: false } });
+  /**
+   * HTX-004. A chain that awaits, as one statement wherever it is printed: React's `async` handler, which runs at once up to
+   * its first `await` and the rest when the answer arrives. Printed as `void (async function () { … })();`.
+   */
+  const asyncBody = (lines: string[], pad: string): string[] => [`${pad}void (async function () {`, ...lines.map((l) => `  ${l}`), `${pad}})();`];
   /** `x?.name`: an output of a run that may not have happened yet. */
   const maybe = (obj: string, name: string): string => (/^[A-Za-z_$][\w$]*$/.test(name) ? `${obj}?.${name}` : `${obj}?.[${js(name)}]`);
   const fold = (code: string, how: 'string' | 'number' | 'boolean' | undefined): string =>
@@ -459,6 +480,27 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         return controlled?.controlId === e.controlId && e.form === 'checked' ? controlled.code : undefined;
       case 'row-relay':
         return relayed?.repeaterId === e.repeaterId ? relayed.read(e.input) : 'undefined';
+      // HTX-004. Who is signed in: `lib/session.js`'s value, React's `useSession()` (one per component).
+      case 'session-get': {
+        usesSession = true;
+        return e.field === 'authenticated' ? 'session.get().authenticated' : `session.get().user?.${e.field}`;
+      }
+      // HTX-004. A Cloud Function's result or Error: its row anywhere, the chain's own answer or message inside it.
+      case 'cloud-out': {
+        const names = plan.cloudCalls.find((c) => c.nodeId === e.nodeId);
+        if (names === undefined) return undefined;
+        if (e.output === 'error') return e.viaState !== undefined ? (stateByName.has(e.viaState) ? `${member('state', e.viaState)}.get()` : undefined) : scope.declared.has(names.messageLocal) ? names.messageLocal : undefined;
+        const field = e.output.slice('out-'.length);
+        if (e.viaState !== undefined) return stateByName.has(e.viaState) ? maybe(`${member('state', e.viaState)}.get()`, field) : undefined;
+        return scope.declared.has(names.answerLocal) ? member(names.answerLocal, field) : undefined;
+      }
+      // HTX-004. A query's rows: the row it last answered, in a chain as in the drawing.
+      case 'query-get':
+        return plan.queries.some((q) => q.stateName === e.stateName) ? `${member('state', e.stateName)}.get()` : undefined;
+      // HTX-004 (P18-EXP022-S4-ADDREFUSED). A Create's Id: its row, or inside its Done chain the answer's own.
+      case 'verb-id':
+        if (e.viaState !== undefined) return stateByName.has(e.viaState) ? `${member('state', e.viaState)}.get()` : undefined;
+        return scope.declared.has(e.local) ? `${e.local}.id` : undefined;
       case 'static-rows':
         // The authored rows, a constant above the component (STATIC-DATA-TARGET §3): `allowEditOnly`, so nothing changes them.
         return plan.staticData.some((d) => d.constName === e.constName) ? e.constName : undefined;
@@ -550,6 +592,95 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       return [a];
     });
 
+  /** HTX-004. Where each backend function comes from: a record verb's class module, or the one session module. */
+  const apiModuleOf = (nodeId: string): string | undefined => {
+    const m = plan.mutations.find((x) => x.nodeId === nodeId);
+    if (m !== undefined) return `api/${m.moduleBase}.js`;
+    if (plan.sessionCalls.some((x) => x.nodeId === nodeId)) return 'api/session.js';
+    return undefined;
+  };
+  const useImport = (file: string, name: string): void => {
+    const names = childImports.get(file) ?? new Set<string>();
+    names.add(name);
+    childImports.set(file, names);
+  };
+  /** A query's call: `fetchTasks({ sort: ['title'], limit: 100 })`, a wired filter's `where` from `values`. */
+  const queryCall = (q: QueryPlan, values: Array<{ name: string; expr: ValueExpr }>, scope: Scope): string => {
+    useImport(`api/${q.moduleBase}.js`, q.fetchName);
+    const wired = q.params?.wired;
+    if (q.params === undefined) return `${q.fetchName}()`;
+    if (wired === undefined) return `${q.fetchName}(${queryParamsLiteral(q.params)})`;
+    const codes = values.map((v) => {
+      const code = expr(v.expr, scope);
+      if (code === undefined) throw new Unprinted(`a query filter value from ${describe(v.expr)}, which the HTML target does not print yet`);
+      return code;
+    });
+    const codeOf = (name: string) => codes[values.findIndex((v) => v.name === name)];
+    const tested = codes.map((code) => (/^[\w$.]+$/.test(code) ? code : `(${code})`));
+    if (q.wiredClient) useImport('api/client.js', 'filterValue');
+    const valueCode = (name: string, date: boolean) => (q.wiredClient ? `filterValue(${codeOf(name)}${date ? ', true' : ''})` : codeOf(name));
+    return `${q.fetchName}(${queryParamsLiteral(q.params, wiredWhereExpr(wired, tested, valueCode))})`;
+  };
+  /** The raise a failure arm makes on the error channel, with the provenance the runtime fills in (the React printer's `raiseLine`). */
+  const raiseLine = (nodeId: string, code: string, message: string): string => {
+    useImport('lib/errors.js', 'raiseAppError');
+    return `raiseAppError({ code: ${js(code)}, message: ${message}, nodeId: ${js(nodeId)}, nodeType: ${js(nodeById.get(nodeId)?.type ?? '<runtime>')}, componentName: ${js(plan.legacyPath)} });`;
+  };
+  const apiCall = (a: Extract<HandlerAction, { kind: 'api-call' }>, pad: string, scope: Scope): string[] => {
+    const module = apiModuleOf(a.nodeId);
+    if (module === undefined) throw new Unprinted(`a ${a.verb} call the plan names no module for`);
+    const errorRow = stateByName.get(a.errorState);
+    if (errorRow === undefined) throw new Unprinted(`a ${a.verb} call whose Error the plan does not keep`);
+    useImport(module, a.fnName);
+    const args = a.args.map((arg) => {
+      if (arg.kind === 'expr') {
+        const code = expr(arg.expr, scope);
+        if (code === undefined) throw new Unprinted(`a ${a.verb} call reading ${describe(arg.expr)}, which the HTML target does not print yet`);
+        return code;
+      }
+      const entries = arg.props.map((p) => {
+        const code = expr(p.expr, scope);
+        if (code === undefined) throw new Unprinted(`a ${a.verb} call writing ${p.key} from ${describe(p.expr)}, which the HTML target does not print yet`);
+        return key(p.key) === code ? code : `${key(p.key)}: ${code}`;
+      });
+      return entries.length ? `{ ${entries.join(', ')} }` : '{}';
+    });
+    if (a.coerceId === 'string') args[0] = `String(${args[0]} ?? '')`;
+    const inner = `${pad}  `;
+    const body: string[] = [];
+    // The Id is read once (P18-S113-IDREADTWICE), as the runtime reads the value its setter stored.
+    if (a.guardId && a.coerceId !== 'string' && args[0].endsWith(')')) {
+      const bound = a.errorState.replace(/Error$/, '') + 'RecordId';
+      body.push(`${inner}const ${bound} = ${args[0]};`);
+      args[0] = bound;
+    }
+    // The runtime's "Missing Record Id", thrown so it lands in the catch: no request, no Done.
+    if (a.guardId) body.push(`${inner}if (${/^[\w$]+$/.test(args[0]) ? `!${args[0]}` : `!(${args[0]})`}) throw new Error('Missing Record Id');`);
+    for (const g of a.guards ?? []) {
+      body.push(`${inner}const ${g.local} = ${g.coerce === 'string' ? `String(${args[g.index]} ?? '')` : args[g.index]};`, `${inner}if (!${g.local}) throw new Error(${js(g.message)});`);
+      args[g.index] = g.local;
+    }
+    const inScope: Scope = a.recordLocal !== undefined ? { ...scope, declared: new Set([...scope.declared, a.recordLocal]) } : scope;
+    body.push(`${inner}${a.recordLocal !== undefined ? `const ${a.recordLocal} = ` : ''}await ${a.fnName}(${args.join(', ')});`);
+    if (a.clearErrorOnDone === true) body.push(`${inner}${member('state', a.errorState)}.set(undefined);`);
+    if (a.idState !== undefined) {
+      if (!stateByName.has(a.idState)) throw new Unprinted(`a ${a.verb} call whose Id row the plan does not keep`);
+      body.push(`${inner}${member('state', a.idState)}.set(${a.recordLocal}.id);`);
+    }
+    body.push(...block(a.then, inner, inScope));
+    const message = `${a.errorState}Message`;
+    return [
+      `${pad}try {`,
+      ...body,
+      `${pad}} catch (error) {`,
+      `${inner}const ${message} = error instanceof Error ? error.message : String(error);`,
+      `${inner}${member('state', a.errorState)}.set(${message});`,
+      `${inner}${raiseLine(a.nodeId, API_CALL_ERROR_CODES[nodeById.get(a.nodeId)?.type ?? ''] ?? 'outcome/unspecified-failure', message)}`,
+      ...block(a.failThen, inner, scope),
+      `${pad}}`
+    ];
+  };
+
   /** A chain as statements. Throws {@link Unprinted} at the first step this printer does not print. */
   const block = (list: HandlerAction[], pad: string, scope: Scope): string[] => {
     const out: string[] = [];
@@ -564,7 +695,73 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
 
   const statement = (a: HandlerAction, pad: string, scope: Scope): { lines: string[]; scope: Scope } => {
     const one = (line: string) => ({ lines: [`${pad}${line}`], scope });
+    /*
+     * HTX-004 (EXP-011 §90, the React printer's, copied). An awaited step a later wire of the same chain follows: its own
+     * async body, so the later wires run before the answer arrives, as the runtime's do (each node acts in its turn; the
+     * answer comes later). What it declares stays inside.
+     */
+    if ('detached' in a && a.detached === true) {
+      const own: Scope = { ...scope, declared: new Set(scope.declared), awaits: { used: false } };
+      return { lines: asyncBody(statement({ ...a, detached: undefined } as HandlerAction, pad, own).lines, pad), scope };
+    }
     switch (a.kind) {
+      /**
+       * HTX-004. A Query Records' Fetch, as the React printer prints it (`component.ts` `query-fetch`, copied,
+       * P134-HTX001-PRINTERDECIDES): the query's own settings, a wired filter's `where` from the values as the chain reads
+       * them. Not awaited: the runtime schedules its fetch.
+       */
+      case 'query-fetch': {
+        const q = plan.queries.find((x) => x.nodeId === a.nodeId);
+        if (q === undefined) throw new Unprinted('a Fetch of a query the plan does not keep');
+        return one(`void ${queryCall(q, a.values, scope)}.then(${member('state', q.stateName)}.set);`);
+      }
+      /**
+       * HTX-004. A record verb or a user verb, awaited, as the React printer prints it (`component.ts` `api-call`,
+       * copied): the call in a `try`, the Done chain after the answer, the Error row and the error channel in the `catch`,
+       * then the Failure chain. `detached` (a later wire of the same press follows it): its own async body, so the later
+       * wires run before the answer arrives, as the runtime's do.
+       */
+      case 'api-call': {
+        scope.awaits.used = true;
+        return { lines: apiCall(a, pad, scope), scope };
+      }
+      /**
+       * HTX-004. A Cloud Function's Call, as the React printer prints it (`component.ts` `cloud-call`, copied): one
+       * try/catch, the answer merged over the results row where something outside the chain reads a result (the runtime
+       * keeps a key the function did not answer this time, EXP-011 §42), the Error row and the error channel on failure.
+       */
+      case 'cloud-call': {
+        const names = plan.cloudCalls.find((c) => c.nodeId === a.nodeId);
+        if (names === undefined || !stateByName.has(a.errorState)) throw new Unprinted('a Cloud Function call the plan does not keep');
+        if (a.materialize !== undefined && !stateByName.has(a.materialize)) throw new Unprinted('a Cloud Function call whose results row the plan does not keep');
+        scope.awaits.used = true;
+        useImport('api/functions.js', a.fnName);
+        const args = a.args.map((arg) => {
+          const code = expr(arg.expr, scope);
+          if (code === undefined) throw new Unprinted(`a Cloud Function call reading ${describe(arg.expr)}, which the HTML target does not print yet`);
+          return code === arg.param ? code : `${key(arg.param)}: ${code}`;
+        });
+        const call = `await ${a.fnName}(${args.length ? `{ ${args.join(', ')} }` : ''})`;
+        const answer = a.materialize !== undefined ? `{ ...${member('state', a.materialize)}.get(), ...(${call}) }` : call;
+        const inner = `${pad}  `;
+        const done: Scope = { ...scope, declared: new Set([...scope.declared, names.answerLocal]) };
+        const failed: Scope = { ...scope, declared: new Set([...scope.declared, names.messageLocal]) };
+        return {
+          lines: [
+            `${pad}try {`,
+            `${inner}const ${names.answerLocal} = ${answer};`,
+            ...(a.materialize !== undefined ? [`${inner}${member('state', a.materialize)}.set(${names.answerLocal});`] : []),
+            ...block(a.then, inner, done),
+            `${pad}} catch (error) {`,
+            `${inner}const ${names.messageLocal} = error instanceof Error ? error.message : String(error);`,
+            `${inner}${member('state', a.errorState)}.set(${names.messageLocal});`,
+            `${inner}${raiseLine(a.nodeId, 'cloud-function/call-failed', names.messageLocal)}`,
+            ...block(a.failThen, inner, failed),
+            `${pad}}`
+          ],
+          scope
+        };
+      }
       case 'navigate': {
         const path = ctx.routeOf(a.to);
         if (path === undefined || a.pathParams.length > 0 || a.query.length > 0 || a.newTab) throw new Unprinted(`a navigate to ${a.to} with parameters or a new tab, which the HTML target does not carry yet`);
@@ -602,8 +799,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       case 'jsfun-run': {
         const def = fnByNode[a.nodeId];
         if (!def || def.kind !== 'function') throw new Unprinted(`a run of a ${def?.kind ?? 'missing'} node`);
-        if (a.awaitsAt !== undefined || def.awaits) throw new Unprinted(`a run of "${def.fnName}", which awaits (HTX-004)`);
-        if (def.noodl !== undefined) throw new Unprinted(`a run of "${def.fnName}", which reads Noodl (HTX-004)`);
+        if (def.noodl !== undefined && !noodlCarried(def)) throw new Unprinted(`a run of "${def.fnName}", which reads Noodl (${[...def.noodl.members, ...def.noodl.variables].join(', ')}), which this export does not carry`);
         if (def.component) throw new Unprinted(`a run of "${def.fnName}", which reads Component.Object`);
         const names = useFunction(def);
         const args = jsArgs(def, scope, a.inputsAtRun);
@@ -616,6 +812,26 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
           if (watch.some((w) => w === undefined)) throw new Unprinted(`the inputs "${def.fnName}" runs again on, which the HTML target does not print yet`);
           imports.run.add('tickedArrival');
           lines.push(`${pad}tickedArrival(${names.held}, [${watch.join(', ')}]);`);
+        }
+        /*
+         * HTX-004 (EXP-019 slice 1b, the React printer's, copied). A body that awaits: the run returns at its first `await`
+         * (what it wrote and sent until then is the run's, and its signals' chains act on it), the rest of the body arrives
+         * `late`, and what follows the run waits for the body to finish, as the runtime's `runScript` awaits it.
+         */
+        if (a.awaitsAt !== undefined) {
+          let run = `${names.base}Run`;
+          for (let n = 2; scope.declared.has(run) || taken.has(run); n++) run = `${names.base}Run${n}`;
+          scope.declared.add(run);
+          imports.run.add('runFunction');
+          lines.push(`${pad}const ${run} = runFunction(${def.fnName}, ${args}, ${names.node});`);
+          if (a.materialize !== undefined) lines.push(`${pad}${member('state', a.materialize)}.set({ ...${run}.outputs });`);
+          const runs = new Map(scope.runs);
+          runs.set(a.nodeId, run);
+          const inner: Scope = { ...scope, runs };
+          lines.push(...block(a.then.slice(0, a.awaitsAt), pad, inner));
+          scope.awaits.used = true;
+          lines.push(`${pad}await ${run}.settled;`, ...block(a.then.slice(a.awaitsAt), pad, inner));
+          return { lines, scope: inner };
         }
         if (keptNode(a.nodeId)) {
           let run = `${names.base}Run`;
@@ -728,7 +944,9 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   /** A chain from its start (a press, a callback, an effect), or undefined and a named loss: never half a chain. */
   const chain = (id: string, port: string, list: HandlerAction[], pad: string): string[] | undefined => {
     try {
-      return block(list, pad, chainScope());
+      const scope = chainScope();
+      const lines = block(list, pad, scope);
+      return scope.awaits.used ? asyncBody(lines, pad) : lines;
     } catch (e) {
       if (!(e instanceof Unprinted)) throw e;
       lose(id, `its ${port} runs ${e.message}; the chain is left out whole`);
@@ -952,14 +1170,16 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     const module = rep?.templatePath ? ctx.moduleOf(rep.templatePath) : undefined;
     // STATIC-DATA §3: the authored rows, the constant above the component, which nothing changes.
     const staticData = rep?.itemsStaticId ? plan.staticData.find((s) => s.nodeId === rep.itemsStaticId) : undefined;
-    const items = rep?.itemsExpr ? expr(rep.itemsExpr) : staticData?.constName;
+    // HTX-004. A query's rows, kept with their record by its id (React's `key={task.id}`).
+    const query = rep?.itemsQueryId ? plan.queries.find((q) => q.nodeId === rep.itemsQueryId) : undefined;
+    const items = rep?.itemsExpr ? expr(rep.itemsExpr) : staticData !== undefined ? staticData.constName : query !== undefined ? `${member('state', query.stateName)}.get()` : undefined;
     if (!rep || !target || !module || target.hook || items === undefined || rep.mapping === null) {
       const why = !rep?.templatePath
         ? 'it repeats no component'
         : rep.mapping === null
           ? 'its mapping script is more than a list of names'
           : rep.itemsQueryId
-            ? 'its items are a backend query (HTX-004)'
+            ? 'its items are a backend query the plan does not keep'
             : rep.itemsCollectionName
               ? `its items are the named list "${rep.itemsCollectionName}", which the HTML target does not keep yet`
               : rep.itemsExpr
@@ -991,6 +1211,13 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       }
       mapping = mapping.filter((m) => (m.repeaterItem !== undefined ? idOk : carried.has(m.field)));
     }
+    if (query !== undefined) {
+      // The React printer's rule (copied): a row carries its record's `id` and the collection's declared columns, and the
+      // runtime feeds nothing outside them.
+      const allowed = new Set(['id', ...(ctx.columnsOf?.(query.collectionName) ?? [])]);
+      for (const m of mapping) if (!allowed.has(m.field)) lose(id, `it maps "${m.input}" from the field "${m.field}", which no row of ${query.collectionName} is known to carry`);
+      mapping = mapping.filter((m) => allowed.has(m.field));
+    }
     const pairs = mapping.map((m) => `${key(m.input)}: ${member('item', m.field)}`);
     const fieldOfInput = (input: string): string | undefined => mapping.find((m) => m.input === input)?.field;
     const callbacks: string[] = [];
@@ -1016,7 +1243,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     }
     const label = node.authoredLabel ?? id;
     // STATIC-DATA §3.2: keyed by `id` when every authored row has a unique one, the runtime's own record identity.
-    const keyField = staticData?.keyField;
+    const keyField = staticData !== undefined ? staticData.keyField : query !== undefined ? 'id' : undefined;
     return [
       `${pad}// ${label}: one ${target.file?.symbol ?? 'row'} for each item, ${keyField ? `kept with its item by its ${js(keyField)}` : 'kept by its place in the list'}.`,
       `${pad}list(l, ${parent}, function () {`,
@@ -1459,6 +1686,39 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   const tree = plan.rootId ? draw(plan.rootId, 'element', 'before', '  ') : [];
 
   /*
+   * HTX-004. The queries that ask without a Fetch (React's mount effect, `component.ts`, copied): once the part is drawn,
+   * so a placed component's ask goes before its parent's, as React runs effects. A query with wired filter values asks
+   * again when one changes, unless only its Fetch asks then.
+   */
+  const asks: string[] = [];
+  for (const q of plan.queries) {
+    const label = nodeById.get(q.nodeId)?.authoredLabel ?? q.nodeId;
+    if (!queryHasEffect(q)) continue;
+    try {
+      const wired = q.params?.wired !== undefined && q.wiredValues !== undefined;
+      const call = queryCall(q, q.wiredValues ?? [], TOP);
+      const set = `${member('state', q.stateName)}.set`;
+      if (!wired) {
+        asks.push(`  // "${label}" asks as it is made.`, `  ${call}.then(${set});`);
+        continue;
+      }
+      const once = q.fetchWired !== undefined && !q.fetchWired.onValues;
+      const reads = once ? [] : (q.wiredValues ?? []).map((v) => expr(v.expr, TOP)!);
+      asks.push(
+        once ? `  // "${label}" asks once as it is made; a new filter value waits for its Fetch.` : `  // "${label}" asks again whenever a filter value it reads changes.`,
+        '  l.watch(function () {',
+        `    return [${reads.join(', ')}];`,
+        '  }, function () {',
+        `    ${call}.then(${set});`,
+        '  });'
+      );
+    } catch (e) {
+      if (!(e instanceof Unprinted)) throw e;
+      lose(q.nodeId, `it asks as it is made with ${e.message}; the ask is left out`);
+    }
+  }
+
+  /*
    * EXP-019 (session 133), React's `<name>Node.late`: a kept Function whose body may call back after its run has returned
    * (a timer, a listener: `JsFunctionPlan.late`). What it writes then lands in its row, and a signal it sends then runs
    * that signal's chain, as the running app's node delivers them when they happen. The row and the pulse arms are the
@@ -1490,7 +1750,8 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       const scope = chainScope();
       scope.runs.set(def.nodeId, run);
       try {
-        body.push(...statement(pulses, '    ', scope).lines);
+        const lines = statement(pulses, '    ', scope).lines;
+        body.push(...(scope.awaits.used ? asyncBody(lines, '    ') : lines));
       } catch (e) {
         if (!(e instanceof Unprinted)) throw e;
         // The row still lands: the signals' chain is the part left out, whole.
@@ -1507,8 +1768,6 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   // What this printer reads in the plan and does not print yet: each a named loss, never a silent drop.
   const UNPRINTED: Array<[keyof ComponentPlan, string]> = [
     ['branchEffects', 'a Condition that tests again on every change (HTX-002)'],
-    ['queries', 'a backend query (HTX-004)'],
-    ['mutations', 'a record write (HTX-004)'],
     ['receivers', 'an Event Receiver'],
     ['streams', 'a streaming node'],
     ['styleSheets', 'a CSS Definition'],
@@ -1579,6 +1838,11 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     imports.dom.add('keep');
     state.push(`    ${key(s.name)}: keep(${s.boot === null ? 'undefined' : js(s.boot)}), // ${s.comment.split('\n')[0]}`);
   }
+  // HTX-004. A Query Records' rows: what it last answered, empty until then (React's `useState<Task[]>([])`).
+  for (const q of plan.queries) {
+    imports.dom.add('keep');
+    state.push(`    ${key(q.stateName)}: keep([]), // the rows "${nodeById.get(q.nodeId)?.authoredLabel ?? q.nodeId}" last answered`);
+  }
   if (valueProps.length > 0) {
     imports.dom.add('keep');
     imports.core.add('batch');
@@ -1590,11 +1854,12 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   for (const def of usedFunctions.values()) {
     if (def.kind !== 'function') continue;
     const path = `functions/${file.dir ? `${file.dir}/` : ''}${file.fileBase}/${def.fnName}.js`;
-    functions[path] = functionFileJs(plan.path, def);
+    functions[path] = functionFileJs(plan.path, def, path, ctx.variableOf);
     fnImports.push(`import { ${def.fnName} } from '${relative(file.dir, path)}';`);
   }
 
   const lines: string[] = [];
+  if (usesSession) useImport('lib/session.js', 'followSession');
   lines.push(`// @nodegx:generated by \`nodegx export --target html\` — ${plan.path}.`);
   if (imports.core.size) lines.push(`import { ${[...imports.core].sort().join(', ')} } from '${relative(file.dir, 'lib/core.js')}';`);
   lines.push(`import { ${[...imports.dom].sort().join(', ')} } from '${relative(file.dir, 'lib/dom.js')}';`);
@@ -1622,6 +1887,9 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   if (state.length) lines.push('  const state = {', ...state, '  };');
   lines.push(...pulsesTaken);
   if (plan.role === 'page' && plan.head?.title) lines.push(`  document.title = ${js(plan.head.title)};`);
+  if (usesSession) {
+    lines.push('  const session = followSession(l); // who is signed in, followed while this part is on the page');
+  }
   lines.push(...keyLines);
   lines.push(...fieldLines);
   lines.push(...nodeLines);
@@ -1635,6 +1903,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   lines.push(...tree);
   if (mounted.length) lines.push('', ...mounted);
   if (lateLines.length) lines.push('', ...lateLines);
+  if (asks.length) lines.push('', ...asks);
   lines.push('');
   lines.push('  return {');
   lines.push('    update(next) {');
@@ -1661,14 +1930,34 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
  * A Function node's file: its body verbatim inside the wrapper the React and Swift exports give it (EXP-019): `Inputs`,
  * `Outputs` (its signals are functions on it), `this` (what it keeps across runs), and `Component`.
  */
-export function functionFileJs(component: string, def: JsFunctionPlan): string {
+export function functionFileJs(component: string, def: JsFunctionPlan, path = '', variableOf: (name: string) => string | undefined = () => undefined): string {
   const signals = def.signals.length ? `{ ${def.signals.map((sig) => `${key(sig)}() {}`).join(', ')} }` : '{}';
+  const dir = path.split('/').slice(0, -1).join('/');
+  const awaits = def.awaits === true;
+  // HTX-004. The Noodl the body reads (EXP-020): the client's members, and each Variable it names over the app's own.
+  const head: string[] = [];
+  const noodl: string[] = [];
+  if (def.noodl !== undefined) {
+    const backend = def.noodl.members.some((m) => m !== 'Variables');
+    if (backend) head.push(`import { noodl } from '${relative(dir, 'lib/noodl.js')}';`);
+    if (def.noodl.variables.length > 0) head.push(`import * as variables from '${relative(dir, 'variables.js')}';`);
+    const pairs = def.noodl.variables.map((name) => {
+      const v = member('variables', variableOf(name) ?? name);
+      return `      get ${key(name)}() {\n        return ${v}.get();\n      },\n      set ${key(name)}(value) {\n        ${v}.set(value);\n      }`;
+    });
+    if (pairs.length === 0) noodl.push('  const Noodl = noodl;');
+    else noodl.push('  const Noodl = {', ...(backend ? ['    ...noodl,'] : []), '    Variables: {', pairs.join(',\n'), '    }', '  };');
+  }
   return [
     `// @nodegx:generated by \`nodegx export --target html\` — the Function node "${def.fnName}" (node ${def.nodeId}) of ${component}.`,
     '// The body is as it was written in NodeGX. It reads `Inputs`, writes `Outputs`, and keeps what it puts on `this`.',
-    `export function ${def.fnName}(Inputs, Outputs = ${signals}, self = {}, Component) {`,
+    ...(awaits ? ['// It awaits: the run returns at its first `await`, and what follows the run waits for the body to finish.'] : []),
+    ...head,
+    ...(head.length ? [''] : []),
+    `export ${awaits ? 'async ' : ''}function ${def.fnName}(Inputs, Outputs = ${signals}, self = {}, Component) {`,
+    ...noodl,
     '  try {',
-    '    (function () {',
+    `    ${awaits ? 'await (async ' : '('}function () {`,
     ...def.body.split('\n'),
     '    }).call(self);',
     '  } catch (e) {',

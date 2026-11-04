@@ -1,44 +1,48 @@
 # Next session — Phase 134, the app in plain files
 
-**Written 2026-11-04 by session 5 (HTX-003 finished).** Read [README.md](README.md) §10 (sessions 1 to 5) first: how
-React's constructs map onto `lib/core.js`, what the desks read, and what is not printed yet. Sessions used: 5 of at most 10.
+**Written 2026-11-04 by session 6 (HTX-004's Build done in jsdom).** Read [README.md](README.md) §10 (sessions 1 to 6)
+first: how React's constructs map onto `lib/core.js`, how the client travels, what the desks read. Sessions used: 6 of at
+most 10.
 
 ## Before anything
 
 1. **Is R4 ruled?** README §9/§10 session 1 ends with the question (double-click: Chrome and Firefox refuse; keep "any
    static server", or also write a bundled copy). If Richard has not answered, carry on: nothing here depends on it.
 2. **BOARD.** Lane 4 is reopened for this phase only (BOARD §2); React and Swift stay paused.
-3. **The box.** Export suites are a heavy job: one at a time, `nice -n 19 … --runInBand`, busy-check by
-   `ps -A -o pid,comm` (never `pgrep -f` in a wait loop). `grep` here skips some `.ts` files as binary: `/usr/bin/grep -a`.
+3. **The box.** Export suites and drives are heavy jobs: one at a time, `nice -n 19 … --runInBand`, busy-check by
+   `ps -A -o pid,comm` (never `pgrep -f` in a wait loop). Other sessions' editors (Electron) were running on 2026-11-04:
+   look before you launch a browser, a backend or a build. `grep` here skips some `.ts` files as binary: `/usr/bin/grep -a`.
 
-## Then: HTX-004 ([task](HTX-004-THE-BACKEND-THROUGH-THE-ONE-CLIENT.md))
+## Then: HTX-004's Chrome drive ([task](HTX-004-THE-BACKEND-THROUGH-THE-ONE-CLIENT.md), Done when)
 
-todo-list on a real backend, through the React export's own client type-stripped (Swift S3's route,
-`emit/swift/client.ts`). Its Done-when now carries HTX-003's Chrome drive too: sign in, add, tick, delete, **open a
-task's page and come back**, reload, three arms (runtime, React, HTML) on one fresh backend each.
+todo-list in Chrome, three arms (the runtime, the React export, the HTML export), **one fresh real backend each**
+(EXP-022 S4's rule): sign in, add, tick, delete, open a task's page and come back, reload. The wire read from the
+backend's own request log, split by step; the three arms equal at every step, or the difference filed. The two writes
+EXP-022 S6 fixed in both exports (add, and every dialog) work here too.
 
-1. **Measure first:** which of todo-list's 87 HTML losses are the backend's (`a record write (HTX-004)`, `cloud-call`,
-   `api-call`, `awaits (HTX-004)`, `reads Noodl`, `a backend query (HTX-004)`), across all templates too (the census
-   is a 30-line script over `emitHtmlApp(...).preflight.htmlLosses`; session 5's lists the top kinds in README §10).
-2. The runtime arm already answers the runtime's `XMLHttpRequest` from `fake-parse-backend.js` (`backend:` option, P18
-   s134); the HTML arm has no backend yet. Start there, as session 5 started with the arm.
+1. **Read EXP-022 S4 and S6 first** (`../phase-18-code-export-v2/EXP-022-THE-SAME-GRAPH-IN-SWIFT.md` §7–§9): how it
+   started a fresh backend per arm, seeded a user, read the request log, and drove the runtime and React arms. Copy that
+   recipe; add the HTML arm (a copy of todo-list bound to the backend, `nodegx export --target html`, served by
+   `python3 -m http.server`).
+2. The endpoint and app id: `env.js` in the HTML folder (`export const env = { VITE_NODEGX_ENDPOINT: …,
+   VITE_NODEGX_APP_ID: … }`), `.env` in the React folder. Nothing generated is edited.
+3. Grade HTX-003's sentence there too: the list right, the field keeping its cursor, nothing run twice.
 
 ## Known
 
-- `tests/html-lists-fields-pages.test.ts` (20 rows, about 18 s): §A Field Desk ×4, §B Root Desk ×3, §C `lib/dom.js`
-  alone, §D the caret, §E Back, §F the Checkbox Desk (F1 pins two cells every export holds, F3 the plan's three
-  refusals in its words). Reuse `COUNTED_CORE` for any leak test.
-- Runtime arm steps: a button's words, `type:`/`enter:` for a field, `tick:<name>` for a box (its label's text, `#1`
-  unlabelled); readings `fields` and `boxes`. The HTML arm takes the same.
-- A checkbox draws `<label class="…Label"><input type="checkbox" class="…">text</label>`; the box keeps the node's
-  local, its label is `<local>Label` (`outerOf`, what a `when` removes).
-- The plan carries a run-on-arrival Function's signal pulses only when its body keeps something (`this.`); a pure one's
-  are refused by name. Not a bug; write desks the templates' way.
-- Options: all 39 in the templates have wired items; the plan leaves them out of every export (P134-HTX003-OPTIONSWIRED).
-  Do not print Options until the plan carries wired items.
-- Still undrawn by the HTML printer: 38 custom nodes, 21 images, 18 icons, 15 Columns. Image and Icon copy React's
-  `renderIcon` and `MEDIA_ATTRS`; the runtime arm mounts neither yet (teach the arm first, as session 5 did).
-- P134-HTX001-PRINTERDECIDES lists twenty-four copied decisions. Copy the next one the same way and add it there.
+- `tests/html-the-backend.test.ts` (22 rows, about 25 s): §A Record Desk (EXP-022 S3's prediction, the wire beside
+  React's), §B Noodl Desk (`s134-noodlapi/EXPECTED.md`, signed in and out), §C what is printed, §D the client over every
+  template bound to a backend, §E the Call Desk (a Cloud Function, beside React only: P134-HTX004-CLOUDARM).
+- The HTML arm takes `backend: { spec, appId, session? }` and `allowErrors`, as the React arm does; `htmlBackendArm`
+  hands back `{ readings, requests }`. `openHtmlExport(files, hash, stored, { prepare, allowErrors })`.
+- todo-list bound to a backend: 29 HTML losses, none the backend's (`html-state-and-scripts.test.ts` D2, D3b). Unbound
+  it sends the person to Sign in (D3): nobody can be signed in without a backend, as in every export.
+- The client is `src/emit/html/client.ts` (`clientFilesEsm`): React's files, types out by Node's stripper,
+  `closeStripped` for the blanks, hooks cut by name, `import.meta.env` → `env.js`. A module line it does not know throws.
+- Options still wait on the plan (P134-HTX003-OPTIONSWIRED). Still undrawn: 38 custom nodes, 21 images, 18 icons, 15
+  Columns. Next big losses across the templates: For Eaches fed by a Function (82, every export), `cssClassName` bound
+  (37), Functions using script files (30), Conditions that test again (22).
+- P134-HTX001-PRINTERDECIDES now lists thirty-two copied decisions and four imported. Add any new one there.
 - Five library files are generated, never edited (`lib/core.js`, `functionRun.js`, `states.js`, `animate.js`,
   `persistStore.js`): regenerate with `npx ts-node --transpile-only -O '{"module":"commonjs"}' tests/helpers/html-core-js.ts`
   in `packages/nodegx-export` after a change to their sources.

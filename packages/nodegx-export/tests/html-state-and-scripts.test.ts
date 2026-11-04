@@ -12,6 +12,8 @@
  */
 
 import { execFileSync } from 'child_process';
+import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 
 import { loadCatalog } from '../src/catalog';
@@ -361,28 +363,57 @@ describe('§D todo-list', () => {
   const TODO = path.join(__dirname, '..', '..', '..', 'templates', 'todo-list');
   const todo = emitHtmlApp(parseProject(TODO, catalog), catalog);
 
-  it('D1 every one of its 36 logic components prints, and 59 Function bodies travel, each in its own file', () => {
+  it('D1 every one of its 36 logic components prints, and 63 Function bodies travel, each in its own file', () => {
     expect(todo.preflight.logic).toHaveLength(36);
-    expect(Object.keys(todo.files).filter((f) => f.startsWith('functions/'))).toHaveLength(59);
+    // 59 in HTX-002; HTX-004 adds the four that read Noodl or await (the minute clock's wake among them).
+    expect(Object.keys(todo.files).filter((f) => f.startsWith('functions/'))).toHaveLength(63);
   });
 
   it('D2 what is left out is named, and none of it is a logic component or a Function it could not place', () => {
     const losses = todo.preflight.htmlLosses.map((l) => l.what);
-    // 368 before HTX-002 (session 2's first measurement), 101 after it, 88 after HTX-003's fields; the rest is the backend
-    // (HTX-004), five For Eaches fed by a Function the plan refuses in every export (EXP-003), and the style ports the React
-    // export drops too.
-    expect(losses.length).toBeLessThanOrEqual(88);
+    // 368 before HTX-002 (session 2's first measurement), 101 after it, 87 after HTX-003, 29 after HTX-004's backend: five
+    // For Eaches fed by a Function the plan refuses in every export (EXP-003), the style ports the React export drops too,
+    // and the app shell's Group.
+    expect(losses.length).toBeLessThanOrEqual(29);
+    expect(losses.filter((w) => /HTX-004|api-call|query|session|record|verb-id|Noodl|awaits/.test(w))).toEqual([]);
     expect(losses.filter((w) => /text field|field-focus|HTX-003/.test(w))).toEqual([]);
     expect(losses.filter((w) => /logic component|states-go|Variable's starting value|a Value Changed/.test(w))).toEqual([]);
   });
 
-  it('D3 its first page runs in jsdom from its own files, with no error, and draws its tabs', async () => {
+  it('D3 as it ships (no backend declared), its first page runs from its own files with no error and, nobody being signed in, sends the person to Sign in', async () => {
+    // HTX-004: the Todo page's session check prints now, as the running app runs it (its User node's Authenticated false).
     const page = await openHtmlExport(todo.files);
     try {
-      expect(page.document.title).toBe('Todo list');
-      for (const words of ['List (0)', 'Today (0)', 'Done (0)', 'Nothing on the list. Add the next thing you need to do.']) expect(page.text()).toContain(words);
+      for (let i = 0; i < 3; i++) await page.settle();
+      expect(page.window.location.hash).toBe('#/sign-in');
+      expect(page.text()).toContain('Sign in, or create an account.');
     } finally {
       page.close();
+    }
+  });
+
+  it('D3b bound to a backend, with a session stored, it draws its tabs and asks for each of its collections once', async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'htx004-todo-'));
+    fs.cpSync(TODO, dir, { recursive: true });
+    const file = path.join(dir, 'nodegx.project.json');
+    const project = JSON.parse(fs.readFileSync(file, 'utf-8'));
+    project.metadata = { ...(project.metadata ?? {}), cloudservices: { endpoint: 'http://backend.test', appId: 'todo', instanceId: 'x', type: 'nodegx' } };
+    fs.writeFileSync(file, JSON.stringify(project));
+    const bound = emitHtmlApp(parseProject(dir, catalog), catalog);
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const fake = require('./helpers/fake-parse-backend').createFakeBackend({ classes: {}, sessions: { 'tok-ann': { objectId: 'u1', username: 'ann' } } });
+    const page = await openHtmlExport(bound.files, '', { 'Parse/todo/currentUser': JSON.stringify({ objectId: 'u1', username: 'ann', sessionToken: 'tok-ann' }) }, { prepare: (w) => (w.fetch = fake.fetch) });
+    try {
+      for (let i = 0; i < 3; i++) await page.settle();
+      expect(page.document.title).toBe('Todo list');
+      for (const words of ['List (0)', 'Today (0)', 'Done (0)', 'Nothing on the list. Add the next thing you need to do.']) expect(page.text()).toContain(words);
+      const asked = fake.log.map((r: { method: string; path: string }) => `${r.method} ${r.path}`);
+      expect(asked).toEqual([...new Set(asked)]);
+      expect(asked).toContain('POST /classes/Task');
+      expect(fake.log.every((r: { signedIn: boolean }) => r.signedIn)).toBe(true);
+    } finally {
+      page.close();
+      fs.rmSync(dir, { recursive: true, force: true });
     }
   });
 });

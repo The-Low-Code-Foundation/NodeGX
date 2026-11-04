@@ -17,10 +17,21 @@
 
 import { openHtmlExport, type HtmlPage } from './html-in-jsdom';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { createFakeBackend } = require('./fake-parse-backend') as { createFakeBackend: (spec: unknown) => { log: unknown[]; fetch: unknown } };
+
 export interface HtmlArmOptions {
   fields?: boolean;
   boxes?: boolean;
   storage?: { keys: string[]; seeds?: Array<Record<string, string>> };
+  /**
+   * P134 HTX-004, the runtime and React arms' option (P18 session 134): the page's `fetch` is `fake-parse-backend.js`, fresh
+   * per scenario, with `session` stored where the running app keeps it (`Parse/<appId>/currentUser`). Read with
+   * {@link htmlBackendArm}, which hands back each scenario's readings and the requests the backend was sent.
+   */
+  backend?: { spec: unknown; appId: string; session?: unknown };
+  /** Console errors a scenario may report (a refused verb's line on the error channel), by their text. */
+  allowErrors?: string[];
 }
 
 const FIELDS = 'input:not([type="checkbox"]), textarea';
@@ -90,9 +101,21 @@ function step(page: HtmlPage, label: string): void {
 
 /** Per scenario: one reading after load, and one after each step. */
 export async function htmlArm(files: Record<string, string>, scenarios: string[][], options: HtmlArmOptions = {}): Promise<string[][][]> {
-  const out: string[][][] = [];
+  return (await htmlBackendArm(files, scenarios, options)).map((s) => s.readings);
+}
+
+/** Per scenario: the readings, and every request the backend was sent (none without `backend`). */
+export async function htmlBackendArm(files: Record<string, string>, scenarios: string[][], options: HtmlArmOptions = {}): Promise<Array<{ readings: string[][]; requests: unknown[] }>> {
+  const out: Array<{ readings: string[][]; requests: unknown[] }> = [];
   for (const [index, steps] of scenarios.entries()) {
-    const page = await openHtmlExport(files, '', options.storage?.seeds?.[index] ?? {});
+    const backend = options.backend;
+    const fake = backend !== undefined ? createFakeBackend(backend.spec) : undefined;
+    const prepare = (w: any) => {
+      if (fake === undefined) return;
+      w.fetch = fake.fetch;
+      if (backend!.session) w.localStorage.setItem(`Parse/${backend!.appId}/currentUser`, JSON.stringify(backend!.session));
+    };
+    const page = await openHtmlExport(files, '', options.storage?.seeds?.[index] ?? {}, { prepare, allowErrors: options.allowErrors });
     try {
       await settled(page, options);
       const readings = [read(page, options)];
@@ -101,7 +124,7 @@ export async function htmlArm(files: Record<string, string>, scenarios: string[]
         await settled(page, options);
         readings.push(read(page, options));
       }
-      out.push(readings);
+      out.push({ readings, requests: fake?.log ?? [] });
     } finally {
       page.close();
     }

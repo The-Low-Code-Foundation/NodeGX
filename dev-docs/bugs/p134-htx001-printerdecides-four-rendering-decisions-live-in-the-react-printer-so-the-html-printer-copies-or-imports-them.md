@@ -59,6 +59,16 @@ with the label text after it when Use Label is on, the label's default "Label"),
 (`changeAttrs`: the row from the box's `checked`, then `changeHandlers`, then its Changed; React's `control-event`), and
 the uncontrolled box's typed-in Checked (`defaultChecked`). Twenty-four in all.
 
+**HTX-004 session 6 (2026-11-04) copied eight more and imported four**, for the backend. Copied, each marked in
+`printComponent.ts`: the record and user verbs' `try`/`catch` (`api-call`: the Id read once, the `Missing Record Id`
+throw, the relation guards, the record local, the Error row, the raise, the Failure chain), the Cloud Function's
+(`cloud-call`: the answer merged over the results row), a Fetch's call (`query-fetch`), the query's mount ask and its
+place after the drawing, a query row's fields (`id` and the collection's declared columns, `renderRepeater`), its key
+(`id`), an awaiting run's split at `awaitsAt` (`jsfun-run`), and `detached` (any awaited step a later wire follows runs
+in its own async body). Imported, made `export` in `component.ts` (React's output unchanged): `API_CALL_ERROR_CODES`,
+`queryHasEffect`, `queryParamsLiteral`, `wiredWhereExpr`. Thirty-two copied in all. The Function file's `Noodl`
+(the client's, with each named Variable over the app's) is the React wrapper's too.
+
 **What a fix needs:** the plan carries each answer as data (`tagOf[nodeId]`, a `mountedKeeps` flag beside the Mounted
 binding, the merged page declarations, the removed ids), and the three printers read it. AC4's ledger (HTX-005) is
 where a drift would show.

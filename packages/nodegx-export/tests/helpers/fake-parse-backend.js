@@ -31,6 +31,8 @@
  * - any path under `/down` (`/classes/Down`, `/functions/down`, `/files/down.png/sign`): the backend cannot be reached —
  *   the XHR answers status 0 with no text, `fetch` rejects as a browser's does.
  * - `POST /functions/empty` — 500 with no body.
+ * - `POST /functions/publishPage` (P134 HTX-004, the Call Desk) — `{ result: { pageId, published: true } }`; with no `pageId`,
+ *   400 `{ code: 141, error: 'No page id.' }`.
  *
  * Anything else answers 404 `{ error: 'No such route: …' }`. An operator the query does not evaluate matches every row.
  */
@@ -123,6 +125,11 @@ function createFakeBackend(spec) {
         return json(200, { result: { id } });
       }
       if (m[1] === 'locked') return json(400, { code: 141, error: 'Not for you.' });
+      // P134 HTX-004, for the Call Desk (`tests/fixtures/call-desk`): a page published, or refused with no page id.
+      if (m[1] === 'publishPage') {
+        const pageId = body && body.pageId;
+        return pageId ? json(200, { result: { pageId: String(pageId), published: true } }) : json(400, { code: 141, error: 'No page id.' });
+      }
       if (m[1] === 'empty') return { status: 500, text: '' };
     }
     if (path === '/users/me' && method === 'GET') return user ? json(200, { ...user, sessionToken: token }) : json(209, { code: 209, error: 'Invalid session token' });

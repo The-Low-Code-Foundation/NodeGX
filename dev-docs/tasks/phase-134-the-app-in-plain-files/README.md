@@ -1,7 +1,7 @@
 # Phase 134 — The app in plain files
 
 **Scoped:** 2026-11-03, on Richard's ask ("Let's scope up the HTML export phase please, I think it'll be important").
-**State:** 🔵 HTX-001, HTX-002 and HTX-003 done (§10, session 5 of at most 10, 2026-11-04): a checkbox ticked by a person, Checked and Unchecked by a chain or a Function, driven by a wire, mounted by a value and placed, as the runtime's own Checkbox does it, at every step but two cells every export holds (filed); before that, text fields, keyed lists, show and hide leak-free, and Back. Twelve desks read exactly what the runtime reads. HTX-003's Chrome drive is HTX-004's (todo-list's lists are records). **HTX-004 next.** Options wait on the plan: all 39 in the templates are left out of every export (P134-HTX003-OPTIONSWIRED). R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
+**State:** 🔵 HTX-001, HTX-002 and HTX-003 done; **HTX-004 half done** (§10, session 6 of at most 10, 2026-11-04): the React export's own backend client travels into the folder as ES modules, its types taken out, and the HTML printer calls it as React does (record and user verbs, queries, the session, Cloud Functions, Functions that await or read `Noodl`). Three desks read in jsdom exactly what was predicted at every step, and send what the React export sends, request for request. todo-list's HTML losses 87 → 29, none of them the backend's. **Left in HTX-004: its Chrome drive**, todo-list on a real backend, three arms (session 7). Options wait on the plan: all 39 in the templates are left out of every export (P134-HTX003-OPTIONSWIRED). R1, R2, R3 and R5 ruled 2026-11-03 (§9); R4 measured, the recommendation stands, waiting on Richard. **Lane 4, reopened by Richard for this
 phase only** (BOARD §2); React and Swift stay paused. **Read first:** this page, then [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md),
 then the task you take. The Swift precedent this phase copies is
 [EXP-022](../phase-18-code-export-v2/EXP-022-THE-SAME-GRAPH-IN-SWIFT.md) §7–§9.
@@ -461,3 +461,65 @@ sheet prints whole: seven boxes with their rows and the Function's pulses into t
 `emitHtml` 282, `libJs` 322. Lines moved out of React's helpers: 0. Tests: the desk 252 lines, §F 110. 106 tests pass in
 five suites (the three HTML specs, the Field and Root desks' React specs, which share the runtime arm); React's and
 Swift's output did not change.
+
+### Session 6 — HTX-004, the backend through the one client (2026-11-04, Opus 5.5)
+
+**Result: the backend travels, in jsdom.** The React export's client (`src/api/*.ts`, `src/lib/noodl.ts`,
+`src/lib/errors.ts`) is carried into the folder as ES modules with its types taken out (`src/emit/html/client.ts`), and
+the HTML printer calls into it construct for construct as the React printer does. The spec is
+`packages/nodegx-export/tests/html-the-backend.test.ts` (22 rows, about 25 s). Every graded row passed on its first run.
+
+**Measured first:** 58 of todo-list's 87 HTML losses were the backend's (23 verb or user calls, 19 record-write groups, 6
+query reads, 4 session reads, 2 Fetches, 2 verb Ids, 1 Noodl body). The client is written only where the project declares
+a backend (`metadata.cloudservices`); without one, React writes stubs, and they travel the same way.
+
+**What travels, and how:**
+
+| React | plain files |
+|---|---|
+| `src/api/client.ts`, `src/api/<class>.ts`, `src/api/session.ts`, `src/lib/noodl.ts`, `src/lib/errors.ts` | `api/client.js`, `api/tasks.js`, `api/session.js`, `lib/noodl.js`, `lib/errors.js`: the same text, every comment, its types out |
+| `import.meta.env.VITE_NODEGX_ENDPOINT` (Vite) | `env` from `env.js`, where a person writes another backend's address (C3 measures it) |
+| `useSession()` | `followSession(l)` in `lib/session.js`: the same stored session and listeners, a `derived` value, not a hook |
+| an `async` handler: `try { await createTask(…); …Done } catch { setError; raiseAppError; …Failure }` | the same body in `void (async function () { … })();`, which runs at once up to its first `await` |
+| `useState<Task[]>([])`, a mount `useEffect` that asks | `state.tasks: keep([])`; the ask after the drawing, so a placed part asks before its parent, as React's effects run |
+| a For Each over a query, `key={task.id}` | `list(…)` keyed by `id`, the row's fields `id` and the collection's declared columns |
+| an awaiting run, `detached` | `await run.settled` before what follows; a step a later wire follows runs in its own async body |
+
+The types come out with Node's stripper (Swift S3's), which turns each type into spaces; `closeStripped` removes only the
+characters the stripper blanked, so nothing in a string or a comment moves, and a line that was only a type goes with its
+doc comment. React's hooks (`useSession`, `useAppError`) are cut with a line naming them, and the `react` import with
+them; a React name still read after that, or a module line of a shape it does not know, throws by name.
+
+**Graded** (predictions written before any arm ran):
+
+- **The Record Desk** (EXP-022 S3's, the backend nodes todo-list is made of): equal to the prediction at all 10
+  readings, including the running app's "true" and "false" for Authenticated, which the React export draws empty
+  (P18-EXP022-S3-BOOLTEXT, pinned in A2). The wire: the React export's 11 requests, in order, with the same bodies; the
+  session rides every one after Log In.
+- **The Noodl Desk** (P18 s134's): equal to `s134-noodlapi/EXPECTED.md` at all 11 readings, signed in and signed out;
+  the wire equal to React's (11 each). One cell was wrong on the first probe (the click's later wire ran after the
+  awaited body): `detached` was printed for record verbs only, and React detaches any awaited step. Fixed before the spec.
+- **The Call Desk** (`fixtures/call-desk`, a Cloud Function's Done, Failure, Error and two results): equal to the
+  prediction and to the React export at all 4 readings, the same two requests. The runtime arm cannot mount a
+  `CloudFunction2` (P134-HTX004-CLOUDARM, filed), so this one is graded against React and the prediction only.
+- **The corpus** (§D): every template bound to a backend carries its client and loads from its own files.
+- **Four mutants, all killed:** the catch not writing the Error row (A1), `detached` ignored (four §B rows), the session
+  not followed (A1), a Fetch's rows not kept (A1).
+
+**Measured on the templates:** 1,572 → 1,318 HTML losses. todo-list 87 → 29: five For Eaches the plan refuses in every
+export (EXP-003), 23 style ports React drops too, the shell's Group. Bound to a backend with a session stored, its first
+page draws its tabs and asks for each of its nine collections once, signed in; as it ships (no backend), it sends the
+person to Sign in, as the running app does (`html-state-and-scripts.test.ts` D3, D3b). 63 Function files travel (59
+before: the four that await or read `Noodl`).
+
+**Not done:** HTX-004's Chrome drive (todo-list, three arms, one fresh real backend each: sign in, add, tick, delete,
+open a task and come back, reload). That is session 7.
+
+**Copied from the React printer** (P134-HTX001-PRINTERDECIDES, now thirty-two copied, four imported): listed there.
+
+**Cost, so far:** 6 sessions (HTX-004 was budgeted one; its drive makes it two). The printer is 2,882 hand-written lines
+(session 5: 2,326): `printComponent` 2,011, `emitHtml` 292, `libJs` 322, `client` 257. Lines moved out of React's
+helpers: 0; four of `component.ts`'s functions are exported now, its output unchanged. Tests: the new spec 325 lines; the
+HTML arm takes `backend:` and `allowErrors` as the React arm does; `fake-parse-backend.js` answers `publishPage`. Nine
+suites pass (196 tests): the four HTML specs, React's Noodl, Cloud Function and Record specs, Swift S3, the CLI.
+

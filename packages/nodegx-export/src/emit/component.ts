@@ -93,12 +93,12 @@ import { computeNodeStyle, computeRoleCss, CONTENT_ATTR_ORDER, CONTENT_PARAMS, D
  * P18-S116-QUERYFETCH. Whether the page asks for a query in an effect: always, unless its Fetch is wired and no box asks
  * (none at mount, and no wired filter value whose box asks on a change).
  */
-function queryHasEffect(query: QueryPlan): boolean {
+export function queryHasEffect(query: QueryPlan): boolean {
   const fetched = query.fetchWired;
   return fetched === undefined || fetched.mount || (fetched.onValues && query.params?.wired !== undefined);
 }
 
-function queryParamsLiteral(params: NonNullable<QueryPlan['params']>, whereLocal?: string): string {
+export function queryParamsLiteral(params: NonNullable<QueryPlan['params']>, whereLocal?: string): string {
   const parts: string[] = [];
   if (whereLocal !== undefined) parts.push(whereLocal === 'where' ? 'where' : `where: ${whereLocal}`);
   else if (params.where !== undefined) parts.push(`where: ${JSON.stringify(params.where)}`);
@@ -113,7 +113,7 @@ function queryParamsLiteral(params: NonNullable<QueryPlan['params']>, whereLocal
  * a conditional on each value being set, down to the translator's own document for that combination. Two branches that
  * print the same collapse into one; `undefined` is no `where`.
  */
-function wiredWhereExpr(wired: WiredWhere, locals: string[], valueCode: (name: string, date: boolean) => string): string {
+export function wiredWhereExpr(wired: WiredWhere, locals: string[], valueCode: (name: string, date: boolean) => string): string {
   const at = (index: number, mask: number): string => {
     if (index === wired.params.length) {
       const where = wired.cases[mask];
@@ -8526,7 +8526,7 @@ function recordKeyDeclaration(key: string): string {
  * EXP-011 §54. The code each `api-call` type raises its failure under — the record verbs share one funnel
  * (`dbmodelcrudbase.ts` STORAGE_OP_ERROR_CODE), the user family one code per node file.
  */
-const API_CALL_ERROR_CODES: Record<string, string> = {
+export const API_CALL_ERROR_CODES: Record<string, string> = {
   NewDbModelProperties: 'record/storage-op-failed',
   SetDbModelProperties: 'record/storage-op-failed',
   DeleteDbModelProperties: 'record/storage-op-failed',

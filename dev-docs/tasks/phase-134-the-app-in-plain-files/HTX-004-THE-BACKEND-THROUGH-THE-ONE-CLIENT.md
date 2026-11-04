@@ -1,6 +1,10 @@
 # HTX-004 — The backend through the one client
 
-**Phase:** [134](README.md). **AC:** AC3. **Sessions:** 1. **Needs:** HTX-003.
+**Phase:** [134](README.md). **AC:** AC3. **Sessions:** 1 (now 2). **Needs:** HTX-003.
+
+**Status (2026-11-04, session 6):** 🔵 the Build is done and graded in jsdom (README §10 session 6,
+`tests/html-the-backend.test.ts`): the client travels, and the Record, Noodl and Call desks read what was predicted at
+every step and send what the React export sends. **Left: the Chrome drive below** (session 7).
 
 ## The sentence
 

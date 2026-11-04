@@ -23,3 +23,7 @@ would draw nothing too; that reach was not counted.
 
 **Fix (for the React session, which owns `component.ts`):** print a Text's bound value through the runtime's own rule,
 `value === null || value === undefined ? '' : String(value)`, at least where the source can be a boolean.
+
+**P134 HTX-004 (2026-11-04):** the HTML export prints the runtime's rule (`lib/dom.js` `show()`), so on the Record Desk it
+draws "true" and "false" where the Swift app does and React draws nothing (`tests/html-the-backend.test.ts` A1, A2). React
+is now the one export of three without it.

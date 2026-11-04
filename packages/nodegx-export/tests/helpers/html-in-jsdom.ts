@@ -48,8 +48,15 @@ export async function bundleApp(files: Record<string, string>, entry = 'app.js')
   return result.outputFiles[0].text;
 }
 
+export interface OpenOptions {
+  /** P134 HTX-004. Runs on the window before the app's script: a backend's `fetch`, say. */
+  prepare?: (window: any) => void;
+  /** Console errors the page may report without failing (a refused verb's line on the error channel), by their text. */
+  allowErrors?: string[];
+}
+
 /** `stored`: what the browser's storage holds before the page loads (a reload's leavings: the arms' `storage.seeds`). */
-export async function openHtmlExport(files: Record<string, string>, hash = '', stored: Record<string, string> = {}): Promise<HtmlPage> {
+export async function openHtmlExport(files: Record<string, string>, hash = '', stored: Record<string, string> = {}, options: OpenOptions = {}): Promise<HtmlPage> {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { JSDOM, VirtualConsole } = require('jsdom') as { JSDOM: new (html: string, options?: unknown) => any; VirtualConsole: new () => any };
   const errors: string[] = [];
@@ -58,7 +65,10 @@ export async function openHtmlExport(files: Record<string, string>, hash = '', s
     // jsdom draws nothing, so it has no scrolling: the router's scroll to the top is a no-op there.
     if (!/Not implemented: window\.scrollTo/.test(e.message)) errors.push(e.message);
   });
-  virtualConsole.on('error', (...args: unknown[]) => errors.push(args.map(String).join(' ')));
+  virtualConsole.on('error', (...args: unknown[]) => {
+    const text = args.map(String).join(' ');
+    if (!(options.allowErrors ?? []).some((allowed) => text.includes(allowed))) errors.push(text);
+  });
   const dom = new JSDOM(files['index.html'].replace(/<script type="module"[^>]*><\/script>/, ''), {
     url: `http://localhost/index.html${hash}`,
     runScripts: 'outside-only',
@@ -66,6 +76,7 @@ export async function openHtmlExport(files: Record<string, string>, hash = '', s
     virtualConsole
   });
   for (const [k, text] of Object.entries(stored)) dom.window.localStorage.setItem(k, text);
+  options.prepare?.(dom.window);
   dom.window.eval(await bundleApp(files));
   const settle = async () => {
     for (let i = 0; i < 5; i++) await new Promise((r) => dom.window.setTimeout(r, 0));

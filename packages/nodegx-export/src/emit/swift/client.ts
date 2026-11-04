@@ -59,7 +59,7 @@ function resolve(from: string, spec: string): string {
 
 let strip: ((code: string) => string) | undefined;
 /** Node's own type stripper, with its one-time "experimental" warning kept off the person's terminal. */
-function stripTypes(code: string): string {
+export function stripTypes(code: string): string {
   if (strip === undefined) {
     // A namespace read, not a named import: on a Node without it the package still loads, and only this export refuses.
     const mod = nodeModule as unknown as { stripTypeScriptTypes?: (code: string, options?: { mode: 'strip' }) => string };
