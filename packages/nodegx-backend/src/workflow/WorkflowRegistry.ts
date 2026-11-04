@@ -22,6 +22,7 @@ import * as path from 'path';
 import { ApiCallLookup, validateCallUses } from './apiCalls';
 import { validateWorkflowDefinition } from './WorkflowEngine';
 import { migrateDefinition } from './steps/migrate';
+import { validatePieceUses } from './pieces';
 import type { WorkflowDefinition, WorkflowInput } from './types';
 
 const DIR = 'workflow-defs';
@@ -227,6 +228,8 @@ export class WorkflowRegistry {
   private writeErrors(def: WorkflowDefinition): string[] {
     const errors = validateWorkflowDefinition(def);
     if (!errors.length && this.apiCalls) errors.push(...validateCallUses(def, this.apiCalls));
+    // P132 BWF-013: a workflow that would run itself, directly or round a ring of pieces
+    if (!errors.length) errors.push(...validatePieceUses(def, this.defs.values()));
     return errors;
   }
 

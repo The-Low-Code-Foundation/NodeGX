@@ -77,6 +77,16 @@ export interface RunOptions {
   stopAfter?: string;
   /** P132 BWF-002 — a person's test from an editor, on a sample. Marked on the record; the run is otherwise real. */
   test?: boolean;
+  /**
+   * P132 BWF-013: this run is a piece another run's `run-workflow` step started. `depth` counts the pieces above it
+   * (1 for a piece run by a top-level run); the record names the run and step that started it.
+   */
+  parent?: { executionId: string; workflowId: string; stepId: string; depth: number };
+  /**
+   * P132 BWF-013: whether the run counts as the app (P127-BKO006-SCHEDULEAUTH), when it is not the trigger type's to
+   * say: a piece run by a schedule's run is the app's, though a step, not a schedule, started it.
+   */
+  startedByApp?: boolean;
 }
 
 /** A step's error message ended as a sentence, so another can follow it. */
@@ -431,7 +441,11 @@ export class WorkflowEngine {
           // BAK-009: the request that started this run, when an HTTP request did.
           ...(opts.trigger.requestId ? { requestId: opts.trigger.requestId } : {}),
           ...(opts.test ? { test: true } : {}),
-          ...(opts.stopAfter ? { stopAfter: opts.stopAfter } : {})
+          ...(opts.stopAfter ? { stopAfter: opts.stopAfter } : {}),
+          // P132 BWF-013: a piece's run names the run and step that started it (an editor's *Open that run* goes back)
+          ...(opts.parent
+            ? { parentExecutionId: opts.parent.executionId, parentWorkflowId: opts.parent.workflowId, parentStepId: opts.parent.stepId, pieceDepth: opts.parent.depth }
+            : {})
         }
       }) || '';
 
@@ -588,7 +602,8 @@ export class WorkflowEngine {
             upstream,
             signal,
             // P127-BKO006-SCHEDULEAUTH: a run the app started itself lets its function steps past "signed in only".
-            ...(runStartedByApp(opts.trigger.type) ? { startedByApp: true } : {})
+            ...((opts.startedByApp ?? runStartedByApp(opts.trigger.type)) ? { startedByApp: true } : {}),
+            run: { executionId, workflowId: def.id, depth: opts.parent?.depth ?? 0, ...(opts.test ? { test: true } : {}) }
           };
           const result = await this.runStepGuarded(ctx, timeoutMs, signal);
           const output = result.output;

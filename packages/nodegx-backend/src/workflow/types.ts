@@ -68,7 +68,9 @@ export type StepKind =
   // P132 BWF-006: an outside API, its key named from Secrets
   | 'http-request'
   // P132 BWF-007: an email, through the backend's own SMTP settings
-  | 'send-email';
+  | 'send-email'
+  // P132 BWF-013 (R6): a reusable piece, a workflow others run
+  | 'run-workflow';
 
 export interface WorkflowStep {
   /** Unique within the workflow. Doubles as the execution-history `nodeId`. */

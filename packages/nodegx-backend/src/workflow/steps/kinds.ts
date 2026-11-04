@@ -151,8 +151,14 @@ import { isPlainObject, VALUE_LANGUAGE } from './values';
  * Degradation: an editor that finds no route `displayName` draws the name, as
  * every editor did before. A dynamic route (a switch's case) has none: its
  * words are the case label the author typed.
+ *
+ * 1.10.0 — P132 BWF-012: saved API calls (`call` and `fill` on `http-request`, `savedCalls`).
+ *
+ * 1.11.0 — P132 BWF-013 (R6): the `run-workflow` kind, a reusable piece being a workflow others run, and `pieces`
+ * saying this backend runs one. Degradation: an older backend refuses the kind ("unknown kind"); an editor that finds
+ * no `pieces` offers no *Run a workflow* and no *Make a reusable piece*.
  */
-export const STEP_KIND_CATALOG_VERSION = '1.10.0';
+export const STEP_KIND_CATALOG_VERSION = '1.11.0';
 
 export interface StepParamSpec {
   name: string;
@@ -500,6 +506,50 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
         'saying `kind: "retry"` is migrated on read, forever.',
       'Backoff waits are cancellable: cancelling the run or tripping the workflow timeout aborts the wait ' +
         'immediately rather than sleeping out the delay.'
+    ]
+  },
+
+  'run-workflow': {
+    kind: 'run-workflow',
+    displayName: 'Run a workflow',
+    category: 'Workflow',
+    source: 'P132 BWF-013',
+    summary: 'Runs another workflow, a reusable piece, with values handed in, and hands on what it answers.',
+    whenToUse:
+      'The same steps are wanted in more than one workflow: put them in one workflow of their own (a piece, usually ' +
+      'one no trigger starts, ending in a `return`) and run it from each with this step, instead of copying the ' +
+      'steps. Values go in with `send` and arrive in the piece as `body.<name>`; a change to the piece reaches every ' +
+      'workflow that runs it. A cloud function is still the way for work no step expresses.',
+    invokesFunction: false,
+    params: [
+      {
+        name: 'workflow',
+        type: 'string',
+        required: true,
+        displayName: 'Workflow',
+        control: 'workflow',
+        description: 'The id of the workflow to run (GET /admin/workflow-defs, the project file\'s `workflows`). It may not run the workflow it is in, directly or through others.'
+      },
+      {
+        name: 'send',
+        type: 'object',
+        displayName: 'Send',
+        control: 'key-values',
+        description:
+          'Named values handed to the piece: `{ "<name>": <value> }`, each a literal, `{"$path": …}` or a formula. The piece reads ' +
+          'them as `body.<name>`.'
+      }
+    ],
+    routes: [],
+    output:
+      '`{ result, run }` — `result` what the piece answered (its `return` value, else its last step\'s output), `run` the ' +
+      'piece\'s own run id (its record names this run and step).',
+    clientEquivalent: 'A component used inside another, for steps: one place to change, used by name.',
+    notes: [
+      'The piece runs as its own recorded run. If it fails, this step fails with the piece\'s reason, so `onError` applies.',
+      'A ring (a runs b, b runs a, or a workflow running itself) is refused when the workflow is saved; a run more than ' +
+        '8 pieces deep is refused when it would start.',
+      'A piece that does not exist yet is allowed when the workflow is saved (write the piece next) and fails the step if it runs.'
     ]
   },
 
@@ -1477,6 +1527,8 @@ export interface StepKindCatalog {
    * Absent on an older backend, which refuses a step with `call` and no address ("needs a url").
    */
   savedCalls?: boolean;
+  /** P132 BWF-013: this backend runs a `run-workflow` step (a reusable piece). Absent on an older backend. */
+  pieces?: boolean;
   /**
    * P132 BWF-004: the closed formula set (`{"$fn": …}`), with each formula's words, sentence, typed args and what
    * it gives — what a formula picker offers and what an agent writes instead of a cloud function for a small sum.
@@ -1497,6 +1549,7 @@ export function stepKindCatalog(): StepKindCatalog {
     migratedKinds: { ...MIGRATED_STEP_KINDS },
     testRuns: true,
     savedCalls: true,
+    pieces: true,
     formulaLanguage: FORMULA_LANGUAGE
   };
 }
@@ -1830,6 +1883,14 @@ export function validateStepShape(step: WorkflowStep): string[] {
 
     case 'send-email': {
       errors.push(...validateSendEmailParams(p, at));
+      break;
+    }
+
+    case 'run-workflow': {
+      // P132 BWF-013. A ring is the registry's check (it needs the other workflows); here, the step's own shape.
+      if (p.workflow === undefined || p.workflow === '') errors.push(`${at}: run-workflow needs "workflow", the id of the workflow to run`);
+      else if (!isValueSpec(p.workflow) && typeof p.workflow !== 'string') errors.push(`${at}.params.workflow must be a workflow's id`);
+      if (p.send !== undefined && (!isPlainObject(p.send) || isValueSpec(p.send))) errors.push(`${at}.params.send must be named values, { "<name>": <value> }`);
       break;
     }
 

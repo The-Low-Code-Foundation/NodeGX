@@ -1,5 +1,30 @@
 # P132 — next session
 
+**s16 (2026-11-04): BWF-012 driven in the Electron app, green; BWF-013's engine built.**
+- BWF-012 AC1 + AC2 by real presses on a Greenhouse copy ([greenhouse-drive-bwf012.mjs](greenhouse-drive-bwf012.mjs),
+  [the record](BWF-012-SAVED-API-CALLS.md#s16-2026-11-04-ac1-and-ac2-green-in-the-electron-app-by-presses)). Three look
+  fixes in nodegx-studio `54bf770` (a blank reads "city · from each workflow", one tick per line, the list heading).
+- BWF-013 Build 1 (this commit): the `run-workflow` kind, the piece's own run linked to its parent, rings refused by
+  name, depth cap 8, catalog **1.11.0** `pieces: true`
+  ([the record](BWF-013-A-REUSABLE-PIECE-IS-A-WORKFLOW-OTHERS-RUN.md#s16-2026-11-04-build-1-the-engine-built-studio-make-a-reusable-piece-and-the-editor-are-next)).
+
+**Next, in this order:**
+1. **BWF-013 Build 2 in Studio**: *Reusable pieces* lists the workflows no trigger starts, with *New* (a piece: name,
+   first step), who runs each; cloud functions under them as "made by the agent". A `run-workflow` step's panel: the
+   piece picked by name (catalog `control: 'workflow'`), `send` as named values with composers, *Open the piece ↗*,
+   and *Open that run* from the step's `run`. Studio asks `beNow().pieces` before offering any of it.
+   **Rebuild `packages/nodegx-backend/dist` first** (`npm run build`), and drive with `NODEGX_REPO`.
+2. Build 3: *Make a reusable piece* from selected steps. Build 4: the editor draws the kind. Then AC3's agent round.
+
+- 🔴 **P132-PRESSLOSTINREDRAW** (filed, low): a press that straddles a list or canvas rebuild gets mousedown and
+  mouseup but no click. The rebuilds come in the ~80 ms after an action, so the drive waits 1 s after opening the tab.
+  In a new drive, if a press "does nothing", log `pointerdown/mousedown/mouseup/click` first.
+- 🔴 OBS was recording at 410 % CPU this session: check:automations froze once (60 s on a row click) and check:editor's
+  CCN-002 clash line went red once; both green on re-run. Under that load, re-run a lone red once before reading it.
+- Asks for Richard: none new.
+
+---
+
 **s15 (2026-11-04): BWF-012 built** ([the record](BWF-012-SAVED-API-CALLS.md#s15-2026-11-04-built-engine-file-mcp-studio-ac1-and-ac2-green-in-chrome)),
 NodeGX (this commit) + nodegx-studio `60796d4`. A saved API call is Call an API's settings kept once in the file's
 `apiCalls`, its blanks `{"$path": "fill.<blank>"}`; a step uses it as `{ call, fill }`, read when the step runs.

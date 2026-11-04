@@ -1319,6 +1319,53 @@ to before the first test that sends one.
 
 ---
 
+### `run-workflow`
+
+*Run a workflow* (P132 BWF-013, ruling R6). Runs another workflow, a
+**reusable piece**, with values handed in, and hands on what it answers. A
+piece is an ordinary workflow, usually one no trigger starts, ending in a
+`return`. Use it when the same steps are wanted in more than one workflow,
+instead of copying them: a change to the piece reaches every workflow that runs it.
+
+| Param | Default | Description |
+|---|---|---|
+| `workflow` | — (required) | The id of the workflow to run. It may not be the workflow the step is in, directly or through others. |
+| `send` | `{}` | Named values handed to the piece, `{ "<name>": <value> }`, each a literal, `{"$path"}` or a formula. The piece reads them as `body.<name>`. |
+
+**Output:** `{ result, run }` — `result` what the piece answered (its `return`
+value, else its last step's output), `run` the piece's own run id.
+
+**The piece's run is its own.** It has its own record, which names the run and
+the step that started it (`parentExecutionId`, `parentWorkflowId`,
+`parentStepId`, `pieceDepth` in its metadata). A test run's piece is marked as
+a test too, and a piece run by a run the app started (a schedule, a row change,
+Studio) counts as the app.
+
+**A failing piece fails the step**, with the piece's name and its own reason
+(`the piece "Always fails" failed at its step "Say no": …`), so the step's
+`onError` route applies. Cancelling the run cancels the piece's.
+
+**Rings are refused when a workflow is saved**, naming them: `"a" runs "b",
+which runs "a" again`, or `"loop" runs itself`. A run more than 8 pieces deep is
+refused when it would start (a guard for a ring that reached the disk another
+way). A piece that does not exist yet is allowed, with a warning, so the piece
+can be written after the workflow that runs it; the step fails, naming it, if it
+runs first.
+
+```jsonc
+// the piece: no trigger starts it
+{ "id": "how-thirsty", "name": "How thirsty", "entry": "say",
+  "steps": [{ "id": "say", "kind": "return",
+              "params": { "value": { "$fn": "text", "args": [{ "$path": "body.plant" }, " is thirsty"] } } }] }
+// a workflow that runs it
+{ "id": "ask", "kind": "run-workflow",
+  "params": { "workflow": "how-thirsty", "send": { "plant": { "$path": "upstream.find.first.name" } } },
+  "next": ["tell"] }
+// later steps read upstream.ask.result
+```
+
+---
+
 ### `stop`
 
 Ends this path deliberately.

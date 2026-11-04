@@ -31,6 +31,8 @@ import {
 import type { ApiCallLookup } from '../apiCalls';
 import { HttpRequestStepExecutor } from './http';
 import { SendEmailStepExecutor } from './email';
+import { RunWorkflowStepExecutor } from './runWorkflow';
+import type { PieceRunner } from './runWorkflow';
 import { ReturnStepExecutor } from './returns';
 import { WaitStepExecutor, WaitUntilStepExecutor } from './timing';
 import { TransformStepExecutor } from './transform';
@@ -40,6 +42,8 @@ export interface CompositeStepExecutorDeps {
   getRunner: () => WorkflowRunner | null;
   /** P132 BWF-012: the backend's saved API calls, read when a step that uses one runs. */
   getApiCall?: ApiCallLookup;
+  /** P132 BWF-013: runs a reusable piece (another workflow) for a `run-workflow` step. */
+  getPieceRunner?: () => PieceRunner | null;
   /** Test hook: override individual kinds (used to stub function invocation). */
   overrides?: Partial<Record<StepKind, StepExecutor>>;
 }
@@ -71,6 +75,7 @@ export class CompositeStepExecutor implements StepExecutor {
       'find-records': new FindRecordsStepExecutor(getRunner),
       'http-request': new HttpRequestStepExecutor(deps.getApiCall),
       'send-email': new SendEmailStepExecutor(),
+      'run-workflow': new RunWorkflowStepExecutor(deps.getPieceRunner || (() => null)),
       ...(deps.overrides || {})
     } as Record<StepKind, StepExecutor>;
   }

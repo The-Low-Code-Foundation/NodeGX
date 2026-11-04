@@ -33,3 +33,47 @@ with no trigger** that other workflows run. This reverses "sub-workflows" in the
   second workflow, both tested.
 - AC2: two steps of *TriggerTest* grouped into a piece; the workflow's test gives the same result before and after.
 - AC3: a ring is refused with both names; an agent asked to reuse steps across two workflows writes `run-workflow`.
+
+## s16 (2026-11-04): Build 1 (the engine) built; Studio, *Make a reusable piece* and the editor are next
+
+**The kind.** `run-workflow` (*Run a workflow*, category Workflow, beside *Call Function* in the catalog's order):
+`workflow` (an id, required) and `send` (`{ <name>: value }`, each a literal, `$path` or formula, resolved by the
+engine). The piece runs as **its own recorded run** through the same engine, `send` arriving as its `body` (built by
+`buildRunPayload`, type `internal_event`, so `body.<name>` reads it as any run's body). The step's output is
+`{ result, run }`: `result` what the piece answered (its `return`, else its last step's output), `run` the piece's run
+id. Same `result` wrapper as a function step's, so `pathWords` already says `upstream.ask.result.x` as "x".
+- The piece's record names its parent: `parentExecutionId`, `parentWorkflowId`, `parentStepId`, `pieceDepth` (for
+  *Open that run* in both directions).
+- A failing piece fails the step: `the piece "Always fails" failed at its step "Say no": <its message> (its run: …)`,
+  so `onError` applies. A cancelled parent cancels the piece (through `onStarted`, the run id as soon as it opens).
+- Handed on: the test mark, and "started by the app" (P127-BKO006-SCHEDULEAUTH). A piece run by a schedule's run
+  counts as the app, though `internal_event` alone would not (`RunOptions.startedByApp`).
+- **Rings refused at write** (`WorkflowRegistry.writeErrors` → `pieces.ts validatePieceUses`), naming them: `"ring-b"
+  runs "ring-a", which runs "ring-b" again`, `"loop" runs itself`. **A depth cap of 8** at run time, the second guard.
+- **A piece not written yet is a warning, not a refusal** (`definitionWarnings(def, hasWorkflow)` on the admin routes):
+  a project file seeds workflow by workflow in its own order, and an agent may write the runner first. The step fails
+  naming it if it runs.
+- Catalog **1.11.0**, `pieces: true`. WORKFLOW-NODES.md has a `run-workflow` section.
+
+Files: `workflow/pieces.ts` (pure: `pieceOf`, `piecesRunBy`, `ringThrough`, `ringWords`, `MAX_PIECE_DEPTH`),
+`workflow/steps/runWorkflow.ts` (the executor and the `PieceRunner` seam), `WorkflowSubsystem.pieces` (the runner),
+`StepExecContext.run` (`executionId`, `workflowId`, `depth`, `test`), `RunOptions.parent` / `startedByApp`.
+
+**Gates.** `tests/p132-bwf-013-pieces.test.ts` 11/11 over a real BackendService: two workflows run one piece with
+their own values (AC1's engine half); the record links; a failing piece's reason reaches the parent's `onError`; ring
+and self refused with names (and the refused one is not stored); the unwritten piece warned then failing by name; the
+test mark on the child; the depth cap; what is handed on; cancel. The 44 suites reaching the workflow layer: 670/677
+with the 7 being pins this moves (the catalog version in 5, the `source` pattern that allowed only `BWF-00x`, the
+kind list in 2), moved, all green. `tsc --noEmit` clean. No MCP or editor test pins the version or the kind list.
+
+**Not done (next):**
+- Build 2: Studio's *Reusable pieces* list shows workflows no trigger starts, with *New*; a piece's row says who runs
+  it; cloud functions under them as "made by the agent". A `run-workflow` step's panel: a workflow picker
+  (`control: 'workflow'`, new) and `send` as key-values with composers; *Open the piece ↗*; the run's *Open that run*.
+- Build 3: *Make a reusable piece* from selected steps (shift-press), one chain in, one way out, `send` from
+  `readSources`; refused in words otherwise.
+- Build 4: the NodeGX editor draws the kind (it reads the catalog; `control: 'workflow'` is new to it, NOT CHECKED).
+- The MCP: an agent can write `run-workflow` (it is a kind like any other); `list_backend_workflows` does not say who
+  runs a piece. AC3's agent round after Build 2.
+- Studio from the kit has none of it until a release carries catalog 1.11.0.
+- Rebuild `packages/nodegx-backend/dist` before a Studio drive (`npm run build`): not done this session.

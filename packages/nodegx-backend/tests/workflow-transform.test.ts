@@ -291,7 +291,7 @@ describe('CWF-004 the catalog', () => {
     // `formulaLanguage`.
     // Kept as a literal rather than read from the constant, so a shape change
     // has to be a deliberate edit here as well as there.
-    expect(wire.version).toBe('1.10.0'); // P132 BWF-012: saved API calls (call, fill, savedCalls)
+    expect(wire.version).toBe('1.11.0'); // P132 BWF-013: run-workflow, a reusable piece (pieces)
     expect(wire.transformLanguage.ops.map((o) => o.name).sort()).toEqual([...TRANSFORM_OP_NAMES].sort());
     // The table and its served description cannot drift: removing an op from
     // the backend has to remove it from the editor's picker with no editor

@@ -28,6 +28,8 @@ import { ApiCallConfigError, ApiCallRegistry } from './ApiCallRegistry';
 import { callsUsedBy } from './apiCalls';
 import type { ApiCallDefinition, ApiCallInput } from './apiCalls';
 import { WorkflowRegistry } from './WorkflowRegistry';
+import type { PieceRunner } from './steps/runWorkflow';
+import { buildRunPayload } from './runPayload';
 import type { WorkflowRunResult } from './types';
 
 export interface WorkflowSubsystemDeps {
@@ -57,11 +59,33 @@ export class WorkflowSubsystem {
     this.registry = new WorkflowRegistry(deps.dataDir, getApiCall);
     this.engine = new WorkflowEngine({
       executions: deps.executions,
-      executor: deps.executor || new CompositeStepExecutor({ getRunner: deps.getRunner, getApiCall }),
+      executor: deps.executor || new CompositeStepExecutor({ getRunner: deps.getRunner, getApiCall, getPieceRunner: () => this.pieces }),
       backendId: deps.backendId,
       backendName: deps.backendName
     });
   }
+
+  /**
+   * P132 BWF-013: how a `run-workflow` step runs its piece: the piece's own run, through this engine, its record naming
+   * the run and step that started it. Not a trigger: the run's type says a workflow started it.
+   */
+  readonly pieces: PieceRunner = {
+    run: async (req) => {
+      const def = this.registry.get(req.workflow);
+      if (!def) return null;
+      const result = await this.engine.run(def, {
+        trigger: { type: 'internal_event', source: `workflow ${req.parent.workflowId} step ${req.parent.stepId}`, ...(req.onStarted ? { onStarted: req.onStarted } : {}) },
+        payload: buildRunPayload({ type: 'internal_event', body: req.body }),
+        parent: req.parent,
+        startedByApp: !!req.startedByApp,
+        ...(req.test ? { test: true } : {})
+      });
+      return { result, name: def.name || def.id };
+    },
+    cancel: (executionId) => {
+      this.engine.cancel(executionId);
+    }
+  };
 
   /** The workflows that use a saved call, by id. */
   usersOfApiCall(id: string): string[] {

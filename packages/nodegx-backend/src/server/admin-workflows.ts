@@ -228,7 +228,7 @@ export class AdminWorkflowRoutes {
     sendJSON(ctx.res, 200, {
       valid: errors.length === 0,
       errors,
-      warnings: definitionWarnings(definition ?? (body as unknown as WorkflowDefinition)),
+      warnings: definitionWarnings(definition ?? (body as unknown as WorkflowDefinition), (id) => !!this.subsystem().registry.get(id)),
       definition
     } satisfies WorkflowValidateResponse);
   }
@@ -246,7 +246,7 @@ export class AdminWorkflowRoutes {
   private upsert(ctx: RequestContext, input: WorkflowInput, id: string | undefined, status: number): void {
     try {
       const def = this.subsystem().registry.upsert({ ...input, id: id || input.id });
-      sendJSON(ctx.res, status, { workflow: def, warnings: definitionWarnings(def) } satisfies WorkflowResponse);
+      sendJSON(ctx.res, status, { workflow: def, warnings: definitionWarnings(def, (wid) => !!this.subsystem().registry.get(wid)) } satisfies WorkflowResponse);
     } catch (e) {
       if (e instanceof WorkflowConfigError) throw new HttpError(400, e.message);
       throw e;

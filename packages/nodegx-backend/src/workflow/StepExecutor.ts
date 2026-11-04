@@ -84,6 +84,12 @@ export interface StepExecContext {
    * a function step passes its Request node's "signed in only" check. Absent for a webhook's run.
    */
   startedByApp?: boolean;
+  /**
+   * P132 BWF-013: the run this step belongs to: its record's id, how many pieces deep it is (0 for a run a trigger, a
+   * call or a person started), and whether it is a person's test. A `run-workflow` step hands these on to the piece's
+   * run. Absent where a context is built by hand (tests).
+   */
+  run?: { executionId: string; workflowId: string; depth: number; test?: boolean };
 }
 
 /**

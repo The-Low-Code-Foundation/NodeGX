@@ -107,8 +107,47 @@ to point at a real service. 🔴 It found the call by grepping the project's fil
 - **Studio from the kit** has none of it until a NodeGX release carries catalog 1.10.0 (Studio refuses in words).
 - An older backend refuses a project file that has `apiCalls` ("unknown key"): a project that uses saved calls needs
   a backend at this commit or later.
-- Not driven in the Electron app on a Greenhouse copy yet (the Chrome gate's `.click()` and focus are not a person's:
-  s4's and s14's lessons). Next session's first job, before BWF-013.
+- ~~Not driven in the Electron app~~: driven in s16, below.
 - In a saved call's panel a blank can be removed and its example changed; a new blank can only be made by *Save this
   call* (no "+ A blank" with a place to put it). A step that uses a call has no *Stop using it* (copy the settings in).
 - P132-FOCUSBYINDEX filed (low): the panel restores the focus by position, the mechanism under s15's drive miss.
+
+## s16 (2026-11-04): AC1 and AC2 green in the Electron app, by presses
+
+[greenhouse-drive-bwf012.mjs](greenhouse-drive-bwf012.mjs): a Greenhouse copy, Studio's Electron app at `60796d4` +
+s16's fixes, the backend from the NodeGX checkout, a weather API run by the script on 127.0.0.1. Every step was a CDP
+mouse press or typed text, with no `.click()` on the product's controls (the Backend tab's rail button aside).
+- *When a plant is watered*: the Watering sample kept; *Add a step after* → *Call an API*; *Paste a curl command* with
+  `?city=Paris&units=metric` and a Bearer key; the key asked a Secret's name (`API_KEY` offered, value hidden),
+  `WEATHER_KEY` typed. *Save this call*: the box offers the address, city and units unticked (the city was typed, not
+  read from the run); city ticked by a press, "The weather" typed, *Save the call*. The step became
+  `{ call: "the-weather", fill: { city: "Paris" } }`, the file's `apiCalls` holds the address, `units`, the Secret's
+  name and the blank `city` (example "Paris"). The list row says "Used by 1 workflow · fills in city". Tested: success,
+  the API saw `/forecast?city=Paris` with the key.
+- *The morning check* (a schedule starts it, the other way in): the schedule's sample kept; *Add a step after* → the
+  menu's Integrations lists "The weather — A saved call: fill in city" under Call an API and Send an email; picked, the
+  step is `{ call, fill: { city: "Paris" } }` (the example). The panel says "Uses the saved call The weather", city
+  typed over with "Lyon", the box left. List: "Used by 2 workflows". Tested: success, the API saw `city=Lyon`.
+- AC2: the saved call opened from the list (who uses it, each opens; *Delete* off), its Address typed over with
+  `/v2/forecast`. The file and the backend both have the new address. **Neither workflow changed**, in the file or on
+  the backend (`updatedAt` the same). Both tested again from their own rows: `/v2/forecast?city=Paris` and
+  `/v2/forecast?city=Lyon`, each with the key.
+- The key: in no project file, in neither workflow nor the saved call on the backend. The only file holding it is the
+  backend's `secrets.json` (every file under the copy and its backends dir searched).
+- Two clean runs in a row (6, 7), and run 8 after the fixes below.
+
+**Three things a person would trip on, fixed (nodegx-studio, this session):**
+- In the saved call's settings the city read **"fill › city · from the run"**. It is not from the run: each
+  workflow fills it in. `pathWords` now says "city · from each workflow" for a `fill.` path (unit check added).
+- *Save this call*'s ticks ran together on one line ("Query: city (now "Paris") ☐ Query: units…"). Now one per line.
+- The list's *Saved API calls* heading was a bold line unlike *Workflows* and *Reusable pieces*. It is now the same
+  `h3.sec` with a line under it ("an outside API set up once, used by name in any workflow").
+
+🔴 **P132-PRESSLOSTINREDRAW** (filed, low): in 3 of 8 runs the first press on a list row opened nothing. The press got
+`mousedown` and `mouseup` and no `click`, because the list was rebuilt between them (it is rebuilt 3 times in the
+~80 ms after the tab opens). A person cannot press that soon, and idle redraws are 0. The drive waits 1 s, as a person
+would. The open reach is an agent's write landing mid-press (unmeasured).
+
+Gates: check:automations with `NODEGX_REPO` 145/145 + 167/167. Its first run froze the page's main thread for 60 s
+in RECORDSTEPREFUSED's section, before any saved call exists, so none of the changed code runs there. OBS was taking
+410 % CPU. The re-run was green.

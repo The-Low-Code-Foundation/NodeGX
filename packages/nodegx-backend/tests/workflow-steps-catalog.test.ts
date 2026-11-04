@@ -47,6 +47,8 @@ const EXPECTED_KINDS = [
   'http-request',
   // P132 BWF-007: an email, through the backend's own SMTP settings.
   'send-email',
+  // P132 BWF-013: a reusable piece, a workflow others run.
+  'run-workflow',
   'stop',
   'return',
   'wait',
@@ -76,7 +78,7 @@ describe('WF-002 step-kind catalog coverage', () => {
       expect(spec.category.length).toBeGreaterThan(0);
       // Traceability back to the spec that specified it: phase 11, WF-001, or —
       // for a kind added after the fact — the phase-42 task that argued for it.
-      expect(spec.source).toMatch(/^(CF11-00[123]|WF-001|CWF-00[1-9]|P132 BWF-00[1-9])$/);
+      expect(spec.source).toMatch(/^(CF11-00[123]|WF-001|CWF-00[1-9]|P132 BWF-0(0[1-9]|1[0-9]))$/);
       // A summary must be a sentence, not a label — and short enough to skim,
       // mirroring the enrichment corpus's 140-char rule.
       expect(spec.summary.length).toBeGreaterThan(20);
