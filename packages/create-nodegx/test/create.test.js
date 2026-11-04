@@ -149,6 +149,8 @@ test('P112 OWN-036: the folder gets what our builds learned, as two skills the a
   assert.ok((traps.match(/^- \*\*/gm) || []).length >= 80, 'the trap list');
   // A game's moving world is the one exception to "no hand-written HTML and JavaScript" (CANON "Where NodeGX fits").
   assert.match(AGENT_NOTE, /The one exception is a game whose world moves on its own/);
+  // OWN-038 (Richard 2026-11-04, P112-OWN037-SECONDSERVER): that world is one plain page, never a second server
+  assert.match(AGENT_NOTE, /plain-code page in its own folder that opens by itself\. Don't make a NodeGX app open it from a second server/);
   // P130: the skill carries knowledge, never an obligation; its spine is the loop with the person.
   const first = fs.readFileSync(path.join(dir, '.claude', 'skills', 'nodegx-first-project', 'SKILL.md'), 'utf8');
   for (const heading of ['## Ask once, then build', '## The app arrives in rounds', "## Don't build what nobody asked for yet", '## Which parts are NodeGX']) {

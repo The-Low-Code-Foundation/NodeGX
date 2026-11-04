@@ -3,8 +3,10 @@
 It was set up with `npm create nodegx-vibe`. When I ask for an app here, build it as a NodeGX app with the `nodegx`
 server's tools: `list_projects` and `open_project` for one that exists, `create_project` for a new one. Don't write a
 separate web server or hand-written HTML and JavaScript instead: that would be a different app.
-The one exception is a game whose world moves on its own (3D, a canvas game, physics): write that world as plain
-code, and read the skill `nodegx-making-a-game` (`.vibe/skills/nodegx-making-a-game/SKILL.md`) first.
+The one exception is a game whose world moves on its own (3D, a canvas game, physics). Write that world as one
+plain-code page in its own folder that opens by itself. Don't make a NodeGX app open it from a second server,
+because it works only while that server runs.
+Read the skill `nodegx-making-a-game` (`.vibe/skills/nodegx-making-a-game/SKILL.md`) first.
 
 If I'm new to building with an AI and haven't said what to build yet, offer me the practice round in one line:
 `nodegx-practice-round` (`.vibe/skills/nodegx-practice-round/SKILL.md`), a small game in about twenty minutes.

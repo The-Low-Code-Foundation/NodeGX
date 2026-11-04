@@ -58,8 +58,11 @@ const AGENT_NOTE = [
   // What the builds people loved had in common is a skill, not a rule: P130 measured that obliging Opus up front cost
   // the game on screen. And CANON "Where NodeGX fits": a game's moving world is plain code, so the line above has an
   // exception a game needs to read before it starts.
-  'The one exception is a game whose world moves on its own (3D, a canvas game, physics): write that world as plain',
-  'code, and read the skill `nodegx-making-a-game` (`.claude/skills/nodegx-making-a-game/SKILL.md`) first.',
+  // OWN-038 (Richard 2026-11-04, P112-OWN037-SECONDSERVER): the world is one plain page, never a second server.
+  'The one exception is a game whose world moves on its own (3D, a canvas game, physics). Write that world as one',
+  "plain-code page in its own folder that opens by itself. Don't make a NodeGX app open it from a second server,",
+  'because it works only while that server runs.',
+  'Read the skill `nodegx-making-a-game` (`.claude/skills/nodegx-making-a-game/SKILL.md`) first.',
   '',
   'Before you build a new app or game, read `nodegx-first-project` (`.claude/skills/nodegx-first-project/SKILL.md`):',
   'how the builds people loved were run. Any agent can read it.',

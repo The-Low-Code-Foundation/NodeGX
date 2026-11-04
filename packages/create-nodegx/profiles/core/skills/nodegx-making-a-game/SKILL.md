@@ -26,6 +26,9 @@ Make the first version one page, with no framework and no build step. A three.js
 liked 28 minutes after the brief. An earlier game spent its first session on an engine and 29 checks, and was shelved
 as "silly looking and not fun".
 
+Keep that page in its own folder and open it by itself. One game's NodeGX app opened its page from a second server.
+The game worked only while that server ran. Put online, the app would have opened a dead link.
+
 These shapes held up as the games grew:
 
 - the rules of the game in one module that draws nothing;
