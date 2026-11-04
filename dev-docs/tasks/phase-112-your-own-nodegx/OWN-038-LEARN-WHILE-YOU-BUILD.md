@@ -1,6 +1,6 @@
 # OWN-038: Learn while you build (a practice round, your own way of building, and a help page)
 
-**Phase:** [112](README.md). **Opened:** 2026-11-04 by Richard. **Status:** 🟡 s1: the practice round is in the kit for all three harnesses (`bae12bb41`), nodegx.io/help is LIVE, and the 0.2.10 cut is packed for Richard to publish. AC1, AC2 and AC6's page ✅; AC3–AC5 (the probes, which spend) wait on his go; AC7 after the publish.
+**Phase:** [112](README.md). **Opened:** 2026-11-04 by Richard. **Status:** 🟡 s1: **on npm in create-nodegx, -vibe and -cline 0.2.10** (2026-11-04, Richard's publish; shasums equal the packed tarballs), nodegx.io/help and the changelog section LIVE, the email ready. AC1, AC2 and AC6's page ✅; AC3–AC5 (the probes, which spend) wait on his go; AC7 (Anna Malzy) next.
 
 > "What if the npm package and kit comes with a sort of 'tutorial mode' that offers the user to first engage in a
 > Claude discussion to learn our lessons about how to best construct a project and communicate with Claude, guide
@@ -196,4 +196,12 @@ lists it" is the proof still owed.
   - **Probes owed (AC3–AC5), on Richard's go.** Priced from OWN-036/037: Claude Code about $3 a build turn on Opus,
     Cline on DeepSeek V4.1 Flash under $1 a build. Three scripted people and one full round per harness: about $15–20
     in Claude Code, $2–3 in Cline.
+- **s1 (after the publish), 2026-11-04.** Richard published 0.2.10. The gate stopped him twice: the P132 and then the
+  P115 session saved their phase memory between my triage and his run (each marked `general-no`, phase status). He
+  published with `KIT_HARVEST_SKIP` naming that; `--count` afterwards was 0, so nothing slipped past. Registry shasums
+  equal the three tarballs (create-nodegx 6ac769a1…, -cline bc4caaf5…, -vibe 0242c0fd…), `latest` 0.2.10 on all three.
+  From npm, in empty folders: each kit writes `nodegx-practice-round` and its note names it; the Vibe folder has both
+  guides; the Cline entry went to the scratch HOME. The site changelog was re-rendered alone (`ops/changelog.py` +
+  `build.wrap` for that folder; the diff against live was the 0.2.10 section only), rsynced, 200, md5 equal live.
+  The email draft says 0.2.10 for Vibe and that the round is in the kit; it still asks beginners to reply.
 
