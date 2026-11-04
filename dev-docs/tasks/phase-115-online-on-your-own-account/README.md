@@ -170,6 +170,13 @@ Each is to be asked in plain words, with the recommendation first and its cost i
 | R4 | Does Digital Bricks take the Claude Team organisation the directory submission needs, or does NodeGX go through the open MCP registry and a `.mcpb` file? | Measure what each costs in HST-009 before asking. |
 | R5 | Is a 14.9 MB interpreter an acceptable first load for a shared link, or does this phase wait for P107's smaller runtime? | Measure first (HST-003). If the first page on a phone is over a few seconds, wait. |
 
+**Ruled 2026-11-04, R6 — one Worker, not Pages plus a Worker.** Richard: *"Sure go for one worker if we can make sure
+it's as sure as pages for not getting charged if you have an app with dozens of active users."* The condition, read the
+same day: a Free account is never billed (over a limit, Cloudflare refuses the request: 1027 for the day's 100,000,
+1102 for CPU; billing starts only on the $5 Paid plan), and page files are free and unlimited in both; Pages
+Functions are Worker requests. So "not charged" is the same for both; what a free user can meet is a **refused call**,
+and the line that matters is 10 ms CPU a call (HST-004 §8.7–8.8).
+
 ## 9. Not this phase
 
 - **A free hosted tier** (UNI-008). This phase builds the off-ramp UNI-008 R7 promises; the tier stays deliberately last.

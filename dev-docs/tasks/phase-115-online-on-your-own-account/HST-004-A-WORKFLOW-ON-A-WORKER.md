@@ -275,3 +275,30 @@ So the free plan does not separate them. Two things that matter on Free whicheve
    own door is not the cost (its bundle has no interpreter); the cloud runtime's start-up is.
 
 **Five crons per account** is the free-plan line a person with several sites meets first: one daily job per site.
+
+### 8.8 R6 ruled (one Worker), and WARMRUNNER fixed so a call fits the free plan
+
+Richard ruled one Worker on condition it is as safe from charges as Pages with dozens of active users (README §8 R6).
+Free is never billed: over a limit Cloudflare refuses (1027, 1102), the same for both. Dozens of users at 50 calls a day
+each is ~2,500 of the 100,000; page files do not count (`run_worker_first` names only the two doors). The real line is
+CPU per call, so WARMRUNNER went first.
+
+**Cause, measured on workerd** (the functions probe): the runtime's `updateScheduled` flag is `true` before every run;
+the `setImmediate` that clears it is dropped when a request ends. Clearing the flag before a run (`?unstick=1`): a warm
+runner answered 3 of 3 at 4 ms, and the control without it failed again. **Fix** in `CloudRunner.run`: a stale flag
+is cleared and the update asked for again inside this request (`packages/noodl-viewer-cloud/src/index.ts`). Test
+`tests/p115-hst004-warmrunner.test.ts` recreates the dropped callback on Node; it fails with the fix removed. Cloud
+package 274/274; the backend's 28 cloud-function suites 258/258.
+
+**On the deploy** (the Worker now keeps one runner per isolate, built at startup; `wrangler tail` `cpuTime` in ms):
+
+| version | refused (blank email) | a real subscribe | the first call on a new isolate | Startup Time |
+|---|---|---|---|---|
+| fresh runner per call (§8.7) | 11, 12, 32 | 11 | (every call) | 17–19 ms |
+| warm, built on first call | 1–2 | 2–8 | 36, 38, 67, 68 | 19 ms |
+| **warm, built at startup** (deployed, `09d56639`) | **2–3** | **4–15** | **25, 27** | 80 ms (limit 1 s) |
+
+Six different emails each time, each arriving at the stand-in as its own (no carry-over between warm requests). Every
+call answered `ok`, including those over 10 ms; Cloudflare's page does not say how strictly 1102 is applied, so
+"over 10 ms answered today" is not a promise. **Left:** a real call's 4–15 ms is the HTTP Request node's path, and an
+isolate's first call 25–27 ms is `setData`; both are the next places to cut if 10 ms is to hold for every call.

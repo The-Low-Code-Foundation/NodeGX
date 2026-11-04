@@ -9,7 +9,7 @@ never ahead of lanes 9, 2 and 3. Earlier prompts are in git history (`git log --
 1. [HST-004 §8](HST-004-A-WORKFLOW-ON-A-WORKER.md): session 3, the deploy on Richard's account and the transport fix.
 2. §7 for session 2 (§7.5, the deploy commands), §6 for session 1.
 3. README §12: the session log and the estimate.
-4. The bugs: `node scripts/bugs.js --from P115` (WARMRUNNER, **BUNDLEDROPS high**, RULEFIVE low; HTTPLOOKUP fixed `ef3f7388a`).
+4. The bugs: `node scripts/bugs.js --from P115` (**BUNDLEDROPS high**, RULEFIVE low; HTTPLOOKUP, BLANKREQUIRED, WARMRUNNER fixed).
 
 ## 2. Built vs driven
 
@@ -29,7 +29,9 @@ never ahead of lanes 9, 2 and 3. Earlier prompts are in git history (`git log --
    `21bb85fc3`).
 2. After 08:00 UTC on 2026-11-05: MUST line 6. `npx wrangler tail hst-stand-in -c wrangler.stand-in.toml` only sees live
    events, so read the dashboard (Workers & Pages → hst-stand-in → Logs, observability is on) for the digest call.
-3. Then ask the one-Worker ruling (§4) with the URL in front of him.
+3. ✅ R6 ruled 2026-11-04: **one Worker** (README §8), on condition it is as safe from charges as Pages; it is (Free is
+   never billed). WARMRUNNER fixed. Open: a real call costs 4–15 ms CPU and an isolate's first call 25–27 against
+   Free's 10 ms (HST-004 §8.8): profile the HTTP Request node's path and `setData` before HST-006.
 4. BUNDLEDROPS (high) belongs to the cloud-deploy owner, not this phase, but it blocks every MCP-written cloud function
    that wires an HTTP Request's body or auth. Before anyone fixes it: measure the editor's own Deploy button with a
    viewer running, and a browser export with the same wiring (the bug file says how).
@@ -38,5 +40,4 @@ never ahead of lanes 9, 2 and 3. Earlier prompts are in git history (`git log --
 ## 4. Rulings owed (ask in plain words, recommendation first)
 
 - R1–R5 as in the README §8. R5 (first-load size) is mostly answered: the HTML export is 1.4 MB against ~14.9 MB.
-- **One Worker or Pages plus a Worker?** Recommended: one Worker with static assets (one address, one deploy, no
-  cross-site setup). Ask once the deploy has answered from his phone.
+- R6 (one Worker) ruled 2026-11-04.
