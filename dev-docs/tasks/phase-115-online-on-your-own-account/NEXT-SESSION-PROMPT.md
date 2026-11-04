@@ -37,6 +37,10 @@ never ahead of lanes 9, 2 and 3. Earlier prompts are in git history (`git log --
    answered (0 `exceededCpu`). Carry the warm-up into the deploy target (HST-003). Not worth more profiling unless a
    1102 is ever seen; the left-over (a fresh isolate's real fetch path, ~1 call in 5 for its first ~20) cannot be
    pre-paid with a stubbed fetch.
+3b. ✅ Refusal alerts built (HST-004 §10): the page reports a 1102/1027, the Worker emails once a day. ⏳ The email
+   itself waits on Richard (§10.4): a Resend key from his terminal (`wrangler secret put RESEND_API_KEY` + `ALERT_TO`),
+   or a domain on Cloudflare. Then drive one real refusal (a probe that burns ~4 s of CPU, §10.1) and read his inbox.
+   The real Free cut-off measured is ~2 s of CPU per call, so §9's 10–35 ms spikes are far from it.
 4. BUNDLEDROPS (high) belongs to the cloud-deploy owner, not this phase, but it blocks every MCP-written cloud function
    that wires an HTTP Request's body or auth. Before anyone fixes it: measure the editor's own Deploy button with a
    viewer running, and a browser export with the same wiring (the bug file says how).

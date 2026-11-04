@@ -23,8 +23,9 @@ import type { WorkflowDefinition } from '@backend/workflow/types';
 import automations from 'project-automations';
 import functionsBundle from 'project-functions';
 import { CloudRunner } from '@cloud-runtime';
+import { handlePlanLimit, type PlanLimitEnv } from './planLimit';
 
-interface Env {
+interface Env extends PlanLimitEnv {
   [name: string]: unknown;
   /** Local runs only: let the HTTP step call 127.0.0.1 (the stand-in). Never set on a deployed Worker. */
   ALLOW_PRIVATE_HTTP?: string;
@@ -77,6 +78,10 @@ const json = (v: unknown, status = 200) =>
  * of it is paid from the startup allowance (1 s CPU) rather than from the first calls' 10 ms each. If the warm-up
  * fails, the bundle is loaded on the first call instead; a failed load is not kept, so the next call retries.
  */
+/** The project's cloud functions by name: the only names a refusal report may put in the builder's email. */
+const FUNCTION_NAMES = new Set(
+  (functionsBundle as unknown as { components: { name: string }[] }).components.map((c) => c.name.replace(/^\/#__cloud__\//, ''))
+);
 const runner0 = new CloudRunner({});
 let runnerReady: Promise<CloudRunner> | null = null;
 
@@ -199,6 +204,8 @@ export default {
     leaveStartup();
     install(env);
     const url = new URL(req.url);
+    // HST-004 §10: the page's report that Cloudflare refused one of its calls over the plan's limit.
+    if (url.pathname === '/__nodegx/plan-limit') return handlePlanLimit(req, env, 'hst-spike-worker', FUNCTION_NAMES);
     const fn = /^\/functions\/([^/]+)$/.exec(url.pathname);
     if (fn) return runFunction(decodeURIComponent(fn[1]), req);
     const m = /^\/workflows\/([a-z0-9-]+)$/.exec(url.pathname);

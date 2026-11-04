@@ -2139,6 +2139,7 @@ export async function signFileUrlRequest(name: string): Promise<{ url: string; e
  * message is the backend's \`error\` or the runtime's own sentence for it.
  */
 export async function callFunction<T>(name: string, params: Record<string, unknown>): Promise<T> {
+  sendPlanLimitReport();
   const headers: Record<string, string> = {
     'X-Parse-Application-Id': APP_ID,
     'Content-Type': 'application/json'
@@ -2163,10 +2164,87 @@ export async function callFunction<T>(name: string, params: Record<string, unkno
     json = undefined;
   }
   if (response.status !== 200 && response.status !== 201) {
+    // A Cloudflare Worker over its plan's limit answers with Cloudflare's page, not the function's JSON: 503 with
+    // 1102 (computing time) or 1027 (the free plan's requests a day), as the text "error code: 1102" or as an HTML page
+    // whose code sits in \`<span class="cf-error-code">\` (which one depends on the request's headers; Node's fetch got
+    // the page). The visitor gets a sentence, and the site's Worker is told so that it can email its builder
+    // (P115 HST-004 §10).
+    const limit = /^error code: (1102|1027)\\b|class="cf-error-code">(1102|1027)</.exec(text.trim());
+    const limitCode = limit ? (limit[1] ?? limit[2]) : undefined;
+    if (limitCode !== undefined) {
+      reportPlanLimit(name, limitCode);
+      throw new Error(limitCode === '1027' ? PLAN_LIMIT_TODAY : PLAN_LIMIT_NOW);
+    }
     throw new Error(typeof json?.error === 'string' ? json.error : 'Failed running cloud function.');
   }
   // No result is still success: the node keeps its previous results and fires Done.
   return (json?.result ?? {}) as T;
+}
+
+const PLAN_LIMIT_NOW = "This site has gone over its hosting plan's limit. Please try again in a moment.";
+const PLAN_LIMIT_TODAY = "This site has reached its hosting plan's limit for today. Please try again tomorrow.";
+const PLAN_LIMIT_KEY = \`nodegx/\${APP_ID}/planLimitReport\`;
+/** A report not yet delivered is dropped after three days, so a host that never answers is not asked for ever. */
+const PLAN_LIMIT_KEEP_MS = 3 * 24 * 60 * 60 * 1000;
+
+/**
+ * Tell the site's own Worker that Cloudflare refused a call. Kept in localStorage until the Worker answers: over the
+ * daily limit the report is refused too, so the next call after the reset delivers it.
+ */
+function reportPlanLimit(fn: string, code: string): void {
+  const report = JSON.stringify({ code, fn, at: new Date().toISOString() });
+  try {
+    sessionStorageArea()?.setItem(PLAN_LIMIT_KEY, report);
+  } catch {
+    // No storage: the one attempt below is all there is.
+  }
+  postPlanLimitReport(report);
+}
+
+/** Deliver a report a refused call left behind; every call tries first, at no cost when there is none. */
+function sendPlanLimitReport(): void {
+  let report: string | null | undefined;
+  try {
+    report = sessionStorageArea()?.getItem(PLAN_LIMIT_KEY);
+  } catch {
+    return;
+  }
+  if (!report) return;
+  let at = NaN;
+  try {
+    at = Date.parse(JSON.parse(report).at);
+  } catch {
+    // An unreadable report is dropped below.
+  }
+  if (!(Date.now() - at < PLAN_LIMIT_KEEP_MS)) {
+    try {
+      sessionStorageArea()?.removeItem(PLAN_LIMIT_KEY);
+    } catch {
+      // Nothing to drop.
+    }
+    return;
+  }
+  postPlanLimitReport(report);
+}
+
+function postPlanLimitReport(report: string): void {
+  fetch(\`\${ENDPOINT}/__nodegx/plan-limit\`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: report,
+    keepalive: true
+  })
+    .then((answer) => {
+      if (!answer.ok) return;
+      try {
+        sessionStorageArea()?.removeItem(PLAN_LIMIT_KEY);
+      } catch {
+        // Delivered; a copy left behind is sent again and the Worker ignores it.
+      }
+    })
+    .catch(() => {
+      // Kept for the next call.
+    });
 }
 ` +
     (returnLeg ? authReturnLegSource() : '') +

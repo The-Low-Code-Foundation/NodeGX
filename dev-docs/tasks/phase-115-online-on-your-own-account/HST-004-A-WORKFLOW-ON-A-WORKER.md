@@ -377,3 +377,69 @@ warm-up is worth carrying into the deploy target (HST-003) because it costs noth
   `Origin` header (`Origin: https://devtools.devprod.cloudflare.dev` works).
 - `wrangler dev`'s local observability (`/cdn-cgi/local/explorer/api/local/observability/query`) has no CPU time.
 - The stand-in received the probe's bare fetches (`{"probe":true,…}`) and ~90 `cpu-*@example.com` subscriptions today.
+
+## 10. Session 4, later: the builder is emailed when Cloudflare refuses a call
+
+Richard: *"Can we at least bake in a system that will alert the builder if their worker goes over and a request gets
+blocked? So they can up their plan if they need to."* He chose email, sent through Cloudflare when the builder has a
+domain on Cloudflare and through Resend when they don't.
+
+### 10.1 What a refusal looks like (measured, a temporary probe that burned CPU on purpose, removed)
+
+| CPU used by one call (`cpuTime`) | answered |
+|---|---|
+| 13–332 ms, one at a time | ✅ every one |
+| 40 calls in a row at 68–133 ms | ✅ every one |
+| 725–803 ms | ✅ |
+| **2010 ms** (asked for ~4 s and ~12 s) | ❌ `exceededCpu`, *"Worker exceeded CPU time limit."* |
+
+So on this Free account the cut-off is about **2 s of CPU per call**, not the 10 ms the plan names; §9's spikes of 10–35 ms
+are nowhere near it. A refused call is **503** with Cloudflare's own body: `text/plain` *"error code: 1102"* to curl
+(whatever its Accept or User-Agent), but an **HTML page** (*"Worker exceeded resource limits"*, the code in
+`<span class="cf-error-code">1102</span>`) to Node's `fetch`, whose `sec-fetch-*` headers are a browser's. The daily
+limit (100,000 requests, reset at midnight UTC) is error 1027 the same way; not produced here.
+
+### 10.2 What a Worker cannot do, so the page does it
+
+A Worker never sees its own refusal (the isolate is stopped). Tail Workers would see it but are Paid only; Cloudflare's
+analytics API sees it but needs an API token (wrangler's login has no analytics scope); Cloudflare has no notification
+for it. The page does see it, so:
+
+- **The emitted client** (`packages/nodegx-export/src/emit/emitApp.ts`, `callFunction`, React and HTML exports both)
+  recognises 1102 or 1027 in either form, tells the visitor *"This site has gone over its hosting plan's limit. Please
+  try again in a moment."* (1027: *"…has reached its hosting plan's limit for today. Please try again tomorrow."*),
+  and POSTs `{ code, fn, at }` to `/__nodegx/plan-limit` on the same endpoint. The report waits in localStorage until
+  the Worker answers (over the daily limit it is refused too), is tried before every later call, and is dropped after
+  three days. Graded by `tests/p115-plan-limit-report.test.ts` (the emitted client run against a scripted wire, 6/6,
+  including the HTML page and a control with Cloudflare's page for another code; with the check disabled 4 fail, the
+  2 controls pass). The EXP-009 client golden and the HLS-001 corpus hashes (12 files, every corpus project with a
+  backend, nothing else) were regenerated after counting.
+- **The Worker** (`spike-worker/src/planLimit.ts`) emails the builder at most once a day for each code, remembered in
+  KV (`NODEGX_ALERTS`, created on Richard's account): Cloudflare's `send_email` binding when `ALERT_EMAIL` +
+  `ALERT_FROM` + `ALERT_TO` are set (free on every plan to a verified address of the account; the sender must be on a
+  domain onboarded to Cloudflare), else Resend when `RESEND_API_KEY` + `ALERT_TO` are set (from
+  `onboarding@resend.dev`, which Resend lets an account send to its own address without a domain; not tried here),
+  else one log line a day. Anyone can POST a report, so the email carries only the code and a function name the project
+  really has. `/__nodegx/*` is in `run_worker_first`.
+
+### 10.3 Driven
+
+- Live, the page's own client (downloaded from the deploy) against a real refusal: `exceededCpu` at 2010 ms → the
+  visitor's sentence → `/__nodegx/plan-limit` 204 → the Worker logged `{"nodegxPlanLimit":"1102",…,"via":"none"}` and
+  wrote `plan-limit:2026-11-04:1102` to KV → a second refusal the same day logged nothing new.
+- Node, against fakes of both senders: one email for two reports (Cloudflare route, `from` NodeGX
+  `<alerts@…>`), the Resend route's request, a made-up function name kept out, a made-up code 400.
+- **Not driven: an email arriving.** Neither of Richard's domains is on Cloudflare (both on Namecheap's DNS), and no
+  Resend key exists. Either is his step (§10.4).
+
+### 10.4 What Richard does to get the email
+
+- **Resend (no domain):** sign up at resend.com, create an API key, then in his own terminal
+  `cd dev-docs/tasks/phase-115-online-on-your-own-account/spike-worker && npx wrangler secret put RESEND_API_KEY`, set
+  `ALERT_TO` in `wrangler.toml` to the address he signed up with, `npm run deploy`.
+- **Cloudflare (a domain):** move a domain's DNS to Cloudflare, `npx wrangler email sending enable <domain>`, verify his
+  address, uncomment the `[[send_email]]` binding, set `ALERT_FROM`/`ALERT_TO`, deploy.
+
+🔴 `public/` was regenerated for `api/client.js` only, from the exporter's source, because rebuilding
+`packages/nodegx-export/dist` (what `export-page.mjs` runs) would have carried a peer's uncommitted HTML-printer work.
+Until `dist/` is rebuilt, `node export-page.mjs` prints the old client.
