@@ -1,6 +1,6 @@
 # OWN-037 — The first project, in Mistral Vibe and in Cline
 
-**Phase:** [112](README.md). **Opened:** 2026-11-04 by Richard. **Status:** 🔨 s1 — rulings in (§6, 2026-11-04); AC1 the probe.
+**Phase:** [112](README.md). **Opened:** 2026-11-04 by Richard. **Status:** ✅ AC1–AC4 (2026-11-04, s1). AC5 owed: Vibe's AC2 in the next lockstep cut; the site line.
 
 > "Can we scope a task to try it out on Vibe and see if we can help it the same way please? And Cline?"
 > — Richard, 2026-11-04, after create-nodegx 0.2.9 shipped the [OWN-036](OWN-036-THE-FIRST-PROJECT-KIT.md) guides.
@@ -126,3 +126,14 @@ reads clearly.
   preview 0.2.9), `OWN037-VB` (V-b: the checkout's create-nodegx, which differs from 0.2.9 by AC2 alone, measured by
   `diff -r`), `OWN037-CA-create028-mcp029` (C-a: create-nodegx 0.2.8 with the 0.2.9 server, so both Cline arms run one
   server; mcp 0.2.8 → 0.2.9 changed `noodl-mcp.cjs` and the backend CLI).
+- **2026-11-04, s1: AC1 ✅, AC3 ✅ (game, four builds), AC4 ✅ both harnesses.** All in [own-037/RESULTS.md](own-037/RESULTS.md).
+  AC1: each arm lists the skills it should. Vibe replies resume with `-c`. Cline 3.0.71 can't resume headless, so a
+  Cline reply carries the chat as text (`round.mjs --reply`). AC3, one builder at a time: only Vibe-with-guides asked
+  (seven questions). Cline-with-guides read both guides and built without asking, the whole game in plain code. Both
+  no-guides arms built at once. AC4, Richard blind: *"Vibe 1 is terrible. Vibe 2 is playable but the control are
+  weird and the visuals too, bit boring. Cline 1 is playable, probably the closest to the Claude efforts. Cline 2 is
+  awful"*. Vibe 2 and Cline 1 are the guided arms. Asked whether he'd throw Vibe 2: **"Keep it: ship the guides"**.
+  Filed P112-OWN037-SECONDSERVER. Spend: Vibe $3.82, Cline $0.71 (ClinePass prices), probes $0.10.
+  **AC5 owed:** (1) the next lockstep cut carries `22333b7fe` (create-nodegx-vibe); (2) nodegx.io/first-project/ gains
+  a Vibe and Cline line with the honesty section (one build per cell, Richard judged, the turn-2 difference). The site
+  push deploys, so it needs Richard's go.

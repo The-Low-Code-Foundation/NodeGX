@@ -68,6 +68,39 @@ game. Where the moving world lives: vb canvas code (on a 2nd server, launched fr
 entirely (no NodeGX project); va all in nodes (tap-to-move, nothing moves by itself); ca a NodeGX project with a
 script engine.
 
+### Richard plays all four (2026-11-04 ~13:50, blind, served on 127.0.0.1)
+
+Verbatim: *"Vibe 1 is terrible. Vibe 2 is playable but the control are weird and the visuals too, bit boring. Cline 1
+is playable, probably the closest to the Claude efforts. Cline 2 is awful"*.
+
+Unblinded after his words (`ARMS.json`): Vibe 1 = va (no guides), **Vibe 2 = vb (the guides)**, **Cline 1 = cb (the
+guides)**, Cline 2 = ca (no guides). **In both harnesses the build with the guides is the one he didn't throw out.**
+
+What carried in each harness was different:
+
+- **Cline:** cb never asked, so the guide's first line didn't land. What came through was the game guide's
+  knowledge: the world in plain code, the traps (`[hidden]` spelled out first in its stylesheet, shots at phone
+  size). Without the guides, ca built the moving world inside a NodeGX project and spent its last turn fixing node
+  layout ("absolute children anchor top-left").
+- **Vibe:** vb asked and built from Richard's answers. va built the world in nodes as tap-to-move, which is what the
+  no-guides note's "Don't write hand-written HTML and JavaScript" leads to. vb's weak points, from Richard's words
+  (*"the controls are weird and the visuals too, bit boring"*), weren't covered by its checklist: every line on it
+  passed.
+
+## AC4 — the verdict ✅ both harnesses (2026-11-04)
+
+- **Cline:** Cline 1 (cb, the guides) *"playable, probably the closest to the Claude efforts"*; Cline 2 (ca) *"awful"*.
+  Passes. Nothing to ship: the guides are in create-nodegx 0.2.9 already, and cb loaded both (the AC5 "pointer"
+  fix is for an arm that never loaded them). Open for Cline: DeepSeek V4.1 Flash read "Ask once, then build" and
+  didn't ask. Nothing in the kit is measured to change that yet.
+- **Vibe:** asked plainly, *"Vibe 2, the one you called playable but weird controls and a bit boring, is the
+  Mistral Vibe build that had the new guides … Would you [throw it away]?"* → **"Keep it: ship the guides"**.
+  Passes. AC2 (`22333b7fe`) is cleared for the next lockstep cut.
+- One build per cell, Richard the only judge, blind by number until his words were in. The two harnesses' turn 2
+  differ (AC1), and only vb had a turn 2.
+- Filed: P112-OWN037-SECONDSERVER (vb's game needs a second server on a hard-coded port; the guides never say where
+  the plain-code world lives).
+
 ### Turn 2
 
 - **vb (Vibe 2), Richard's answers** (`msg/vb-2.txt`, 2026-11-04 ~12:05, word for word): me and my kids; *"Calm and a
