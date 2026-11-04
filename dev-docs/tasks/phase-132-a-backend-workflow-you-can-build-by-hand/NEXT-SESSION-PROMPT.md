@@ -1,5 +1,37 @@
 # P132 — next session
 
+**s22 (2026-11-04): route words served, HIDDENPANELCHURN fixed, BWF-009's agent part green.**
+- **Studio speaks the backend's route words** (catalog 1.9.0) before its own table (nodegx-studio `0dbd922`): the
+  drive serves the If's Yes as another word and grades the wire says it (mutant red). Gates all green.
+- **P132-HIDDENPANELCHURN fixed** (NodeGX `cc316cd19`): not the workflow's. With ANY project open, `warningsChanged`
+  fired ~480/s: the Components panel re-renders on it and reads page names via `readNameList`, which cleared its
+  (absent) warning on each read, and the clear announced a change. `WarningsModel.setWarning` now says nothing when
+  nothing changed. Dev editor: 0 DOM changes in 2 s (were ~28,000). Spec 6/6, HEAD red on 4.
+  [The record](BWF-008-THE-NODEGX-EDITOR-EDITS-THEM-TOO.md#s22-2026-11-04-studio-speaks-the-served-route-words-p132-hiddenpanelchurn-fixed).
+- **BWF-009 part 2 green** ([agent-round-bwf009.mjs](agent-round-bwf009.mjs)): the three briefs in words, one agent,
+  $3.97: three workflows, 0 functions, 14/14 steps of form-drawn kinds, each tested before done. It switched off two
+  existing triggers unasked (said so). **P132-LISTLINETWOFIELDS** filed (a list line can hold one field per item).
+  [The record](BWF-009-THE-TEST.md#s22-2026-11-04-part-2-the-agent-green-parts-1-and-3-wait-on-richards-sitting).
+
+**Next:**
+1. **Richard's sitting (BWF-009 part 1, then part 3)**, his time: set it up first. A Greenhouse copy, the two overlap
+   workflows removed (the `--setup` lines), its backend by Studio's `provisionFor` WITHOUT `NODEGX_BACKENDS_DIR` (so the
+   editor adopts it, s21), SMTP pointed at a catcher (greenhouse-drive-bwf007.mjs has one), three plants seeded.
+   Then he builds the three in Studio; then the editor opens all six and one change crosses.
+2. Optionally first: open the agent's three in Studio to grade "Studio draws each one with its steps editable"
+   (s22 graded kinds only; rerun `--setup` + the round, ~$4, or seed the file with its three workflows).
+
+- 🔴 **Core-ui `Portal` swaps an unused empty `<div>` on every render of a mounted dialog**: what turned 480 renders a
+  second into 14,000 DOM changes. Not fixed (every dialog). If the editor churns again, the portal is the amplifier,
+  not the cause: wrap `WarningsModel`'s writers (or diff fiber hooks) to find the loop. Probes: [churn-probes/](churn-probes/README.md).
+- 🔴 A clear inside a `warningsChanged` listener does NOT loop (the pending flag swallows it); only a LATER task
+  (a React re-render) does: a spec of such a loop must re-read on a later tick.
+- 🔴 `cp` to `$TMPDIR` and restore from the scratchpad = two different folders: a mutant's backup path is one variable.
+- Asks for Richard: P132-LISTLINETWOFIELDS (one formula more, or say it); should an agent ask before switching off a
+  trigger it was not asked about?
+
+---
+
 **s21 (2026-11-04): BWF-008 AC2's crossing green, in both apps on one Greenhouse copy.**
 - **P132-EDITORBLINDTOSTUDIO** (high, `launch: beta`) filed and fixed: the editor's file watcher dropped
   `nodegx.automations.json`, so a Studio change never reached an open canvas and the editor's next Save put the old
