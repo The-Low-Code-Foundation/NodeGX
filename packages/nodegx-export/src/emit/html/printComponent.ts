@@ -34,13 +34,14 @@
 import type { NodeIR } from '../../ir/types';
 import type { CatalogIndex } from '../../catalog';
 import { INPUT_PULSE_TS_TYPE, STREAM_NODES, type QueryPlan, type BindingSource, type ComponentPlan, type HandlerAction, type JsFunctionPlan, type ProjectPlan, type ValueExpr } from '../../analyze/plan';
-import { computeNodeStyle, computeRoleCss, CONTENT_ATTR_ORDER, CONTENT_PARAMS, DRAG_OWN_PORTS, iconSourceOf, WIRED_STYLE_SINKS, type Decl, type StyleRole } from '../style';
+import { BLOCK_TOUCH_NOTE, computeNodeStyle, computeRoleCss, CONTENT_ATTR_ORDER, CONTENT_PARAMS, DRAG_OWN_PORTS, iconSourceOf, WIRED_STYLE_SINKS, type Decl, type StyleRole } from '../style';
 import { assignClassNames, camelCase, isReservedWord, lowerFirst, type ClassCandidate } from '../naming';
 // 🔴 A decision the React printer holds, not the plan (P134-HTX001-PRINTERDECIDES): which element a node's `as` names.
 import { authoredTag, PRESET_MARKERS } from '../component';
 // 🔴 HTX-004, the same: the query's call, its wired `where`, when it asks, and the code each verb raises its failure under.
 import { API_CALL_ERROR_CODES, queryHasEffect, queryParamsLiteral, wiredWhereExpr } from '../component';
 import { UTIL_HELPERS } from '../utilLib';
+import type { KitBinding } from '../kits';
 
 export interface HtmlLoss {
   component: string;
@@ -66,6 +67,8 @@ export interface HtmlComponentContext {
   noodlClient?: boolean;
   /** HTX-004. A backend collection's declared columns, by its class name (the project's schema snapshot). */
   columnsOf?: (collection: string) => string[];
+  /** P134 session 13 (R8). A kit node type → its ports, bound as the React export binds them (`emitKits`). */
+  kitOf?: (type: string) => KitBinding | undefined;
 }
 
 export interface PrintedComponent {
@@ -158,7 +161,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   const nodeById = new Map(nodes.map((n) => [n.id, n]));
   const losses: HtmlLoss[] = [];
   const lose = (nodeId: string, what: string) => losses.push({ component: plan.path, nodeId, label: nodeById.get(nodeId)?.authoredLabel, what });
-  const imports = { core: new Set<string>(), dom: new Set<string>(['life']), router: new Set<string>(), run: new Set<string>(), states: new Set<string>(), timer: new Set<string>(), util: new Set<string>(), animate: new Set<string>(), drag: new Set<string>(), repeat: new Set<string>() };
+  const imports = { core: new Set<string>(), dom: new Set<string>(['life']), router: new Set<string>(), run: new Set<string>(), states: new Set<string>(), timer: new Set<string>(), util: new Set<string>(), animate: new Set<string>(), drag: new Set<string>(), repeat: new Set<string>(), kits: new Set<string>() };
   const childImports = new Map<string, Set<string>>();
   const machineByNode = new Map(plan.statesMachines.map((m) => [m.nodeId, m]));
   const stateNames = new Set(plan.stateVars.map((s) => s.name));
@@ -273,6 +276,8 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     }
     if (literalParam(node, 'visible') === false) decls = [...decls, { prop: 'visibility', value: 'hidden' }];
     for (const name of unhandled) if (!NOT_STYLE.has(name)) lose(id, `its ${name} is not carried (no style the export knows for it)`);
+    // P134-S14-BLOCKTOUCH. The style layer's sentence, said here too: the HTML export keeps only the click as well.
+    if (style.notes.includes(BLOCK_TOUCH_NOTE)) lose(id, BLOCK_TOUCH_NOTE);
     declsOf.set(id, decls);
     const roleCss = computeRoleCss(node, role, ctx.catalog, ctx.styles);
     // A checkbox's label wrapper and a Columns' query container are drawn (`drawNode`), its breakpoints `@container` rules.
@@ -336,6 +341,7 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   for (const d of plan.drags) taken.add(d.local);
   // GAM-013, the same for a Repeat's `useRepeat` handle (the one streaming node this printer prints, session 13).
   taken.add('repeatNode');
+  taken.add('mountKitNode');
   const repeats = plan.streams.filter((st) => STREAM_NODES[st.type]?.lib === 'repeat');
   const repeatLocals = new Set(repeats.map((st) => st.local));
   for (const st of repeats) taken.add(st.local);
@@ -588,6 +594,19 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         const field = e.output.slice('out-'.length);
         if (e.viaState !== undefined) return stateByName.has(e.viaState) ? maybe(`${member('state', e.viaState)}.get()`, field) : undefined;
         return scope.declared.has(names.answerLocal) ? member(names.answerLocal, field) : undefined;
+      }
+      // P134-S14-HTTPSTEP. An HTTP Request's output, React's `http-out` (copied): Error is the message; Response, Status
+      // Code and Response Headers are the answer's own; an Output Field `out-<name>` is a key of its `fields`.
+      case 'http-out': {
+        const names = plan.httpCalls.find((c) => c.nodeId === e.nodeId);
+        if (names === undefined) return undefined;
+        if (e.output === 'error') return e.viaState !== undefined ? (stateByName.has(e.viaState) ? `${member('state', e.viaState)}.get()` : undefined) : scope.declared.has(names.messageLocal) ? names.messageLocal : undefined;
+        const read = (base: string, optional: boolean): string => {
+          if (!e.output.startsWith('out-')) return optional ? maybe(base, e.output) : member(base, e.output);
+          return member(optional ? maybe(base, 'fields') : member(base, 'fields'), e.output.slice('out-'.length));
+        };
+        if (e.viaState !== undefined) return stateByName.has(e.viaState) ? read(`${member('state', e.viaState)}.get()`, true) : undefined;
+        return scope.declared.has(names.answerLocal) ? read(names.answerLocal, false) : undefined;
       }
       // EXP-011 §49. An Animate To Value's Current Value: the number it last published.
       case 'animate-out':
@@ -907,6 +926,56 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
             `${inner}${member('state', a.errorState)}.set(${names.messageLocal});`,
             `${inner}${raiseLine(a.nodeId, 'cloud-function/call-failed', names.messageLocal)}`,
             ...block(a.failThen, inner, failed),
+            `${pad}}`
+          ],
+          scope
+        };
+      }
+      /**
+       * P134-S14-HTTPSTEP. An HTTP Request's Fetch, as the React printer prints it (`component.ts` `http-call`, copied,
+       * P134-HTX001-PRINTERDECIDES): the request module (`api/http.js`, the React export's `src/api/http.ts` with its
+       * types out) awaited in a `try`; the answer kept where something outside the chain reads it; a 2xx answer runs the
+       * Done chain, any other writes the Error row, raises `http/error-status` with the status and runs the Failure chain;
+       * nothing back (blank URL, timeout, network) raises the module's own code. No template reached here before: every
+       * request a chain ran was HiveClip's, and the plan refused each one for its wired URL (P134-S14-URLWIRED).
+       */
+      case 'http-call': {
+        const names = plan.httpCalls.find((c) => c.nodeId === a.nodeId);
+        if (names === undefined || !stateByName.has(a.errorState)) throw new Unprinted('an HTTP request the plan does not keep');
+        if (a.materialize !== undefined && !stateByName.has(a.materialize)) throw new Unprinted('an HTTP request whose answer row the plan does not keep');
+        const args = a.args.map((arg) => {
+          const code = expr(arg.expr, scope);
+          if (code === undefined) throw new Unprinted(`an HTTP request reading ${describe(arg.expr)}, which the HTML target does not print yet`);
+          return code === arg.param ? code : `${key(arg.param)}: ${code}`;
+        });
+        scope.awaits.used = true;
+        useImport('api/http.js', a.fnName);
+        useImport('lib/errors.js', 'raiseAppError');
+        const inner = `${pad}  `;
+        const deeper = `${pad}    `;
+        const done: Scope = { ...scope, declared: new Set([...scope.declared, names.answerLocal]) };
+        const answered: Scope = { ...done, declared: new Set([...done.declared, names.messageLocal]) };
+        const failed: Scope = { ...scope, declared: new Set([...scope.declared, names.messageLocal]) };
+        const raise = (code: string, message: string, detail?: string): string =>
+          `raiseAppError({ code: ${code}, message: ${message}, nodeId: ${js(a.nodeId)}, nodeType: ${js(nodeById.get(a.nodeId)?.type ?? '<runtime>')}, componentName: ${js(plan.legacyPath)}${detail !== undefined ? `, detail: ${detail}` : ''} });`;
+        const failArm = (at: string, code: string, message: string, detail: string | undefined, armScope: Scope): string[] => [
+          `${at}${member('state', a.errorState)}.set(${names.messageLocal});`,
+          `${at}${raise(code, message, detail)}`,
+          ...block(a.failThen, at, armScope)
+        ];
+        return {
+          lines: [
+            `${pad}try {`,
+            `${inner}const ${names.answerLocal} = await ${a.fnName}(${args.length ? `{ ${args.join(', ')} }` : ''});`,
+            ...(a.materialize !== undefined ? [`${inner}${member('state', a.materialize)}.set(${names.answerLocal});`] : []),
+            // The failure arm is never empty (it writes the Error row), so a request with no Done chain tests the other way.
+            ...(a.then.length > 0 ? [`${inner}if (${names.answerLocal}.ok) {`, ...block(a.then, deeper, done), `${inner}} else {`] : [`${inner}if (!${names.answerLocal}.ok) {`]),
+            `${deeper}const ${names.messageLocal} = ${names.answerLocal}.error;`,
+            ...failArm(deeper, js('http/error-status'), `${names.messageLocal} ?? ''`, `{ status: ${names.answerLocal}.statusCode }`, answered),
+            `${inner}}`,
+            `${pad}} catch (error) {`,
+            `${inner}const ${names.messageLocal} = error instanceof Error ? error.message : String(error);`,
+            ...failArm(inner, `error.code ?? ${js('http/network-error')}`, names.messageLocal, undefined, failed),
             `${pad}}`
           ],
           scope
@@ -1441,8 +1510,10 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
    * mounts, children first: the React printer's gated mount effect, with the part's own life in place of its ref.
    */
   const partMounts: string[][] = [];
+  const clickStops = new Set(plan.clickStops);
   const listenFor = (id: string, local: string, pad: string, known: Record<string, string>): string[] => {
     const out: string[] = [];
+    let clickStopped = false;
     for (const [port, list] of Object.entries(plan.handlers[id] ?? {})) {
       if (port === 'didMount') {
         if (partMounts.length > 0) {
@@ -1472,8 +1543,19 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
         continue;
       }
       const body = chain(id, port, list, `${pad}  `);
+      // P134-S13-CLICKBUBBLES. Where the running app keeps the click it is stopped first, the chain printed or not (the
+      // runtime asks whether the Click is connected, not whether its chain ran), as React's handler stops it.
+      if (port === 'onClick' && clickStops.has(id)) {
+        out.push(`${pad}${local}.addEventListener('click', function (event) {`, `${pad}  event.stopPropagation();`, ...(body ?? []), `${pad}});`);
+        clickStopped = true;
+        continue;
+      }
       if (body === undefined) continue;
       out.push(`${pad}${local}.addEventListener(${js(event)}, function () {`, ...body, `${pad}});`);
+    }
+    // P134-S13-CLICKBUBBLES. Click Bubbling "never" with nothing on the node's own Click: the click is kept all the same.
+    if (clickStops.has(id) && !clickStopped) {
+      out.push(`${pad}${local}.addEventListener('click', function (event) {`, `${pad}  event.stopPropagation(); // Click Bubbling: never`, `${pad}});`);
     }
     return out;
   };
@@ -1546,6 +1628,58 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
     const fixed = args.fixed.length ? `{\n${args.fixed.map((f) => `${pad}  ${f}`).join(',\n')}\n${pad}}` : '{}';
     const live = args.live.length ? `function () {\n${pad}  return { ${args.live.join(', ')} };\n${pad}}` : 'null';
     return `place(l, ${mountName}, ${parent}, ${fixed}, ${live}${before ? `, ${before}` : ''})`;
+  };
+
+  /** P134 session 13 (R8). Modules imported for what they do as they load: a kit's `kits/<dir>.js`. */
+  const sideImports = new Set<string>();
+  /**
+   * P134 session 13, Richard's R8: a kit node, as the React export draws it (`component.ts` `renderCustom`, copied,
+   * P134-HTX001-PRINTERDECIDES): its authored values on the ports the kit declares (a wired port takes the wire, never
+   * both), its wires, its signal outputs as their chains, its value outputs the graph reads into their rows. Rendered by
+   * the kit's own code through the same bridge (`lib/kits.js`, React's `KitNode`), in a box `mountKitNode` makes.
+   */
+  const drawKitNode = (id: string, node: NodeIR, parent: string, before: string | undefined, pad: string): string[] => {
+    const kit = ctx.kitOf?.(node.type);
+    const custom = plan.customNodes[id];
+    if (kit === undefined || custom === undefined) {
+      lose(id, `a kit node whose kit registered no usable definition${custom ? ` (${custom.moduleDir})` : ''}, as in the React export`);
+      return [`${pad}// ${node.authoredLabel ?? id}: a kit node (${node.type}) whose kit did not load, so it is not drawn (see EXPORT-PREFLIGHT.md).`];
+    }
+    if ((plan.childrenOf[id] ?? []).length > 0) {
+      if (kit.def.allowChildren) lose(id, 'the children placed inside a kit node are not drawn by the HTML target yet');
+    }
+    const bound = plan.bindings[id] ?? {};
+    const params: string[] = [];
+    for (const param of node.parameters) {
+      if (param.value.kind !== 'literal' || !kit.propOf.has(param.name) || bound[param.name] !== undefined) continue;
+      params.push(`${key(param.name)}: ${js(param.value.value)}`);
+    }
+    for (const [port, source] of Object.entries(bound)) {
+      if (!kit.propOf.has(port)) continue; // React drops and reports it: the plan's, not this printer's
+      const v = binding(id, port, source);
+      if (v !== undefined) params.push(`${key(port)}: ${v}`);
+    }
+    const signals: string[] = [];
+    for (const [port, list] of Object.entries(plan.handlers[id] ?? {})) {
+      if (!kit.signalPropOf.has(port)) continue;
+      const cb = callback(id, port, list, `${pad}  `);
+      if (cb !== undefined) signals.push(`${pad}  ${key(port)}: ${cb}`);
+    }
+    const values: string[] = [];
+    for (const lifted of plan.customLifted[id] ?? []) {
+      const row = stateBySetter.get(lifted.setterName);
+      if (!kit.valuePropOf.has(lifted.port) || row === undefined) continue;
+      values.push(`${pad}  ${key(lifted.port)}: function (sent) {\n${pad}    ${member('state', row.name)}.set(sent);\n${pad}  }`);
+    }
+    imports.kits.add('mountKitNode');
+    sideImports.add(`kits/${custom.moduleDir}.js`);
+    const obj = (entries: string[]): string => (entries.length > 0 ? `{\n${entries.join(',\n')}\n${pad}}` : '{}');
+    return [
+      `${pad}// ${node.authoredLabel ?? id}: ${node.type}, drawn by its kit's own code (${custom.moduleDir}).`,
+      `${pad}const ${local(id)} = mountKitNode(l, ${parent}, ${before ?? 'null'}, ${js(node.type)}, function () {`,
+      `${pad}  return ${params.length > 0 ? `{ ${params.join(', ')} }` : '{}'};`,
+      `${pad}}, ${obj(signals)}, ${obj(values)});`
+    ];
   };
 
   const importMount = (file: string, mountName: string) => {
@@ -2099,6 +2233,8 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
       out.push(`${pad}${h.el}.textContent = '';`, `${pad}${parent}.insertBefore(${h.el}, ${before ?? 'null'});`);
       for (const child of plan.childrenOf[id] ?? []) out.push(...draw(child, h.el, undefined, pad));
       extra([...DRAG_OWN_PORTS]);
+    } else if (role === 'custom') {
+      out.push(...drawKitNode(id, node, parent, before, pad));
     } else if (role === 'slot') {
       // EXP-011 §51. Where the children placed inside this component go: the placing component draws them here.
       out.push(`${pad}if (given.children) given.children(${parent}, ${before ?? 'undefined'}); // the children placed inside it, drawn here`);
@@ -2622,6 +2758,8 @@ export function printComponent(plan: ComponentPlan, ctx: HtmlComponentContext): 
   if (imports.timer.size) lines.push(`import { ${[...imports.timer].sort().join(', ')} } from '${relative(file.dir, 'lib/timer.js')}';`);
   if (imports.animate.size) lines.push(`import { ${[...imports.animate].sort().join(', ')} } from '${relative(file.dir, 'lib/animate.js')}';`);
   if (imports.util.size) lines.push(`import { ${[...imports.util].sort().join(', ')} } from '${relative(file.dir, 'lib/util.js')}';`);
+  if (imports.kits.size) lines.push(`import { ${[...imports.kits].sort().join(', ')} } from '${relative(file.dir, 'lib/kits.js')}';`);
+  for (const mod of [...sideImports].sort()) lines.push(`import '${relative(file.dir, mod)}';`);
   if (imports.repeat.size) lines.push(`import { ${[...imports.repeat].sort().join(', ')} } from '${relative(file.dir, 'lib/repeat.js')}';`);
   if (imports.drag.size) lines.push(`import { ${[...imports.drag].sort().join(', ')} } from '${relative(file.dir, 'lib/drag.js')}';`);
   for (const [mod, names] of [...childImports].sort(([a], [b]) => a.localeCompare(b))) lines.push(`import { ${[...names].sort().join(', ')} } from '${relative(file.dir, mod)}';`);

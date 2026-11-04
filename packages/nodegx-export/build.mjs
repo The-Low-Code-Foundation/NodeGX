@@ -37,6 +37,16 @@ mkdirSync('dist', { recursive: true });
  */
 copyFileSync('../noodl-types/src/node-catalog.json', 'dist/node-catalog.json');
 
+/**
+ * P134 session 13 (R8). React 19's two global builds, the ones the running app's deploy loads, travel with the package:
+ * the HTML export writes them into an app's `lib/vendor/` when one of its pages uses a kit node. Built and owned by
+ * `noodl-viewer-react` (`scripts/build-react-globals.js`), copied here, never edited.
+ */
+mkdirSync('dist/react19', { recursive: true });
+for (const file of ['react.production.min.js', 'react-dom.production.min.js', 'VERSION']) {
+  copyFileSync(`../noodl-viewer-react/static/shared-react19/${file}`, `dist/react19/${file}`);
+}
+
 const shared = {
   bundle: true,
   platform: 'node',

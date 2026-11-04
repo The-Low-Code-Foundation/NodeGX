@@ -77,6 +77,11 @@ export async function openHtmlExport(files: Record<string, string>, hash = '', s
   });
   for (const [k, text] of Object.entries(stored)) dom.window.localStorage.setItem(k, text);
   options.prepare?.(dom.window);
+  // P134 session 13 (R8). index.html's classic scripts, in order, before the app: React's global builds when a kit is used.
+  for (const m of files['index.html'].matchAll(/<script src="([^"]+)"><\/script>/g)) {
+    if (!(m[1] in files)) throw new Error(`index.html loads ${m[1]}, which the export did not write`);
+    dom.window.eval(files[m[1]]);
+  }
   dom.window.eval(await bundleApp(files));
   const settle = async () => {
     for (let i = 0; i < 5; i++) await new Promise((r) => dom.window.setTimeout(r, 0));

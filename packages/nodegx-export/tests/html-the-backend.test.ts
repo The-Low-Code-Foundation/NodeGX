@@ -312,7 +312,12 @@ describe('§D the client over the corpus: every template, with a backend declare
         const ir = parseProject(dir, catalog);
         const client = clientFilesEsm(emitApp(ir, catalog).files);
         carried += Object.keys(client).length;
-        await bundleApp(emitHtmlApp(ir, catalog).files);
+        // R8 (session 13): a kit's own script is a copy the writer makes from the project, not a text file the export
+        // holds, so the folder as it lands is the files with the copies read in (as `html-the-kits.test.ts`'s `landed`).
+        const html = emitHtmlApp(ir, catalog);
+        const files = { ...html.files };
+        for (const c of html.copies) if (/\.(js|mjs|css|json)$/.test(c.to)) files[c.to] = fs.readFileSync(path.join(dir, c.from), 'utf8');
+        await bundleApp(files);
       } catch (e) {
         report.push(`${name}: ${String(e).split('\n')[0]}`);
       } finally {

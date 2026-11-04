@@ -346,8 +346,12 @@ function inputTsTypeOf(port: KitPortIR): string {
   return type === 'Record<string, unknown>' ? 'Record<string, unknown> | readonly unknown[]' : type;
 }
 
-/** The shim. The only file in an exported app that knows what a Noodl node is. */
-function runtimeFile(): string {
+/**
+ * The shim. The only file in an exported app that knows what a Noodl node is.
+ *
+ * Exported (P134 session 13, R8) so the HTML export's `lib/kits.js` is made from this same text, its types out.
+ */
+export function runtimeFile(): string {
   return (
     GENERATED_TS +
     `/*

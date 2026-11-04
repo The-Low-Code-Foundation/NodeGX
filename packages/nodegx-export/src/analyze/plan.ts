@@ -4026,8 +4026,13 @@ export interface HttpCallPlan {
    */
   answerLocal: string;
   messageLocal: string;
-  /** The authored URL, `{placeholders}` included. */
+  /** The authored URL, `{placeholders}` included; `''` when only a wire gives one. */
   url: string;
+  /**
+   * P134-S14-URLWIRED. The URL a wire gives, read when the request is sent (`buildUrl` over `_internal.url`); it wins
+   * over {@link url}, whose placeholders still name the path inputs (`updatePorts` makes them from the authored one).
+   */
+  urlParam?: HttpValuePlan;
   method: string;
   /** Milliseconds; `timeout || 30000`, the runtime's own defaulting, already applied. */
   timeout: number;
@@ -4455,6 +4460,13 @@ export interface ComponentPlan {
   popups: PopupSlotPlan[];
   /** True when a translated Close Popup attached — the component declares `onClose` (§4). */
   closesPopup: boolean;
+  /**
+   * P134-S13-CLICKBUBBLES. The drawn nodes where the running app keeps a click (`pointerlisteners.ts`
+   * `stopsClickPropagation`, FH-015 slice 2): Block Pointer Events on; else Click Bubbling "never"; else, on its default
+   * "auto", a Click port with a connection (any, translated or not: the runtime asks `hasConnections()`). "always" lets
+   * it through. Each printer stops the click there, before the node's own chain, so a wired ancestor's Click does not run.
+   */
+  clickStops: string[];
   queries: QueryPlan[];
   /** Record verbs translated in this component (RECORD-VERBS-TARGET §4), compile order. */
   mutations: MutationPlan[];
@@ -4670,6 +4682,117 @@ export interface ProjectPlan {
    * one the author is looking at.
    */
   kitDuplicates: string[];
+}
+
+/** The roles that draw no element of their own: nothing there to stop a click on. */
+const NO_ELEMENT_ROLES = new Set<string>(['instance', 'repeater', 'custom', 'slot']);
+
+/** P134-S13-CLICKBUBBLES. {@link ComponentPlan.clickStops}, by the runtime's rule. */
+export function clickStopsOf(component: ComponentIR, roleOf: Record<string, RenderRole>): string[] {
+  const literal = (node: NodeIR, name: string): unknown => {
+    const v = node.parameters.find((p) => p.name === name)?.value;
+    return v?.kind === 'literal' ? v.value : undefined;
+  };
+  const clickWired = new Set(component.connections.filter((c) => c.fromProperty === 'onClick').map((c) => c.fromId));
+  const out: string[] = [];
+  for (const node of component.nodes) {
+    const role = roleOf[node.id];
+    if (role === undefined || NO_ELEMENT_ROLES.has(role)) continue;
+    const mode = literal(node, 'clickBubbling');
+    const stops = literal(node, 'blockTouch') === true || mode === 'never' || (mode !== 'always' && clickWired.has(node.id));
+    if (stops) out.push(node.id);
+  }
+  return out;
+}
+
+/**
+ * P134-S14-CLICKNOISE (Richard's R10, 2026-11-04: print the stop "only where it matters"). {@link clickStopsOf} is where
+ * the running app keeps a click; a stop printed where nothing above listens for a click changes nothing, and it was 790
+ * of the corpus's 910 wired Clicks. So a stop is kept only where something above could hear the click:
+ *
+ * - a node above it in its own component whose Click is wired;
+ * - a placed component's slot it sits in (its own parent is an instance), when that component wires any Click;
+ * - its component placed under such a node anywhere it is placed: an instance, a For Each's row, a Router's page, a
+ *   Page Stack's page;
+ *   followed up through every placement, a cycle answering no. A popup is drawn at the top: nothing above it listens.
+ *
+ * And kept everywhere, to stay safe, where the plan cannot see what listens: an app that draws a kit (its React
+ * component may listen on the document), and a component a node names in a way not listed here.
+ */
+export function narrowClickStops(ir: ExportIR, plans: ComponentPlan[]): void {
+  if (plans.every((p) => p.clickStops.length === 0)) return;
+  if (plans.some((p) => Object.values(p.roleOf).includes('custom'))) return;
+  const byPath = new Map(ir.components.map((c) => [`/${c.path}`, c]));
+  const nodeMaps = new Map(ir.components.map((c) => [c, new Map(c.nodes.map((n) => [n.id, n]))]));
+  const hearers = new Map(
+    ir.components.map((c) => [c, new Set(c.connections.filter((w) => w.fromProperty === 'onClick').map((w) => w.fromId))])
+  );
+
+  /** Where each component is drawn: the component and the node it is drawn at; `unknown` when reached another way. */
+  const placements = new Map<string, Array<{ at: ComponentIR; nodeId: string }>>();
+  const unknown = new Set<string>();
+  const place = (target: unknown, at: ComponentIR, nodeId: string) => {
+    if (typeof target !== 'string' || !byPath.has(target)) return;
+    if (!placements.has(target)) placements.set(target, []);
+    placements.get(target)!.push({ at, nodeId });
+  };
+  for (const c of ir.components) {
+    for (const n of c.nodes) {
+      if (byPath.has(n.type)) place(n.type, c, n.id);
+      for (const p of n.parameters) {
+        const v = p.value;
+        if (n.type === 'For Each' && p.name === 'template' && v.kind === 'literal') place(v.value, c, n.id);
+        // A Page Stack draws its pages inside itself (`navigation-stack.tsx`, which listens for no click).
+        else if (n.type === PAGE_STACK_TYPE && p.name.startsWith('pageComp-') && v.kind === 'literal') place(v.value, c, n.id);
+        else if (n.type === 'Router' && p.name === 'pages' && v.kind === 'json') {
+          const pages = v.value as { startPage?: unknown; routes?: unknown };
+          place(pages.startPage, c, n.id);
+          if (Array.isArray(pages.routes)) for (const r of pages.routes) place(r, c, n.id);
+        } else if ((n.type === 'NavigationShowPopup' && p.name === 'target') || (n.type === 'RouterNavigate' && p.name === 'target')) {
+          // A popup is drawn at the top, in a layer with no click listener (`popup-dialog.ts` and the export's host hear
+          // only Escape); a Navigate names a page the Router places. Neither puts anything above the component.
+          continue;
+        } else if (v.kind === 'literal' && typeof v.value === 'string' && byPath.has(v.value)) {
+          unknown.add(v.value);
+        }
+      }
+    }
+  }
+
+  /** Is anything listening above this node, inside its own component (and the slot it may sit in)? */
+  const heardWithin = (c: ComponentIR, nodeId: string): boolean => {
+    const nodes = nodeMaps.get(c)!;
+    let parentId = nodes.get(nodeId)?.parent;
+    while (parentId !== undefined) {
+      const parent = nodes.get(parentId);
+      if (parent === undefined) return false;
+      if (hearers.get(c)!.has(parentId)) return true;
+      const placed = byPath.get(parent.type);
+      if (placed !== undefined && hearers.get(placed)!.size > 0) return true;
+      parentId = parent.parent;
+    }
+    return false;
+  };
+  const memo = new Map<string, boolean>();
+  const heardAbove = (path: string, visiting: Set<string>): boolean => {
+    if (memo.has(path)) return memo.get(path)!;
+    if (unknown.has(path)) return true;
+    if (visiting.has(path)) return false;
+    visiting.add(path);
+    const answer = (placements.get(path) ?? []).some(
+      ({ at, nodeId }) => hearers.get(at)!.has(nodeId) || heardWithin(at, nodeId) || heardAbove(`/${at.path}`, visiting)
+    );
+    visiting.delete(path);
+    memo.set(path, answer);
+    return answer;
+  };
+
+  for (const plan of plans) {
+    const component = byPath.get(plan.legacyPath);
+    if (component === undefined) continue;
+    const above = heardAbove(plan.legacyPath, new Set());
+    plan.clickStops = above ? plan.clickStops : plan.clickStops.filter((id) => heardWithin(component, id));
+  }
 }
 
 export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
@@ -5054,6 +5177,7 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
   // The plans keep the project's own component order, whatever order they were computed in.
   const plans = ir.components.map((component) => plannedByLegacy.get(`/${component.path}`)!);
   const byLegacyPath = new Map(plans.map((p) => [p.legacyPath, p]));
+  narrowClickStops(ir, plans);
 
   const stubCollections: string[] = [];
   for (const plan of plans) {
@@ -5381,6 +5505,7 @@ function planComponent(
     liftedPulseChains: [],
     popups: [],
     closesPopup: false,
+    clickStops: [],
     queries: [],
     mutations: [],
     sessionCalls: [],
@@ -13164,10 +13289,14 @@ function planComponent(
     // rebuilds the node. A wire on any of them is read at *fetch* time by the interpreter, and
     // this slice folds the configuration into a module at build time — the one sentence that
     // covers a wired URL, a wired timeout and a wired Output Fields list alike.
+    //
+    // P134-S14-URLWIRED: all but the URL. The path inputs are made from the URL the editor holds (`updatePorts` reads
+    // `parameters.url`), and the request reads the wire's latest value when it is sent (`buildUrl` over
+    // `_internal.url`), so a wired URL changes no port and is a value like a header's: the module's parameter.
     const configWire = component.connections.find(
       (c) =>
         c.toId === node.id &&
-        (HTTP_CONFIG_PORTS.includes(c.toProperty) ||
+        ((HTTP_CONFIG_PORTS.includes(c.toProperty) && c.toProperty !== 'url') ||
           c.toProperty.startsWith('body-type-') ||
           c.toProperty.startsWith('mapping-path-') ||
           c.toProperty === 'auth-authApiKeyLocation')
@@ -13226,10 +13355,13 @@ function planComponent(
       }
     }
 
-    const url = literalParam(node, 'url');
-    if (typeof url !== 'string') {
+    const authoredUrl = literalParam(node, 'url');
+    const urlWired = component.connections.some((c) => c.toId === node.id && c.toProperty === 'url');
+    if (typeof authoredUrl !== 'string' && !urlWired) {
       return { defer: 'it has no URL, so every Fetch answers Failure with "URL is required" and never sends a request' };
     }
+    // The URL the editor holds: what the path inputs were made from, and the module's address when nothing is wired.
+    const url = typeof authoredUrl === 'string' ? authoredUrl : '';
     const method = String(literalParam(node, 'method') ?? 'GET');
     // `setTimeout`'s own defaulting: `(value as number) || 30000`, so 0 and a blank both mean
     // the default rather than "no timeout".
@@ -13294,6 +13426,14 @@ function planComponent(
       }
       return null;
     };
+
+    // P134-S14-URLWIRED. Wired wins over authored, as for every value here; the param is `url`, its own name.
+    let urlParam: HttpValuePlan | undefined;
+    if (urlWired) {
+      const wired = valueOf('url', 'url', 'url');
+      if (isDefer(wired)) return wired;
+      if (wired !== null) urlParam = wired;
+    }
 
     // Path parameters are the placeholders in the authored URL, deduplicated the way
     // `updatePorts` deduplicates them — one input per distinct name, however often it appears.
@@ -13397,6 +13537,7 @@ function planComponent(
       answerLocal: names.answerLocal,
       messageLocal: names.messageLocal,
       url,
+      ...(urlParam !== undefined ? { urlParam } : {}),
       method,
       timeout,
       responseType,
@@ -20479,6 +20620,7 @@ function planComponent(
     for (const animation of plan.animations) if (animation.arrive !== undefined) scanActions(animation.arrive);
     plan.popups = slotRegistry.filter((s) => attachedSlotKeys.has(s.slotKey));
     plan.closesPopup = closeAttached;
+    plan.clickStops = clickStopsOf(component, plan.roleOf);
     plan.popsStack = popAttached;
     plan.mutations = plan.mutations.filter((m) => attachedMutations.has(m.nodeId));
     // The user family earns its session exports the same way (USER-FAMILY-TARGET §5.1). The

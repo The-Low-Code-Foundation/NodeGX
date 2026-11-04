@@ -12,6 +12,9 @@
  *   listens during a drag.
  * - `readDrag(window)`: `transform=<the dragged element's transform>`, the cell both arms add to a reading with a layout.
  * - A step label is `mouse:<down|move|up>:<x>:<y>` (client coordinates) or `wait:<ms>`; `DRAG_STEP` reads one.
+ * - Session 13 (P134-S13-CLICKBUBBLES): `click:<words>` clicks the innermost element whose text is exactly those words (a
+ *   card, a label, not only a button), bubbling, as a person's press does; `clickText(window, root, words)` does it. The
+ *   runtime arm takes it too, so all three arms are pressed the same way.
  */
 
 const DRAG_STEP = /^mouse:(down|move|up):(-?\d+(?:\.\d+)?):(-?\d+(?:\.\d+)?)$/;
@@ -54,4 +57,13 @@ function readDrag(w) {
   return `transform=${wrapper ? wrapper.style.transform : 'none'}`;
 }
 
-module.exports = { DRAG_STEP, WAIT_STEP, sizeDragLayout, dragStep, readDrag };
+const CLICK_STEP = /^click:([\s\S]+)$/;
+
+function clickText(w, root, words) {
+  const found = [...root.querySelectorAll('*')].filter((el) => (el.textContent || '').trim() === words);
+  if (found.length === 0) throw new Error(`nothing on the page reads "${words}"`);
+  // Document order puts a descendant after its ancestors: the last match is the innermost.
+  found[found.length - 1].dispatchEvent(new w.MouseEvent('click', { bubbles: true, cancelable: true, button: 0 }));
+}
+
+module.exports = { DRAG_STEP, WAIT_STEP, CLICK_STEP, sizeDragLayout, dragStep, readDrag, clickText };

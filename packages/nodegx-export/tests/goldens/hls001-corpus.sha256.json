@@ -510,7 +510,7 @@
     "src/kits/runtime.tsx": "3845fcae05ff2dbf5b8cb97d07442cc7b5da48a4506eb71b5c16d2f6683b98f2",
     "src/main.tsx": "505969740deeb6eafacd9c9f802c287fe2dcbd3a1db237b5ebfcae8696dc4cd8",
     "src/pages/Home.module.css": "152f0f1138b0e731d3cd3af225f282a2ed2db603ff70ba486276631e22ff6d81",
-    "src/pages/Home.tsx": "923fefe469e53841bf28f738994bb4a38a2bcd9653b9e68e46ce8becfde9b015",
+    "src/pages/Home.tsx": "b7ba587b49cdaa5e7ec8548c6da216f75e3e09d39a18d7b08532984a5e1bf675",
     "src/styles/base.css": "a7fedcfbf358a263efb02c615f0a02195dd746c98ab9e0e707846c031bffd551",
     "src/styles/tokens.css": "1cd99a5d0e047105d2c8c580714fffd54a1595937eacc76d52a3e1fca0c18d1b",
     "tsconfig.json": "806e550db96d029916e3bb987b52bdd1949070d364935879aa061247e2e68697",

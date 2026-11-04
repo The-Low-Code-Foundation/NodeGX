@@ -21,8 +21,10 @@ import { openHtmlExport, type HtmlPage } from './html-in-jsdom';
 const { createFakeBackend } = require('./fake-parse-backend') as { createFakeBackend: (spec: unknown) => { log: unknown[]; fetch: unknown } };
 // P134 session 13. A person's pointer on a Drag, and the sizes jsdom does not lay out: the React arm's own (`drag-steps.js`).
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { DRAG_STEP, WAIT_STEP, sizeDragLayout, dragStep, readDrag } = require('./drag-steps') as {
+const { DRAG_STEP, WAIT_STEP, CLICK_STEP, sizeDragLayout, dragStep, readDrag, clickText } = require('./drag-steps') as {
   readDrag: (w: unknown) => string;
+  CLICK_STEP: RegExp;
+  clickText: (w: unknown, root: unknown, words: string) => void;
   DRAG_STEP: RegExp;
   WAIT_STEP: RegExp;
   sizeDragLayout: (w: unknown, layout: { wrapper: [number, number]; parent: [number, number] }) => void;
@@ -41,6 +43,8 @@ export interface HtmlArmOptions {
   backend?: { spec: unknown; appId: string; session?: unknown };
   /** Console errors a scenario may report (a refused verb's line on the error channel), by their text. */
   allowErrors?: string[];
+  /** P134 session 13 (R8). A CSS selector: every match's text ends each reading (a kit's own elements), as in the React arm. */
+  cells?: string;
   /** P134 session 13. The dragged element's size and its parent's, as the React arm's `dragLayout` gives them. */
   dragLayout?: { wrapper: [number, number]; parent: [number, number] };
 }
@@ -62,6 +66,7 @@ const read = (page: HtmlPage, options: HtmlArmOptions): string[] => {
   const stored = (options.storage?.keys ?? []).map((k) => `storage=${page.window.localStorage.getItem(k)}`);
   const boxes = options.boxes === true ? boxNames(doc).map((b) => `[${b.name}]=${b.el.checked ? 'on' : 'off'}`) : [];
   const drag = options.dragLayout !== undefined ? [readDrag(page.window)] : [];
+  if (options.cells !== undefined) drag.push(...[...doc.querySelectorAll(options.cells)].map((el: any) => `cell=${(el.textContent ?? '').trim()}`));
   if (options.fields !== true) return [...texts, ...boxes, ...stored, ...drag];
   const els = [...doc.querySelectorAll(FIELDS)] as any[];
   const name = (el: any) => `[${el.getAttribute('placeholder') ?? ''}]`;
@@ -84,6 +89,11 @@ async function settled(page: HtmlPage, options: HtmlArmOptions): Promise<void> {
 function step(page: HtmlPage, label: string): void {
   const w = page.window;
   const doc = page.document;
+  const clicked = CLICK_STEP.exec(label);
+  if (clicked) {
+    clickText(w, doc.getElementById('app'), clicked[1]);
+    return;
+  }
   const pointer = DRAG_STEP.exec(label);
   if (pointer) {
     dragStep(w, pointer[1], pointer[2], pointer[3]);

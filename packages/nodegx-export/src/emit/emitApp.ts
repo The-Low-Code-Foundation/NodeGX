@@ -1147,6 +1147,7 @@ const httpValueCode = (value: HttpValuePlan): string =>
 /** Every parameter this request takes, as the emitted argument's inline type. */
 function httpParamsType(call: HttpCallPlan): string | null {
   const all: HttpValuePlan[] = [
+    ...(call.urlParam !== undefined ? [call.urlParam] : []),
     ...call.pathParams,
     ...call.queryParams,
     ...call.headers,
@@ -1233,7 +1234,7 @@ function httpFunction(componentPath: string, call: HttpCallPlan): string {
 
   out.push(
     '/**',
-    ` * ${call.method} ${call.url}`,
+    ` * ${call.method} ${call.urlParam !== undefined ? '— the URL arrives on a wire and is read when the request is sent' : call.url}`,
     ` *`,
     ` * From the HTTP Request node ${call.nodeId} in ${componentPath}.`,
     ' */',
@@ -1256,7 +1257,20 @@ function httpFunction(componentPath: string, call: HttpCallPlan): string {
 
   // ---- the URL: the authored address, its placeholders, then the query string ----------------
   const buildsUrl = call.pathParams.length > 0 || call.queryParams.length > 0 || call.auth?.kind === 'apiKey';
-  out.push(`  ${buildsUrl ? 'let' : 'const'} url = ${lit(call.url)};`);
+  if (call.urlParam === undefined) {
+    out.push(`  ${buildsUrl ? 'let' : 'const'} url = ${lit(call.url)};`);
+  } else {
+    // P134-S14-URLWIRED. `doFetch`'s order: a URL that is not text fails first (`inputNotText`), then `buildUrl`
+    // reads `this._internal.url || ''`, and a blank one fails as "URL is required".
+    const code = httpValueCode(call.urlParam);
+    const tsType = call.urlParam.from.kind === 'param' ? call.urlParam.from.tsType : 'string';
+    if (tsType !== 'string') {
+      out.push(
+        `  if (${code} && typeof ${code} !== 'string') throw new HttpError('URL is not text, so no request could be sent', 'http/input-not-text');`
+      );
+    }
+    out.push(`  ${buildsUrl ? 'let' : 'const'} url = ${tsType === 'string' ? `${code} || ""` : `String(${code} || "")`};`);
+  }
   for (const param of call.pathParams) {
     const code = httpValueCode(param);
     // `split`/`join` rather than `replace`: `buildUrl` iterates every match of the placeholder
@@ -1293,8 +1307,8 @@ function httpFunction(componentPath: string, call: HttpCallPlan): string {
       "  if (queryString) url += (url.includes('?') ? '&' : '?') + queryString;"
     );
   }
-  // Only reachable with an authored-empty URL: nothing below can empty a URL that had text in it.
-  if (call.url === '') {
+  // Only reachable with an authored-empty URL or a wired one: nothing below can empty a URL that had text in it.
+  if (call.url === '' || call.urlParam !== undefined) {
     out.push("  if (!url) throw new HttpError('URL is required, so no request could be sent', 'http/no-url');");
   }
 

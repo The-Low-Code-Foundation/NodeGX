@@ -270,6 +270,13 @@ const PASSTHROUGH = new Set([
  * content. ⚠️ `plan.ts`'s `DRAG_OPTION_PORTS` is the authority (it carries the keys and labels); this list must name the
  * same ports, and `drag.test.ts` pins that it does. style.ts cannot import plan.ts (plan.ts imports this module).
  */
+/**
+ * P134-S14-BLOCKTOUCH. Said wherever Block Pointer Events is on: the running app stops every pointer event there (press,
+ * hover, touch, the click; `pointerlisteners.ts`), and both exports keep only the click (the plan's `clickStops`).
+ */
+export const BLOCK_TOUCH_NOTE =
+  'its Block Pointer Events is carried for the click only — the press, hover and touch events still reach the parents, where the running app stops them';
+
 export const DRAG_OWN_PORTS: readonly string[] = [
   'axis',
   'enabled',
@@ -506,6 +513,14 @@ export function computeNodeStyle(
   const consumed = new Set<string>();
   // EXP-011 §63. A Drag's own ports are the hook's options — consumed here so the emitter does not report them unmapped.
   if (role === 'drag') for (const port of DRAG_OWN_PORTS) consumed.add(port);
+  // P134-S13-CLICKBUBBLES. Click Bubbling and Block Pointer Events are behaviour, carried by the plan's `clickStops` (each
+  // printer stops the click there): spent here, never reported as a style the export does not know.
+  consumed.add('clickBubbling');
+  consumed.add('blockTouch');
+  // P134-S14-BLOCKTOUCH. Block Pointer Events stops all sixteen pointer events in the app (`pointerlisteners.ts`); the
+  // exports keep the click alone, so the rest is said, as it was before R9 spent the port.
+  const blockTouch = node.parameters.find((p) => p.name === 'blockTouch')?.value;
+  if (blockTouch?.kind === 'literal' && blockTouch.value === true) notes.push(BLOCK_TOUCH_NOTE);
   // STY-004 AC4. A `textStyle` naming a style the project actually defines has already been
   // expanded into its nine child ports by the parser, so the name itself is spent. One that names
   // nothing is deliberately NOT consumed: it falls through to `unhandled` and is reported, which is

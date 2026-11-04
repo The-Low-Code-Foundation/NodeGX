@@ -33,10 +33,14 @@
  *
  * P134 HTX-003 (session 5). `boxes: true` appends to every reading each checkbox, `[name]=on|off` in document order
  * (`boxNames`: its label's text, or `#1`, `#2`… unlabelled), and a step `tick:<name>` clicks it as a person does.
+ *
+ * P134 session 13. A step `click:<words>` clicks the innermost element reading those words (`drag-steps.js`, shared with
+ * the export arms), so a card or a label can be pressed, not only a button.
  */
 
 const fs = require('fs');
 const path = require('path');
+const { CLICK_STEP, clickText } = require('./drag-steps');
 
 const ROOT = path.join(__dirname, '..', '..', '..', '..');
 const { JSDOM } = require(require.resolve('jsdom', { paths: [ROOT] }));
@@ -101,7 +105,10 @@ const MODULES = [
   // P18 session 139 (EXP-021 AC4): the Store Desk's Global Store, Subscribe and Set, over the runtime's own manager.
   def(require(path.join(LIB, 'nodes', 'std-library', 'agent', 'globalstorenode'))),
   def(require(path.join(LIB, 'nodes', 'std-library', 'agent', 'globalstoresubscribenode'))),
-  def(require(path.join(LIB, 'nodes', 'std-library', 'agent', 'globalstoresetnode')))
+  def(require(path.join(LIB, 'nodes', 'std-library', 'agent', 'globalstoresetnode'))),
+  // P134 session 14 (P134-S14-HTTPSTEP): the Request Desk's String Format and HTTP Request, the runtime's own.
+  def(require(path.join(LIB, 'nodes', 'std-library', 'stringformat'))),
+  def(require(path.join(LIB, 'nodes', 'std-library', 'data', 'httpnode')))
 ];
 const { globalStoreManager } = require(path.join(LIB, 'nodes', 'std-library', 'agent', 'globalstore'));
 
@@ -211,6 +218,9 @@ function installBackend(backend) {
   const fake = createFakeBackend(backend.spec);
   g.XMLHttpRequest = fake.FakeXMLHttpRequest;
   dom.window.XMLHttpRequest = fake.FakeXMLHttpRequest;
+  // P134-S14-HTTPSTEP. The HTTP Request node asks with `fetch`: the same backend answers it.
+  g.fetch = fake.fetch;
+  dom.window.fetch = fake.fetch;
   const runtimeModule = require(require.resolve('@noodl/runtime', { paths: [path.join(ROOT, 'packages', 'noodl-viewer-react')] }));
   const NoodlRuntime = runtimeModule && runtimeModule.default ? runtimeModule.default : runtimeModule;
   const cloudservices = { endpoint: backend.endpoint, appId: backend.appId };
@@ -232,7 +242,7 @@ function installBackend(backend) {
   return fake;
 }
 
-async function run({ dir, scenarios, fields, boxes, backend, storage }) {
+async function run({ dir, scenarios, fields, boxes, backend, storage, allowErrors }) {
   const components = componentsOf(dir);
   const home = components.find((c) => c.name === '/Pages/Home');
   // The Home page's Page node is the router's; the arm draws the Page's one child, the page's Group.
@@ -297,6 +307,16 @@ async function run({ dir, scenarios, fields, boxes, backend, storage }) {
     await settled();
     const readings = [read()];
     for (const label of presses) {
+      // P134 session 13 (P134-S13-CLICKBUBBLES): a press on any element by its words, as the export arms take it.
+      const clicked = CLICK_STEP.exec(label);
+      if (clicked) {
+        await act(async () => {
+          clickText(dom.window, container, clicked[1]);
+        });
+        await settled();
+        readings.push(read());
+        continue;
+      }
       const ticked = /^tick:([\s\S]*)$/.exec(label);
       if (ticked) {
         await act(async () => {
@@ -325,7 +345,10 @@ async function run({ dir, scenarios, fields, boxes, backend, storage }) {
       readings.push(read());
     }
     await act(async () => root.unmount());
-    if (errors.length > 0) throw new Error(`the page logged errors: ${errors.join(' | ').slice(0, 600)}`);
+    // P134 session 14: `allowErrors: [text, …]`, the React arm's option — an error the scenario provokes on purpose.
+    const unexpected = errors.filter((e) => !(allowErrors ?? []).some((allowed) => e.includes(allowed)));
+    if (unexpected.length > 0) throw new Error(`the page logged errors: ${unexpected.join(' | ').slice(0, 600)}`);
+    errors.length = 0;
     out.push(readings);
   }
   return backend !== undefined ? { readings: out, requests } : out;

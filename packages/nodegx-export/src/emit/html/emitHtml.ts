@@ -33,6 +33,8 @@ import { COMPONENT_SCOPE_JS } from './componentScopeJs';
 import { TIMER_JS } from './timerJs';
 import { DRAG_JS } from './dragJs';
 import { REPEAT_JS } from './repeatJs';
+import { KITS_JS } from './kitsJs';
+import { REACT_GLOBAL_PATHS, reactGlobalFiles } from './reactGlobals';
 import { UTIL_JS } from './utilJs';
 import { projectScriptsFiles } from './projectScripts';
 import { PERSIST_STORE_JS } from './persistStoreJs';
@@ -102,6 +104,10 @@ export function emitHtmlApp(ir: ExportIR, catalog: Catalog): EmittedHtmlApp {
   let usesStates = false;
   // HTX-004. The React export's own files, read for its backend client (`client.ts`).
   const reactFiles = emitApp(ir, catalog).files;
+  // P134 session 13 (R8). The kit nodes the plans draw, bound as the React export binds them (`emitKits`): the same ports.
+  const usedKitTypes = new Set<string>();
+  for (const plan of project.plans) for (const custom of Object.values(plan.customNodes)) usedKitTypes.add(custom.def.type);
+  const kitBindings = emitKits(ir, usedKitTypes).bindings;
   for (const plan of project.plans) {
     if (!plan.file) continue;
     const component = ir.components.find((c) => c.path === plan.path)!;
@@ -115,7 +121,8 @@ export function emitHtmlApp(ir: ExportIR, catalog: Catalog): EmittedHtmlApp {
       storeOf: (name) => project.stores.find((st) => st.name === name && st.deferred === undefined)?.exportName,
       routeOf,
       noodlClient: 'src/lib/noodl.ts' in reactFiles,
-      columnsOf: (name) => (ir.project.collections.find((c) => c.name === name)?.columns ?? []).map((c) => c.name)
+      columnsOf: (name) => (ir.project.collections.find((c) => c.name === name)?.columns ?? []).map((c) => c.name),
+      kitOf: (type) => kitBindings.get(type)
     });
     const base = `${plan.file.dir}/${plan.file.fileBase}`;
     parts.push({ path: plan.path, file: `${base}.js`, mount: printed.mount, logic: plan.hook === true, page: plan.role === 'page' });
@@ -188,6 +195,23 @@ export function emitHtmlApp(ir: ExportIR, catalog: Catalog): EmittedHtmlApp {
   else if (usesDrag || usesRepeat) files['lib/errors.js'] = clientFilesEsm(reactFiles)['lib/errors.js'];
   files['app.js'] = appJs(pages, moduleByLegacy, start?.urlPath ?? '/');
   const fontLinks = moduleStylesheetLinks(ir).replace(/href="\//g, 'href="');
+  // P134 session 13 (R8). A kit node: the kit bridge, React's two global builds (loaded first, by index.html), and one module
+  // per kit that loads the bridge and then the kit's own script, as the React export's `src/kits/<Kit>.tsx` does.
+  const usesKits = Object.values(files).some((text) => /from '(?:\.\.\/|\.\/)+lib\/kits\.js'/.test(text));
+  if (usesKits) {
+    files['lib/kits.js'] = KITS_JS;
+    Object.assign(files, reactGlobalFiles());
+    for (const module of ir.project.modules) {
+      if (module.main === undefined || !module.nodes.some((n) => usedKitTypes.has(n.type))) continue;
+      files[`kits/${module.dirName}.js`] = [
+        `// @nodegx:generated — the kit "${module.displayName}": the bridge first (it gives the kit window.Noodl), then the kit's`,
+        `// own script, noodl_modules/${module.dirName}/${module.main}, as written. Do not swap these two lines.`,
+        "import '../lib/kits.js';",
+        `import '../noodl_modules/${module.dirName}/${module.main}';`,
+        ''
+      ].join('\n');
+    }
+  }
   files['index.html'] = [
     '<!doctype html>',
     '<html lang="en">',
@@ -203,6 +227,8 @@ export function emitHtmlApp(ir: ExportIR, catalog: Catalog): EmittedHtmlApp {
     '  </head>',
     '  <body>',
     '    <div id="app"></div>',
+    // R8. React before the app, only when a kit node is drawn: a kit's script reads window.React as it loads.
+    ...(usesKits ? REACT_GLOBAL_PATHS.map((p) => `    <script src="${p}"></script>`) : []),
     '    <script type="module" src="app.js"></script>',
     '  </body>',
     '</html>',

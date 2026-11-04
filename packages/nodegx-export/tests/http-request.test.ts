@@ -388,9 +388,10 @@ describe('EXP-011 Tier 1.2 — HTTP Request', () => {
     });
 
     it('defers a wired configuration input on when it would be read', () => {
+      // P134-S14-URLWIRED: the URL is no longer one (it is read at the call, below); the method still is.
       expect(
         deferralFor((ir, notes, http) => {
-          connect(notes, 'noteDraftVar', 'value', http.id, 'url', 'value');
+          connect(notes, 'noteDraftVar', 'value', http.id, 'method', 'value');
         })
       ).toContain('configures what the request is');
     });
@@ -615,5 +616,129 @@ describe('P18-S104-RESPONSETYPE — the exported request reads the body the way 
     });
     expect(notesReport(app)).toContain('its responseType is wired — that input configures what the request is');
     expect(httpFile(app)).toBeUndefined();
+  });
+});
+
+/**
+ * P134-S14-URLWIRED — a URL that arrives on a wire (HiveClip's thirteen: a String Format's `{url}/projects?token={token}`
+ * into each request's URL, which is how its window reaches the engine).
+ *
+ * EXP-011 §8.4 put every wired configuration input out of scope in one sentence: they decide what the request IS and
+ * the module is built from what the editor settled. That holds for the inputs that re-publish the port set (method, the
+ * string lists, a mapping path, the body type, the auth preset) and NOT for the URL's value: the path inputs come from
+ * the URL the editor holds (`updatePorts` reads `parameters.url`), and the request reads `_internal.url`, the wire's
+ * latest value, when it is sent (`buildUrl`). So the module takes it as a parameter, read at the call, and the runtime's
+ * own two failures for a URL that is no use come with it: blank (`http/no-url`) and not text (`http/input-not-text`).
+ *
+ * 🔴 **Run, not read**: the emitted function against a stubbed `fetch`, with the expected sentences read out of
+ * `httpnode.ts`, so a reworded runtime sentence turns this red rather than drifting.
+ */
+describe('P134-S14-URLWIRED — a URL on a wire is read when the request is sent', () => {
+  const RUNTIME = fs.readFileSync(
+    path.join(__dirname, '..', '..', 'noodl-runtime', 'src', 'nodes', 'std-library', 'data', 'httpnode.ts'),
+    'utf8'
+  );
+  const NO_URL = "URL is required, so no request could be sent";
+  const NOT_TEXT_TAIL = " is not text, so no request could be sent";
+
+  const wiredUrl = (extra: (ir: ExportIR, notes: ComponentIR, http: NodeIR) => void = () => undefined) =>
+    withRequest((ir, notes, http) => {
+      http.parameters = http.parameters.filter((p) => p.name !== 'url');
+      connect(notes, 'noteDraftVar', 'value', http.id, 'url', 'value');
+      extra(ir, notes, http);
+    });
+
+  const runWith = async (app: ReturnType<typeof emitApp>, params: Record<string, unknown>) => {
+    const js = ts.transpileModule(httpFile(app), {
+      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 }
+    }).outputText;
+    const exported: Record<string, unknown> = {};
+    const asked: string[] = [];
+    const fetchStub = async (url: string) => {
+      asked.push(url);
+      return {
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        headers: { get: () => 'text/plain', forEach: (fn: (v: string, k: string) => void) => fn('text/plain', 'content-type') },
+        text: async () => 'hi'
+      };
+    };
+    // eslint-disable-next-line no-new-func
+    new Function('exports', 'fetch', js)(exported, fetchStub);
+    try {
+      const answer = (await (exported.fetchQuote as (p: unknown) => Promise<{ ok: boolean }>)(params)) as { ok: boolean };
+      return { asked, ok: answer.ok };
+    } catch (error) {
+      return { asked, code: (error as { code?: string }).code, message: (error as Error).message };
+    }
+  };
+
+  it('the sentences this reads are the runtime’s own', () => {
+    expect(RUNTIME).toContain(`message: 'URL is required, so no request could be sent'`);
+    expect(RUNTIME).toContain(`message: notText + ' is not text, so no request could be sent'`);
+    expect(RUNTIME).toContain("inputNotText: 'http/input-not-text'");
+    expect(RUNTIME).toContain("noUrl: 'http/no-url'");
+  });
+
+  it('is no longer deferred, and the call site hands the wire’s value over', () => {
+    const { app } = wiredUrl();
+    expectParses(app);
+    expect(app.notes.find((n) => n.includes('node quoteRequest') && n.includes('deferred'))).toBeUndefined();
+    const http = httpFile(app);
+    expect(http).toContain('export async function fetchQuote(params: { url?: string })');
+    expect(http).toContain('const url = params.url || "";');
+    // A handler reads a variable through its snapshot, as every other wired request value (LOGIC §1).
+    expect(notesFile(app)).toContain('fetchQuote({ url: noteDraft.get() })');
+  });
+
+  it('sends to the address it is given at the call, and to a second one on the next', async () => {
+    const { app } = wiredUrl();
+    expect(await runWith(app, { url: 'http://127.0.0.1:4100/projects?token=a' })).toEqual({
+      asked: ['http://127.0.0.1:4100/projects?token=a'],
+      ok: true
+    });
+    expect((await runWith(app, { url: 'http://127.0.0.1:4200/jobs' })).asked).toEqual(['http://127.0.0.1:4200/jobs']);
+  });
+
+  it('a blank or absent URL fails with the runtime’s sentence and sends nothing', async () => {
+    const { app } = wiredUrl();
+    for (const params of [{ url: '' }, {}]) {
+      expect(await runWith(app, params)).toEqual({ asked: [], code: 'http/no-url', message: NO_URL });
+    }
+  });
+
+  it('a URL that is not text fails as the runtime fails it, before anything is sent', async () => {
+    // A Number Variable's value into the URL: the wire is typed `number`, so the check is printed.
+    const { app } = wiredUrl((ir, notes, http) => {
+      notes.connections = notes.connections.filter((c) => !(c.toId === http.id && c.toProperty === 'url'));
+      addNode(notes, { id: 'portNumber', type: 'Number', parameters: [{ name: 'value', value: literal(4100) }] });
+      connect(notes, 'portNumber', 'savedValue', http.id, 'url', 'value');
+    });
+    expectParses(app);
+    const result = await runWith(app, { url: 4100 });
+    expect(result).toEqual({ asked: [], code: 'http/input-not-text', message: 'URL' + NOT_TEXT_TAIL });
+  });
+
+  it('a path placeholder the editor made from the authored URL is filled in the wired one, as buildUrl fills it', async () => {
+    const { app } = wiredUrl((ir, notes, http) => {
+      setParam(http, 'url', literal('https://authored.example/{id}'));
+      setParam(http, 'path-id', literal('7'));
+    });
+    expect((await runWith(app, { url: 'https://wired.example/notes/{id}' })).asked).toEqual(['https://wired.example/notes/7']);
+  });
+
+  it('the other configuration inputs still defer, with the configuration sentence', () => {
+    for (const port of ['method', 'timeout', 'headers']) {
+      const { app } = withRequest((ir, notes, http) => connect(notes, 'noteDraftVar', 'value', http.id, port, 'value'));
+      expect(app.notes.join('\n')).toContain(`its ${port} is wired — that input configures what the request is`);
+      expect(httpFile(app)).toBeUndefined();
+    }
+  });
+
+  it('each shape typechecks in the emitted app', () => {
+    for (const { app } of [wiredUrl(), wiredUrl((ir, notes, http) => setParam(http, 'url', literal('https://a.example/{id}')))]) {
+      expect(typecheckEmittedApp(app)).toEqual([]);
+    }
   });
 });

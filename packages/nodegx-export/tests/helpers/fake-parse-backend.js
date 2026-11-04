@@ -63,6 +63,8 @@ function matches(row, where) {
   });
 }
 
+const STATUS_TEXT = { 200: 'OK', 400: 'Bad Request', 403: 'Forbidden', 404: 'Not Found', 500: 'Internal Server Error' };
+
 function createFakeBackend(spec) {
   const classes = JSON.parse(JSON.stringify(spec.classes || {}));
   const sessions = Object.assign({}, spec.sessions || {});
@@ -138,6 +140,8 @@ function createFakeBackend(spec) {
       if (m[1] === 'secret.png') return json(403, { error: 'This file is private.' });
       return json(200, { url: `http://files.test/${m[1]}?exp=1&sig=abc`, expiresAt: '2026-10-22T00:00:00.000Z', ttlSeconds: 3600 });
     }
+    // P134-S14-HTTPSTEP, the Request Desk: an engine beside the backend, as HiveClip's window asks its own.
+    if (method === 'GET' && path === '/engine/projects') return json(200, { count: 2, names: ['Bees', 'Wasps'] });
     return json(404, { error: `No such route: ${method} ${path}` });
   }
 
@@ -194,7 +198,18 @@ function createFakeBackend(spec) {
       request(init.method || 'GET', String(url), headers, init.body, (reply) =>
         reply.status === 0
           ? reject(new TypeError('Failed to fetch'))
-          : resolve({ status: reply.status, ok: reply.status >= 200 && reply.status < 300, text: async () => reply.text })
+          : resolve({
+              status: reply.status,
+              ok: reply.status >= 200 && reply.status < 300,
+              // P134-S14-HTTPSTEP: what an HTTP Request reads besides the text (the runtime's node and the exports' module).
+              statusText: STATUS_TEXT[reply.status] ?? '',
+              headers: {
+                get: (name) => (String(name).toLowerCase() === 'content-type' ? 'application/json' : null),
+                forEach: (fn) => fn('application/json', 'content-type')
+              },
+              text: async () => reply.text,
+              json: async () => JSON.parse(reply.text)
+            })
       );
     });
   }

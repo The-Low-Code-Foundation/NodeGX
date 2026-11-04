@@ -5535,6 +5535,7 @@ export function emitComponent(
     return SIMPLE_REF.test(base) ? `!${base}` : `!(${base})`;
   };
 
+  const clickStops = new Set(plan.clickStops);
   const handlerAttrs = (node: NodeIR, attrIndent: number): string[] => {
     const attrs: string[] = [];
     const roleEvents = ROLE_EVENT_ATTRS[plan.roleOf[node.id]] ?? {};
@@ -5562,8 +5563,15 @@ export function emitComponent(
         defer(node.id, `the "${port}" signal`, 'has no DOM event equivalent');
         continue;
       }
+      // P134-S13-CLICKBUBBLES. Where the running app keeps the click, it is stopped first (before an await could make it late).
+      if (port === 'onClick' && clickStops.has(node.id)) {
+        attrs.push(`${eventAttr}={${prependStatements(handlerArrow(actions, '(event)', attrIndent), ['event.stopPropagation()'], attrIndent)}}`);
+        continue;
+      }
       attrs.push(`${eventAttr}={${handlerArrow(actions, '()', attrIndent)}}`);
     }
+    // P134-S13-CLICKBUBBLES. Click Bubbling "never" with nothing on the node's own Click: the click is kept all the same.
+    if (clickStops.has(node.id) && !attrs.some((a) => a.startsWith('onClick='))) attrs.push('onClick={(event) => event.stopPropagation()}');
     return attrs;
   };
 

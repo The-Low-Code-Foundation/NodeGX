@@ -283,9 +283,10 @@ describe('§E Close Popup, an unkept Fetch, a skipped row', () => {
     const { calls, window } = await mountCaseStudy(true);
     const close = [...window.document.querySelectorAll('button')].find((b: any) => b.textContent.trim() === 'Close');
     close.click();
-    expect(calls).toEqual(['close', 'close']); // 🔴 P134-S13-CLICKBUBBLES: Close, then the backdrop that holds it, as in React; the app calls once
+    // P134-S13-CLICKBUBBLES fixed (R9): Close keeps its click, so the backdrop that holds it does not run too — once, as the app.
+    expect(calls).toEqual(['close']);
     window.document.querySelector('.CaseStudy-csBackdrop').click();
-    expect(calls).toEqual(['close', 'close', 'close']);
+    expect(calls).toEqual(['close', 'close']);
   });
 
   it('E2. drawn as a plain part, with no close handed to it, a press does nothing and throws nothing', async () => {

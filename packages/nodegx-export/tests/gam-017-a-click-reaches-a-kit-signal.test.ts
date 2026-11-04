@@ -68,7 +68,9 @@ describe('GAM-017 export — the page', () => {
       signalProp: true,
       inputsRoute: true
     });
-    const onClick = /<button\b[^>]*onClick=\{\(\) => \{?([^}]*)\}/.exec(home)?.[1] ?? '';
+    // P134-S14-CLICKNOISE (R10): an app that draws a kit keeps every click where the running app keeps it, so the handler
+    // takes its event and stops it first.
+    const onClick = /<button\b[^>]*onClick=\{(?:\(\)|\(event\)) => \{?([^}]*)\}/.exec(home)?.[1] ?? '';
     for (const name of [signalProp, inputsRoute]) {
       const setter = counts.find((c) => c.name === name)!.setter;
       // A functional increment: two pulses in one render are two, not one written twice.
