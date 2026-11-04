@@ -2,7 +2,7 @@
 id: P115-HST004-WARMRUNNER
 title: "cloud runtime: on a Cloudflare Worker a CloudRunner answers its first request and refuses every later one as unauthenticated"
 status: open
-severity: medium
+severity: high
 area: cloud runtime / CloudRunner (`packages/noodl-viewer-cloud/src/index.ts` `run`), on workerd only
 found: P115 HST-004 session 1, 2026-11-04, the functions probe under `wrangler dev`
 evidence: dev-docs/tasks/phase-115-online-on-your-own-account/HST-004-A-WORKFLOW-ON-A-WORKER.md §6
@@ -26,3 +26,10 @@ twice; then `?fresh=1` twice.
 
 Fix: confirm the cause first (log the flag at the second `run`). A Worker host can build a runner per request today
 (the cost measured above); the runtime fix would be to clear a stale schedule at the start of `run`.
+
+**Raised to high, 2026-11-04 (HST-004 §8.7): the workaround costs the free plan.** On the deployed Worker, a fresh
+runner per request measured **11, 12, 32 and 11 ms of CPU** for four `POST /functions/subscribe` (`wrangler tail`
+`cpuTime`; three refused at the contract, one real call). The Workers Free plan allows **10 ms of CPU per request**
+([limits](https://developers.cloudflare.com/workers/platform/limits/)). Every call answered `ok` today, but a site
+that runs over the allowance risks Cloudflare's "exceeded resource limits" error, and a person staying on the free plan
+is the default case. A runner that answers more than once (this bug fixed) is what brings a function under it.

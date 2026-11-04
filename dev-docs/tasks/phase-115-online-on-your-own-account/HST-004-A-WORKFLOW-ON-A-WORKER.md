@@ -251,3 +251,27 @@ and `not-an-email` → 200 `subscribed: true`, each reaching the stand-in. The f
 not supply a Required field); redeployed (`e5658ce0`): `""` and `"   "` → 400 naming `email`, **0** stand-in events
 in a live tail, then a real email → 200 and **1** (the control that the tail was listening). Richard's retry on the page:
 ✅ *"it says email is required when I click the button with an empty field"*. `not-an-email` still passes: no email type in the contract.
+
+### 8.7 One Worker or Pages plus a Worker: the free plan (for Richard's ruling)
+
+Richard: *"It depends, are there pros and cons re: pricing? A lot of people will want to stay on the free plan as long
+as possible."* Cloudflare's pages, read 2026-11-04:
+
+| | one Worker with static assets | Pages + a Worker |
+|---|---|---|
+| page files | free and unlimited ([assets billing](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/)) | free and unlimited ([Functions pricing](https://developers.cloudflare.com/pages/functions/pricing/)) |
+| a function call | a Worker request, 100,000 a day on Free | a Worker request (Pages Functions *"count towards your quota for the Workers Free plan"*), the same 100,000 |
+| CPU per request on Free | 10 ms | 10 ms |
+| a daily job | a Worker cron, 5 per account on Free | Pages has none: the cron needs the Worker anyway |
+| files per site on Free | 20,000 | 20,000 |
+| deploys | `wrangler deploy` | Pages: 500 builds a month when it builds from git |
+
+So the free plan does not separate them. Two things that matter on Free whichever is chosen:
+
+1. **Only the function paths may wake the Worker.** `run_worker_first` is `["/workflows/*", "/functions/*"]`; with
+   `true`, every page file would count toward the 100,000 and, past it, get a 429 instead of the file.
+2. **CPU per function call, measured on the deploy:** 11, 12, 32, 11 ms against the 10 ms allowance (`wrangler tail`
+   `cpuTime`), because a fresh `CloudRunner` is built per request (WARMRUNNER, raised to high). The workflow engine's
+   own door is not the cost (its bundle has no interpreter); the cloud runtime's start-up is.
+
+**Five crons per account** is the free-plan line a person with several sites meets first: one daily job per site.
