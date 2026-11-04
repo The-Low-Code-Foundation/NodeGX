@@ -120,3 +120,36 @@ Claude Code's built-in skills only and "none" for MCP. Their brief is the same w
 the seal keeps out settings, MCP and skills, not built-in tools. That is what a stranger's Claude Code does too, so it
 stays in the measurement; it is noted because it wrote outside the lab folder. Kit arms a–d did not reach for it.
 
+### Richard plays App 3 and Game 3 (2026-11-04), word for word
+
+> **App 3:** It's a pretty sad prototype, not sure how it didn't understand the brief to the point of just making like
+> what looks to be a form component rather than an app in itself. It looks more like a Claude artifact that a credible
+> prototype. I hope the prompt wasn't misleading.
+>
+> **Game 3:** It's a bit better than Game 1, one extra fish type which was cool and it only appeared a bit lower so you
+> get the impression of progress, but it didn't get more difficult and the sounds were disappointing, and I couldn't
+> remember how to turn the lamp off after I started. Then you hit rock bottom at a certain point and don't know what
+> to do next, so I went back up looking for a fork in the cave I'd missed but there wasn't one, the game just had a
+> bottom with no endgame. So disappointing
+
+On "misleading": App 3's brief is App 1's and App 2's word for word, with "Let's use nodegx to build" replaced by
+"I'm building" (`msg/app-bare.txt`). Without NodeGX, the tool Claude Code reached for was its built-in Artifact.
+
+### The six, ranked by Richard's words
+
+| brief | NodeGX + first-project guides | NodeGX, no guides | Claude alone |
+|---|---|---|---|
+| game | **Game 2: "a keeper, I'll get my kids to play it"** (asked 6 questions first; $2.79) | Game 1: "deffo wasn't that fun to play" (built at once; $2.63) | Game 3: "a bit better than Game 1 … no endgame. So disappointing" (built at once; $1.28) |
+| app | **App 1: "better UX"**, "childish … on desktop" (asked 5 questions; $10.06) | App 2: "clean, simple … very basic" (asked 3 questions; $4.53) | App 3: "a pretty sad prototype … more like a Claude artifact" (built at once; $1.07) |
+
+What it does and doesn't show: one build per cell; the owner judging is NodeGX's founder, blind to the kits for
+a–d but not for e–f (he knew those were the Claude-alone runs); the guided arms had a second turn because they asked.
+The steady difference is the order of work: both guided arms asked first, both Claude-alone arms never asked, and the
+answers Richard gave are what he praised in Game 2.
+
+**Game 3 opens with its game-over panel over the title (measured, headless 1280×800 and in the file).** `.screen {
+display: grid }` overrides the `hidden` attribute on `#overScreen` and the page has no `[hidden]` rule, so "Air
+exhausted / DIVE AGAIN" draws on top of the title card before anyone has played. It is one of the nine traps in
+`nodegx-making-a-game/SKILL.md` ("A hidden overlay still covers the game … `[hidden] { display: none !important }`").
+Richard did not name it. The file also has no `<meta charset>`: served without a charset header (python's
+http.server), `·` reads `Â·`; nodegx.io sends `charset=utf-8`, so it displays right there.
