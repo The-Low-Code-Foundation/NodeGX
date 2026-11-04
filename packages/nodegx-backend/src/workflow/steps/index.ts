@@ -27,6 +27,8 @@ export * from './httpParams';
 export * from './outbound';
 export { HttpRequestStepExecutor, HTTP_MAX_RESPONSE_BYTES, scrubValue } from './http';
 export type { HttpStepPolicy } from './http';
+export { fetchHttpTransport, nodeHttpTransport } from './httpTransport';
+export type { HttpHop, HttpHopAnswer, HttpTransport } from './httpTransport';
 export * from './emailParams';
 export { SendEmailStepExecutor, htmlToText } from './email';
 export * from './kinds';

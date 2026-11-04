@@ -14,24 +14,24 @@
  * the key back (a debugging endpoint, an error page quoting the header) would carry it into the OUTPUT, so the
  * output has the value cut out wherever it appears before the engine sees it.
  *
- * WHERE IT MAY CALL: `outbound.ts`. Not `fetch`: the address check has to be made on the connection itself.
+ * WHERE IT MAY CALL: `outbound.ts`. On a machine the address check is made on the connection itself (Node's `http`
+ * with the guard's `lookup`); on a Cloudflare Worker, which has no `lookup`, the platform refuses private addresses.
+ * `httpTransport.ts` holds both; the step is given one, the Node one unless its host says otherwise (P115-HTTPLOOKUP).
  *
  * @module nodegx-backend/workflow/steps/http
  */
-
-import * as http from 'http';
-import * as https from 'https';
 
 import { ApiCallLookup, mergeSavedCall } from '../apiCalls';
 import type { StepExecContext, StepExecutor } from '../StepExecutor';
 import { StepExecutionError } from '../StepExecutor';
 import { HTTP_DEFAULT_TIMEOUT_MS, HTTP_MAX_TIMEOUT_MS } from './httpParams';
-import { checkLiteralHost, guardedLookup, PrivateAddressError } from './outbound';
+import { HTTP_MAX_RESPONSE_BYTES, nodeHttpTransport } from './httpTransport';
+import type { HttpTransport } from './httpTransport';
+import { checkLiteralHost, PrivateAddressError } from './outbound';
 import { retryPolicyActive, runWithRetryPolicy } from './retryPolicy';
 import { isPlainObject, resolveValueDeep } from './values';
 
-/** The largest answer a step keeps. A bigger one fails the step rather than filling the run record. */
-export const HTTP_MAX_RESPONSE_BYTES = 10 * 1024 * 1024;
+export { HTTP_MAX_RESPONSE_BYTES };
 const MAX_REDIRECTS = 5;
 const REDACTED = '[REDACTED]';
 
@@ -179,60 +179,30 @@ interface Answer {
 }
 
 /** One request, through the address guard, following redirects through it too. */
-function send(b: Built, signal: AbortSignal, allowPrivate: boolean): Promise<Answer> {
-  const go = (url: URL, method: string, headers: Record<string, string>, body: Buffer | undefined, hops: number): Promise<Answer> =>
-    new Promise<Answer>((resolve, reject) => {
-      try {
-        checkLiteralHost(url.hostname, allowPrivate);
-      } catch (e) {
-        return reject(e);
-      }
-      const mod = url.protocol === 'https:' ? https : http;
-      const req = mod.request(
-        url,
-        {
-          method,
-          headers: body ? { ...headers, 'content-length': String(body.length) } : headers,
-          lookup: guardedLookup(allowPrivate) as never,
-          signal
-        },
-        (res) => {
-          const status = res.statusCode || 0;
-          const location = res.headers.location;
-          if (status >= 300 && status < 400 && location && status !== 304) {
-            res.resume();
-            if (hops >= MAX_REDIRECTS) return reject(new StepExecutionError(`followed ${MAX_REDIRECTS} redirects and was sent on again`, status));
-            const next = new URL(location, url);
-            const keep = status === 307 || status === 308;
-            const nextMethod = keep || method === 'HEAD' ? method : 'GET';
-            const nextHeaders = { ...headers };
-            if (!keep) delete nextHeaders['content-type'];
-            if (next.origin !== url.origin) for (const h of b.authHeaders) delete nextHeaders[h];
-            return resolve(go(next, nextMethod, nextHeaders, keep ? body : undefined, hops + 1));
-          }
-          const chunks: Buffer[] = [];
-          let size = 0;
-          res.on('data', (c: Buffer) => {
-            size += c.length;
-            if (size > HTTP_MAX_RESPONSE_BYTES) {
-              req.destroy(new StepExecutionError(`the answer is larger than ${HTTP_MAX_RESPONSE_BYTES / 1024 / 1024} MB, the most a step keeps`));
-              return;
-            }
-            chunks.push(c);
-          });
-          res.on('end', () => {
-            const out: Record<string, string> = {};
-            for (const [k, v] of Object.entries(res.headers)) if (v !== undefined) out[k] = Array.isArray(v) ? v.join(', ') : v;
-            resolve({ status, headers: out, text: Buffer.concat(chunks).toString('utf8'), contentType: String(res.headers['content-type'] || '') });
-          });
-          res.on('error', reject);
-        }
-      );
-      req.on('error', reject);
-      if (body) req.write(body);
-      req.end();
-    });
-  return go(b.url, b.method, b.headers, b.body, 0);
+async function send(b: Built, signal: AbortSignal, allowPrivate: boolean, transport: HttpTransport): Promise<Answer> {
+  let url = b.url;
+  let method = b.method;
+  let headers = b.headers;
+  let body = b.body;
+  for (let hops = 0; ; hops++) {
+    checkLiteralHost(url.hostname, allowPrivate);
+    const a = await transport({ url, method, headers, body, signal, allowPrivate });
+    const location = a.headers.location;
+    if (a.status >= 300 && a.status < 400 && location && a.status !== 304) {
+      if (hops >= MAX_REDIRECTS) throw new StepExecutionError(`followed ${MAX_REDIRECTS} redirects and was sent on again`, a.status);
+      const next = new URL(location, url);
+      const keep = a.status === 307 || a.status === 308;
+      const nextHeaders = { ...headers };
+      if (!keep) delete nextHeaders['content-type'];
+      if (next.origin !== url.origin) for (const h of b.authHeaders) delete nextHeaders[h];
+      method = keep || method === 'HEAD' ? method : 'GET';
+      headers = nextHeaders;
+      body = keep ? body : undefined;
+      url = next;
+      continue;
+    }
+    return { status: a.status, headers: a.headers, text: a.text, contentType: a.headers['content-type'] || '' };
+  }
 }
 
 function parseBody(a: Answer): unknown {
@@ -266,7 +236,14 @@ function withSavedCall(ctx: StepExecContext, p: Record<string, unknown>, lookup:
 }
 
 export class HttpRequestStepExecutor implements StepExecutor {
-  constructor(private readonly getApiCall?: ApiCallLookup) {}
+  /**
+   * @param transport how one request goes on the wire: Node's `http` through the address guard unless the host says
+   *   otherwise (a Cloudflare Worker passes `fetchHttpTransport`, P115-HST004-HTTPLOOKUP).
+   */
+  constructor(
+    private readonly getApiCall?: ApiCallLookup,
+    private readonly transport: HttpTransport = nodeHttpTransport
+  ) {}
 
   async execute(ctx: StepExecContext): Promise<Record<string, unknown>> {
     const p = withSavedCall(ctx, resolvedParams(ctx), this.getApiCall);
@@ -282,7 +259,7 @@ export class HttpRequestStepExecutor implements StepExecutor {
       const signal = AbortSignal.any([ctx.signal, timer]);
       let a: Answer;
       try {
-        a = await send(b, signal, allowPrivate);
+        a = await send(b, signal, allowPrivate, this.transport);
       } catch (e) {
         const where = shown(b.url);
         if (e instanceof PrivateAddressError) throw new StepExecutionError(`Step "${ctx.step.id}" may not call ${where}: ${e.message}`);

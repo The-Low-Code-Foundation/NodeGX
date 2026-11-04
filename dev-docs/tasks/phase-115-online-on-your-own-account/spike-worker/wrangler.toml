@@ -9,10 +9,6 @@ compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
 [triggers]
 crons = ["0 8 * * *"]
 
-# The HTTP step through fetch (see src/http-over-fetch.ts for why this is a shim, not an edit).
-[alias]
-"http" = "./src/http-over-fetch.ts"
-"https" = "./src/http-over-fetch.ts"
 
 # The front end: the HTML export, served by the same Worker (one origin, one deploy). The Worker runs first only for its doors.
 [assets]

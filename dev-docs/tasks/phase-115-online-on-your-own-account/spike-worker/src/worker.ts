@@ -6,6 +6,7 @@
  *
  *   - the workflows: the project's nodegx.automations.json, bundled at deploy (the `project-automations` alias);
  *   - the Secrets: `_noodl_get_secret`, read from the Worker's own secret bindings (never from the project);
+ *   - Call an API's transport: `fetch` (`fetchHttpTransport`), since workerd has no `lookup` for the address guard;
  *   - a run history: a stub, because `createLogger()` may answer null (D1 is HST-006's);
  *   - the doors: `POST /workflows/<id>` (the spike's; how a browser calls a workflow is a finding), the Worker's
  *     cron, which fires the project's schedule triggers, and (session 2) `POST /functions/<name>`, the door the exported
@@ -15,6 +16,7 @@
  */
 import { WorkflowEngine } from '@backend/workflow/WorkflowEngine';
 import { CompositeStepExecutor } from '@backend/workflow/steps/CompositeStepExecutor';
+import { fetchHttpTransport } from '@backend/workflow/steps/httpTransport';
 import { buildRunPayload } from '@backend/workflow/runPayload';
 import type { WorkflowDefinition } from '@backend/workflow/types';
 import automations from 'project-automations';
@@ -55,7 +57,9 @@ function install(env: Env): void {
 }
 
 function engine(): WorkflowEngine {
-  const executor = new CompositeStepExecutor({ getRunner: () => null });
+  // workerd has node:http's client but not its `lookup` (P115-HST004-HTTPLOOKUP): Call an API sends over fetch here,
+  // and a deployed Worker cannot reach a private address anyway. checkLiteralHost still runs in the step.
+  const executor = new CompositeStepExecutor({ getRunner: () => null, httpTransport: fetchHttpTransport });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return new WorkflowEngine({ executions: history as any, executor, backendId: 'worker', backendName: 'worker' });
 }

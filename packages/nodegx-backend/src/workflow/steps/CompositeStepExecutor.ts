@@ -30,6 +30,7 @@ import {
 } from './records';
 import type { ApiCallLookup } from '../apiCalls';
 import { HttpRequestStepExecutor } from './http';
+import type { HttpTransport } from './httpTransport';
 import { SendEmailStepExecutor } from './email';
 import { RunWorkflowStepExecutor } from './runWorkflow';
 import type { PieceRunner } from './runWorkflow';
@@ -42,6 +43,8 @@ export interface CompositeStepExecutorDeps {
   getRunner: () => WorkflowRunner | null;
   /** P132 BWF-012: the backend's saved API calls, read when a step that uses one runs. */
   getApiCall?: ApiCallLookup;
+  /** P115-HST004-HTTPLOOKUP: how Call an API sends. Node's `http` through the address guard unless given (a Worker: fetch). */
+  httpTransport?: HttpTransport;
   /** P132 BWF-013: runs a reusable piece (another workflow) for a `run-workflow` step. */
   getPieceRunner?: () => PieceRunner | null;
   /** Test hook: override individual kinds (used to stub function invocation). */
@@ -73,7 +76,7 @@ export class CompositeStepExecutor implements StepExecutor {
       'update-record': new UpdateRecordStepExecutor(getRunner),
       'delete-record': new DeleteRecordStepExecutor(getRunner),
       'find-records': new FindRecordsStepExecutor(getRunner),
-      'http-request': new HttpRequestStepExecutor(deps.getApiCall),
+      'http-request': new HttpRequestStepExecutor(deps.getApiCall, deps.httpTransport),
       'send-email': new SendEmailStepExecutor(),
       'run-workflow': new RunWorkflowStepExecutor(deps.getPieceRunner || (() => null)),
       ...(deps.overrides || {})
