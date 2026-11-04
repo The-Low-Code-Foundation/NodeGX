@@ -1,5 +1,21 @@
 # P132 — next session
 
+**s13 (2026-11-04): BWF-010 built** ([the record](BWF-010-THE-TRIGGER-IS-THE-FIRST-STEP.md#s13-2026-11-04-built-ac1ac3-green)),
+nodegx-studio `26e602d`, P132-TRIGGERROWS fixed. One row per workflow; what starts it is the first card on its
+canvas, its settings on the right; a workflow nothing starts gets one from that card. Driven in the Electron app on a
+Greenhouse copy ([greenhouse-drive-bwf010.mjs](greenhouse-drive-bwf010.mjs)): 5 rows, the time moved from the card,
+file and backend agree. **Next: BWF-011** (item 2 below), then 012, 013.
+
+- 🔴 **check:hosted's *Delete type* goes red on the backend's admin rate limit (burst 100)**, at HEAD too
+  (P132-HOSTEDRATELIMIT). It now prints the toast on a red. A "Not deleted: Rate limit exceeded" there is that bug;
+  re-run once before reading it as yours. Studio's page made the same 18 admin calls on HEAD and on BWF-010.
+- 🔴 A regex written inside the drive's `ev(\`…\`)` template needs `\\s`, not `\s`: the template eats one backslash
+  (`/\s+/` became `/s+/` and a right card read as wrong).
+- Ask Richard: the card says "Every day at 08:00" (the backend's words for the cron), not the file's name "Every morning
+  at 08:00". Does he want his name on it?
+
+---
+
 **s12 (2026-11-03/04): Richard re-walked the Backend tab** ("It's still confusing AF"; his eight points verbatim in the
 [README](README.md#richards-re-walk-verbatim-2026-11-03-studio-on-greenhouse-screenshot-of-call-an-apis-query-with-a-formula-open)).
 Four were bugs, fixed in nodegx-studio `d4c72c0` (P132-FXMENUWORDS, -BRANCHROWSCROSS, -RECORDSTEPREFUSED,
@@ -104,5 +120,5 @@ Studio gates before you commit: `check:automations` (with and without `NODEGX_RE
 "workflow/|WorkflowEngine|WorkflowSubsystem|/steps/|workflow-defs|stepKindCatalog" tests/*.test.ts`), about 4
 minutes, `nice -n 19 … --runInBand`.
 
-Still open from earlier: the list shows triggers as rows of their own (BWF-001 item 8's fold); TriggerTest's three
+Still open from earlier (the fold of BWF-001 item 8 is BWF-010, done s13): TriggerTest's three
 ports crowd the column gap at 71 %; Richard's re-walk of BWF-001 points 2–4 (AC7).
