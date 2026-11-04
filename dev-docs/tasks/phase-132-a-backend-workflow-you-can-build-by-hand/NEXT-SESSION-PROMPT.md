@@ -1,5 +1,24 @@
 # P132 — next session
 
+**s20 (2026-11-04): BWF-013 AC3 green; every BWF-013 AC is green.**
+- The MCP's `list_backend_workflows` answers `pieces` (`{ id, name, runBy, reads, startedBy }`), the rules in the
+  engine's `pieces.ts` (`runnersOf`, `bodyNames`: Studio's and the editor's ports are twins, change all three).
+  **P132-CREATEWFCALLSONLY** fixed: `create_backend_workflow` said every step "invokes a cloud function in v1".
+  Spec `noodl-mcp/tests/p132-bwf013-pieces.test.ts` 5/5 (a mutant red).
+- The agent round ([agent-round-bwf013.mjs](agent-round-bwf013.mjs)): two reports copying the same steps, "make those
+  steps one thing both reports use": one piece `thirsty-plants`, both reports run it, no copy kept, no function,
+  $2.18. [The record](BWF-013-A-REUSABLE-PIECE-IS-A-WORKFLOW-OTHERS-RUN.md#s20-2026-11-04-ac3-green-the-mcp-says-who-runs-a-piece).
+- The noodl-mcp `dist/` was rebuilt for the round (it holds the working tree as it was at 21:06).
+
+**Next, in this order:**
+1. **BWF-008's AC2 crossing**: Studio and the editor open on one Greenhouse copy, a change in each shows in the other.
+2. The s11 list below (Studio reads the served route words; P132-HIDDENPANELCHURN measured first).
+3. **BWF-009, the test** (README's order). Richard's re-walk is the real grade of 010–013.
+
+- Asks for Richard: none new.
+
+---
+
 **s19 (2026-11-04): BWF-013 Build 4 built in the NodeGX editor; driven in the dev editor on a Greenhouse copy.**
 - A Run a workflow card says **Run <piece>** by name (`NodeGraphNode.derivedTitle`, never saved); its *Workflow* row
   picks the piece by name (pieces first, a ring shown and disabled, *Open the piece ↗*); *Send* is named values with

@@ -39,6 +39,36 @@ export function piecesRunBy(def: Pick<WorkflowDefinition, 'steps'>): string[] {
   return out;
 }
 
+/** The workflows (by id, each once, in their order) with a step that runs `id`. */
+export function runnersOf(all: Iterable<Pick<WorkflowDefinition, 'id' | 'steps'>>, id: string): string[] {
+  const out: string[] = [];
+  for (const w of all) if (w.id !== id && piecesRunBy(w).includes(id)) out.push(w.id);
+  return out;
+}
+
+/**
+ * The names a workflow reads from what it was given (`body.<name>` anywhere in its steps' settings), each once, in
+ * step order: what a piece asks to be sent. Studio's `automations.mjs bodyNames` and the editor's `workflowPieces.ts`
+ * say the same: change all three or none.
+ */
+export function bodyNames(def: Pick<WorkflowDefinition, 'steps'> | null | undefined): string[] {
+  const out: string[] = [];
+  const walk = (v: unknown): void => {
+    if (Array.isArray(v)) return v.forEach(walk);
+    if (!v || typeof v !== 'object') return;
+    const o = v as Record<string, unknown>;
+    if (typeof o.$path === 'string') {
+      const [root, name] = o.$path.split('.');
+      if (root === 'body' && name && !out.includes(name)) out.push(name);
+      return;
+    }
+    if ('$literal' in o) return;
+    Object.values(o).forEach(walk);
+  };
+  for (const s of def?.steps || []) walk(s.params);
+  return out;
+}
+
 /**
  * The ring `def` would close if saved beside `others` (by id; `def` replaces its own old version): the ids in order
  * from `def` back to `def` (`['a', 'b', 'a']`), or null when there is none.

@@ -22,6 +22,8 @@ import { BackendClient, listBackends, requireBackend } from '../backend/client';
 import { ENFORCED_RULES_NOTE, OPEN_RULES_NOTE } from '../backend/enforcedRulesNote';
 import { ensureEnvPlaceholder, readEnvSecret } from '../backend/envSecret';
 import { PROJECT_AUTOMATIONS_FILE } from '../../../nodegx-backend/src/automations/shape';
+import { bodyNames, piecesRunBy, runnersOf } from '../../../nodegx-backend/src/workflow/pieces';
+import type { WorkflowDefinition } from '../../../nodegx-backend/src/workflow/types';
 import { patchAutomations, patchRules, PROJECT_RULES_FILE, writeBoth } from '../backend/projectFiles';
 import { resolveFunctionName } from '../backend/functionTarget';
 import { writeProposal } from '../backend/workflowProposals';
@@ -170,7 +172,11 @@ export function registerBackendReadTools(server: McpServer): void {
         'server executions. Each shows its steps, entry, concurrency cap, and timeouts. This is how an agent ' +
         'sees what multi-step automation already exists before authoring more. (A "workflow" here is the WF-001 ' +
         'engine artifact — distinct from a single cloud function.) Also lists the SAVED API CALLS (`apiCalls`): an ' +
-        'http-request step uses one as `{"call": "<id>", "fill": {…}}`, never a copy of its settings.',
+        'http-request step uses one as `{"call": "<id>", "fill": {…}}`, never a copy of its settings. And the ' +
+        'REUSABLE PIECES (`pieces`): a workflow other workflows run with a `run-workflow` step, or one no trigger ' +
+        'starts, each with `runBy` (the workflows that run it), `reads` (the names it reads as `body.<name>`, what a ' +
+        'run-workflow step `send`s it) and `startedBy` (its triggers). Steps wanted in two workflows go in one piece, ' +
+        'run from both: never a copy of the steps in each.',
       inputSchema: { backendId: z.string().optional().describe('Which backend (omit if exactly one is running)') }
     },
     guarded(async ({ backendId }) => {
@@ -178,7 +184,11 @@ export function registerBackendReadTools(server: McpServer): void {
       const { json } = await client.request('GET', '/admin/workflow-defs');
       // P132 BWF-012: an older backend has no saved calls (404), and says nothing about them.
       const calls = await client.request('GET', '/admin/api-calls', undefined, [404]);
-      return jsonResult(calls.status === 200 ? { ...(json as object), apiCalls: (calls.json as { calls?: unknown[] }).calls ?? [], apiCallsUsedBy: (calls.json as { usedBy?: unknown }).usedBy ?? {} } : json);
+      const listed = calls.status === 200 ? { ...(json as object), apiCalls: (calls.json as { calls?: unknown[] }).calls ?? [], apiCallsUsedBy: (calls.json as { usedBy?: unknown }).usedBy ?? {} } : json;
+      // P132 BWF-013 AC3: who runs each piece and what it reads, so an agent reuses one by its id instead of grepping
+      const triggers = await client.request('GET', '/admin/triggers', undefined, [404]);
+      const pieces = pieceSummary(((json as { workflows?: PieceWorkflow[] }).workflows) ?? [], triggers.status === 200 ? ((triggers.json as { triggers?: PieceTrigger[] }).triggers ?? []) : []);
+      return jsonResult({ ...(listed as object), pieces });
     })
   );
 
@@ -1604,7 +1614,9 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
       title: 'Create a backend workflow',
       description:
         'Author a WF-001 workflow on a running backend: a multi-step, ordered, error-routed, cancellable server ' +
-        'execution over a DAG of steps (each step invokes a cloud function in v1). The definition is validated ' +
+        'execution over a DAG of steps (each one of the kinds list_backend_step_kinds serves). The same steps ' +
+        'wanted in two workflows go in ONE workflow of their own, a reusable piece ending in a `return`, run from ' +
+        'each with a `run-workflow` step (list_backend_workflows `pieces` lists the ones there are). The definition is validated ' +
         '(acyclic, edges resolve, every step reference is to a step that exists upstream) and REJECTED with the ' +
         'reason if invalid — never silently accepted. It is ' +
         'persisted and deploys with the backend. Point a trigger at it with target {kind:"workflow", name:<id>}. ' +
@@ -2170,4 +2182,20 @@ async function backendReadsProjectEnv(backendId: string | undefined): Promise<bo
   const listing = await secretsListing(client);
   if (!listing) return undefined;
   return Array.isArray(listing.projectEnvFile);
+}
+
+type PieceWorkflow = Pick<WorkflowDefinition, 'id' | 'name' | 'steps'>;
+type PieceTrigger = { id: string; name?: string; target?: { kind?: string; name?: string } };
+
+/**
+ * P132 BWF-013: the reusable pieces on a backend — every workflow another one runs (a `run-workflow` step names it),
+ * and every workflow no trigger starts (Studio's *Reusable pieces* list). Each says who runs it, what it reads from
+ * what it is sent, and what starts it. Exported for the spec.
+ */
+export function pieceSummary(workflows: PieceWorkflow[], triggers: PieceTrigger[]) {
+  const run = new Set(workflows.flatMap((w) => piecesRunBy(w)));
+  const startedBy = (id: string) => triggers.filter((t) => t.target?.kind === 'workflow' && t.target.name === id).map((t) => t.id);
+  return workflows
+    .filter((w) => run.has(w.id) || startedBy(w.id).length === 0)
+    .map((w) => ({ id: w.id, name: w.name || w.id, runBy: runnersOf(workflows, w.id), reads: bodyNames(w), startedBy: startedBy(w.id) }));
 }

@@ -261,3 +261,39 @@ no wire). Not run: the Electron `test:ci` (`tests/workflow/*` read neither chang
 **Not done (next):** AC3's agent round (`list_backend_workflows` should say who runs a piece first). Making a piece from
 selected steps in the EDITOR is not in the task. The seeded `ui` positions overlapped cards (the drive's seed, not
 the product).
+
+## s20 (2026-11-04): AC3 green, the MCP says who runs a piece
+
+**The MCP half.** `list_backend_workflows` now answers `pieces`: every workflow another one runs, and every workflow
+no trigger starts (Studio's *Reusable pieces*), each `{ id, name, runBy, reads, startedBy }`: the workflows whose
+`run-workflow` step names it, the `body.<name>`s it reads (what a step `send`s it), its triggers. The rules are the
+engine's (`nodegx-backend/src/workflow/pieces.ts`, new `runnersOf` and `bodyNames`, the Studio and editor ports'
+twins: change all three or none); the MCP reads `/admin/triggers` beside `/admin/workflow-defs` and summarises
+(`backendTools.ts pieceSummary`). The tool's words say a step wanted in two workflows goes in ONE piece run from both.
+🔴 **P132-CREATEWFCALLSONLY** (filed, fixed): `create_backend_workflow` still said every step "invokes a cloud function
+in v1", so the tool an agent writes with pointed it at a function. It now names the served kinds and pieces.
+
+Spec `packages/noodl-mcp/tests/p132-bwf013-pieces.test.ts`, 5 green: four pure lines (two runners each once, a
+`$literal` holding a `body.` path not read, a triggered workflow another runs listed with its trigger, a function
+trigger of the same name starting no workflow) and one through the tool against the built backend (a piece, two
+runners, a webhook on one). A mutant emptying `runnersOf` goes red (3). Beside it green: toolDisclosure,
+workflowProposals, hls013, the backend's `p132-bwf-013-pieces` 11/11; `tsc` backend 0, noodl-mcp the known 19.
+
+**AC3 by an agent** ([agent-round-bwf013.mjs](agent-round-bwf013.mjs), the MCP's dist rebuilt): a Greenhouse copy
+with *The weekly report* and *The monthly report*, each a COPY of the same find-the-thirsty-plants and count steps
+before its own email, each on its own schedule. The request, saying neither "piece" nor the kind: "My weekly report
+and my monthly report both find the thirsty plants and count them, with the same steps copied in each. Make those
+steps one thing both reports use, so I only change them in one place." Opus, $2.18, 2.4 minutes:
+
+- a new workflow `thirsty-plants` holding the find and the count, ending in a `return` of the count's output;
+- both reports are now *Run The thirsty plants* then their own email, the email reading `upstream.thirsty.result.count`;
+  neither keeps a find; no trigger, no cloud function added; the file and the backend agree;
+- it read `list_backend_workflows` and `list_backend_step_kinds` before writing (no grep until after), test-ran the
+  piece, and did NOT run the reports because they send email. Its own words: "I used a workflow piece, not a cloud
+  function … it keeps the steps visible and editable on the canvas".
+
+Then by hand: the weekly report tested up to its Run step answered `{result: {count: 0, names: ""}, run: …}` (the
+piece's own run). The ring refused with both names is the engine's (s16). **AC3 is green; BWF-013's ACs are all green.**
+
+Not graded: it set the piece's concurrency to 2 on its own reasoning (both schedules fire on a Monday the 1st), and the
+Run steps carry no `send` (the piece reads nothing it is given). Only one agent round was run.
