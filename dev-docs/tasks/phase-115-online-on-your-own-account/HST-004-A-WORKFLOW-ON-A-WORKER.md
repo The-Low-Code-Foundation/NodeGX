@@ -1,6 +1,6 @@
 # HST-004 — A workflow on a Worker, no VM
 
-**Opened 2026-10-07.** **Depends on HST-002, P107 (server-side nodes).** **Status: 🟡 live on Richard's account 2026-11-04 (session 3, §8): his own Subscribe reached the stand-in with the email and the key. AC1 still owes MUST line 4's sentence on the page (Richard's retry) and line 6 (the cron, 2026-11-05 08:00 UTC).** Kind: experiment.
+**Opened 2026-10-07.** **Depends on HST-002, P107 (server-side nodes).** **Status: 🟡 live on Richard's account 2026-11-04 (session 3, §8): his own Subscribe reached the stand-in with the email and the key. MUST 1–5 ticked; AC1 owes only line 6 (the cron, 2026-11-05 08:00 UTC).** Kind: experiment.
 
 ## 1. The person sentence
 
@@ -249,5 +249,5 @@ like if you have an email, no difference."* §8.5 row 4 and session 2's §7.2 ro
 `{"email":""}`, and the Request contract counted only absent and `null` as missing. Live, before the fix: `""`, `"   "`
 and `not-an-email` → 200 `subscribed: true`, each reaching the stand-in. The fix is in the product (a blank string does
 not supply a Required field); redeployed (`e5658ce0`): `""` and `"   "` → 400 naming `email`, **0** stand-in events
-in a live tail, then a real email → 200 and **1** (the control that the tail was listening). Owed: Richard's retry on
-the page, to read what sentence the page shows for the 400. `not-an-email` still passes: no email type in the contract.
+in a live tail, then a real email → 200 and **1** (the control that the tail was listening). Richard's retry on the page:
+✅ *"it says email is required when I click the button with an empty field"*. `not-an-email` still passes: no email type in the contract.

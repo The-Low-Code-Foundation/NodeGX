@@ -25,9 +25,8 @@ never ahead of lanes 9, 2 and 3. Earlier prompts are in git history (`git log --
 ## 3. Next, in order
 
 1. ✅ The secret is set and Richard's Subscribe reached the stand-in with the email and the key (HST-004 §8.5; 1042
-   answered). MUST 1 ✅ (his phone). Line 4 found P115-HST004-BLANKREQUIRED (fixed `21bb85fc3`, live): still owed,
-   Richard's retry with the box empty, to read the sentence the PAGE shows for the 400 (it may show nothing; if so,
-   that is the page's failure wiring, fixture or exporter, and a new bug).
+   answered). MUST 1–5 ✅: his phone, and the empty field says the email is required (after BLANKREQUIRED,
+   `21bb85fc3`).
 2. After 08:00 UTC on 2026-11-05: MUST line 6. `npx wrangler tail hst-stand-in -c wrangler.stand-in.toml` only sees live
    events, so read the dashboard (Workers & Pages → hst-stand-in → Logs, observability is on) for the digest call.
 3. Then ask the one-Worker ruling (§4) with the URL in front of him.
