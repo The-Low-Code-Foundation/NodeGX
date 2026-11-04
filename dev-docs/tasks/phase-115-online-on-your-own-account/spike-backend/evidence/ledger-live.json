@@ -1,0 +1,1 @@
+{"loopback":{"calls":17,"byPath":{"GET /users/me":17}},"adapter":{"statements":9649,"rowsRead":93202,"rowsWritten":3113,"dropped":{"SAVEPOINT":12,"RELEASE":12},"refused":{"journal_mode = WAL":12,"secure_delete = ON":12,"wal_checkpoint(TRUNCATE)":9},"other":36},"sqlite":{"statements":308,"rowsWritten":530,"refused":{"auto_vacuum = INCREMENTAL":12}}}

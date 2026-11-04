@@ -1,7 +1,7 @@
 # HST-006 — The backend contract on Workers and D1
 
-**Opened 2026-10-07.** **Depends on HST-002, P34's `@noodl/backend-contract`.** **Status: 🟡 records half measured
-(session 5, 2026-11-04); users, files and realtime not yet.** Kind: experiment.
+**Opened 2026-10-07.** **Depends on HST-002, P34's `@noodl/backend-contract`.** **Status: 🟡 records (session 5) and users
+and sign-in (session 6) measured, 2026-11-04; files, realtime and Fixture C not yet.** Kind: experiment.
 
 ## 0. The recommendation for R3 (AC4), as of session 5
 
@@ -25,8 +25,21 @@ What it changes in the person sentence: the bill is **$0 on the Free plan**, ref
 rows written a day**. One new record writes 4 rows, so that's about 25,000 new records a day, and reads are 5 million a
 day. Not "$5 plus D1".
 
-Still unmeasured, and the next sessions: **users and sign-in** (the backend's HTTP layer, not the store), **files**
-(R2), **realtime** (a Durable Object's WebSockets), and Fixture C itself, which does not exist yet (AC2).
+**Session 6 moved the recommendation further: not "an adapter", the whole service.** The built-in backend's
+`BackendService`, unchanged (HTTP layer, access gate, users, sessions, roles, rules, the execution history), boots
+inside one Durable Object in 40–120 ms, and **67 of the 76 cases in nine of the backend's own HTTP suites pass on
+Richard's account** (users, sign-in, sessions, roles, row rules), the same 67 as locally (§7). Node: 76 / 76. The 9 reds
+have one cause: a code node in a cloud function cannot run on a Worker (P115-HST004-NOCODEGEN). What it took, four
+seams and no product change: the store's engine (session 5), `node:sqlite` for the history, the data dir on Workers'
+in-memory `node:fs`, and the service's call to itself (P115-HST006-LOOPBACK). What it costs: a sign-up 74 ms of CPU,
+a sign-in 62 ms (the password hash), every other call 1–15 ms, and a Durable Object request may use 30 s.
+
+So the adapter phase is three things, not a rewrite: (1) the two product changes the seams stand in for (the
+runtime's transport to its own backend in-process; the data dir's files kept in the object's storage, since isolate
+memory goes with the isolate), (2) code nodes printed at deploy (NOCODEGEN), (3) session 5's three reds.
+
+Still unmeasured: **files** (R2), **realtime** (a Durable Object's WebSockets), **email** from the object, and Fixture C
+itself, which does not exist yet (AC2).
 
 ## 1. The person sentence
 
@@ -153,7 +166,12 @@ two relation reads).
 | the exit | ✅ | `reimport.ts` SAME, tampered DIFFERENT |
 | schedule triggers | ✅ Worker cron | HST-004 §6, §8 |
 | D1 as the store | ❌ without a rewrite | the call-site count in §6.1, not a run |
-| users and sign-in | ⏳ not measured | (the backend's HTTP layer: `nodegx-backend/src/auth`, `users`) |
+| users and sign-in (password) | ✅ whole service in a Durable Object | 9 suites 67/76 live, §7; sign-up 74 ms CPU, sign-in 62 ms |
+| sessions (end, renewal, sign-out, restart) | ✅ | `session-expiry` 4/4, `isl040-sessions` 11/11 live |
+| roles and row rules over HTTP | ✅ | `security-enforcement` 22/22, `bmg-005-roles` 9/9, `p127-duplicate-role` 4/4, `f84` 8/8, `p121` 4/4 live |
+| cloud functions that need a signed-in caller | 🟡 with the loopback seam | `p127-no-roles` 0/11 → 5/11 (P115-HST006-LOOPBACK) |
+| code nodes in a cloud function | ❌ | 9 reds, one cause (P115-HST004-NOCODEGEN) |
+| provider and magic-link sign-in, email flows | ⏳ not run | `auth-linking`, `bmg-004-users` reach the mailer in-process |
 | files | ⏳ not measured | candidate: R2 through the existing `S3Driver` (R2 speaks S3) |
 | realtime | ⏳ not measured | candidate: the Durable Object's own WebSockets |
 | mail | elsewhere | HST-004 §10 (Resend; Cloudflare's sending needs a domain on Cloudflare) |
@@ -173,3 +191,98 @@ node_modules/.bin/wrangler deploy --var "RUN_KEY:$(cat .run-key)"
 curl -s "https://hst-records-spike.richard-digitalbricks.workers.dev/__exit?key=$(cat .run-key)" > exit.json
 node dist/reimport.cjs exit.json; echo $?               # 0 = the same answers
 ```
+
+## 7. Session 6 — 2026-11-04 (Opus 5.5): the whole backend in a Durable Object, graded by its own HTTP suites
+
+### 7.1 Why the whole service
+
+Users and sign-in are not the store: they are the service's HTTP layer (`server/users.ts`, `auth/sessions.ts`, the
+access gate in `HttpServer.handle`, `SecurityState`). The backend's own suites for that layer start a `BackendService`
+and talk HTTP to it. So the honest grade was to boot the real service where the records already live, and run those
+suites unchanged against it.
+
+`spike-backend/` (Worker `hst-backend-spike`, one Durable Object class `Backend`):
+- `build.mjs` bundles the service (esbuild: html-as-text for the admin page, `node:sqlite` → the shim, `require` and
+  `__dirname` given to the CommonJS inside), and wrangler uploads it as built: **4.76 MB, 1.13 MB gzipped** (Free
+  allows 3 MB gzipped), **startup 40 ms** (1 s allowed).
+- Inside the object the real service runs `listen()`; Cloudflare's Node HTTP server support
+  (`httpServerHandler` from `cloudflare:node`) hands each request to it.
+- `remote/BackendService.js` is what `../src/service` becomes for jest (`remote/jest.remote.config.js`): `start()`
+  ships the suite's data dir to `/__hst/boot`, writes back what the service wrote (`secrets.json`, `auth.json`), and
+  answers the Worker's URL. `facade` and `systemUsers`, for the two suites that reach in, are calls through
+  `/__hst/call`. Doors need `?key=` (`.run-key`, gitignored); without it they answer 404.
+
+### 7.2 The four seams (none in product code)
+
+| seam | what Cloudflare lacks | the spike's answer | what the product needs |
+|---|---|---|---|
+| 1. the store's engine | `node:sqlite` | `LocalSQLAdapter.prototype.connect` resolves `durableObjectEngine` (session 5) | the existing `options.engine` passed by `createAdapter` |
+| 2. the history's `new DatabaseSync()` | `node:sqlite` | `nodeSqliteShim.ts`: the same database; `PRAGMA auto_vacuum` refused, counted | the same, or the history in the store |
+| 3. the data dir | a disk | Workers' `node:fs` (`/tmp`, the isolate's memory). Measured: files survive requests; **the ledger's counters reset between suites on Cloudflare, so the isolate was replaced at least once**, and a data dir there goes with it | `security.json`, `secrets.json`, `auth.json` … in the object's storage |
+| 4. the service's call to itself | anything on 127.0.0.1 | a `fetch` to the service's own address goes to its in-process handler (P115-HST006-LOOPBACK) | the cloud runtime's transport in-process on a Worker |
+
+Platform notes, measured under workerd: `process.versions.node` is `22.19.0`; `fs.rmSync(missing, { force: true })`
+throws ENOENT (Node ignores it); a port a closed `http.Server` held cannot be listened on again (EADDRINUSE), so
+each boot takes the next port.
+
+### 7.3 The grade
+
+Nine suites that start the service and talk HTTP (`packages/nodegx-backend/tests/`), unchanged, three arms:
+
+| suite | Node (control) | Durable Object, `wrangler dev` | Durable Object, Richard's account |
+|---|---|---|---|
+| security-enforcement (cross-user isolation, CLP, keys, signup rule, the route walk) | 22/22 | 22/22 | 22/22 (the walk needs 50 s over the internet: timeouts ×4, `remote/slow-network.js`) |
+| isl040-sessions (30-day end, renewal, restart, policy saved to auth.json) | 11/11 * | 11/11 | 11/11 |
+| session-expiry | 4/4 | 4/4 | 4/4 |
+| bmg-005-roles | 9/9 | 9/9 | 9/9 |
+| p127-duplicate-role | 4/4 | 4/4 | 4/4 |
+| f84-acl-visibility | 8/8 | 8/8 | 8/8 |
+| p121-acl-null | 4/4 | 4/4 | 4/4 |
+| p127-no-roles (functions that need a signed-in caller) | 11/11 | 0/11 → **5/11** with seam 4 | 5/11 |
+| impersonate-session | 3/3 | 0/3 | 0/3 |
+| **total** | **76/76** | **67/76** | **67/76** |
+
+\* 10/11 at first: the census case named a file P124 had moved (P115-HST006-STALECENSUS, fixed `816929bcf`). It was
+red in Node too, which is why the control arm runs first.
+
+**Every one of the 9 reds is a code node** (`JavaScriptFunction`) in a cloud function: *Code generation from strings
+disallowed*. Where the node leads to the Response, the call waits out the 30 s function timeout and answers 504
+(P115-HST004-NOCODEGEN). Not run: `auth-linking` and `bmg-004-users` (they reach the mailer in-process).
+
+That the suites really graded the object: the Worker's log carries every sign-up, sign-in and `/users/me` of each
+run; and before seam 4, the functions failed with `principal: user` on a fresh isolate, from the first call.
+
+### 7.4 What a sign-in costs on Cloudflare
+
+`wrangler tail --format json` during the live run (`spike-backend/evidence/cpu-live-summary.json`, a sample: 608
+events, 270 in the object). CPU per call, inside the object:
+
+| call | p50 | max |
+|---|---|---|
+| sign-up `POST /users` | 74 ms | 108 ms |
+| sign-in `POST /login` | 62 ms | 75 ms |
+| password change `PUT /users/:id` | 82 ms | 82 ms |
+| `GET /users/me` | 5 ms | 6 ms |
+| create a record `POST /classes/Doc` | 6 ms | 10 ms |
+| read a record | 4 ms | 8 ms |
+| a cloud function (no code node) | 12–25 ms | 52 ms |
+| boot the whole service | 35 ms | 121 ms |
+
+The password calls are scrypt (`server/users.ts`). They run in the object, where a request may use 30 s of CPU; the
+front Worker that forwards them costs 0–9 ms. 607 of 608 outcomes `ok` (the one `canceled` is a 30 s code-node wait
+the client gave up on).
+
+### 7.5 How to run it again
+
+```
+cd spike-backend                       # node_modules → ../spike-worker/node_modules
+node_modules/.bin/wrangler dev --port 8796      # runs build.mjs itself
+cd ../../../../packages/nodegx-backend
+C=../../dev-docs/tasks/phase-115-online-on-your-own-account/spike-backend/remote/jest.remote.config.js
+nice -n 19 npx jest -c $C --runInBand tests/session-expiry.test.ts tests/isl040-sessions.test.ts …
+# live:
+#   (spike-backend) node_modules/.bin/wrangler deploy --var "RUN_KEY:$(cat .run-key)"
+#   HST_BACKEND_URL=https://hst-backend-spike.richard-digitalbricks.workers.dev HST_RUN_KEY=$(cat …/.run-key) npx jest -c $C …
+```
+The control arm is the same command without `-c $C`. The last suite's `afterAll` stops the service; the live Worker
+then answers 503 to everything but its doors.

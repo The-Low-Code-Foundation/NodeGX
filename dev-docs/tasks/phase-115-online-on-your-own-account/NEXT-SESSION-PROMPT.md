@@ -1,17 +1,19 @@
 # Phase 115 — next session prompt
 
-**Written 2026-11-04 at the end of session 5 (Opus 5.5).** Unparked by Richard 2026-11-04 (BOARD lane 10: *"Let's kick
+**Written 2026-11-04 at the end of session 6 (Opus 5.5).** Unparked by Richard 2026-11-04 (BOARD lane 10: *"Let's kick
 it off and lift the park. If this can go out with the Beta, it'd be a nice addition"*). A nice-to-have for the Beta,
 never ahead of lanes 9, 2 and 3. Earlier prompts are in git history (`git log -- this file`).
 
 ## 1. Read first
 
-1. [HST-006 §0 and §6](HST-006-THE-CONTRACT-ON-D1.md): session 5. The record store in a Durable Object (99/102 on
+0. [HST-006 §0 and §7](HST-006-THE-CONTRACT-ON-D1.md): session 6. The WHOLE backend service in one Durable Object,
+   nine of its own HTTP suites run against it unchanged (67/76 live, 76/76 Node), the four seams, what a sign-in costs.
+1. [HST-006 §6](HST-006-THE-CONTRACT-ON-D1.md): session 5. The record store in a Durable Object (99/102 on
    Cloudflare), what a create costs on Free, the exit round trip, and the capability table with its ⏳ rows.
 1b. [HST-004 §9](HST-004-A-WORKFLOW-ON-A-WORKER.md): session 4, where a call's CPU goes and the warm-up at startup.
 2. §8 for session 3 (the deploy on Richard's account), §7 for session 2 (§7.5, the deploy commands), §6 for session 1.
 3. README §12: the session log and the estimate.
-4. The bugs: `node scripts/bugs.js --from P115` (**BUNDLEDROPS high**; HST006 NOROLLBACKCASE medium, EXPRDEPTH and ALTERPERCREATE low; RULEFIVE low; HTTPLOOKUP, BLANKREQUIRED, WARMRUNNER fixed).
+4. The bugs: `node scripts/bugs.js --from P115` (**BUNDLEDROPS high**; **LOOPBACK high**, **NOCODEGEN high** (s6); HST006 NOROLLBACKCASE medium, EXPRDEPTH and ALTERPERCREATE low; RULEFIVE low; HTTPLOOKUP, BLANKREQUIRED, WARMRUNNER fixed).
 
 ## 2. Built vs driven
 
@@ -23,6 +25,7 @@ never ahead of lanes 9, 2 and 3. Earlier prompts are in git history (`git log --
 | Call an API's transport (`steps/httpTransport.ts`), the shim deleted | ✅ `ef3f7388a` | ✅ wrangler dev before/after control; jest 27/27 |
 | `MAILCHIMP_KEY` on the Worker | ✅ Richard, from his terminal | ✅ his Subscribe reached the stand-in with the key (fingerprint matched) |
 | `hst-records-spike` (HST-006: `/__conformance`, `/__ops`, `/__exit`, all behind `?key=`, key in `spike-records/.run-key`, gitignored) | ✅ deployed | ✅ 99/102 ×3; ops costs; exit SAME (control DIFFERENT) |
+| `hst-backend-spike` (HST-006 §7: the whole `BackendService` in a Durable Object; doors `/__hst/*` behind `?key=`, key in `spike-backend/.run-key`, gitignored) | ✅ deployed, service STOPPED (answers 503 until a boot) | ✅ 9 suites 67/76 live = local; CPU per call from the tail |
 | The page in a real browser | — | ❌ never (Chrome hangs in the sandbox): Richard's phone is the reading |
 
 ## 3. Next, in order
@@ -47,17 +50,20 @@ never ahead of lanes 9, 2 and 3. Earlier prompts are in git history (`git log --
 4. BUNDLEDROPS (high) belongs to the cloud-deploy owner, not this phase, but it blocks every MCP-written cloud function
    that wires an HTTP Request's body or auth. Before anyone fixes it: measure the editor's own Deploy button with a
    viewer running, and a browser export with the same wiring (the bug file says how).
-5. ✅ HST-006 records half (session 5). **Next, in order:** (a) **users and sign-in** on the Durable Object: does
-   the backend's auth/users layer (`packages/nodegx-backend/src/auth`, `users`) run over the same shim, or is it
-   tied to the Node HTTP server? Grade it with that package's own tests where they take an adapter. (b) **Fixture C**
+5. ✅ HST-006 records (s5) and ✅ users and sign-in (s6: the whole service runs in the object; §7). **Next, in order:**
+   (b) **Fixture C**
    (HST-002): an MCP-written project with records + a sign-in, and its `MUST.md`, so AC2 has something to tick.
    (c) Files on R2 through `S3Driver` (needs R2 enabled on Richard's account: ask first, it may want a card). (d)
-   Realtime over the object's WebSockets. 🔴 Don't run `/__conformance` on the live Worker for fun: each run reads
+   Realtime over the object's WebSockets (the service's own `RealtimeHub` is already in the object: try its socket
+   through `httpServerHandler` first). (e) The two suites not run (`auth-linking`, `bmg-004-users`) need a remote
+   mailer fake in `remote/BackendService.js`. Fixture C should be graded on `hst-backend-spike` (the whole service),
+   not on `hst-records-spike`: its cloud functions then need LOOPBACK's seam, and must not use a code node (NOCODEGEN). 🔴 Don't run `/__conformance` on the live Worker for fun: each run reads
    ~752,000 rows, 15% of the Free day.
 
 ## 4. Rulings owed (ask in plain words, recommendation first)
 
 - R1–R5 as in the README §8. R5 (first-load size) is mostly answered: the HTML export is 1.4 MB against ~14.9 MB.
 - R6 (one Worker) ruled 2026-11-04.
-- R3: recommendation updated in HST-006 §0 (still a spike here; the adapter is smaller than thought and is a Durable
-  Object, not D1). Ask once users/sign-in are measured, not before.
+- R3: recommendation updated in HST-006 §0 after s6 (no adapter: the whole service in a Durable Object, plus two
+  product changes and code nodes printed at deploy). Users/sign-in are measured now, so R3 can be asked; ask it once
+  Fixture C is ticked, so the ruling is about a real app.

@@ -1,0 +1,2054 @@
+{
+ "capturedFrom": "wrangler tail hst-backend-spike --format json, 2026-11-04, the nine suites live (doors' ?key= stripped)",
+ "events": 608,
+ "models": {
+  "stateless": 338,
+  "durableObject": 270
+ },
+ "outcomes": {
+  "ok": 607,
+  "canceled": 1
+ },
+ "rows": [
+  {
+   "k": "DO POST /users",
+   "n": 11,
+   "p50": 74,
+   "p90": 94,
+   "max": 108,
+   "sum": 786
+  },
+  {
+   "k": "DO POST /__hst/boot",
+   "n": 6,
+   "p50": 35,
+   "p90": 121,
+   "max": 121,
+   "sum": 278
+  },
+  {
+   "k": "DO POST /admin/users",
+   "n": 4,
+   "p50": 68,
+   "p90": 86,
+   "max": 86,
+   "sum": 165
+  },
+  {
+   "k": "DO PUT /users/REDACTED",
+   "n": 2,
+   "p50": 82,
+   "p90": 82,
+   "max": 82,
+   "sum": 164
+  },
+  {
+   "k": "DO POST /login",
+   "n": 3,
+   "p50": 62,
+   "p90": 75,
+   "max": 75,
+   "sum": 144
+  },
+  {
+   "k": "DO POST /functions/three-wired",
+   "n": 2,
+   "p50": 52,
+   "p90": 52,
+   "max": 52,
+   "sum": 69
+  },
+  {
+   "k": "DO GET /__hst/files",
+   "n": 43,
+   "p50": 1,
+   "p90": 4,
+   "max": 7,
+   "sum": 60
+  },
+  {
+   "k": "DO POST /classes/Doc",
+   "n": 9,
+   "p50": 6,
+   "p90": 10,
+   "max": 10,
+   "sum": 60
+  },
+  {
+   "k": "DO POST /functions/list-jobs",
+   "n": 2,
+   "p50": 31,
+   "p90": 31,
+   "max": 31,
+   "sum": 50
+  },
+  {
+   "k": "DO POST /admin/roles",
+   "n": 5,
+   "p50": 10,
+   "p90": 17,
+   "max": 17,
+   "sum": 46
+  },
+  {
+   "k": "DO GET /classes/Doc/REDACTED",
+   "n": 11,
+   "p50": 4,
+   "p90": 6,
+   "max": 8,
+   "sum": 44
+  },
+  {
+   "k": "DO POST /functions/list-jobs-as-done",
+   "n": 2,
+   "p50": 22,
+   "p90": 22,
+   "max": 22,
+   "sum": 42
+  },
+  {
+   "k": "DO POST /functions/list-jobs-control",
+   "n": 2,
+   "p50": 26,
+   "p90": 26,
+   "max": 26,
+   "sum": 39
+  },
+  {
+   "k": "DO PUT /admin/:id",
+   "n": 6,
+   "p50": 6,
+   "p90": 7,
+   "max": 7,
+   "sum": 35
+  },
+  {
+   "k": "DO GET /users/me",
+   "n": 7,
+   "p50": 5,
+   "p90": 6,
+   "max": 6,
+   "sum": 30
+  },
+  {
+   "k": "DO PUT /admin/auth",
+   "n": 3,
+   "p50": 4,
+   "p90": 20,
+   "max": 20,
+   "sum": 28
+  },
+  {
+   "k": "DO POST /functions/jointwo",
+   "n": 1,
+   "p50": 25,
+   "p90": 25,
+   "max": 25,
+   "sum": 25
+  },
+  {
+   "k": "DO POST /classes/Secrets",
+   "n": 3,
+   "p50": 7,
+   "p90": 9,
+   "max": 9,
+   "sum": 23
+  },
+  {
+   "k": "DO PUT /admin/roles/plain",
+   "n": 2,
+   "p50": 14,
+   "p90": 14,
+   "max": 14,
+   "sum": 22
+  },
+  {
+   "k": "DO POST /functions/join",
+   "n": 1,
+   "p50": 22,
+   "p90": 22,
+   "max": 22,
+   "sum": 22
+  },
+  {
+   "k": "DO POST /admin/keys",
+   "n": 2,
+   "p50": 9,
+   "p90": 9,
+   "max": 9,
+   "sum": 17
+  },
+  {
+   "k": "DO POST /admin/roles/editors/users",
+   "n": 3,
+   "p50": 6,
+   "p90": 6,
+   "max": 6,
+   "sum": 17
+  },
+  {
+   "k": "DO GET /admin/keys",
+   "n": 4,
+   "p50": 4,
+   "p90": 6,
+   "max": 6,
+   "sum": 15
+  },
+  {
+   "k": "DO GET /admin/users",
+   "n": 1,
+   "p50": 14,
+   "p90": 14,
+   "max": 14,
+   "sum": 14
+  },
+  {
+   "k": "DO POST /functions/empty-role",
+   "n": 1,
+   "p50": 13,
+   "p90": 13,
+   "max": 13,
+   "sum": 13
+  },
+  {
+   "k": "DO POST /__hst/stop",
+   "n": 8,
+   "p50": 2,
+   "p90": 3,
+   "max": 3,
+   "sum": 13
+  },
+  {
+   "k": "DO PUT /admin/secrets/WalkProbe",
+   "n": 2,
+   "p50": 7,
+   "p90": 7,
+   "max": 7,
+   "sum": 13
+  },
+  {
+   "k": "DO POST /admin/roles/staff/users",
+   "n": 1,
+   "p50": 12,
+   "p90": 12,
+   "max": 12,
+   "sum": 12
+  },
+  {
+   "k": "DO POST /functions/unchanged-as-done",
+   "n": 1,
+   "p50": 12,
+   "p90": 12,
+   "max": 12,
+   "sum": 12
+  },
+  {
+   "k": "DO POST /functions/echo",
+   "n": 1,
+   "p50": 12,
+   "p90": 12,
+   "max": 12,
+   "sum": 12
+  },
+  {
+   "k": "front POST /users",
+   "n": 16,
+   "p50": 0,
+   "p90": 3,
+   "max": 6,
+   "sum": 11
+  },
+  {
+   "k": "DO POST /functions/private-fn",
+   "n": 1,
+   "p50": 11,
+   "p90": 11,
+   "max": 11,
+   "sum": 11
+  },
+  {
+   "k": "DO DELETE /admin/roles/editors/users/REDACTED",
+   "n": 2,
+   "p50": 7,
+   "p90": 7,
+   "max": 7,
+   "sum": 11
+  },
+  {
+   "k": "DO POST /classes/_Role",
+   "n": 1,
+   "p50": 11,
+   "p90": 11,
+   "max": 11,
+   "sum": 11
+  },
+  {
+   "k": "DO DELETE /admin/roles/WalkProbe",
+   "n": 1,
+   "p50": 11,
+   "p90": 11,
+   "max": 11,
+   "sum": 11
+  },
+  {
+   "k": "front GET /__hst/ledger",
+   "n": 2,
+   "p50": 9,
+   "p90": 9,
+   "max": 9,
+   "sum": 10
+  },
+  {
+   "k": "DO POST /functions/:id",
+   "n": 1,
+   "p50": 10,
+   "p90": 10,
+   "max": 10,
+   "sum": 10
+  },
+  {
+   "k": "DO GET /aggregate/WalkProbe",
+   "n": 2,
+   "p50": 6,
+   "p90": 6,
+   "max": 6,
+   "sum": 10
+  },
+  {
+   "k": "front GET /health",
+   "n": 2,
+   "p50": 8,
+   "p90": 8,
+   "max": 8,
+   "sum": 9
+  },
+  {
+   "k": "front POST /__hst/boot",
+   "n": 8,
+   "p50": 1,
+   "p90": 6,
+   "max": 6,
+   "sum": 9
+  },
+  {
+   "k": "front POST /functions/list-jobs-as-done",
+   "n": 2,
+   "p50": 8,
+   "p90": 8,
+   "max": 8,
+   "sum": 9
+  },
+  {
+   "k": "front POST /functions/list-jobs-control",
+   "n": 2,
+   "p50": 9,
+   "p90": 9,
+   "max": 9,
+   "sum": 9
+  },
+  {
+   "k": "DO PUT /classes/Doc/REDACTED",
+   "n": 2,
+   "p50": 5,
+   "p90": 5,
+   "max": 5,
+   "sum": 9
+  },
+  {
+   "k": "DO POST /files/WalkProbe",
+   "n": 1,
+   "p50": 9,
+   "p90": 9,
+   "max": 9,
+   "sum": 9
+  },
+  {
+   "k": "DO POST /auth/email-code",
+   "n": 2,
+   "p50": 6,
+   "p90": 6,
+   "max": 6,
+   "sum": 9
+  },
+  {
+   "k": "DO POST /api/WalkProbe",
+   "n": 2,
+   "p50": 5,
+   "p90": 5,
+   "max": 5,
+   "sum": 9
+  },
+  {
+   "k": "DO POST /admin/world/migrate",
+   "n": 2,
+   "p50": 5,
+   "p90": 5,
+   "max": 5,
+   "sum": 9
+  },
+  {
+   "k": "DO PUT /classes/Post/REDACTED",
+   "n": 2,
+   "p50": 5,
+   "p90": 5,
+   "max": 5,
+   "sum": 9
+  },
+  {
+   "k": "DO POST /:id",
+   "n": 1,
+   "p50": 9,
+   "p90": 9,
+   "max": 9,
+   "sum": 9
+  },
+  {
+   "k": "DO POST /classes/_ApiKey",
+   "n": 1,
+   "p50": 9,
+   "p90": 9,
+   "max": 9,
+   "sum": 9
+  },
+  {
+   "k": "DO POST /admin/executions/compact",
+   "n": 1,
+   "p50": 9,
+   "p90": 9,
+   "max": 9,
+   "sum": 9
+  },
+  {
+   "k": "DO GET /api/_User",
+   "n": 2,
+   "p50": 5,
+   "p90": 5,
+   "max": 5,
+   "sum": 8
+  },
+  {
+   "k": "DO GET /classes/WalkProbe",
+   "n": 2,
+   "p50": 5,
+   "p90": 5,
+   "max": 5,
+   "sum": 8
+  },
+  {
+   "k": "DO DELETE /admin/users/WalkProbe",
+   "n": 1,
+   "p50": 8,
+   "p90": 8,
+   "max": 8,
+   "sum": 8
+  },
+  {
+   "k": "DO DELETE /admin/views/WalkProbe/WalkProbe",
+   "n": 2,
+   "p50": 4,
+   "p90": 4,
+   "max": 4,
+   "sum": 8
+  },
+  {
+   "k": "DO DELETE /admin/triggers/WalkProbe",
+   "n": 2,
+   "p50": 5,
+   "p90": 5,
+   "max": 5,
+   "sum": 8
+  },
+  {
+   "k": "DO POST /__hst/call",
+   "n": 5,
+   "p50": 2,
+   "p90": 2,
+   "max": 2,
+   "sum": 8
+  },
+  {
+   "k": "front GET /__hst/files",
+   "n": 63,
+   "p50": 0,
+   "p90": 0,
+   "max": 2,
+   "sum": 7
+  },
+  {
+   "k": "DO DELETE /classes/Doc/REDACTED",
+   "n": 1,
+   "p50": 7,
+   "p90": 7,
+   "max": 7,
+   "sum": 7
+  },
+  {
+   "k": "DO PUT /admin/permissions/collections/_User",
+   "n": 1,
+   "p50": 7,
+   "p90": 7,
+   "max": 7,
+   "sum": 7
+  },
+  {
+   "k": "DO PUT /admin/workflows/WalkProbe",
+   "n": 2,
+   "p50": 4,
+   "p90": 4,
+   "max": 4,
+   "sum": 7
+  },
+  {
+   "k": "DO GET /admin/roles",
+   "n": 2,
+   "p50": 4,
+   "p90": 4,
+   "max": 4,
+   "sum": 7
+  },
+  {
+   "k": "DO DELETE /files/WalkProbe",
+   "n": 1,
+   "p50": 7,
+   "p90": 7,
+   "max": 7,
+   "sum": 7
+  },
+  {
+   "k": "DO DELETE /admin/search/collections/WalkProbe",
+   "n": 1,
+   "p50": 7,
+   "p90": 7,
+   "max": 7,
+   "sum": 7
+  },
+  {
+   "k": "DO GET /users/WalkProbe",
+   "n": 1,
+   "p50": 6,
+   "p90": 6,
+   "max": 6,
+   "sum": 6
+  },
+  {
+   "k": "DO POST /admin/workflow-defs",
+   "n": 1,
+   "p50": 6,
+   "p90": 6,
+   "max": 6,
+   "sum": 6
+  },
+  {
+   "k": "DO PUT /classes/WalkProbe/WalkProbe",
+   "n": 1,
+   "p50": 6,
+   "p90": 6,
+   "max": 6,
+   "sum": 6
+  },
+  {
+   "k": "DO PUT /admin/permissions/collections/WalkProbe",
+   "n": 1,
+   "p50": 6,
+   "p90": 6,
+   "max": 6,
+   "sum": 6
+  },
+  {
+   "k": "DO PUT /admin/roles/WalkProbe",
+   "n": 1,
+   "p50": 6,
+   "p90": 6,
+   "max": 6,
+   "sum": 6
+  },
+  {
+   "k": "DO DELETE /admin/keys/REDACTED",
+   "n": 1,
+   "p50": 6,
+   "p90": 6,
+   "max": 6,
+   "sum": 6
+  },
+  {
+   "k": "DO POST /classes/_Session",
+   "n": 1,
+   "p50": 6,
+   "p90": 6,
+   "max": 6,
+   "sum": 6
+  },
+  {
+   "k": "DO GET /files/WalkProbe",
+   "n": 1,
+   "p50": 6,
+   "p90": 6,
+   "max": 6,
+   "sum": 6
+  },
+  {
+   "k": "DO PUT /admin/views/WalkProbe/WalkProbe",
+   "n": 1,
+   "p50": 6,
+   "p90": 6,
+   "max": 6,
+   "sum": 6
+  },
+  {
+   "k": "DO POST /api/_Session",
+   "n": 1,
+   "p50": 5,
+   "p90": 5,
+   "max": 5,
+   "sum": 5
+  },
+  {
+   "k": "front POST /classes/Doc",
+   "n": 16,
+   "p50": 0,
+   "p90": 1,
+   "max": 1,
+   "sum": 5
+  },
+  {
+   "k": "DO GET /aggregate/Doc",
+   "n": 1,
+   "p50": 5,
+   "p90": 5,
+   "max": 5,
+   "sum": 5
+  },
+  {
+   "k": "DO GET /oauth/WalkProbe/callback",
+   "n": 2,
+   "p50": 3,
+   "p90": 3,
+   "max": 3,
+   "sum": 5
+  },
+  {
+   "k": "DO GET /classes/Notice",
+   "n": 1,
+   "p50": 5,
+   "p90": 5,
+   "max": 5,
+   "sum": 5
+  },
+  {
+   "k": "DO POST /logout",
+   "n": 2,
+   "p50": 3,
+   "p90": 3,
+   "max": 3,
+   "sum": 5
+  },
+  {
+   "k": "DO POST /admin/roles/WalkProbe/users",
+   "n": 1,
+   "p50": 5,
+   "p90": 5,
+   "max": 5,
+   "sum": 5
+  },
+  {
+   "k": "DO GET /api/WalkProbe/WalkProbe",
+   "n": 1,
+   "p50": 5,
+   "p90": 5,
+   "max": 5,
+   "sum": 5
+  },
+  {
+   "k": "DO DELETE /admin/roles/WalkProbe/users/WalkProbe",
+   "n": 1,
+   "p50": 5,
+   "p90": 5,
+   "max": 5,
+   "sum": 5
+  },
+  {
+   "k": "DO DELETE /admin/keys/WalkProbe",
+   "n": 1,
+   "p50": 5,
+   "p90": 5,
+   "max": 5,
+   "sum": 5
+  },
+  {
+   "k": "DO POST /admin/schema/diff",
+   "n": 1,
+   "p50": 5,
+   "p90": 5,
+   "max": 5,
+   "sum": 5
+  },
+  {
+   "k": "DO POST /_admin/setup",
+   "n": 1,
+   "p50": 5,
+   "p90": 5,
+   "max": 5,
+   "sum": 5
+  },
+  {
+   "k": "DO GET /api/_Role",
+   "n": 1,
+   "p50": 4,
+   "p90": 4,
+   "max": 4,
+   "sum": 4
+  },
+  {
+   "k": "DO GET /api/_schema",
+   "n": 2,
+   "p50": 2,
+   "p90": 2,
+   "max": 2,
+   "sum": 4
+  },
+  {
+   "k": "DO GET /admin/schema-export",
+   "n": 2,
+   "p50": 3,
+   "p90": 3,
+   "max": 3,
+   "sum": 4
+  },
+  {
+   "k": "DO PUT /admin/permissions/functions/WalkProbe",
+   "n": 1,
+   "p50": 4,
+   "p90": 4,
+   "max": 4,
+   "sum": 4
+  },
+  {
+   "k": "DO POST /admin/email/test",
+   "n": 1,
+   "p50": 4,
+   "p90": 4,
+   "max": 4,
+   "sum": 4
+  },
+  {
+   "k": "DO GET /api/Doc",
+   "n": 1,
+   "p50": 4,
+   "p90": 4,
+   "max": 4,
+   "sum": 4
+  },
+  {
+   "k": "DO PUT /api/Doc/REDACTED",
+   "n": 1,
+   "p50": 4,
+   "p90": 4,
+   "max": 4,
+   "sum": 4
+  },
+  {
+   "k": "DO GET /api/Doc/REDACTED",
+   "n": 1,
+   "p50": 4,
+   "p90": 4,
+   "max": 4,
+   "sum": 4
+  },
+  {
+   "k": "DO GET /api/_ApiKey",
+   "n": 1,
+   "p50": 4,
+   "p90": 4,
+   "max": 4,
+   "sum": 4
+  },
+  {
+   "k": "DO GET /apps/WalkProbe/verify_email",
+   "n": 2,
+   "p50": 2,
+   "p90": 2,
+   "max": 2,
+   "sum": 4
+  },
+  {
+   "k": "DO DELETE /admin/users/WalkProbe/sessions",
+   "n": 1,
+   "p50": 4,
+   "p90": 4,
+   "max": 4,
+   "sum": 4
+  },
+  {
+   "k": "DO POST /admin/backups",
+   "n": 1,
+   "p50": 4,
+   "p90": 4,
+   "max": 4,
+   "sum": 4
+  },
+  {
+   "k": "DO DELETE /admin/files/WalkProbe",
+   "n": 1,
+   "p50": 4,
+   "p90": 4,
+   "max": 4,
+   "sum": 4
+  },
+  {
+   "k": "DO DELETE /admin/auth/providers/WalkProbe",
+   "n": 1,
+   "p50": 4,
+   "p90": 4,
+   "max": 4,
+   "sum": 4
+  },
+  {
+   "k": "DO POST /apps/WalkProbe/request_password_reset",
+   "n": 1,
+   "p50": 3,
+   "p90": 3,
+   "max": 3,
+   "sum": 3
+  },
+  {
+   "k": "DO GET /admin/status",
+   "n": 2,
+   "p50": 2,
+   "p90": 2,
+   "max": 2,
+   "sum": 3
+  },
+  {
+   "k": "DO POST /admin/triggers/preview",
+   "n": 2,
+   "p50": 2,
+   "p90": 2,
+   "max": 2,
+   "sum": 3
+  },
+  {
+   "k": "DO GET /admin/workflow-step-kinds",
+   "n": 2,
+   "p50": 2,
+   "p90": 2,
+   "max": 2,
+   "sum": 3
+  },
+  {
+   "k": "DO GET /classes/Expense/REDACTED",
+   "n": 1,
+   "p50": 3,
+   "p90": 3,
+   "max": 3,
+   "sum": 3
+  },
+  {
+   "k": "DO GET /admin/permissions/functions",
+   "n": 1,
+   "p50": 3,
+   "p90": 3,
+   "max": 3,
+   "sum": 3
+  },
+  {
+   "k": "DO POST /auth/email-code/verify",
+   "n": 1,
+   "p50": 3,
+   "p90": 3,
+   "max": 3,
+   "sum": 3
+  },
+  {
+   "k": "DO POST /api/_schema",
+   "n": 1,
+   "p50": 3,
+   "p90": 3,
+   "max": 3,
+   "sum": 3
+  },
+  {
+   "k": "DO POST /admin/files/sweep",
+   "n": 1,
+   "p50": 3,
+   "p90": 3,
+   "max": 3,
+   "sum": 3
+  },
+  {
+   "k": "DO GET /health",
+   "n": 2,
+   "p50": 2,
+   "p90": 2,
+   "max": 2,
+   "sum": 2
+  },
+  {
+   "k": "front POST /functions/list-jobs",
+   "n": 2,
+   "p50": 1,
+   "p90": 1,
+   "max": 1,
+   "sum": 2
+  },
+  {
+   "k": "front GET /classes/Doc/REDACTED",
+   "n": 13,
+   "p50": 0,
+   "p90": 1,
+   "max": 1,
+   "sum": 2
+  },
+  {
+   "k": "front POST /classes/Secrets",
+   "n": 4,
+   "p50": 1,
+   "p90": 1,
+   "max": 1,
+   "sum": 2
+  },
+  {
+   "k": "front POST /admin/keys",
+   "n": 7,
+   "p50": 0,
+   "p90": 1,
+   "max": 1,
+   "sum": 2
+  },
+  {
+   "k": "DO GET /config",
+   "n": 1,
+   "p50": 2,
+   "p90": 2,
+   "max": 2,
+   "sum": 2
+  },
+  {
+   "k": "DO GET /executions/WalkProbe",
+   "n": 1,
+   "p50": 2,
+   "p90": 2,
+   "max": 2,
+   "sum": 2
+  },
+  {
+   "k": "DO GET /classes/Board/REDACTED",
+   "n": 1,
+   "p50": 2,
+   "p90": 2,
+   "max": 2,
+   "sum": 2
+  },
+  {
+   "k": "DO POST /hooks/WalkProbe/WalkProbe",
+   "n": 1,
+   "p50": 2,
+   "p90": 2,
+   "max": 2,
+   "sum": 2
+  },
+  {
+   "k": "DO GET /admin/schema/WalkProbe",
+   "n": 1,
+   "p50": 2,
+   "p90": 2,
+   "max": 2,
+   "sum": 2
+  },
+  {
+   "k": "DO GET /realtime",
+   "n": 1,
+   "p50": 2,
+   "p90": 2,
+   "max": 2,
+   "sum": 2
+  },
+  {
+   "k": "DO PUT /users/WalkProbe",
+   "n": 1,
+   "p50": 2,
+   "p90": 2,
+   "max": 2,
+   "sum": 2
+  },
+  {
+   "k": "DO POST /oauth/exchange",
+   "n": 1,
+   "p50": 2,
+   "p90": 2,
+   "max": 2,
+   "sum": 2
+  },
+  {
+   "k": "DO GET /admin/schema",
+   "n": 1,
+   "p50": 2,
+   "p90": 2,
+   "max": 2,
+   "sum": 2
+  },
+  {
+   "k": "DO GET /admin/users/WalkProbe",
+   "n": 1,
+   "p50": 2,
+   "p90": 2,
+   "max": 2,
+   "sum": 2
+  },
+  {
+   "k": "DO GET /admin/audit",
+   "n": 1,
+   "p50": 2,
+   "p90": 2,
+   "max": 2,
+   "sum": 2
+  },
+  {
+   "k": "DO GET /__hst/routes",
+   "n": 6,
+   "p50": 0,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "front POST /admin/roles/staff/users",
+   "n": 1,
+   "p50": 1,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "front DELETE /classes/Doc/REDACTED",
+   "n": 1,
+   "p50": 1,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "front PUT /users/REDACTED",
+   "n": 4,
+   "p50": 0,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "front GET /config",
+   "n": 2,
+   "p50": 1,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "front GET /files/WalkProbe/sign",
+   "n": 1,
+   "p50": 1,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "front GET /users/WalkProbe",
+   "n": 1,
+   "p50": 1,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "front GET /admin/schema/WalkProbe",
+   "n": 2,
+   "p50": 1,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "front PUT /admin/:id",
+   "n": 6,
+   "p50": 0,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "front DELETE /admin/views/WalkProbe/WalkProbe",
+   "n": 1,
+   "p50": 1,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "DO GET /admin/email/templates/WalkProbe/preview",
+   "n": 1,
+   "p50": 1,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "front PUT /admin/auth",
+   "n": 2,
+   "p50": 1,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "front GET /admin/roles",
+   "n": 4,
+   "p50": 0,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "front PUT /admin/roles/nope",
+   "n": 1,
+   "p50": 1,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "front DELETE /admin/roles/editors/users/REDACTED",
+   "n": 3,
+   "p50": 0,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "front POST /functions/join",
+   "n": 2,
+   "p50": 1,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "front POST /login",
+   "n": 4,
+   "p50": 0,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "front POST /classes/Note",
+   "n": 1,
+   "p50": 1,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "front PUT /api/Doc/REDACTED",
+   "n": 1,
+   "p50": 1,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "DO POST /mcp",
+   "n": 1,
+   "p50": 1,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "DO GET /:id",
+   "n": 1,
+   "p50": 1,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "front GET /admin/permissions/functions",
+   "n": 1,
+   "p50": 1,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "front DELETE /admin/keys/WalkProbe",
+   "n": 1,
+   "p50": 1,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "front POST /classes/_Session",
+   "n": 1,
+   "p50": 1,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "DO GET /admin/files",
+   "n": 1,
+   "p50": 1,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "front GET /admin/files",
+   "n": 1,
+   "p50": 1,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "DO GET /_admin/whoami",
+   "n": 1,
+   "p50": 1,
+   "p90": 1,
+   "max": 1,
+   "sum": 1
+  },
+  {
+   "k": "DO GET /__hst/ledger",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /__hst/routes",
+   "n": 5,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /admin/roles",
+   "n": 3,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /functions/three-wired",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /functions/unchanged-as-done",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /functions/empty-role",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /__hst/stop",
+   "n": 4,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /functions/:id",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /api/_User",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /api/_Session",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /aggregate/Doc",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front PUT /classes/Doc/REDACTED",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /functions/echo",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /users/me",
+   "n": 7,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /api/_Role",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front PUT /admin/permissions/collections/_User",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /classes/WalkProbe",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front DELETE /classes/WalkProbe/WalkProbe",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /mcp",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /apps/WalkProbe/request_password_reset",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /oauth/WalkProbe/start",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /auth/magic-link/callback",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /api/_schema",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /api/WalkProbe",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /admin/status",
+   "n": 3,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front PUT /admin/workflows/WalkProbe",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /:id",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front PUT /admin/permissions/collections/WalkProbe",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front PUT /admin/permissions/functions/WalkProbe",
+   "n": 3,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /admin/secrets",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front PUT /admin/roles/WalkProbe",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /admin/users",
+   "n": 4,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front DELETE /admin/users/WalkProbe/sessions",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /admin/triggers/preview",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /admin/triggers/WalkProbe/fire",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /admin/workflow-step-kinds",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /admin/api-calls",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /admin/api-calls/WalkProbe",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front DELETE /admin/api-calls/WalkProbe",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /admin/workflow-defs",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /admin/workflow-defs",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /_admin/login",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /__hst/call",
+   "n": 6,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front PUT /admin/workflow-defs/WalkProbe",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /admin/workflow-defs/WalkProbe/run",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /classes/Notice",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /admin/backups",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /admin/backups",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /admin/backups/restore",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /admin/backups/archive",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /admin/files/config/test",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /admin/files/move",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front PUT /admin/email/config",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front DELETE /admin/email/templates/WalkProbe",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /admin/email/templates/WalkProbe/preview",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front PUT /admin/roles/plain",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /admin/audit",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /admin/roles/editors/users",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /admin/users",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /admin/:id",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /classes/Expense/REDACTED",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front PUT /classes/Post/REDACTED",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /classes/Board/REDACTED",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /api/Doc/REDACTED",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front PUT /admin/permissions/collections/Secrets",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /classes/_User",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /api/_Session",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /api/_ApiKey",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /realtime/:id",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /hooks/WalkProbe/WalkProbe",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /classes/WalkProbe/WalkProbe",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /functions/*name",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front DELETE /files/WalkProbe",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /logout",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front PUT /users/WalkProbe",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /:id",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /apps/WalkProbe/verify_email",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /oauth/WalkProbe/callback",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /oauth/exchange",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /auth/email-code",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /api/_schema",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /admin/schema",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /admin/schema-export",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /executions/WalkProbe",
+   "n": 2,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front DELETE /admin/secrets/WalkProbe",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /admin/roles/WalkProbe/users",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "DO POST /admin/triggers/WalkProbe/enabled",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front DELETE /admin/keys/REDACTED",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /classes/_ApiKey",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /realtime",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /classes/WalkProbe",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /aggregate/WalkProbe",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /files/WalkProbe",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /api/WalkProbe",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front PUT /admin/secrets/WalkProbe",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front DELETE /admin/roles/WalkProbe/users/WalkProbe",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /admin/views/WalkProbe",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /admin/keys",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front POST /admin/world/migrate",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front DELETE /admin/files/WalkProbe",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front PUT /admin/email/templates/WalkProbe",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /admin/auth",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front DELETE /admin/auth/providers/WalkProbe",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  },
+  {
+   "k": "front GET /_admin",
+   "n": 1,
+   "p50": 0,
+   "p90": 0,
+   "max": 0,
+   "sum": 0
+  }
+ ]
+}
