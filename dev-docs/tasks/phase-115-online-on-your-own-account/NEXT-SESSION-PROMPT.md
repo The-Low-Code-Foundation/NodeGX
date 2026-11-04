@@ -19,21 +19,15 @@ never ahead of lanes 9, 2 and 3. Earlier prompts are in git history (`git log --
 | `hst-spike-worker` on https://hst-spike-worker.richard-digitalbricks.workers.dev (page, `/functions/*`, `/workflows/*`, cron) | ✅ deployed | ✅ page 200; the function refuses cleanly with no secret; ⏳ with the secret |
 | `hst-stand-in` on https://hst-stand-in.richard-digitalbricks.workers.dev | ✅ deployed | ✅ answers; ⏳ its log of a real call |
 | Call an API's transport (`steps/httpTransport.ts`), the shim deleted | ✅ `ef3f7388a` | ✅ wrangler dev before/after control; jest 27/27 |
-| `MAILCHIMP_KEY` on the Worker | — | ❌ the classifier refuses a session's `wrangler secret put` (*Secret-Store Writes*), even with Richard's OK in chat |
+| `MAILCHIMP_KEY` on the Worker | ✅ Richard, from his terminal | ✅ his Subscribe reached the stand-in with the key (fingerprint matched) |
 | The page in a real browser | — | ❌ never (Chrome hangs in the sandbox): Richard's phone is the reading |
 
 ## 3. Next, in order
 
-1. **Check whether the secret is set:** `npx wrangler secret list` in `spike-worker/` (lists names only). If it is not,
-   print this for Richard **in the reply text, not in a multiple-choice question** (he asked for that), to paste into
-   VS Code's terminal (Terminal → New Terminal):
-   `cd ~/vscode_projects/OpenNoodl/dev-docs/tasks/phase-115-online-on-your-own-account/spike-worker && grep '^MAILCHIMP_KEY=' .dev.vars | cut -d= -f2- | tr -d '\n' | npx wrangler secret put MAILCHIMP_KEY`
-   Or, if he says so, a permission rule for `npx wrangler secret put` in `.claude/settings.local.json`.
-2. With the secret: `npx wrangler tail hst-stand-in -c wrangler.stand-in.toml --format json` in the background,
-   `POST /functions/subscribe {"email":…}` and `POST /workflows/subscribe`, then read: **the 1042 question** (did
-   `global_fetch_strictly_public` let the Worker reach the stand-in?), the logged fingerprint against
-   `node fingerprint.mjs`, the email in the body. No redeploy is needed for a secret. Then the page on Richard's phone
-   (MUST lines 1–5, HST-003 AC3) and, after 08:00 UTC on 2026-11-05, line 6 (the cron's call in the stand-in's log).
+1. ✅ The secret is set and Richard's Subscribe reached the stand-in with the email and the key (HST-004 §8.5; 1042
+   answered). Still owed: MUST line 1 (the page on his phone) and line 4 (the empty field's sentence on the page).
+2. After 08:00 UTC on 2026-11-05: MUST line 6. `npx wrangler tail hst-stand-in -c wrangler.stand-in.toml` only sees live
+   events, so read the dashboard (Workers & Pages → hst-stand-in → Logs, observability is on) for the digest call.
 3. Then ask the one-Worker ruling (§4) with the URL in front of him.
 4. BUNDLEDROPS (high) belongs to the cloud-deploy owner, not this phase, but it blocks every MCP-written cloud function
    that wires an HTTP Request's body or auth. Before anyone fixes it: measure the editor's own Deploy button with a

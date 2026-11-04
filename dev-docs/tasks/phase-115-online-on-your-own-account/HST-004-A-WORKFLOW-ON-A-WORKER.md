@@ -1,6 +1,6 @@
 # HST-004 — A workflow on a Worker, no VM
 
-**Opened 2026-10-07.** **Depends on HST-002, P107 (server-side nodes).** **Status: 🟡 deployed to Richard's account 2026-11-04 (session 3, §8); AC1 waits on the `MAILCHIMP_KEY` secret, which only Richard can set (§8.4).** Kind: experiment.
+**Opened 2026-10-07.** **Depends on HST-002, P107 (server-side nodes).** **Status: 🟡 live on Richard's account 2026-11-04 (session 3, §8): his own Subscribe reached the stand-in with the email and the key. AC1 still owes MUST lines 1 and 4 (his phone) and line 6 (the cron, 2026-11-05 08:00 UTC).** Kind: experiment.
 
 ## 1. The person sentence
 
@@ -229,3 +229,15 @@ grep '^MAILCHIMP_KEY=' .dev.vars | cut -d= -f2- | tr -d '\n' | npx wrangler secr
 Then, no redeploy needed (a secret is live on the next request): `POST /functions/subscribe`, `npx wrangler tail
 hst-stand-in` (or the dashboard's Logs), the fingerprint against `node fingerprint.mjs`, the page on his phone (MUST
 1–5), and line 6 after 08:00 UTC on 2026-11-05.
+
+### 8.5 With the secret (Richard set it from his terminal)
+
+| # | reading | result |
+|---|---|---|
+| 1 | Richard's Subscribe on the deployed page | ✅ *You are on the list* (his reading) |
+| 2 | The stand-in's log (`wrangler tail`, 12:57:49 UTC) | ✅ `POST /3.0/lists/readers/members`, from `cf-worker: richard-digitalbricks.workers.dev`, 200; body `{"email_address":"<his>","status":"subscribed"}`; Authorization fingerprint `len 37 sha256 41c045a1f9ec` = `node fingerprint.mjs` |
+| 3 | **The 1042 question** | ✅ answered: with `global_fetch_strictly_public` a Worker reaches another Worker on the same account |
+| 4 | The key in `/`, `env.js`, `app.js`, the 400 and the 200 answers (curl, one probe call `probe-s3@example.com` is in the stand-in's log) | ✅ 0 each |
+
+MUST: lines 2, 3, 5 ticked. Line 1 (a phone) and line 4 (the empty field's sentence on the page) are his next reading;
+line 6 after 08:00 UTC on 2026-11-05.
