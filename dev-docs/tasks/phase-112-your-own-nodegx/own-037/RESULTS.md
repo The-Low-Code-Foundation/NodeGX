@@ -37,3 +37,31 @@ listed." Rounds `/Users/Shared/nodegx-lab/own037/probe-<arm>`.
 - Both Cline arms read the folder with `run_commands` first. cb called `skills {skill: "nodegx-first-project"}`.
 
 ## AC3 — the game
+
+One builder at a time: a plain-code game is served by the agent's own server, and two arms building at once could
+drive each other's. Turn 1 = `msg/game.txt` word for word, `--continues 0`.
+
+### Turn 1
+
+| arm (Richard sees) | started (CET) | what came back | min | $ |
+|---|---|---|---|---|
+| vb (Vibe 2) | 11:28 | **seven questions in one message** (who for, first-screen feeling, device, what it won't do, games loved, what you did in them, what bored you). It says the cave world will be plain canvas code with NodeGX around it for the screens. It loaded `nodegx-first-day`, `nodegx-first-project` and `nodegx-making-a-game` first, then grepped for `# Next session` | 0.4 | 0.04 |
+| cb (Cline 1) | 11:29 | **no questions: built the whole game** ("The Glimmer", `submarine/`), all of it plain HTML and JS, menus included. **No `create_project`**: 1 `list_projects`, 1 `find_tools`, 1 `list_examples`, nothing else from the server. Arrow keys/WASD, a four-button pad on a phone. `tools/check.mjs` 10/10 on the rules, `tools/shot.mjs` drives the page at laptop and phone sizes. Ends by naming the guide's three game questions as `> TODO:` in `docs/decisions/000-initial-scope.md` | 46 | 0.32 |
+
+**cb read both guides first and then did the opposite of their first line.** Its first words: *"I'll start by
+reading the two skills this folder requires before building anything"*. It called `skills nodegx-making-a-game` and
+`skills nodegx-first-project`, then read `traps.md` in three pieces. Then it built. Its `000-initial-scope.md`
+answers the guide's four questions itself ("one person, on their own, on a laptop first … a phone held sideways"),
+leaves the three game questions as TODOs "written after the first playable version", and gives your brief "word for
+word" as a paraphrase: *"Build a browser game: pilot a submarine into a dark sea cave …"*. The brief says "Let's use
+nodegx to build my first project". Seal: 23 paths outside the round, all its own `/tmp` scratch (`/tmp/shot.log`,
+`/tmp/glimmer-probe` …), moved into `left-in-tmp/` by the audit; one Chrome sandbox hit. Its shell ran `pkill -f
+'glimmer-'` several times. That matches its own process names only, but the fence doesn't stop signals.
+
+### Turn 2
+
+- **vb (Vibe 2), Richard's answers** (`msg/vb-2.txt`, 2026-11-04 ~12:05, word for word): me and my kids; *"Calm and a
+  little tense, Echo the Dolphin vibes, beautiful but a bit unnerving, the fear of the deep blue"*; phone portrait;
+  carte blanche; Echo the Dolphin; *"Discovery, a mix between fun playfulness and the unknown dangers lurking, the
+  beautiful visuals and atmosphere"*; *"Repetetiveness, it should increase in difficulty and complexity to keep the
+  player hooked"*. Queued after cb (`queue-1.sh`), `--continues 2`.
