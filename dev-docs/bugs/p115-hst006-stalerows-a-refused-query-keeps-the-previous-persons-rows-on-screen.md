@@ -2,7 +2,7 @@
 id: P115-HST006-STALEROWS
 title: "Query Records: after one person signs out and another signs in on the same device, the refused re-fetch left the first person's rows on screen"
 status: fixed
-commit: (this session's STALEROWS commit)
+commit: f1ab6d778
 severity: high
 area: "runtime / Query Records (`packages/noodl-runtime/src/nodes/std-library/data/dbcollectionnode2.ts`, the fetch `error` branch REL-011b guarded); the query's error callback (`ParseWireAdapter.query`, `RestDataAdapter.query`) dropped the HTTP status; contract `QueryOptions.error` (`packages/nodegx-backend-contract/src/data.ts`)"
 regression: packages/noodl-runtime/test/nodes/rel011b-failed-fetch-keeps-rows.test.ts "P115-HST006-STALEROWS"; packages/noodl-runtime/test/backends/parse-wire-adapter.test.ts "P115-HST006-STALEROWS"
