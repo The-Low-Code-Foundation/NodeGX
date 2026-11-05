@@ -562,7 +562,8 @@ export class BackendService {
       executions: this.executions,
       backendId: this.options.backendId,
       backendName: this.options.backendName,
-      requireSecrets: this.options.requireSecrets
+      requireSecrets: this.options.requireSecrets,
+      filesBucket: this.options.filesBucket
     });
     // PRD-005: the signed-URL secret is settled NOW — before the port opens — rather than on
     // the first signed URL, so a deploy told not to invent secrets refuses at start and not on

@@ -1,11 +1,15 @@
 # Phase 115 — next session prompt
 
-**Written 2026-11-05 at the end of session 9 (Opus 5.5).** Unparked by Richard 2026-11-04 (BOARD lane 10: *"Let's kick
+**Written 2026-11-05 at the end of session 10 (Opus 5.5).** Unparked by Richard 2026-11-04 (BOARD lane 10: *"Let's kick
 it off and lift the park. If this can go out with the Beta, it'd be a nice addition"*). A nice-to-have for the Beta,
 never ahead of lanes 9, 2 and 3. Earlier prompts are in git history (`git log -- this file`).
 
 ## 1. Read first
 
+00000. [HST-012 §5](HST-012-FILES-IN-A-BUCKET.md): session 10. The third product piece: files in a bucket the host
+   hands in (`filesBucket`, `BindingDriver`, `kind: 'binding'`), the spike's prototype patch gone, Campus's 4 files
+   moved once and live; `set_file_permissions` (NOFILESRULE fixed), Campus now owner-only upload, live. Then
+   [HST-013](HST-013-CODE-NODES-PRINTED-AT-DEPLOY.md), the next piece.
 0000. [HST-011 §5](HST-011-THE-DATA-DIR-IN-A-STORE.md): session 9. The second product piece: the data dir's own files
    through one seam (`dataDirStore`), the census that is now a gate, live across two redeploys of Campus. Then
    [HST-012](HST-012-FILES-IN-A-BUCKET.md), the next piece.
@@ -88,11 +92,14 @@ that unblocks the most (each: a product change + its tests + Fixture C still 8/8
 2. ✅ **Seam 3 in the product** → [HST-011](HST-011-THE-DATA-DIR-IN-A-STORE.md), session 9: `BackendServiceOptions.dataDirStore`
    (sync `list/get/put/delete`); `start()` writes the store's files into the dir, every write through
    `config/dataDirStore.ts` reaches the store. The spike hands in a table in the object's SQLite (`_nodegx_data_dir`)
-   and moved session 7's `hst:file:*` once (live `1b48270c`, then `16875ec8` from the store alone). **Next: piece 3,
-   [HST-012](HST-012-FILES-IN-A-BUCKET.md)**: read `storage/LocalDriver.ts`, `S3Driver.ts` and the `_Files` sweep before
-   choosing `kind`.
-3. **Seam 5 in the product** ([HST-012](HST-012-FILES-IN-A-BUCKET.md)): a file driver for an R2 binding (today `LocalDriver.prototype` patched); `kind` and
-   `_Files.driver` decided honestly. With it, NOFILESRULE (an MCP tool for the files rule).
+   and moved session 7's `hst:file:*` once (live `1b48270c`, then `16875ec8` from the store alone).
+3. ✅ **Seam 5 in the product** → [HST-012](HST-012-FILES-IN-A-BUCKET.md), session 10: `BackendServiceOptions.filesBucket` →
+   `storage/BindingDriver.ts`, `kind: 'binding'` (a third key space: `driverFor` serves a row from the store it names);
+   the spike passes `env.FILES` and moved session 7's 4 `local` rows to `binding` once (live `d5f4656d`); the Storage
+   page says *This app's bucket*. NOFILESRULE fixed: `set_file_permissions`; Campus owner-only upload live (`d728174c`).
+   **Next: piece 4, [HST-013](HST-013-CODE-NODES-PRINTED-AT-DEPLOY.md)**: start by reading how the cloud runtime compiles a
+   Function/Expression/Script node's text (`new Function` in noodl-viewer-cloud / noodl-runtime) and what the cloud
+   bundle (`noodl-mcp/dist/cloud-bundle.cjs`, BUNDLEDROPS) carries per node, before choosing where to print.
 4. **NOCODEGEN** ([HST-013](HST-013-CODE-NODES-PRINTED-AT-DEPLOY.md)): code nodes in cloud functions compiled at deploy (a Worker refuses `new Function`).
 5. **The deploy command** ([HST-014](HST-014-THE-DEPLOY-COMMAND.md)): `nodegx deploy --cloudflare` (or the MCP's) doing what `site.mjs` + `seed-campus.mjs` +
    `wrangler deploy` do by hand, the production engine included; never wipes a live app.

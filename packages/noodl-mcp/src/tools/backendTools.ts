@@ -24,7 +24,7 @@ import { ensureEnvPlaceholder, readEnvSecret } from '../backend/envSecret';
 import { PROJECT_AUTOMATIONS_FILE } from '../../../nodegx-backend/src/automations/shape';
 import { bodyNames, piecesRunBy, runnersOf } from '../../../nodegx-backend/src/workflow/pieces';
 import type { WorkflowDefinition } from '../../../nodegx-backend/src/workflow/types';
-import { patchAutomations, patchRules, PROJECT_RULES_FILE, writeBoth } from '../backend/projectFiles';
+import { patchAutomations, patchFileRules, patchRules, PROJECT_RULES_FILE, writeBoth } from '../backend/projectFiles';
 import { resolveFunctionName } from '../backend/functionTarget';
 import { writeProposal } from '../backend/workflowProposals';
 import { ToolError } from '../errors';
@@ -734,6 +734,51 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
         }
       });
       return jsonResult({ ...(answer as object), project, ...(note ? { note } : {}), ...(warning ? { warning } : {}) });
+    })
+  );
+
+  // P115 HST-012 (P115-HST006-NOFILESRULE): who may upload had no tool, so an MCP-written app kept "any signed-in
+  // account uploads" — with open sign-up, anyone on the internet. The same both-or-neither write as a collection's.
+  server.registerTool(
+    'set_file_permissions',
+    {
+      title: 'Set who may upload files',
+      description:
+        "Set who may upload, open and delete the app's files, on the running backend and in the project's " +
+        'nodegx.security.json together. Defaults: upload "authenticated", read "public", delete "nobody" ' +
+        '(the uploader still deletes their own).',
+      inputSchema: {
+        backendId: z.string().optional(),
+        upload: ruleValue.optional(),
+        read: ruleValue.optional(),
+        delete: ruleValue.optional()
+      }
+    },
+    guarded(async ({ backendId, upload, read, delete: del }) => {
+      const given: Record<string, unknown> = {};
+      if (upload !== undefined) given.upload = upload;
+      if (read !== undefined) given.read = read;
+      if (del !== undefined) given.delete = del;
+      if (Object.keys(given).length === 0) {
+        throw new ToolError('invalid-argument', 'Say at least one of upload, read or delete.');
+      }
+      const client = await requireBackend(backendId);
+      const before = await permissionsConfig(client);
+      const files = { ...((before.files as Record<string, unknown>) ?? {}), ...given };
+      const { answer, project } = await writeBoth({
+        binding,
+        client,
+        fileName: PROJECT_RULES_FILE,
+        write: async () => {
+          const put = await client.request('PUT', '/admin/permissions', { ...before, files });
+          return ((await permissionsConfig(client)).files ?? put.json) as Record<string, unknown>;
+        },
+        mirror: async (dir, held) => patchFileRules(dir, held, await permissionsConfig(client)),
+        undo: async () => {
+          await client.request('PUT', '/admin/permissions', before);
+        }
+      });
+      return jsonResult({ files: answer, project });
     })
   );
 

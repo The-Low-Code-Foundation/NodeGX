@@ -88,6 +88,8 @@ interface FilesConfig {
 
 interface FilesData {
   driverKind?: string;
+  /** P115 HST-012: the host bound a bucket to this backend; it is where files go unless a bucket of its own is set. */
+  hostBucket?: boolean;
   s3CredentialsConfigured?: boolean;
   transformsAvailable?: boolean;
   transformUnavailableReason?: string;
@@ -153,7 +155,7 @@ export function FilesView(_props: ViewProps) {
       {data ? (
         <div>
           <Row>
-            <Chip kind="accent">{'stored ' + (data.driverKind === 's3' ? 'in S3' : 'on this machine')}</Chip>
+            <Chip kind="accent">{'stored ' + (data.driverKind === 's3' ? 'in S3' : data.driverKind === 'binding' ? "in this app's bucket" : 'on this machine')}</Chip>
             {data.transformsAvailable ? (
               <Chip kind="ok">thumbnails available</Chip>
             ) : (
@@ -165,7 +167,7 @@ export function FilesView(_props: ViewProps) {
           <Gap />
           <Browser presets={presets} transforms={!!data.transformsAvailable} />
           <h2>Where files are stored</h2>
-          <WhereCard key={'where' + generation} config={config} credentialsConfigured={!!data.s3CredentialsConfigured} reload={loadConfig} />
+          <WhereCard key={'where' + generation} config={config} credentialsConfigured={!!data.s3CredentialsConfigured} hostBucket={!!data.hostBucket} reload={loadConfig} />
           {data.driverKind === 's3' ? <MoveCard key={'move' + generation} /> : null}
           <h2>Settings</h2>
           <LimitsCard key={'limits' + generation} config={config} reload={loadConfig} />
@@ -458,7 +460,17 @@ export function wherePayload(d: WhereDraft): Record<string, unknown> {
 }
 
 /** Where files are stored: this machine, or an S3-compatible bucket (BMG-015). */
-function WhereCard({ config, credentialsConfigured, reload }: { config: FilesConfig; credentialsConfigured: boolean; reload: () => void }) {
+function WhereCard({
+  config,
+  credentialsConfigured,
+  hostBucket,
+  reload
+}: {
+  config: FilesConfig;
+  credentialsConfigured: boolean;
+  hostBucket: boolean;
+  reload: () => void;
+}) {
   const { readonly } = useSession();
   const [draft, setDraft] = useState<WhereDraft>(whereDraftFrom(config));
   const [tested, setTested] = useState<{ ok: boolean; words: string } | null>(null);
@@ -489,7 +501,14 @@ function WhereCard({ config, credentialsConfigured, reload }: { config: FilesCon
     }
     api('PUT', '/admin/files/config', wherePayload(draft))
       .then(() => {
-        toast(draft.where === 's3' ? 'New uploads go to the bucket "' + draft.bucket.trim() + '".' : 'New uploads are stored on this machine.', 'ok');
+        toast(
+          draft.where === 's3'
+            ? 'New uploads go to the bucket "' + draft.bucket.trim() + '".'
+            : hostBucket
+              ? "New uploads go to this app's bucket."
+              : 'New uploads are stored on this machine.',
+          'ok'
+        );
         reload();
       })
       .catch(fail);
@@ -506,7 +525,9 @@ function WhereCard({ config, credentialsConfigured, reload }: { config: FilesCon
   return (
     <Card id="where-card">
       <div class="tiles" role="radiogroup" aria-label="Where files are stored">
-        {tile('local', 'This machine', "A folder beside the backend's data. Fine on a laptop; it fills a small server's disk.")}
+        {hostBucket
+          ? tile('local', "This app's bucket", 'The bucket its host gives it (on Cloudflare, an R2 binding). Nothing to type: no address, no keys.')
+          : tile('local', 'This machine', "A folder beside the backend's data. Fine on a laptop; it fills a small server's disk.")}
         {tile('s3', 'An S3-compatible bucket', 'AWS S3, MinIO, Backblaze, Cloudflare R2, Hetzner… Uploads and backup archives go there instead of the disk.')}
       </div>
       {draft.where === 's3' ? (

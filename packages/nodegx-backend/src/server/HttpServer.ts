@@ -2268,7 +2268,9 @@ export class HttpServer {
         // `assertReadable` passes any file without an ACL, so a gate that merely
         // stepped aside for `?sig=` would hand a forged one every public file.
         if (access.op === 'read' && params.name && query.sig && this.signatureAdmits(params.name, query)) return;
-        throw new RuleRefusal('Permission denied for this file operation.', fileTarget, {
+        // P115 HST-012: the sentence names what was refused (an app with an owner-only upload says "upload").
+        const refusedWords = access.op === 'upload' ? 'upload files to this app' : access.op === 'delete' ? 'delete this file' : 'open this file';
+        throw new RuleRefusal(`Permission denied: you may not ${refusedWords}.`, fileTarget, {
           op: access.op,
           rule: this.security.config.files[access.op]
         });

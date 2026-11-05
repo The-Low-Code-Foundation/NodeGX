@@ -131,6 +131,18 @@ export function patchRules(
 }
 
 /**
+ * P115 HST-012 (P115-HST006-NOFILESRULE): who may upload, open and delete files, kept in the project's
+ * nodegx.security.json as the backend holds it (`files` is one object, not a map of entries like `collections`).
+ */
+export function patchFileRules(projectDir: string, files: Record<string, unknown>, backendConfig: Record<string, unknown>): { file: string; before: string | null } {
+  const file = path.join(projectDir, PROJECT_RULES_FILE);
+  const before = readText(file);
+  const base = before ? (JSON.parse(before) as Record<string, unknown>) : { ...backendConfig, devOpen: false };
+  writeAtomic(file, serializeV2File({ ...base, files }, before));
+  return { file, before };
+}
+
+/**
  * Run a backend write, then keep it in the project. `mirror` patches the file from the write's answer;
  * if it throws, `undo` puts the backend back and the call fails saying so. Not this project's backend:
  * the write stands alone and the note says why.

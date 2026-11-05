@@ -43,6 +43,8 @@ import type { TriggerDef } from '../triggers/registry';
 import { validateCron } from '../triggers/cron';
 import { FileConfigStore, DriverConfig, OrphanSweepSchedule, ThumbPreset } from './config';
 import { LocalDriver } from './LocalDriver';
+import { BindingDriver } from './BindingDriver';
+import type { BucketBinding } from './BindingDriver';
 import { S3Driver } from './S3Driver';
 import type { S3ProbeResult } from './S3Driver';
 import type { StorageDriver } from './types';
@@ -203,6 +205,12 @@ export interface FileSubsystemDeps {
   backendName: string;
   /** PRD-005: refuse to start rather than mint the signed-URL secret. See `verifyProvisionedSecrets`. */
   requireSecrets?: boolean;
+  /**
+   * P115 HST-012: a bucket the host hands in (a Cloudflare R2 binding). When there is one, it is where uploads go
+   * unless files.json names a bucket of its own: it takes the place the folder beside the data dir has on a machine
+   * whose disk outlives the process. See `BindingDriver`.
+   */
+  filesBucket?: BucketBinding | null;
 }
 
 export class FileSubsystem {
@@ -214,6 +222,8 @@ export class FileSubsystem {
   private signingProvenance: SecretProvenance | null = null;
   /** Always there: the store beside the data dir. Files uploaded before a switch to the bucket live here. */
   private readonly local: LocalDriver;
+  /** P115 HST-012: the bucket the host handed in, or null (every Node spawner). */
+  private readonly hostBucket: BindingDriver | null;
   /** The bucket, when files.json names one. Shared with the backups. */
   private bucket: S3Driver | null = null;
   /** Where the NEXT upload goes: the bucket when configured, else the local store. */
@@ -226,7 +236,8 @@ export class FileSubsystem {
     this.config = new FileConfigStore(deps.dataDir);
     this.metadata = new MetadataStore(deps.facade);
     this.local = new LocalDriver(path.join(deps.dataDir, 'files', 'blobs'));
-    this.driver = this.local;
+    this.hostBucket = deps.filesBucket ? new BindingDriver(deps.filesBucket) : null;
+    this.driver = this.defaultStore();
     this.applyDriver(this.config.get().driver);
     this.mover = new FileMover({ facade: deps.facade, local: this.local, bucket: () => this.bucket });
     this.registry = new SweepScheduleRegistry(this.config);
@@ -244,7 +255,17 @@ export class FileSubsystem {
   /** (Re)build the bucket driver from a driver config + the stored credentials, and point the next upload at it. */
   private applyDriver(driverConfig: DriverConfig): void {
     this.bucket = buildBucketDriver(driverConfig, this.deps.secrets);
-    this.driver = this.bucket || this.local;
+    this.driver = this.bucket || this.defaultStore();
+  }
+
+  /** Where an upload goes when files.json names no bucket: the host's bucket when it handed one, else the disk. */
+  private defaultStore(): StorageDriver {
+    return this.hostBucket || this.local;
+  }
+
+  /** P115 HST-012: whether the host handed in a bucket (the Storage page names it instead of "this machine"). */
+  hasHostBucket(): boolean {
+    return this.hostBucket !== null;
   }
 
   /** Where the next upload goes. */
@@ -259,7 +280,10 @@ export class FileSubsystem {
 
   /** Every store that can hold a file right now — what the orphan sweep walks. */
   stores(): StorageDriver[] {
-    return this.bucket ? [this.local, this.bucket] : [this.local];
+    const all: StorageDriver[] = [this.local];
+    if (this.hostBucket) all.push(this.hostBucket);
+    if (this.bucket) all.push(this.bucket);
+    return all;
   }
 
   /**
@@ -275,6 +299,14 @@ export class FileSubsystem {
         );
       }
       return this.bucket;
+    }
+    if (record.driver === 'binding') {
+      if (!this.hostBucket) {
+        throw new Error(
+          `"${record.storedName}" is stored in the bucket this app's host binds to it, and this backend was started without one. Start it where that bucket is bound (on Cloudflare, the Worker's FILES binding) to serve it.`
+        );
+      }
+      return this.hostBucket;
     }
     return this.local;
   }

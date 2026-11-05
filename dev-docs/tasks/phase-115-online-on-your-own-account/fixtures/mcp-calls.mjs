@@ -73,6 +73,7 @@ try {
       let line = JSON.stringify({ at: new Date().toISOString(), tool, args, isError: !!r.isError, ms: Date.now() - t, text });
       for (const pw of secrets) line = line.split(pw).join('«password»');
       line = line.replace(/(sessionToken\\?"\s*:\s*\\?")[^"\\]+/g, '$1«token»');
+      line = line.replace(/(x-parse-session-token\\?"\s*:\s*\\?")[^"\\]+/g, '$1«token»');
       fs.appendFileSync(log, line + '\n');
       console.log(`=== ${tool}${r.isError ? ' (ERROR)' : ''} ${Date.now() - t} ms`);
       if (process.env.OUT) {

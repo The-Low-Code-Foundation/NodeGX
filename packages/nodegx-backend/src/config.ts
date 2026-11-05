@@ -15,6 +15,7 @@ import * as crypto from 'crypto';
 import * as os from 'os';
 import * as path from 'path';
 import type { DataDirStore } from './config/dataDirStore';
+import type { BucketBinding } from './storage/BindingDriver';
 
 /** Fully-resolved options a BackendService runs with. */
 export interface BackendServiceOptions {
@@ -124,6 +125,13 @@ export interface BackendServiceOptions {
    * the store's files into the data dir first, and every write of one of them reaches the store too. Not a CLI flag.
    */
   dataDirStore: DataDirStore | null;
+  /**
+   * P115 HST-012 — a bucket the host hands in for uploaded files (on a Cloudflare Worker, an R2 binding: an object
+   * already authorised for one bucket, so no endpoint and no keys). null (every Node spawner) = the folder beside the
+   * data dir, as before. With one, uploads go to it unless files.json names a bucket of its own, and their `_Files`
+   * rows say `binding` (`storage/BindingDriver.ts`). Not a CLI flag: only code that runs the service has a binding.
+   */
+  filesBucket: BucketBinding | null;
 }
 
 /** P115 HST-010: a `fetch` for requests to the backend's own address (see `loopbackFetch`). */
@@ -156,7 +164,8 @@ const DEFAULTS: BackendServiceOptions = {
   enforceRules: false,
   serveApp: null,
   loopbackFetch: null,
-  dataDirStore: null
+  dataDirStore: null,
+  filesBucket: null
 };
 
 /**

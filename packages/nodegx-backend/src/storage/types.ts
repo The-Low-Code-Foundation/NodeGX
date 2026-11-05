@@ -20,6 +20,9 @@
  * @module nodegx-backend/storage/types
  */
 
+/** Which store holds a file: `_Files.driver`, and the orphan sweep's key-space tag. */
+export type StorageKind = 'local' | 's3' | 'binding';
+
 export interface StorageStat {
   exists: boolean;
   size: number;
@@ -39,7 +42,8 @@ export interface ByteRange {
 }
 
 export interface StorageDriver {
-  readonly kind: 'local' | 's3';
+  /** `binding` (P115 HST-012): a bucket the host handed in as an object (`BindingDriver`). */
+  readonly kind: StorageKind;
 
   /** Write `data` under a NEW key derived from `hash` (collision-proofed by the driver) and return that key. */
   put(hash: string, data: Buffer): Promise<string>;

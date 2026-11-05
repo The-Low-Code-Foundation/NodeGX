@@ -17,6 +17,8 @@
  *      (since HST-010 a product option, `loopbackFetch`, not a seam).
  *   5. (session 7) the files: with an R2 binding `FILES`, the backend's LocalDriver (bytes under the data dir, which
  *      on a Worker is the isolate's memory) keeps them in the bucket instead, same keys. No access keys anywhere.
+ *      (since HST-012 a product option, `filesBucket`: the binding goes to the service as it is, and its uploads'
+ *      `_Files` rows say `binding`. Session 7's rows, which say `local` over bytes in the bucket, are moved once.)
  *
  * Doors (all under `/__hst/`; with a RUN_KEY var they need `?key=`):
  *   POST /__hst/boot    { name, fresh, options, files: { rel: base64 } }  stop any service, (fresh: wipe the object's
@@ -44,9 +46,7 @@ import * as path from 'node:path';
 import localSql from '@noodl/runtime/src/api/adapters/local-sql';
 import { BackendService } from '@backend/service';
 import type { DataDirStore } from '@backend/config/dataDirStore';
-import { LocalDriver } from '@backend/storage/LocalDriver';
-import { PassThrough } from 'node:stream';
-import * as crypto from 'node:crypto';
+import type { BucketBinding } from '@backend/storage/BindingDriver';
 import { durableObjectEngine, newLedger, type DoStorage } from '../../spike-records/src/doEngine';
 import { openedPaths, setStorage, sqliteLedger } from './nodeSqliteShim';
 
@@ -61,28 +61,14 @@ interface Env {
   BACKEND: { idFromName(name: string): unknown; get(id: unknown): { fetch(r: Request): Promise<Response> } };
   RUN_KEY?: string;
   ASSETS?: { fetch(r: Request): Promise<Response> };
-  FILES?: R2Like;
-}
-
-/** The part of an R2 bucket binding seam 5 uses. */
-interface R2Object {
-  size: number;
-  uploaded: Date;
-  arrayBuffer(): Promise<ArrayBuffer>;
-}
-interface R2Like {
-  put(key: string, value: ArrayBuffer | Uint8Array): Promise<unknown>;
-  get(key: string, options?: { range?: { offset: number; length: number } }): Promise<R2Object | null>;
-  head(key: string): Promise<{ size: number } | null>;
-  delete(key: string): Promise<void>;
-  list(options?: { cursor?: string }): Promise<{ objects: Array<{ key: string; uploaded: Date }>; truncated: boolean; cursor?: string }>;
+  FILES?: BucketBinding;
 }
 
 /** Kept in the object's storage beside the database: what a boot was. */
 const BOOT_KEY = 'hst:boot';
 /** Session 7's keys for the data dir's files (base64); read once, into the store, by a deploy that finds them. */
 const OLD_FILE_PREFIX = 'hst:file:';
-const restarts = { autoBoots: 0, last: null as string | null, restored: 0, migratedFromSession7: 0 };
+const restarts = { autoBoots: 0, last: null as string | null, restored: 0, migratedFromSession7: 0, fileRowsToBinding: 0 };
 const storeLedger = { puts: 0, deletes: 0 };
 
 /**
@@ -139,67 +125,19 @@ proto.connect = function (this: { _resolveEngine: unknown }, ...args: unknown[])
 };
 
 /**
- * Seam 5 (session 7). The file subsystem stores bytes with `LocalDriver` under `<dataDir>/files/blobs`, which on a
- * Worker is `/tmp`: the isolate's memory, gone when it is replaced. With a `FILES` R2 binding, the same class keeps
- * them in the bucket, under the same keys, so `_Files` rows, signed URLs and the orphan sweep are untouched. The
- * product half would be a driver of its own for a Worker (`kind` stays 'local' here so no row changes meaning).
+ * Seam 5. Since HST-012 the service takes the R2 binding itself (`filesBucket`, `storage/BindingDriver.ts`). This
+ * wrapper only counts the calls, for `/__hst/ledger`.
  */
-let filesBucket: R2Like | null = null;
-const filesLedger = { puts: 0, gets: 0, streams: 0, deletes: 0, stats: 0, lists: 0 };
-const notFound = (key: string) => Object.assign(new Error(`ENOENT: no such file in the bucket, '${key}'`), { code: 'ENOENT' });
-{
-  const local = LocalDriver.prototype as unknown as Record<string, (...a: never[]) => unknown>;
-  const original = { put: local.put, get: local.get, createReadStream: local.createReadStream, delete: local.delete, stat: local.stat, listEntries: local.listEntries };
-  local.put = async function (this: unknown, hash: string, data: Buffer) {
-    if (!filesBucket) return (original.put as Function).call(this, hash, data);
-    const key = `${hash.slice(0, 2) || '00'}/${hash.slice(2, 4) || '00'}/${hash}-${crypto.randomBytes(4).toString('hex')}`;
-    await filesBucket.put(key, new Uint8Array(data));
-    filesLedger.puts++;
-    return key;
-  } as never;
-  local.get = async function (this: unknown, key: string) {
-    if (!filesBucket) return (original.get as Function).call(this, key);
-    const object = await filesBucket.get(key);
-    if (!object) throw notFound(key);
-    filesLedger.gets++;
-    return Buffer.from(await object.arrayBuffer());
-  } as never;
-  local.createReadStream = function (this: unknown, key: string, range?: { start: number; end: number }) {
-    if (!filesBucket) return (original.createReadStream as Function).call(this, key, range);
-    const bucket = filesBucket;
-    const out = new PassThrough();
-    (async () => {
-      const object = await bucket.get(key, range ? { range: { offset: range.start, length: range.end - range.start + 1 } } : undefined);
-      if (!object) throw notFound(key);
-      filesLedger.streams++;
-      out.end(Buffer.from(await object.arrayBuffer()));
-    })().catch((e) => out.destroy(e));
-    return out;
-  } as never;
-  local.delete = async function (this: unknown, key: string) {
-    if (!filesBucket) return (original.delete as Function).call(this, key);
-    await filesBucket.delete(key);
-    filesLedger.deletes++;
-  } as never;
-  local.stat = async function (this: unknown, key: string) {
-    if (!filesBucket) return (original.stat as Function).call(this, key);
-    filesLedger.stats++;
-    const head = await filesBucket.head(key);
-    return head ? { exists: true, size: head.size } : { exists: false, size: 0 };
-  } as never;
-  local.listEntries = async function* (this: unknown) {
-    if (!filesBucket) {
-      yield* (original.listEntries as () => AsyncIterable<unknown>).call(this);
-      return;
-    }
-    filesLedger.lists++;
-    let cursor: string | undefined;
-    do {
-      const page = await filesBucket.list(cursor ? { cursor } : undefined);
-      for (const o of page.objects) yield { key: o.key, modified: o.uploaded };
-      cursor = page.truncated ? page.cursor : undefined;
-    } while (cursor);
-  } as never;
+let filesBucket: BucketBinding | null = null;
+const filesLedger = { puts: 0, gets: 0, heads: 0, deletes: 0, lists: 0 };
+function countedBucket(bucket: BucketBinding): BucketBinding {
+  return {
+    put: (key, value) => (filesLedger.puts++, bucket.put(key, value)),
+    get: (key, options) => (filesLedger.gets++, bucket.get(key, options)),
+    head: (key) => (filesLedger.heads++, bucket.head(key)),
+    delete: (key) => (filesLedger.deletes++, bucket.delete(key)),
+    list: (options) => (filesLedger.lists++, bucket.list(options))
+  };
 }
 
 function readTree(dir: string): Record<string, string> {
@@ -239,7 +177,7 @@ export class Backend extends DurableObject {
     const s = (this.ctx as unknown as { storage: Storage }).storage;
     currentStorage = s;
     setStorage(s);
-    filesBucket = (this.env as Env).FILES ?? null;
+    filesBucket = (this.env as Env).FILES ? countedBucket((this.env as Env).FILES as BucketBinding) : null;
     return s;
   }
 
@@ -301,6 +239,27 @@ export class Backend extends DurableObject {
     await storage.delete([...old.keys()]);
   }
 
+  /**
+   * HST-012: session 7's patched `LocalDriver` kept uploads in the bucket under rows that say `local`. With the
+   * product driver a `local` row is served from the disk (the isolate's memory, empty), so each such row whose key IS
+   * in the bucket is pointed at `binding`, compare-and-set as `moveToBucket.ts` does. Only rows made by that patch can
+   * match: a real local upload's key is not in the bucket. Idempotent: a second start finds none.
+   */
+  private async moveSession7FileRows(service: BackendService): Promise<number> {
+    if (!filesBucket) return 0;
+    const facade = (service as unknown as { facade: { rawQueryAll: Function; rawSave: Function } }).facade;
+    const { results } = (await facade.rawQueryAll('_Files', { where: { driver: 'local' }, sort: 'createdAt' })) as {
+      results: Array<{ objectId: string; key: string }>;
+    };
+    let moved = 0;
+    for (const row of results) {
+      if (!(await filesBucket.head(row.key))) continue;
+      await facade.rawSave('_Files', row.objectId, { driver: 'binding' }, undefined, { driver: 'local', key: row.key });
+      moved++;
+    }
+    return moved;
+  }
+
   private async boot(storage: Storage, body: BootBody): Promise<Response> {
     if (body.fresh) await storage.deleteAll();
     await storage.put(BOOT_KEY, { name: body.name, options: body.options || {} });
@@ -324,9 +283,10 @@ export class Backend extends DurableObject {
     fs.mkdirSync(dir, { recursive: true });
     writeTree(dir, body.files || {});
     const port = nextPort++;
-    const service = new BackendService({ ...(body.options || {}), dataDir: dir, port, loopbackFetch, dataDirStore: objectStore(storage) } as never);
+    const service = new BackendService({ ...(body.options || {}), dataDir: dir, port, loopbackFetch, dataDirStore: objectStore(storage), filesBucket } as never);
     const started = await service.start();
     restarts.restored = service.dataDirFilesRestored;
+    restarts.fileRowsToBinding += await this.moveSession7FileRows(service);
     this.service = service;
     this.handler = httpServerHandler({ port });
     loopbackHandler = this.handler as typeof loopbackHandler;

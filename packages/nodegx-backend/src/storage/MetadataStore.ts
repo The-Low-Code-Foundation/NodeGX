@@ -24,6 +24,7 @@
 
 import type { IStorageFacade } from '@noodl/backend-contract';
 import type { IStorageSchema } from '@noodl/backend-contract';
+import type { StorageKind } from './types';
 
 export const FILES_COLLECTION = '_Files';
 
@@ -39,7 +40,7 @@ export interface FileRecord {
   size: number;
   contentType: string;
   hash: string;
-  driver: 'local' | 's3';
+  driver: StorageKind;
   key: string;
   owner: string | null;
   private: boolean;
@@ -56,7 +57,7 @@ export interface CreateFileRecordInput {
   size: number;
   contentType: string;
   hash: string;
-  driver: 'local' | 's3';
+  driver: StorageKind;
   key: string;
   owner: string | null;
   private: boolean;

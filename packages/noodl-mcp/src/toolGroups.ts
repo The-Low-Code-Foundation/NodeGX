@@ -229,6 +229,8 @@ const BACKEND_TOOLS = [
   'reset_collection_permissions',
   // P127-S9-FNLIMITFILEONLY: a function's rule, backend and nodegx.security.json together.
   'set_function_permissions',
+  // P115 HST-012 (P115-HST006-NOFILESRULE): who may upload, open and delete files.
+  'set_file_permissions',
   // P112 OWN-026 FIX-01 (P112-OWN023-NOENFORCETOOL): turns a backend's rules on (devOpen off).
   'set_backend_enforcement',
   'create_backend_role',
@@ -628,6 +630,8 @@ export const WRITE_ONLY_TOOLS: ReadonlySet<string> = new Set<string>([
   'reset_collection_permissions',
   // P127-S9-FNLIMITFILEONLY: a function's rule, backend and nodegx.security.json together.
   'set_function_permissions',
+  // P115 HST-012 (P115-HST006-NOFILESRULE): who may upload, open and delete files.
+  'set_file_permissions',
   // P112 OWN-026 FIX-01 (P112-OWN023-NOENFORCETOOL): turns a backend's rules on (devOpen off).
   'set_backend_enforcement',
   'create_backend_role',
