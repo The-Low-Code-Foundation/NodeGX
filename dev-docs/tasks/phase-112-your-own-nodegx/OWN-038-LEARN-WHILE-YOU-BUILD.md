@@ -1,6 +1,6 @@
 # OWN-038: Learn while you build (a practice round, your own way of building, and a help page)
 
-**Phase:** [112](README.md). **Opened:** 2026-11-04 by Richard. **Status:** 🟡 s2: **AC1–AC6 ✅** (2026-11-04). The probes ran on both harnesses on 0.2.10 from npm ([own-038/RESULTS.md](own-038/RESULTS.md)). Two kit fixes are committed for the next cut: R14's game rule `943328f1d` and the stuck person's help pointer `ac9303f4a`. **AC7 (real beginners) is next.**
+**Phase:** [112](README.md). **Opened:** 2026-11-04 by Richard. **Status:** 🟡 s3: **AC1–AC6 ✅** (2026-11-04). The probes ran on both harnesses on 0.2.10 from npm ([own-038/RESULTS.md](own-038/RESULTS.md)). The 0.2.11 cut (`738b11a36`, 2026-11-05) carries R14's game rule and the stuck person's help pointer; Richard publishes it. R15 keeps the first offer as worded. **AC7 (real beginners) is next.**
 
 > "What if the npm package and kit comes with a sort of 'tutorial mode' that offers the user to first engage in a
 > Claude discussion to learn our lessons about how to best construct a project and communicate with Claude, guide
@@ -113,6 +113,10 @@ before their real project pays the same cost.
 - **R14 (s2).** Asked: *"Where does a game's plain-code world go: one plain page, or inside the NodeGX app?"*
   Answer: **one plain page** in its own folder that opens by itself, never opened from a NodeGX app on a second
   server. Both games he kept were one plain page. Fixed in `943328f1d` (P112-OWN037-SECONDSERVER).
+- **R15 (s3, 2026-11-05).** Asked: *"Cline offered the round to 'an app for my running club' in its first reply.
+  Keep the note, or add 'if my first message names an app or game, don't offer it then'?"* Answer: **keep it.** The
+  offer is one line, and a vague brief is who the round is for. P112-OWN038-VAGUEOFFER is `wontfix`; R13 stays as
+  worded.
 
 ## Found while building the help page
 
@@ -233,3 +237,18 @@ lists it" is the proof still owed.
     `~/.nodegx/claude-oauth-token`). Spend: Claude Code ≈ $21.40 at list price, Cline ≈ $0.80.
   - 🔴 Lab traps: `claude -p` holds its turn open while a preview it started runs (two turns sat over an hour, one
     shared on the Wi-Fi); `total_cost_usd` on `--continue` is the session's running total.
+- **s3, 2026-11-05. The 0.2.11 cut, and R15 (Opus 5.5).**
+  - **The cut** (`738b11a36`). create-nodegx, create-nodegx-vibe and create-nodegx-cline at 0.2.11; stamp
+    `4819d3371703720b`. It carries `943328f1d` (R14) and `ac9303f4a` (STUCKHELP). `@nodegx/mcp` stays 0.2.9: its one
+    commit since the 0.2.10 cut is P132's (`70021e2bc`, lane 9). The lockfile is HEAD's with the version line alone,
+    committed through a temporary index; the same line was carried into the peer's working-tree lockfile, so their
+    next commit can't put 0.2.10 back. Package test 42/42. The changelog section is clean on
+    `written`/`closer`/`contract`/`opener` after one rewrite (", so" joining two sentences, and a tacked-on "too").
+  - **The harvest**, after the cut's own edits: 30 entries. 17 product bugs `general-no`; STUCKHELP and SECONDSERVER
+    `taken`; 5 phase or method notes `general-no` or `duplicate`; 4 `private` (three client, one Richard's own app);
+    VAGUEOFFER `backlog`, then re-marked `general-no` once R15 closed it. `--gate` passes.
+  - **Tarballs** packed from `738b11a36` with `git archive`, in
+    `~/vscode_projects/OpenNoodl-worktrees/npm-0.2.11-tarballs/`: create-nodegx `0d926772…`, -cline `88dd8885…`,
+    -vibe `51ee81b0…`. Installed together into an empty folder, each kit writes its folder; all three folder notes say
+    "one plain page" and name `https://nodegx.io/help`; the Cline entry went to the scratch HOME.
+  - **R15:** VAGUEOFFER kept as is (above).

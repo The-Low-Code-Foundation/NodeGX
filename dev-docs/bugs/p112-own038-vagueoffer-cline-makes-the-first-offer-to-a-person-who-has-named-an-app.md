@@ -1,7 +1,7 @@
 ---
 id: P112-OWN038-VAGUEOFFER
 title: "Cline + DeepSeek makes the first-run practice-round offer to a person whose first message already names an app (\"an app for my running club\"), against R13's \"only when they haven't said what to build\""
-status: open
+status: wontfix
 phase: P112
 task: OWN-038
 severity: low
@@ -9,6 +9,7 @@ area: packages/create-nodegx/bin/create-nodegx.js (AGENT_NOTE, the line "If I'm 
 found: P112 OWN-038 AC4, 2026-11-04 (arm cl-vague, Cline 3.0.71 + DeepSeek V4.1 Flash, create-nodegx 0.2.10 from npm)
 evidence: /Users/Shared/nodegx-lab/own038/cl-vague/sittings.json (sitting 1); dev-docs/tasks/phase-112-your-own-nodegx/own-038/RESULTS.md
 kit: create-nodegx
+reason: "Richard 2026-11-05 (R15): keep it. The offer is one line, and a person with a vague brief such as an app for my running club is who the round is for."
 ---
 
 The person's first message: "I've never built an app before. I want an app for my running club." Cline's first
@@ -25,3 +26,7 @@ DeepSeek as not having said. Fix candidates (not chosen): name the case in the n
 app or game, even in a few words, don't offer it then"); or leave it, since the offer is one line and a vague brief is
 the person the round is for. Ask Richard before changing it; R13 was his. Re-measure: the same message in a Cline arm
 gets no offer at turn 1.
+
+**Ruled 2026-11-05 (R15, Richard): keep it.** He picked "keep it" over the stricter line. The offer stays one line,
+and "an app for my running club" is a vague brief, the person the round is for. R13 stays as worded; nothing changes
+in the kit, and 0.2.11 ships as cut (738b11a36).
