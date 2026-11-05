@@ -37,7 +37,7 @@ never ahead of lanes 9, 2 and 3. Earlier prompts are in git history (`git log --
 1. ✅ The secret is set and Richard's Subscribe reached the stand-in with the email and the key (HST-004 §8.5; 1042
    answered). MUST 1–5 ✅: his phone, and the empty field says the email is required (after BLANKREQUIRED,
    `21bb85fc3`).
-2. After 08:00 UTC on 2026-11-05: MUST line 6. `npx wrangler tail hst-stand-in -c wrangler.stand-in.toml` only sees live
+2. ✅ (Richard, 2026-11-05: "Done it all") After 08:00 UTC on 2026-11-05: MUST line 6. `npx wrangler tail hst-stand-in -c wrangler.stand-in.toml` only sees live
    events, so read the dashboard (Workers & Pages → hst-stand-in → Logs, observability is on) for the digest call.
    A digest run BY HAND reached it at 15:12:59 UTC on 11-04 (session 4's check of the cron path): the reading is the
    one after 08:00 UTC on 11-05, not that one.
@@ -55,7 +55,10 @@ never ahead of lanes 9, 2 and 3. Earlier prompts are in git history (`git log --
    that wires an HTTP Request's body or auth. Before anyone fixes it: measure the editor's own Deploy button with a
    viewer running, and a browser export with the same wiring (the bug file says how).
 5. ✅ HST-006 records (s5) and ✅ users and sign-in (s6: the whole service runs in the object; §7). **Next, in order:**
-   ✅ (b) **Fixture C** (s7, HST-006 §8): written, driven, live. **Next: Richard ticks its MUST.md on his phone**
+   ✅ (b) **Fixture C** (s7, HST-006 §8): written, driven, live. Richard ticked 1–4 and 6, 7 read after a redeploy.
+   **Line 5 failed** (the owner's row stayed on screen for the next account: STALEROWS, fixed in the runtime and live
+   `34f862a8`, §8.6): **his re-read of line 5 is owed first** (sign in as owner, sign out, sign in as someone: no
+   name). The rest of this item is how it was handed to him:
    (Ada's link, *Count me in*, a made-up id, `/owner` as the owner and as the second account, signed out; the
    passwords are in `fixtures/c-campus/.accounts.json`, give them to him from there, never in a commit). Then line 7:
    redeploy (`wrangler deploy` in `spike-backend`, NOT `seed-campus.mjs`, which wipes) and his answer must still be on

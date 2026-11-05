@@ -636,7 +636,7 @@ export class RestDataAdapter extends AdapterEvents implements IDataAdapter {
           const total = options.count ? readTotalCount(profile, body, headers, rows.length) : undefined;
           options.success(records, total);
         },
-        fail: (message) => options.error(message)
+        fail: (message, status) => options.error(message, status) // P115-HST006-STALEROWS: a refusal is told apart
       }
     );
   }

@@ -409,8 +409,9 @@ export class ParseWireAdapter extends AdapterEvents implements IDataAdapter {
       // P99 HLT-023: pass the server's words on, as `fetch` and the rest do. Dropped here, a
       // refusal that names its cause (the per-run ceiling, a 429 with its class) reached the
       // function as "Failed to query."
-      error: function (res) {
-        options.error(res && res.error);
+      // P115-HST006-STALEROWS: and the status, so a reader can tell a refusal (403) from a blip.
+      error: function (res, status) {
+        options.error(res && res.error, status);
       }
     });
   }

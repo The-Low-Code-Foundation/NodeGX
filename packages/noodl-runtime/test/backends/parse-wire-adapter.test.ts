@@ -144,6 +144,15 @@ describe('BCN-002 — the traps the move had to preserve', () => {
     expect(xhr.headers['x-parse-application-id']).toBe('app-id-123');
   });
 
+  test('P115-HST006-STALEROWS: a refused query hands its reader the message AND the status', () => {
+    // A reader that keeps its rows through a blip (Query Records, REL-011b) must clear them on a refusal, and it can
+    // only tell the two apart if the status reaches it. Before: `options.error(res && res.error)`, the 403 dropped.
+    const got: unknown[][] = [];
+    makeAdapter().query(handle, { collection: 'Answer', success: () => undefined, error: (...args) => got.push(args) });
+    FakeXHR.instances[0].complete(403, { error: 'Permission denied for this operation on "Answer".', code: 119 });
+    expect(got).toEqual([['Permission denied for this operation on "Answer".', 403]]);
+  });
+
   test('query still tunnels through POST so the filter travels in the body', () => {
     const where = { and: [{ title: { equalTo: 'x' } }] };
 

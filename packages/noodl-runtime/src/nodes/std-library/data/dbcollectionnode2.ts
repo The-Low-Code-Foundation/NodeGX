@@ -931,7 +931,7 @@ const DbCollectionNode: NodeDefinitionOptions = {
           this.setCollection(_c);
           this.sendSignalOnOutput('fetched');
         },
-        error: (err: string) => {
+        error: (err: string, status?: number) => {
           /**
            * 🔴 **REL-011b AC2 — a failed fetch must not DELETE the rows it has
            * already delivered.**
@@ -967,7 +967,16 @@ const DbCollectionNode: NodeDefinitionOptions = {
            * offers). This one stops the query destroying good data on its way to
            * being illegible.
            */
-          if (this._internal.collection === undefined) this.setCollection(_c);
+          /**
+           * 🔴 **P115-HST006-STALEROWS — except when the backend REFUSED.** A 401/403 is not a blip: it says
+           * this caller may not see these rows. Measured on Fixture C (2026-11-05, Richard's phone, then
+           * drive_page): the owner signed in and read *Ada · Count me in*, signed out, the second account
+           * signed in, the re-fetch was refused 403, and the owner's row stayed on the screen beside "This
+           * account cannot read the answers". So a refusal publishes the empty collection, as a first
+           * failure does; anything else (no answer, a 5xx, a timeout) keeps the rows as REL-011b ruled.
+           */
+          const refused = status === 401 || status === 403;
+          if (refused || this._internal.collection === undefined) this.setCollection(_c);
           this.setError(err || 'Failed to fetch.');
         }
       });

@@ -82,7 +82,7 @@ function makeModelScope(): Record<string, unknown> {
 /** Whatever `query` was handed, so a test can answer it late and twice. */
 type QueryCall = {
   success(results: Record<string, unknown>[], count?: number): void;
-  error(err: string): void;
+  error(err: string, status?: number): void;
 };
 
 function createStubContext() {
@@ -208,5 +208,39 @@ describe('Query Records — a failed fetch keeps the rows it already delivered',
     store.calls[1].success([{ objectId: 'sec-9', kind: 'richText' }]);
 
     expect(node.getOutput('count').value).toBe(1);
+  });
+});
+
+/**
+ * P115-HST006-STALEROWS — the half REL-011b did not cover: a re-fetch the backend REFUSES. Fixture C on Cloudflare,
+ * 2026-11-05: the owner read the answers, signed out, a second account signed in, its re-fetch answered 403, and the
+ * owner's row stayed on screen. A refusal is not a blip: it clears; a blip still keeps.
+ */
+describe('Query Records — a REFUSED re-fetch clears the rows (P115-HST006-STALEROWS)', () => {
+  const REFUSAL = 'Permission denied for this operation on "Section".';
+
+  it.each([403, 401])('🔴 %i after delivered rows → the rows are gone, and the error says why', (status) => {
+    const { node, store } = armed();
+    node.fetch();
+    store.calls[0].success(ROWS);
+
+    node.fetch();
+    store.calls[1].error(REFUSAL, status);
+
+    expect(`after a ${status} — count: ${node.getOutput('count').value}, isEmpty: ${node.getOutput('isEmpty').value}`).toBe(
+      `after a ${status} — count: 0, isEmpty: true`
+    );
+    expect(node.getOutput('error').value).toBe(REFUSAL);
+  });
+
+  it.each([500, 503, 0, undefined])('a %s still keeps them — REL-011b unchanged for a blip', (status) => {
+    const { node, store } = armed();
+    node.fetch();
+    store.calls[0].success(ROWS);
+
+    node.fetch();
+    store.calls[1].error('Failed to fetch.', status as number | undefined);
+
+    expect(node.getOutput('count').value).toBe(3);
   });
 });

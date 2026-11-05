@@ -364,3 +364,23 @@ node seed-campus.mjs https://hst-backend-spike.richard-digitalbricks.workers.dev
 node check-campus.mjs https://hst-backend-spike.richard-digitalbricks.workers.dev
 ```
 🔴 Running the backend's suites against this Worker boots FRESH and wipes Campus: run `seed-campus.mjs` after them.
+
+### 8.6 Richard's phone, and a leak between two accounts (P115-HST006-STALEROWS, fixed)
+
+Richard ticked MUST 1–4 and 6 on his phone. Line 5 failed: signed in as the second account **after the owner had
+signed out on the same phone**, the page showed *Ada · Count me in* and its date beside *"This account cannot read the
+answers."* The server had refused (403). Reproduced with drive_page in that order. The session's own drive had used a
+fresh browser per account, which cannot show it.
+
+Cause: Query Records keeps its rows when a re-fetch fails (REL-011b, so a blip does not blank a published page), and
+the query's error callback dropped the HTTP status, so a refusal looked like a blip. Fix in the product: the status
+travels (`QueryOptions.error(err, status)`), and a 401/403 clears the rows; anything else still keeps them. Unit and
+mutant-checked; the production engine rebuilt with it and redeployed (`34f862a8`, `401===n||403===n` in the served
+`noodl.deploy.js`).
+
+🔴 drive_page renders with the SHARED development viewer (`noodl-editor/src/external/viewer/noodl.viewer.js`, built
+2026-11-03), not the source: every drive this session ran Nov 3's runtime, and the fix cannot be driven there without
+rebuilding a folder peers' editors use. The phone is the reading: MUST 5 is owed again.
+
+MUST 7 (a redeploy keeps the records): Richard's answer was on the owner's list after the redeploy to `34f862a8`
+(`check-campus.mjs`, 1 answer, `autoBoots: 1`).

@@ -67,6 +67,8 @@ interface AdapterCallbacks<TSuccess> {
 export type WhereClause = Record<string, unknown>;
 
 export interface QueryOptions extends AdapterCallbacks<(results: AdapterRecord[], count?: number) => void> {
+  /** `status`: the HTTP status when a backend answered (P115-HST006-STALEROWS; see the contract's `QueryOptions`). */
+  error: (err?: string, status?: number) => void;
   collection: string;
   where?: WhereClause;
   /** Max records to return */
