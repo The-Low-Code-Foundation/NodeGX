@@ -59,7 +59,9 @@ never ahead of lanes 9, 2 and 3. Earlier prompts are in git history (`git log --
    Line 5 failed first (STALEROWS, fixed in the runtime, live `34f862a8`, §8.6) and **passed on his re-read**: MUST
    1–7 ✅, line 8 waits on R2. (c) R2 ruled ("go for CF file storage"), built and measured locally as a binding
    (seam 5, §8.7, `50c7859fc`); **LIVE** (R enabled R2; bucket `hst-campus-files`; `d068aad3`; upload 201 + link 200 over
-   the internet). MUST 8 on his phone, then (d) realtime, (e) the two suites, and R3 can be asked. How it was handed to him, for the next run:
+   the internet). MUST 8 ✅ on his phone: **Fixture C 8/8.** Next: **ask R3** (the full-stack route, now about a real app: HST-006 §0 +
+   §8), then (d) realtime, (e) the two suites. Product rows the spike stands in for: LOOPBACK, NOCODEGEN, seams 3 and 5,
+   NOFILESRULE, and a deploy target doing what `site.mjs` + `seed-campus.mjs` do by hand. How it was handed to him, for the next run:
    (Ada's link, *Count me in*, a made-up id, `/owner` as the owner and as the second account, signed out; the
    passwords are in `fixtures/c-campus/.accounts.json`, give them to him from there, never in a commit). Then line 7:
    redeploy (`wrangler deploy` in `spike-backend`, NOT `seed-campus.mjs`, which wipes) and his answer must still be on

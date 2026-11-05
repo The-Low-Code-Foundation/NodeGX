@@ -11,4 +11,4 @@ Ada's link is `<address>/home?id=6f468bbd-4091-48c8-90a1-9232f4753a90`; on the C
 - [x] Signed in as the second account, the page says it cannot read the answers, and shows no name. *(Richard, 2026-11-05, re-read after the fix: "I can't see Ada's answer or any answers anymore, just the 'this account can't read' message". First read ❌ it showed Ada's answer beside the refusal, after the owner had signed out on the same phone — P115-HST006-STALEROWS, fixed and live `34f862a8`; his re-read owed)*
 - [x] Signed out, `/owner` shows only the sign-in form, and the answers' address refuses a signed-out caller (HST-006 records the request). *(Richard, 2026-11-05, his phone)*
 - [x] After a redeploy, Ada's answer is still on the owner's list. *(his tap's answer, read after the redeploys `a0c7bb47` → `34f862a8`, HST-006 §8.6; his own look on the next visit)*
-- [ ] A file the owner uploads opens at its link. *(Waits on R2, Richard's go: built after it.)*
+- [x] A file the owner uploads opens at its link. *(Richard, 2026-11-05, his phone on `d068aad3`: "Uploaded a file on my phone as owner, opened it, it works!"; files on R2 through a binding, HST-006 §8.7)*

@@ -416,3 +416,6 @@ fails), then: `wrangler r2 bucket create hst-campus-files`, `wrangler deploy` (n
 the owner's upload 201 → `https://hst-backend-spike.richard-digitalbricks.workers.dev/files/98209a8d8a707079_open-day.txt`,
 that link signed out 200 with the same bytes; ledger `bucket: true, puts: 1, streams: 1`; every earlier reading
 unchanged (Richard's answer still on the owner's list; the second account 403). MUST 8 on his phone is the reading.
+
+Richard, on his phone: *"Uploaded a file on my phone as owner, opened it, it works!"* **Fixture C: all eight MUST lines
+ticked** — a full-stack app (pages, records by id, sign-in with roles, files) on one Worker on the Free plan.
