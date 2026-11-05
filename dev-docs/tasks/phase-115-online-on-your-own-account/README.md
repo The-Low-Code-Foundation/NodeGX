@@ -177,6 +177,12 @@ same day: a Free account is never billed (over a limit, Cloudflare refuses the r
 Functions are Worker requests. So "not charged" is the same for both; what a free user can meet is a **refused call**,
 and the line that matters is 10 ms CPU a call (HST-004 §8.7–8.8).
 
+**Ruled 2026-11-05, R3 — build it in P115.** Asked after Fixture C passed 8/8 on Richard's phone (one Worker, Free
+plan, with spike scripts standing in for six product pieces, estimated 4–6 sessions, realtime not included), with three
+choices: its own phase (recommended), build it in P115, or park. Richard chose **build it in P115**: the scripts become
+the product here, aiming at the Beta as a nice-to-have, still never ahead of lanes 9, 2 and 3. The build order is in
+`NEXT-SESSION-PROMPT.md` §3.
+
 ## 9. Not this phase
 
 - **A free hosted tier** (UNI-008). This phase builds the off-ramp UNI-008 R7 promises; the tier stays deliberately last.

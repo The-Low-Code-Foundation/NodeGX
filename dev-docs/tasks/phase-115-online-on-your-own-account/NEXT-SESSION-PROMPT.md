@@ -73,11 +73,28 @@ never ahead of lanes 9, 2 and 3. Earlier prompts are in git history (`git log --
    not on `hst-records-spike`: its cloud functions then need LOOPBACK's seam, and must not use a code node (NOCODEGEN). 🔴 Don't run `/__conformance` on the live Worker for fun: each run reads
    ~752,000 rows, 15% of the Free day.
 
+## 3b. R3 RULED (2026-11-05): build the Cloudflare route as a product, in this phase
+
+Richard chose "Build it in P115" over a phase of its own. The six pieces the spike scripts stand in for, in the order
+that unblocks the most (each: a product change + its tests + Fixture C still 8/8 on hst-backend-spike):
+1. **LOOPBACK** (high): the cloud runtime reaches its own backend in-process on a Worker (today the spike's `fetch`
+   wrapper). Unblocks every signed-in cloud function.
+2. **Seam 3 in the product**: the backend's data-dir files kept in a store it is handed (the object's storage on a
+   Worker), and the service started again from it.
+3. **Seam 5 in the product**: a file driver for an R2 binding (today `LocalDriver.prototype` patched); `kind` and
+   `_Files.driver` decided honestly. With it, NOFILESRULE (an MCP tool for the files rule).
+4. **NOCODEGEN**: code nodes in cloud functions compiled at deploy (a Worker refuses `new Function`).
+5. **The deploy command**: `nodegx deploy --cloudflare` (or the MCP's) doing what `site.mjs` + `seed-campus.mjs` +
+   `wrangler deploy` do by hand, the production engine included; never wipes a live app.
+6. **Session 5's three DO reds**: regex declared unsupported, EXPRDEPTH flattened, NOROLLBACKCASE + transactions.
+Realtime (d) is measured alongside or after 5. A ticket per piece (HST-010…) before building; the BOARD lane 10 line
+says "building" once the first lands.
+
 ## 4. Rulings owed (ask in plain words, recommendation first)
 
 - R1–R5 as in the README §8. R5 (first-load size) is mostly answered: the HTML export is 1.4 MB against ~14.9 MB.
 - R6 (one Worker) ruled 2026-11-04.
 - R2 (files on R2): ask with (c) — it may want a card on his account. MUST line 8 waits on it.
-- R3: recommendation updated in HST-006 §0 after s6 (no adapter: the whole service in a Durable Object, plus two
+- ✅ R3 RULED 2026-11-05: build it in P115 (§3b). Was: recommendation updated in HST-006 §0 after s6 (no adapter: the whole service in a Durable Object, plus two
   product changes and code nodes printed at deploy). Users/sign-in are measured now, so R3 can be asked; ask it once
   Fixture C is ticked, so the ruling is about a real app.
