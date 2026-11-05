@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "0245aef3-30f9-5070-8529-caf582d607f6",
+  "name": "Answer Row",
+  "path": "/Answer Row",
+  "type": "visual",
+  "created": "2026-11-05T13:47:09.932Z",
+  "modified": "2026-11-05T13:47:09.932Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One saved answer in the owner's list: who, what they chose, and when."
+}

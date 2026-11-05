@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "devOpen": false,
+  "defaults": {
+    "permissions": {
+      "find": "authenticated",
+      "get": "authenticated",
+      "create": "authenticated",
+      "update": "authenticated",
+      "delete": "authenticated"
+    },
+    "creatorOwns": true
+  },
+  "collections": {
+    "Reader": {
+      "permissions": {
+        "find": "role:owner",
+        "get": "public",
+        "create": "role:owner",
+        "update": "role:owner",
+        "delete": "role:owner"
+      },
+      "creatorOwns": false
+    },
+    "Answer": {
+      "permissions": {
+        "find": "role:owner",
+        "get": "role:owner",
+        "create": "public",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "creatorOwns": false
+    }
+  },
+  "functions": {},
+  "files": {
+    "upload": "authenticated",
+    "read": "public",
+    "delete": "nobody"
+  },
+  "signup": "public"
+}

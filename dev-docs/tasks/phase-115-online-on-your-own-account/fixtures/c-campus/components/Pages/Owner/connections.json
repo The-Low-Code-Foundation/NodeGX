@@ -1,0 +1,139 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "9c4ab3d8-787d-5788-8a61-803d635cc097",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "o-user",
+      "fromProperty": "authenticated",
+      "toId": "o-notin",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "o-notin",
+      "fromProperty": "result",
+      "toId": "o-login",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "o-user",
+      "fromProperty": "authenticated",
+      "toId": "o-in",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "o-email",
+      "fromProperty": "onTextChanged",
+      "toId": "o-dologin",
+      "toProperty": "username"
+    },
+    {
+      "fromId": "o-pass",
+      "fromProperty": "onTextChanged",
+      "toId": "o-dologin",
+      "toProperty": "password"
+    },
+    {
+      "fromId": "o-signin",
+      "fromProperty": "onClick",
+      "toId": "o-dologin",
+      "toProperty": "login"
+    },
+    {
+      "fromId": "o-pass",
+      "fromProperty": "onEnter",
+      "toId": "o-dologin",
+      "toProperty": "login"
+    },
+    {
+      "fromId": "o-dologin",
+      "fromProperty": "error",
+      "toId": "o-login-err",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "o-signout",
+      "fromProperty": "onClick",
+      "toId": "o-dologout",
+      "toProperty": "login"
+    },
+    {
+      "fromId": "o-signout",
+      "fromProperty": "onClick",
+      "toId": "o-refusedsw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "o-user",
+      "fromProperty": "email",
+      "toId": "o-whofmt",
+      "toProperty": "email"
+    },
+    {
+      "fromId": "o-whofmt",
+      "fromProperty": "formatted",
+      "toId": "o-who",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "o-user",
+      "fromProperty": "loggedIn",
+      "toId": "o-answers",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "o-user",
+      "fromProperty": "fetched",
+      "toId": "o-answers",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "o-answers",
+      "fromProperty": "items",
+      "toId": "o-list",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "o-answers",
+      "fromProperty": "isEmpty",
+      "toId": "o-empty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "o-answers",
+      "fromProperty": "failure",
+      "toId": "o-refusedsw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "o-answers",
+      "fromProperty": "fetched",
+      "toId": "o-refusedsw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "o-refusedsw",
+      "fromProperty": "state",
+      "toId": "o-refused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "o-dologin",
+      "fromProperty": "failure",
+      "toId": "o-loginerrsw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "o-signin",
+      "fromProperty": "onClick",
+      "toId": "o-loginerrsw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "o-loginerrsw",
+      "fromProperty": "state",
+      "toId": "o-login-err",
+      "toProperty": "mounted"
+    }
+  ]
+}

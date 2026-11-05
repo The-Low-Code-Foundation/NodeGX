@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "9c4ab3d8-787d-5788-8a61-803d635cc097",
+  "name": "Owner",
+  "path": "/Pages/Owner",
+  "type": "page",
+  "created": "2026-11-05T13:47:09.966Z",
+  "modified": "2026-11-05T13:48:48.532Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The owner signs in and reads every answer. Anyone else sees the sign-in form, or a refusal."
+}

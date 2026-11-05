@@ -1,0 +1,14 @@
+
+# Machine-specific MCP registration: absolute paths to this install of NodeGX.
+# Each developer gets their own, written when the project is created or opened in the NodeGX editor.
+.mcp.json
+
+# A pause on this machine: NodeGX Studio writes it while the person holds the agent, and removes it on release.
+.nodegx-hold.json
+
+# P115: the owner and the second account (passwords), kept on this machine only.
+.accounts.json
+
+# P115: drive and render screenshots are made again on demand; the page uses none of the starter photos (4.1 MB).
+.previews/
+noodl_modules/starter-imagery/
