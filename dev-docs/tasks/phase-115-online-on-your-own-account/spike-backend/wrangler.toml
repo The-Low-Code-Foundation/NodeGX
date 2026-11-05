@@ -26,5 +26,10 @@ directory = "./public"
 binding = "ASSETS"
 run_worker_first = true
 
+# HST-006 §8.7 (seam 5): the backend's files, in R2 through a binding (no access keys). R2 must be enabled on the account.
+[[r2_buckets]]
+binding = "FILES"
+bucket_name = "hst-campus-files"
+
 [observability]
 enabled = true

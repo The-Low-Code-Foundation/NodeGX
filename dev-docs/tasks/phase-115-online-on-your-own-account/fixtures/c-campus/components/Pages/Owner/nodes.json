@@ -241,7 +241,8 @@
         "o-who-row",
         "o-list",
         "o-empty",
-        "o-refused"
+        "o-refused",
+        "o-files"
       ],
       "x": 220,
       "y": 1240
@@ -416,6 +417,211 @@
       "label": "Sign-in failed",
       "x": 590,
       "y": 1360
+    },
+    {
+      "id": "o-files",
+      "type": "Group",
+      "label": "A file for the readers",
+      "parent": "o-in",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-4)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-subtle)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingBottom": "var(--space-4)"
+      },
+      "children": [
+        "o-files-title",
+        "o-upload-btn",
+        "o-uploading",
+        "o-uploaded",
+        "o-file-url",
+        "o-open-file",
+        "o-upload-err"
+      ],
+      "x": 280,
+      "y": 2080
+    },
+    {
+      "id": "o-files-title",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "o-files",
+      "parameters": {
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "text": "A file for the readers",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 340,
+      "y": 2200
+    },
+    {
+      "id": "o-upload-btn",
+      "type": "net.noodl.controls.button",
+      "label": "Upload a file",
+      "parent": "o-files",
+      "parameters": {
+        "label": "Upload a file",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 340,
+      "y": 2320
+    },
+    {
+      "id": "o-uploading",
+      "type": "Text",
+      "label": "Uploading",
+      "parent": "o-files",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "text": "Uploading…",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 2440
+    },
+    {
+      "id": "o-uploaded",
+      "type": "Text",
+      "label": "Uploaded",
+      "parent": "o-files",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "text": "Uploaded. Its link:",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 2560
+    },
+    {
+      "id": "o-file-url",
+      "type": "Text",
+      "label": "The file's link",
+      "parent": "o-files",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 2680
+    },
+    {
+      "id": "o-open-file",
+      "type": "net.noodl.controls.button",
+      "label": "Open the file",
+      "parent": "o-files",
+      "parameters": {
+        "label": "Open the file",
+        "backgroundColor": "var(--secondary)",
+        "color": "var(--secondary-foreground)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 2800
+    },
+    {
+      "id": "o-upload-err",
+      "type": "Text",
+      "label": "Upload error",
+      "parent": "o-files",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--red-700)",
+        "lineHeight": "var(--leading-relaxed)",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 2920
+    },
+    {
+      "id": "o-picker",
+      "type": "Open File Picker",
+      "label": "Choose the file",
+      "x": 590,
+      "y": 2320
+    },
+    {
+      "id": "o-upload",
+      "type": "Upload File",
+      "label": "Store it",
+      "metadata": {
+        "comment": "Public by default: the backend's files read rule is public, so the link opens for anyone who has it."
+      },
+      "x": 590,
+      "y": 2920
+    },
+    {
+      "id": "o-stored",
+      "type": "Cloud File",
+      "label": "The stored file",
+      "x": 590,
+      "y": 2680
+    },
+    {
+      "id": "o-open",
+      "type": "net.noodl.externallink",
+      "label": "Open it",
+      "parameters": {
+        "openInNewTab": true
+      },
+      "x": 590,
+      "y": 2800
+    },
+    {
+      "id": "o-uploadingsw",
+      "type": "Switch",
+      "label": "Uploading",
+      "x": 590,
+      "y": 2440
+    },
+    {
+      "id": "o-uploadedsw",
+      "type": "Switch",
+      "label": "Uploaded",
+      "x": 590,
+      "y": 2560
+    },
+    {
+      "id": "o-uploaderrsw",
+      "type": "Switch",
+      "label": "Upload failed",
+      "x": 590,
+      "y": 3040
     }
   ],
   "visualRoots": [

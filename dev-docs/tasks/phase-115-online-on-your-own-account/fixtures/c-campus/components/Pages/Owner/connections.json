@@ -134,6 +134,126 @@
       "fromProperty": "state",
       "toId": "o-login-err",
       "toProperty": "mounted"
+    },
+    {
+      "fromId": "o-upload-btn",
+      "fromProperty": "onClick",
+      "toId": "o-picker",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "o-picker",
+      "fromProperty": "file",
+      "toId": "o-upload",
+      "toProperty": "file"
+    },
+    {
+      "fromId": "o-picker",
+      "fromProperty": "done",
+      "toId": "o-upload",
+      "toProperty": "upload"
+    },
+    {
+      "fromId": "o-picker",
+      "fromProperty": "done",
+      "toId": "o-uploadingsw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "o-picker",
+      "fromProperty": "done",
+      "toId": "o-uploadedsw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "o-picker",
+      "fromProperty": "done",
+      "toId": "o-uploaderrsw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "o-upload",
+      "fromProperty": "done",
+      "toId": "o-uploadingsw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "o-upload",
+      "fromProperty": "done",
+      "toId": "o-uploadedsw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "o-upload",
+      "fromProperty": "failure",
+      "toId": "o-uploadingsw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "o-upload",
+      "fromProperty": "failure",
+      "toId": "o-uploaderrsw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "o-upload",
+      "fromProperty": "error",
+      "toId": "o-upload-err",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "o-uploadingsw",
+      "fromProperty": "state",
+      "toId": "o-uploading",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "o-uploadedsw",
+      "fromProperty": "state",
+      "toId": "o-uploaded",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "o-uploaderrsw",
+      "fromProperty": "state",
+      "toId": "o-upload-err",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "o-upload",
+      "fromProperty": "cloudFile",
+      "toId": "o-stored",
+      "toProperty": "file"
+    },
+    {
+      "fromId": "o-stored",
+      "fromProperty": "url",
+      "toId": "o-file-url",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "o-stored",
+      "fromProperty": "url",
+      "toId": "o-open",
+      "toProperty": "link"
+    },
+    {
+      "fromId": "o-uploadedsw",
+      "fromProperty": "state",
+      "toId": "o-file-url",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "o-uploadedsw",
+      "fromProperty": "state",
+      "toId": "o-open-file",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "o-open-file",
+      "fromProperty": "onClick",
+      "toId": "o-open",
+      "toProperty": "do"
     }
   ]
 }

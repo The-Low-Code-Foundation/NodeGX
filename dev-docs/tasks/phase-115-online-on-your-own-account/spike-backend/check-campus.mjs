@@ -1,5 +1,6 @@
 // HST-006 §8: Fixture C's MUST lines read over HTTP, the calls its page makes, against a Worker running it.
-//   node check-campus.mjs <worker-address> [--answer]      --answer saves one answer for Ada first (as her page does)
+//   node check-campus.mjs <worker-address> [--answer] [--upload]   --answer saves one answer for Ada first (as her page does);
+//   --upload stores a small text file as the owner and reads it back at its link
 // Prints one line per reading; exits 1 if any reading is not what MUST.md says. Never prints a password or a token.
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -60,6 +61,23 @@ const list = await req('GET', '/classes/Answer?order=-createdAt', undefined, { '
 const names = (list.json?.results || []).map((a) => `${a.readerName}: ${a.choice}`);
 check('the owner reads the answers', list.status === 200 && names.some((n) => n.startsWith('Ada')), `${list.status}, ${names.length} answer(s): ${names.slice(0, 3).join('; ')}`);
 
+// MUST 8: a file the owner uploads opens at its link (`--upload`, the call Upload File makes: POST /files/<name>).
+if (process.argv.includes('--upload')) {
+  const body = `Campus open day, ${new Date().toISOString()}`;
+  const up = await fetch(`${base}/files/open-day.txt`, {
+    method: 'POST',
+    headers: { 'content-type': 'text/plain', 'x-parse-application-id': 'campus', 'x-parse-session-token': o.token },
+    body
+  });
+  const made = await up.json().catch(() => null);
+  check('the owner uploads a file', up.status === 201 || up.status === 200, `${up.status} ${made?.url || JSON.stringify(made).slice(0, 160)}`);
+  if (made?.url) {
+    const url = made.url.startsWith('http') ? made.url : base + made.url;
+    const back = await fetch(url);
+    check('the file opens at its link, signed out', back.status === 200 && (await back.text()) === body, `${back.status} ${url}`);
+    console.log(`file link: ${url}`);
+  }
+}
 const x = await signIn('other');
 check('the second account signs in', x.status === 200 && !!x.token, `${x.status}`);
 const refused = await req('GET', '/classes/Answer', undefined, { 'x-parse-session-token': x.token });

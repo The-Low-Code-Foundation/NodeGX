@@ -386,3 +386,27 @@ Fixture C's MUST lines 1–7 are ticked; line 8 (a file) waits on R2.
 
 MUST 7 (a redeploy keeps the records): Richard's answer was on the owner's list after the redeploy to `34f862a8`
 (`check-campus.mjs`, 1 answer, `autoBoots: 1`).
+
+### 8.7 Files on R2, through a binding (seam 5) — Richard ruled R2 on 2026-11-05
+
+Richard: *"Yep go for CF file storage"*. R2 was not enabled on his account (`wrangler r2 bucket list`: *Please enable
+R2 through the Cloudflare Dashboard* [10042]): enabling it is his click. Today's pricing page
+([R2 pricing](https://developers.cloudflare.com/r2/pricing/)): Standard storage 10 GB-month, 1M Class A and 10M
+Class B operations a month free, egress free; it does not say whether enabling asks for a card.
+
+Two ways to R2: the backend's own `S3Driver` against R2's S3 API (an R2 API token: an access key and a SECRET Richard
+would have to type, which a session cannot set), or a Worker **binding** (Cloudflare gives the bucket to the Worker,
+no keys). On a Worker the binding is the native way, so seam 5: with `FILES` bound, the backend's `LocalDriver`
+(bytes under `<dataDir>/files/blobs`, which on a Worker is the isolate's memory) keeps them in the bucket under the
+same keys. `_Files` rows, signed URLs and the sweep are untouched; `/__hst/ledger` counts the bucket calls.
+
+Fixture C: the Owner page gained *A file for the readers* through the MCP (Open File Picker → Upload File → Cloud File
+→ the link and *Open the file*; 71 nodes, 0 code, 0 diagnostics; drawn on a phone, signed in). Who may upload stays the
+default, any signed-in account: no MCP tool sets the files rule (P115-HST006-NOFILESRULE).
+
+Measured under `wrangler dev` (R2 simulated): the owner's `POST /files/open-day.txt` → 201 and a link on the Worker's
+own address; the link signed out → 200, the same bytes; ledger `puts: 1, streams: 1`. After a full restart of the
+local Worker: the service started again from storage (`autoBoots: 1`) and the link answered 200 from the bucket.
+`check-campus.mjs --upload` reads it. Live waits on R2 being enabled (a deploy naming a bucket that cannot exist
+fails), then: `wrangler r2 bucket create hst-campus-files`, `wrangler deploy` (no re-seed: Richard's answer stays),
+`check-campus.mjs --upload`, and MUST 8 on his phone.

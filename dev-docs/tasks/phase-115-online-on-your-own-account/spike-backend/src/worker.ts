@@ -13,6 +13,8 @@
  *   2. `node:sqlite` itself, for the execution history (wrangler `[alias]` → nodeSqliteShim.ts).
  *   3. the data dir: `node:fs` on Workers is the isolate's memory (`/tmp`). It survives requests, not an eviction.
  *   4. the loopback: the service's cloud runtime calls the service over HTTP; here that is an in-process call.
+ *   5. (session 7) the files: with an R2 binding `FILES`, the backend's LocalDriver (bytes under the data dir, which
+ *      on a Worker is the isolate's memory) keeps them in the bucket instead, same keys. No access keys anywhere.
  *
  * Doors (all under `/__hst/`; with a RUN_KEY var they need `?key=`):
  *   POST /__hst/boot    { name, fresh, options, files: { rel: base64 } }  stop any service, (fresh: wipe the object's
@@ -36,6 +38,9 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import localSql from '@noodl/runtime/src/api/adapters/local-sql';
 import { BackendService } from '@backend/service';
+import { LocalDriver } from '@backend/storage/LocalDriver';
+import { PassThrough } from 'node:stream';
+import * as crypto from 'node:crypto';
 import { durableObjectEngine, newLedger, type DoStorage } from '../../spike-records/src/doEngine';
 import { openedPaths, setStorage, sqliteLedger } from './nodeSqliteShim';
 
@@ -50,6 +55,21 @@ interface Env {
   BACKEND: { idFromName(name: string): unknown; get(id: unknown): { fetch(r: Request): Promise<Response> } };
   RUN_KEY?: string;
   ASSETS?: { fetch(r: Request): Promise<Response> };
+  FILES?: R2Like;
+}
+
+/** The part of an R2 bucket binding seam 5 uses. */
+interface R2Object {
+  size: number;
+  uploaded: Date;
+  arrayBuffer(): Promise<ArrayBuffer>;
+}
+interface R2Like {
+  put(key: string, value: ArrayBuffer | Uint8Array): Promise<unknown>;
+  get(key: string, options?: { range?: { offset: number; length: number } }): Promise<R2Object | null>;
+  head(key: string): Promise<{ size: number } | null>;
+  delete(key: string): Promise<void>;
+  list(options?: { cursor?: string }): Promise<{ objects: Array<{ key: string; uploaded: Date }>; truncated: boolean; cursor?: string }>;
 }
 
 /** Kept in the object's storage beside the database: what a boot was, and the data dir's files (base64). */
@@ -94,6 +114,70 @@ proto.connect = function (this: { _resolveEngine: unknown }, ...args: unknown[])
   return originalConnect.apply(this, args);
 };
 
+/**
+ * Seam 5 (session 7). The file subsystem stores bytes with `LocalDriver` under `<dataDir>/files/blobs`, which on a
+ * Worker is `/tmp`: the isolate's memory, gone when it is replaced. With a `FILES` R2 binding, the same class keeps
+ * them in the bucket, under the same keys, so `_Files` rows, signed URLs and the orphan sweep are untouched. The
+ * product half would be a driver of its own for a Worker (`kind` stays 'local' here so no row changes meaning).
+ */
+let filesBucket: R2Like | null = null;
+const filesLedger = { puts: 0, gets: 0, streams: 0, deletes: 0, stats: 0, lists: 0 };
+const notFound = (key: string) => Object.assign(new Error(`ENOENT: no such file in the bucket, '${key}'`), { code: 'ENOENT' });
+{
+  const local = LocalDriver.prototype as unknown as Record<string, (...a: never[]) => unknown>;
+  const original = { put: local.put, get: local.get, createReadStream: local.createReadStream, delete: local.delete, stat: local.stat, listEntries: local.listEntries };
+  local.put = async function (this: unknown, hash: string, data: Buffer) {
+    if (!filesBucket) return (original.put as Function).call(this, hash, data);
+    const key = `${hash.slice(0, 2) || '00'}/${hash.slice(2, 4) || '00'}/${hash}-${crypto.randomBytes(4).toString('hex')}`;
+    await filesBucket.put(key, new Uint8Array(data));
+    filesLedger.puts++;
+    return key;
+  } as never;
+  local.get = async function (this: unknown, key: string) {
+    if (!filesBucket) return (original.get as Function).call(this, key);
+    const object = await filesBucket.get(key);
+    if (!object) throw notFound(key);
+    filesLedger.gets++;
+    return Buffer.from(await object.arrayBuffer());
+  } as never;
+  local.createReadStream = function (this: unknown, key: string, range?: { start: number; end: number }) {
+    if (!filesBucket) return (original.createReadStream as Function).call(this, key, range);
+    const bucket = filesBucket;
+    const out = new PassThrough();
+    (async () => {
+      const object = await bucket.get(key, range ? { range: { offset: range.start, length: range.end - range.start + 1 } } : undefined);
+      if (!object) throw notFound(key);
+      filesLedger.streams++;
+      out.end(Buffer.from(await object.arrayBuffer()));
+    })().catch((e) => out.destroy(e));
+    return out;
+  } as never;
+  local.delete = async function (this: unknown, key: string) {
+    if (!filesBucket) return (original.delete as Function).call(this, key);
+    await filesBucket.delete(key);
+    filesLedger.deletes++;
+  } as never;
+  local.stat = async function (this: unknown, key: string) {
+    if (!filesBucket) return (original.stat as Function).call(this, key);
+    filesLedger.stats++;
+    const head = await filesBucket.head(key);
+    return head ? { exists: true, size: head.size } : { exists: false, size: 0 };
+  } as never;
+  local.listEntries = async function* (this: unknown) {
+    if (!filesBucket) {
+      yield* (original.listEntries as () => AsyncIterable<unknown>).call(this);
+      return;
+    }
+    filesLedger.lists++;
+    let cursor: string | undefined;
+    do {
+      const page = await filesBucket.list(cursor ? { cursor } : undefined);
+      for (const o of page.objects) yield { key: o.key, modified: o.uploaded };
+      cursor = page.truncated ? page.cursor : undefined;
+    } while (cursor);
+  } as never;
+}
+
 function readTree(dir: string): Record<string, string> {
   const out: Record<string, string> = {};
   if (!fs.existsSync(dir)) return out;
@@ -133,6 +217,7 @@ export class Backend extends DurableObject {
     const s = (this.ctx as unknown as { storage: Storage }).storage;
     currentStorage = s;
     setStorage(s);
+    filesBucket = (this.env as Env).FILES ?? null;
     return s;
   }
 
@@ -145,7 +230,7 @@ export class Backend extends DurableObject {
       if (url.pathname === '/__hst/routes') return Response.json(this.service ? this.service.getRouteTable() : []);
       if (url.pathname === '/__hst/files') return Response.json({ files: this.dir ? readTree(this.dir) : {} });
       if (url.pathname === '/__hst/call' && request.method === 'POST') return await this.call((await request.json()) as CallBody);
-      if (url.pathname === '/__hst/ledger') return Response.json({ adapter: adapterLedger, sqlite: sqliteLedger, openedPaths, loopback, restarts });
+      if (url.pathname === '/__hst/ledger') return Response.json({ adapter: adapterLedger, sqlite: sqliteLedger, openedPaths, loopback, restarts, files: { bucket: !!filesBucket, ...filesLedger } });
     } catch (e) {
       return errorJson(e);
     }
