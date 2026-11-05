@@ -17,6 +17,22 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
+## create-nodegx 0.2.11 · 2026-11-05
+
+**If you start by saying you're stuck, your agent points you to the help page in its first reply.**
+
+This release is `create-nodegx`, `create-nodegx-vibe` and `create-nodegx-cline` at 0.2.11. `npm create nodegx` still
+sets up `@nodegx/mcp` 0.2.9. The other packages stay at their versions.
+
+### Changed
+
+- **Help from the first reply.** The pointer to [nodegx.io/help](https://nodegx.io/help/) used to be only in the
+  first-project guide. Your agent reads that guide when it starts a build. A person who was lost before any build
+  never got it. Now the folder note your agent reads first has it as well.
+- **A game's world is one plain page.** When a game needs its moving world written in code, your agent puts it in one
+  plain page in its own folder. It no longer starts a second server for it. A second server works only while it's
+  running on your computer, so the game stops working once it's online.
+
 ## create-nodegx 0.2.10 · 2026-11-04
 
 **If you're new to building with an AI, your agent can now take you through a practice round first.**
