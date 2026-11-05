@@ -13,6 +13,9 @@
  *
  *   HST_BACKEND_URL   the Worker (default http://localhost:8796, `wrangler dev --port 8796`)
  *   HST_RUN_KEY       the doors' key, when the Worker has one
+ *   HST_CAPTURE_DIR   HST-013: copy each suite's `workflows/*.workflow.json` there as it boots, for `build.mjs`'s
+ *                     HST_PRINT_FROM. A Worker's code nodes are printed when it is BUILT, so a suite whose functions
+ *                     carry code is run twice: once to capture (its code nodes refused), then on a Worker built from it.
  */
 'use strict';
 const fs = require('fs');
@@ -108,6 +111,13 @@ class BackendService {
     const { dataDir, port: _port, ...options } = this.options;
     const fresh = !booted.has(dataDir);
     booted.add(dataDir);
+    const wf = path.join(dataDir, 'workflows');
+    if (process.env.HST_CAPTURE_DIR && fs.existsSync(wf)) {
+      for (const f of fs.readdirSync(wf).filter((n) => n.endsWith('.workflow.json'))) {
+        fs.mkdirSync(process.env.HST_CAPTURE_DIR, { recursive: true });
+        fs.copyFileSync(path.join(wf, f), path.join(process.env.HST_CAPTURE_DIR, `${path.basename(dataDir)}-${f}`));
+      }
+    }
     const res = await fetch(door('/__hst/boot'), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },

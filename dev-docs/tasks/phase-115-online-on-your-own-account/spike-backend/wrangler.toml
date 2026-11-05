@@ -4,6 +4,10 @@ compatibility_date = "2026-10-01"
 compatibility_flags = ["nodejs_compat"]
 # HST-006 §7: build.mjs bundles (an html-as-text loader and the node:sqlite swap wrangler cannot do); upload as built.
 no_bundle = true
+# HST-013: dist/printed-code.mjs (the cloud functions' code nodes, printed by build.mjs) is its own module beside it.
+find_additional_modules = true
+base_dir = "dist"
+rules = [{ type = "ESModule", globs = ["printed-code.mjs"] }]
 
 [build]
 command = "node build.mjs"

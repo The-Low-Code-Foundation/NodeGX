@@ -9,6 +9,8 @@ import type {
   RuntimeDiscoveredPort
 } from '@noodl/types';
 
+import { compileCode, REST_REQUEST_PARAMS, REST_RESPONSE_PARAMS } from '../../../printedcode';
+
 const defaultRequestScript =
   '' +
   '//Add custom code to setup the request object before the request\n' +
@@ -178,7 +180,7 @@ const RestNode: NodeDefinitionOptions = {
       group: 'Scripts',
       set: function (this: RestNodeInstance, script: unknown) {
         try {
-          this._internal.requestFunc = new Function('Inputs', 'Outputs', 'Request', script as string) as UserScript;
+          this._internal.requestFunc = compileCode<UserScript>(REST_REQUEST_PARAMS, script as string); // P115 HST-013
         } catch (e) {
           console.log(e);
         }
@@ -195,7 +197,7 @@ const RestNode: NodeDefinitionOptions = {
       group: 'Scripts',
       set: function (this: RestNodeInstance, script: unknown) {
         try {
-          this._internal.responseFunc = new Function('Inputs', 'Outputs', 'Response', script as string) as UserScript;
+          this._internal.responseFunc = compileCode<UserScript>(REST_RESPONSE_PARAMS, script as string); // P115 HST-013
         } catch (e) {
           console.log(e);
         }

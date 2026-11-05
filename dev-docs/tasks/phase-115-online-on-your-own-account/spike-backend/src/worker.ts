@@ -39,6 +39,13 @@
  * HST-011: the service writes those files through `dataDirStore` itself (each write, as it happens), into the table
  * below; session 7's copy of the whole dir after every non-GET is gone. The boot record stays the host's.
  */
+
+// HST-013: the code nodes of the cloud functions this Worker serves, printed at build (`build.mjs`, HST_PRINT_FROM) into
+// their OWN module, so a printed function sees no name of this bundle's. Installed before any function loads; a text
+// not printed is refused with a sentence a person can act on, not workerd's "Code generation from strings disallowed".
+import printedCode from './printed-code.mjs';
+import { installPrintedCode } from '@noodl/runtime/src/printedcode';
+installPrintedCode(printedCode, { refuseOthers: true });
 import { DurableObject } from 'cloudflare:workers';
 import { httpServerHandler } from 'cloudflare:node';
 import * as fs from 'node:fs';

@@ -10,6 +10,41 @@ import { fileURLToPath } from 'node:url';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const shim = path.join(here, 'src/nodeSqliteShim.ts');
 
+// HST-013: print every code node of the cloud functions this Worker will serve into dist/printed-code.mjs, its own
+// module (wrangler uploads it beside worker.mjs: wrangler.toml `find_additional_modules`). HST_PRINT_FROM: paths, ':'
+// between them, each a `*.workflow.json` (`{ components }`) or a folder searched for them. A text that cannot be
+// printed refuses the BUILD, by function and node. With nothing to print the table is empty, and still installed:
+// a code node then answers "This code was not printed when the app was deployed", never workerd's own refusal.
+{
+  const printer = path.join(here, 'dist/.printcode.cjs');
+  await esbuild.build({
+    entryPoints: [path.resolve(here, '../../../../packages/noodl-runtime/src/printcode.ts')],
+    outfile: printer,
+    bundle: true,
+    format: 'cjs',
+    platform: 'node',
+    logLevel: 'error'
+  });
+  const { createRequire } = await import('node:module');
+  const { collectCode, printCodeModule, refusalSentence } = createRequire(import.meta.url)(printer);
+  const fs = await import('node:fs');
+  const files = [];
+  const walk = (p) => {
+    if (fs.statSync(p).isDirectory()) fs.readdirSync(p).forEach((e) => walk(path.join(p, e)));
+    else if (p.endsWith('.workflow.json')) files.push(p);
+  };
+  for (const p of (process.env.HST_PRINT_FROM || '').split(':').filter(Boolean)) walk(path.resolve(p));
+  const components = files.flatMap((f) => JSON.parse(fs.readFileSync(f, 'utf8')).components || []);
+  const { print, refusals } = collectCode(components);
+  if (refusals.length) {
+    refusals.forEach((r) => console.error(refusalSentence(r)));
+    process.exit(1);
+  }
+  fs.mkdirSync(path.join(here, 'dist'), { recursive: true });
+  fs.writeFileSync(path.join(here, 'dist/printed-code.mjs'), printCodeModule(print));
+  console.log(`printed ${print.length} code text(s) from ${components.length} function(s) in ${files.length} file(s)`);
+}
+
 await esbuild.build({
   // HST_ENTRY: build another entry (HST-011 built session 7's worker this way to grade the move of its files).
   entryPoints: [process.env.HST_ENTRY ? path.resolve(process.env.HST_ENTRY) : path.join(here, 'src/worker.ts')],
@@ -26,6 +61,12 @@ await esbuild.build({
   logLevel: 'warning',
   logOverride: { 'direct-eval': 'silent' },
   plugins: [
+    {
+      name: 'printed-code-is-its-own-module',
+      setup(b) {
+        b.onResolve({ filter: /^\.\/printed-code\.mjs$/ }, () => ({ path: './printed-code.mjs', external: true }));
+      }
+    },
     {
       name: 'node-sqlite-is-the-durable-object',
       setup(b) {

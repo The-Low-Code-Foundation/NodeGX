@@ -4,6 +4,7 @@ import Node = require('../../../node');
 import Collection = require('../../../collection');
 import Model = require('../../../model');
 import { outcomeOutputs, reportOutcomes } from '../../../outcome';
+import { compileCode, MAP_COLLECTION_PARAMS } from '../../../printedcode';
 import { notAList } from './itemsinput';
 import type {
   CollectionLike,
@@ -211,7 +212,7 @@ const MapCollectionNode: NodeDefinitionOptions = {
     compileMapScript: function (this: MapCollectionInstance, code: string) {
       this._internal.mapCode = code;
       try {
-        this._internal.mapFunc = new Function('map', 'object', code) as MapCollectionInstance['_internal']['mapFunc'];
+        this._internal.mapFunc = compileCode<MapCollectionInstance['_internal']['mapFunc']>(MAP_COLLECTION_PARAMS, code); // P115 HST-013
       } catch (e) {
         this._internal.mapFunc = undefined;
         this._internal.mapCompileError = (e as Error).message || String(e);

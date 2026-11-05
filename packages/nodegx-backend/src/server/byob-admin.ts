@@ -24,6 +24,7 @@ import type { WorkflowRunner } from '../workflow/WorkflowRunner';
 import type { RequestContext } from './HttpServer';
 import { assertSeriesWrite } from './series-door';
 import { seriesProblem } from '@noodl/runtime/src/api/adapters/series';
+import { unprintedCodeOnThisHost, type PrintableComponent } from '@noodl/runtime/src/printcode';
 import { dropCallerOwner, type ClpOp } from '../security/model';
 import type {
   StorageCheckDecl,
@@ -1057,6 +1058,11 @@ export class ByobAdminRoutes {
     if (wiring.refusals.length > 0) {
       throw new HttpError(400, `Not deployed: ${wiring.refusals.join(' ')}`, undefined, { success: false });
     }
+    // P115 HST-013: on a host whose code nodes were printed at deploy (a Cloudflare Worker), a code text that was not
+    // printed cannot run; it is refused here, by node and function, rather than waiting out a visitor's call.
+    const components = body && Array.isArray(body.components) ? (body.components as PrintableComponent[]) : [];
+    const unprinted = unprintedCodeOnThisHost(components);
+    if (unprinted.length > 0) throw new HttpError(400, `Not deployed: ${unprinted.join(' ')}`, undefined, { success: false });
     const { conflict, ...result } = await runner.loadWorkflow(name, body);
     const warnings = [...(verdict ? [verdict.message] : []), ...wiring.warnings];
     // P112-S14-MOVEDDEPLOY: a component another project's bundle defines is a 409 in words, not a 500.

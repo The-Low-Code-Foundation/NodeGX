@@ -115,8 +115,9 @@ const PLANTS: Array<{ rule: string; find: string; replace: string; red: string }
     // (not "drop the `await`": that leaves the code's rejection unheard, and jest fails the whole test on it — s59's lesson —
     // before any scenario can be read)
     rule: 'the code is an async function: it may await, and what follows the await is still the run',
-    find: 'func = new AsyncFunction(',
-    replace: 'func = new Function(',
+    // P115 HST-013: the compile goes through `printedcode.ts` `compileCode`; the async flag is the node's to give.
+    find: 'functionNodeBody(script), { async: true })',
+    replace: 'functionNodeBody(script), { async: false })',
     red: 'a throw after an await'
   },
   {

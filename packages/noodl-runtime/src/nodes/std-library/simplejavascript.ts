@@ -27,6 +27,7 @@ import Node = require('../../node');
 import { ScriptFileError, scriptAlias, scriptUsesOf, type ScriptFiles, type ScriptPath } from '../../scriptfiles';
 import { functionScriptPortNames } from '@nodegx/project-contract/function-ports';
 import { currentTraceCause, withTraceCause } from '../../tracecause';
+import { compileCode, FUNCTION_NODE_PARAMS, functionNodeBody } from '../../printedcode';
 
 const JavascriptNodeParser = require('../../javascriptnodeparser');
 const { logJavaScriptNodeError, thrownMessage } = require('../../utils');
@@ -872,15 +873,8 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
     parseScript: function (this: SimpleJavascriptNodeInstance, script: string) {
       let func;
       try {
-        const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
-        func = new AsyncFunction(
-          'Inputs',
-          'Outputs',
-          'Noodl',
-          'Component',
-          'Scripts',
-          JavascriptNodeParser.getCodePrefix() + script
-        );
+        // P115 HST-013: through the seam, so on a Worker the function printed at deploy answers instead.
+        func = compileCode(FUNCTION_NODE_PARAMS, functionNodeBody(script), { async: true });
         this._internal.parseError = undefined;
         // A script that compiles re-arms the report, so a syntax error reintroduced later is
         // heard again rather than suppressed for the life of the node.

@@ -14,6 +14,7 @@ import type {
 
 import { expressionNodeInputsRead, expressionPorts, isReservedExpressionName } from './expression-ports';
 import { ARITHMETIC_SEARCH_TAGS } from './logic-search-tags';
+import { compileCode, expressionNodeBody, findPrintedBody, hasPrintedCode } from '../../printedcode';
 
 import Node = require('../../node');
 import { outcomeOutputs, reportOutcomes } from '../../outcome';
@@ -482,13 +483,35 @@ const ExpressionNode: NodeDefinitionOptions = {
       // Add 'Noodl' as last parameter for backward compatibility
       args.push('Noodl');
 
+      // P115 HST-013: on a Worker, the function printed at deploy. Its parameters are the names the expression reads
+      // (`expressionPorts`), not this scope's keys, whose order depends on how the ports were registered, so the
+      // values are bound by the names it declares. With no table installed this misses and nothing below changes.
+      const printed = findPrintedBody(expression, false);
+      if (printed) {
+        this._internal.compiledWith = printed.params.slice(0, -1);
+        this._internal.compileError = undefined;
+        return printed.fn;
+      }
+      // Under a printed table the process-wide cache below is not consulted: a function compiled before the table was
+      // installed would answer for a text the deploy did not print (the HST-013 backend test's sabotage arm found it).
+      if (hasPrintedCode()) {
+        try {
+          const fn = compileCode(args, expression);
+          this._internal.compileError = undefined;
+          return fn;
+        } catch (e) {
+          this._internal.compileError = e.message;
+          return undefined;
+        }
+      }
+
       const key = expression + args.join(' ');
 
       if (compiledFunctionsCache.hasOwnProperty(key) === false) {
-        args.push(expression);
+        const params = args.slice();
 
         try {
-          compiledFunctionsCache[key] = construct(Function, args);
+          compiledFunctionsCache[key] = compileCode(params, expression);
           this._internal.compileError = undefined;
         } catch (e) {
           // Kept rather than reported here: this runs inside `_calculateExpression`, which owns
@@ -524,7 +547,7 @@ const ExpressionNode: NodeDefinitionOptions = {
         "JavaScript expression whose value becomes Result. Every name it reads becomes an input port, except JavaScript's own (String, Number, JSON, Date, parseInt, Math and the rest), the Math shortcuts (round, min, pi…) and keywords such as typeof; a port can never be called one of those, nor run, expression or evaluateAtLoad, which are this node's own inputs",
       set: function (this: ExpressionNodeInstance, value: string) {
         const internal = this._internal;
-        internal.currentExpression = functionPreamble + 'return (' + value + ');';
+        internal.currentExpression = expressionNodeBody(value);
         internal.compiledFunction = undefined;
 
         const newInputs = expressionPorts(value);
@@ -774,45 +797,8 @@ const ExpressionNode: NodeDefinitionOptions = {
   }
 };
 
-const functionPreamble = [
-  'var min = Math.min,' +
-    '    max = Math.max,' +
-    '    cos = Math.cos,' +
-    '    sin = Math.sin,' +
-    '    tan = Math.tan,' +
-    '    sqrt = Math.sqrt,' +
-    '    pi = Math.PI,' +
-    '    round = Math.round,' +
-    '    floor = Math.floor,' +
-    '    ceil = Math.ceil,' +
-    '    abs = Math.abs,' +
-    '    random = Math.random,' +
-    '    pow = Math.pow,' +
-    '    log = Math.log,' +
-    '    exp = Math.exp;' +
-    // Add Noodl global context
-    'try {' +
-    '  var NoodlContext = (typeof Noodl !== "undefined") ? Noodl : (typeof global !== "undefined" && global.Noodl) || {};' +
-    '  var Variables = NoodlContext.Variables || {};' +
-    '  var Objects = NoodlContext.Objects || {};' +
-    '  var Arrays = NoodlContext.Arrays || {};' +
-    '} catch (e) {' +
-    '  var Variables = {}, Objects = {}, Arrays = {};' +
-    '}'
-].join('');
-
 /** GAM-001: what `_evaluateOverUnsetInputs` returns when there is no answer to publish. */
 const NOT_EVALUATED = {};
-
-//Since apply cannot be used on constructors (i.e. new Something) we need this hax
-//see http://stackoverflow.com/questions/1606797/use-of-apply-with-new-operator-is-this-possible
-function construct(constructor: FunctionConstructor, args: string[]) {
-  function F(this: unknown) {
-    return constructor.apply(this, args);
-  }
-  F.prototype = constructor.prototype;
-  return new (F as unknown as { new (): (...args: unknown[]) => unknown })();
-}
 
 const compiledFunctionsCache: Record<string, (...args: unknown[]) => unknown> = {};
 
