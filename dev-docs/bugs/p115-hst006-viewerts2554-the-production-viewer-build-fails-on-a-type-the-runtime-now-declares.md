@@ -2,7 +2,7 @@
 id: P115-HST006-VIEWERTS2554
 title: "viewer build: the production viewer (`npm run build:editor:_viewer`) failed with TS2554, so no deploy could carry a production engine"
 status: fixed
-commit: (this session's P115 HST-006 §8 commit)
+commit: c4b0844a4
 severity: high
 area: "viewer / `packages/noodl-viewer-react/src/nodes/std-library/user/userservice.ts` :130 (the `ParseAuthAdapter` serialiser), against `packages/noodl-runtime/dist-types/src/api/cloudstore.d.ts` (generated, gitignored)"
 regression: "the viewer's production webpack (webpack-configs/webpack.deploy.prod.js) compiling with 0 errors is the check: ts-loader type-checks"
