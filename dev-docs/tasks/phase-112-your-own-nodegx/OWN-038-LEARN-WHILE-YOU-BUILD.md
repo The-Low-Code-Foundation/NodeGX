@@ -250,5 +250,23 @@ lists it" is the proof still owed.
   - **Tarballs** packed from `738b11a36` with `git archive`, in
     `~/vscode_projects/OpenNoodl-worktrees/npm-0.2.11-tarballs/`: create-nodegx `0d926772…`, -cline `88dd8885…`,
     -vibe `51ee81b0…`. Installed together into an empty folder, each kit writes its folder; all three folder notes say
-    "one plain page" and name `https://nodegx.io/help`; the Cline entry went to the scratch HOME.
+    "one plain-code page in its own folder" and name `https://nodegx.io/help`; the Cline entry went to the scratch HOME.
   - **R15:** VAGUEOFFER kept as is (above).
+- **s4, 2026-11-05. 0.2.11 published (Opus 5.5).** Richard's first run never reached npm: the harvest gate stopped it on
+  five entries the P115 session wrote after the cut (two phase notes, three product bugs, all `general-no`). Triaged;
+  P115 re-saved its phase note before his second run, so he published with `KIT_HARVEST_SKIP` naming it. That run
+  stopped on E404 for `PUT create-nodegx`: his npm token had expired (`npm whoami` 401; npm answers an unauthorised
+  publish with 404). Nothing went out. After `npm login`, all three went live 14:31–14:37 UTC.
+  - **Registry** (the full document, no cache): create-nodegx `0d926772…`, -vibe `51ee81b0…`, -cline `88dd8885…`,
+    equal to the tarballs; `latest` 0.2.11 on all three.
+  - **From npm**, each kit in its own empty folder with a scratch `HOME` (so a fresh npm cache): all three exit 0 at
+    0.2.11; each `AGENTS.md` has the R14 sentence once and `https://nodegx.io/help`; Vibe has its three guides; the
+    Cline entry went to the scratch HOME (Richard's real `cline_mcp_settings.json` unchanged since 11-04).
+  - **The site changelog**: before, local `site/changelog/index.html` md5 = live and nothing uncommitted in that folder.
+    `ops/changelog.py` + `build.wrap` for that folder alone; the diff against live is the 0.2.11 section and its index
+    line, nothing else. The rsync is Richard's (the auto-mode classifier refuses `ssh` from a session).
+  - **The harvest after the publish**: three more (P115's phase note again, P115 NOFILESRULE `general-no`;
+    `le-jibe-logiciel/LEARNINGS.md` `private`, the same file as `le-jibe`'s by md5, no NodeGX in it). `--count` 0.
+  - 🔴 For the next publish: the gate stops a run whenever an active session saves its phase memory, which during the
+    working day is every few minutes. Triage, then hand Richard the command with `KIT_HARVEST_SKIP` already in it.
+    If `npm publish` says E404 on a package that exists, it's the login: `npm whoami` first.
