@@ -1,11 +1,15 @@
 # Phase 115 — next session prompt
 
-**Written 2026-11-05 at the end of session 10 (Opus 5.5).** Unparked by Richard 2026-11-04 (BOARD lane 10: *"Let's kick
+**Written 2026-11-05 at the end of session 11 (Opus 5.5).** Unparked by Richard 2026-11-04 (BOARD lane 10: *"Let's kick
 it off and lift the park. If this can go out with the Beta, it'd be a nice addition"*). A nice-to-have for the Beta,
 never ahead of lanes 9, 2 and 3. Earlier prompts are in git history (`git log -- this file`).
 
 ## 1. Read first
 
+000000. [HST-013 §5](HST-013-CODE-NODES-PRINTED-AT-DEPLOY.md): session 11. The fourth product piece: every code
+   node's compile through one seam (`noodl-runtime/src/printedcode.ts`), printed at build (`printcode.ts`) into its own
+   Worker module; the nine suites 76/76 on workerd; a function upload with unprinted code refused by name. Then
+   [HST-014](HST-014-THE-DEPLOY-COMMAND.md), the next piece.
 00000. [HST-012 §5](HST-012-FILES-IN-A-BUCKET.md): session 10. The third product piece: files in a bucket the host
    hands in (`filesBucket`, `BindingDriver`, `kind: 'binding'`), the spike's prototype patch gone, Campus's 4 files
    moved once and live; `set_file_permissions` (NOFILESRULE fixed), Campus now owner-only upload, live. Then
@@ -97,10 +101,16 @@ that unblocks the most (each: a product change + its tests + Fixture C still 8/8
    `storage/BindingDriver.ts`, `kind: 'binding'` (a third key space: `driverFor` serves a row from the store it names);
    the spike passes `env.FILES` and moved session 7's 4 `local` rows to `binding` once (live `d5f4656d`); the Storage
    page says *This app's bucket*. NOFILESRULE fixed: `set_file_permissions`; Campus owner-only upload live (`d728174c`).
-   **Next: piece 4, [HST-013](HST-013-CODE-NODES-PRINTED-AT-DEPLOY.md)**: start by reading how the cloud runtime compiles a
-   Function/Expression/Script node's text (`new Function` in noodl-viewer-cloud / noodl-runtime) and what the cloud
-   bundle (`noodl-mcp/dist/cloud-bundle.cjs`, BUNDLEDROPS) carries per node, before choosing where to print.
-4. **NOCODEGEN** ([HST-013](HST-013-CODE-NODES-PRINTED-AT-DEPLOY.md)): code nodes in cloud functions compiled at deploy (a Worker refuses `new Function`).
+4. ✅ **NOCODEGEN** → [HST-013](HST-013-CODE-NODES-PRINTED-AT-DEPLOY.md), session 11: `compileCode` looks in a table the host
+   installs (`installPrintedCode(rows, { refuseOthers: true })`) before compiling a string; `collectCode` /
+   `printCodeModule` print it from the same helpers the nodes compile with. Spike: `build.mjs` `HST_PRINT_FROM`,
+   `dist/printed-code.mjs` its own module; `remote/BackendService.js` `HST_CAPTURE_DIR` (a suite whose functions carry
+   code runs twice: capture, then on a Worker built from it). NOT deployed live: Campus has no code node, and the
+   backend's suites would wipe it; HST-014's first live deploy carries it.
+   **Next: piece 5, [HST-014](HST-014-THE-DEPLOY-COMMAND.md)**: one command doing what `site.mjs` + `seed-campus.mjs` +
+   `build.mjs` (now with the printing) + `wrangler deploy` do by hand. Its print step is `collectCode` over the
+   project's cloud functions; a refusal stops the deploy (`refusalSentence`). Read `spike-backend/site.mjs`,
+   `seed-campus.mjs` and `src/worker.ts` first: the command's Worker is that file made a product.
 5. **The deploy command** ([HST-014](HST-014-THE-DEPLOY-COMMAND.md)): `nodegx deploy --cloudflare` (or the MCP's) doing what `site.mjs` + `seed-campus.mjs` +
    `wrangler deploy` do by hand, the production engine included; never wipes a live app.
 6. **Session 5's three DO reds** ([HST-015](HST-015-THE-THREE-DURABLE-OBJECT-REDS.md)): regex declared unsupported, EXPRDEPTH flattened, NOROLLBACKCASE + transactions.

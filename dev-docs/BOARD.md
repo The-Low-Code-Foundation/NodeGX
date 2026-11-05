@@ -92,7 +92,7 @@ can go out with the Beta, it'd be a nice addition."* A NodeGX app on Cloudflare 
 account, no VM. Estimated 2 sessions for the narrow proof (the front end on Pages; a backend workflow carrying a secret on
 a Worker) and 6–7 for full stack on D1 + R2; a nice-to-have for the Beta, never ahead of lanes 9, 2, 3. **Fixture C 8/8
 on Richard's phone 2026-11-05; R3 ruled: build the Cloudflare route as a product in P115 — building** (HST-010 the
-backend calls itself in-process ✅ 2026-11-05; HST-011 the data dir in a store ✅ 2026-11-05; HST-012 files in the app's own bucket + who may upload ✅ 2026-11-05; HST-013…015 next). Session log and order in the
+backend calls itself in-process ✅ 2026-11-05; HST-011 the data dir in a store ✅ 2026-11-05; HST-012 files in the app's own bucket + who may upload ✅ 2026-11-05; HST-013 code nodes printed at deploy ✅ 2026-11-05; HST-014 the deploy command next, then HST-015). Session log and order in the
 [P115 README](tasks/phase-115-online-on-your-own-account/README.md) §12.
 
 | release | what is in it | state 2026-10-23 |
