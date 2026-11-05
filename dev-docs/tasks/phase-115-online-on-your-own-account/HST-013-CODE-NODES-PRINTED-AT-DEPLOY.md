@@ -67,7 +67,7 @@ the deploy by name, never at a visitor's call.
 | HST-006 §7.3's nine suites + this test, Node control | **80/80** |
 | the same on `wrangler dev`, Worker built with an EMPTY table (pass 1) | p127-no-roles 5/11 (six 30 s waits), impersonate 0/3, this test's code functions time out |
 | the same on `wrangler dev`, Worker built from the captured functions (pass 2) | **79/80, the 1 = the sabotage arm, skipped** (a jest-side table cannot reach the Worker): the nine suites **76/76** (was 67/76), **p127-no-roles 11/11 (AC1)**, impersonate-session 3/3, Function/Expression/Logic Builder = Node's answers (**AC2**) |
-| noodl-runtime whole suite | see §5.4 |
+| noodl-runtime, all 217 files | 140 in one serial run, then the other 77 one at a time: all green but two. `node-spec/function-contract` planted its async mutant by the text `func = new AsyncFunction(`, which this change removed: the plant now flips `{ async: true }` at the node's call (15/15). `node-spec/conformance` is the whole node library (30 and 60 minute timeouts, by design): run for the four specs touched (`NSP_ONLY`: Expression, JavaScriptFunction, Logic Builder, Map Collection), green with mutants |
 
 Not run live on `hst-backend-spike`: the backend's suites boot FRESH and wipe Campus, and Campus has no code node.
 The live Worker still runs the build before this session; its next deploy (HST-014) carries the seam.
