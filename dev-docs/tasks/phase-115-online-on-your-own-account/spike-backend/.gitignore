@@ -4,3 +4,4 @@ dist/
 *.log
 .run-key
 evidence/*.jsonl
+public/

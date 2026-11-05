@@ -19,5 +19,12 @@ class_name = "Backend"
 tag = "v1"
 new_sqlite_classes = ["Backend"]
 
+# HST-006 §8: an app on the same Worker (its interpreter site, written by site.mjs). The Worker runs first so the
+# backend's own paths never meet a file, and a page's address (/home, /owner) is answered with index.html.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = true
+
 [observability]
 enabled = true

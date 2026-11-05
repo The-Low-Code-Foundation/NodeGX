@@ -286,3 +286,81 @@ nice -n 19 npx jest -c $C --runInBand tests/session-expiry.test.ts tests/isl040-
 ```
 The control arm is the same command without `-c $C`. The last suite's `afterAll` stops the service; the live Worker
 then answers 503 to everything but its doors.
+
+## 8. Session 7 — 2026-11-05 (Opus 5.5): Fixture C written through the MCP, and online on the whole-service Worker
+
+### 8.1 Fixture C (HST-002), written through the MCP
+
+`fixtures/c-campus` (*Campus*): HST-001's flow with records and a sign-in. **Home** reads `?id=` (Page Inputs), fetches
+that **Reader** (Record), greets them by name and saves an **Answer** from either button (two Create Record nodes); a
+made-up id or no id says the link is not recognised (a 1.5 s Delay → Condition on "found" covers the no-id case,
+where nothing fails). **Owner** signs in (Log In, User) and lists every Answer (Query Records → Repeater of
+`Answer Row`). 56 nodes, **0 code nodes**, 0 validator diagnostics, honesty 100% known.
+
+The rules are the backend's, set with the MCP's own tools and written by them into `nodegx.security.json`: Reader
+`get: public` (the id in the link is the key), `find`/writes `role:owner`; Answer `create: public`,
+`find`/`get: role:owner`, `update`/`delete: nobody`; both `creatorOwns: false`. Accounts: the owner (in role `owner`)
+and a second account to be refused, passwords in `.accounts.json` (gitignored).
+
+How: this session's own MCP connection was bound to Fixture B (a server binds once), so the fixture's noodl-mcp ran
+over stdio with the SDK's Client, `fixtures/mcp-calls.mjs`, every call logged in `fixtures/c-campus.mcp-log.jsonl`
+(passwords and session tokens redacted). Five `drive_page` runs on a phone viewport against the local backend
+passed: Ada greeted and her answer saved; a made-up id and a missing id say "not recognised" and show no name; the
+owner reads *Ada · Count me in*; the second account gets the backend's 403 and the page says it cannot read them.
+
+### 8.2 Which artefact a full-stack app ships
+
+| route | Fixture C | size |
+|---|---|---|
+| plain-HTML export (Fixture B's route) | ❌ 15 nodes left out, the whole data path (P115-HST006-EXPORTDATAPATH, preflight in `spike-backend/evidence/`) | 4.4 MB with unused starter photos |
+| interpreter site (`nodegx deploy`), development viewer | refused by the deploy itself (its source as a 10.9 MB inline map) | 17.3 MB engine |
+| interpreter site, **production** viewer | ✅ every node runs, as in the preview | **2.93 MB** (engine 1.81 MB) |
+
+The production viewer did not build: TS2554 in `userservice.ts` against the runtime's regenerated types
+(P115-HST006-VIEWERTS2554, fixed this session; red since 2026-11-04 22:16, unseen). The session built only the deploy
+bundle into a scratch folder (`OUT_PATH=… webpack --config <requires webpack.deploy.prod.js>`, 17 s), because
+`build:editor:_viewer` runs `npm i` and `lerna clean` on a shared checkout. `spike-backend/site.mjs` writes the site
+from a copy, aims it at the Worker (`nodegx-config.json`), swaps the engine in, and refuses to finish if a test
+password is anywhere in it.
+
+### 8.3 The Worker: an app beside the whole service, and seam 3 made real
+
+- `[assets]` = `public/`, `run_worker_first`. A GET for a file is the file; any other path that is not one of the
+  service's own (`/classes`, `/users`, `/login`, … , `/__hst`) is `index.html`, whatever the request's `Accept` says
+  (a first version required `text/html`: `nodegx live` was told 404). Everything else goes to the object.
+- **Seam 3:** after every non-GET the data dir's changed files go into the object's storage (`hst:file:*`), and the
+  boot itself (`hst:boot`). A request that finds no service starts it again from those (`restarts` in
+  `/__hst/ledger`). A stop forgets the boot, so a suite's `afterAll` still leaves it stopped. Measured: locally across a
+  full `wrangler dev` restart, and live across two redeploys and one isolate Cloudflare replaced on its own a minute
+  after the seed. Every time: Ada, the owner's role, both rules and the saved answer held, `autoBoots: 1`.
+- No regression: three of the backend's own suites against the changed Worker locally, 21/21.
+
+`seed-campus.mjs` boots FRESH with the project's `nodegx.security.json` and replays what the MCP did locally (role,
+two sign-ups, the owner into the role through `/admin`, the two readers with their local ids, Answer declared).
+`check-campus.mjs [--answer]` reads the MUST lines over HTTP as the page makes its calls.
+
+### 8.4 Live on Richard's account (`a0c7bb47`), read over HTTP
+
+| reading | result |
+|---|---|
+| `/home?id=<Ada>` and `/owner` | 200, the app (320–590 ms cold) |
+| the engine | production, 1.81 MB |
+| Ada by her id, signed out | 200 *Ada* |
+| a made-up id | 404 |
+| list readers / list answers / an answer by id, signed out | 403 / 403 / 403 |
+| the owner signs in, reads the answers | 200, 200 (0 answers: left empty for Richard's tap) |
+| the second account reads the answers | 403, no name |
+
+Not read: the page in a browser (Chrome hangs in this sandbox). Richard's phone is the reading (Fixture C's MUST.md).
+
+### 8.5 How to run it again
+
+```
+cd spike-backend
+OUT_PATH=<scratch> nice -n 19 ../../../../node_modules/.bin/webpack --config <file: module.exports = require('<repo>/packages/noodl-viewer-react/webpack-configs/webpack.deploy.prod.js')>   # in packages/noodl-viewer-react
+node site.mjs ../fixtures/c-campus https://hst-backend-spike.richard-digitalbricks.workers.dev <scratch>/deploy
+node_modules/.bin/wrangler deploy --var "RUN_KEY:$(cat .run-key)"
+node seed-campus.mjs https://hst-backend-spike.richard-digitalbricks.workers.dev     # ⚠️ FRESH: wipes the app's records
+node check-campus.mjs https://hst-backend-spike.richard-digitalbricks.workers.dev
+```
+🔴 Running the backend's suites against this Worker boots FRESH and wipes Campus: run `seed-campus.mjs` after them.

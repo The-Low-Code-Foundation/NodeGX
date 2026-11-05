@@ -1,6 +1,7 @@
 # Fixture C online: what it must do (HST-002; ticked per run by HST-006 and HST-008)
 
-Ada's link is `<address>/home?id=6f468bbd-4091-48c8-90a1-9232f4753a90`. The owner and the second account are in
+Ada's link is `<address>/home?id=6f468bbd-4091-48c8-90a1-9232f4753a90`; on the Cloudflare run (HST-006 §8) the address is
+`https://hst-backend-spike.richard-digitalbricks.workers.dev`. The owner and the second account are in
 `.accounts.json` beside this file (not committed).
 
 - [ ] Ada's link opens on a phone from its public address and says "Hello, Ada".

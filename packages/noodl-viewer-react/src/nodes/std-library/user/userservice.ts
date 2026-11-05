@@ -127,7 +127,9 @@ class UserService {
     this.adapter = new ParseAuthAdapter({
       // The module-scope serialiser, exactly as before — `_User` properties have
       // always been serialised against the process-wide Model store.
-      serializeObject: (data, collectionName) => CloudStore._serializeObject(data, collectionName)
+      // P115-HST006-VIEWERTS2554: the third argument (the model scope) is named, undefined, as JavaScript already
+      // passed it: the runtime's generated types declare all three, and the production viewer build type-checks.
+      serializeObject: (data, collectionName) => CloudStore._serializeObject(data, collectionName, undefined)
     });
 
     this._bridge(this.adapter);

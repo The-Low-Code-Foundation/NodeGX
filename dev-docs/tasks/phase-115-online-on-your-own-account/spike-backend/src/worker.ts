@@ -23,6 +23,12 @@
  *   GET  /__hst/files   the data dir's files now
  *   POST /__hst/call    { target: 'facade' | 'systemUsers', method, args }  for suites that reach into the service
  * Every other path: the service, exactly as a Node process would answer it.
+ *
+ * HST-006 §8 (session 7), an app on it: with an `ASSETS` binding (wrangler `[assets]`, `public/` = the app's
+ * interpreter site, `site.mjs`), a GET for a file is the file, a page address is `index.html`, and the backend's own
+ * paths go to the object. Seam 3 made real: the data dir's files are kept in the object's storage after every
+ * change, and a booted service is started again from them when the isolate was replaced (an eviction, a redeploy),
+ * so an app keeps its rules, keys and secrets as its records already kept themselves. A stop forgets the boot.
  */
 import { DurableObject } from 'cloudflare:workers';
 import { httpServerHandler } from 'cloudflare:node';
@@ -43,7 +49,13 @@ type Storage = DoStorage & { deleteAll(): Promise<void> };
 interface Env {
   BACKEND: { idFromName(name: string): unknown; get(id: unknown): { fetch(r: Request): Promise<Response> } };
   RUN_KEY?: string;
+  ASSETS?: { fetch(r: Request): Promise<Response> };
 }
+
+/** Kept in the object's storage beside the database: what a boot was, and the data dir's files (base64). */
+const BOOT_KEY = 'hst:boot';
+const FILE_PREFIX = 'hst:file:';
+const restarts = { autoBoots: 0, last: null as string | null, filesPersisted: 0 };
 
 const adapterLedger = newLedger();
 
@@ -113,6 +125,9 @@ export class Backend extends DurableObject {
   private service: BackendService | null = null;
   private dir: string | null = null;
   private handler: unknown = null;
+  /** What the object's storage holds for each data-dir file, so only a changed file is written. */
+  private persisted = new Map<string, string>();
+  private booting: Promise<boolean> | null = null;
 
   private storageNow(): Storage {
     const s = (this.ctx as unknown as { storage: Storage }).storage;
@@ -126,26 +141,72 @@ export class Backend extends DurableObject {
     const url = new URL(request.url);
     try {
       if (url.pathname === '/__hst/boot' && request.method === 'POST') return await this.boot(storage, (await request.json()) as BootBody);
-      if (url.pathname === '/__hst/stop' && request.method === 'POST') return await this.stop();
+      if (url.pathname === '/__hst/stop' && request.method === 'POST') return await this.stop(storage);
       if (url.pathname === '/__hst/routes') return Response.json(this.service ? this.service.getRouteTable() : []);
       if (url.pathname === '/__hst/files') return Response.json({ files: this.dir ? readTree(this.dir) : {} });
       if (url.pathname === '/__hst/call' && request.method === 'POST') return await this.call((await request.json()) as CallBody);
-      if (url.pathname === '/__hst/ledger') return Response.json({ adapter: adapterLedger, sqlite: sqliteLedger, openedPaths, loopback });
+      if (url.pathname === '/__hst/ledger') return Response.json({ adapter: adapterLedger, sqlite: sqliteLedger, openedPaths, loopback, restarts });
     } catch (e) {
       return errorJson(e);
     }
-    if (!this.service) return Response.json({ error: 'no backend booted in this object' }, { status: 503 });
-    return (this.handler as { fetch(r: Request, env: unknown, ctx: unknown): Promise<Response> }).fetch(request, this.env, this.ctx);
+    if (!this.service && !(await this.restart(storage))) {
+      return Response.json({ error: 'no backend booted in this object' }, { status: 503 });
+    }
+    const response = await (this.handler as { fetch(r: Request, env: unknown, ctx: unknown): Promise<Response> }).fetch(request, this.env, this.ctx);
+    if (request.method !== 'GET' && request.method !== 'HEAD') await this.persistDir(storage);
+    return response;
+  }
+
+  /** Seam 3: a booted service whose isolate was replaced starts again from the boot and files kept in storage. */
+  private restart(storage: Storage): Promise<boolean> {
+    if (!this.booting) {
+      this.booting = (async () => {
+        const boot = (await storage.get(BOOT_KEY)) as { name: string; options?: Record<string, unknown> } | undefined;
+        if (!boot) return false;
+        const files: Record<string, string> = {};
+        for (const [key, value] of await storage.list({ prefix: FILE_PREFIX })) files[key.slice(FILE_PREFIX.length)] = String(value);
+        await this.start(storage, { name: boot.name, options: boot.options, files });
+        restarts.autoBoots++;
+        restarts.last = new Date().toISOString();
+        return true;
+      })().finally(() => {
+        this.booting = null;
+      });
+    }
+    return this.booting;
+  }
+
+  /** Writes the data dir's changed files into the object's storage, and forgets the ones that are gone. */
+  private async persistDir(storage: Storage): Promise<void> {
+    if (!this.dir) return;
+    const now = readTree(this.dir);
+    const puts: Record<string, string> = {};
+    for (const [rel, b64] of Object.entries(now)) {
+      if (this.persisted.get(rel) !== b64) puts[FILE_PREFIX + rel] = b64;
+    }
+    const gone = [...this.persisted.keys()].filter((rel) => !(rel in now));
+    if (Object.keys(puts).length) await storage.put(puts);
+    if (gone.length) await storage.delete(gone.map((rel) => FILE_PREFIX + rel));
+    restarts.filesPersisted += Object.keys(puts).length;
+    this.persisted = new Map(Object.entries(now));
   }
 
   private async boot(storage: Storage, body: BootBody): Promise<Response> {
+    if (body.fresh) await storage.deleteAll();
+    await storage.put(BOOT_KEY, { name: body.name, options: body.options || {} });
+    this.persisted = new Map();
+    const started = await this.start(storage, body);
+    await this.persistDir(storage);
+    return Response.json({ started, files: readTree(this.dir as string) });
+  }
+
+  private async start(_storage: Storage, body: BootBody): Promise<Record<string, unknown>> {
     if (this.service) {
       await this.service.stop();
       this.service = null;
     }
     const dir = path.join(DATA_ROOT, body.name.replace(/[^A-Za-z0-9_.-]/g, '_'));
     if (body.fresh) {
-      await storage.deleteAll();
       // workerd's rmSync throws ENOENT for a missing path even with `force: true` (Node ignores it).
       if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -162,7 +223,7 @@ export class Backend extends DurableObject {
     const { stop: _stop, persistence, servedApp: _app, ...rest } = started as unknown as Record<string, unknown> & {
       persistence: { status: unknown; dbPath: string };
     };
-    return Response.json({ started: { ...rest, persistence: { status: persistence.status, dbPath: persistence.dbPath } }, files: readTree(dir) });
+    return { ...rest, persistence: { status: persistence.status, dbPath: persistence.dbPath } };
   }
 
   /**
@@ -183,7 +244,9 @@ export class Backend extends DurableObject {
     }
   }
 
-  private async stop(): Promise<Response> {
+  private async stop(storage: Storage): Promise<Response> {
+    // A stopped service stays stopped: the boot is forgotten, so nothing starts it again by itself.
+    await storage.delete(BOOT_KEY);
     if (this.service) {
       await this.service.stop();
       this.service = null;
@@ -205,11 +268,28 @@ interface BootBody {
   files?: Record<string, string>;
 }
 
+/** The service's own paths (its route table's first segments): never a file, never the app's index. */
+const BACKEND_PREFIXES = ['__hst', 'classes', 'users', 'login', 'logout', 'functions', 'files', 'roles', 'sessions', 'schemas', 'admin', '_admin', 'oauth', 'auth', 'health', 'config', 'batch', 'aggregate', 'workflows', 'hooks', 'realtime', 'requestPasswordReset', 'verificationEmailRequest', 'api', 'magic-link', 'email-code'];
+function isBackendPath(pathname: string): boolean {
+  return BACKEND_PREFIXES.includes(pathname.split('/')[1] || '');
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     if (url.pathname.startsWith('/__hst/') && env.RUN_KEY && url.searchParams.get('key') !== env.RUN_KEY) {
       return new Response('Not found', { status: 404 });
+    }
+    if (env.ASSETS && (request.method === 'GET' || request.method === 'HEAD') && !isBackendPath(url.pathname)) {
+      const asset = await env.ASSETS.fetch(request);
+      if (asset.status !== 404) return asset;
+      // A page's own address (`/home`, `/owner`, a reload, a shared link) is the app's index; the page reads the path.
+      const last = url.pathname.split('/').pop() || '';
+      // Not gated on `Accept: text/html`: a phone's browser sends it, but `nodegx live` (Node's fetch) does not, and
+      // it was answered 404 for a page that exists.
+      if (!last.includes('.')) {
+        return env.ASSETS.fetch(new Request(new URL('/', url), request));
+      }
     }
     // One object for the whole spike: suites run one after another (`--runInBand`), each boot fresh.
     return env.BACKEND.get(env.BACKEND.idFromName('backend')).fetch(request);
