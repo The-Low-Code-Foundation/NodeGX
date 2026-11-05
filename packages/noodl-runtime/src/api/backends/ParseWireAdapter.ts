@@ -345,7 +345,11 @@ export class ParseWireAdapter extends AdapterEvents implements IDataAdapter {
         options.headers || {}
       );
 
-      fetch(endpoint + path, {
+      // P115 HST-010: a host where nothing answers `endpoint` over TCP (a Cloudflare Worker) hands the backend's own
+      // transport in as `_noodl_cloudservices.fetch`; absent (Node), the global `fetch`, as before.
+      const send: typeof fetch =
+        typeof _noodl_cloudservices !== 'undefined' && _noodl_cloudservices.fetch ? _noodl_cloudservices.fetch : fetch;
+      send(endpoint + path, {
         method: options.method || 'GET',
         headers,
         body: JSON.stringify(options.content)

@@ -33,6 +33,11 @@ declare const _noodl_cloud_runtime_version: string | undefined;
 declare const _noodl_cloudservices:
   | {
       endpoint: string;
+      /**
+       * P115 HST-010: the transport for requests to `endpoint`, set by a host where nothing answers it over TCP (a
+       * Cloudflare Worker: the backend's in-process handler). Absent on Node, where the global `fetch` is used.
+       */
+      fetch?: typeof fetch;
       appId: string;
       masterKey?: string;
       /**

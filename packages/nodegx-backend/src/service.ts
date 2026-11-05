@@ -645,6 +645,9 @@ export class BackendService {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (globalThis as any)._noodl_cloudservices = {
       endpoint: `http://127.0.0.1:${listen.port}`,
+      // P115 HST-010: the transport for that address. Absent on Node (every caller then uses the global `fetch`);
+      // on a Worker, the host's in-process handler, because nothing listens on 127.0.0.1 there.
+      ...(this.options.loopbackFetch ? { fetch: this.options.loopbackFetch } : {}),
       appId: this.options.backendId,
       masterKey: this.security.adminToken,
       // HLT-023: the clients stamp each loopback request with the run it belongs to

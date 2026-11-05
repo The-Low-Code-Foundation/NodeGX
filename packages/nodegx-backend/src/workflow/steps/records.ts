@@ -63,6 +63,8 @@ interface Column {
 
 interface CloudServices {
   endpoint: string;
+  /** P115 HST-010: set by a host where nothing answers `endpoint` over TCP (a Worker). */
+  fetch?: typeof globalThis.fetch;
   appId?: string;
   masterKey?: string;
   collections?: () => { name: string; columns?: Column[] }[];
@@ -238,7 +240,8 @@ async function call(
       // HLT-023: the run header is honoured only beside the app's key, so a visitor's request is charged as one.
       if (runId) headers['x-nodegx-run'] = runId;
     }
-    const res = await (globalThis.fetch as unknown as Fetch)(svc.endpoint + path, {
+    // P115 HST-010: the backend's own transport when the host handed one (a Worker: in-process), else the global one.
+    const res = await ((svc.fetch ?? globalThis.fetch) as unknown as Fetch)(svc.endpoint + path, {
       method,
       headers,
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),

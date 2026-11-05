@@ -12,7 +12,8 @@
  *      `durableObjectEngine` (spike-records) instead of `node:sqlite`. Same class object the service requires.
  *   2. `node:sqlite` itself, for the execution history (wrangler `[alias]` → nodeSqliteShim.ts).
  *   3. the data dir: `node:fs` on Workers is the isolate's memory (`/tmp`). It survives requests, not an eviction.
- *   4. the loopback: the service's cloud runtime calls the service over HTTP; here that is an in-process call.
+ *   4. the loopback: the service's cloud runtime calls the service over HTTP; here that is an in-process call
+ *      (since HST-010 a product option, `loopbackFetch`, not a seam).
  *   5. (session 7) the files: with an R2 binding `FILES`, the backend's LocalDriver (bytes under the data dir, which
  *      on a Worker is the isolate's memory) keeps them in the bucket instead, same keys. No access keys anywhere.
  *
@@ -80,27 +81,22 @@ const restarts = { autoBoots: 0, last: null as string | null, filesPersisted: 0 
 const adapterLedger = newLedger();
 
 /**
- * Seam 4 (P115-HST006-LOOPBACK). The service points its own cloud runtime at ITSELF over HTTP (`_noodl_cloudservices`
- * = its listen URL, `WorkflowRunner.ts` header): a cloud function's Request node checks the caller with
- * `GET /users/me`, its Record nodes read and write through `/classes`. On a Worker nothing answers 127.0.0.1, so every
- * signed-in call read as anonymous ("Unauthenticated requests not accepted"). Here a fetch to the service's own
- * address is handed to its in-process HTTP handler, and counted.
+ * Seam 4 (P115-HST006-LOOPBACK), now the product's option (HST-010). The service points its own cloud runtime at
+ * ITSELF (`_noodl_cloudservices.endpoint`): a cloud function's Request node checks the caller with `GET /users/me`,
+ * its Record nodes and a workflow's record steps read and write through `/classes`. On a Worker nothing answers
+ * 127.0.0.1, so every signed-in call read as anonymous. Sessions 6 and 7 replaced the isolate's global `fetch`;
+ * since HST-010 the service takes `loopbackFetch`, and this host hands it the in-process handler (counted below).
  */
 const loopback = { calls: 0, byPath: {} as Record<string, number> };
 let loopbackHandler: { fetch(r: Request, env: unknown, ctx: unknown): Promise<Response> } | null = null;
-let loopbackPort = 0;
-const platformFetch = globalThis.fetch.bind(globalThis);
-globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
-  const request = new Request(input as RequestInfo, init);
-  const url = new URL(request.url);
-  if (loopbackHandler && (url.hostname === '127.0.0.1' || url.hostname === 'localhost') && Number(url.port) === loopbackPort) {
-    loopback.calls++;
-    const key = `${request.method} ${url.pathname.split('/').slice(0, 3).join('/')}`;
-    loopback.byPath[key] = (loopback.byPath[key] ?? 0) + 1;
-    return loopbackHandler.fetch(request, {}, {});
-  }
-  return platformFetch(request);
-}) as typeof fetch;
+const loopbackFetch = (input: string, init?: RequestInit): Promise<Response> => {
+  if (!loopbackHandler) throw new Error('HST spike: the backend called itself before it was started');
+  const request = new Request(input, init);
+  loopback.calls++;
+  const key = `${request.method} ${new URL(request.url).pathname.split('/').slice(0, 3).join('/')}`;
+  loopback.byPath[key] = (loopback.byPath[key] ?? 0) + 1;
+  return loopbackHandler.fetch(request, {}, {});
+};
 let currentStorage: Storage | null = null;
 
 // Seam 1. The service builds its adapter with `new LocalSQLAdapter(dbPath, { allowEphemeral, collections })`, no
@@ -298,12 +294,11 @@ export class Backend extends DurableObject {
     fs.mkdirSync(dir, { recursive: true });
     writeTree(dir, body.files || {});
     const port = nextPort++;
-    const service = new BackendService({ ...(body.options || {}), dataDir: dir, port } as never);
+    const service = new BackendService({ ...(body.options || {}), dataDir: dir, port, loopbackFetch } as never);
     const started = await service.start();
     this.service = service;
     this.handler = httpServerHandler({ port });
     loopbackHandler = this.handler as typeof loopbackHandler;
-    loopbackPort = port;
     this.dir = dir;
     const { stop: _stop, persistence, servedApp: _app, ...rest } = started as unknown as Record<string, unknown> & {
       persistence: { status: unknown; dbPath: string };

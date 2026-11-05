@@ -105,7 +105,20 @@ export interface BackendServiceOptions {
    * by it. null = serve no app (every existing spawner). See `server/static-app.ts`.
    */
   serveApp: string | null;
+  /**
+   * P115 HST-010 (P115-HST006-LOOPBACK) — how the cloud runtime reaches THIS backend. A cloud function's Request
+   * node checks its caller with `GET /users/me`, and its Record, User and Config nodes (and a workflow's record
+   * steps) call `/classes` and friends, all at `_noodl_cloudservices.endpoint` (this service's own address). On Node
+   * that is a TCP loopback and this stays null: the global `fetch` makes the call, as before. A host where nothing
+   * answers 127.0.0.1 — a Cloudflare Worker or Durable Object — hands in a `fetch` that gives the request to this
+   * service's in-process handler instead (there: `httpServerHandler({ port }).fetch`). Not a CLI flag: only code
+   * that runs the service can supply one.
+   */
+  loopbackFetch: LoopbackFetch | null;
 }
+
+/** P115 HST-010: a `fetch` for requests to the backend's own address (see `loopbackFetch`). */
+export type LoopbackFetch = (input: string, init?: RequestInit) => Promise<Response>;
 
 /** Non-loopback bind => a token is mandatory. */
 export function requiresAuth(options: Pick<BackendServiceOptions, 'host'>): boolean {
@@ -132,7 +145,8 @@ const DEFAULTS: BackendServiceOptions = {
   requireSecrets: false,
   allowPrivateHttp: false,
   enforceRules: false,
-  serveApp: null
+  serveApp: null,
+  loopbackFetch: null
 };
 
 /**
