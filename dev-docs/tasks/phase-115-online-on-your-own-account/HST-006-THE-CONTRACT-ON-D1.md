@@ -410,3 +410,9 @@ local Worker: the service started again from storage (`autoBoots: 1`) and the li
 `check-campus.mjs --upload` reads it. Live waits on R2 being enabled (a deploy naming a bucket that cannot exist
 fails), then: `wrangler r2 bucket create hst-campus-files`, `wrangler deploy` (no re-seed: Richard's answer stays),
 `check-campus.mjs --upload`, and MUST 8 on his phone.
+
+**Live (2026-11-05):** Richard enabled R2 (*"It's enabled"*); `wrangler r2 bucket create hst-campus-files`; deploy
+`d068aad3` with `env.FILES (hst-campus-files) R2 Bucket`, no re-seed. `check-campus.mjs --upload` over the internet:
+the owner's upload 201 → `https://hst-backend-spike.richard-digitalbricks.workers.dev/files/98209a8d8a707079_open-day.txt`,
+that link signed out 200 with the same bytes; ledger `bucket: true, puts: 1, streams: 1`; every earlier reading
+unchanged (Richard's answer still on the owner's list; the second account 403). MUST 8 on his phone is the reading.
