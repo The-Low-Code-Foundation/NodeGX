@@ -26,6 +26,7 @@ import * as path from 'path';
 
 import { SecretsStore } from '../config/SecretsStore';
 import { DEFAULT_TEMPLATES, EmailTemplate, TemplateId, isTemplateId } from './templates';
+import { writeDataJSON } from '../config/dataDirStore';
 
 /** The secrets.json namespace this subsystem owns (see config/SecretsStore). */
 const EMAIL_SECRETS_NAMESPACE = 'email';
@@ -125,11 +126,8 @@ export function validateEmailConfig(candidate: unknown): string[] {
   return errors;
 }
 
-function atomicWriteJSON(filePath: string, value: unknown): void {
-  const tmp = `${filePath}.tmp-${process.pid}`;
-  fs.writeFileSync(tmp, JSON.stringify(value, null, 2) + '\n');
-  fs.renameSync(tmp, filePath);
-}
+/** P115 HST-011: the data dir's files are written through one seam (a host may keep them in a store). */
+const atomicWriteJSON = writeDataJSON;
 
 export class EmailConfigStartupError extends Error {
   code: string;

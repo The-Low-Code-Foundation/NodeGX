@@ -16,6 +16,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { CollectionSearchConfig, SearchConfig, defaultSearchConfig, validateSearchConfig } from './model';
+import { writeDataJSON } from '../config/dataDirStore';
 
 export class SearchStartupError extends Error {
   code: string;
@@ -28,11 +29,8 @@ export class SearchStartupError extends Error {
 
 const SEARCH_FILE = 'search.json';
 
-function atomicWriteJSON(filePath: string, value: unknown): void {
-  const tmp = `${filePath}.tmp-${process.pid}`;
-  fs.writeFileSync(tmp, JSON.stringify(value, null, 2) + '\n');
-  fs.renameSync(tmp, filePath);
-}
+/** P115 HST-011: the data dir's files are written through one seam (a host may keep them in a store). */
+const atomicWriteJSON = writeDataJSON;
 
 export class SearchState {
   readonly config: SearchConfig;

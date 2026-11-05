@@ -18,6 +18,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import type { MissedFirePolicy } from '../triggers/registry';
+import { writeDataJSON } from '../config/dataDirStore';
 
 const BACKUPS_FILE = 'backups.json';
 
@@ -162,9 +163,7 @@ export class BackupConfigStore {
 
   private persist(): void {
     fs.mkdirSync(this.dataDir, { recursive: true });
-    const tmp = `${this.filePath}.tmp-${process.pid}`;
-    fs.writeFileSync(tmp, JSON.stringify(this.config, null, 2) + '\n');
-    fs.renameSync(tmp, this.filePath);
+    writeDataJSON(this.filePath, this.config);
   }
 
   get(): BackupConfig {

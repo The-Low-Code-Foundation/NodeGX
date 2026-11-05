@@ -70,6 +70,7 @@ import { AuthConfigState } from './auth/AuthConfigState';
 import { DEFAULT_SESSION_IDLE_DAYS } from './auth/model';
 import { ensureIdentityTable } from './auth/identities';
 import { clearDiscoveryCache } from './auth/oidc';
+import { attachDataDirStore } from './config/dataDirStore';
 
 /** The shape the Send Email node (noodl-viewer-cloud) calls `_noodl_send_email` with. */
 export interface SendEmailNodeRequest {
@@ -159,6 +160,10 @@ export class BackendService {
   private readonly executions = new ExecutionHistory();
   /** CWF-016: the idempotency claim table, in the execution history's own file. */
   private readonly idempotency = new IdempotencyStore();
+  /** P115 HST-011: stops writes reaching the host's store after `stop()` (see `attachDataDirStore`). */
+  private detachDataDirStore: (() => void) | null = null;
+  /** P115 HST-011: how many data-dir files the last `start()` wrote from the host's store (0 without one). */
+  dataDirFilesRestored = 0;
 
   constructor(partial: Partial<BackendServiceOptions> = {}) {
     this.options = resolveOptions(partial);
@@ -179,6 +184,15 @@ export class BackendService {
     // 0.4 DEP-002: the app folder is checked before anything opens, so a wrong path is a refusal
     //     that names the folder, with no database left half-open behind it.
     this.servedApp = this.options.serveApp ? openServedApp(this.options.serveApp) : null;
+
+    // 0.45 P115 HST-011: a host that keeps the data dir's files in a store of its own (a Durable Object's storage)
+    //      has them written into the dir before anything reads one, and every later write reaches the store too.
+    if (this.options.dataDirStore) {
+      this.detachDataDirStore?.();
+      const kept = attachDataDirStore(this.options.dataDir, this.options.dataDirStore);
+      this.detachDataDirStore = kept.detach;
+      this.dataDirFilesRestored = kept.restored;
+    }
 
     // 0.5 Operational config (BAK-009) BEFORE anything that logs: ops.json owns
     //     the log level and format, so loading it first is what makes startup
@@ -876,6 +890,10 @@ export class BackendService {
     // F86, same reasoning: the global stays, the answer becomes a loud
     // `role/service-stopped`.
     this.systemRoles = null;
+    if (this.detachDataDirStore) {
+      this.detachDataDirStore();
+      this.detachDataDirStore = null;
+    }
   }
 
   /** True when the current options require a bearer token (non-loopback bind). */

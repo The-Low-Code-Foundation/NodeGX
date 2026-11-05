@@ -25,6 +25,7 @@ import * as path from 'path';
 import { readArchive } from './archive';
 import type { BackupManager } from './BackupManager';
 import type { IStorageSchema, StorageCheckDecl, StorageIndexDecl } from '@noodl/backend-contract';
+import { writeDataJSON } from '../config/dataDirStore';
 
 export interface ColumnDef {
   name: string;
@@ -610,9 +611,7 @@ function applyConfig(dataDir: string, source: SchemaSnapshot, diff: SchemaDiff, 
   }
 }
 
+/** P115 HST-011: reachable over HTTP (`/admin` schema apply), so through the data dir's one seam. */
 function writeJson(file: string, value: unknown): void {
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  const tmp = `${file}.tmp-${process.pid}`;
-  fs.writeFileSync(tmp, JSON.stringify(value, null, 2) + '\n');
-  fs.renameSync(tmp, file);
+  writeDataJSON(file, value);
 }

@@ -15,6 +15,7 @@ export { BackendService, StartedService } from './service';
 export { createAdapter, PersistenceHandle, LocalBackendPersistenceError } from './persistence/createAdapter';
 export { AdapterFacade, AclOption } from './persistence/AdapterFacade';
 export { BackendServiceOptions, resolveOptions, requiresAuth, generateAuthToken } from './config';
+export { DataDirStore } from './config/dataDirStore';
 export { HttpServer, ListenInfo, RequestContext, RouteAccess, RouteInfo } from './server/HttpServer';
 export { WorkflowRunner } from './workflow/WorkflowRunner';
 export { ExecutionHistory } from './execution/ExecutionStore';

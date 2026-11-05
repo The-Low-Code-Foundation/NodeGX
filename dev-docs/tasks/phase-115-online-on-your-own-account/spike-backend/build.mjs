@@ -11,7 +11,8 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const shim = path.join(here, 'src/nodeSqliteShim.ts');
 
 await esbuild.build({
-  entryPoints: [path.join(here, 'src/worker.ts')],
+  // HST_ENTRY: build another entry (HST-011 built session 7's worker this way to grade the move of its files).
+  entryPoints: [process.env.HST_ENTRY ? path.resolve(process.env.HST_ENTRY) : path.join(here, 'src/worker.ts')],
   outfile: path.join(here, 'dist/worker.mjs'),
   bundle: true,
   format: 'esm',

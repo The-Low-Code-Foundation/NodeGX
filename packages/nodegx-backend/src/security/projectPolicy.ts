@@ -83,6 +83,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { SecurityConfig, validateSecurityConfig } from './model';
+import { writeDataJSON } from '../config/dataDirStore';
 
 /** The project-root file a template ships and provisioning applies. */
 export const PROJECT_POLICY_FILE = 'nodegx.security.json';
@@ -202,9 +203,7 @@ export function applyProjectPolicy(args: { projectDir?: string | null; dataDir: 
   }
 
   fs.mkdirSync(args.dataDir, { recursive: true });
-  const tmp = `${backendPath}.tmp-${process.pid}`;
-  fs.writeFileSync(tmp, JSON.stringify(config, null, 2) + '\n');
-  fs.renameSync(tmp, backendPath);
+  writeDataJSON(backendPath, config);
   return { status: 'applied', policyPath, backendPath, config };
 }
 

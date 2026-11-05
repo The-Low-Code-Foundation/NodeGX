@@ -70,18 +70,13 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { writeDataJSON } from './dataDirStore';
 
 const SECRETS_FILE = 'secrets.json';
 
+/** P115 HST-011: written through the data dir's one seam (a host may keep it in a store). */
 function atomicWrite0600(filePath: string, value: unknown): void {
-  const tmp = `${filePath}.tmp-${process.pid}`;
-  fs.writeFileSync(tmp, JSON.stringify(value, null, 2) + '\n', { mode: 0o600 });
-  fs.renameSync(tmp, filePath);
-  try {
-    fs.chmodSync(filePath, 0o600);
-  } catch {
-    // chmod is best-effort on platforms without POSIX modes.
-  }
+  writeDataJSON(filePath, value, { mode: 0o600 });
 }
 
 /**

@@ -24,6 +24,7 @@ import { validateWorkflowDefinition } from './WorkflowEngine';
 import { migrateDefinition } from './steps/migrate';
 import { validatePieceUses } from './pieces';
 import type { WorkflowDefinition, WorkflowInput } from './types';
+import { removeDataDir, removeDataFile, writeDataJSON } from '../config/dataDirStore';
 
 const DIR = 'workflow-defs';
 const SUFFIX = '.workflow-def.json';
@@ -103,7 +104,7 @@ export class WorkflowRegistry {
     try {
       fresh = new WorkflowRegistry(this.dataDir, this.apiCalls);
     } catch (e) {
-      fs.rmSync(this.dir, { recursive: true, force: true });
+      removeDataDir(this.dir);
       for (const def of this.defs.values()) this.persist(def);
       throw e;
     }
@@ -238,7 +239,7 @@ export class WorkflowRegistry {
     this.defs.delete(id);
     const full = path.join(this.dir, `${id}${SUFFIX}`);
     try {
-      fs.unlinkSync(full);
+      removeDataFile(full);
     } catch {
       // Already gone on disk — the in-memory delete is what matters.
     }
@@ -248,8 +249,6 @@ export class WorkflowRegistry {
   private persist(def: WorkflowDefinition): void {
     fs.mkdirSync(this.dir, { recursive: true });
     const full = path.join(this.dir, `${def.id}${SUFFIX}`);
-    const tmp = `${full}.tmp-${process.pid}`;
-    fs.writeFileSync(tmp, JSON.stringify(def, null, 2) + '\n');
-    fs.renameSync(tmp, full);
+    writeDataJSON(full, def);
   }
 }

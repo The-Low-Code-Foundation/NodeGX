@@ -12,6 +12,7 @@
  *      `durableObjectEngine` (spike-records) instead of `node:sqlite`. Same class object the service requires.
  *   2. `node:sqlite` itself, for the execution history (wrangler `[alias]` → nodeSqliteShim.ts).
  *   3. the data dir: `node:fs` on Workers is the isolate's memory (`/tmp`). It survives requests, not an eviction.
+ *      (since HST-011 a product option, `dataDirStore`: this host hands in a table in the object's SQLite.)
  *   4. the loopback: the service's cloud runtime calls the service over HTTP; here that is an in-process call
  *      (since HST-010 a product option, `loopbackFetch`, not a seam).
  *   5. (session 7) the files: with an R2 binding `FILES`, the backend's LocalDriver (bytes under the data dir, which
@@ -29,9 +30,12 @@
  *
  * HST-006 §8 (session 7), an app on it: with an `ASSETS` binding (wrangler `[assets]`, `public/` = the app's
  * interpreter site, `site.mjs`), a GET for a file is the file, a page address is `index.html`, and the backend's own
- * paths go to the object. Seam 3 made real: the data dir's files are kept in the object's storage after every
- * change, and a booted service is started again from them when the isolate was replaced (an eviction, a redeploy),
- * so an app keeps its rules, keys and secrets as its records already kept themselves. A stop forgets the boot.
+ * paths go to the object. Seam 3 made real: the data dir's files are kept in the object's storage, and a booted
+ * service is started again from them when the isolate was replaced (an eviction, a redeploy), so an app keeps its
+ * rules, keys and secrets as its records already kept themselves. A stop forgets the boot.
+ *
+ * HST-011: the service writes those files through `dataDirStore` itself (each write, as it happens), into the table
+ * below; session 7's copy of the whole dir after every non-GET is gone. The boot record stays the host's.
  */
 import { DurableObject } from 'cloudflare:workers';
 import { httpServerHandler } from 'cloudflare:node';
@@ -39,6 +43,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import localSql from '@noodl/runtime/src/api/adapters/local-sql';
 import { BackendService } from '@backend/service';
+import type { DataDirStore } from '@backend/config/dataDirStore';
 import { LocalDriver } from '@backend/storage/LocalDriver';
 import { PassThrough } from 'node:stream';
 import * as crypto from 'node:crypto';
@@ -73,10 +78,33 @@ interface R2Like {
   list(options?: { cursor?: string }): Promise<{ objects: Array<{ key: string; uploaded: Date }>; truncated: boolean; cursor?: string }>;
 }
 
-/** Kept in the object's storage beside the database: what a boot was, and the data dir's files (base64). */
+/** Kept in the object's storage beside the database: what a boot was. */
 const BOOT_KEY = 'hst:boot';
-const FILE_PREFIX = 'hst:file:';
-const restarts = { autoBoots: 0, last: null as string | null, filesPersisted: 0 };
+/** Session 7's keys for the data dir's files (base64); read once, into the store, by a deploy that finds them. */
+const OLD_FILE_PREFIX = 'hst:file:';
+const restarts = { autoBoots: 0, last: null as string | null, restored: 0, migratedFromSession7: 0 };
+const storeLedger = { puts: 0, deletes: 0 };
+
+/**
+ * HST-011: the data dir's files in the object's own SQLite. `sql.exec` is synchronous, as every writer in the service
+ * is, so a write is in the table before the request that made it answers.
+ */
+function objectStore(storage: Storage): DataDirStore {
+  const sql = storage.sql;
+  sql.exec('CREATE TABLE IF NOT EXISTS _nodegx_data_dir (rel TEXT PRIMARY KEY, body TEXT NOT NULL)');
+  return {
+    list: () => (sql.exec('SELECT rel FROM _nodegx_data_dir ORDER BY rel').toArray() as Array<{ rel: string }>).map((r) => r.rel),
+    get: (rel) => (sql.exec('SELECT body FROM _nodegx_data_dir WHERE rel = ?', rel).toArray()[0] as { body: string } | undefined)?.body,
+    put: (rel, contents) => {
+      sql.exec('INSERT INTO _nodegx_data_dir (rel, body) VALUES (?, ?) ON CONFLICT(rel) DO UPDATE SET body = excluded.body', rel, contents);
+      storeLedger.puts++;
+    },
+    delete: (rel) => {
+      sql.exec('DELETE FROM _nodegx_data_dir WHERE rel = ?', rel);
+      storeLedger.deletes++;
+    }
+  };
+}
 
 const adapterLedger = newLedger();
 
@@ -205,8 +233,6 @@ export class Backend extends DurableObject {
   private service: BackendService | null = null;
   private dir: string | null = null;
   private handler: unknown = null;
-  /** What the object's storage holds for each data-dir file, so only a changed file is written. */
-  private persisted = new Map<string, string>();
   private booting: Promise<boolean> | null = null;
 
   private storageNow(): Storage {
@@ -226,16 +252,14 @@ export class Backend extends DurableObject {
       if (url.pathname === '/__hst/routes') return Response.json(this.service ? this.service.getRouteTable() : []);
       if (url.pathname === '/__hst/files') return Response.json({ files: this.dir ? readTree(this.dir) : {} });
       if (url.pathname === '/__hst/call' && request.method === 'POST') return await this.call((await request.json()) as CallBody);
-      if (url.pathname === '/__hst/ledger') return Response.json({ adapter: adapterLedger, sqlite: sqliteLedger, openedPaths, loopback, restarts, files: { bucket: !!filesBucket, ...filesLedger } });
+      if (url.pathname === '/__hst/ledger') return Response.json({ adapter: adapterLedger, sqlite: sqliteLedger, openedPaths, loopback, restarts, dataDirStore: { ...storeLedger, files: objectStore(storage).list() }, files: { bucket: !!filesBucket, ...filesLedger } });
     } catch (e) {
       return errorJson(e);
     }
     if (!this.service && !(await this.restart(storage))) {
       return Response.json({ error: 'no backend booted in this object' }, { status: 503 });
     }
-    const response = await (this.handler as { fetch(r: Request, env: unknown, ctx: unknown): Promise<Response> }).fetch(request, this.env, this.ctx);
-    if (request.method !== 'GET' && request.method !== 'HEAD') await this.persistDir(storage);
-    return response;
+    return await (this.handler as { fetch(r: Request, env: unknown, ctx: unknown): Promise<Response> }).fetch(request, this.env, this.ctx);
   }
 
   /** Seam 3: a booted service whose isolate was replaced starts again from the boot and files kept in storage. */
@@ -244,9 +268,8 @@ export class Backend extends DurableObject {
       this.booting = (async () => {
         const boot = (await storage.get(BOOT_KEY)) as { name: string; options?: Record<string, unknown> } | undefined;
         if (!boot) return false;
-        const files: Record<string, string> = {};
-        for (const [key, value] of await storage.list({ prefix: FILE_PREFIX })) files[key.slice(FILE_PREFIX.length)] = String(value);
-        await this.start(storage, { name: boot.name, options: boot.options, files });
+        await this.migrateSession7Files(storage);
+        await this.start(storage, { name: boot.name, options: boot.options });
         restarts.autoBoots++;
         restarts.last = new Date().toISOString();
         return true;
@@ -257,31 +280,38 @@ export class Backend extends DurableObject {
     return this.booting;
   }
 
-  /** Writes the data dir's changed files into the object's storage, and forgets the ones that are gone. */
-  private async persistDir(storage: Storage): Promise<void> {
-    if (!this.dir) return;
-    const now = readTree(this.dir);
-    const puts: Record<string, string> = {};
-    for (const [rel, b64] of Object.entries(now)) {
-      if (this.persisted.get(rel) !== b64) puts[FILE_PREFIX + rel] = b64;
+  /**
+   * A Campus booted by session 7's Worker kept its files under `hst:file:*`. The first start that finds them (and an
+   * empty table) moves them into the store, once, and deletes the old keys: the redeploy that ships HST-011 must not
+   * lose the live app's rules.
+   */
+  private async migrateSession7Files(storage: Storage): Promise<void> {
+    const old = await storage.list({ prefix: OLD_FILE_PREFIX });
+    if (!old.size) return;
+    const store = objectStore(storage);
+    if (!store.list().length) {
+      for (const [key, value] of old) {
+        const rel = key.slice(OLD_FILE_PREFIX.length);
+        if (rel.endsWith('.json')) {
+          store.put(rel, Buffer.from(String(value), 'base64').toString('utf8'));
+          restarts.migratedFromSession7++;
+        }
+      }
     }
-    const gone = [...this.persisted.keys()].filter((rel) => !(rel in now));
-    if (Object.keys(puts).length) await storage.put(puts);
-    if (gone.length) await storage.delete(gone.map((rel) => FILE_PREFIX + rel));
-    restarts.filesPersisted += Object.keys(puts).length;
-    this.persisted = new Map(Object.entries(now));
+    await storage.delete([...old.keys()]);
   }
 
   private async boot(storage: Storage, body: BootBody): Promise<Response> {
     if (body.fresh) await storage.deleteAll();
     await storage.put(BOOT_KEY, { name: body.name, options: body.options || {} });
-    this.persisted = new Map();
+    // The files a suite ships are the app's data dir: the store is where the service reads them from at start.
+    const store = objectStore(storage);
+    for (const [rel, b64] of Object.entries(body.files || {})) if (rel.endsWith('.json')) store.put(rel, Buffer.from(b64, 'base64').toString('utf8'));
     const started = await this.start(storage, body);
-    await this.persistDir(storage);
     return Response.json({ started, files: readTree(this.dir as string) });
   }
 
-  private async start(_storage: Storage, body: BootBody): Promise<Record<string, unknown>> {
+  private async start(storage: Storage, body: BootBody): Promise<Record<string, unknown>> {
     if (this.service) {
       await this.service.stop();
       this.service = null;
@@ -294,8 +324,9 @@ export class Backend extends DurableObject {
     fs.mkdirSync(dir, { recursive: true });
     writeTree(dir, body.files || {});
     const port = nextPort++;
-    const service = new BackendService({ ...(body.options || {}), dataDir: dir, port, loopbackFetch } as never);
+    const service = new BackendService({ ...(body.options || {}), dataDir: dir, port, loopbackFetch, dataDirStore: objectStore(storage) } as never);
     const started = await service.start();
+    restarts.restored = service.dataDirFilesRestored;
     this.service = service;
     this.handler = httpServerHandler({ port });
     loopbackHandler = this.handler as typeof loopbackHandler;
@@ -349,7 +380,9 @@ interface BootBody {
 }
 
 /** The service's own paths (its route table's first segments): never a file, never the app's index. */
-const BACKEND_PREFIXES = ['__hst', 'classes', 'users', 'login', 'logout', 'functions', 'files', 'roles', 'sessions', 'schemas', 'admin', '_admin', 'oauth', 'auth', 'health', 'config', 'batch', 'aggregate', 'workflows', 'hooks', 'realtime', 'requestPasswordReset', 'verificationEmailRequest', 'api', 'magic-link', 'email-code'];
+// HST-011 s9 (P115-S9-SITEROUTES): `apps`, `executions`, `mcp`, `metrics` were missing, so a GET there was the app's
+// page (200) instead of the backend's 401. The product (HST-014) must route by the service's route table, not a list.
+const BACKEND_PREFIXES = ['__hst', 'classes', 'users', 'login', 'logout', 'functions', 'files', 'roles', 'sessions', 'schemas', 'admin', '_admin', 'oauth', 'auth', 'health', 'config', 'batch', 'aggregate', 'workflows', 'hooks', 'realtime', 'requestPasswordReset', 'verificationEmailRequest', 'api', 'magic-link', 'email-code', 'apps', 'executions', 'mcp', 'metrics'];
 function isBackendPath(pathname: string): boolean {
   return BACKEND_PREFIXES.includes(pathname.split('/')[1] || '');
 }

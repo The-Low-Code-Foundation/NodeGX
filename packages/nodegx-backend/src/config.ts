@@ -14,6 +14,7 @@
 import * as crypto from 'crypto';
 import * as os from 'os';
 import * as path from 'path';
+import type { DataDirStore } from './config/dataDirStore';
 
 /** Fully-resolved options a BackendService runs with. */
 export interface BackendServiceOptions {
@@ -115,6 +116,14 @@ export interface BackendServiceOptions {
    * that runs the service can supply one.
    */
   loopbackFetch: LoopbackFetch | null;
+  /**
+   * P115 HST-011 — where the data dir's own files are kept besides the disk (`security.json`, `secrets.json`,
+   * `auth.json`, triggers, deployed cloud functions; `config/dataDirStore.ts` lists what is in and what is not).
+   * null (every Node spawner) = the disk alone, as before. A host whose disk does not outlive the process — a
+   * Cloudflare Durable Object, where `node:fs` is the isolate's memory — hands in its own storage: `start()` writes
+   * the store's files into the data dir first, and every write of one of them reaches the store too. Not a CLI flag.
+   */
+  dataDirStore: DataDirStore | null;
 }
 
 /** P115 HST-010: a `fetch` for requests to the backend's own address (see `loopbackFetch`). */
@@ -146,7 +155,8 @@ const DEFAULTS: BackendServiceOptions = {
   allowPrivateHttp: false,
   enforceRules: false,
   serveApp: null,
-  loopbackFetch: null
+  loopbackFetch: null,
+  dataDirStore: null
 };
 
 /**

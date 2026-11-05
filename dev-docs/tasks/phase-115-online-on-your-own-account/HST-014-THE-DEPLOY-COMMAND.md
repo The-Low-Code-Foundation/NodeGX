@@ -25,3 +25,6 @@ carried over, and the warm-up at startup (HST-004 §9).
 1. Fixture C deployed by the command alone to a new Worker name on Richard's account, MUST 1–8 on his phone.
 2. A second run of the command keeps every record, account and file.
 3. No key or token in any uploaded or committed file (phase AC7).
+4. (added s9, P115-S9-SITEROUTES) The page and the backend share one origin by the service's own route table, not a
+   hand list: a GET on every route's first segment reaches the backend (the spike's list missed `mcp` and three more,
+   and `security-enforcement`'s route walk caught `GET /mcp` answered by the page).

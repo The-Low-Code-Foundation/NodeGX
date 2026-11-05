@@ -24,6 +24,7 @@ import * as path from 'path';
 
 import { SecretsStore } from '../config/SecretsStore';
 import { AuthConfig, AuthProvider, defaultAuthConfig, validateAuthConfig } from './model';
+import { writeDataJSON } from '../config/dataDirStore';
 
 /** The secrets.json namespace this subsystem owns (see config/SecretsStore). */
 export const AUTH_SECRETS_NAMESPACE = 'auth';
@@ -34,11 +35,8 @@ function clientSecretKey(providerId: string): string {
   return `${providerId}.clientSecret`;
 }
 
-function atomicWriteJSON(filePath: string, value: unknown): void {
-  const tmp = `${filePath}.tmp-${process.pid}`;
-  fs.writeFileSync(tmp, JSON.stringify(value, null, 2) + '\n');
-  fs.renameSync(tmp, filePath);
-}
+/** P115 HST-011: the data dir's files are written through one seam (a host may keep them in a store). */
+const atomicWriteJSON = writeDataJSON;
 
 export class AuthConfigStartupError extends Error {
   code: string;

@@ -55,6 +55,7 @@ import type {
   RuntimeStepEnd,
   RuntimeStepStart
 } from '@cloud-runtime';
+import { removeDataFile, writeDataFile } from '../config/dataDirStore';
 
 // Bundled from noodl-viewer-cloud/src by esbuild (test-time: jest mapper).
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -754,7 +755,8 @@ export class WorkflowRunner {
 
     try {
       await fs.mkdir(this.workflowsPath, { recursive: true });
-      await fs.writeFile(path.join(this.workflowsPath, `${name}.workflow.json`), JSON.stringify(exportData, null, 2));
+      // P115 HST-011: through the data dir's one seam (a host may keep it in a store); same bytes as before.
+      writeDataFile(path.join(this.workflowsPath, `${name}.workflow.json`), JSON.stringify(exportData, null, 2));
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       safeLog(`Failed to persist workflow ${name} (not activated):`, message);
@@ -766,7 +768,7 @@ export class WorkflowRunner {
     this.loadedWorkflows = candidateWorkflows;
     for (const old of replaced) {
       try {
-        await fs.unlink(path.join(this.workflowsPath, `${old}.workflow.json`));
+        removeDataFile(path.join(this.workflowsPath, `${old}.workflow.json`));
       } catch (e) {
         // Served no longer, but a restart would load it beside its replacement and refuse both: say so.
         logger.warn(`Workflow ${name} replaced ${old}, whose file could not be removed`, {
@@ -783,7 +785,7 @@ export class WorkflowRunner {
 
   async deleteWorkflow(name: string): Promise<{ success: boolean; error?: string }> {
     try {
-      await fs.unlink(path.join(this.workflowsPath, `${name}.workflow.json`));
+      removeDataFile(path.join(this.workflowsPath, `${name}.workflow.json`));
       this.loadedWorkflows.delete(name);
       safeLog(`Workflow deleted: ${name}`);
       return { success: true };

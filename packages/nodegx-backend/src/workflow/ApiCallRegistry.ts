@@ -16,6 +16,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { ApiCallDefinition, ApiCallInput, validateApiCall } from './apiCalls';
+import { writeDataJSON } from '../config/dataDirStore';
 
 const FILE = 'api-calls.json';
 
@@ -123,8 +124,6 @@ export class ApiCallRegistry {
   private persist(): void {
     fs.mkdirSync(this.dataDir, { recursive: true });
     const sorted = [...this.calls.values()].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
-    const tmp = `${this.file}.tmp-${process.pid}`;
-    fs.writeFileSync(tmp, JSON.stringify({ version: 1, calls: sorted }, null, 2) + '\n');
-    fs.renameSync(tmp, this.file);
+    writeDataJSON(this.file, { version: 1, calls: sorted });
   }
 }
