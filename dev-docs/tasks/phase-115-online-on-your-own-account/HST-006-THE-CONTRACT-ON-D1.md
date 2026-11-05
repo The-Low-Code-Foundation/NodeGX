@@ -380,7 +380,9 @@ mutant-checked; the production engine rebuilt with it and redeployed (`34f862a8`
 
 🔴 drive_page renders with the SHARED development viewer (`noodl-editor/src/external/viewer/noodl.viewer.js`, built
 2026-11-03), not the source: every drive this session ran Nov 3's runtime, and the fix cannot be driven there without
-rebuilding a folder peers' editors use. The phone is the reading: MUST 5 is owed again.
+rebuilding a folder peers' editors use. The phone is the reading: Richard re-read MUST 5 on `34f862a8` (owner, sign
+out, second account): *"I can't see Ada's answer or any answers anymore, just the 'this account can't read' message"*.
+Fixture C's MUST lines 1–7 are ticked; line 8 (a file) waits on R2.
 
 MUST 7 (a redeploy keeps the records): Richard's answer was on the owner's list after the redeploy to `34f862a8`
 (`check-campus.mjs`, 1 answer, `autoBoots: 1`).

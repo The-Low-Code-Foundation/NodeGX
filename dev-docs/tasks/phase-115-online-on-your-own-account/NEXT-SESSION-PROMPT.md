@@ -56,9 +56,8 @@ never ahead of lanes 9, 2 and 3. Earlier prompts are in git history (`git log --
    viewer running, and a browser export with the same wiring (the bug file says how).
 5. ✅ HST-006 records (s5) and ✅ users and sign-in (s6: the whole service runs in the object; §7). **Next, in order:**
    ✅ (b) **Fixture C** (s7, HST-006 §8): written, driven, live. Richard ticked 1–4 and 6, 7 read after a redeploy.
-   **Line 5 failed** (the owner's row stayed on screen for the next account: STALEROWS, fixed in the runtime and live
-   `34f862a8`, §8.6): **his re-read of line 5 is owed first** (sign in as owner, sign out, sign in as someone: no
-   name). The rest of this item is how it was handed to him:
+   Line 5 failed first (STALEROWS, fixed in the runtime, live `34f862a8`, §8.6) and **passed on his re-read**: MUST
+   1–7 ✅, line 8 waits on R2. **Next: (c), after asking Richard about R2.** How it was handed to him, for the next run:
    (Ada's link, *Count me in*, a made-up id, `/owner` as the owner and as the second account, signed out; the
    passwords are in `fixtures/c-campus/.accounts.json`, give them to him from there, never in a commit). Then line 7:
    redeploy (`wrangler deploy` in `spike-backend`, NOT `seed-campus.mjs`, which wipes) and his answer must still be on
