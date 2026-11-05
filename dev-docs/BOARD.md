@@ -87,6 +87,14 @@ only where something above could hear it, 917 → 343; the plan's HTTP URL on a 
 both exports, HiveClip's 13 engine-call refusals gone), then HTX-007 on a HiveClip copy, ThreadSpace's menu**; past the 10-session stop by Richard's rulings, said in the README;
 [P134 README](tasks/phase-134-the-app-in-plain-files/README.md). React and Swift stay paused.
 
+**Online on Cloudflare, unparked by Richard 2026-11-04 (P115, lane 10):** *"Let's kick it off and lift the park. If this
+can go out with the Beta, it'd be a nice addition."* A NodeGX app on Cloudflare Pages + Workers, on the person's own
+account, no VM. Estimated 2 sessions for the narrow proof (the front end on Pages; a backend workflow carrying a secret on
+a Worker) and 6–7 for full stack on D1 + R2; a nice-to-have for the Beta, never ahead of lanes 9, 2, 3. **Fixture C 8/8
+on Richard's phone 2026-11-05; R3 ruled: build the Cloudflare route as a product in P115 — building** (HST-010 the
+backend calls itself in-process ✅ 2026-11-05; HST-011…015 next). Session log and order in the
+[P115 README](tasks/phase-115-online-on-your-own-account/README.md) §12.
+
 | release | what is in it | state 2026-10-23 |
 |---|---|---|
 | **0.4.2** | the editor Richard's two jobs | ✅ published 2026-10-20 |
@@ -143,7 +151,6 @@ re-measured on the day it is unparked.
 |---|---|---|
 | [P110](tasks/phase-110-the-app-in-your-pocket/README.md) the app in your pocket | became lane 6's EXP-022 (an emitter, not a Swift runtime); its R1–R7 carry | — |
 | [P114](tasks/phase-114-the-groovebox/README.md), [P118](tasks/phase-118-the-castle-holds/README.md), [P121](tasks/phase-121-a-marketplace-and-a-community/README.md) | apps built with the kit: lane 2's strangers, run under OWN-008 | — |
-| [P115](tasks/phase-115-online-on-your-own-account/README.md) | HST-005 is in lane 4; the rest is research | lane 4 closes |
 | [P116](tasks/phase-116-the-person-says-what-their-world-is/README.md) beyond lane 3, [P120](tasks/phase-120-building-locally/README.md) beyond LOC-002, [P104](tasks/phase-104-the-backend-manager/README.md) beyond lane 3 | the lanes take what they need; the rest waits | — |
 | [P117](tasks/phase-117-tchac-boum/README.md) | shelved by Richard 2026-10-11 | he asks |
 | [P123](tasks/phase-123-open-bubble/README.md) Open Bubble | carried on in the `nodegx-studio` repo | — |

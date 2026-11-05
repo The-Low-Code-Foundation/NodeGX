@@ -1,11 +1,13 @@
 # Phase 115 — next session prompt
 
-**Written 2026-11-05 at the end of session 7 (Opus 5.5).** Unparked by Richard 2026-11-04 (BOARD lane 10: *"Let's kick
+**Written 2026-11-05 at the end of session 8 (Opus 5.5).** Unparked by Richard 2026-11-04 (BOARD lane 10: *"Let's kick
 it off and lift the park. If this can go out with the Beta, it'd be a nice addition"*). A nice-to-have for the Beta,
 never ahead of lanes 9, 2 and 3. Earlier prompts are in git history (`git log -- this file`).
 
 ## 1. Read first
 
+000. [HST-010 §6](HST-010-THE-BACKEND-CALLS-ITSELF-IN-PROCESS.md): session 8. The first product piece: the backend calls
+   itself through `loopbackFetch`. Then the tickets HST-011…015 (one per piece left).
 00. [HST-006 §8](HST-006-THE-CONTRACT-ON-D1.md): session 7. Fixture C written through the MCP, and online on
    `hst-backend-spike`: the interpreter site with the production viewer beside the whole service, seam 3 made real.
 0. [HST-006 §0 and §7](HST-006-THE-CONTRACT-ON-D1.md): session 6. The WHOLE backend service in one Durable Object,
@@ -77,18 +79,18 @@ never ahead of lanes 9, 2 and 3. Earlier prompts are in git history (`git log --
 
 Richard chose "Build it in P115" over a phase of its own. The six pieces the spike scripts stand in for, in the order
 that unblocks the most (each: a product change + its tests + Fixture C still 8/8 on hst-backend-spike):
-1. **LOOPBACK** (high): the cloud runtime reaches its own backend in-process on a Worker (today the spike's `fetch`
-   wrapper). Unblocks every signed-in cloud function.
-2. **Seam 3 in the product**: the backend's data-dir files kept in a store it is handed (the object's storage on a
+1. ✅ **LOOPBACK** → [HST-010](HST-010-THE-BACKEND-CALLS-ITSELF-IN-PROCESS.md), session 8: `BackendServiceOptions.loopbackFetch`
+   → `_noodl_cloudservices.fetch`; the spike passes it (its global `fetch` patch is gone); live `f1887406`, Fixture C
+   unchanged. **Next: piece 2, [HST-011](HST-011-THE-DATA-DIR-IN-A-STORE.md)** (census the data-dir writes first).
+2. **Seam 3 in the product** ([HST-011](HST-011-THE-DATA-DIR-IN-A-STORE.md)): the backend's data-dir files kept in a store it is handed (the object's storage on a
    Worker), and the service started again from it.
-3. **Seam 5 in the product**: a file driver for an R2 binding (today `LocalDriver.prototype` patched); `kind` and
+3. **Seam 5 in the product** ([HST-012](HST-012-FILES-IN-A-BUCKET.md)): a file driver for an R2 binding (today `LocalDriver.prototype` patched); `kind` and
    `_Files.driver` decided honestly. With it, NOFILESRULE (an MCP tool for the files rule).
-4. **NOCODEGEN**: code nodes in cloud functions compiled at deploy (a Worker refuses `new Function`).
-5. **The deploy command**: `nodegx deploy --cloudflare` (or the MCP's) doing what `site.mjs` + `seed-campus.mjs` +
+4. **NOCODEGEN** ([HST-013](HST-013-CODE-NODES-PRINTED-AT-DEPLOY.md)): code nodes in cloud functions compiled at deploy (a Worker refuses `new Function`).
+5. **The deploy command** ([HST-014](HST-014-THE-DEPLOY-COMMAND.md)): `nodegx deploy --cloudflare` (or the MCP's) doing what `site.mjs` + `seed-campus.mjs` +
    `wrangler deploy` do by hand, the production engine included; never wipes a live app.
-6. **Session 5's three DO reds**: regex declared unsupported, EXPRDEPTH flattened, NOROLLBACKCASE + transactions.
-Realtime (d) is measured alongside or after 5. A ticket per piece (HST-010…) before building; the BOARD lane 10 line
-says "building" once the first lands.
+6. **Session 5's three DO reds** ([HST-015](HST-015-THE-THREE-DURABLE-OBJECT-REDS.md)): regex declared unsupported, EXPRDEPTH flattened, NOROLLBACKCASE + transactions.
+Realtime (d) is measured alongside or after 5. Tickets written (HST-010…015); the BOARD lane 10 line says "building".
 
 ## 4. Rulings owed (ask in plain words, recommendation first)
 
