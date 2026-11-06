@@ -1,11 +1,37 @@
 # Phase 115 — next session prompt
 
-**Written 2026-11-06 at the end of session 12 (Opus 5.5).** Unparked by Richard 2026-11-04 (BOARD lane 10: *"Let's kick
+**Written 2026-11-06 at the end of session 13 (Opus 5.5).** Unparked by Richard 2026-11-04 (BOARD lane 10: *"Let's kick
 it off and lift the park. If this can go out with the Beta, it'd be a nice addition"*). A nice-to-have for the Beta,
 never ahead of lanes 9, 2 and 3. Earlier prompts are in git history (`git log -- this file`).
 
+## 0. What "finished" means now (R7, ruled 2026-11-06, README §8)
+
+Richard chose **the Cloudflare work plus a domain**; the October research plan is parked when the phase closes. What
+is left, in order:
+0. **Richard's terminal: redeploy Campus with HST-015** (the classifier refused it to session 13). From the repo root:
+   `NODEGX_WRANGLER=$PWD/dev-docs/tasks/phase-115-online-on-your-own-account/spike-backend/node_modules/wrangler/bin/wrangler.js node packages/nodegx-backend/cloudflare/deploy.mjs dev-docs/tasks/phase-115-online-on-your-own-account/fixtures/c-campus --name hst-campus --viewer <a folder holding the deployed noodl.deploy.js>`
+   (session 13 copied `~/.nodegx/cloudflare/hst-campus/site/noodl.deploy.js` + its LICENSE into a scratch folder; do
+   not point `--viewer` at the site folder itself, the deploy rewrites it). Then read: `node fixtures/check-campus-deploy.mjs
+   ~/.nodegx/cloudflare/hst-campus` (no `--seed`: everything kept) and the four `$regex` reads of HST-015 §5.6 (before:
+   all 500 `no such function`; after: three answer, the real pattern is a 400 in words).
+1. **HST-014 §5.4 item 2: a changed automation carried by a redeploy.** Workflows and triggers are read at a
+   backend's FIRST start only; a redeploy must upsert them through `/admin/workflow-defs` and `/admin/triggers`
+   (and say what it changed). Grade on `--local` with Fixture B (its `subscribe` + the schedule), then a live
+   redeploy of a Worker that has one (Fixture C has none: add one to a copy, or redeploy Fixture B through the
+   command as a new Worker: a FIRST deploy sends the admin secret, which is Richard's terminal).
+2. **HST-014 §5.4 item 4: the refusal alert on the product Worker** (HST-004 §10's email when Cloudflare refuses a
+   call), and measure whether the warm-up is needed (`wrangler tail --format json` `.cpuTime`) before carrying it.
+3. **HST-007 cut to Cloudflare**: a domain bought on Richard's Cloudflare account (about $10 a year; the purchase is
+   his, behind a price shown first), pointed at `hst-campus` as a Worker custom domain, with the human steps counted.
+   Re-read the registrar price on the day.
+4. Then close: move HST-000, 001, 003, 005, 008, 009 and the rest of HST-007 to a parked phase with README §7's ACs
+   3–6, mark P115 done on the BOARD.
+
 ## 1. Read first
 
+00000000. [HST-015 §5](HST-015-THE-THREE-DURABLE-OBJECT-REDS.md): session 13. The suite 103/103 in a Durable Object on
+   workerd; "contains" and the other everyday string filters as plain SQL (they were all failing on Cloudflare:
+   STRINGFILTERS); paths as joined steps; the schema code's blocks through `transactionSync`. **✅ done.**
 0000000. [HST-014 §5](HST-014-THE-DEPLOY-COMMAND.md): session 12. The fifth product piece: the deploy COMMAND
    (`packages/nodegx-backend/cloudflare/deploy.mjs`), graded on workerd with Fixture C (first deploy 22/22, a second
    run over the same state kept everything) and Fixture B (a function and the seeded schedule); then LIVE (§5.5):
@@ -122,7 +148,12 @@ that unblocks the most (each: a product change + its tests + Fixture C still 8/8
    run it; a FIRST deploy sends the admin credential and is Richard's terminal. 🔴 `--local` needs
    `NODEGX_WRANGLER=<absolute spike-backend path>/node_modules/wrangler/bin/wrangler.js` and a free `--port`; stop it with
    BOTH the task stop and `pkill -f -- "--persist-to <out>"`. Follow-ups: HST-014 §5.4.
-6. **Session 5's three DO reds** ([HST-015](HST-015-THE-THREE-DURABLE-OBJECT-REDS.md)): regex declared unsupported, EXPRDEPTH flattened, NOROLLBACKCASE + transactions.
+6. ✅ **Session 5's three DO reds** ([HST-015](HST-015-THE-THREE-DURABLE-OBJECT-REDS.md)), session 13: regex NOT declared
+   away (the everyday string filters were inside it; now plain SQL), EXPRDEPTH as joined steps, NOROLLBACKCASE a
+   contract case + `transactionSync`. 🔴 Instruments: `nodegx-backend/tests/p115-hst015-durable-object-reds.test.ts`
+   (stand-in object + a Python `sqlite3` replay at depth 100: node:sqlite cannot set the limit); on workerd,
+   `spike-records` `GET /__hst015` under `wrangler dev` (product engine; the spike's own `doEngine.ts` is the
+   "as it was" control). A local PostgreSQL 16 answers `postgres:///nodegx_brg005`, so `brg-005` RUNS here.
 Realtime (d) is measured alongside or after 5. Tickets written (HST-010…015); the BOARD lane 10 line says "building".
 
 ## 4. Rulings owed (ask in plain words, recommendation first)
