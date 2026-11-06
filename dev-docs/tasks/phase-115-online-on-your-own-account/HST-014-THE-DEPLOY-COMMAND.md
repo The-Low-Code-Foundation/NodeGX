@@ -1,6 +1,6 @@
 # HST-014 — The deploy command
 
-**Opened 2026-11-05.** **Depends on HST-010…013.** **Status: 🔨 built, session 12 (2026-11-06, `579657bed`), §5: AC2, AC3 and AC4 graded on workerd; AC1 waits on Richard running the command live and reading MUST on his phone.** Kind: product.
+**Opened 2026-11-05.** **Depends on HST-010…013.** **Status: 🔨 built, session 12 (2026-11-06, `579657bed`), §5: LIVE on `hst-campus` (§5.5): Richard ran the command; AC2, AC3, AC4 and MUST 1–6 and 8 read over HTTP on Cloudflare; AC1 waits only on his phone.** Kind: product.
 
 ## 1. The person sentence
 
@@ -93,3 +93,17 @@ modules check the flag, `_getCurrentUser` among them). The product build has it.
    with `wrangler tail` first.
 5. wrangler is not a dependency of any package. The command takes `NODEGX_WRANGLER`, a `wrangler` it can resolve, or
    `npx --yes wrangler@4`.
+
+### 5.5 Live, 2026-11-06
+
+Richard ran the command from his terminal: a NEW Worker `hst-campus` (https://hst-campus.richard-digitalbricks.workers.dev),
+a new bucket `hst-campus-files`, the admin credential up as a secret with the first deploy. Then, from this session:
+
+| reading | result |
+|---|---|
+| `check-campus-deploy.mjs ~/.nodegx/cloudflare/hst-campus --seed --answer --upload` (no boot: sign-ups, the role, Ada and Grace by import) | 22/22: MUST 1–6 and 8 as calls, the address from `nodegx-config.json`, production engine 1.82 MB (built 11-06), `.accounts.json` 404, owner-only upload, `/mcp` `/metrics` `/executions` 401, `/apps` 404 JSON, `/__nodegx/*` 404. The `owner` role was already there for the seed: the first deploy's apply made it |
+| the SAME command run again (version `d7b8725a`; no secret sent, "No updated asset files to upload") | collections and rules: already there, nothing made |
+| the check after it, no seed, `--file` of the file uploaded before | 15/15: the accounts, the role, Ada, her answer and the file are all kept (**AC2 live**) |
+| wrangler's "Read 29 files" against step 4's 24 site files | 24 files + 5 folders: wrangler counts the folders; nothing else went up |
+
+Left for AC1: MUST 1–8 on Richard's phone (line 7: his tap's answer, then a redeploy, then the owner's list).
