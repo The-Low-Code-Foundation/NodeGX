@@ -499,6 +499,53 @@ export const schemaCases: readonly ConformanceCase[] = Object.freeze([
   },
 
   {
+    id: 'schema/a-change-that-fails-halfway-changes-nothing',
+    area: 'schema',
+    pins:
+      'P115-HST006-NOROLLBACKCASE: a schema change refused halfway leaves the collection as it was — a text field turned into a number, where two values become equal under its unique index, is refused, and the field is still text with its values and its index as they were; the same change without the clash goes through (the control)',
+    async run(ctx) {
+      // Until this case no case noticed an engine that drops every BEGIN, COMMIT and SAVEPOINT: a Cloudflare Durable
+      // Object refuses them as SQL, the shim dropped them, and the whole suite still passed (HST-006 §6). The retype
+      // is add a column, copy, drop the old one, rename, then re-make the index: the clash is found at the LAST step,
+      // after the old column has gone, so only a real rollback brings it back.
+      if (typeof ctx.schema.changeColumnType !== 'function' || !hasIndexSupport(ctx)) {
+        throw new Error('changeColumnType or reconcileIndexes is absent — declare this case unsupported (§3.4)');
+      }
+      const typeOf = (c: string): string | undefined => (ctx.schema.getTableSchema(c)?.columns || []).find((col) => col.name === 'code')?.type;
+
+      const c = ctx.collection('Atom');
+      ctx.createTable(c, [
+        { name: 'code', type: 'String' },
+        { name: 'label', type: 'String' }
+      ]);
+      ctx.schema.reconcileIndexes!(c, [{ fields: ['code'], unique: true }]);
+      const a = String((await ctx.create(c, { code: '1', label: 'a' })).objectId);
+      const b = String((await ctx.create(c, { code: '1.0', label: 'b' })).objectId);
+
+      // SQLite throws from the call; PostgreSQL queues the change and throws at the next data-plane call.
+      const refusal = await refusedOverRecords(ctx, c, () => ctx.schema.changeColumnType!(c, 'code', 'Number'));
+      ok(refusal.length > 0, 'turning "1" and "1.0" into numbers under a unique index was refused without words');
+      eq(typeOf(c), 'String', 'a refused change left the field declared as a number');
+      eq((await ctx.fetch(c, a)).code, '1', 'a refused change converted a value: it was half done');
+      eq((await ctx.fetch(c, b)).code, '1.0', 'a refused change converted a value: it was half done');
+      eq(await ctx.count(c, { code: '1.0' }), 1, 'a refused change left the stored text unreadable by its own value');
+      await ctx.refused(() => ctx.create(c, { code: '1' }));
+      eq(await ctx.count(c), 2, 'a refused change took the unique index away');
+
+      // The control: the same change on a collection where it can go through, so the refusal above is the clash.
+      const d = ctx.collection('Atom');
+      ctx.createTable(d, [{ name: 'code', type: 'String' }]);
+      ctx.schema.reconcileIndexes!(d, [{ fields: ['code'], unique: true }]);
+      const e = String((await ctx.create(d, { code: '1' })).objectId);
+      await ctx.create(d, { code: '2' });
+      ctx.schema.changeColumnType!(d, 'code', 'Number');
+      eq(await ctx.count(d), 2, 'the control: the records are not all there'); // PostgreSQL: past the queued change
+      eq(typeOf(d), 'Number', 'the control: the change did not go through');
+      eq((await ctx.fetch(d, e)).code, 1, 'the control: the value was not converted');
+    }
+  },
+
+  {
     id: 'schema/index-declaration-survives-a-reread',
     area: 'schema',
     pins: 'the declaration is stored, not merely applied — otherwise it cannot be exported',

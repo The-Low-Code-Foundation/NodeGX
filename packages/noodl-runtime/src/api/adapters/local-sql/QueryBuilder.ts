@@ -46,6 +46,7 @@ import {
   searchVectorSql
 } from '../postgres/search';
 import { distanceKmSql, pointInPolygonSql, polygonLiteral, regexpSql, toAreRegex } from '../postgres/geo';
+import { plainRegexSql, readPlainRegex } from './plainRegex';
 import {
   EARTH_RADIUS_KM,
   KM_PER_MILE,
@@ -107,6 +108,8 @@ export interface CollectionLookup {
     properties?: Record<string, { type?: string; targetClass?: string }>;
     /** The columns the table has right now; absent when the table does not exist. */
     present?: ReadonlySet<string>;
+    /** P115 HST-015: the ones with TEXT affinity (`ColumnScope.texts`). */
+    texts?: ReadonlySet<string>;
   } | null;
 }
 
@@ -281,6 +284,13 @@ export interface ColumnScope {
    * can never equal one element. Omitted = no column is treated as an array.
    */
   arrays?: ReadonlySet<string>;
+  /**
+   * P115 HST-015: the columns whose declared SQL type gives them TEXT affinity (`PRAGMA table_info`), where SQLite
+   * stores only text. A `$regex` the product wrote itself ("contains", "starts with" …) is answered in plain SQL on
+   * one of them (`plainRegex.ts`), the same rows the JavaScript function gives, on an engine that cannot call it.
+   * Omitted = no column is known to be text, and every `$regex` goes to the function.
+   */
+  texts?: ReadonlySet<string>;
 }
 
 /**
@@ -569,6 +579,7 @@ export function buildWhereClause(
     const col = columnRef(key, scope, tableAlias);
 
     const isArray = !!scope?.arrays?.has(key) && col !== 'NULL';
+    const isText = !!scope?.texts?.has(key) && col !== 'NULL';
     if (typeof condition !== 'object' || condition === null || isTaggedValue(condition)) {
       // Direct equality
       const value = convertQueryValue(condition);
@@ -601,7 +612,7 @@ export function buildWhereClause(
     // condition of its own.
     const siblings = condition as Record<string, unknown>;
     for (const [op, value] of Object.entries(condition)) {
-      const sqlCondition = translateOperator(col, op, value, params, schema, siblings, dialect, isArray);
+      const sqlCondition = translateOperator(col, op, value, params, schema, siblings, dialect, isArray, isText);
       if (sqlCondition) {
         conditions.push(sqlCondition);
       }
@@ -643,7 +654,8 @@ function translateOperator(
   schema?: unknown,
   siblings?: Record<string, unknown>,
   dialect: SqlDialect = 'sqlite',
-  arrayColumn = false
+  arrayColumn = false,
+  textColumn = false
 ): string | null {
   // Convert special types
   const convertedValue = convertQueryValue(value);
@@ -738,6 +750,13 @@ function translateOperator(
           params.push(toAreRegex(String(value)));
           return regexpSql(col, flags);
         }
+        // P115 HST-015: a column the table does not have is NULL in every row, which the function never matches.
+        if (col === 'NULL') return 'FALSE';
+        // P115 HST-015: the shapes the product writes itself ("contains", "starts with" …), on a text column, in
+        // plain SQL: the same rows, and an engine that cannot call JavaScript (a Cloudflare Durable Object) can
+        // answer them. Anything else is a real pattern and goes to the function.
+        const plain = textColumn ? readPlainRegex(value, flags) : null;
+        if (plain) return plainRegexSql(col, plain, params);
         params.push(String(value), flags);
         return `${SQL_REGEXP}(?, ?, ${col}) = 1`;
       }
@@ -982,6 +1001,7 @@ function noSuchCollection(message: string): Error {
 }
 
 function pathSelect(raw: unknown, env: PathEnv, params: unknown[], dialect: SqlDialect): string {
+  const mark = params.length;
   const path = checkPathShape(raw);
   const lookup = env.lookup;
   if (!lookup) throw new Error('A $path filter needs the schema, and this read was built without one');
@@ -989,7 +1009,7 @@ function pathSelect(raw: unknown, env: PathEnv, params: unknown[], dialect: SqlD
 
   const scopeOf = (collection: string): ColumnScope | undefined => {
     const info = lookup(collection);
-    return info?.present ? { present: info.present } : undefined;
+    return info?.present ? { present: info.present, texts: info.texts } : undefined;
   };
   // A hop's where is qualified by the hop's table: inside the recursive walk two
   // tables carry an "objectId", and an unqualified name would be ambiguous.
@@ -1033,10 +1053,22 @@ function pathSelect(raw: unknown, env: PathEnv, params: unknown[], dialect: SqlD
 
   const fixed = edges.filter((e) => !e.repeat).length;
   const left = path.maxDepth - fixed;
-  for (const edge of edges) {
-    frontier = edge.repeat ? repeatedHop(edge, frontier, left, guards, params, dialect) : oneHop(edge, frontier, guards, dialect);
-  }
-  return frontier;
+  // P115-HST006-EXPRDEPTH: one named step per hop, each joining the step before it in its own FROM, never nested in
+  // its WHERE. SQLite adds up the heights of every WHERE that is open while it resolves a subquery, so a path built as
+  // nested `IN (SELECT …)` grew with the square of the hops (a Cloudflare Durable Object, whose SQLite is built with
+  // a depth of 100, refused five hops with the row rule at each; node:sqlite allows 1000). Fenced into FROM-clause
+  // subqueries it grew with the hops (seven); as steps joined through FROM, only the step being read is open: the
+  // depth no longer grows with the hops (measured over 60 at depth 100). Each step is a set (DISTINCT), as `IN` was.
+  // The names carry the parameter count at the path's start. Not load-bearing (a path nested in a step, a dotted
+  // filter in a hop's where, sits in its own subquery and reads only its own names; the mutant survives), but the
+  // SQL of a statement with two paths reads unambiguously.
+  const name = (i: number): string => `"_p${mark}_h${i}"`;
+  const steps = [`${name(0)}("objectId") AS (${frontier})`];
+  edges.forEach((edge, i) => {
+    if (edge.repeat) steps.push(...repeatedHop(edge, name(i), name(i + 1), `"_p${mark}_walk"`, left, guards, params));
+    else steps.push(`${name(i + 1)}("objectId") AS (${oneHop(edge, name(i), guards, dialect)})`);
+  });
+  return `WITH RECURSIVE ${steps.join(', ')} SELECT "objectId" FROM ${name(edges.length)}`;
 }
 
 /** P116-S17-DOTTEDFILTER: how a refused dotted filter begins, so the backend answers it 400 (the caller's to fix), not 500. */
@@ -1173,84 +1205,63 @@ function resolveEdge(hop: PathHop, current: string, lookup: CollectionLookup, at
 /** The junction a Relation column is stored in — the SQLite adapter's private convention, reproduced by the Postgres one. */
 const junctionOf = (owning: string, field: string): string => escapeTable(`_Join_${field}_${owning}`);
 
-/** The ids the current rows' list field holds, as a subquery over `prev`. */
-function listValues(of: string, field: string, prev: string, dialect: SqlDialect): string {
-  const t = escapeTable(of);
-  const col = `${t}.${escapeColumn(field)}`;
-  if (dialect === 'postgres') {
-    return `SELECT jsonb_array_elements_text(${col}) FROM ${t} WHERE ${t}."objectId" IN (${prev}) AND jsonb_typeof(${col}) = 'array'`;
-  }
-  return `SELECT "value" FROM ${t}, json_each(${col}) WHERE ${t}."objectId" IN (${prev}) AND json_valid(${col})`;
-}
-
-/** One fixed hop: the ids of `edge.to` reached from the ids `prev` selects. */
-function oneHop(edge: Edge, prev: string, guards: (c: string, w?: Record<string, unknown>) => string, dialect: SqlDialect): string {
+/**
+ * The joins from the rows of `from` (a step, or the walk) to the rows of `edge.to` one hop away. `edge.to` is joined
+ * under its own name, so a hop's guards (`"Table"."ACL"`, its `where`) read it; the table it comes from, when it is
+ * read too, is `"_from"` (a link from a collection to itself), a junction `"_j"`, a list's items `"_item"`.
+ */
+function hopJoins(edge: Edge, from: string, dialect: SqlDialect): string {
   const to = escapeTable(edge.to);
   const of = escapeTable(edge.of);
   const field = escapeColumn(edge.field);
-  let ids: string;
+  if (edge.storage === 'absent') return `JOIN ${to} ON FALSE`;
   if (edge.back) {
     // The rows of `to` whose field names a current row.
-    ids =
-      edge.storage === 'relation'
-        ? `${to}."objectId" IN (SELECT "owningId" FROM ${junctionOf(edge.to, edge.field)} WHERE "relatedId" IN (${prev}))`
-        : edge.storage === 'absent'
-          ? 'FALSE'
-          : `${to}.${field} IN (${prev})`;
-  } else {
-    ids =
-      edge.storage === 'relation'
-        ? `${to}."objectId" IN (SELECT "relatedId" FROM ${junctionOf(edge.of, edge.field)} WHERE "owningId" IN (${prev}))`
-        : edge.storage === 'list'
-          ? `${to}."objectId" IN (${listValues(edge.of, edge.field, prev, dialect)})`
-          : edge.storage === 'absent'
-            ? 'FALSE'
-            : `${to}."objectId" IN (SELECT ${of}.${field} FROM ${of} WHERE ${of}."objectId" IN (${prev}) AND ${of}.${field} IS NOT NULL)`;
+    return edge.storage === 'relation'
+      ? `JOIN ${junctionOf(edge.to, edge.field)} AS "_j" ON "_j"."relatedId" = ${from}."objectId" JOIN ${to} ON ${to}."objectId" = "_j"."owningId"`
+      : `JOIN ${to} ON ${to}.${field} = ${from}."objectId"`;
   }
-  return `SELECT "objectId" FROM ${to} WHERE ${ids}${guards(edge.to, edge.where)}`;
+  if (edge.storage === 'relation') {
+    return `JOIN ${junctionOf(edge.of, edge.field)} AS "_j" ON "_j"."owningId" = ${from}."objectId" JOIN ${to} ON ${to}."objectId" = "_j"."relatedId"`;
+  }
+  const source = `JOIN ${of} AS "_from" ON "_from"."objectId" = ${from}."objectId"`;
+  if (edge.storage === 'list') {
+    // The ids the list holds. Anything that is not JSON (an array on Postgres) holds none, rather than failing the read.
+    const col = `"_from".${field}`;
+    return dialect === 'postgres'
+      ? `${source} CROSS JOIN LATERAL jsonb_array_elements_text(CASE WHEN jsonb_typeof(${col}) = 'array' THEN ${col} ELSE '[]'::jsonb END) AS "_item"("value") JOIN ${to} ON ${to}."objectId" = "_item"."value"`
+      : `${source} JOIN json_each(CASE WHEN json_valid(${col}) THEN ${col} ELSE '[]' END) AS "_item" JOIN ${to} ON ${to}."objectId" = "_item"."value"`;
+  }
+  return `${source} JOIN ${to} ON ${to}."objectId" = "_from".${field}`;
 }
 
-/**
- * A repeated hop: a recursive common table expression over one collection,
- * bounded by `left` steps. `UNION` (not `UNION ALL`) so a cycle does not grow
- * the working set, and the depth column so it ends at the bound regardless.
- * Rows at depth 0 are the seeds and are not returned — "the topics under this
- * one" does not include this one.
- */
+/** One fixed hop: the rows of `edge.to` reached from the rows of the step `prev`. */
+function oneHop(edge: Edge, prev: string, guards: (c: string, w?: Record<string, unknown>) => string, dialect: SqlDialect): string {
+  const conditions = guards(edge.to, edge.where);
+  return `SELECT DISTINCT ${escapeTable(edge.to)}."objectId" FROM ${prev} ${hopJoins(edge, prev, dialect)}${conditions ? ` WHERE ${conditions.slice(5)}` : ''}`;
+}
+
+/** A repeated hop: a recursive walk seeded with the step `prev`, bounded by what the other hops leave; two steps. */
 function repeatedHop(
   edge: Edge,
   prev: string,
+  name: string,
+  walk: string,
   left: number,
   guards: (c: string, w?: Record<string, unknown>) => string,
-  params: unknown[],
-  dialect: SqlDialect
-): string {
+  params: unknown[]
+): string[] {
   if (left < 1) throw new Error(`The repeated hop has no depth left: "maxDepth" covers only the ${edge.repeat ? 'other' : ''} hops`);
-  const t = escapeTable(edge.to);
-  const field = escapeColumn(edge.field);
-  let join: string;
-  if (edge.storage === 'absent') join = `JOIN ${t} ON FALSE`;
-  else if (edge.storage === 'relation') {
-    const j = junctionOf(edge.to, edge.field);
-    join = edge.back
-      ? `JOIN ${j} ON ${j}."relatedId" = "_walk"."objectId" JOIN ${t} ON ${t}."objectId" = ${j}."owningId"`
-      : `JOIN ${j} ON ${j}."owningId" = "_walk"."objectId" JOIN ${t} ON ${t}."objectId" = ${j}."relatedId"`;
-  } else if (edge.storage === 'list') {
-    throw new Error('A list field cannot be followed again and again; a tree is a Link to the same collection');
-  } else {
-    join = edge.back
-      ? `JOIN ${t} ON ${t}.${field} = "_walk"."objectId"`
-      : `JOIN ${t} AS "_from" ON "_from"."objectId" = "_walk"."objectId" JOIN ${t} ON ${t}."objectId" = "_from".${field}`;
-  }
-  // The seeds bind before the step's guards: SQL reads the CTE top to bottom,
-  // and the parameter order has to follow the text order.
-  const seeds = `SELECT "_seed"."objectId", 0 FROM (${prev}) AS "_seed"`;
+  if (edge.storage === 'list') throw new Error('A list field cannot be followed again and again; a tree is a Link to the same collection');
+  // The bound binds before the step's guards: SQL reads the text top to bottom, and the parameter order has to follow it.
   params.push(left);
-  const step = `SELECT ${t}."objectId", "_walk"."_depth" + 1 FROM "_walk" ${join} WHERE "_walk"."_depth" < ?${guards(edge.to, edge.where)}`;
-  return (
-    `WITH RECURSIVE "_walk"("objectId", "_depth") AS (${seeds} UNION ${step}) ` +
-    `SELECT DISTINCT "objectId" FROM "_walk" WHERE "_depth" >= 1`
-  );
+  const step =
+    `SELECT ${escapeTable(edge.to)}."objectId", "_walk"."_depth" + 1 FROM ${walk} AS "_walk" ${hopJoins(edge, '"_walk"', 'sqlite')} ` +
+    `WHERE "_walk"."_depth" < ?${guards(edge.to, edge.where)}`;
+  return [
+    `${walk}("objectId", "_depth") AS (SELECT "objectId", 0 FROM ${prev} UNION ${step})`,
+    `${name}("objectId") AS (SELECT DISTINCT "objectId" FROM ${walk} WHERE "_depth" >= 1)`
+  ];
 }
 
 /**

@@ -69,6 +69,12 @@ export interface EngineDatabase {
    * rather than assuming it is there.
    */
   registerFunction?(name: string, fn: (...args: never[]) => number | string | bigint | null): void;
+  /**
+   * P115-HST006-NOROLLBACKCASE: run `fn` atomically, nested or not, by the engine's own means. Present only on an
+   * engine that refuses transaction statements in SQL (a Cloudflare Durable Object: `ctx.storage.transactionSync`);
+   * absent, the schema code uses a SAVEPOINT. `transaction(fn)` stays as it is: it is better-sqlite3's shape.
+   */
+  atomic?<T>(fn: () => T): T;
 }
 
 export interface ResolvedEngine {

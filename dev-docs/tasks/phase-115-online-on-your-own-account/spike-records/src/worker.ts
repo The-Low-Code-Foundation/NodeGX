@@ -10,6 +10,11 @@
  *   GET /__exit                   records written through the adapter, its answers, and the database as an export file
  *   GET /__ops                    what one ordinary create / fetch / list / update / count costs in Cloudflare's
  *                                 billed rows (rows read, rows written), on a 4-column collection of 50 rows
+ *   GET /__hst015                 HST-015 (2026-11-06): the whole suite through the PRODUCT engine
+ *                                 (`packages/nodegx-backend/cloudflare/durableObjectSql.ts`), HST-015's own cases
+ *                                 (every string filter against the JavaScript function, a real pattern refused in
+ *                                 words, eight hops), and the atomicity case on this spike's engine as it was (the
+ *                                 control: it drops every SAVEPOINT, so the case must be red there)
  *
  * Both doors need `?key=<RUN_KEY>` when the Worker has a RUN_KEY var (set at deploy with `--var`, never committed),
  * so a stranger cannot spend the account's free rows. Each object deletes its own storage after a run.
@@ -20,12 +25,14 @@ import { DurableObject } from 'cloudflare:workers';
 import { makeContext, runConformance, type ConformanceArea } from '@noodl/backend-contract/conformance';
 import localSql from '@noodl/runtime/src/api/adapters/local-sql';
 import { durableObjectEngine, newLedger, type DoStorage } from './doEngine';
+import { durableObjectEngine as productEngine, newLedger as productLedger } from '../../../../../packages/nodegx-backend/cloudflare/durableObjectSql';
+import { eightHopsCase, notPlainCase, stringFilterCase } from '../../../../../packages/nodegx-backend/tests/helpers/hst015-cases';
 import { exportDatabase } from './exit';
 
 interface Env {
   RECORDS: {
     idFromName(name: string): unknown;
-    get(id: unknown): { conformance(areas: string[] | null): Promise<unknown>; ops(): Promise<unknown>; exit(): Promise<unknown> };
+    get(id: unknown): { conformance(areas: string[] | null): Promise<unknown>; ops(): Promise<unknown>; exit(): Promise<unknown>; hst015(): Promise<unknown> };
   };
   RUN_KEY?: string;
 }
@@ -61,6 +68,64 @@ export class Records extends DurableObject {
       byArea: tally(report.results),
       ledger
     };
+  }
+
+  async hst015(): Promise<unknown> {
+    const storage = (this.ctx as unknown as { storage: Storage }).storage;
+    const summary = (report: Awaited<ReturnType<typeof runConformance>>) => ({
+      total: report.total,
+      passed: report.passed,
+      failed: report.failed,
+      failedAsDeclared: report.failedAsDeclared,
+      failures: report.failures.map((f) => ({ id: f.id, message: (f.message ?? '').slice(0, 600) }))
+    });
+    const run = async (engine: unknown, cases?: Parameters<typeof runConformance>[2]) => {
+      let adapter: { disconnect(): Promise<void> } | undefined;
+      const report = await runConformance(
+        async () => {
+          const a = new localSql.LocalSQLAdapter('durable-object', { engine: engine as never });
+          await a.connect();
+          adapter = a;
+          return a;
+        },
+        { adapter: 'local-sql on a Durable Object' },
+        cases
+      );
+      if (adapter) await adapter.disconnect().catch(() => undefined);
+      return report;
+    };
+    const out: Record<string, unknown> = {};
+    const ledger = productLedger();
+    out.suite = { ...summary(await run(productEngine(storage, ledger))), ledger };
+    const tally = { plain: 0, viaFunction: 0, refused: 0 };
+    out.hst015 = { ...summary(await run(productEngine(storage, productLedger()), { cases: [stringFilterCase(false, tally), notPlainCase, eightHopsCase] })), tally };
+    const asItWas = newLedger();
+    out.atomicityOnTheSpikeEngine = {
+      ...summary(await run(durableObjectEngine(storage, asItWas), { only: ['schema/a-change-that-fails-halfway-changes-nothing'] })),
+      dropped: asItWas.droppedTransactionStatements
+    };
+    // Does transactionSync nest? The schema code's atomic blocks run inside db.transaction on an import.
+    try {
+      storage.sql.exec('CREATE TABLE IF NOT EXISTS "_nest" ("v" TEXT)');
+      storage.transactionSync(() => {
+        storage.sql.exec('INSERT INTO "_nest" VALUES (\'outer\')');
+        try {
+          storage.transactionSync(() => {
+            storage.sql.exec('INSERT INTO "_nest" VALUES (\'inner\')');
+            throw new Error('inner refused');
+          });
+        } catch {
+          /* the inner block alone rolls back */
+        }
+      });
+      out.nestedTransactionSync = storage.sql.exec('SELECT "v" FROM "_nest" ORDER BY "v"').toArray();
+    } catch (e) {
+      out.nestedTransactionSync = { error: String((e as Error)?.message ?? e) };
+    }
+    // Is SQLite's lower() ASCII-only here, as the plain string filters assume?
+    out.lower = storage.sql.exec("SELECT lower('\u00c4\u212a\u0130') AS l").toArray();
+    await storage.deleteAll();
+    return out;
   }
 
   async ops(): Promise<unknown> {
@@ -184,6 +249,14 @@ export default {
       const stub = env.RECORDS.get(env.RECORDS.idFromName('ops-' + Date.now() + '-' + Math.random()));
       try {
         return Response.json(await stub.ops());
+      } catch (e) {
+        return Response.json({ error: String((e as Error)?.stack ?? e) }, { status: 500 });
+      }
+    }
+    if (url.pathname === '/__hst015') {
+      const stub = env.RECORDS.get(env.RECORDS.idFromName('hst015-' + Date.now() + '-' + Math.random()));
+      try {
+        return Response.json(await stub.hst015());
       } catch (e) {
         return Response.json({ error: String((e as Error)?.stack ?? e) }, { status: 500 });
       }

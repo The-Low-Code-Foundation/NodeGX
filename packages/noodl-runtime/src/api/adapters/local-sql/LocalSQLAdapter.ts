@@ -9,7 +9,7 @@
  */
 
 import { resolveEngine, type EngineDatabase, type ResolvedEngine } from './engine';
-import { registerSqlFunctions } from './sqlFunctions';
+import { refuseMissingSqlFunctions, registerSqlFunctions } from './sqlFunctions';
 import { declaredProperties, inferType, requiredWithoutDefault } from './schemaCommon';
 import { SERIES_RAISE_SQL, SERIES_TABLE_DDL, SERIES_TAKE_SQL, formatSeries, seriesColumns, seriesName, seriesNow, seriesPeriod, seriesRaises } from '../series';
 import type { AclContext } from './QueryBuilder';
@@ -363,6 +363,9 @@ class LocalSQLAdapter {
       // prepare time, which is the behaviour we want if this ever stops
       // running.
       this._sqlFunctionsAvailable = registerSqlFunctions(this.db);
+      // P115 HST-015: an engine that cannot call JavaScript from SQL (a Cloudflare Durable Object) is never sent a
+      // statement that calls one of the three; it is refused first, in words, before anything runs.
+      if (!this._sqlFunctionsAvailable) this.db = refuseMissingSqlFunctions(this.db, engine.name);
 
       // Initialize schema manager
       this.schemaManager = new SchemaManager(this.db);
@@ -707,11 +710,18 @@ class LocalSQLAdapter {
     try {
       const rows = this.db.prepare(`PRAGMA table_info(${QueryBuilder.escapeTable(collection)})`).all() as Array<{
         name?: string;
+        type?: string;
       }>;
       if (!Array.isArray(rows) || rows.length === 0) return undefined;
       const present = new Set(rows.map((r) => r.name).filter((n): n is string => typeof n === 'string'));
       if (present.size === 0) return undefined;
-      return { present, absent: new Set<string>(), arrays: QueryBuilder.arrayColumns(this.schemaManager?.getTableSchema(collection)) };
+      // P115 HST-015: SQLite's own affinity rule (§3.1 of its datatype page): INT first, then CHAR, CLOB or TEXT.
+      const texts = new Set(
+        rows
+          .filter((r) => typeof r.name === 'string' && /CHAR|CLOB|TEXT/i.test(r.type || '') && !/INT/i.test(r.type || ''))
+          .map((r) => r.name as string)
+      );
+      return { present, absent: new Set<string>(), arrays: QueryBuilder.arrayColumns(this.schemaManager?.getTableSchema(collection)), texts };
     } catch (e) {
       return undefined;
     }
@@ -757,7 +767,7 @@ class LocalSQLAdapter {
       const properties = declaredProperties(this._getSchema(collection));
       const scope = this._columnScope(collection);
       if (!properties && !scope) return null;
-      return { properties, present: scope?.present };
+      return { properties, present: scope?.present, texts: scope?.texts };
     };
   }
 

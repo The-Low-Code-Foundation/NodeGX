@@ -116,6 +116,13 @@ export function wrapDurableObjectSql(storage: DoStorage, ledger: EngineLedger): 
         return storage.transactionSync(() => fn(...args));
       };
     },
+    // HST-015 (P115-HST006-NOROLLBACKCASE): the schema code's atomic blocks (drop a column, rename a collection,
+    // retype a field, make one required, declare indexes and checks) come here instead of as SAVEPOINT/BEGIN text,
+    // which this engine can only drop. After HST-015 `droppedTransactionStatements` stays empty: the ledger is the gate.
+    atomic(fn) {
+      ledger.transactionSyncCalls++;
+      return storage.transactionSync(fn);
+    },
     close() {
       /* a Durable Object's database has no handle to close */
     }
