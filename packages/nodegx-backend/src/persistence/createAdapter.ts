@@ -143,6 +143,17 @@ export interface CreateAdapterOptions {
   allowEphemeral?: boolean;
   /** Collection schemas, if known up front (same shape as dbCollections metadata). */
   collections?: Record<string, unknown>;
+  /**
+   * P115 HST-014: a SQLite engine the host hands in (`BackendServiceOptions.recordEngine`) instead of the runtime's
+   * resolver. Ignored with a `storageUrl` (PostgreSQL is not SQLite).
+   */
+  engine?: RecordEngine | null;
+}
+
+/** P115 HST-014: `{ name, open(dbPath) }`, the shape `LocalSQLAdapter`'s `engine` option takes. */
+export interface RecordEngine {
+  name: string;
+  open(dbPath: string): unknown;
 }
 
 /**
@@ -177,7 +188,8 @@ export async function createAdapter(options: CreateAdapterOptions): Promise<Pers
 
   const adapter: IStorageAdapter = new LocalSQLAdapter(dbPath, {
     allowEphemeral: !!options.allowEphemeral,
-    collections: options.collections || {}
+    collections: options.collections || {},
+    ...(options.engine ? { engine: options.engine } : {})
   });
 
   await adapter.connect(); // throws loudly if it cannot persist and !allowEphemeral

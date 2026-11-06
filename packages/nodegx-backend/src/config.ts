@@ -16,6 +16,7 @@ import * as os from 'os';
 import * as path from 'path';
 import type { DataDirStore } from './config/dataDirStore';
 import type { BucketBinding } from './storage/BindingDriver';
+import type { RecordEngine } from './persistence/createAdapter';
 
 /** Fully-resolved options a BackendService runs with. */
 export interface BackendServiceOptions {
@@ -132,6 +133,14 @@ export interface BackendServiceOptions {
    * rows say `binding` (`storage/BindingDriver.ts`). Not a CLI flag: only code that runs the service has a binding.
    */
   filesBucket: BucketBinding | null;
+  /**
+   * P115 HST-014 — the SQLite engine the records live in, handed in by the host. null (every Node spawner) = the
+   * runtime's own resolver (`node:sqlite`, then better-sqlite3), as before. A Cloudflare Durable Object hands in its
+   * own database (`ctx.storage.sql`, synchronous like `node:sqlite`), whose transactions are `transactionSync`.
+   * Sessions 5–13 set it by patching `LocalSQLAdapter.prototype.connect`; this is that seam made an option. Not a
+   * CLI flag: only code that runs the service has one.
+   */
+  recordEngine: RecordEngine | null;
 }
 
 /** P115 HST-010: a `fetch` for requests to the backend's own address (see `loopbackFetch`). */
@@ -165,7 +174,8 @@ const DEFAULTS: BackendServiceOptions = {
   serveApp: null,
   loopbackFetch: null,
   dataDirStore: null,
-  filesBucket: null
+  filesBucket: null,
+  recordEngine: null
 };
 
 /**

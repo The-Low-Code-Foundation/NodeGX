@@ -237,7 +237,8 @@ export class BackendService {
     //    service refuses to start. That is the point.
     this.persistence = await createAdapter({
       dataDir: this.options.dataDir,
-      allowEphemeral: this.options.allowEphemeral
+      allowEphemeral: this.options.allowEphemeral,
+      engine: this.options.recordEngine
     });
     // PRD-001: the page cap, read fresh on every query so `PUT /admin/ops`
     // applies to the next request rather than the next restart. `this.ops` is
