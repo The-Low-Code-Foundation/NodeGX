@@ -1,6 +1,6 @@
 # HST-014 — The deploy command
 
-**Opened 2026-11-05.** **Depends on HST-010…013.** **Status: 🔨 built, session 12 (2026-11-06, `579657bed`), §5: LIVE on `hst-campus` (§5.5): Richard ran the command; AC2, AC3, AC4 and MUST 1–6 and 8 read over HTTP on Cloudflare; AC1 waits only on his phone.** Kind: product.
+**Opened 2026-11-05.** **Depends on HST-010…013.** **Status: ✅ done, session 12 (2026-11-06, `579657bed`), §5: Fixture C deployed by the command alone to a new Worker (`hst-campus`), MUST 1–8 on Richard's phone (AC1), a second and a third run kept everything (AC2), nothing private uploaded (AC3), one origin by the route table (AC4). The follow-ups are in §5.4.** Kind: product.
 
 ## 1. The person sentence
 
@@ -78,11 +78,9 @@ modules check the flag, `_getCurrentUser` among them). The product build has it.
 - Not a defect: under `wrangler dev` a GET on `/metrics` is 200, because the request really comes from 127.0.0.1. The
   live spike answers 401, so on Cloudflare the service sees the visitor's address.
 
-### 5.4 Left
+### 5.4 Left (follow-ups, not ACs)
 
-1. **AC1:** Richard runs the command against a NEW Worker name (`hst-campus`); then `check-campus-deploy.mjs
-   ~/.nodegx/cloudflare/hst-campus --seed --answer --upload` and MUST 1–8 on his phone. Then AC2 live: run the command
-   again and read the same list.
+1. ✅ AC1 and AC2 live (§5.5).
 2. Workflows and triggers are taken at a backend's FIRST start only. A change to `nodegx.automations.json` after that is
    not carried by a redeploy: it needs upserts through `/admin/workflow-defs` and `/admin/triggers`, and the command says
    so on every deploy that has the file.
@@ -106,4 +104,8 @@ a new bucket `hst-campus-files`, the admin credential up as a secret with the fi
 | the check after it, no seed, `--file` of the file uploaded before | 15/15: the accounts, the role, Ada, her answer and the file are all kept (**AC2 live**) |
 | wrangler's "Read 29 files" against step 4's 24 site files | 24 files + 5 folders: wrangler counts the folders; nothing else went up |
 
-Left for AC1: MUST 1–8 on Richard's phone (line 7: his tap's answer, then a redeploy, then the owner's list).
+**AC1, Richard's phone (2026-11-06):** *"Done! All worked as expected"*: MUST 1–6 and 8 on the live address. Line 7:
+after his tap, the command was run a third time (version `0dec9022`), and the owner's list read 2 answers over HTTP
+(the check's and his), with the file uploaded before still at its link. 🔴 `MUST.md` is published at `/MUST.md` (Ada's
+id, no password): `nodegx deploy` copies a project's top-level `.md`. Harmless for the fixture; it belongs with
+GITIGNOREDPUBLISHED's ruling on what a deploy publishes.

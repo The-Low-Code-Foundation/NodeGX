@@ -8,8 +8,9 @@ never ahead of lanes 9, 2 and 3. Earlier prompts are in git history (`git log --
 
 0000000. [HST-014 §5](HST-014-THE-DEPLOY-COMMAND.md): session 12. The fifth product piece: the deploy COMMAND
    (`packages/nodegx-backend/cloudflare/deploy.mjs`), graded on workerd with Fixture C (first deploy 22/22, a second
-   run over the same state kept everything) and Fixture B (a function and the seeded schedule). **AC1 is Richard's
-   live run** (§5.4.1); then the left items in §5.4, then [HST-015](HST-015-THE-THREE-DURABLE-OBJECT-REDS.md).
+   run over the same state kept everything) and Fixture B (a function and the seeded schedule); then LIVE (§5.5):
+   Richard ran it to `hst-campus`, MUST 1–8 on his phone, two more runs kept everything. **✅ done.** Next:
+   [HST-015](HST-015-THE-THREE-DURABLE-OBJECT-REDS.md), or the follow-ups in §5.4 (automations on a redeploy first).
 000000. [HST-013 §5](HST-013-CODE-NODES-PRINTED-AT-DEPLOY.md): session 11. The fourth product piece: every code
    node's compile through one seam (`noodl-runtime/src/printedcode.ts`), printed at build (`printcode.ts`) into its own
    Worker module; the nine suites 76/76 on workerd; a function upload with unprinted code refused by name. Then
@@ -115,13 +116,12 @@ that unblocks the most (each: a product change + its tests + Fixture C still 8/8
    `build.mjs` (now with the printing) + `wrangler deploy` do by hand. Its print step is `collectCode` over the
    project's cloud functions; a refusal stops the deploy (`refusalSentence`). Read `spike-backend/site.mjs`,
    `seed-campus.mjs` and `src/worker.ts` first: the command's Worker is that file made a product.
-5. 🔨 **The deploy command** ([HST-014](HST-014-THE-DEPLOY-COMMAND.md)), session 12: `packages/nodegx-backend/cloudflare/deploy.mjs`,
-   graded on workerd (§5.2). Next: Richard runs it live to a NEW Worker name (`hst-campus`), the deploying machine's
-   record is `~/.nodegx/cloudflare/hst-campus/deployment.json`, then `fixtures/check-campus-deploy.mjs
-   ~/.nodegx/cloudflare/hst-campus --seed --answer --upload` (never a boot) and MUST 1–8 on his phone; then run it again
-   (AC2 live). Then §5.4: automations on a redeploy, the npm CLI / MCP door, the alert and warm-up. 🔴 Run `--local`
-   with `NODEGX_WRANGLER=<spike-backend>/node_modules/wrangler/bin/wrangler.js` and a free `--port`; stop it with
-   BOTH the task stop and `pkill -f -- "--persist-to <out>"` (the command spawns `wrangler dev` as its child; session 12 always did both, and never measured one alone).
+5. ✅ **The deploy command** ([HST-014](HST-014-THE-DEPLOY-COMMAND.md)), session 12: `packages/nodegx-backend/cloudflare/deploy.mjs`,
+   live on `hst-campus` (record `~/.nodegx/cloudflare/hst-campus/deployment.json`; check with
+   `fixtures/check-campus-deploy.mjs <that folder>`, `--seed` never boots). A redeploy sends no secret, so a session may
+   run it; a FIRST deploy sends the admin credential and is Richard's terminal. 🔴 `--local` needs
+   `NODEGX_WRANGLER=<absolute spike-backend path>/node_modules/wrangler/bin/wrangler.js` and a free `--port`; stop it with
+   BOTH the task stop and `pkill -f -- "--persist-to <out>"`. Follow-ups: HST-014 §5.4.
 6. **Session 5's three DO reds** ([HST-015](HST-015-THE-THREE-DURABLE-OBJECT-REDS.md)): regex declared unsupported, EXPRDEPTH flattened, NOROLLBACKCASE + transactions.
 Realtime (d) is measured alongside or after 5. Tickets written (HST-010…015); the BOARD lane 10 line says "building".
 
