@@ -6,7 +6,8 @@ phase 107 and our Swift runtime experiment phase"* (P110). Nothing here is built
 **2026-10-12: HST-005's VM route is taken forward by P112 [OWN-016](../phase-112-your-own-nodegx/OWN-016-SHIP-IT.md)**
 (P112 R18), for the npm kit: a deploy folder plus the backend on a VM the person owns. Read OWN-016 before building
 HST-005. The rest of this phase stays parked.
-Task files: [HST-000](HST-000-THE-HOURS-WRITTEN-DOWN.md) … [HST-015](HST-015-THE-THREE-DURABLE-OBJECT-REDS.md). The board is §6.
+Task files: [HST-000](../../parked/online-the-twelve-runs/HST-000-THE-HOURS-WRITTEN-DOWN.md) … [HST-018](HST-018-CLAUDE-FINDS-AND-BUYS-THE-DOMAIN.md). The board is §6. HST-000, 001, 003, 005, 008, 009 and HST-007
+§1–§5 were parked at the close (R7) in [`parked/online-the-twelve-runs/`](../../parked/online-the-twelve-runs/README.md), with §7's ACs 3–6.
 
 > "Now if someone had a system where it just set up the VM, got you the domain name you wanted, connected all the APIs
 > and just said 'ok now go ahead and start your conversation with Claude', that would be a big deal."
@@ -129,16 +130,16 @@ The report (HST-008) puts the twelve runs in one table and asks Richard for the 
 
 | task | what | kind | depends on |
 |---|---|---|---|
-| [HST-000](HST-000-THE-HOURS-WRITTEN-DOWN.md) | **The hours, written down.** The ex-client lists the evenings he lost and what he googled; each becomes a row with the task that removes it, or "a sign-up, stays human". The phase's acceptance criteria come from this list. | research | — |
-| [HST-001](HST-001-THE-CAMPUS-FLOW-REBUILT.md) | **The campus flow, rebuilt.** The client's id-in-the-link, interactions-by-id, hook-to-Mailchimp flow built through Claude Desktop, the MCP and the preview, no editor. Every node the vocabulary lacks is a finding for P107. | proof | OWN-011 or this checkout |
+| [HST-000](../../parked/online-the-twelve-runs/HST-000-THE-HOURS-WRITTEN-DOWN.md) | **The hours, written down.** The ex-client lists the evenings he lost and what he googled; each becomes a row with the task that removes it, or "a sign-up, stays human". The phase's acceptance criteria come from this list. | research | — |
+| [HST-001](../../parked/online-the-twelve-runs/HST-001-THE-CAMPUS-FLOW-REBUILT.md) | **The campus flow, rebuilt.** The client's id-in-the-link, interactions-by-id, hook-to-Mailchimp flow built through Claude Desktop, the MCP and the preview, no editor. Every node the vocabulary lacks is a finding for P107. | proof | OWN-011 or this checkout |
 | [HST-002](HST-002-THREE-FIXTURES.md) | **Three fixtures.** One NodeGX project per shape (A, B, C), small, each with a written list of what it must do online. | fixtures | HST-001 |
-| [HST-003](HST-003-PAGES-AS-A-DEPLOY-TARGET.md) | **Cloudflare Pages as a deploy target.** DEP-003's direct upload, lifted into `nodegx deploy` and the MCP; where the engine lives (reading 3) decided; the interpreter's size on a phone measured. | plumbing | DEP-003's design, R2 |
+| [HST-003](../../parked/online-the-twelve-runs/HST-003-PAGES-AS-A-DEPLOY-TARGET.md) | **Cloudflare Pages as a deploy target.** DEP-003's direct upload, lifted into `nodegx deploy` and the MCP; where the engine lives (reading 3) decided; the interpreter's size on a phone measured. | plumbing | DEP-003's design, R2 |
 | [HST-004](HST-004-A-WORKFLOW-ON-A-WORKER.md) | **A workflow on a Worker.** Shape B with no VM: which server-side nodes can run on Workers, how the secret stays server-side, how the front end calls it. A spike that ends in a measurement, not a product. | experiment | HST-002, P107 |
-| [HST-005](HST-005-A-BOX-YOU-OWN.md) | **A box you own.** DEP-005 and DEP-006 lifted into the CLI and MCP; Hetzner's availability and price re-measured on its console; Cloudflare Containers run as the third row. | plumbing | DEP-004/005/006's designs |
+| [HST-005](../../parked/online-the-twelve-runs/HST-005-A-BOX-YOU-OWN.md) | **A box you own.** DEP-005 and DEP-006 lifted into the CLI and MCP; Hetzner's availability and price re-measured on its console; Cloudflare Containers run as the third row. | plumbing | DEP-004/005/006's designs |
 | [HST-006](HST-006-THE-CONTRACT-ON-D1.md) | **The contract on D1.** A spike: which of `@noodl/backend-contract` a Workers + D1 adapter can honour, and which parts (files, realtime, mail) need something else. Ends in a table, not an adapter. | experiment | HST-002, P34's contract |
 | [HST-007](HST-007-THE-DOMAIN.md) | **The domain.** Registrar and DNS from the connector: the name the person wanted, bought on their account, pointed at the site, with the human steps named. | plumbing | HST-003 |
-| [HST-008](HST-008-THE-COMPARISON.md) | **The comparison.** Twelve runs (three shapes, two routes, two drivers), the six measurements from §4, the vendor numbers re-read on the day, and the ruling asked. | report | HST-003…007 |
-| [HST-009](HST-009-THE-WORDS.md) | **The words.** The one sentence a person says to Claude; what the connector says as it works; the directory listing or the registry entry; the exit explained in the person's words. | copy + distribution | HST-008, SEE-008 |
+| [HST-008](../../parked/online-the-twelve-runs/HST-008-THE-COMPARISON.md) | **The comparison.** Twelve runs (three shapes, two routes, two drivers), the six measurements from §4, the vendor numbers re-read on the day, and the ruling asked. | report | HST-003…007 |
+| [HST-009](../../parked/online-the-twelve-runs/HST-009-THE-WORDS.md) | **The words.** The one sentence a person says to Claude; what the connector says as it works; the directory listing or the registry entry; the exit explained in the person's words. | copy + distribution | HST-008, SEE-008 |
 | [HST-010](HST-010-THE-BACKEND-CALLS-ITSELF-IN-PROCESS.md) | **The backend calls itself in-process** (R3, 2026-11-05: build the route here). A cloud function's calls to its own backend go through a transport the host hands in; on a Worker, the in-process handler (LOOPBACK). | product | HST-006 §7 |
 | [HST-011](HST-011-THE-DATA-DIR-IN-A-STORE.md) | **The data dir in a store it is handed** (seam 3): rules, keys and secrets survive a restart on a Worker. | product | HST-010 |
 | [HST-012](HST-012-FILES-IN-A-BUCKET.md) | **Files in a bucket, and who may upload** (seam 5 + NOFILESRULE). | product | HST-010 |
@@ -152,6 +153,9 @@ The report (HST-008) puts the twelve runs in one table and asks Richard for the 
 **Order:** HST-000 and HST-001 first and in parallel (both are measurements; neither waits for P107 to close). Then
 HST-002. Then HST-003 and HST-005 in parallel (plumbing), HST-004 and HST-006 in parallel (experiments). HST-007 after
 HST-003. HST-008 last but one, HST-009 last.
+
+**Parked 2026-11-07 (R7):** HST-000, 001, 003, 005, 008, 009 and HST-007 §1–§5 live in
+[`parked/online-the-twelve-runs/`](../../parked/online-the-twelve-runs/README.md); the order above is theirs if it is unparked.
 
 ## 7. Acceptance criteria for the phase
 
