@@ -7,20 +7,19 @@
 
 ## 0. Where it stands
 
-**ODT-002 is built** (`packages/nodegx-backend/cloudflare/deployApi.ts`, 17 tests): the deploy's step 5 goes up
-through Cloudflare's API whenever this computer holds NodeGX's sign-in, else wrangler (saying why). What is left of it
-is **the live grade, Richard's command** (ODT-002 §4): a redeploy of P115's live `hst-campus` through the API, read
-before and after with `check-campus-deploy.mjs`. Baseline (s3, 2026-11-07 ~22:50 CET): **14/14, the owner reads 2
-answers.** 🔴 The classifier refuses a session's live writes to Richard's account (P115 s13–15): write him the
-command, read the result.
+**ODT-002 is DONE** (`packages/nodegx-backend/cloudflare/deployApi.ts`, 17 tests, and LIVE: Richard redeployed
+P115's `hst-campus` through the API at 22:46 CET 2026-11-07; after it 15/15, the 2 answers, the file uploaded just
+before, the credential). The deploy's step 5 goes up through Cloudflare's API whenever this computer holds NodeGX's
+sign-in, else wrangler (saying why). **Next: ODT-003** (the Worker's build without esbuild on the person's machine).
+🔴 The classifier refuses a session's live writes to Richard's account (P115 s13–15): write him the command, read the
+result (`deployment.json`, `GET /admin/files`, `check-campus-deploy.mjs` are the session's).
 
 **Measure first** (nothing is inherited):
 ```
 node packages/nodegx-backend/cloudflare/sign-in.mjs status
 python3 -c "import json,os;d=json.load(open(os.path.expanduser('~/.nodegx/cloudflare/hst-campus/deployment.json')));print(d['deploys'][-1], d['domain'])"
 ```
-A last deploy with `"via": "api"` means Richard ran ODT-002 §4: run the checker with `--file <path>` (he has the
-path from `--upload`; ask only for that) and write the readings into ODT-002 §4. No `via` = not run yet.
+(`hst-campus`'s last deploy is `"via": "api"`, 21:46:39Z: anything later is someone else's.)
 
 ## 1. The order
 
@@ -32,8 +31,8 @@ path from `--upload`; ask only for that) and write the readings into ODT-002 §4
 4. ✅ **The Claude Desktop drive of `cloudflare_sign_in`**: ODT-001 DONE (sign out, sign in, the page opened, Allow,
    found; ODT-001 AC5). The `nodegx-dev` config entry was removed after it; Richard switches the extension back on.
    The `.mcpb` is graded when a release carries the tool. P135-DESKTOP-NOTOOLS is open beside it.
-5. 🔨 **ODT-002, the deploy through the API**: BUILT s3. Left: the live grade (ODT-002 §4, Richard's command), then
-   its readings written. Not yet live: the secrets call (`--new-admin-credential`), the domain detach (`--no-domain`).
+5. ✅ **ODT-002, the deploy through the API**: built and graded live s3 (ODT-002 §4). Not yet live: the secrets
+   call (`--new-admin-credential`), the domain detach (`--no-domain`).
 6. **ODT-003 next** (no bundler on the person's machine): (e) says a prebuilt Worker module beside a printed-code
    module uploads as it is; `@nodegx/backend`'s `src/prebuilt-worker.cjs` is that idea already, at pack time, and
    [`deployCloudflare-seam.patch`](deployCloudflare-seam.patch) is the seam it wants (README §4).
@@ -46,7 +45,7 @@ path from `--upload`; ask only for that) and write the readings into ODT-002 §4
 | a batch's answer used as the next batch's key (the protocol: the session's jwt for every batch) | ✅ fixed in `deployApi.ts` and, latent, in `probeWrites.ts` |
 | `@nodegx/backend` anchors (`node --test` 3/3); dry run of Fixture C (26 files, 3 modules) | ✅ |
 | the comparison with wrangler shipped (ODT-002 §5): ~15 KB against 369 MB | ✅ |
-| the live redeploy of `hst-campus` | ⏳ Richard's command |
+| the live redeploy of `hst-campus` (Richard) | ✅ 15/15 after, 2 answers, the file from just before opens; the session found the file's path itself with `GET /admin/files` |
 
 ## 2b. What session 2 did (2026-11-07)
 

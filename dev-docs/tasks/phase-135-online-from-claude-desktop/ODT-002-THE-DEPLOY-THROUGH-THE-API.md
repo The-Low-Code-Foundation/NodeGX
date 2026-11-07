@@ -1,8 +1,8 @@
 # ODT-002 — The deploy through Cloudflare's API
 
-**Phase:** [135](README.md) · **Kind:** product · **Depends on:** ODT-000 (c) ✅ · **State:** 🔨 BUILT 2026-11-07
-(session 3), graded on a scripted Cloudflare; **the live redeploy (§4) is Richard's command**, because the classifier
-refuses a session's live writes to his account (P115 sessions 13–15).
+**Phase:** [135](README.md) · **Kind:** product · **Depends on:** ODT-000 (c) ✅ · **State:** ✅ DONE 2026-11-07
+(session 3): graded on a scripted Cloudflare, then **live**: Richard redeployed P115's `hst-campus` through the API
+(22:46 CET) and every account, record, answer and file was still there (§4). Two calls remain unmade live (§4).
 
 ## 1. What
 
@@ -80,10 +80,16 @@ updated (its data and its credential kept)"*. Every site file is sent once (the 
 so Cloudflare has none of them under the new names). The session then runs the checker with `--file <the path the
 upload printed>`: **14/14, 2 answers, the file still opens** = AC5 on the API.
 
-| reading | answer |
+| reading (2026-11-07) | answer |
 |---|---|
-| the redeploy's step 5 output | ⏳ |
-| `check-campus-deploy.mjs … --file …` after | ⏳ |
+| the upload before (Richard, `--upload`) | `open-day.txt` stored 21:46:13Z as `/files/80f5c6077f0237ce_open-day.txt` (read back by the session from `GET /admin/files`) |
+| the redeploy (Richard) | ✅ `deployment.json`: deploy 6 at **21:46:39Z, `"via": "api"`**, same address. Step 5's printed lines were not relayed: the record is the reading |
+| the admin credential kept | ✅ `GET /admin/files` with the record's credential after the redeploy: 200 (a lost secret would be 401) |
+| `check-campus-deploy.mjs … --file /files/80f5c6077f0237ce_open-day.txt` after (session, 22:50 CET) | ✅ **15/15**: MUST 1, 3–6, the owner reads **2 answers** (as before), the second account refused, signed out refused, the production engine, the accounts file 404, AC4's four families the backend's, **AC2: the file uploaded before the redeploy opens (200)** |
+| the older file (11-06, survived five wrangler deploys) | ✅ `/files/dc77c4dd02d20503_open-day.txt` 200 |
+
+So the switch from wrangler to the API, on an app wrangler made, kept the Durable Object (no migration sent), the
+secret (`keep_bindings`), the R2 bucket's files and the rules. **P135 AC5 holds for a redeploy through the API.**
 
 Not graded live yet: the secrets call (8), the domain detach (10), a NEW Worker made by this route (the probe made
 one: run 3), and `--domain` on the real deploy (P115's step 3 can now run through the API, without `NODEGX_WRANGLER`:
@@ -105,7 +111,8 @@ machine (esbuild + the backend's source); this task replaced the upload only.
 
 1. ✅ The deploy goes up through the API with NodeGX's sign-in, no wrangler: scripted (17 tests, 3 mutants caught:
    a redeploy sending the migration, the "ours" refusal off, the domain not waited for in public DNS).
-2. ⏳ A live redeploy of `hst-campus` through the API keeps every account, record and file (§4).
+2. ✅ A live redeploy of `hst-campus` through the API keeps every account, record and file (§4: 15/15, 2 answers,
+   both files, the credential).
 3. ✅ Nothing it says holds the token, the credential or the account id (test 1).
 4. ✅ The comparison with wrangler shipped is written (§5).
 5. ✅ `@nodegx/backend`'s pack anchors still hold (`node --test` 3/3) and the deploy's dry run on Fixture C still
