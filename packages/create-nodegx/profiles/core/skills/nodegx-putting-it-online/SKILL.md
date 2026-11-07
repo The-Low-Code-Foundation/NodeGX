@@ -1,6 +1,6 @@
 ---
 name: nodegx-putting-it-online
-description: "How to put a NodeGX app online on the person's own free Cloudflare account with one command: its pages, its backend, its data, its rules and its functions, at a workers.dev address that stays the same, with nothing wiped when it is updated. LOAD when the person asks to put an app online, publish it, deploy it, share it with people on other devices, or host it on Cloudflare."
+description: "How to put a NodeGX app online on the person's own free Cloudflare account with one command: its pages, its backend, its data, its rules and its functions, at a workers.dev address that stays the same, with nothing wiped when it is updated. LOAD when the person asks to put an app online, publish it, deploy it, share it with people on other devices, or host it on Cloudflare, and before you build a link the app sends by email (to sign in, confirm an address or set a password)."
 ---
 
 # Putting a NodeGX app online on Cloudflare
@@ -57,3 +57,11 @@ A free Cloudflare account is enough. It needs no card. On the free plan, Cloudfl
   Cloudflare's other command line (`cf`) signed in, because wrangler's sign-in cannot buy names.
 - If the nodegx server offers a `cloudflare_sign_in` tool, don't use it for this. Its sign-in can't put a Worker up
   yet. The sign-in in step 2 can.
+
+## A link the app sends by email
+
+Opening a link in an email must do nothing on its own. The link opens a page. A button on that page does the work.
+Many work and school mail systems open each link in a new email to scan it, before the person sees the email. A link
+that signs someone in, confirms an address or sets a password as it opens is used up by that scan. The person then
+sees "this link has expired", however many new links you send. The sign-in and new-password links NodeGX's backend
+sends already open a page first. Build any link of your own, in a cloud function or a workflow, the same way.

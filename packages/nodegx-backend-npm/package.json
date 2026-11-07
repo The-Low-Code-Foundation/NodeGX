@@ -28,8 +28,8 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@nodegx/export": "^0.2.5",
-    "@nodegx/preview": "^0.2.8"
+    "@nodegx/export": "^0.2.6",
+    "@nodegx/preview": "^0.2.9"
   },
   "scripts": {
     "build": "node build.mjs",

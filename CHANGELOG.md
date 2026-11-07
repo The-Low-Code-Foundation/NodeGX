@@ -17,6 +17,66 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
+## npm packages 0.2.12 · 2026-11-07
+
+**An app that saves data can go online on your own free Cloudflare account, with one command.**
+
+This release is `create-nodegx`, `create-nodegx-vibe` and `create-nodegx-cline` at 0.2.12, `@nodegx/mcp` 0.2.10,
+`@nodegx/export` 0.2.6 and `@nodegx/preview` 0.2.9. `@nodegx/backend` 0.1.0 is published for the first time.
+`npm create nodegx` now sets up `@nodegx/mcp` 0.2.10 with `@nodegx/studio` 0.1.0 beside it. The other packages stay
+at their versions.
+
+### New
+
+- **Your app online on your own Cloudflare account.** `npx @nodegx/backend deploy cloudflare <the app's folder>` puts
+  the app's pages, data, accounts, rules and functions on Cloudflare. The address stays the same when you update the
+  app. An update keeps every record and account. A free Cloudflare account is enough.
+- **One sign-in.** `npx @nodegx/backend sign-in cloudflare` opens a Cloudflare page in your browser. You click Allow
+  once on each computer.
+- **Your agent knows the steps.** Every folder `npm create nodegx` sets up has a guide to putting an app online. It
+  ends with you checking the app on your phone.
+- **Studio opens from an npm install.** Before, an agent set up with `npm create nodegx` said "NodeGX Studio is not
+  installed" unless you had the desktop app. Now Studio is installed beside the server. `open_studio` shows your app
+  in Studio.
+- **Your app as plain files.** `npx @nodegx/export export --target html <the app's folder> <a new folder>` writes the
+  app as HTML, CSS and JavaScript. There's nothing to install or build. Any web server for plain files runs it, for
+  example `npx serve <the folder>`. The note your agent reads names it beside the React export.
+- **One part of your app inside a page of your own.** Add `--component <its name>` to write one component into a
+  folder you already have. A game's menus can be built in NodeGX this way and shown over a world written in code.
+  Running the command again updates the component and leaves your own files alone.
+- **Workflows without code.** A backend workflow can now make, change, delete or find records. It can also call an
+  API, send an email and work out a value with a formula. You save an API call once and use it by name in any
+  workflow. One workflow can run another by name.
+
+### Changed
+
+- **A link your app sends by email waits for a press.** Many work and school mail systems open each link in a new
+  email to scan it. A link that does its work when it's opened is used up by that scan. Your agent now makes such a
+  link open a page. A button on that page does the work.
+
+### Fixed
+
+- **A second person signing in on one phone no longer sees the first person's rows.** When the backend refused
+  the new account a list, the page kept showing the rows it had before.
+- **Every Record node offers the record's created and updated dates.** They arrive as dates.
+- **A press on a text field's padding puts the cursor in the field.**
+- **A copied project folder gets its own backend**, never the original's.
+- **`provision_backend` keeps the rules on a table you declared.** It used to erase them.
+- **On Mistral Vibe, the Large 4 model sees its screenshots.**
+- **In Claude Code, `get_project_info` arrives whole.** It used to arrive as a short preview of a saved file.
+- **The export package no longer carries folder names** from the computer it was built on.
+
+### Good to know
+
+- The first start downloads more, because Studio comes with the server. It's about 175 MB and takes 6 to 9 seconds
+  the first time. The server alone is about 43 MB.
+- A folder set up before this release keeps the server alone. `npm create nodegx` writes `.mcp.json`,
+  `opencode.json` and `.vibe/config.toml` only when they're missing. To get Studio, delete the file and run
+  `npm create nodegx` again. The Cline kit moves its own entry to the new server when you run it again.
+- An app that lets people upload files needs Cloudflare's file storage, R2. Switch it on in your Cloudflare dashboard
+  before the first deploy.
+- On the free plan, Cloudflare refuses requests past about 100,000 a day. It doesn't charge for them.
+
 ## create-nodegx 0.2.11 · 2026-11-05
 
 **If you start by saying you're stuck, your agent points you to the help page in its first reply.**

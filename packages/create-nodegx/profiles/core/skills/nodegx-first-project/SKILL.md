@@ -88,8 +88,11 @@ too detailed to change as nodes and wires.
 - **Screens and taps** (a quiz, a card or board game, a tracker, a shop) make a NodeGX app, as the server describes.
 - **A world that moves** (3D, a canvas game, physics) is plain HTML and JavaScript in its own folder. Open it through a
   local web server. A page that loads its own JavaScript modules doesn't run from a `file://` address. Load
-  `nodegx-making-a-game` first. NodeGX can't yet place a moving world and its menus in one app. If they want to
-  change the menus themselves, tell them so.
+  `nodegx-making-a-game` first. A game's menus can still be NodeGX. Build them as a component in a NodeGX app. Then
+  `npx @nodegx/export export --target html --component <its name> <the app's folder> <the world's folder>` writes them
+  into the world's folder. The command's last line names a CSS file and a `mount…` function. The world's page links
+  that CSS file, imports the function and calls it with the element to show the menus in. When the person changes the
+  menus in NodeGX, the same command updates them and leaves the world's own files alone.
 
 ## Look, don't trust a count
 
