@@ -104,3 +104,29 @@ API could not show this: its 201 was written from the docs.
 Human steps counted for the domain (HST-007's measurement): **one browser sign-in** (`cf auth login`) and **one yes**.
 The card and the registrant contact were already on the account (R2 enabled earlier); for a new person they are once.
 
+## 7. From Claude Desktop, no terminal (Richard 2026-11-07: *"They're in Claude Desktop rocking out with a new app and
+they say 'let's get it online with CloudFlare'. What can Claude Desktop do to trigger the OAuth and save the token?"*)
+
+Read the same day:
+- **Claude Desktop itself cannot start a third-party sign-in for a connector.** MCP's URL-mode elicitation is the
+  protocol's way (the SDK the kit uses, 1.29, has it), but Desktop's support was an open feature request (claude-code
+  #41110, March 2026) with nothing found since; Claude Code has had it on and off. Desktop's built-in OAuth is for a
+  REMOTE connector's own sign-in.
+- **The NodeGX connector can.** It runs on the person's machine and already opens browser pages (`openInBrowser`,
+  Studio and the mini editor). A `cloudflare_sign_in` tool can open Cloudflare's consent page, take the answer on a
+  local callback, and keep the token (Keychain, or a 600 file under `~/.nodegx`). Claude only says "a Cloudflare page
+  opened: click Allow".
+- **Whose sign-in.** Cloudflare lets any app register its OWN OAuth client (*Create your OAuth client*: Authorization
+  Code + PKCE, no secret, for desktop/CLI apps; no device grant for third parties). Private = only the owning account's
+  members; public = any Cloudflare user, after a TXT record `cloudflare_oauth_client_publisher=…` on the client URL's
+  domain (Cloudflare polls up to two days; no manual review mentioned). So NodeGX can show ONE consent screen ("NodeGX
+  wants to deploy Workers, store files, buy a domain, send email") instead of wrangler's and cf's two.
+- **The other blocker is not the sign-in: the `.mcpb` has no npm.** It bundles a Node binary only (P128-S3-HELPERNODE),
+  so `npx wrangler` and `npm i -g cf` cannot run from Desktop. The deploy must call Cloudflare's API itself (script and
+  assets upload, the Durable Object migration, the R2 bucket, the custom domain), or ship wrangler in the bundle.
+
+To measure before building (a private OAuth client on Richard's account needs no domain verification): (a) does it
+accept a loopback redirect (`http://127.0.0.1:<port>/…`); (b) can a third-party client be granted registrar, Workers
+scripts, R2, DNS and email scopes; (c) does its access token upload a Worker and attach a domain through the API;
+(d) the refresh token's lifetime.
+
