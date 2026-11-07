@@ -12,8 +12,10 @@
  *      `nodegx-config.json` with its own origin, so the same site works at any address
  *   3. the Worker: `worker.ts` and the whole backend bundled with the backend's own esbuild settings
  *   4. a search of every file that would be uploaded for the admin credential and the project's `.env` values (AC3)
- *   5. `wrangler deploy` (or `wrangler dev` with `--local`); on a first deploy the admin credential goes up as the
- *      Worker secret NODEGX_ADMIN_TOKEN with it (`--secrets-file`), and the R2 bucket is made
+ *   5. up to Cloudflare: through its API with NodeGX's own sign-in when this computer has one (P135 ODT-002,
+ *      `deployApi.ts`: no wrangler), else `wrangler deploy` (`--wrangler` asks for it; `--local` is always `wrangler
+ *      dev`); on a first deploy the admin credential goes up as the Worker secret NODEGX_ADMIN_TOKEN with it, and the
+ *      R2 bucket is made
  *   6. the project's collections, rules and roles applied to the running backend (`applyProject`), its workflows and
  *      triggers when `nodegx.automations.json` changed since the last deploy (`applyAutomations`), then its cloud
  *      functions uploaded through the admin API, as `deploy_cloud_functions` does
@@ -33,6 +35,7 @@ import { cloudBundleNameFrom, deployCloudBundle, type CloudBundleParts, type Clo
 import { readViewerBuild } from '../../noodl-preview/src/viewerBuild';
 import { applyAutomations } from './applyAutomations';
 import { applyProject, type AdminCall } from './applyProject';
+import { ApiDeployError, chooseRoute, deployThroughApi, type ApiDeployResult } from './deployApi';
 import { domainProblem, emailProblem, workerNameFrom, workerNameProblem, wranglerConfig } from './wranglerConfig';
 
 /** Where this file is: `packages/nodegx-backend/cloudflare` (the launcher sets it; the bundle's own dir is `.build`). */
@@ -56,6 +59,10 @@ export interface DeployOptions {
   /** HST-017: the refusal email's addresses; `null` (`--no-alert`) removes them. */
   alertTo?: string | null;
   alertFrom?: string | null;
+  /** P135 ODT-002: deploy with wrangler even when this computer holds NodeGX's own Cloudflare sign-in. */
+  wrangler?: boolean;
+  /** The Cloudflare account, when the sign-in sees more than one. */
+  account?: string;
 }
 
 interface DeploymentRecord {
@@ -64,7 +71,7 @@ interface DeploymentRecord {
   url: string | null;
   adminToken: string;
   project: string;
-  deploys: Array<{ at: string; url: string | null; local: boolean }>;
+  deploys: Array<{ at: string; url: string | null; local: boolean; via?: 'api' | 'wrangler' }>;
   /** HST-007: the domain the app also answers at, kept for every later deploy. */
   domain?: string | null;
   /** HST-017: who is emailed when the backend cannot answer, and the address the last test email went to. */
@@ -84,7 +91,8 @@ const say = (line = '') => process.stdout.write(line + '\n');
 const USAGE = `usage: deploy.mjs <project> [--name <worker>] [--bucket <r2 bucket> | --no-bucket] [--viewer <folder>]
                  [--allow-development-engine] [--out <folder>] [--local [--port <n>]] [--make-roles]
                  [--new-admin-credential] [--dry-run] [--domain <hostname> | --no-domain]
-                 [--alert-to <address> --alert-from <address on your Cloudflare domain> | --no-alert]`;
+                 [--alert-to <address> --alert-from <address on your Cloudflare domain> | --no-alert]
+                 [--wrangler] [--account <id>]`;
 
 export function parseArgs(argv: string[]): DeployOptions {
   const o: DeployOptions = { project: '' };
@@ -111,6 +119,8 @@ export function parseArgs(argv: string[]): DeployOptions {
     else if (a === '--alert-to') o.alertTo = next().trim();
     else if (a === '--alert-from') o.alertFrom = next().trim();
     else if (a === '--no-alert') o.alertTo = o.alertFrom = null;
+    else if (a === '--wrangler') o.wrangler = true;
+    else if (a === '--account') o.account = next().trim();
     else if (a.startsWith('--')) throw new DeployError(`${a} is not an option.\n${USAGE}`);
     else if (!o.project) o.project = path.resolve(a);
     else throw new DeployError(`One project at a time.\n${USAGE}`);
@@ -542,8 +552,8 @@ export async function deploy(o: DeployOptions): Promise<number> {
     return 0;
   }
 
-  say(`5. ${o.local ? 'wrangler dev' : 'wrangler deploy'}`);
   if (o.local) {
+    say('5. wrangler dev');
     const port = o.port || 8787;
     fs.writeFileSync(path.join(dir, '.dev.vars'), `NODEGX_ADMIN_TOKEN=${record.adminToken}\n`, { mode: 0o600 });
     const [cmd, ...pre] = wranglerCommand();
@@ -567,6 +577,64 @@ export async function deploy(o: DeployOptions): Promise<number> {
     return 0;
   }
 
+  const route = await chooseRoute(o);
+  let url: string;
+  let domainAnswer: ApiDeployResult['domain'] = null;
+  if (route.via === 'api') {
+    say('5. Up to Cloudflare, through its API, with your NodeGX sign-in');
+    const ours = !!before?.deploys.some((d) => !d.local);
+    const up = await deployThroughApi({
+      token: route.token,
+      account: o.account,
+      name,
+      distDir,
+      siteDir,
+      bucket: record.bucket,
+      firstDeploy,
+      domain: record.domain ?? null,
+      previousDomain: before?.domain ?? null,
+      alert: record.alert ?? null,
+      adminToken: record.adminToken,
+      replaceSecret: mint,
+      ours,
+      log: (l) => say(`  ${l}`),
+      onWorkerUp: (at) => {
+        record.url = at;
+        record.deploys.push({ at: new Date().toISOString(), url: at, local: false, via: 'api' });
+        writeRecord(dir, record);
+      }
+    });
+    url = up.url;
+    domainAnswer = up.domain;
+  } else {
+    say(`5. wrangler deploy (${route.why})`);
+    url = wranglerDeploy(dir, record, firstDeploy, mint);
+    record.url = url;
+    record.deploys.push({ at: new Date().toISOString(), url, local: false, via: 'wrangler' });
+    writeRecord(dir, record);
+  }
+  await waitFor(`${url}/health`, 60);
+  say(`6. The project onto the backend at ${url}`);
+  await applyEverything(url, record.adminToken, project, functions, firstDeploy || !!o.makeRoles, { dir, record, local: false });
+  say(`\nOnline: ${url}`);
+  if (record.domain && route.via === 'wrangler') {
+    say(`And at https://${record.domain} once Cloudflare has made its certificate (a few minutes the first time).`);
+  } else if (domainAnswer?.inPublicDns) {
+    say(`And at https://${domainAnswer.host} (the first visit can wait a minute for Cloudflare's certificate).`);
+  } else if (domainAnswer) {
+    // ODT-000 run 4: a name looked up before its record is public is remembered as missing, for up to half an hour.
+    say(
+      `https://${domainAnswer.host} is attached, but the world's DNS does not have it yet. Open it in a few minutes, not before: ` +
+        'a browser that looks a name up too early remembers it as missing for up to half an hour.'
+    );
+  }
+  await testAlert(url, record, dir);
+  say(`The backend's dashboard: ${url}/_admin — its admin credential is in ${path.join(dir, 'deployment.json')} (never uploaded).`);
+  return 0;
+}
+
+/** P115's step 5: the bucket and `wrangler deploy`, with the credential as a secrets file on a first deploy. */
+function wranglerDeploy(dir: string, record: DeploymentRecord, firstDeploy: boolean, mint: boolean): string {
   if (record.bucket && firstDeploy) {
     const made = wrangler(['r2', 'bucket', 'create', record.bucket], dir, { quiet: true });
     if (made.status !== 0 && !/already exists|already own/i.test(made.out)) {
@@ -590,26 +658,14 @@ export async function deploy(o: DeployOptions): Promise<number> {
   if (done.status !== 0) throw new DeployError('wrangler deploy failed (above). Nothing on the backend was changed.');
   const url = /https:\/\/[a-z0-9.-]+\.workers\.dev/.exec(done.out)?.[0] ?? record.url;
   if (!url) throw new DeployError('wrangler deployed, but did not say the address: deploy again to finish.');
-  record.url = url;
-  record.deploys.push({ at: new Date().toISOString(), url, local: false });
-  writeRecord(dir, record);
-  await waitFor(`${url}/health`, 60);
-  say(`6. The project onto the backend at ${url}`);
-  await applyEverything(url, record.adminToken, project, functions, firstDeploy || !!o.makeRoles, { dir, record, local: false });
-  say(`\nOnline: ${url}`);
-  if (record.domain) {
-    say(`And at https://${record.domain} once Cloudflare has made its certificate (a few minutes the first time).`);
-  }
-  await testAlert(url, record, dir);
-  say(`The backend's dashboard: ${url}/_admin — its admin credential is in ${path.join(dir, 'deployment.json')} (never uploaded).`);
-  return 0;
+  return url;
 }
 
 export async function main(argv: string[]): Promise<number> {
   try {
     return await deploy(parseArgs(argv));
   } catch (e) {
-    if (e instanceof DeployError || (e as Error)?.name === 'ApplyError') {
+    if (e instanceof DeployError || e instanceof ApiDeployError || (e as Error)?.name === 'ApplyError') {
       process.stderr.write(`\n${(e as Error).message}\n`);
       return 1;
     }

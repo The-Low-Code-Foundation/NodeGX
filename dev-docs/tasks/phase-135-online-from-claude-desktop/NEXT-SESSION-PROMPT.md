@@ -1,23 +1,26 @@
 # Phase 135 — next session prompt
 
-**Written 2026-11-07 at the end of session 2 (Opus 5.5).** Lane 10, a nice-to-have for the Beta, never ahead of lanes
-9, 2 and 3. Read [the README](README.md), [ODT-000](ODT-000-THE-MEASUREMENTS.md) §5 and
-[ODT-001](ODT-001-CLOUDFLARE-SIGN-IN.md) first. P115's close-out (Richard's three live steps, P115
+**Written 2026-11-07 at the end of session 3 (Opus 5.5).** Lane 10, a nice-to-have for the Beta, never ahead of lanes
+9, 2 and 3. Read [the README](README.md), [ODT-002](ODT-002-THE-DEPLOY-THROUGH-THE-API.md) and
+[ODT-000](ODT-000-THE-MEASUREMENTS.md) §5 first. P115's close-out (Richard's live steps, P115
 `NEXT-SESSION-PROMPT.md`) is still open beside this; it is not this prompt's work unless Richard says so.
 
 ## 0. Where it stands
 
-**The deploy works through Cloudflare's API with NodeGX's own sign-in, no wrangler** (ODT-000 (c) run 3, 2026-11-07):
-P115's whole Worker shape (3 modules, SQLite Durable Object + migration v1, secret, assets with `run_worker_first`,
-R2, observability, workers.dev, a custom domain attach, the `send_email` binding) went up, answered, and a redeploy kept
-the Durable Object's row and the secret. Then everything was deleted. 🔴 It needs **`workers-scripts.admin`** (dashboard
-Workers → **Admin**): with `workers-scripts.edit` (Workers → Edit) Cloudflare refuses ANY Worker, a bare one too (403
-"No access to the specified resource."). `CLOUDFLARE_SCOPES` now asks `.admin`; Richard's client has Admin ticked and
-his sign-in (`~/.nodegx/cloudflare/sign-in.json`, client `a05351f2868e068ab4caa13cdfaca9fe`) holds it.
+**ODT-002 is built** (`packages/nodegx-backend/cloudflare/deployApi.ts`, 17 tests): the deploy's step 5 goes up
+through Cloudflare's API whenever this computer holds NodeGX's sign-in, else wrangler (saying why). What is left of it
+is **the live grade, Richard's command** (ODT-002 §4): a redeploy of P115's live `hst-campus` through the API, read
+before and after with `check-campus-deploy.mjs`. Baseline (s3, 2026-11-07 ~22:50 CET): **14/14, the owner reads 2
+answers.** 🔴 The classifier refuses a session's live writes to Richard's account (P115 s13–15): write him the
+command, read the result.
 
-**Measure first** (nothing is inherited): `node packages/nodegx-backend/cloudflare/sign-in.mjs status`, then `… probe`.
-Expired or refused: Richard signs in again (`NODEGX_CLOUDFLARE_CLIENT_ID=a05351f2868e068ab4caa13cdfaca9fe node
-packages/nodegx-backend/cloudflare/sign-in.mjs sign-in`, his browser click).
+**Measure first** (nothing is inherited):
+```
+node packages/nodegx-backend/cloudflare/sign-in.mjs status
+python3 -c "import json,os;d=json.load(open(os.path.expanduser('~/.nodegx/cloudflare/hst-campus/deployment.json')));print(d['deploys'][-1], d['domain'])"
+```
+A last deploy with `"via": "api"` means Richard ran ODT-002 §4: run the checker with `--file <path>` (he has the
+path from `--upload`; ask only for that) and write the readings into ODT-002 §4. No `via` = not run yet.
 
 ## 1. The order
 
@@ -29,12 +32,23 @@ packages/nodegx-backend/cloudflare/sign-in.mjs sign-in`, his browser click).
 4. ✅ **The Claude Desktop drive of `cloudflare_sign_in`**: ODT-001 DONE (sign out, sign in, the page opened, Allow,
    found; ODT-001 AC5). The `nodegx-dev` config entry was removed after it; Richard switches the extension back on.
    The `.mcpb` is graded when a release carries the tool. P135-DESKTOP-NOTOOLS is open beside it.
-5. **ODT-002, the deploy through the API**: `probeWrites.ts` is the blueprint (every call it makes is in ODT-000 §5,
-   with its status). Replace `deployCloudflare.ts`'s `wrangler deploy` step; the redeploy uses no migration and
-   `keep_bindings: ["secret_text"]`. ODT-003 (no bundler on the person's machine) next: (e) says a prebuilt Worker
-   module beside a printed-code module uploads as it is.
+5. 🔨 **ODT-002, the deploy through the API**: BUILT s3. Left: the live grade (ODT-002 §4, Richard's command), then
+   its readings written. Not yet live: the secrets call (`--new-admin-credential`), the domain detach (`--no-domain`).
+6. **ODT-003 next** (no bundler on the person's machine): (e) says a prebuilt Worker module beside a printed-code
+   module uploads as it is; `@nodegx/backend`'s `src/prebuilt-worker.cjs` is that idea already, at pack time, and
+   [`deployCloudflare-seam.patch`](deployCloudflare-seam.patch) is the seam it wants (README §4).
 
-## 2. What session 2 did (2026-11-07)
+## 2. What session 3 did (2026-11-07)
+
+| piece | state |
+|---|---|
+| `cloudflare/deployApi.ts` (`deployThroughApi`, `chooseRoute`) + step 5 of `deployCloudflare.ts` (`--wrangler`, `--account`) | ✅ 17 tests (`tests/p135-odt002-deploy-api.test.ts`), 3 mutants caught; the four Cloudflare suites 53/53 |
+| a batch's answer used as the next batch's key (the protocol: the session's jwt for every batch) | ✅ fixed in `deployApi.ts` and, latent, in `probeWrites.ts` |
+| `@nodegx/backend` anchors (`node --test` 3/3); dry run of Fixture C (26 files, 3 modules) | ✅ |
+| the comparison with wrangler shipped (ODT-002 §5): ~15 KB against 369 MB | ✅ |
+| the live redeploy of `hst-campus` | ⏳ Richard's command |
+
+## 2b. What session 2 did (2026-11-07)
 
 | piece | state |
 |---|---|
@@ -44,6 +58,13 @@ packages/nodegx-backend/cloudflare/sign-in.mjs sign-in`, his browser click).
 | run 4 (domain answers once in public DNS), (a) loose port, the Desktop drive (ODT-001 ✅), R3 ruled (API) | ✅ |
 
 ## 3. Traps (also in memory `phase-135-online-from-claude-desktop.md`)
+
+- 🔴 **Assets upload: every batch carries the SESSION's jwt**; only the LAST answer (201) carries the completion jwt.
+  A fake that answers every batch with a jwt hides passing one batch's answer on as the next one's key.
+- 🔴 A Worker that is there must get NO migration, even if the scripts listing leaves `migration_tag` out: an applied
+  migration sent twice is refused, which would fail every redeploy.
+- The deploy's record is written when the Worker is up, not at the end: a later failure must not make the next
+  deploy refuse the person's own Worker as "not ours".
 
 - 🔴 **Workers → Edit (`workers-scripts.edit`, "Workers Editor") cannot create a Worker through the API.** Admin can.
   `workers-scripts.write` ("Workers Scripts Write") is in the catalog with no dashboard row: untried.

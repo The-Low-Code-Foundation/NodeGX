@@ -230,8 +230,10 @@ export async function probeWrites(o: ProbeWritesOptions): Promise<ProbeWritesRes
       for (const b of buckets) {
         const form = new FormData();
         for (const h of b) form.append(h, new Blob([Buffer.from(INDEX_HTML).toString('base64')], { type: 'text/html' }), h);
+        // Every batch with the SESSION's jwt; the last answer carries the completion jwt (ODT-002 found the probe
+        // passing a batch's answer on as the next batch's key: harmless with one file, wrong with two batches).
         const up = await call(`upload ${n}: assets content (${b.length} file, sha256 hash, base64)`, 'POST', `/accounts/${account}/workers/assets/upload?base64=true`, form, {
-          authorization: `Bearer ${assetsJwt}`
+          authorization: `Bearer ${session.j?.result?.jwt}`
         });
         if (up.j?.result?.jwt) assetsJwt = up.j.result.jwt;
         if (!up.ok) assetsJwt = undefined;
