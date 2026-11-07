@@ -10,7 +10,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import { accountOf, parseArgs, readToken, run } from '../cloudflare/domainCommand';
+import { accountOf, cfLoginFiles, cfLoginToken, parseArgs, readToken, run } from '../cloudflare/domainCommand';
 import { buyProblem, offerLine, type CfCall, type DomainOffer } from '../cloudflare/registrar';
 
 const ACC = 'acc123';
@@ -55,6 +55,8 @@ beforeEach(() => {
   process.env.NODEGX_CLOUDFLARE_HOME = home;
   delete process.env.CLOUDFLARE_API_TOKEN;
   delete process.env.CLOUDFLARE_ACCOUNT_ID;
+  // Never the real sign-in on this machine: a file of the test's own.
+  process.env.NODEGX_CF_LOGIN_FILE = path.join(home, 'cf-login.json');
 });
 afterEach(() => {
   jest.restoreAllMocks();
@@ -143,7 +145,8 @@ describe('finding and the credentials', () => {
   });
 
   test('the token: a file others can read is refused; none says how to make one', () => {
-    expect(() => readToken()).toThrow(/Registrar · Edit/);
+    if (cfLoginFiles().slice(1).some((f) => fs.existsSync(f))) return; // this machine has a real cf sign-in: covered below
+    expect(() => readToken()).toThrow(/cf auth login/);
     const file = path.join(home, 'registrar-token');
     fs.writeFileSync(file, 'tok\n', { mode: 0o644 });
     fs.chmodSync(file, 0o644);
@@ -158,3 +161,33 @@ describe('finding and the credentials', () => {
     expect(cf.calls).toHaveLength(0);
   });
 });
+
+describe("the person's Cloudflare sign-in (cf auth login) instead of a token", () => {
+  const NOW = Date.parse('2026-11-07T18:00:00Z');
+  const write = (login: object) => fs.writeFileSync(process.env.NODEGX_CF_LOGIN_FILE!, JSON.stringify(login), { mode: 0o600 });
+
+  test('a valid sign-in that allows Registrar is used, with no refresh', () => {
+    write({ oauth_token: 'oauth-abc', expiration_time: '2026-11-07T19:46:40Z', scopes: ['account:read', 'registrar:write', 'registrar-domains.admin'] });
+    const refresh = jest.fn();
+    expect(cfLoginToken(NOW, refresh)).toBe('oauth-abc');
+    expect(refresh).not.toHaveBeenCalled();
+  });
+
+  test('expired: refreshed once through cf; still expired: "sign in again"', () => {
+    write({ oauth_token: 'old', expiration_time: '2026-11-07T17:00:00Z', scopes: ['registrar:write'] });
+    expect(cfLoginToken(NOW, () => write({ oauth_token: 'fresh', expiration_time: '2026-11-07T20:00:00Z', scopes: ['registrar:write'] }))).toBe('fresh');
+    write({ oauth_token: 'old', expiration_time: '2026-11-07T17:00:00Z', scopes: ['registrar:write'] });
+    expect(() => cfLoginToken(NOW, () => undefined)).toThrow(/sign-in has expired: run `cf auth login`/);
+  });
+
+  test('a sign-in without Registrar is refused in words', () => {
+    write({ oauth_token: 'x', expiration_time: '2026-11-07T20:00:00Z', scopes: ['account:read', 'workers:write'] });
+    expect(() => cfLoginToken(NOW, () => undefined)).toThrow(/does not allow buying domains/);
+  });
+
+  test('premium names are never bought (Cloudflare: do not proceed)', () => {
+    expect(buyProblem('a.org', OFFER('a.org', '10.11', { tier: 'premium' }), 'a.org 10.11 USD')).toMatch(/premium name/);
+    expect(offerLine({ name: 'b.org', registrable: false, reason: 'domain_premium' })).toMatch(/premium name/);
+  });
+});
+

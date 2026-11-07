@@ -66,7 +66,8 @@ const REASONS: Record<string, string> = {
   domain_unavailable: 'it is already registered by someone',
   extension_not_supported_via_api: "Cloudflare's API cannot register this ending yet (its beta covers some endings); it can be bought in the dashboard, or try another ending",
   extension_not_supported: 'Cloudflare does not sell this ending',
-  extension_disallows_registration: 'this ending does not allow registration'
+  extension_disallows_registration: 'this ending does not allow registration',
+  domain_premium: "it is a premium name, which Cloudflare's API does not sell (the dashboard may)"
 };
 
 /** One line a person reads, for a table of ideas or a check. */
@@ -81,6 +82,8 @@ export function buyProblem(name: string, fresh: DomainOffer | undefined, confirm
   if (!fresh) return `Cloudflare did not answer for ${name}: nothing was bought.`;
   if (!fresh.registrable) return `${offerLine(fresh)}. Nothing was bought.`;
   if (!fresh.pricing) return `Cloudflare gave no price for ${name}: nothing was bought.`;
+  // Cloudflare's own workflow: "If tier: premium, … do not proceed to POST /registrations."
+  if (fresh.tier === 'premium') return `${name} is a premium name, which Cloudflare's API does not sell: nothing was bought.`;
   const expected = confirmationFor(fresh);
   if (!confirm) {
     return `${offerLine(fresh)}.\nTo buy it, the person must say yes to exactly this, and the command is run again with --confirm "${expected}". It is charged to the account's default card and cannot be refunded.`;

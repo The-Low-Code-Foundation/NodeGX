@@ -16,8 +16,10 @@
  * `email_sending:write`, `email_routing:write`; it cannot buy): `wrangler email sending enable <domain>`, then
  * `wrangler email routing addresses create <to>` (Cloudflare emails the person a link to click: the one human step).
  *
- * Credentials: buying needs an API token with Registrar permission (wrangler's login has none), from
- * `CLOUDFLARE_API_TOKEN` or the file `~/.nodegx/cloudflare/registrar-token` (the person's, mode 600, never printed).
+ * Credentials, in order (none is ever printed): `CLOUDFLARE_API_TOKEN`; **the person's sign-in to Cloudflare's own CLI**
+ * (`cf auth login`, a browser OAuth sign-in whose grant includes `registrar:write` / `registrar-domains.admin`: measured
+ * on Richard's account 2026-11-07, HST-018 §5), read from where `cf` keeps it; then an API token in
+ * `~/.nodegx/cloudflare/registrar-token` (mode 600). Wrangler's login cannot buy (no registrar scope).
  * The account is `--account <id>`, `CLOUDFLARE_ACCOUNT_ID`, or the one account the token can see.
  * Each purchase is written to `~/.nodegx/cloudflare/domains.json`.
  */
@@ -55,8 +57,59 @@ function home(): string {
   return process.env.NODEGX_CLOUDFLARE_HOME || path.join(os.homedir(), '.nodegx', 'cloudflare');
 }
 
+/** Where `cf` keeps its sign-in (`cf auth whoami` names it; macOS measured, the others by the same convention). */
+export function cfLoginFiles(): string[] {
+  const h = os.homedir();
+  return [
+    process.env.NODEGX_CF_LOGIN_FILE,
+    path.join(h, 'Library', 'Preferences', 'cloudflare', 'config', 'default.json'),
+    process.env.XDG_CONFIG_HOME ? path.join(process.env.XDG_CONFIG_HOME, 'cloudflare', 'config', 'default.json') : undefined,
+    path.join(h, '.config', 'cloudflare', 'config', 'default.json'),
+    process.env.APPDATA ? path.join(process.env.APPDATA, 'cloudflare', 'config', 'default.json') : undefined
+  ].filter((p): p is string => !!p);
+}
+
+interface CfLogin {
+  oauth_token?: string;
+  expiration_time?: string;
+  scopes?: string[];
+}
+
+function readCfLogin(): { file: string; login: CfLogin } | null {
+  for (const file of cfLoginFiles()) {
+    if (!fs.existsSync(file)) continue;
+    try {
+      return { file, login: JSON.parse(fs.readFileSync(file, 'utf8')) as CfLogin };
+    } catch {
+      /* not this one */
+    }
+  }
+  return null;
+}
+
+/** The person's `cf` sign-in, refreshed once through `cf` when it has expired; null when there is none. */
+export function cfLoginToken(now = Date.now(), refresh: () => void = () => void spawnSync('cf', ['auth', 'whoami', '--quiet'], { encoding: 'utf8', timeout: 60_000 })): string | null {
+  let found = readCfLogin();
+  if (!found?.login.oauth_token) return null;
+  const expired = (l: CfLogin) => !l.expiration_time || Date.parse(l.expiration_time) - 60_000 < now;
+  if (expired(found.login)) {
+    refresh();
+    found = readCfLogin();
+    if (!found?.login.oauth_token || expired(found.login)) {
+      throw new CommandError('Your Cloudflare sign-in has expired: run `cf auth login` (a browser sign-in), then ask again.');
+    }
+  }
+  const scopes = found.login.scopes ?? [];
+  if (scopes.length && !scopes.some((s) => s === 'registrar:write' || s === 'registrar-domains.admin')) {
+    throw new CommandError('Your Cloudflare sign-in does not allow buying domains: run `cf auth login --force` and allow Registrar.');
+  }
+  return found.login.oauth_token;
+}
+
 export function readToken(): string {
   if (process.env.CLOUDFLARE_API_TOKEN) return process.env.CLOUDFLARE_API_TOKEN.trim();
+  const signedIn = cfLoginToken();
+  if (signedIn) return signedIn;
   const file = path.join(home(), 'registrar-token');
   if (fs.existsSync(file)) {
     const mode = fs.statSync(file).mode & 0o077;
@@ -64,10 +117,9 @@ export function readToken(): string {
     return fs.readFileSync(file, 'utf8').trim();
   }
   throw new CommandError(
-    'Finding and buying a domain needs a Cloudflare API token with Registrar permission (the deploy\'s login cannot buy).\n' +
-      'Once: Cloudflare dashboard → My Profile → API Tokens → Create Token → Custom token, permissions Account · Registrar · Edit\n' +
-      `(and Account · Account Settings · Read), then save it in ${file} (chmod 600), or set CLOUDFLARE_API_TOKEN.\n` +
-      'The account also needs a default card (Billing) and a default registrant contact (Domain Registration), once.'
+    'Finding and buying a domain needs you signed in to Cloudflare once: `npm i -g cf`, then `cf auth login` (a browser\n' +
+      'sign-in; no key to make or save). The account also needs a default card (Billing) and a default registrant contact\n' +
+      `(Domain Registration), once. (An API token with Registrar · Edit in ${file}, chmod 600, works too.)`
   );
 }
 
