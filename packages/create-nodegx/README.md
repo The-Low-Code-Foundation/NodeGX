@@ -29,8 +29,8 @@ skills into `.claude/skills/`. `nodegx-first-project` is how the apps and games 
 editor of your own for these apps, or for their backend. It never touches your global agent settings, never replaces a file you already have, and if
 `.mcp.json` already has a server called `nodegx` it leaves it alone.
 
-Not using Claude Code? Any agent that speaks MCP can use the same server: `npx -y @nodegx/mcp@<version> --allow-writes`
-over stdio.
+Not using Claude Code? Any agent that speaks MCP can use the same server, with NodeGX Studio fetched beside it:
+`npx -y -p @nodegx/studio@<version> -p @nodegx/mcp@<version> noodl-mcp --allow-writes` over stdio.
 
 You can open the app in the NodeGX visual editor whenever you like. It is the same project, and nothing needs
 converting.

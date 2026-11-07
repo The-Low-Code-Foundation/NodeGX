@@ -21,7 +21,7 @@ const path = require('path');
 
 /** The server this release sets up. `test/create.test.js` holds it equal to the checkout's `@nodegx/mcp` version. */
 const MCP_PACKAGE = '@nodegx/mcp';
-const MCP_VERSION = '0.2.9';
+const MCP_VERSION = '0.2.10';
 const PREVIEW_PACKAGE = '@nodegx/preview';
 const SERVER_NAME = 'nodegx';
 
@@ -37,9 +37,16 @@ const SERVER_NAME = 'nodegx';
  * an older server never looks for the Studio fetched beside it, and the person waits for ~130 MB more for nothing
  * (cold npx 8.2 s and 174 MB with Studio 0.1.0, 2.0 s and 43 MB without, measured 2026-11-01). Every registration this command writes (`.mcp.json`, `opencode.json`,
  * `.vibe/config.toml`, Cline's entry, the "Another AI coder" line) comes from `serverArgs`, so they move together.
+ *
+ * FLIPPED with `@nodegx/mcp` 0.2.10, the first server carrying e0801764e (Beta S1, 2026-11-07). Measured from a fresh
+ * folder this file wrote, empty HOME and npm cache, `NODEGX_STUDIO_APP=none`, the 0.2.10 pack in place of its
+ * registry spec: `open_studio` started `<_npx>/node_modules/@nodegx/studio/editor/serve.mjs`, GET / 200; the same with
+ * the published 0.2.9 said "not installed". Studio 0.1.0's own `@nodegx/mcp` 0.2.8 nests under it (175 MB, cold 6–9 s),
+ * and Studio's own pieces (its backend, its server path) read that nested copy first; a Studio pinned to
+ * `MCP_VERSION` would share the one server.
  */
 const STUDIO_PACKAGE = '@nodegx/studio';
-const STUDIO_VERSION = null;
+const STUDIO_VERSION = '0.1.0';
 /** `@nodegx/mcp`'s bin (packages/noodl-mcp/package.json): with two `-p` packages npx needs the command named. */
 const MCP_BIN = 'noodl-mcp';
 
