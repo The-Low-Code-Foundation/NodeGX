@@ -3,7 +3,7 @@ id: P128-S3-UNFINDABLE
 title: "Claude's web search finds no NodeGX: a stranger who says \"I'd like to build an app with NodeGX\" in Claude Desktop is told it cannot be found and offered Node.js, NestJS, Next.js or Node-RED instead"
 status: open
 severity: high
-area: "nodegx.io discoverability (nodegx-web: no `robots.txt`, no `sitemap.xml`, no `llms.txt`); the first-contact copy (the email, the video's description, /start) that could hand Claude the link instead"
+area: "LEFT: submitting nodegx.io to the search engines (Richard's accounts, BOARD §1a R5), then re-asking step 0. Was: nodegx.io discoverability (nodegx-web: no `robots.txt`, no `sitemap.xml`, no `llms.txt`); the first-contact copy (the email, the video's description, /start) that could hand Claude the link instead"
 found: P128 S3 follow-up, 2026-10-27, CCN-006 AC8 run step 0 (Richard, Claude Desktop, incognito chat, no NodeGX installed)
 evidence: "Claude's reply, verbatim opening: \"I couldn't find anything called 'NodeGX' as a framework, platform, or tool. The search turned up only unrelated things, such as a research paper, a Docker image, and the P2P software Nodezilla, so I don't want to guess at setup steps\"; it offers Node.js, NestJS, Next.js, NodeX, Node-RED, and asks for 'a link, a docs page, a GitHub repo'. MEASURED the same hour: `https://nodegx.io/robots.txt`, `/llms.txt`, `/sitemap.xml` are 404; `/start/` fetched as `Claude-User` is 200, 59,948 chars, readable as text (\"Start here · NodeGX … Which sounds most like you?\")."
 launch: beta
@@ -56,3 +56,9 @@ true before and after S8. A HEAD build and this build differ by those three file
 submission (Richard's accounts), nodegx-studio's GitHub "About" website (empty; NodeGX's says nodegx.io, and the
 published npm packages already link it), and the copy half (P128 S8, CCN-006 AC6). Re-measure step 0 after indexing.
 
+## 2026-11-07: the three files are live; only the submission is left (Beta sprint S4)
+
+Measured from outside: `nodegx.io/llms.txt` 200 (2,243 bytes), `/robots.txt` 200 (63 bytes), `/sitemap.xml` 200
+(836 bytes). The copy half also landed: /start links the one-click `.mcpb` (see P128-S3B-MCPBNORELEASE, closed the same
+day). Left: submitting the site to the search engines' webmaster tools (Richard's accounts, BOARD §1a R5), then the
+same incognito question as step 0, some days after indexing.

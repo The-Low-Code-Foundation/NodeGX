@@ -1,13 +1,14 @@
 ---
 id: P128-S3B-MCPBNORELEASE
 title: "No release carries the `.mcpb`, and its file name carries the `@nodegx/mcp` version: /start's two download links (`releases/latest/download/nodegx-0.2.9-darwin-{arm64,x64}.mcpb`) 404 until a person uploads both files to nodegx-studio's latest published release by hand, and stop working at the next Studio release that does not re-attach them under the same names"
-status: open
+status: fixed
 severity: medium
 area: "nodegx-studio `.github/workflows/package.yml` (the draft release step) and `scripts/mcpb.mjs` (the output name); nodegx-web `site/start/_page.html` path 1, step 2"
 found: P128 Beta round, Track C (S3b step 7), 2026-10-27
 evidence: "MEASURED: `curl -s https://api.github.com/repos/The-Low-Code-Foundation/nodegx-studio/releases` → `[]`; `curl -sL -o /dev/null -w %{http_code} …/releases/latest/download/nodegx-0.2.9-darwin-arm64.mcpb` → 404. `package.yml` step \"a draft release with the four installers\" uploads exactly `NodeGX-Studio-mac-arm64.dmg`, `…-mac-arm64.zip`, `…-win-x64.exe`, `…-linux-x86_64.AppImage`; `grep -n mcpb .github/workflows/*` finds nothing. `scripts/mcpb.mjs:124` writes `dist/nodegx-${mcpVersion}-${nodeTarget}.mcpb`, `mcpVersion` = the pinned `@nodegx/mcp` (0.2.8 in package.json today; the registry's latest is 0.2.9). The darwin-x64 bundle has been built in code but never run (S3b step 6)."
 launch: beta
-owner: none
+owner: Beta sprint S4 (2026-11-07)
+commit: nodegx-studio be3a9c5 + 16c4456 (on origin/main); nodegx-web 02ae176 (live)
 task: CCN-006 AC6
 ---
 
@@ -78,3 +79,15 @@ next site build writes it. Left: deploying the site (a push to nodegx-web deploy
 
 The next tag's macOS leg no longer fails on the 0.2.8 pin; every Studio gate green on it (check:app not run: the
 screen was locked). Left: deploying /start (nodegx-web 02ae176, a push: Richard's) and item 3 (a real Intel Mac).
+
+## 2026-11-07: closed (Beta sprint S4), measured from outside
+
+- `api.github.com/…/releases/latest` → `v0.1.0`, carrying `nodegx-darwin-arm64.mcpb` and `nodegx-darwin-x64.mcpb`
+  (62,174,416 and 63,498,584 bytes, the same sizes as the versioned pair) beside the four installers.
+- `nodegx.io/start/` links exactly those two version-free names; `releases/latest/download/nodegx-darwin-{arm64,x64}.mcpb`
+  → 302 to `releases/download/v0.1.0/…`, and the file answers. `/start/` no longer names `nodegx-0.2.9-darwin-*`.
+- Items 1 and 2 (CI builds both bundles and attaches the version-free copies; Studio pins 0.2.9) are on nodegx-studio
+  `origin/main` (be3a9c5, 16c4456), so the next tag carries them without a hand upload.
+
+Item 3 (the Intel bundle on a real Intel Mac) is not this bug's: it rides with the Intel Studio build (BOARD §1a S5)
+and Richard's Desktop sitting (R3).
