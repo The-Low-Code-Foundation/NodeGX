@@ -55,6 +55,8 @@ on a domain Claude bought on a word-for-word yes. **Every step of it runs in a t
 means the registrar stays on `cf`; (c) refused means wrangler ships). Then ODT-001 and ODT-003 in parallel, ODT-002,
 ODT-004, ODT-006 on the private client, and ODT-005 last.
 
+**For ODT-003, from the Beta cut (2026-11-07):** [`deployCloudflare-seam.patch`](deployCloudflare-seam.patch) (not applied) is the seam `@nodegx/backend` 0.1.0 would rather use than its bundle-time rewrites: an exported `bundleWorker(outfile, plugins)`, `buildWorker` copying `NODEGX_CLOUDFLARE_WORKER` when set, `wranglerCommand` exported and the usage line naming `NODEGX_CLOUDFLARE_COMMAND`; take it or leave it (`packages/nodegx-backend-npm/test/bin.test.js` fails if the rewrite anchors move).
+
 ## 5. Acceptance criteria
 
 1. ODT-000's five readings are written down with the date, each from a real call on Richard's account.

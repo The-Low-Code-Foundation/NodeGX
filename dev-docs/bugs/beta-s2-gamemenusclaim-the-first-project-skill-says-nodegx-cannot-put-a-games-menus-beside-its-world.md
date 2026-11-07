@@ -1,7 +1,9 @@
 ---
 id: BETA-S2-GAMEMENUSCLAIM
 title: "The kit's first-project skill says NodeGX \"can't yet place a moving world and its menus in one app\"; once @nodegx/export 0.2.6 is out, `--target html --component` puts a NodeGX menu into the world's own plain page"
-status: needs-ruling
+status: fixed
+commit: 1abfd814e
+fixed: 2026-11-07, the Beta cut, on Richard's ruling ("BETA-S2 yes change the line")
 severity: low
 area: kit text (`packages/create-nodegx/profiles/core/skills/nodegx-first-project/SKILL.md`, "Which parts are NodeGX")
 found: Beta sprint S2, 2026-11-07, reading the kit for where the off-ramp is named
@@ -15,3 +17,12 @@ can be a NodeGX component (where the person changes them) that `npx @nodegx/expo
 The two still are not one NodeGX app (the world is plain code), so the sentence is not simply wrong; whether the kit
 should offer this route, and in which words, is a copy ruling. Not changed here: the 0.2.6 publish comes first, and the
 Beta sprint's S3 is editing the kit's skills at the same time.
+
+**Fixed in the Beta cut (1abfd814e), on Richard's ruling.** The skill now says a game's menus can still be NodeGX: a
+component written into the world's folder by `npx @nodegx/export export --target html --component <its name> <the app's
+folder> <the world's folder>`, the world's page linking the CSS file and calling the `mount…` function the command's
+last line names, and the same command updating them while leaving the world's own files alone. Run in exactly that
+form from the packed 0.2.6 tarball, under a profile that denies reads of the checkout, on the export's `game-menu`
+fixture into a copy of HTX-006's three.js page: 7 files written, the page's three own files' shasums unchanged; again:
+0 written, 7 unchanged. `nodegx-making-a-game` ("the side panel or menu as ordinary page elements over that state")
+does not contradict it and is unchanged.
