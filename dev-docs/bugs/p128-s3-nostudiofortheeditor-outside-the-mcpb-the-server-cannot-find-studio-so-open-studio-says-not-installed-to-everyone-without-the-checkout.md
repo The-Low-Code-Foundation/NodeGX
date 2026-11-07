@@ -1,7 +1,7 @@
 ---
 id: P128-S3-NOSTUDIOFORTHEEDITOR
 title: "Outside the `.mcpb`, the server cannot find Studio: `findStudio` looks only at `$NODEGX_STUDIO` and `~/vscode_projects/nodegx-studio`, and neither the npm route (`create-nodegx`, every agent it sets up) nor the editor's Connect Claude Code sets the variable, so `open_studio` says \"NodeGX Studio is not installed\" to everyone who does not have our checkout"
-status: open
+status: fixed
 severity: high
 area: "`packages/noodl-mcp/src/studio/studioProcess.ts` `findStudio` (the two candidates); `packages/create-nodegx/bin/create-nodegx.js` `serverEntry` (`npx -y @nodegx/mcp@<v> --allow-writes`, no env) for Claude Code, Cline, Mistral Vibe and OpenCode; the editor's registration (`packages/noodl-editor/src/editor/src/pages/ProjectsPage/useConnectAgent.ts` → `connectBootstrapServer`); `@nodegx/studio` is not on npm (nodegx-studio `package.json` is `private: true`)"
 found: P128 S3 (CPY-003), 2026-10-27, checking the claim in the editor's new welcome line before keeping it; widened the same day when Richard asked what a fresh Claude Desktop install takes
@@ -9,6 +9,7 @@ evidence: "MEASURED by reading: `findStudio` candidates are `[process.env.NODEGX
 launch: beta
 regression: packages/noodl-mcp/tests/p128NoStudioForTheEditor.test.ts (the app); packages/noodl-mcp/tests/p128StudioFromNpm.test.ts (the npm package)
 owner: "the app half built by Beta sweep s19 (0b98c2f84); the find half by the P128 Beta round Track B (e0801764e); the package by Track A (nodegx-studio fcdd55e, not published); the install that puts both together: nobody yet"
+commit: 8b618bd8c (create-nodegx fetches @nodegx/studio beside @nodegx/mcp 0.2.10), published as create-nodegx 0.2.12 / @nodegx/mcp 0.2.10 (2026-11-07)
 task: CCN-006 AC7
 ---
 
@@ -128,3 +129,14 @@ path): a packaging change for the release, not a gated one-liner.
 5. Cline: the kit moves its own earlier entry to the new one on a re-run (`updated`); `.mcp.json`, `opencode.json` and
    `.vibe/config.toml` are written only when absent, so an existing folder keeps the server alone until the person
    edits it or deletes the file. Say so in the changelog.
+
+## 2026-11-07: fixed on the published route (Beta sprint S1)
+
+`@nodegx/mcp` 0.2.10 (carries e0801764e) and `create-nodegx` 0.2.12 (registers `npx -y -p @nodegx/studio@0.1.0 -p
+@nodegx/mcp@0.2.10 noodl-mcp --allow-writes` for every agent it sets up) are on npm; the registry's shasums equal the
+graded tarballs. Measured from the REGISTRY, no local tarball: a fresh `npm create nodegx@0.2.12` folder, empty HOME and
+npm cache, `NODEGX_STUDIO_APP=none`, `NODEGX_STUDIO` unset → initialize `noodl-mcp 0.2.10`, `open_studio` ok, GET / 200
+`<title>NodeGX Studio</title>`, `/api/vocabulary` 200, Studio served from the npx folder's
+`@nodegx/studio/editor/serve.mjs`. Before (published 0.2.9, same folder): "NodeGX Studio is not installed".
+Left, filed apart: npm's Studio is 0.1.0 with its own nested mcp 0.2.8 (P128-S3-NPMSTUDIOSTALE): Studio 0.1.1, then
+the `STUDIO_VERSION` flip. The editor's own Connect Claude Code registration was not re-measured here.
