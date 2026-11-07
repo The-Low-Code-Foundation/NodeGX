@@ -27,9 +27,8 @@ packages/nodegx-backend/cloudflare/sign-in.mjs sign-in`, his browser click).
    asks 1.1.1.1 over https. Richard runs `node packages/nodegx-backend/cloudflare/sign-in.mjs probe-writes --zone
    my-hearth.org` (live writes on his account: his yes, the classifier refuses it to the session). 🔴 Do NOT look the
    name up yourself before or during the run.
-2. **R3, Richard's ruling** (README §7): the API, not wrangler. The measurement is in; the recommendation stands.
-   Say it in plain words with the size (wrangler +~370 MB on a 217 MB extension) and the cost (Workers **Admin** on
-   the consent page, a stronger word than "Edit").
+2. ✅ **R3 RULED (Richard, 2026-11-07): the API**, wrangler does not ship (*"370MB extra is a lot"*). Workers
+   **Admin** on the consent page is the accepted cost.
 3. **(a) loose port**: `… sign-in --port 8978` (an unregistered port). Accepted = `CALLBACK_PORT` can become `0`;
    refused (Cloudflare's own error page) = keep 8977. Then `--host localhost`. One click each, Richard's.
 4. **The Claude Desktop drive of `cloudflare_sign_in`** (ODT-001 AC5's second half), connector built from this

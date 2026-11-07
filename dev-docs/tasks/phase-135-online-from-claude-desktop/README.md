@@ -78,7 +78,7 @@ ODT-004, ODT-006 on the private client, and ODT-005 last.
 |---|---|---|
 | R1 | For ODT-000: the private OAuth client is created on your Cloudflare account. Will you click it together in the dashboard (Manage Account → OAuth clients), or make a short-lived API token with "OAuth Clients Write" for Claude to create it with? | The dashboard, once: no new key to look after, and the client's settings are visible to you. |
 | R2 | Once it works on the private client: make NodeGX's client public? It is **permanent** (Cloudflare cannot make it private again), and its address domain is fixed once verified. | Yes, on `nodegx.io`, only after ODT-006 passes on the private client. |
-| R3 | Ship wrangler in the extension (about +370 MB with its runtime, measured today; the extension is 217 MB) or deploy through Cloudflare's API? | The API, if ODT-000 (c) answers yes: no binary, and the bundle stays its size. **2026-11-07: (c) answered YES** with Workers → Admin (`workers-scripts.admin`): P115's whole shape, a redeploy keeping the row and the secret, no wrangler, no blake3. Still Richard's ruling. |
+| R3 | Ship wrangler in the extension (about +370 MB with its runtime, measured today; the extension is 217 MB) or deploy through Cloudflare's API? | The API, if ODT-000 (c) answers yes: no binary, and the bundle stays its size. **2026-11-07: (c) answered YES** with Workers → Admin (`workers-scripts.admin`): P115's whole shape, a redeploy keeping the row and the secret, no wrangler, no blake3. ✅ **RULED 2026-11-07, Richard: the API** (*"API seems like the smart choice, 370MB extra is a lot"*). wrangler does not ship. |
 
 ## 8. Risks
 
