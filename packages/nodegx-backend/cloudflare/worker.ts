@@ -42,18 +42,21 @@ import type { BucketBinding } from '../src/storage/BindingDriver';
 import { dataDirTable } from './dataDirTable';
 import { durableObjectEngine, newLedger, type DoStorage } from './durableObjectSql';
 import { setStorage } from './nodeSqlite';
-import { FAMILIES_PATH, isPageAddress, routeFamilies, routeOf } from './routing';
+import { handleRequest, type Fetcher } from './front';
+import type { AlertEnv, TellCache } from './refusal';
+import { FAMILIES_PATH, routeFamilies } from './routing';
 
-interface Fetcher {
-  fetch(r: Request): Promise<Response>;
-}
-
-interface Env {
+interface Env extends AlertEnv {
   BACKEND: { idFromName(name: string): unknown; get(id: unknown): Fetcher };
   ASSETS: Fetcher;
   FILES?: BucketBinding;
   NODEGX_ADMIN_TOKEN?: string;
 }
+
+interface Ctx {
+  waitUntil(p: Promise<unknown>): void;
+}
+
 
 /** What the deploy command printed beside this file (`build.mjs`). */
 interface AppModule {
@@ -66,7 +69,6 @@ interface AppModule {
 }
 
 const APP = app as AppModule;
-const CONFIG_PATH = '/nodegx-config.json';
 const DATA_DIR = '/tmp/nodegx/backend';
 const PROJECT_DIR = '/tmp/nodegx/project';
 
@@ -203,33 +205,22 @@ function familiesOf(backend: Fetcher): Promise<ReadonlySet<string>> {
   return families;
 }
 
+/** The Cache API's default cache, where workerd has one (best effort: see `refusal.ts`). */
+function tellCache(): TellCache | null {
+  const c = (globalThis as unknown as { caches?: { default?: TellCache } }).caches;
+  return c?.default ?? null;
+}
+
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
-    const url = new URL(request.url);
-    // The viewer reads this beside the page before it starts (`deploy-config.ts`), over the address baked into the
-    // site: answered with the address the page was loaded from, the site works at any address it is served at (the
-    // workers.dev one, a domain added later) and the build never needs to know it.
-    if (url.pathname === CONFIG_PATH && (request.method === 'GET' || request.method === 'HEAD')) {
-      return Response.json(
-        { cloudservices: { endpoint: url.origin, appId: APP.appId, instanceId: APP.appId, type: 'nodegx' } },
-        { headers: { 'cache-control': 'no-store' } }
-      );
-    }
+  fetch(request: Request, env: Env, ctx: Ctx): Promise<Response> {
     const backend = env.BACKEND.get(env.BACKEND.idFromName('app'));
-    let known: ReadonlySet<string>;
-    try {
-      known = await familiesOf(backend);
-    } catch {
-      // The backend cannot say which paths are its own: let it answer (its 503 says why), never the page in its place.
-      return backend.fetch(request);
-    }
-    const route = routeOf(request.method, url.pathname, known);
-    if (route === 'host') return new Response('Not found', { status: 404 });
-    if (route === 'asset') {
-      const asset = await env.ASSETS.fetch(request);
-      if (asset.status !== 404 || !isPageAddress(url.pathname)) return asset;
-      return env.ASSETS.fetch(new Request(new URL('/', url), request));
-    }
-    return backend.fetch(request);
+    return handleRequest(request, {
+      env,
+      backend,
+      families: () => familiesOf(backend),
+      waitUntil: (p) => ctx.waitUntil(p),
+      appId: APP.appId,
+      cache: tellCache()
+    });
   }
 };

@@ -33,7 +33,7 @@ import { cloudBundleNameFrom, deployCloudBundle, type CloudBundleParts, type Clo
 import { readViewerBuild } from '../../noodl-preview/src/viewerBuild';
 import { applyAutomations } from './applyAutomations';
 import { applyProject, type AdminCall } from './applyProject';
-import { domainProblem, workerNameFrom, workerNameProblem, wranglerConfig } from './wranglerConfig';
+import { domainProblem, emailProblem, workerNameFrom, workerNameProblem, wranglerConfig } from './wranglerConfig';
 
 /** Where this file is: `packages/nodegx-backend/cloudflare` (the launcher sets it; the bundle's own dir is `.build`). */
 const HERE = process.env.NODEGX_CLOUDFLARE_SRC || __dirname;
@@ -53,6 +53,9 @@ export interface DeployOptions {
   dryRun?: boolean;
   /** HST-007: a domain the app answers at too; `null` (`--no-domain`) removes the one recorded. */
   domain?: string | null;
+  /** HST-017: the refusal email's addresses; `null` (`--no-alert`) removes them. */
+  alertTo?: string | null;
+  alertFrom?: string | null;
 }
 
 interface DeploymentRecord {
@@ -64,6 +67,9 @@ interface DeploymentRecord {
   deploys: Array<{ at: string; url: string | null; local: boolean }>;
   /** HST-007: the domain the app also answers at, kept for every later deploy. */
   domain?: string | null;
+  /** HST-017: who is emailed when the backend cannot answer, and the address the last test email went to. */
+  alert?: { from: string; to: string } | null;
+  alertTested?: string | null;
   /** The sha256 of the `nodegx.automations.json` each backend last took from a deploy (local and live are two). */
   automations?: { live?: string | null; local?: string | null };
 }
@@ -77,7 +83,8 @@ const say = (line = '') => process.stdout.write(line + '\n');
 
 const USAGE = `usage: deploy.mjs <project> [--name <worker>] [--bucket <r2 bucket> | --no-bucket] [--viewer <folder>]
                  [--allow-development-engine] [--out <folder>] [--local [--port <n>]] [--make-roles]
-                 [--new-admin-credential] [--dry-run] [--domain <hostname> | --no-domain]`;
+                 [--new-admin-credential] [--dry-run] [--domain <hostname> | --no-domain]
+                 [--alert-to <address> --alert-from <address on your Cloudflare domain> | --no-alert]`;
 
 export function parseArgs(argv: string[]): DeployOptions {
   const o: DeployOptions = { project: '' };
@@ -101,6 +108,9 @@ export function parseArgs(argv: string[]): DeployOptions {
     else if (a === '--dry-run') o.dryRun = true;
     else if (a === '--domain') o.domain = next().trim().toLowerCase();
     else if (a === '--no-domain') o.domain = null;
+    else if (a === '--alert-to') o.alertTo = next().trim();
+    else if (a === '--alert-from') o.alertFrom = next().trim();
+    else if (a === '--no-alert') o.alertTo = o.alertFrom = null;
     else if (a.startsWith('--')) throw new DeployError(`${a} is not an option.\n${USAGE}`);
     else if (!o.project) o.project = path.resolve(a);
     else throw new DeployError(`One project at a time.\n${USAGE}`);
@@ -425,6 +435,43 @@ async function applyEverything(
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
+// HST-017: the refusal email
+
+/** The alert's addresses: this run's, or the record's; both or neither. */
+function alertFrom(o: DeployOptions, before: DeploymentRecord | null): { from: string; to: string } | null {
+  if (o.alertTo === null || o.alertFrom === null) return null;
+  const to = o.alertTo ?? before?.alert?.to;
+  const from = o.alertFrom ?? before?.alert?.from;
+  if (!to && !from) return null;
+  if (!to || !from) throw new DeployError('The alert needs both --alert-to (your address, verified in Cloudflare) and --alert-from (an address on a domain on your Cloudflare account).');
+  const bad = emailProblem('--alert-to', to) || emailProblem('--alert-from', from);
+  if (bad) throw new DeployError(bad);
+  return { from, to };
+}
+
+/** When the addresses are new, one test email, so the builder sees where it lands (and marks it "not spam"). */
+async function testAlert(base: string, record: DeploymentRecord, dir: string, local = false): Promise<void> {
+  if (!record.alert) {
+    say('The refusal email is not set up: if the app goes over its plan, it says so to visitors and in the Worker\'s log only (--alert-to, --alert-from).');
+    return;
+  }
+  const key = `${record.alert.from} → ${record.alert.to}`;
+  if (!local && record.alertTested === key) return;
+  const r = await fetch(`${base}/__nodegx/alert-test`, { method: 'POST', headers: { authorization: `Bearer ${record.adminToken}` } }).catch((e) => e as Error);
+  const sent = r instanceof Error ? { ok: false, error: r.message } : ((await r.json().catch(() => ({ ok: false, error: `${r.status}` }))) as { ok: boolean; error?: string; id?: string });
+  if (sent.ok) {
+    // Only the live Worker's test counts as done: a --local one goes to workerd's stand-in, not a mailbox.
+    if (!local) {
+      record.alertTested = key;
+      writeRecord(dir, record);
+    }
+    say(`A test email went to ${record.alert.to}: if it is in Spam or only in All Mail, mark it "Not spam", so a real one is seen.`);
+  } else {
+    say(`The test email to ${record.alert.to} was NOT sent: ${sent.error}. Cloudflare needs the sender's domain onboarded (\`wrangler email sending enable <domain>\`) and ${record.alert.to} verified in the account.`);
+  }
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 export async function deploy(o: DeployOptions): Promise<number> {
   const project = readProject(o.project);
@@ -450,7 +497,9 @@ export async function deploy(o: DeployOptions): Promise<number> {
     // Carried, or every redeploy forgets which file was installed and replaces an edit made on the backend (measured
     // on workerd: the unchanged file replaced the trigger switched off there).
     ...(before?.automations ? { automations: before.automations } : {}),
-    domain: o.domain !== undefined ? o.domain : before?.domain ?? null
+    domain: o.domain !== undefined ? o.domain : before?.domain ?? null,
+    alert: alertFrom(o, before),
+    alertTested: before?.alertTested ?? null
   };
   if (record.domain) {
     const bad = domainProblem(record.domain);
@@ -477,7 +526,7 @@ export async function deploy(o: DeployOptions): Promise<number> {
   fs.rmSync(distDir, { recursive: true, force: true });
   await buildWorker(distDir, { appId: name, appName: project.name, policy: project.policyText, automations: project.automationsText }, printCodeModule(print));
   // A domain belongs to the live Worker; `wrangler dev` cannot answer at it.
-  fs.writeFileSync(path.join(dir, 'wrangler.toml'), wranglerConfig({ name, bucket: record.bucket, domain: o.local ? null : record.domain }));
+  fs.writeFileSync(path.join(dir, 'wrangler.toml'), wranglerConfig({ name, bucket: record.bucket, domain: o.local ? null : record.domain, alert: record.alert }));
   const uploaded = [...filesUnder(siteDir), ...filesUnder(distDir)];
   const mb = uploaded.reduce((n, f) => n + fs.statSync(f).size, 0) / 1e6;
   say(`  ${uploaded.length} files to upload, ${mb.toFixed(2)} MB; files in ${record.bucket ? `the bucket ${record.bucket}` : 'NO bucket (uploads are lost on a restart)'}.`);
@@ -512,6 +561,7 @@ export async function deploy(o: DeployOptions): Promise<number> {
     await applyEverything(base, record.adminToken, project, functions, firstDeploy || !!o.makeRoles, { dir, record, local: true });
     record.deploys.push({ at: new Date().toISOString(), url: base, local: true });
     writeRecord(dir, record);
+    await testAlert(base, record, dir, true);
     say(`\nRunning on workerd at ${base} (log: ${path.join(dir, 'wrangler-dev.log')}). Ctrl-C stops it; its data stays in ${path.join(dir, '.state')}.`);
     await new Promise<void>((resolve) => child.on('exit', () => resolve()));
     return 0;
@@ -550,6 +600,7 @@ export async function deploy(o: DeployOptions): Promise<number> {
   if (record.domain) {
     say(`And at https://${record.domain} once Cloudflare has made its certificate (a few minutes the first time).`);
   }
+  await testAlert(url, record, dir);
   say(`The backend's dashboard: ${url}/_admin — its admin credential is in ${path.join(dir, 'deployment.json')} (never uploaded).`);
   return 0;
 }

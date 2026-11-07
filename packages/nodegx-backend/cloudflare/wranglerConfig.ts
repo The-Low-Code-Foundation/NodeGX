@@ -23,7 +23,17 @@ export interface WranglerConfigInput {
    * hostname must have no CNAME already. The workers.dev address keeps answering.
    */
   domain?: string | null;
+  /**
+   * HST-017: who is emailed when the backend cannot answer (over the account's daily allowance), through Cloudflare's
+   * own sending: `from` on a domain on the account, `to` an address verified in it. Free on Workers Free.
+   */
+  alert?: { from: string; to: string } | null;
   compatibilityDate?: string;
+}
+
+/** An email address, as plainly as a deploy needs: something@domain.tld, no spaces, no name part. */
+export function emailProblem(what: string, address: string): string | null {
+  return /^[^\s@<>"]+@[a-z0-9-]+(\.[a-z0-9-]+)+$/i.test(address) ? null : `${what} "${address}" is not an email address (write it bare, like alerts@example.com).`;
 }
 
 /** A hostname a Custom Domain can be: lowercase labels of letters, digits and dashes, at least one dot, no wildcard. */
@@ -99,6 +109,18 @@ export function wranglerConfig(input: WranglerConfigInput): string {
       `[[routes]]`,
       `pattern = ${q(input.domain)}`,
       `custom_domain = true`,
+      ``
+    );
+  }
+  if (input.alert) {
+    lines.push(
+      `# Emails the builder when the backend cannot answer (HST-017): Cloudflare's own sending, from the app's domain.`,
+      `[[send_email]]`,
+      `name = "ALERT_EMAIL"`,
+      ``,
+      `[vars]`,
+      `NODEGX_ALERT_FROM = ${q(input.alert.from)}`,
+      `NODEGX_ALERT_TO = ${q(input.alert.to)}`,
       ``
     );
   }
