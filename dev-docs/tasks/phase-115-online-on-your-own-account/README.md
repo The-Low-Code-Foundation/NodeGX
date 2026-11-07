@@ -147,6 +147,7 @@ The report (HST-008) puts the twelve runs in one table and asks Richard for the 
 | [HST-015](HST-015-THE-THREE-DURABLE-OBJECT-REDS.md) | **The three Durable Object reds** (regex, EXPRDEPTH, NOROLLBACKCASE). ✅ s13: the suite 103/103 in an object on workerd, none declared away; "contains" and friends plain SQL. Live s14 (Richard's redeploy) | product | HST-006 §6 |
 | [HST-016](HST-016-SCHEDULES-ON-THE-OBJECTS-ALARM.md) | **Schedules on the object's alarm** (SLEEPINGSCHEDULE): a schedule fires on a quiet deployed app. ✅ s14 on workerd | product | HST-014 |
 | [HST-017](HST-017-THE-PAGE-SAYS-WHY-AND-THE-BUILDER-IS-TOLD.md) | **The page says why, and the builder is told** (R8): an object that cannot answer is a sentence and one email a day. ✅ s14 on workerd | product | HST-014 |
+| [HST-018](HST-018-CLAUDE-FINDS-AND-BUYS-THE-DOMAIN.md) | **Claude finds and buys the domain** (Richard 2026-11-07, A to Z): Cloudflare's Registrar API; a purchase only on a word-for-word yes to a fresh check. ✅ s14 against a scripted API; `my-hearth.org` is its first real purchase | product | HST-007 §9, HST-017 |
 
 **Order:** HST-000 and HST-001 first and in parallel (both are measurements; neither waits for P107 to close). Then
 HST-002. Then HST-003 and HST-005 in parallel (plumbing), HST-004 and HST-006 in parallel (experiments). HST-007 after
@@ -216,6 +217,13 @@ hiveclip.com and hiveclips.com; free were dayhearth.com, tendday.com, mantelday.
 chose **my-hearth**: `my-hearth.org` free (control: a registered .org answers 200), `my-hearth.io` free too, the .com
 taken. Campus goes on **`campus.my-hearth.org`**, so the bare name stays free for the real product. The purchase is
 his (Cloudflare Registrar, at cost; the dashboard shows the price before paying).
+
+**Ruled 2026-11-07, R2 — Claude may buy the domain, after the person says yes to the exact name and price.** Richard
+asked for it (*"The more it's A to Z the more non tech people will like it"*) once Cloudflare's Registrar API (beta,
+2026-04-15) made it possible, and chose to build it now and buy `my-hearth.org` with it. The guard is in code, not in a
+prompt ([HST-018](HST-018-CLAUDE-FINDS-AND-BUYS-THE-DOMAIN.md)): no purchase without a fresh check and a confirmation
+that repeats it word for word. What stays human, once per person: a card and the owner's name and address on the
+account, one API token (the deploy's login cannot buy), and the link Cloudflare emails to verify an address.
 
 ## 9. Not this phase
 

@@ -9,38 +9,34 @@ build order of HST-010…015) are in git history: `git log -- dev-docs/tasks/pha
 What "finished" means (R7): the Cloudflare work plus a domain. The Cloudflare work is built and graded on workerd.
 What is left is live, and starts in Richard's dashboard and terminal. Time each step (HST-007's human steps).
 
-**A. Now, no domain needed: carry sessions 14's code to `hst-campus`** (schedules on the alarm, automations on a
-redeploy, the refusal sentence). From the repo root:
+**A. ✅ Done by Richard 2026-11-07 12:24 UTC**: the redeploy carrying session 14's code; read after: Campus 14/14 kept,
+the four filter readings unchanged.
+
+**B. The domain, bought through HST-018** (Richard ruled 2026-11-07: Claude buys it, after he says yes to the name and
+price; [HST-018 §4](HST-018-CLAUDE-FINDS-AND-BUYS-THE-DOMAIN.md)). Do NOT buy it in the dashboard.
+1. Once, in the dashboard (if not there yet): a default card (Billing), a default registrant contact (Domain
+   Registration), then My Profile → API Tokens → Create Token → Custom token: the account's **Registrar** permission at
+   **Edit**, **Account Settings** at **Read**. Save it from your own terminal (a secret, never through a session):
+   `pbpaste > ~/.nodegx/cloudflare/registrar-token && chmod 600 ~/.nodegx/cloudflare/registrar-token`
+2. A session: `node packages/nodegx-backend/cloudflare/domain.mjs check my-hearth.org my-hearth.io` (no money): is .org
+   in Cloudflare's API beta, and today's price. If .org is not, the choice is .io or buying .org in the dashboard.
+3. You say yes to the printed sentence; then `… domain.mjs buy my-hearth.org --confirm "<that sentence>"` (a purchase:
+   your terminal or your approval).
+4. `… domain.mjs email my-hearth.org --to <your address>` (with `NODEGX_WRANGLER` as in the deploy command); click the
+   link Cloudflare emails you.
+
+**C. Campus on the domain, with the alert** (from the repo root):
 
 ```
 NODEGX_WRANGLER=$PWD/dev-docs/tasks/phase-115-online-on-your-own-account/spike-backend/node_modules/wrangler/bin/wrangler.js \
   node packages/nodegx-backend/cloudflare/deploy.mjs dev-docs/tasks/phase-115-online-on-your-own-account/fixtures/c-campus \
-  --name hst-campus --viewer ~/.nodegx/cloudflare-viewer
+  --name hst-campus --viewer ~/.nodegx/cloudflare-viewer \
+  --domain campus.my-hearth.org --alert-to <your address> --alert-from alerts@my-hearth.org
 ```
 
-(`~/.nodegx/cloudflare-viewer` is a copy of the deployed production engine, same sha256 `27e258fc…`.) Expect step 6:
-*"Workflows and triggers: the project has no nodegx.automations.json, so the backend keeps its own"* and *"The refusal
-email is not set up"*.
+Expect *"And at https://campus.my-hearth.org …"* and *"A test email went to <your address>"*. **Look where it landed.**
 
-**B. Buy `my-hearth.org`** (ruled 2026-11-07, README §8): Cloudflare dashboard → Domain Registration → Register
-Domains. The price shows before paying (a .org at cost, around $10–11 a year).
-
-**C. Email sending on it:** dashboard → Compute → Email Service → Email Sending → **Onboard Domain** → `my-hearth.org`
-→ Done (Cloudflare adds SPF/DKIM/DMARC records itself; 5–15 minutes on Cloudflare DNS). HST-004 §10.4 named a wrangler
-command for this; Cloudflare's page of 2026-11-07 documents only the dashboard.
-
-**D. Campus on the domain, with the alert:**
-
-```
-… the command of A … --domain campus.my-hearth.org --alert-to <your address> --alert-from alerts@my-hearth.org
-```
-
-Expect *"And at https://campus.my-hearth.org once Cloudflare has made its certificate"* and *"A test email went to
-<your address>"*. If it says the test email was NOT sent with a recipient error, add your address under the
-domain's Email Routing → Destination addresses (verify it from the email Cloudflare sends), then run D again.
-**Look where the test email landed** (HST-004 §10.5: Resend's went to Gmail's All Mail only).
-
-**E. On your phone:** `https://campus.my-hearth.org/home?id=6f468bbd-4091-48c8-90a1-9232f4753a90` (Ada's link, MUST 1),
+**D. On your phone:** `https://campus.my-hearth.org/home?id=6f468bbd-4091-48c8-90a1-9232f4753a90` (Ada's link, MUST 1),
 and *Count me in* (MUST 2). The passwords are in `fixtures/c-campus/.accounts.json` (never in a commit).
 
 ## 1. The session after Richard's steps
@@ -69,6 +65,7 @@ and *Count me in* (MUST 2). The passwords are in `fixtures/c-campus/.accounts.js
 | the warm-up | — | measured live, **not needed**: front Worker 0–6 ms, object 1–54 ms |
 | the refusal alert (R8) | `cloudflare/front.ts`, `refusal.ts`, `--alert-to/--alert-from`; `tests/p115-hst017-refusal.test.ts` 10/10 | workerd: test email through the real `send_email` binding. [HST-017](HST-017-THE-PAGE-SAYS-WHY-AND-THE-BUILDER-IS-TOLD.md) |
 | the domain flag | `wranglerConfig.ts` `domain`, `--domain` | jest + dry run. [HST-007 §9](HST-007-THE-DOMAIN.md) |
+| Claude finds and buys the domain (HST-018) | `cloudflare/registrar.ts`, `domainCommand.ts`, `domain.mjs`; `tests/p115-hst018-domain-purchase.test.ts` 12/12 | scripted API: no POST without a fresh check AND a word-for-word yes; mutant 3 red. [HST-018](HST-018-CLAUDE-FINDS-AND-BUYS-THE-DOMAIN.md) |
 
 Commits: `bbe8a72f1` (automations, schedules, domain), `e88ce7445` (refusal alert), and the docs commit after them.
 Neighbouring suites 249/249 (scheduler, backups, triggers, files, overlap, BKO-001, HST-010…014).
