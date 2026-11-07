@@ -58,3 +58,27 @@ the token file at 644 refused; a non-domain refused before any call. Mutant: the
 
 Not built: an MCP tool for it. The deploy itself is not an MCP tool yet (HST-014 §5.4 item 3, waiting on where the
 engine lives, P112 R2); both become tools together. Today Claude drives both commands from a terminal.
+
+## 5. A sign-in instead of a token (Richard, 2026-11-07: *"newbies won't want to create several API keys and save them
+into .envs … No chance of a CloudFlare Oauth or something so they can just sign in and Claude can do the rest?"*)
+
+Measured the same day, from Cloudflare's own code:
+- **Cloudflare's production OAuth catalog has the scope**: `registrar-domains.admin` ("Registrar Domains Admin") is one
+  of the 400 scopes in `cloudflare/mcp` `src/auth/derived-oauth-scopes.json` (the catalog every Cloudflare MCP
+  deployment approves against). `wrangler login` (4.157 and 4.158) does not request it.
+- **Cloudflare's own CLI, `cf`** (npm `cf`, `github.com/cloudflare/cf`, 1.0.0-beta.28): `cf auth login` is an OAuth
+  sign-in in the browser (or a device code), with `--scopes`; its bundle's scope list holds `registrar:read`,
+  `registrar:write`, `registrar-domains.admin`, `email_sending:write`, `email_routing:write`, `workers_scripts:write`,
+  `dns_records:edit`; `cf auth scopes` shows what a login was granted. Its `registrar registrations check|create|
+  get-registration-status` call the same endpoints `registrar.ts` calls (`apiPath
+  /accounts/{account_id}/registrar/registrations`), taking `--body`. There is no raw `cf api` command.
+- **Cloudflare's hosted connector** (`mcp.cloudflare.com`, Code Mode: `search` + `execute` over the whole API) signs in
+  with OAuth; its consent page offers minimal / read-only / full-access templates (scopes editable as text). In Claude
+  Desktop a person could add it beside NodeGX's connector and sign in once. There the guard is the client's tool
+  approval and Claude's instructions, not `buyProblem`.
+
+**Plan (not built yet):** `domain.mjs` takes its credential from the `cf` sign-in instead of a token file (shelling out to
+`cf registrar registrations …`, the guard unchanged in front of it); the token stays as a fallback. To measure first, on
+Richard's account: which scopes `cf auth login` grants by default (`cf auth scopes`), and the shape of its output.
+Installing `cf` was refused to the session by the auto-mode classifier, and the sign-in is the person's.
+

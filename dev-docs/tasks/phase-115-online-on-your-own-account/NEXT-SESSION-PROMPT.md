@@ -14,10 +14,12 @@ the four filter readings unchanged.
 
 **B. The domain, bought through HST-018** (Richard ruled 2026-11-07: Claude buys it, after he says yes to the name and
 price; [HST-018 §4](HST-018-CLAUDE-FINDS-AND-BUYS-THE-DOMAIN.md)). Do NOT buy it in the dashboard.
-1. Once, in the dashboard (if not there yet): a default card (Billing), a default registrant contact (Domain
-   Registration), then My Profile → API Tokens → Create Token → Custom token: the account's **Registrar** permission at
-   **Edit**, **Account Settings** at **Read**. Save it from your own terminal (a secret, never through a session):
-   `pbpaste > ~/.nodegx/cloudflare/registrar-token && chmod 600 ~/.nodegx/cloudflare/registrar-token`
+1. **Sign in instead of a token** (HST-018 §5): once, in the dashboard if not there yet: a default card (Billing) and a
+   default registrant contact (Domain Registration). Then in your terminal: `npm i -g cf` (Cloudflare's own CLI, beta)
+   and `cf auth login` (a browser sign-in), then `cf auth scopes`. A session reads that output: if Registrar is
+   granted, it switches `domain.mjs` to the `cf` sign-in (no token anywhere) and continues with step 2. Only if it is
+   NOT granted: the token route (My Profile → API Tokens, Registrar Edit + Account Settings Read, saved with
+   `pbpaste > ~/.nodegx/cloudflare/registrar-token && chmod 600 ~/.nodegx/cloudflare/registrar-token`).
 2. A session: `node packages/nodegx-backend/cloudflare/domain.mjs check my-hearth.org my-hearth.io` (no money): is .org
    in Cloudflare's API beta, and today's price. If .org is not, the choice is .io or buying .org in the dashboard.
 3. You say yes to the printed sentence; then `… domain.mjs buy my-hearth.org --confirm "<that sentence>"` (a purchase:
