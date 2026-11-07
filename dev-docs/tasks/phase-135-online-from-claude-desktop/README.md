@@ -80,7 +80,7 @@ ODT-004, ODT-006 on the private client, and ODT-005 last.
 |---|---|---|
 | R1 | For ODT-000: the private OAuth client is created on your Cloudflare account. Will you click it together in the dashboard (Manage Account → OAuth clients), or make a short-lived API token with "OAuth Clients Write" for Claude to create it with? | The dashboard, once: no new key to look after, and the client's settings are visible to you. |
 | R2 | Once it works on the private client: make NodeGX's client public? It is **permanent** (Cloudflare cannot make it private again), and its address domain is fixed once verified. | Yes, on `nodegx.io`, only after ODT-006 passes on the private client. |
-| R3 | Ship wrangler in the extension (about +370 MB with its runtime, measured today; the extension is 217 MB) or deploy through Cloudflare's API? | The API, if ODT-000 (c) answers yes: no binary, and the bundle stays its size. |
+| R3 | Ship wrangler in the extension (about +370 MB with its runtime, measured today; the extension is 217 MB) or deploy through Cloudflare's API? | The API, if ODT-000 (c) answers yes: no binary, and the bundle stays its size. **2026-11-07: (c) answered YES** with Workers → Admin (`workers-scripts.admin`): P115's whole shape, a redeploy keeping the row and the secret, no wrangler, no blake3. ✅ **RULED 2026-11-07, Richard: the API** (*"API seems like the smart choice, 370MB extra is a lot"*). wrangler does not ship. |
 
 ## 8. Risks
 
@@ -94,6 +94,7 @@ ODT-004, ODT-006 on the private client, and ODT-005 last.
 
 | session | date | what |
 |---|---|---|
+| 2 | 2026-11-07 | `probe-writes` (`cloudflare/probeWrites.ts`, 6 tests on a fake Cloudflare): ODT-000 (c) writes + (e), three runs by Richard. 🔴 `workers-scripts.edit` (Workers → Edit) cannot create ANY Worker (403, a bare one too); with `workers-scripts.admin` (Workers → Admin) the whole P115 shape went up through the API and a redeploy kept the Durable Object's row and the secret; sha256 asset hashes accepted. `CLOUDFLARE_SCOPES` now asks `.admin`. The custom domain did not answer this Mac in 4 min (suspect: a local negative DNS cache; run 4). Consent page: the 10 ticked permissions. |
 | 1 | 2026-11-07 | ODT-001 built: `nodegx-backend/cloudflare/signIn.ts` (PKCE, loopback callback, 0600 file, refresh under a lock), the `cloudflare_sign_in` tool (deferred `project` group, 0 resident tokens), `sign-in.mjs` for ODT-000, the domain command reads it first. Tests 15 + 3 green, two mutants caught. ODT-000 §1: the scope catalog read (403; every scope asked for is in it); the `cf` sign-in cannot make the client, so R1 stands. R1 done (dashboard); real sign-in: loopback accepted, 11/11 scopes incl. registrar, 3599 s token, refresh rotates, 9 read probes 200. Workers → Edit = `workers-scripts.edit`. |
 | 0 | 2026-11-07 | Scoped (P115 session 15). §3 measured: the bundle's contents, wrangler's size, the deploy's needs, Cloudflare's client rules (two new: public is permanent; the domain is fixed once verified). |
 

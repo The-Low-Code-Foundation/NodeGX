@@ -55,7 +55,11 @@ export const CLOUDFLARE_REVOKE_URL = 'https://dash.cloudflare.com/oauth2/revoke'
  */
 export const NODEGX_CLOUDFLARE_CLIENT_ID = '';
 
-/** Fixed until ODT-000 (a) says whether Cloudflare matches a loopback redirect's port. wrangler uses 8976. */
+/**
+ * Fixed ON PURPOSE, though Cloudflare matches a loopback redirect's port loosely (ODT-000 (a), 2026-11-07: an
+ * unregistered 8978 was accepted): Claude Desktop runs two connector processes, and the taken port is what refuses a
+ * second, parallel sign-in page (`port-busy`). `NODEGX_CF_CALLBACK_PORT=0` lets the system pick. wrangler uses 8976.
+ */
 export const CALLBACK_PORT = 8977;
 export const CALLBACK_PATH = '/oauth/callback';
 
@@ -63,12 +67,17 @@ export const CALLBACK_PATH = '/oauth/callback';
  * What putting an app online, its files, its domain and its email need (P115's deploy and HST-018's purchase), named
  * as Cloudflare's OAuth catalog names them (`GET /oauth/scopes`, 2026-11-07). `offline_access` asks for a refresh
  * token (Hydra's convention; the discovery document lists it).
+ *
+ * 🔴 Workers is `workers-scripts.admin` ("Workers Admin", the dashboard's Workers → Admin box), MEASURED
+ * (ODT-000 (c), 2026-11-07): with `workers-scripts.edit` ("Workers Editor", Workers → Edit) Cloudflare's API refuses
+ * to create ANY Worker, a bare one-module one included (403 "No access to the specified resource."); with Admin the
+ * whole P115 deploy shape went up.
  */
 export const CLOUDFLARE_SCOPES: readonly string[] = [
   'offline_access',
   'user-details.read',
   'account-settings.read',
-  'workers-scripts.edit',
+  'workers-scripts.admin',
   'workers-kv-storage.write',
   'workers-r2.write',
   'workers-routes.write',
