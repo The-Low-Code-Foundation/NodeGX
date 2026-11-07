@@ -26,8 +26,12 @@ fi
 # live (its cache and the registry's abbreviated document lag), so a re-run after a partial publish tried mcp again and
 # stopped on E403 "cannot publish over the previously published versions". The full document is the registry's own
 # record: read the version's shasum from it, with no npm cache in between.
+# 2026-11-07 (Beta cut, the first publish of @nodegx/backend): a package that has never been published answers 404, so
+# `curl -f` failed, and under `set -euo pipefail` the `got=$(registry_shasum …)` in the wait loop ended the whole script
+# with no message right after `npm publish` had been accepted (PUT 202), and mcp and create-nodegx were never published.
+# `|| true` keeps "not there yet" an empty answer, which is what every caller here expects.
 registry_shasum() { # <name> <version> → the published version's shasum, or nothing
-  curl -fsS -H 'Cache-Control: no-cache' "https://registry.npmjs.org/$(printf %s "$1" | sed 's|/|%2f|')" 2>/dev/null |
+  { curl -fsS -H 'Cache-Control: no-cache' "https://registry.npmjs.org/$(printf %s "$1" | sed 's|/|%2f|')" 2>/dev/null || true; } |
     node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const v=(JSON.parse(s).versions||{})[process.argv[1]];if(v)process.stdout.write(v.dist.shasum)}catch(e){}})' "$2"
 }
 for name in nodegx-node-spec nodegx-project-contract nodegx-canvas-look nodegx-preview nodegx-export nodegx-backend nodegx-mcp create-nodegx create-nodegx-vibe create-nodegx-cline; do
@@ -36,7 +40,10 @@ for name in nodegx-node-spec nodegx-project-contract nodegx-canvas-look nodegx-p
   pkg=$(tar -xzOf "$tgz" package/package.json | node -pe 'const p=JSON.parse(require("fs").readFileSync(0,"utf8")); p.name+"@"+p.version')
   if [ -n "$(registry_shasum "${pkg%@*}" "${pkg##*@}")" ]; then echo "skip $pkg: already published"; continue; fi
   echo "publishing $pkg from $(basename "$tgz") (shasum $(shasum "$tgz" | cut -c1-40))"
-  npm publish "$tgz" --access public
+  # A version npm accepted but does not serve yet (a new package's first minutes, or "Validating") reads as unpublished
+  # above, so a re-run publishes it again and npm refuses (E403/E409). That refusal is not a reason to stop: the wait
+  # below decides, by the tested shasum, whether it is live.
+  npm publish "$tgz" --access public || echo "  npm publish exited non-zero for $pkg; waiting to see whether the registry has it anyway"
   # 2026-10-14 (npm 0.2.0): npm can STAGE a publish (staged publishing, GA May 2026) instead of making it live, and
   # create-nodegx then pins an MCP version nobody can install. Wait until the registry serves each one, with the
   # tested shasum, before the next; stop rather than publish create-nodegx over a version that isn't there.
