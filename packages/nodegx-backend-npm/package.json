@@ -1,0 +1,42 @@
+{
+  "name": "@nodegx/backend",
+  "version": "0.1.0",
+  "description": "Put a NodeGX app online on your own Cloudflare account: its pages, its backend, its rules and its functions, on one Worker, the same address every time.",
+  "license": "GPL-3.0-only",
+  "homepage": "https://nodegx.io",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/The-Low-Code-Foundation/NodeGX.git",
+    "directory": "packages/nodegx-backend-npm"
+  },
+  "bin": {
+    "nodegx-online": "bin/nodegx-online.js"
+  },
+  "files": [
+    "bin",
+    "dist/cloudflare-deploy.cjs",
+    "dist/cloudflare-domain.cjs",
+    "dist/cloud-bundle.cjs",
+    "dist/package.json",
+    "dist/scripts",
+    "dist/worker",
+    "src/prebuilt-worker.cjs",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@nodegx/export": "^0.2.5",
+    "@nodegx/preview": "^0.2.8"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "prepack": "node build.mjs && node ../noodl-mcp/check-pack-paths.mjs",
+    "test": "node --test"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
