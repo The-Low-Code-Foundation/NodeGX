@@ -25,3 +25,12 @@ another session holds uncommitted edits to. Make it when that tree is clean, the
 `ops/deploy.sh`, which is only safe from a clean tree that also carries the untracked live sections).
 
 /studio/'s "NodeGX Studio is … licensed GPL-3.0" is right as it stands: Studio is one of the tools.
+
+## 2026-11-07: built on Richard's yes (nodegx-web c972cda, on main, NOT deployed)
+
+Richard: "Licence: Sure change it". `ops/build.py` FOOTER now reads "NodeGX is a fork of Noodl, maintained by The Low
+Code Foundation. The tools are open source under GPL-3.0. The runtime your app runs on is MIT." (the homepage's ruled
+words; the offline `written closer contract opener` checks clean, `written` fires on a control). Rendered and committed:
+13 pages whose only change is the footer (3 lines each). Left to their next render: /start/ and /changelog/ (another
+session's uncommitted edits sit in both). Left: the deploy, Richard's — the 13 pages by rsync, or `ops/deploy.sh` once
+that tree is clean. The render also adds /help/ to `sitemap.xml` (the live one lacks it); not committed here.
