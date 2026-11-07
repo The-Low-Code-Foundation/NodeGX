@@ -61,7 +61,7 @@ import {
 import { normalizeScriptPath } from '../scriptFiles';
 import { parseModuleDependencies, parseModules } from './parseModules';
 
-export const EXPORTER_VERSION = '0.2.5';
+export const EXPORTER_VERSION = '0.2.6';
 
 interface RawPort {
   name: string;

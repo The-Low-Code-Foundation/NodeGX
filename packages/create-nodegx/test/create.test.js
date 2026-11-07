@@ -93,6 +93,9 @@ test('P112 OWN-007 (R3): the folder gets the editor brief as a project skill, na
   assert.match(AGENT_NOTE, /`nodegx-your-own-editor` \(`\.claude\/skills\/nodegx-your-own-editor\/SKILL\.md`\)/);
   // P18 EXP-023: the note says how the person leaves, and that the preflight comes first.
   assert.match(AGENT_NOTE, /`npx @nodegx\/export export <the app's folder> --dry-run` says first what/);
+  // P134 (R4): the plain-files way out is named beside React, with a static server to run it.
+  assert.match(AGENT_NOTE, /Add `--target html` to both for plain HTML, CSS and JavaScript files instead/);
+  assert.match(AGENT_NOTE, /`npx serve <that folder>`/);
   assert.match(AGENT_NOTE, /`npx nodegx-deploy` \(from `@nodegx\/preview`\)/);
   assert.match(run.stdout, /Wrote [^\n]*\.claude\/skills\/nodegx-your-own-editor\/SKILL\.md/);
 });
