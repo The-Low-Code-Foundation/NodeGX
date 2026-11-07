@@ -54,7 +54,7 @@ function deployEnvironment() {
   const set = (k, v) => {
     if (!process.env[k]) process.env[k] = v;
   };
-  // The deploy's own folder, as it sees it: `../scripts/build.js` from here is the pack's stub (build.mjs).
+  // The deploy's own folder, as it sees it (where it looks for a wrangler installed beside it).
   set('NODEGX_CLOUDFLARE_SRC', path.join(DIST, 'cloudflare'));
   set('NODEGX_CLOUDFLARE_WORKER', need(path.join(DIST, 'worker', 'worker.mjs'), 'The Worker (dist/worker/worker.mjs)'));
   set('NODEGX_CLOUD_BUNDLE', need(path.join(DIST, 'cloud-bundle.cjs'), 'The cloud-function bundler (dist/cloud-bundle.cjs)'));
@@ -74,8 +74,8 @@ function provider(word, verb) {
 /** wrangler, as the deploy itself runs it (one installed nearby, else `npx wrangler@4`), with the terminal attached. */
 function wrangler(args) {
   deployEnvironment();
-  const { __nodegxWranglerCommand } = require(need(path.join(DIST, 'cloudflare-deploy.cjs'), 'The deploy (dist/cloudflare-deploy.cjs)'));
-  const [cmd, ...pre] = __nodegxWranglerCommand();
+  const { wranglerCommand } = require(need(path.join(DIST, 'cloudflare-deploy.cjs'), 'The deploy (dist/cloudflare-deploy.cjs)'));
+  const [cmd, ...pre] = wranglerCommand();
   const run = spawnSync(cmd, [...pre, ...args], { stdio: 'inherit', env: { ...process.env, WRANGLER_SEND_METRICS: 'false' } });
   return run.status ?? 1;
 }

@@ -1,6 +1,6 @@
 # Phase 135 — next session prompt
 
-**Written 2026-11-07 at the end of session 3 (Opus 5.5).** Lane 10, a nice-to-have for the Beta, never ahead of lanes
+**Written 2026-11-07 at the end of session 3 (Opus 5.5); §0 and §1.6 updated by session 4 (ODT-003).** Lane 10, a nice-to-have for the Beta, never ahead of lanes
 9, 2 and 3. Read [the README](README.md), [ODT-002](ODT-002-THE-DEPLOY-THROUGH-THE-API.md) and
 [ODT-000](ODT-000-THE-MEASUREMENTS.md) §5 first. P115's close-out (Richard's live steps, P115
 `NEXT-SESSION-PROMPT.md`) is still open beside this; it is not this prompt's work unless Richard says so.
@@ -10,7 +10,13 @@
 **ODT-002 is DONE** (`packages/nodegx-backend/cloudflare/deployApi.ts`, 17 tests, and LIVE: Richard redeployed
 P115's `hst-campus` through the API at 22:46 CET 2026-11-07; after it 15/15, the 2 answers, the file uploaded just
 before, the credential). The deploy's step 5 goes up through Cloudflare's API whenever this computer holds NodeGX's
-sign-in, else wrangler (saying why). **Next: ODT-003** (the Worker's build without esbuild on the person's machine).
+sign-in, else wrangler (saying why).
+
+**ODT-003 is BUILT (s4)**: [ODT-003](ODT-003-THE-BUILD-WITHOUT-A-BUNDLER.md). `@nodegx/mcp`'s pack now carries
+`dist/cloudflare/deploy.cjs` + the prebuilt `worker.mjs`; a dry run on the installed extension's own Node, cloud
+bundler and engine, where esbuild does not resolve, goes the whole way. **Next: its live grade** (ODT-003 §4: Richard
+redeploys `hst-campus` through the kit; the session reads `deployment.json` and runs the checker with `--file`), **then
+ODT-004** (the MCP tools; §2 of ODT-003 lists the env the tool sets).
 🔴 The classifier refuses a session's live writes to Richard's account (P115 s13–15): write him the command, read the
 result (`deployment.json`, `GET /admin/files`, `check-campus-deploy.mjs` are the session's).
 
@@ -33,9 +39,10 @@ python3 -c "import json,os;d=json.load(open(os.path.expanduser('~/.nodegx/cloudf
    The `.mcpb` is graded when a release carries the tool. P135-DESKTOP-NOTOOLS is open beside it.
 5. ✅ **ODT-002, the deploy through the API**: built and graded live s3 (ODT-002 §4). Not yet live: the secrets
    call (`--new-admin-credential`), the domain detach (`--no-domain`).
-6. **ODT-003 next** (no bundler on the person's machine): (e) says a prebuilt Worker module beside a printed-code
-   module uploads as it is; `@nodegx/backend`'s `src/prebuilt-worker.cjs` is that idea already, at pack time, and
-   [`deployCloudflare-seam.patch`](deployCloudflare-seam.patch) is the seam it wants (README §4).
+6. 🔨 **ODT-003** (no bundler on the person's machine): built s4, the seam patch taken, `@nodegx/backend`'s rewrites
+   gone (it uses the same builder). Live grade owed (§4 of the task). 🔴 The kit lives in a session scratchpad: if it
+   is gone, rebuild it with `node packages/noodl-mcp/build-cloudflare-copy.mjs --out <dir>` and copy the extension's
+   `cloud-bundle.cjs` + `package.json` beside it.
 
 ## 2. What session 3 did (2026-11-07)
 

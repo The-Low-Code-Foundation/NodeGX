@@ -24,13 +24,14 @@ test('a host it cannot deploy to is a sentence and exit 2, before anything is bu
   assert.equal(run('sign-in').status, 2);
 });
 
-test('the deploy source still has what build.mjs rewrites and exports (a change there stops the pack, and this)', () => {
+test('the deploy exports the seam the pack and the bin use, and copies a prebuilt Worker itself (P135 ODT-003)', () => {
   const src = fs.readFileSync(path.join(__dirname, '..', '..', 'nodegx-backend', 'cloudflare', 'deployCloudflare.ts'), 'utf8');
-  assert.ok(src.includes('const USAGE = `usage: deploy.mjs <project>'));
-  assert.match(src, /^async function buildWorker\(/m);
-  assert.match(src, /^function wranglerCommand\(\)/m);
-  // the installed deploy's esbuild is the copier, and the copier is asked for worker.ts only
-  assert.match(src, /require\('esbuild'\)/);
-  assert.match(src, /entryPoints: \[path\.join\(HERE, 'worker\.ts'\)\]/);
-  assert.match(src, /require\(path\.join\(HERE, '\.\.', 'scripts', 'build\.js'\)\)/);
+  // the pack builds the Worker with this (noodl-mcp/build-cloudflare-copy.mjs), handing it its own esbuild
+  assert.match(src, /^export async function bundleWorker\(outfile: string, plugins: unknown\[\] = \[\], esbuild: any = require\('esbuild'\)\)/m);
+  // an install's deploy copies the prebuilt Worker instead of bundling
+  assert.match(src, /const prebuilt = process\.env\.NODEGX_CLOUDFLARE_WORKER;/);
+  // the bin's `sign-in` and `whoami` run the deploy's own wrangler; its usage line names the bin's spelling
+  assert.match(src, /^export function wranglerCommand\(\)/m);
+  assert.match(src, /process\.env\.NODEGX_CLOUDFLARE_COMMAND/);
+  assert.match(src, /^export async function main\(/m);
 });

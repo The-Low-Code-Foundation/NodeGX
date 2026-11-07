@@ -88,7 +88,10 @@ const say = (line = '') => process.stdout.write(line + '\n');
 // ---------------------------------------------------------------------------------------------------------------------
 // Arguments
 
-const USAGE = `usage: deploy.mjs <project> [--name <worker>] [--bucket <r2 bucket> | --no-bucket] [--viewer <folder>]
+/** The command as the person typed it: the checkout's launcher, or `@nodegx/backend`'s bin (it sets this). */
+const PROGRAM = process.env.NODEGX_CLOUDFLARE_COMMAND || 'deploy.mjs';
+
+const USAGE = `usage: ${PROGRAM} <project> [--name <worker>] [--bucket <r2 bucket> | --no-bucket] [--viewer <folder>]
                  [--allow-development-engine] [--out <folder>] [--local [--port <n>]] [--make-roles]
                  [--new-admin-credential] [--dry-run] [--domain <hostname> | --no-domain]
                  [--alert-to <address> --alert-from <address on your Cloudflare domain> | --no-alert]
@@ -208,6 +211,63 @@ function cloudFunctions(projectDir: string): { bundleName: string; projectId?: s
 
 const NOT_FOR_THE_HOST = ['DEPLOY.md', 'serve.js', 'package.json', '.nodegx-deploy.json', 'nodegx-config.json'];
 
+const VIEWER_HINT = '\nName a production viewer with --viewer <folder holding noodl.deploy.js>.';
+
+/**
+ * `nodegx deploy` (`@nodegx/export`'s command): a checkout's build, or `NODEGX_CLI` (`@nodegx/backend`'s bin sets it).
+ * `null` when there is none and the engine is named instead: Claude Desktop's extension ships `@nodegx/preview`'s
+ * engine (`NODEGX_DEPLOY_CLI`, in its manifest) and not `@nodegx/export` (P135 ODT-003).
+ */
+function siteThroughCli(copy: string, out: string, allowDev: boolean): string[] | null {
+  const cli = process.env.NODEGX_CLI || path.join(PACKAGES, 'nodegx-export', 'dist', 'cli.mjs');
+  if (!process.env.NODEGX_CLI && process.env.NODEGX_DEPLOY_CLI && !fs.existsSync(cli)) return null;
+  const args = [cli, 'deploy', copy, out];
+  if (allowDev) args.push('--allow-development-engine');
+  const run = spawnSync(process.execPath, args, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+  if (run.status !== 0) {
+    throw new DeployError(`\`nodegx deploy\` refused (${run.status}):\n${(run.stdout + run.stderr).trim()}` + (run.status === 11 ? VIEWER_HINT : ''));
+  }
+  return run.stdout.split('\n').filter((l) => / deployed to |left out|excluded|engine/i.test(l)).map((l) => l.trim());
+}
+
+/**
+ * The engine itself (`nodegx-deploy.cjs`), as `deploy_to_vm` runs it: its report is the last line of its stdout. The
+ * two refusals `nodegx deploy` adds on top of a report are kept: a report that is not `ok`, and a blank site.
+ */
+function siteThroughEngine(copy: string, out: string, allowDev: boolean): string[] {
+  const engine = process.env.NODEGX_DEPLOY_CLI as string;
+  if (!fs.existsSync(engine)) throw new DeployError(`NODEGX_DEPLOY_CLI is set to ${engine}, and there is nothing there.`);
+  const args = [engine, copy, out];
+  if (allowDev) args.push('--allow-development-engine');
+  const run = spawnSync(process.execPath, args, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+  const last = (run.stdout || '').trim().split('\n').pop() || '';
+  let report: {
+    ok?: boolean;
+    stage?: string;
+    message?: string;
+    blank?: string | null;
+    projectName?: string;
+    files?: string[];
+    excluded?: Array<{ path: string; rule: string }>;
+    engine?: { kind: string; bytes: number };
+    warnings?: string[];
+  };
+  try {
+    report = JSON.parse(last);
+  } catch {
+    throw new DeployError(`The site's deploy engine gave no report (${run.status}):\n${(run.stderr || '').trim().slice(-2000) || 'no output'}`);
+  }
+  if (report.ok !== true) {
+    throw new DeployError(`The site's deploy engine refused (${report.stage}): ${report.message ?? 'no reason given'}` + (report.stage === 'engine' ? VIEWER_HINT : ''));
+  }
+  if (report.blank) throw new DeployError(`This deploy would ship a blank site, so it stops here.\n${report.blank}`);
+  const notes = [`${report.projectName ?? 'project'} deployed to ${out} — ${(report.files ?? []).length} entries`];
+  if (report.engine) notes.push(`engine: ${report.engine.kind} build of the NodeGX viewer, ${(report.engine.bytes / 1e6).toFixed(2)} MB`);
+  for (const w of report.warnings ?? []) notes.push(`! ${w}`);
+  if (report.excluded?.length) notes.push(`${report.excluded.length} project file(s) left out: ${report.excluded.slice(0, 5).map((e) => e.path).join(', ')}`);
+  return notes;
+}
+
 function buildSite(project: Project, name: string, siteDir: string, o: DeployOptions): string[] {
   const work = fs.mkdtempSync(path.join(os.tmpdir(), 'nodegx-cf-site-'));
   try {
@@ -219,17 +279,8 @@ function buildSite(project: Project, name: string, siteDir: string, o: DeployOpt
     fs.writeFileSync(path.join(copy, 'nodegx.project.json'), JSON.stringify(json, null, 2));
 
     const out = path.join(work, 'site');
-    const cli = process.env.NODEGX_CLI || path.join(PACKAGES, 'nodegx-export', 'dist', 'cli.mjs');
-    const args = [cli, 'deploy', copy, out];
-    if (o.viewer || o.allowDevelopmentEngine) args.push('--allow-development-engine');
-    const run = spawnSync(process.execPath, args, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
-    if (run.status !== 0) {
-      throw new DeployError(
-        `\`nodegx deploy\` refused (${run.status}):\n${(run.stdout + run.stderr).trim()}` +
-          (run.status === 11 ? '\nName a production viewer with --viewer <folder holding noodl.deploy.js>.' : '')
-      );
-    }
-    const notes = run.stdout.split('\n').filter((l) => / deployed to |left out|excluded|engine/i.test(l)).map((l) => l.trim());
+    const allowDev = !!(o.viewer || o.allowDevelopmentEngine);
+    const notes = siteThroughCli(copy, out, allowDev) ?? siteThroughEngine(copy, out, allowDev);
     if (o.viewer) {
       for (const f of ['noodl.deploy.js', 'noodl.deploy.js.LICENSE.txt']) {
         const from = path.join(o.viewer, f);
@@ -260,21 +311,21 @@ function buildSite(project: Project, name: string, siteDir: string, o: DeployOpt
 // ---------------------------------------------------------------------------------------------------------------------
 // 3. The Worker
 
-async function buildWorker(
-  distDir: string,
-  app: { appId: string; appName: string; policy: string | null; automations: string | null },
-  printed: string
-): Promise<void> {
-  const esbuild = require('esbuild');
+/**
+ * The Worker's code: `worker.ts` and the whole backend, one ES module. Nothing in it is the app's: the app's own parts
+ * are its two neighbours, `printed-code.mjs` and `app.mjs`, left as imports (ODT-000 (e): they go up as modules of
+ * their own). So it is built ONCE, before anyone deploys (P135 ODT-003): `@nodegx/mcp`'s and `@nodegx/backend`'s packs
+ * build it with this function (`noodl-mcp/build-cloudflare-copy.mjs`; `plugins` is the path rename a worktree build
+ * needs), and an installed deploy copies it (`NODEGX_CLOUDFLARE_WORKER`): no esbuild and no backend source on the
+ * person's machine. A pack passes its own `esbuild` (the deploy it requires may sit where none resolves). The backend's admin dashboard (`build/admin/`, `scripts/build-admin-app.js`) must exist first.
+ */
+export async function bundleWorker(outfile: string, plugins: unknown[] = [], esbuild: any = require('esbuild')): Promise<void> {
   const { shared } = require(path.join(HERE, '..', 'scripts', 'build.js'));
-  fs.mkdirSync(distDir, { recursive: true });
-  fs.writeFileSync(path.join(distDir, 'printed-code.mjs'), printed);
-  fs.writeFileSync(path.join(distDir, 'app.mjs'), `export default ${JSON.stringify(app)};\n`);
   const nodeSqlite = path.join(HERE, 'nodeSqlite.ts');
   await esbuild.build({
     ...shared,
     entryPoints: [path.join(HERE, 'worker.ts')],
-    outfile: path.join(distDir, 'worker.mjs'),
+    outfile,
     format: 'esm',
     target: 'es2022',
     sourcemap: false,
@@ -296,9 +347,31 @@ async function buildWorker(
           b.onResolve({ filter: /^\.\/(printed-code|app)\.mjs$/ }, (a: any) => ({ path: a.path, external: true }));
           b.onResolve({ filter: /^node:sqlite$/ }, () => ({ path: nodeSqlite }));
         }
-      }
+      },
+      ...plugins
     ]
   });
+}
+
+/** The prebuilt Worker's two imports: the app's own modules, which every deploy writes beside it. */
+export const WORKER_OWN_MODULES = ['./printed-code.mjs', './app.mjs'];
+
+export async function buildWorker(
+  distDir: string,
+  app: { appId: string; appName: string; policy: string | null; automations: string | null },
+  printed: string
+): Promise<'prebuilt' | 'bundled'> {
+  fs.mkdirSync(distDir, { recursive: true });
+  fs.writeFileSync(path.join(distDir, 'printed-code.mjs'), printed);
+  fs.writeFileSync(path.join(distDir, 'app.mjs'), `export default ${JSON.stringify(app)};\n`);
+  const prebuilt = process.env.NODEGX_CLOUDFLARE_WORKER;
+  if (prebuilt) {
+    if (!fs.existsSync(prebuilt)) throw new DeployError(`The prebuilt Worker is not here (${prebuilt}): this copy of the deploy is incomplete.`);
+    fs.copyFileSync(prebuilt, path.join(distDir, 'worker.mjs'));
+    return 'prebuilt';
+  }
+  await bundleWorker(path.join(distDir, 'worker.mjs'));
+  return 'bundled';
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -329,7 +402,8 @@ export function leaks(files: string[], secrets: Array<{ what: string; value: str
 // ---------------------------------------------------------------------------------------------------------------------
 // 5. wrangler
 
-function wranglerCommand(): string[] {
+/** The wrangler the deploy runs: `NODEGX_WRANGLER`, one installed beside the project or this file, else `npx wrangler@4`. */
+export function wranglerCommand(): string[] {
   if (process.env.NODEGX_WRANGLER) return [process.execPath, process.env.NODEGX_WRANGLER];
   for (const from of [process.cwd(), HERE]) {
     try {
@@ -534,7 +608,8 @@ export async function deploy(o: DeployOptions): Promise<number> {
   say('3. The Worker');
   const distDir = path.join(dir, 'dist');
   fs.rmSync(distDir, { recursive: true, force: true });
-  await buildWorker(distDir, { appId: name, appName: project.name, policy: project.policyText, automations: project.automationsText }, printCodeModule(print));
+  const how = await buildWorker(distDir, { appId: name, appName: project.name, policy: project.policyText, automations: project.automationsText }, printCodeModule(print));
+  if (how === 'prebuilt') say('  the backend: the prebuilt Worker (nothing bundled on this computer); the app\'s code beside it');
   // A domain belongs to the live Worker; `wrangler dev` cannot answer at it.
   fs.writeFileSync(path.join(dir, 'wrangler.toml'), wranglerConfig({ name, bucket: record.bucket, domain: o.local ? null : record.domain, alert: record.alert }));
   const uploaded = [...filesUnder(siteDir), ...filesUnder(distDir)];

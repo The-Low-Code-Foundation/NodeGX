@@ -18,9 +18,7 @@
     "dist/cloudflare-domain.cjs",
     "dist/cloud-bundle.cjs",
     "dist/package.json",
-    "dist/scripts",
     "dist/worker",
-    "src/prebuilt-worker.cjs",
     "README.md",
     "LICENSE"
   ],
