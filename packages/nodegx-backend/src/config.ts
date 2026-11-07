@@ -141,7 +141,18 @@ export interface BackendServiceOptions {
    * CLI flag: only code that runs the service has one.
    */
   recordEngine: RecordEngine | null;
+  /**
+   * P115 HST-016 — the host keeps the clock for every schedule (triggers, scheduled backups, the orphan sweep). null
+   * (every Node spawner) = timers in this process, as before. A host whose process is evicted when idle (a Cloudflare
+   * Durable Object: a pending timer holds it at most 15 minutes, then the timer is gone) hands in this instead: no
+   * timer is armed, it is told the earliest instant a schedule is due (null: none), and at that instant it calls
+   * `BackendService.fireDueSchedules()`. On Cloudflare, the object's alarm. Not a CLI flag.
+   */
+  scheduleWake: ScheduleWake | null;
 }
+
+/** P115 HST-016: told the earliest instant any schedule of this backend is due, or null for none. */
+export type ScheduleWake = (at: Date | null) => void;
 
 /** P115 HST-010: a `fetch` for requests to the backend's own address (see `loopbackFetch`). */
 export type LoopbackFetch = (input: string, init?: RequestInit) => Promise<Response>;
@@ -175,7 +186,8 @@ const DEFAULTS: BackendServiceOptions = {
   loopbackFetch: null,
   dataDirStore: null,
   filesBucket: null,
-  recordEngine: null
+  recordEngine: null,
+  scheduleWake: null
 };
 
 /**

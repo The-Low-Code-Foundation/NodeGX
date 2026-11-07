@@ -16,7 +16,7 @@ import * as path from 'path';
 import { applyProject, type AdminCall, type ProjectBackendState } from '../cloudflare/applyProject';
 import { dataDirTable } from '../cloudflare/dataDirTable';
 import { FAMILIES_PATH, isPageAddress, routeFamilies, routeOf } from '../cloudflare/routing';
-import { workerNameFrom, workerNameProblem, wranglerConfig } from '../cloudflare/wranglerConfig';
+import { domainProblem, workerNameFrom, workerNameProblem, wranglerConfig } from '../cloudflare/wranglerConfig';
 import { BackendService } from '../src/service';
 import { adminToken } from './helpers/http';
 
@@ -260,5 +260,15 @@ describe('wranglerConfig', () => {
     expect(workerNameProblem('campus-2')).toBeNull();
     expect(workerNameProblem('Campus')).toMatch(/lowercase/);
     expect(workerNameProblem('-x')).toMatch(/lowercase/);
+  });
+  test('HST-007: a domain is a Custom Domain route, only when there is one', () => {
+    const withDomain = wranglerConfig({ name: 'campus', bucket: null, domain: 'campus.example.com' });
+    expect(withDomain).toMatch(/\[\[routes\]\]\npattern = "campus.example.com"\ncustom_domain = true/);
+    expect(wranglerConfig({ name: 'campus', bucket: null })).not.toMatch(/routes/);
+    expect(domainProblem('campus.example.com')).toBeNull();
+    expect(domainProblem('example.co.uk')).toBeNull();
+    for (const bad of ['https://campus.example.com', 'campus.example.com/home', '*.example.com', 'Campus.Example.com', 'localhost', 'campus..example.com']) {
+      expect(domainProblem(bad)).toMatch(/cannot be a domain/);
+    }
   });
 });

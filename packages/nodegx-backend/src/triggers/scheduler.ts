@@ -47,6 +47,19 @@
  * which does not touch the fire counter or the fire metric. A schedule skipping
  * correctly every morning must not look like a schedule that is broken.
  *
+ * ## A host that keeps the clock (P115 HST-016)
+ *
+ * On Cloudflare the backend lives in a Durable Object, which is evicted when idle (a pending timer holds it at most
+ * 15 minutes, and eviction drops the timer), and `skip` then skipped the missed fire: a daily schedule on a quiet
+ * deployed app never fired. With `wake`, this scheduler arms NO timer. It says the earliest instant it must be woken
+ * at (`wake(at)`, null for none), the host sets its own alarm to it, and on that alarm calls `fireDue()`, which fires
+ * every schedule due by now and resolves when their runs have settled (so the host can keep the object alive for them).
+ *
+ * The alarm wakes an object that is not running, so the service starts FIRST, and a plain start computes the NEXT
+ * occurrence: the one that woke it would be skipped. So in wake mode a start keeps the STORED next fire as due when it
+ * is an occurrence of the current cron, at most `WAKE_GRACE_MS` past and not yet fired. That is the alarm arriving,
+ * not a window missed while down; older than that, the missed-fire policy applies as on Node.
+ *
  * @module nodegx-backend/triggers/scheduler
  */
 
@@ -60,6 +73,9 @@ import type { FireInput, FireOutcome, RejectionInput, SkipInput, TriggerResultSh
 // setTimeout clamps delays > ~24.8 days; chunk long waits so a monthly/yearly
 // schedule doesn't fire immediately from an overflowed delay.
 const MAX_TIMER_MS = 2 ** 31 - 1;
+
+/** HST-016: how late a host's alarm may be and still be the alarm for a fire (else: a window missed while down). */
+export const WAKE_GRACE_MS = 15 * 60 * 1000;
 
 /**
  * The minimal registry surface the scheduler drives. The concrete
@@ -101,6 +117,11 @@ export interface SchedulerDeps {
   dispatcher: SchedulerDispatcher;
   /** Injectable clock for tests. */
   now?: () => Date;
+  /**
+   * P115 HST-016: the host keeps the clock. No timer is armed; the earliest instant this scheduler must be woken at is
+   * reported here (null: none), and the host calls `fireDue()` at it.
+   */
+  wake?: (at: Date | null) => void;
 }
 
 export interface StartPlan {
@@ -175,11 +196,62 @@ export class CronScheduler {
    * run is the delayed one.
    */
   private queued = new Map<string, string>();
+  /** HST-016, wake mode only: the instant each armed schedule is due at, in place of its timer. */
+  private readonly wake: ((at: Date | null) => void) | null;
+  private due = new Map<string, Date>();
+  private lastWake: number | null | undefined = undefined;
+  /** HST-016: each trigger's run in flight, so `fireDue` can wait for what it started. */
+  private runs = new Map<string, Promise<void>>();
 
   constructor(deps: SchedulerDeps) {
     this.registry = deps.registry;
     this.dispatcher = deps.dispatcher;
     this.now = deps.now || (() => new Date());
+    this.wake = deps.wake || null;
+  }
+
+  /**
+   * HST-016: fire every schedule due by now (wake mode), and resolve when the runs they started have settled. Each
+   * fired schedule is re-armed for its next occurrence first, so the host's next wake is already reported.
+   */
+  async fireDue(): Promise<void> {
+    if (!this.wake || !this.running) return;
+    const now = this.now().getTime();
+    const fired: string[] = [];
+    for (const [id, at] of [...this.due]) {
+      if (at.getTime() > now) continue;
+      this.due.delete(id);
+      fired.push(id);
+      this.onFire(id);
+    }
+    this.reportWake();
+    await Promise.all(fired.map((id) => this.runs.get(id)).filter(Boolean));
+  }
+
+  /** The earliest due instant, to the host, when it changed. */
+  private reportWake(): void {
+    if (!this.wake) return;
+    let min: number | null = null;
+    for (const at of this.due.values()) if (min === null || at.getTime() < min) min = at.getTime();
+    if (min === this.lastWake) return;
+    this.lastWake = min;
+    this.wake(min === null ? null : new Date(min));
+  }
+
+  /** HST-016: in wake mode, the stored next fire this start must keep as due now (the alarm that woke it), or null. */
+  private dueAtStart(trigger: TriggerDef): Date | null {
+    if (!this.wake || !trigger.schedule || !trigger.status || !trigger.status.nextFireAt) return null;
+    const stored = new Date(trigger.status.nextFireAt);
+    const now = this.now().getTime();
+    if (isNaN(stored.getTime()) || stored.getTime() > now || now - stored.getTime() > WAKE_GRACE_MS) return null;
+    const last = trigger.status.lastFiredAt ? new Date(trigger.status.lastFiredAt).getTime() : NaN;
+    if (!isNaN(last) && last >= stored.getTime()) return null;
+    try {
+      // An occurrence of the CURRENT cron: an edit since must not fire on the old one's instant.
+      return parseCron(trigger.schedule.cron).next(new Date(stored.getTime() - 1000)).getTime() === stored.getTime() ? stored : null;
+    } catch {
+      return null;
+    }
   }
 
   /** Arm every enabled schedule trigger. Idempotent (clears then re-arms). */
@@ -190,6 +262,8 @@ export class CronScheduler {
       if (!trigger.enabled || !trigger.schedule) continue;
       this.arm(trigger.id);
     }
+    // HST-016: after a re-arm that left nothing armed (the last schedule disabled), the host is told "none".
+    this.reportWake();
   }
 
   /** Recompute after a registry change (admin/MCP edited triggers). */
@@ -200,6 +274,12 @@ export class CronScheduler {
   private arm(triggerId: string): void {
     const trigger = this.registry.get(triggerId);
     if (!trigger || !trigger.enabled || !trigger.schedule) return;
+
+    const dueNow = this.dueAtStart(trigger);
+    if (dueNow) {
+      this.armAt(trigger.id, dueNow);
+      return;
+    }
 
     let plan: StartPlan;
     try {
@@ -232,6 +312,11 @@ export class CronScheduler {
 
   /** Arm a timer for a specific instant, chunking waits past the setTimeout cap. */
   private armAt(triggerId: string, when: Date): void {
+    if (this.wake) {
+      this.due.set(triggerId, when);
+      this.reportWake();
+      return;
+    }
     const delay = when.getTime() - this.now().getTime();
     if (delay > MAX_TIMER_MS) {
       const t = setTimeout(() => this.armAt(triggerId, when), MAX_TIMER_MS);
@@ -303,9 +388,13 @@ export class CronScheduler {
     this.inFlight.set(triggerId, entry);
 
     const settled = (): void => this.onRunSettled(triggerId);
-    this.fire(triggerId, source, (executionId: string) => {
+    const run = this.fire(triggerId, source, (executionId: string) => {
       entry.executionId = executionId;
     }).then(settled, settled);
+    this.runs.set(triggerId, run);
+    void run.then(() => {
+      if (this.runs.get(triggerId) === run) this.runs.delete(triggerId);
+    });
   }
 
   /**
@@ -393,6 +482,11 @@ export class CronScheduler {
   stop(markStopped = true): void {
     for (const t of this.timers.values()) clearTimeout(t);
     this.timers.clear();
+    if (this.wake) {
+      this.due.clear();
+      // An internal re-arm (`start()` → `stop(false)`) reports once it has re-armed, not a null in between.
+      if (markStopped) this.reportWake();
+    }
     if (markStopped) {
       this.running = false;
       // A queued fire is one that has not happened; a stopped scheduler owes

@@ -14,7 +14,8 @@
  *   4. a search of every file that would be uploaded for the admin credential and the project's `.env` values (AC3)
  *   5. `wrangler deploy` (or `wrangler dev` with `--local`); on a first deploy the admin credential goes up as the
  *      Worker secret NODEGX_ADMIN_TOKEN with it (`--secrets-file`), and the R2 bucket is made
- *   6. the project's collections, rules and roles applied to the running backend (`applyProject`), then its cloud
+ *   6. the project's collections, rules and roles applied to the running backend (`applyProject`), its workflows and
+ *      triggers when `nodegx.automations.json` changed since the last deploy (`applyAutomations`), then its cloud
  *      functions uploaded through the admin API, as `deploy_cloud_functions` does
  *
  * The deployment's folder (`~/.nodegx/cloudflare/<name>/`, or `--out`) keeps `deployment.json` (mode 600: the
@@ -30,8 +31,9 @@ import * as path from 'node:path';
 import { collectCode, printCodeModule, refusalSentence } from '../../noodl-runtime/src/printcode';
 import { cloudBundleNameFrom, deployCloudBundle, type CloudBundleParts, type CloudDeployTransport } from '../../noodl-editor/src/editor/src/utils/exporter/cloudDeployCore';
 import { readViewerBuild } from '../../noodl-preview/src/viewerBuild';
+import { applyAutomations } from './applyAutomations';
 import { applyProject, type AdminCall } from './applyProject';
-import { workerNameFrom, workerNameProblem, wranglerConfig } from './wranglerConfig';
+import { domainProblem, workerNameFrom, workerNameProblem, wranglerConfig } from './wranglerConfig';
 
 /** Where this file is: `packages/nodegx-backend/cloudflare` (the launcher sets it; the bundle's own dir is `.build`). */
 const HERE = process.env.NODEGX_CLOUDFLARE_SRC || __dirname;
@@ -49,6 +51,8 @@ export interface DeployOptions {
   makeRoles?: boolean;
   newAdminCredential?: boolean;
   dryRun?: boolean;
+  /** HST-007: a domain the app answers at too; `null` (`--no-domain`) removes the one recorded. */
+  domain?: string | null;
 }
 
 interface DeploymentRecord {
@@ -58,6 +62,10 @@ interface DeploymentRecord {
   adminToken: string;
   project: string;
   deploys: Array<{ at: string; url: string | null; local: boolean }>;
+  /** HST-007: the domain the app also answers at, kept for every later deploy. */
+  domain?: string | null;
+  /** The sha256 of the `nodegx.automations.json` each backend last took from a deploy (local and live are two). */
+  automations?: { live?: string | null; local?: string | null };
 }
 
 class DeployError extends Error {}
@@ -69,7 +77,7 @@ const say = (line = '') => process.stdout.write(line + '\n');
 
 const USAGE = `usage: deploy.mjs <project> [--name <worker>] [--bucket <r2 bucket> | --no-bucket] [--viewer <folder>]
                  [--allow-development-engine] [--out <folder>] [--local [--port <n>]] [--make-roles]
-                 [--new-admin-credential] [--dry-run]`;
+                 [--new-admin-credential] [--dry-run] [--domain <hostname> | --no-domain]`;
 
 export function parseArgs(argv: string[]): DeployOptions {
   const o: DeployOptions = { project: '' };
@@ -91,6 +99,8 @@ export function parseArgs(argv: string[]): DeployOptions {
     else if (a === '--make-roles') o.makeRoles = true;
     else if (a === '--new-admin-credential') o.newAdminCredential = true;
     else if (a === '--dry-run') o.dryRun = true;
+    else if (a === '--domain') o.domain = next().trim().toLowerCase();
+    else if (a === '--no-domain') o.domain = null;
     else if (a.startsWith('--')) throw new DeployError(`${a} is not an option.\n${USAGE}`);
     else if (!o.project) o.project = path.resolve(a);
     else throw new DeployError(`One project at a time.\n${USAGE}`);
@@ -372,7 +382,14 @@ function cloudTransport(call: AdminCall): CloudDeployTransport {
   };
 }
 
-async function applyEverything(base: string, token: string, project: Project, functions: ReturnType<typeof cloudFunctions>, makeRoles: boolean): Promise<void> {
+async function applyEverything(
+  base: string,
+  token: string,
+  project: Project,
+  functions: ReturnType<typeof cloudFunctions>,
+  makeRoles: boolean,
+  where: { dir: string; record: DeploymentRecord; local: boolean }
+): Promise<void> {
   const call = adminCaller(base, token);
   const who = await call('GET', '/admin/permissions');
   if (who.status === 401 || who.status === 403) {
@@ -383,17 +400,17 @@ async function applyEverything(base: string, token: string, project: Project, fu
   }
   const report = await applyProject(call, { policy: project.policyText ? JSON.parse(project.policyText) : null, collections: project.collections }, { firstDeploy: makeRoles });
   for (const l of report.lines) say(`  ${l}`);
-  if (project.automationsText) {
-    const a = JSON.parse(project.automationsText) as { workflows?: unknown[]; triggers?: unknown[] };
-    const wf = (await call('GET', '/admin/workflow-defs')).json as { workflows?: unknown[] } | unknown[] | null;
-    const tr = (await call('GET', '/admin/triggers')).json as { triggers?: unknown[] } | unknown[] | null;
-    const count = (x: typeof wf | typeof tr, k: 'workflows' | 'triggers') => (Array.isArray(x) ? x.length : ((x as Record<string, unknown[]> | null)?.[k]?.length ?? 0));
-    say(
-      `  Workflows and triggers: the backend has ${count(wf, 'workflows')} and ${count(tr, 'triggers')}; nodegx.automations.json has ` +
-        `${a.workflows?.length ?? 0} and ${a.triggers?.length ?? 0}. They are taken from the project at the backend's first start only: ` +
-        `a change to them since is NOT carried by a redeploy yet (HST-014 left).`
-    );
+
+  const target = where.local ? 'local' : 'live';
+  const automations = await applyAutomations(call, project.automationsText, { installedSha256: where.record.automations?.[target] ?? null });
+  if (automations.before) {
+    const kept = path.join(where.dir, `automations.before-${new Date().toISOString().replace(/[:.]/g, '-')}.json`);
+    fs.writeFileSync(kept, JSON.stringify(automations.before, null, 2) + '\n');
+    automations.lines.push(`The backend's previous ones are kept in ${kept}.`);
   }
+  for (const l of automations.lines) say(`  ${l}`);
+  where.record.automations = { ...where.record.automations, [target]: automations.sha256 };
+  writeRecord(where.dir, where.record);
 
   const transport = cloudTransport(call);
   const served = (await transport.readServingHash!(functions.bundleName).catch(() => null)) !== null;
@@ -429,8 +446,16 @@ export async function deploy(o: DeployOptions): Promise<number> {
     url: before?.url ?? null,
     adminToken: mint ? crypto.randomBytes(32).toString('base64url') : before!.adminToken,
     project: project.dir,
-    deploys: before?.deploys ?? []
+    deploys: before?.deploys ?? [],
+    // Carried, or every redeploy forgets which file was installed and replaces an edit made on the backend (measured
+    // on workerd: the unchanged file replaced the trigger switched off there).
+    ...(before?.automations ? { automations: before.automations } : {}),
+    domain: o.domain !== undefined ? o.domain : before?.domain ?? null
   };
+  if (record.domain) {
+    const bad = domainProblem(record.domain);
+    if (bad) throw new DeployError(bad);
+  }
   say(`NodeGX → Cloudflare: "${project.name}" as the Worker ${name}${o.local ? ' (locally, on workerd)' : ''}${firstDeploy ? ', first deploy' : ''}.`);
 
   say('1. Cloud functions');
@@ -451,7 +476,8 @@ export async function deploy(o: DeployOptions): Promise<number> {
   const distDir = path.join(dir, 'dist');
   fs.rmSync(distDir, { recursive: true, force: true });
   await buildWorker(distDir, { appId: name, appName: project.name, policy: project.policyText, automations: project.automationsText }, printCodeModule(print));
-  fs.writeFileSync(path.join(dir, 'wrangler.toml'), wranglerConfig({ name, bucket: record.bucket }));
+  // A domain belongs to the live Worker; `wrangler dev` cannot answer at it.
+  fs.writeFileSync(path.join(dir, 'wrangler.toml'), wranglerConfig({ name, bucket: record.bucket, domain: o.local ? null : record.domain }));
   const uploaded = [...filesUnder(siteDir), ...filesUnder(distDir)];
   const mb = uploaded.reduce((n, f) => n + fs.statSync(f).size, 0) / 1e6;
   say(`  ${uploaded.length} files to upload, ${mb.toFixed(2)} MB; files in ${record.bucket ? `the bucket ${record.bucket}` : 'NO bucket (uploads are lost on a restart)'}.`);
@@ -483,7 +509,7 @@ export async function deploy(o: DeployOptions): Promise<number> {
     const base = `http://127.0.0.1:${port}`;
     await waitFor(`${base}/health`, 90);
     say(`6. The project onto the backend at ${base}`);
-    await applyEverything(base, record.adminToken, project, functions, firstDeploy || !!o.makeRoles);
+    await applyEverything(base, record.adminToken, project, functions, firstDeploy || !!o.makeRoles, { dir, record, local: true });
     record.deploys.push({ at: new Date().toISOString(), url: base, local: true });
     writeRecord(dir, record);
     say(`\nRunning on workerd at ${base} (log: ${path.join(dir, 'wrangler-dev.log')}). Ctrl-C stops it; its data stays in ${path.join(dir, '.state')}.`);
@@ -519,8 +545,11 @@ export async function deploy(o: DeployOptions): Promise<number> {
   writeRecord(dir, record);
   await waitFor(`${url}/health`, 60);
   say(`6. The project onto the backend at ${url}`);
-  await applyEverything(url, record.adminToken, project, functions, firstDeploy || !!o.makeRoles);
+  await applyEverything(url, record.adminToken, project, functions, firstDeploy || !!o.makeRoles, { dir, record, local: false });
   say(`\nOnline: ${url}`);
+  if (record.domain) {
+    say(`And at https://${record.domain} once Cloudflare has made its certificate (a few minutes the first time).`);
+  }
   say(`The backend's dashboard: ${url}/_admin — its admin credential is in ${path.join(dir, 'deployment.json')} (never uploaded).`);
   return 0;
 }

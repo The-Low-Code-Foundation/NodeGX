@@ -57,6 +57,7 @@ import { AuditLog, ensureAuditTable } from './ops/audit';
 import { SystemUsers, SystemUserRequest, SystemUserResult } from './users/SystemUsers';
 import { SystemRoles, SystemRoleRequest, SystemRoleResult } from './roles/SystemRoles';
 import { TriggerSubsystem } from './triggers/TriggerSubsystem';
+import { ScheduleClock } from './triggers/scheduleClock';
 import { BackupSubsystem } from './backup/BackupSubsystem';
 import { FileSubsystem } from './storage/FileSubsystem';
 import { ensureFilesTable } from './storage/MetadataStore';
@@ -142,6 +143,8 @@ export class BackendService {
   private changeBus: ChangeBus | null = null;
   private realtime: RealtimeHub | null = null;
   private triggers: TriggerSubsystem | null = null;
+  /** P115 HST-016: the host's clock for every schedule, when it keeps one (`scheduleWake`). */
+  private scheduleClock: ScheduleClock | null = null;
   private backups: BackupSubsystem | null = null;
   private files: FileSubsystem | null = null;
   private emailConfig: EmailConfigState | null = null;
@@ -500,7 +503,9 @@ export class BackendService {
     //     The db-change source is the SAME ChangeBus the realtime hub uses — the
     //     dispatcher becomes the bus's SECOND consumer via bus.subscribe(); no
     //     second tap. Webhook secrets share the one secrets.json convention.
+    this.scheduleClock = this.options.scheduleWake ? new ScheduleClock(this.options.scheduleWake) : null;
     this.triggers = new TriggerSubsystem({
+      wake: this.scheduleClock?.wakeFor('triggers'),
       dataDir: this.options.dataDir,
       executions: this.executions,
       getRunner: () => this.runner,
@@ -535,6 +540,7 @@ export class BackendService {
     //      loud execution records through this.executions. dbPath is the live
     //      persistence file; schema is exported live for the archive's record.
     this.backups = new BackupSubsystem({
+      wake: this.scheduleClock?.wakeFor('backups'),
       dataDir: this.options.dataDir,
       dbPath: this.persistence.dbPath,
       // BRG-008: which engine actually holds the rows. On PostgreSQL `dbPath`
@@ -557,6 +563,7 @@ export class BackendService {
     //      backups, files). Shares the `files` namespace of secrets.json for
     //      S3 credentials and the signed-URL HMAC secret.
     this.files = new FileSubsystem({
+      wake: this.scheduleClock?.wakeFor('files'),
       dataDir: this.options.dataDir,
       facade: this.facade,
       secrets: new SecretsStore(this.options.dataDir),
@@ -793,6 +800,10 @@ export class BackendService {
 
     // 6.6 The orphan-sweep schedule (BAK-006), same mechanism, disabled by default.
     this.files.start();
+    if (this.scheduleClock) {
+      const { triggers, backups, files } = this;
+      for (const sub of [triggers, backups, files]) if (sub) this.scheduleClock.register(() => sub.fireDue());
+    }
 
     return {
       options: this.options,
@@ -1030,6 +1041,15 @@ export class BackendService {
    */
   getRouteTable(): import('./server/HttpServer').RouteInfo[] {
     return this.http ? this.http.getRouteTable() : [];
+  }
+
+  /**
+   * P115 HST-016 — the host's wake (`scheduleWake`) has come: fire every schedule due by now (triggers, the scheduled
+   * backup, the orphan sweep) and resolve when the runs they started have settled, so the host can stay up for them.
+   * Nothing to do without a `scheduleWake` (the schedules keep their own timers then).
+   */
+  fireDueSchedules(): Promise<void> {
+    return this.scheduleClock ? this.scheduleClock.fireDue() : Promise.resolve();
   }
 
   /**

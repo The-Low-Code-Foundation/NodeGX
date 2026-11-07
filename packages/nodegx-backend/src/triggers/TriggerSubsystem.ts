@@ -37,6 +37,8 @@ export interface TriggerSubsystemDeps {
   bus: ChangeBus;
   /** Reuse the service's SecretsStore if it has one; else construct over dataDir. */
   secrets?: SecretsStore;
+  /** P115 HST-016: the host keeps the clock (see `CronScheduler`'s `wake`). */
+  wake?: (at: Date | null) => void;
 }
 
 export class TriggerSubsystem {
@@ -56,7 +58,7 @@ export class TriggerSubsystem {
       backendId: deps.backendId,
       backendName: deps.backendName
     });
-    this.scheduler = new CronScheduler({ registry: this.registry, dispatcher: this.dispatcher });
+    this.scheduler = new CronScheduler({ registry: this.registry, dispatcher: this.dispatcher, wake: deps.wake });
     this.dbChange = new DbChangeTriggers({ bus: deps.bus, registry: this.registry, dispatcher: this.dispatcher });
   }
 
@@ -64,6 +66,11 @@ export class TriggerSubsystem {
   start(): void {
     this.scheduler.start();
     this.dbChange.start();
+  }
+
+  /** P115 HST-016: fire the schedules due by now (wake mode), resolving when their runs settle. */
+  fireDue(): Promise<void> {
+    return this.scheduler.fireDue();
   }
 
   /** Recompute schedules after triggers change (admin/MCP edits). */

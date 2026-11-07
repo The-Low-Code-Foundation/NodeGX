@@ -17,7 +17,22 @@ export interface WranglerConfigInput {
   name: string;
   /** The R2 bucket for uploaded files, or null for none (uploads then live in the isolate's memory and are lost). */
   bucket: string | null;
+  /**
+   * HST-007: a domain the app also answers at (`campus.example.com` or `example.com`), as a Worker Custom Domain:
+   * Cloudflare makes the DNS record and the certificate. Its zone must be on the same Cloudflare account and the
+   * hostname must have no CNAME already. The workers.dev address keeps answering.
+   */
+  domain?: string | null;
   compatibilityDate?: string;
+}
+
+/** A hostname a Custom Domain can be: lowercase labels of letters, digits and dashes, at least one dot, no wildcard. */
+export function domainProblem(domain: string): string | null {
+  const label = '[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?';
+  if (domain.length > 253 || !new RegExp(`^(?:${label}\\.)+[a-z]{2,63}$`).test(domain)) {
+    return `"${domain}" cannot be a domain for the app: write the bare name, lowercase, like campus.example.com (no https://, no path, no *).`;
+  }
+  return null;
 }
 
 /** Cloudflare's rule for a Worker name: lowercase letters, digits and dashes, 1–63, no dash at either end. */
@@ -75,6 +90,15 @@ export function wranglerConfig(input: WranglerConfigInput): string {
       `[[r2_buckets]]`,
       `binding = "FILES"`,
       `bucket_name = ${q(input.bucket)}`,
+      ``
+    );
+  }
+  if (input.domain) {
+    lines.push(
+      `# The app's own domain (a Custom Domain: Cloudflare makes its DNS record and certificate). workers.dev still answers.`,
+      `[[routes]]`,
+      `pattern = ${q(input.domain)}`,
+      `custom_domain = true`,
       ``
     );
   }

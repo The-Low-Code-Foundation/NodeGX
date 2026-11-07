@@ -12,6 +12,9 @@
  *   filesBucket    uploads in the app's own R2 bucket, through a binding: no keys anywhere (HST-012)
  *   loopbackFetch  the cloud runtime's calls to its own backend, given to the in-process handler (HST-010)
  *
+ *   scheduleWake   every schedule (triggers, backups, the orphan sweep) on the object's ALARM (HST-016): an idle object
+ *                  is evicted and a timer with it, so the backend arms none and says when it must be woken
+ *
  * and the cloud functions' code nodes come printed at build (`printed-code.mjs`, HST-013): a Worker cannot compile
  * a string.
  *
@@ -73,6 +76,12 @@ let nextPort = 8080;
 const adapterLedger = newLedger();
 
 type Handler = { fetch(r: Request, env: unknown, ctx: unknown): Promise<Response> };
+
+/** The object's alarm (one per object), as the storage API gives it. */
+interface AlarmStorage {
+  setAlarm(at: number): Promise<void>;
+  deleteAlarm(): Promise<void>;
+}
 let loopbackHandler: Handler | null = null;
 /** HST-010: the service's calls to its own address, given to its in-process handler. */
 const loopbackFetch = (input: string, init?: RequestInit): Promise<Response> => {
@@ -85,6 +94,33 @@ export class NodegxBackend extends DurableObject {
   private handler: Handler | null = null;
   private families: string[] = [];
   private starting: Promise<void> | null = null;
+  /** HST-016: the instant the backend last asked to be woken at (null: no schedule). */
+  private wakeAt: number | null = null;
+  private alarmWrite: Promise<void> = Promise.resolve();
+
+  /**
+   * HST-016: the alarm, at the instant the backend asked for. Starts the service if the object was evicted (the
+   * schedule that is due is kept due by the start, `CronScheduler.dueAtStart`), fires what is due, waits for the runs,
+   * then sets the alarm again from the backend's latest wake: Cloudflare deletes an alarm once its handler returns
+   * unless the handler set one, and the backend only reports a CHANGE.
+   */
+  async alarm(): Promise<void> {
+    await this.started();
+    await (this.service as BackendService).fireDueSchedules();
+    await this.alarmWrite;
+    const storage = (this.ctx as unknown as { storage: AlarmStorage }).storage;
+    if (this.wakeAt !== null) await storage.setAlarm(this.wakeAt);
+  }
+
+  /** The backend's wake, onto the object's alarm, in order (a later wake never lands before an earlier one). */
+  private wake(at: Date | null): void {
+    this.wakeAt = at ? at.getTime() : null;
+    const storage = (this.ctx as unknown as { storage: AlarmStorage }).storage;
+    const when = this.wakeAt;
+    this.alarmWrite = this.alarmWrite
+      .then(() => (when === null ? storage.deleteAlarm() : storage.setAlarm(when)))
+      .catch((e) => console.error(`[nodegx] the schedule's alarm could not be set: ${String((e as Error)?.message ?? e)}`));
+  }
 
   async fetch(request: Request): Promise<Response> {
     try {
@@ -138,7 +174,8 @@ export class NodegxBackend extends DurableObject {
       recordEngine: durableObjectEngine(storage, adapterLedger),
       dataDirStore: dataDirTable(storage.sql),
       filesBucket: env.FILES ?? null,
-      loopbackFetch
+      loopbackFetch,
+      scheduleWake: (at) => this.wake(at)
     });
     await service.start();
     this.handler = httpServerHandler({ port }) as unknown as Handler;

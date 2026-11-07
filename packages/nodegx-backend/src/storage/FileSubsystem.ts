@@ -211,6 +211,8 @@ export interface FileSubsystemDeps {
    * whose disk outlives the process. See `BindingDriver`.
    */
   filesBucket?: BucketBinding | null;
+  /** P115 HST-016: the host keeps the clock for the orphan sweep (see `CronScheduler`'s `wake`). */
+  wake?: (at: Date | null) => void;
 }
 
 export class FileSubsystem {
@@ -249,7 +251,7 @@ export class FileSubsystem {
       deps.backendId,
       deps.backendName
     );
-    this.scheduler = new CronScheduler({ registry: this.registry, dispatcher });
+    this.scheduler = new CronScheduler({ registry: this.registry, dispatcher, wake: deps.wake });
   }
 
   /** (Re)build the bucket driver from a driver config + the stored credentials, and point the next upload at it. */
@@ -460,6 +462,11 @@ export class FileSubsystem {
 
   start(): void {
     this.scheduler.start();
+  }
+
+  /** P115 HST-016: run the orphan sweep when it is due (wake mode). */
+  fireDue(): Promise<void> {
+    return this.scheduler.fireDue();
   }
 
   reschedule(): void {
