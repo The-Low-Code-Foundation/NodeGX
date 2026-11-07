@@ -61,3 +61,24 @@ plant, make it." A fresh `claude -p` on Opus, the checkout's nodegx MCP alone: *
 **Left for Richard's sitting** (part 1, and the editor part 3 after it): a Greenhouse copy with its backend in
 `~/.noodl/backends` (Studio's `provisionFor` with no `NODEGX_BACKENDS_DIR`, so the editor adopts it), the two overlap
 workflows removed as in this lab, SMTP pointed at a catcher (s8's drive has one) so brief 2 can really send.
+
+## s23 (2026-11-07): the setup for Richard's sitting (BOARD §1a S7)
+
+[setup-bwf009-r2.mjs](setup-bwf009-r2.mjs), one run (`--again` starts over; refused while its backend runs):
+
+- **The copy**: `NodeGX test projects/Greenhouse BWF-009`, named so and given an id of its own (a copy keeping the
+  original's id and name is handed the original's backend by `provisionFor`'s reuse, P123-STU-COPYADOPTS), without
+  *The morning check*, *When a plant is watered* and their triggers. Left: TriggerTest, azdazd, qzdzqzzq.
+- **Its backend**: Studio's `provisionFor`, NO `NODEGX_BACKENDS_DIR`: `~/.noodl/backends/backend_mw6v6ffjxo99j`
+  (`Greenhouse BWF-009 backend`, port 8588), seeded with the file's three workflows (BKO-001). Not left running:
+  Studio's page server, stopped and started again, started it again with everything below still there.
+- **Mail**: [smtp-catcher.mjs](smtp-catcher.mjs) (s8's catcher as a process, kept in `mail.jsonl`), installed in
+  `~/.noodl/bwf009-r2/`, SMTP 127.0.0.1:1025, the caught mail at http://127.0.0.1:8025/. The backend's Email settings
+  point at it; its test email arrived.
+- **Data**: Fern (5 days dry), Cactus (10), Basil (1), dated from the run: two days later Basil is dry too.
+- **No terminal**: `Greenhouse BWF-009 — open in Studio.app` beside the copy starts the catcher if it is down, then
+  Studio from its checkout with `NODEGX_REPO` (Studio from the kit runs backend 0.2.9: no formulas, no tests). Its
+  catcher half was run as the app runs it (`osascript`, a bare PATH); the Studio half was not (no GUI launched).
+  Backend served through it: catalog 1.11.0, `testRuns`, `formulaLanguage`, `send-email`, `find-records`.
+- Still a terminal: brief 3's `curl` (the test's own words), and part 3's editor: NodeGX.app 0.4.3 (2026-10-20)
+  predates BWF-008, so the editor is the checkout's dev editor.

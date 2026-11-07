@@ -1,5 +1,9 @@
 # P132 — next session
 
+**s23 (2026-11-07, Beta sprint S7): Richard's sitting is set up** (s22 "Next" 1's first half). He double-clicks
+`NodeGX test projects/Greenhouse BWF-009 — open in Studio.app`; mail lands at http://127.0.0.1:8025/.
+[setup-bwf009-r2.mjs](setup-bwf009-r2.mjs) (`--again` starts over); [the record](BWF-009-THE-TEST.md#s23-2026-11-07-the-setup-for-richards-sitting-board-1a-s7).
+
 **s22 (2026-11-04): route words served, HIDDENPANELCHURN fixed, BWF-009's agent part green.**
 - **Studio speaks the backend's route words** (catalog 1.9.0) before its own table (nodegx-studio `0dbd922`): the
   drive serves the If's Yes as another word and grades the wire says it (mutant red). Gates all green.
