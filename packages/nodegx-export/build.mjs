@@ -21,7 +21,7 @@
  * `dist/` being absent cannot break a build in this repo. It is a publishing artefact only.
  */
 import { execFileSync } from 'node:child_process';
-import { chmodSync, copyFileSync, existsSync, globSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, copyFileSync, existsSync, globSync, mkdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire, isBuiltin } from 'node:module';
 import { dirname, relative, resolve } from 'node:path';
 import esbuild from 'esbuild';
@@ -139,6 +139,27 @@ if (!cliText.startsWith('#!/usr/bin/env node\n') || shebangs !== 1) {
   );
 }
 
+/**
+ * NPMAUDIT-LOCALPATH, the same hole in this package (Beta S2, 2026-11-07). A release is built in a worktree, whose
+ * `node_modules` entries link to the primary checkout's, and esbuild names a module by its real path: the 0.2.5
+ * tarball and the first 0.2.6 build printed `../../../../OpenNoodl/node_modules/ajv/…` in module comments, in
+ * `cli.inputs.json` (51 entries) and, one level deeper, in every source map. `@nodegx/mcp` and `@nodegx/preview`
+ * were fixed on 2026-10-23; this package was not. The paths are renamed back to the link (relative to the package
+ * for the bundles and the input list, to `dist/` for the maps), and the pack check that guards those two packages
+ * then refuses the build if anything in what `files` ships still names a machine.
+ */
+const NODE_MODULES = resolve('..', '..', 'node_modules');
+const NODE_MODULES_REAL = existsSync(resolve(NODE_MODULES, 'esbuild')) ? dirname(realpathSync(resolve(NODE_MODULES, 'esbuild'))) : NODE_MODULES;
+if (NODE_MODULES_REAL !== NODE_MODULES) {
+  for (const file of globSync('dist/**/*.{mjs,cjs,map,json}')) {
+    const from = file.endsWith('.map') ? dirname(resolve(file)) : resolve('.');
+    const real = relative(from, NODE_MODULES_REAL) + '/';
+    const link = relative(from, NODE_MODULES) + '/';
+    const text = readFileSync(file, 'utf8');
+    if (text.includes(real)) writeFileSync(file, text.split(real).join(link));
+  }
+}
+
 // Declarations come from tsc, which esbuild does not emit. `tsconfig.build.json` sets an explicit
 // `outDir`: a `tsc -p` without one emits beside the sources, which is how this repo has previously
 // turned a typecheck into eighty-five red suites.
@@ -221,3 +242,9 @@ if (offenders.length > 0) {
 }
 
 console.log(`\ndeclarations: ${reachable.size} shipped, ${pruned} pruned as unreachable`);
+
+/**
+ * NPMAUDIT-LOCALPATH's net, the one `@nodegx/mcp` and `@nodegx/preview` run as their last prepack step: nothing in what
+ * `files` ships may name the machine it was built on (a home folder, a worktree, a relative path out of the repo).
+ */
+execFileSync(process.execPath, [resolve('..', 'noodl-mcp', 'check-pack-paths.mjs'), '.'], { stdio: 'inherit' });

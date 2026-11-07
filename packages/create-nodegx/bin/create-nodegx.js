@@ -122,8 +122,11 @@ const AGENT_NOTE = [
   '',
   // P18 EXP-023 (Richard, 2026-10-21): the off-ramp is on npm, and the note says how to leave.
   'If I want to leave NodeGX with the source: `npx @nodegx/export export <the app\'s folder> --dry-run` says first what',
-  'will and will not translate, and without `--dry-run <an empty folder>` writes a React + Vite app there. To put the',
-  'running app on a server as it is, `npx nodegx-deploy` (from `@nodegx/preview`) writes the folder to upload.',
+  'will and will not translate, and without `--dry-run <an empty folder>` writes a React + Vite app there.',
+  // P134 (R4): the plain-files way out, beside React. Needs @nodegx/export 0.2.6 or later (0.2.5 has no html target).
+  'Add `--target html` to both for plain HTML, CSS and JavaScript files instead: nothing to install or build, and any',
+  'static server runs that folder (`npx serve <that folder>`).',
+  'To put the running app on a server as it is, `npx nodegx-deploy` (from `@nodegx/preview`) writes the folder to upload.',
   ''
 ].join('\n');
 

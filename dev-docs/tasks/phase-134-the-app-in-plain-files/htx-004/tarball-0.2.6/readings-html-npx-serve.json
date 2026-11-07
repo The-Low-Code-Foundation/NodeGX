@@ -1,0 +1,622 @@
+{
+ "arm": "html",
+ "seeded": {
+  "mot": "2a801096-2b35-4189-814c-060c64ed1ecf",
+  "vat": "584d5c65-e94c-4edd-95c6-d178aee517e5",
+  "notes": "9dc7ac9b-7e31-443e-b2ad-e03ad02fa265",
+  "domain": "440d7e57-d699-46a7-829e-3717480e7b24",
+  "routine": "00720817-80a0-4468-9ffd-bcf01d46d442"
+ },
+ "steps": [
+  {
+   "step": "D0",
+   "at": "2026-11-07T20:39:40.959Z",
+   "texts": [
+    "☼",
+    "Todo list",
+    "Sign in, or create an account. Your list is kept on your server, so every device you sign in on sees the same one.",
+    "Sign in",
+    "Create account"
+   ],
+   "buttons": [
+    "☼",
+    "Sign in",
+    "Create account"
+   ],
+   "fields": [
+    "text::",
+    "secure::"
+   ],
+   "values": [],
+   "path": "/#/sign-in",
+   "requests": []
+  },
+  {
+   "step": "D1",
+   "at": "2026-11-07T20:39:45.315Z",
+   "texts": [
+    "Todo list",
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "1",
+    "Book the van in for its MOT",
+    "Next: Ring the garage",
+    "✓",
+    "2",
+    "Chase the accountant about VAT",
+    "Due today",
+    "✓",
+    "3",
+    "Write the release notes",
+    "✓",
+    "Add"
+   ],
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "✓",
+    "✓",
+    "✓",
+    "Add"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "values": [],
+   "path": "/#/todo",
+   "reachedTodo": true,
+   "requests": [
+    "OPTIONS /login 204",
+    "POST /login 200",
+    "OPTIONS /classes/Task 204",
+    "POST /classes/Task 200",
+    "OPTIONS /classes/Action 204",
+    "OPTIONS /classes/MoneyItem 204",
+    "OPTIONS /classes/Event 204",
+    "OPTIONS /classes/BalanceReading 204",
+    "OPTIONS /classes/MoneyMark 204",
+    "OPTIONS /classes/Routine 204",
+    "POST /classes/MoneyItem 200",
+    "POST /classes/Event 200",
+    "POST /classes/Action 200",
+    "OPTIONS /classes/RoutineCheck 204",
+    "POST /classes/MoneyMark 200",
+    "POST /classes/Routine 200",
+    "POST /classes/BalanceReading 200",
+    "OPTIONS /classes/Project 204",
+    "POST /classes/RoutineCheck 200",
+    "POST /classes/Project 200"
+   ]
+  },
+  {
+   "step": "D2",
+   "at": "2026-11-07T20:39:47.914Z",
+   "texts": [
+    "Todo list",
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "← Back",
+    "#1 of 3 · added just now",
+    "Deadline",
+    "Close task",
+    "Next actions",
+    "1",
+    "✓",
+    "≡",
+    "✓",
+    "≡",
+    "Add",
+    "History",
+    "Add note",
+    "Today 20:39 · Added the task"
+   ],
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "← Back",
+    "Close task",
+    "✓",
+    "≡",
+    "✓",
+    "≡",
+    "Add",
+    "Add note"
+   ],
+   "fields": [
+    "text::Task title",
+    "text::Next action",
+    "text::Next action",
+    "text::Add a next action",
+    "text::Add a note"
+   ],
+   "values": [
+    "Book the van in for its MOT",
+    "Ring the garage",
+    "Find the logbook"
+   ],
+   "path": "/#/todo",
+   "opened": true,
+   "requests": [
+    "POST /classes/Event 200"
+   ]
+  },
+  {
+   "step": "D2tickdialog",
+   "at": "2026-11-07T20:39:49.509Z",
+   "texts": [
+    "Todo list",
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "← Back",
+    "#1 of 3 · added just now",
+    "Deadline",
+    "Close task",
+    "Next actions",
+    "1",
+    "✓",
+    "≡",
+    "✓",
+    "≡",
+    "Add",
+    "History",
+    "Add note",
+    "Today 20:39 · Added the task",
+    "Ring the garage",
+    "What happened?",
+    "A line is enough.",
+    "Cancel",
+    "Tick off"
+   ],
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "← Back",
+    "Close task",
+    "✓",
+    "≡",
+    "✓",
+    "≡",
+    "Add",
+    "Add note",
+    "Cancel",
+    "Tick off"
+   ],
+   "fields": [
+    "text::Task title",
+    "text::Next action",
+    "text::Next action",
+    "text::Add a next action",
+    "text::Add a note",
+    "text::What happened?"
+   ],
+   "values": [
+    "Book the van in for its MOT",
+    "Ring the garage",
+    "Find the logbook"
+   ],
+   "path": "/#/todo",
+   "ticked": "pressed 2",
+   "requests": []
+  },
+  {
+   "step": "D2tick",
+   "at": "2026-11-07T20:39:54.141Z",
+   "texts": [
+    "Todo list",
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "← Back",
+    "#1 of 3 · added just now",
+    "Deadline",
+    "Close task",
+    "Next actions",
+    "✓",
+    "≡",
+    "Done: Booked for Thursday.",
+    "✓",
+    "≡",
+    "Add",
+    "History",
+    "Add note",
+    "Today 21:39 · Ticked off “Ring the garage”",
+    "Booked for Thursday.",
+    "Today 20:39 · Added the task"
+   ],
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "← Back",
+    "Close task",
+    "✓",
+    "≡",
+    "✓",
+    "≡",
+    "Add",
+    "Add note"
+   ],
+   "fields": [
+    "text::Task title",
+    "text::Next action",
+    "text::Next action",
+    "text::Add a next action",
+    "text::Add a note"
+   ],
+   "values": [
+    "Book the van in for its MOT",
+    "Ring the garage",
+    "Find the logbook"
+   ],
+   "path": "/#/todo",
+   "ok": "Tick off",
+   "noted": true,
+   "okPressed": true,
+   "pressedAgain": false,
+   "requests": [
+    "OPTIONS /classes/Action/abb8162d-9ede-4bb3-9d91-e6a025e7fb98 204",
+    "PUT /classes/Action/abb8162d-9ede-4bb3-9d91-e6a025e7fb98 200",
+    "POST /classes/Event 201",
+    "POST /classes/Task 200",
+    "POST /classes/Action 200",
+    "POST /classes/Event 200",
+    "POST /classes/Routine 200",
+    "POST /classes/RoutineCheck 200",
+    "POST /classes/Event 200"
+   ]
+  },
+  {
+   "step": "D2back",
+   "at": "2026-11-07T20:39:56.249Z",
+   "texts": [
+    "Todo list",
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "1",
+    "Book the van in for its MOT",
+    "✓",
+    "2",
+    "Chase the accountant about VAT",
+    "Due today",
+    "✓",
+    "3",
+    "Write the release notes",
+    "✓",
+    "Add"
+   ],
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "✓",
+    "✓",
+    "✓",
+    "Add"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "values": [],
+   "path": "/#/todo",
+   "back": true,
+   "requests": []
+  },
+  {
+   "step": "D3",
+   "at": "2026-11-07T20:39:59.935Z",
+   "texts": [
+    "Todo list",
+    "List (4)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "1",
+    "Book the van in for its MOT",
+    "✓",
+    "2",
+    "Chase the accountant about VAT",
+    "Due today",
+    "✓",
+    "3",
+    "Write the release notes",
+    "✓",
+    "4",
+    "Pick up the dry cleaning",
+    "✓",
+    "Add"
+   ],
+   "buttons": [
+    "List (4)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "✓",
+    "✓",
+    "✓",
+    "✓",
+    "Add"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #5)"
+   ],
+   "values": [],
+   "path": "/#/todo",
+   "typed": {
+    "value": "Pick up the cleaning",
+    "start": 20,
+    "end": 20,
+    "focused": "INPUT"
+   },
+   "moved": true,
+   "caret": {
+    "value": "Pick up the dry cleaning",
+    "start": 16,
+    "end": 16,
+    "focused": "INPUT"
+   },
+   "addPressed": true,
+   "requests": [
+    "POST /classes/Task 201",
+    "POST /classes/Event 201",
+    "POST /classes/Task 200",
+    "POST /classes/Action 200",
+    "POST /classes/Event 200",
+    "POST /classes/Routine 200",
+    "POST /classes/RoutineCheck 200"
+   ]
+  },
+  {
+   "step": "D4dialog",
+   "at": "2026-11-07T20:40:01.505Z",
+   "texts": [
+    "Todo list",
+    "List (4)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "1",
+    "Book the van in for its MOT",
+    "✓",
+    "2",
+    "Chase the accountant about VAT",
+    "Due today",
+    "✓",
+    "3",
+    "Write the release notes",
+    "✓",
+    "4",
+    "Pick up the dry cleaning",
+    "✓",
+    "Add",
+    "Write the release notes",
+    "What happened?",
+    "Every task keeps a record. One line is enough, even “not needed, dropping it”.",
+    "Cancel",
+    "Close task"
+   ],
+   "buttons": [
+    "List (4)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "✓",
+    "✓",
+    "✓",
+    "✓",
+    "Add",
+    "Cancel",
+    "Close task"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #5)",
+    "text::What happened?"
+   ],
+   "values": [],
+   "path": "/#/todo",
+   "circle": "pressed 4",
+   "requests": []
+  },
+  {
+   "step": "D4",
+   "at": "2026-11-07T20:40:06.141Z",
+   "texts": [
+    "Todo list",
+    "List (3)",
+    "Today (2)",
+    "Done (2)",
+    "Log",
+    "Sign out",
+    "☼",
+    "1",
+    "Book the van in for its MOT",
+    "✓",
+    "2",
+    "Chase the accountant about VAT",
+    "Due today",
+    "✓",
+    "3",
+    "Pick up the dry cleaning",
+    "✓",
+    "Add"
+   ],
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (2)",
+    "Log",
+    "Sign out",
+    "☼",
+    "✓",
+    "✓",
+    "✓",
+    "Add"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "values": [],
+   "path": "/#/todo",
+   "ok": "Close task",
+   "noted": true,
+   "okPressed": true,
+   "pressedAgain": false,
+   "requests": [
+    "OPTIONS /classes/Task/9dc7ac9b-7e31-443e-b2ad-e03ad02fa265 204",
+    "PUT /classes/Task/9dc7ac9b-7e31-443e-b2ad-e03ad02fa265 200",
+    "POST /classes/Event 201",
+    "POST /classes/Task 200",
+    "POST /classes/Action 200",
+    "POST /classes/Event 200",
+    "POST /classes/Routine 200",
+    "POST /classes/RoutineCheck 200"
+   ]
+  },
+  {
+   "step": "D5",
+   "at": "2026-11-07T20:40:11.208Z",
+   "texts": [
+    "Todo list",
+    "List (3)",
+    "Today (2)",
+    "Done (2)",
+    "Log",
+    "Sign out",
+    "☼",
+    "1",
+    "Book the van in for its MOT",
+    "✓",
+    "2",
+    "Chase the accountant about VAT",
+    "Due today",
+    "✓",
+    "3",
+    "Pick up the dry cleaning",
+    "✓",
+    "Add"
+   ],
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (2)",
+    "Log",
+    "Sign out",
+    "☼",
+    "✓",
+    "✓",
+    "✓",
+    "Add"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "values": [],
+   "path": "/#/todo",
+   "requests": [
+    "POST /classes/Task 200",
+    "POST /classes/Action 200",
+    "POST /classes/MoneyItem 200",
+    "POST /classes/Event 200",
+    "POST /classes/Routine 200",
+    "POST /classes/RoutineCheck 200",
+    "POST /classes/BalanceReading 200",
+    "POST /classes/MoneyMark 200",
+    "POST /classes/Project 200"
+   ]
+  },
+  {
+   "step": "D6",
+   "at": "2026-11-07T20:40:13.778Z",
+   "texts": [
+    "☼",
+    "Todo list",
+    "Sign in, or create an account. Your list is kept on your server, so every device you sign in on sees the same one.",
+    "Sign in",
+    "Create account"
+   ],
+   "buttons": [
+    "☼",
+    "Sign in",
+    "Create account"
+   ],
+   "fields": [
+    "text::",
+    "secure::"
+   ],
+   "values": [],
+   "path": "/#/sign-in",
+   "requests": [
+    "OPTIONS /logout 204",
+    "POST /logout 200"
+   ]
+  },
+  {
+   "step": "D6relaunch",
+   "at": "2026-11-07T20:40:17.360Z",
+   "texts": [
+    "☼",
+    "Todo list",
+    "Sign in, or create an account. Your list is kept on your server, so every device you sign in on sees the same one.",
+    "Sign in",
+    "Create account"
+   ],
+   "buttons": [
+    "☼",
+    "Sign in",
+    "Create account"
+   ],
+   "fields": [
+    "text::",
+    "secure::"
+   ],
+   "values": [],
+   "path": "/#/sign-in",
+   "requests": []
+  }
+ ],
+ "console": []
+}
