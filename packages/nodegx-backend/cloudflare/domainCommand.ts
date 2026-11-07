@@ -32,6 +32,7 @@ import {
   buyProblem,
   checkDomains,
   confirmationFor,
+  getRegistration,
   offerLine,
   registerDomain,
   registrationSentence,
@@ -248,7 +249,12 @@ export async function run(o: ParsedArgs, call?: CfCall): Promise<number> {
   }
   say(`Buying ${confirmationFor(fresh!)} on the account's default card…`);
   const first = await registerDomain(c, account, name, { autoRenew: o.autoRenew });
-  const reg = await waitForRegistration(c, account, first);
+  let reg = await waitForRegistration(c, account, first);
+  if (reg.state === 'succeeded') {
+    // The canonical record says how long it is theirs and whether it renews (the registration answer may not).
+    const held = await getRegistration(c, account, name).catch(() => null);
+    if (held) reg = { ...reg, context: { registration: { ...reg.context?.registration, expires_at: held.expires_at, auto_renew: held.auto_renew, status: held.status } } };
+  }
   say(registrationSentence(reg));
   remember({ name, at: new Date().toISOString(), account, offer: fresh, state: reg.state, autoRenew: o.autoRenew });
   if (reg.state === 'succeeded') {

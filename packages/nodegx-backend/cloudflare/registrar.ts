@@ -110,7 +110,15 @@ export async function registerDomain(
   name: string,
   options: { autoRenew: boolean }
 ): Promise<Registration> {
-  return unwrap(await call('POST', `${base(account)}/registrations`, { domain_name: name, auto_renew: options.autoRenew }), 'The registration');
+  const r = unwrap(await call('POST', `${base(account)}/registrations`, { domain_name: name, auto_renew: options.autoRenew }), 'The registration');
+  // Measured on the first real purchase (2026-11-07): a registration that completes at once did not carry
+  // `domain_name` where the docs show it, and the person read "undefined is yours". The name is the one we asked for.
+  return { ...r, domain_name: r?.domain_name ?? r?.context?.registration?.domain_name ?? name, state: r?.state ?? (r?.completed ? 'succeeded' : 'in_progress') };
+}
+
+/** The canonical record of a domain the account owns (`status`, `expires_at`, `auto_renew`, `privacy_mode`, `locked`). */
+export async function getRegistration(call: CfCall, account: string, name: string): Promise<{ domain_name: string; status?: string; expires_at?: string; auto_renew?: boolean }> {
+  return unwrap(await call('GET', `${base(account)}/registrations/${encodeURIComponent(name)}`), 'The registration record');
 }
 
 export async function registrationStatus(call: CfCall, account: string, name: string): Promise<Registration> {

@@ -23,7 +23,7 @@ const OFFER = (name: string, cost = '10.11', extra: Partial<DomainOffer> = {}): 
 });
 
 /** A scripted Cloudflare: `offers` by name, a registration that is 202 then succeeds after `pollsUntilDone` polls. */
-function fakeCloudflare(opts: { offers: Record<string, DomainOffer>; pollsUntilDone?: number; endState?: string; accounts?: number }) {
+function fakeCloudflare(opts: { offers: Record<string, DomainOffer>; pollsUntilDone?: number; endState?: string; accounts?: number; completesAtOnce?: boolean }) {
   const calls: Array<{ method: string; path: string; body?: any }> = [];
   let polls = 0;
   const ok = (result: unknown, status = 200) => ({ status, json: { success: true, errors: [], result } });
@@ -32,7 +32,14 @@ function fakeCloudflare(opts: { offers: Record<string, DomainOffer>; pollsUntilD
     if (p.startsWith('/accounts?')) return ok(Array.from({ length: opts.accounts ?? 1 }, (_, i) => ({ id: i ? `acc${i}` : ACC, name: `Account ${i}` })));
     if (p.endsWith('/registrar/domain-check')) return ok({ domains: (body as { domains: string[] }).domains.map((n) => opts.offers[n] ?? { name: n, registrable: false, reason: 'domain_unavailable' }) });
     if (p.includes('/registrar/domain-search')) return ok({ domains: Object.values(opts.offers) });
-    if (method === 'POST' && p.endsWith('/registrar/registrations')) return ok({ domain_name: (body as { domain_name: string }).domain_name, state: 'in_progress', completed: false }, 202);
+    if (method === 'POST' && p.endsWith('/registrar/registrations')) {
+      // The shape measured on the real purchase: completed at once, no domain_name at the top.
+      if (opts.completesAtOnce) return ok({ state: 'succeeded', completed: true }, 201);
+      return ok({ domain_name: (body as { domain_name: string }).domain_name, state: 'in_progress', completed: false }, 202);
+    }
+    if (method === 'GET' && /\/registrar\/registrations\/[^/]+$/.test(p)) {
+      return ok({ domain_name: decodeURIComponent(p.split('/registrations/')[1]), status: 'active', expires_at: '2027-11-07T18:50:19Z', auto_renew: true, privacy_mode: 'redaction', locked: true });
+    }
     if (p.endsWith('/registration-status')) {
       polls++;
       const name = decodeURIComponent(p.split('/registrations/')[1].split('/')[0]);
@@ -79,6 +86,14 @@ describe('buying: money moves only on a confirmation of a fresh check', () => {
     expect(said()).toMatch(/my-hearth\.org is yours until 2027-11-07, renewed automatically each year/);
     expect(said()).toMatch(/domain\.mjs email my-hearth\.org --to/);
     expect(JSON.parse(fs.readFileSync(path.join(home, 'domains.json'), 'utf8'))[0]).toMatchObject({ name: 'my-hearth.org', state: 'succeeded' });
+  });
+
+  test("the real purchase's answer (completed at once, no name in it): the sentence names the domain and its expiry", async () => {
+    const cf = fakeCloudflare({ offers: { 'my-hearth.org': OFFER('my-hearth.org', '8.50') }, completesAtOnce: true });
+    expect(await run(parseArgs(['buy', 'my-hearth.org', '--confirm', 'my-hearth.org 8.50 USD']), cf.call)).toBe(0);
+    expect(said()).not.toMatch(/undefined/);
+    expect(said()).toMatch(/my-hearth\.org is yours until 2027-11-07, renewed automatically each year/);
+    expect(cf.calls.filter((c) => c.path.endsWith('/registration-status'))).toHaveLength(0);
   });
 
   test('no confirmation: only the offer and the sentence to say yes to; nothing bought', async () => {

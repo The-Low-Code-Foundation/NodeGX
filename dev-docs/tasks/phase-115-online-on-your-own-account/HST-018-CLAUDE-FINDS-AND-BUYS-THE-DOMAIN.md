@@ -2,7 +2,7 @@
 
 **Opened 2026-11-07, session 14 (Richard: *"shouldn't we have a way that Claude can manage the domain finding and
 purchase for the user? The more it's A to Z the more non tech people will like it"*).** **Depends on HST-007 §9,
-HST-017.** **Status: ✅ built and graded against a scripted API (§3); the first real purchase is `my-hearth.org` (§4).**
+HST-017.** **Status: ✅ built, graded against a scripted API (§3), and used: `my-hearth.org` bought with Richard's sign-in on 2026-11-07 (§6).**
 Kind: product.
 
 ## 1. The person sentence
@@ -81,4 +81,26 @@ Measured the same day, from Cloudflare's own code:
 `cf registrar registrations …`, the guard unchanged in front of it); the token stays as a fallback. To measure first, on
 Richard's account: which scopes `cf auth login` grants by default (`cf auth scopes`), and the shape of its output.
 Installing `cf` was refused to the session by the auto-mode classifier, and the sign-in is the person's.
+
+## 6. The first real purchase (2026-11-07, Richard's account, his sign-in, no key)
+
+Built (`c3143cccf`): `domain.mjs` takes the person's `cf auth login` sign-in (read where `cf` keeps it, `0600`; refreshed
+once through `cf` when expired; refused in words without Registrar), before any token file. Measured: Richard's plain
+`cf auth login` (cf 0.15.0) granted `registrar:write` and `registrar-domains.admin` (and `email_sending:write`,
+`email_routing:write`, `workers_scripts:write`, `dns_records:edit`). cf 0.15's own `check` needs the name AND `--body`.
+
+| step | reading |
+|---|---|
+| `check my-hearth.org my-hearth.io my-hearth.com` | .org available **8.50 USD, then 11.20 a year**; .io 32.00 then 50.00; .com taken (so .org IS in the API beta) |
+| `buy my-hearth.org` (no confirmation) | the offer, *"cannot be refunded"*, the renewal, and `--confirm "my-hearth.org 8.50 USD"`; nothing sent |
+| Richard: *"Yes: my-hearth.org 8.50 USD"*; `buy … --confirm "my-hearth.org 8.50 USD"` | bought, 18:50:19 UTC. `cf registrar registrations get`: `active`, expires 2027-11-07, `auto_renew: true`, `privacy_mode: redaction`, `locked: true` |
+| `GET /zones?name=my-hearth.org` | an **active zone on the account at once** (Free Website, Cloudflare nameservers): `--domain` can attach with no DNS step |
+
+🔴 **Found by the real purchase (fixed, `tests` 17/17):** a registration that completes at once answered without
+`domain_name` where the docs show it, and the command said *"undefined is yours."* The name is now the one asked for,
+and the expiry and renewal come from the canonical record (`GET registrations/<name>`) after a success. The scripted
+API could not show this: its 201 was written from the docs.
+
+Human steps counted for the domain (HST-007's measurement): **one browser sign-in** (`cf auth login`) and **one yes**.
+The card and the registrant contact were already on the account (R2 enabled earlier); for a new person they are once.
 

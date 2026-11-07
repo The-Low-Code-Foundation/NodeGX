@@ -12,20 +12,10 @@ What is left is live, and starts in Richard's dashboard and terminal. Time each 
 **A. ✅ Done by Richard 2026-11-07 12:24 UTC**: the redeploy carrying session 14's code; read after: Campus 14/14 kept,
 the four filter readings unchanged.
 
-**B. The domain, bought through HST-018** (Richard ruled 2026-11-07: Claude buys it, after he says yes to the name and
-price; [HST-018 §4](HST-018-CLAUDE-FINDS-AND-BUYS-THE-DOMAIN.md)). Do NOT buy it in the dashboard.
-1. **Sign in instead of a token** (HST-018 §5): once, in the dashboard if not there yet: a default card (Billing) and a
-   default registrant contact (Domain Registration). Then in your terminal: `npm i -g cf` (Cloudflare's own CLI, beta)
-   and `cf auth login` (a browser sign-in), then `cf auth scopes`. A session reads that output: if Registrar is
-   granted, it switches `domain.mjs` to the `cf` sign-in (no token anywhere) and continues with step 2. Only if it is
-   NOT granted: the token route (My Profile → API Tokens, Registrar Edit + Account Settings Read, saved with
-   `pbpaste > ~/.nodegx/cloudflare/registrar-token && chmod 600 ~/.nodegx/cloudflare/registrar-token`).
-2. A session: `node packages/nodegx-backend/cloudflare/domain.mjs check my-hearth.org my-hearth.io` (no money): is .org
-   in Cloudflare's API beta, and today's price. If .org is not, the choice is .io or buying .org in the dashboard.
-3. You say yes to the printed sentence; then `… domain.mjs buy my-hearth.org --confirm "<that sentence>"` (a purchase:
-   your terminal or your approval).
-4. `… domain.mjs email my-hearth.org --to <your address>` (with `NODEGX_WRANGLER` as in the deploy command); click the
-   link Cloudflare emails you.
+**B. ✅ The domain: `my-hearth.org` bought 2026-11-07 18:50 UTC** through HST-018 with Richard's `cf auth login` sign-in and
+his yes to "my-hearth.org 8.50 USD" (HST-018 §6). Active zone on the account at once. Left: the email setup,
+`NODEGX_WRANGLER=… node packages/nodegx-backend/cloudflare/domain.mjs email my-hearth.org --to <his address>` (he clicks
+Cloudflare's link).
 
 **C. Campus on the domain, with the alert** (from the repo root):
 
