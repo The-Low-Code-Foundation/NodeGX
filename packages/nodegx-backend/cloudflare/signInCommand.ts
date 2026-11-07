@@ -7,11 +7,12 @@
  *   node packages/nodegx-backend/cloudflare/sign-in.mjs status        what is saved (no token printed)
  *   node packages/nodegx-backend/cloudflare/sign-in.mjs refresh       renews once now: (d) does a refresh work, does it rotate
  *   node packages/nodegx-backend/cloudflare/sign-in.mjs probe [--domain <name>]   read-only API calls with the sign-in: (b), (c) reads
+ *   node packages/nodegx-backend/cloudflare/sign-in.mjs probe-writes [--zone <name>]   (c) writes + (e): a throwaway Worker, then deleted (probeWrites.ts)
  *   node packages/nodegx-backend/cloudflare/sign-in.mjs sign-out
  *
  * Every reading is appended to `~/.nodegx/cloudflare/odt000-readings.json` (0600) with its time, and never holds a
  * token: a session reads that file to write ODT-000 up. Nothing here writes to Cloudflare except the sign-in itself,
- * the refresh and the sign-out's revoke.
+ * the refresh, the sign-out's revoke, and `probe-writes` (a Worker, a bucket and a domain it makes and then deletes).
  *
  * @module nodegx-backend/cloudflare/signInCommand
  */
@@ -20,6 +21,7 @@ import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
+import { probeWrites } from './probeWrites';
 import {
   CLOUDFLARE_SCOPES,
   cloudflareAccessToken,
@@ -164,12 +166,28 @@ async function probeVerb(argv: string[]): Promise<number> {
   return 0;
 }
 
+/** ODT-000 (c) part 2 and (e): live writes on the person's account, made and deleted by `probeWrites`. */
+async function probeWritesVerb(argv: string[]): Promise<number> {
+  const token = await cloudflareAccessToken(oauthSettings());
+  if (!token) return say('Not signed in: run sign-in first.'), 1;
+  const zone = flag(argv, '--zone') ?? null;
+  say(`Putting up a throwaway Worker "odt000-probe"${zone ? ` on odt000.${zone}` : ''}, then deleting it (a few minutes).\n`);
+  const r = await probeWrites({ token, api: API(), zoneName: zone, log: say });
+  say('\nAnswers:');
+  for (const [q, a] of Object.entries(r.answers)) say(`  ${q}: ${a}`);
+  record('probe-writes', { zone, steps: r.steps, answers: r.answers });
+  const cleanedUp = Object.entries(r.answers).filter(([q]) => q.startsWith('clean up')).every(([, a]) => a === 'true');
+  if (!cleanedUp) say('\n🔴 Something was NOT deleted: look for odt000-probe in the dashboard (Workers, R2, the domain).');
+  return cleanedUp ? 0 : 1;
+}
+
 export async function main(argv: string[]): Promise<number> {
   const [verb, ...rest] = argv;
   try {
     if (verb === 'sign-in') return await signInVerb(rest);
     if (verb === 'refresh') return await refreshVerb();
     if (verb === 'probe') return await probeVerb(rest);
+    if (verb === 'probe-writes') return await probeWritesVerb(rest);
     if (verb === 'status') {
       const s = summarize(readSignIn());
       say(JSON.stringify({ ...s, missing: s.signedIn ? missingScopes(s) : undefined }, null, 2));
@@ -184,6 +202,6 @@ export async function main(argv: string[]): Promise<number> {
     say((e as Error).message);
     return 1;
   }
-  say('sign-in [--port n] [--host localhost] [--scopes a,b] | status | refresh | probe [--domain name] | sign-out');
+  say('sign-in [--port n] [--host localhost] [--scopes a,b] | status | refresh | probe [--domain name] | probe-writes [--zone name] | sign-out');
   return 2;
 }

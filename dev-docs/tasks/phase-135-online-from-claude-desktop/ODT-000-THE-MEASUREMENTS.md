@@ -1,6 +1,6 @@
 # ODT-000 — the measurements, on a private OAuth client on Richard's account
 
-**Phase:** [P135](README.md) · **Kind:** measurement · **State:** 🔨 (a) (b) (d) and the reads of (c) TAKEN 2026-11-07 (§5); (c) writes and (e) next.
+**Phase:** [P135](README.md) · **Kind:** measurement · **State:** 🔨 (a) (b) (d) and the reads of (c) TAKEN 2026-11-07 (§5); (c) writes runs 1–2: R2 yes; ANY Worker upload 403 with `workers-scripts.edit` (§5); run 3 on `workers-scripts.admin`.
 
 ## 1. Taken before the client (2026-11-07, read-only)
 
@@ -73,9 +73,12 @@ R1 done by Richard in the dashboard. Raw readings: `~/.nodegx/cloudflare/odt000-
 | **(a)** loopback redirect | ✅ `http://127.0.0.1:8977/oauth/callback` accepted (both runs came back to it, the refusal too). Loose port (`--port 8978`) and `localhost`: not yet run |
 | **(b)** scopes granted to a private third-party client | ✅ **all 11**: `offline_access user-details.read account-settings.read workers-scripts.edit workers-kv-storage.write workers-r2.write workers-routes.write zone.read dns.write email-sending.write registrar-domains.admin`, `registrar-domains.admin` included |
 | (b) the scope names | 🔴 the dashboard's **Workers → Edit** box = `workers-scripts.edit`. `workers-scripts.write` (in the catalog) has NO dashboard row. First run REFUSED `workers-scripts.edit` because the box was not saved (the form wanted a client URL first: `nodegx.io` accepted); Cloudflare redirects back `invalid_scope` naming the FIRST disallowed scope in request order, before any page is shown |
-| **(c)** reads with the token | ✅ 200 on `/user`, `/accounts` (1), Workers scripts (6), R2 buckets, KV namespaces (1), Workers subdomain, Workers custom domains (1), zones (1), the `my-hearth.org` registration. WRITES not yet: part 2 |
+| **(c)** reads with the token | ✅ 200 on `/user`, `/accounts` (1), Workers scripts (6), R2 buckets, KV namespaces (1), Workers subdomain, Workers custom domains (1), zones (1), the `my-hearth.org` registration. Re-read 2026-11-07 20:19 UTC (session 2): all 9 still 200 after an automatic refresh |
+| **(c)** writes, run 1 (Richard, 2026-11-07 20:25 UTC, `sign-in.mjs probe-writes --zone my-hearth.org`, `probeWrites.ts`) | R2 bucket **made** (200) and deleted (200): `workers-r2.write` writes. 🔴 **The Worker upload REFUSED: 403 "No access to the specified resource."** (no error code), and the assets upload session before it, same 403. The upload was P115's whole shape (3 modules, SQLite Durable Object + migration v1, secret, R2). Nothing else was made; clean-up complete. Not yet known: whether `workers-scripts.edit` can make ANY Worker or refuses only the migration: run 2 narrows it (a bare one-module Worker, then + the Durable Object) |
+| **(c)** writes, run 2 (Richard, 2026-11-07 20:30 UTC, the same command with the narrowing) | 🔴 **A bare Worker (one module, no bindings, `main_module` + `compatibility_date` only) is refused too: 403 "No access to the specified resource."** So `workers-scripts.edit` cannot create ANY Worker through the API; it is not the migration. R2 made and deleted again; clean-up complete |
+| the Workers scope ids (catalog re-read 2026-11-07 20:3x UTC with NodeGX's own token: 200, 403 scopes) | `workers-scripts.edit` = **"Workers Editor"** (dashboard Workers → Edit), `workers-scripts.admin` = **"Workers Admin"** (Workers → Admin), `workers-scripts.write` = "Workers Scripts Write" (no dashboard row), plus `.read`, `.content_read`, `.metadata_read`. Next: the client given Workers → Admin, a new sign-in asking `workers-scripts.admin`, run 3 |
 | **(d)** lifetimes | access token **3599 s**; refresh token **yes** (with `offline_access`); a refresh **ROTATES** the refresh token (the lock in `signIn.ts` is load-bearing) |
-| (e) multi-module upload | not yet: with (c) part 2 |
-| the consent page's words | not recorded: ask Richard what it showed (name, shield, the permission list) |
+| (e) multi-module upload | not yet: the run-1 upload was refused before it could say (see (c) writes) |
+| the consent page's words | Richard, 2026-11-07: it listed **the 10 permissions ticked in the client** (the 11 granted minus `offline_access`, which has no permission row). The page's name and shield colour were not described |
 
 🔴 **An instrument that refused everything:** probing `/oauth2/auth` scope by scope from Python (no redirects followed) answered **403 with no Location for every scope, `openid` included**: Cloudflare's bot protection, not the client's scopes. Void. Only a browser run reads the client.
