@@ -81,14 +81,13 @@ modules check the flag, `_getCurrentUser` among them). The product build has it.
 ### 5.4 Left (follow-ups, not ACs)
 
 1. ✅ AC1 and AC2 live (§5.5).
-2. Workflows and triggers are taken at a backend's FIRST start only. A change to `nodegx.automations.json` after that is
-   not carried by a redeploy: it needs upserts through `/admin/workflow-defs` and `/admin/triggers`, and the command says
-   so on every deploy that has the file.
+2. ✅ (session 14, §5.6) Workflows and triggers are taken at a backend's FIRST start only. A change to
+   `nodegx.automations.json` after that is now carried by a redeploy (`applyAutomations.ts`), by the VM deploy's rule.
+   It also found that a schedule never fired on a quiet deployed app: fixed in [HST-016](HST-016-SCHEDULES-ON-THE-OBJECTS-ALARM.md).
 3. `nodegx deploy --cloudflare` and the MCP tool: the command lives beside the backend because it bundles the backend's
    source, like `nodegx deploy`'s engine. The npm CLI delegating to it waits on where the engine lives (P112 R2).
 4. Not carried from the Fixture B Worker: the refusal alert (HST-004 §10, the HTML export's client) and the warm-up at
-   startup (HST-004 §9). The whole service in an object starts in ~40 ms (§7), so the warm-up may not be needed. Measure
-   with `wrangler tail` first.
+   startup (HST-004 §9). **Warm-up: measured, not needed (§5.6).** The alert: see §5.6 and README §8 R8.
 5. wrangler is not a dependency of any package. The command takes `NODEGX_WRANGLER`, a `wrangler` it can resolve, or
    `npx --yes wrangler@4`.
 
@@ -109,3 +108,46 @@ after his tap, the command was run a third time (version `0dec9022`), and the ow
 (the check's and his), with the file uploaded before still at its link. 🔴 `MUST.md` is published at `/MUST.md` (Ada's
 id, no password): `nodegx deploy` copies a project's top-level `.md`. Harmless for the fixture; it belongs with
 GITIGNOREDPUBLISHED's ruling on what a deploy publishes.
+
+### 5.6 Session 14, 2026-11-07 (Opus 5.5): HST-015 live, automations carried by a redeploy, the warm-up measured
+
+**HST-015 live.** Richard ran the redeploy (record: 4th deploy, 08:56:11 UTC). `check-campus-deploy.mjs` without
+`--seed`: 14/14, every account, answer and rule kept. The four `$regex` reads: `da` → `["Ada"]`, `^Gr` → `["Grace"]`,
+`ADA`+`i` → `["Ada"]`, all 200 (were 500 `no such function`); `^.r` → 400 *"The built-in backend cannot filter on a
+pattern (a regular expression) on Cloudflare … "Contains", "starts with" and "ends with" on a text field still work."*
+
+**Automations carried by a redeploy** (`cloudflare/applyAutomations.ts`, called from step 6). The rule is the VM
+deploy's (`deploy/folder/start.js` `planAutomations`, Richard 2026-10-23): the project's file replaces the backend's when
+it changed since the last deploy; an edit made on the backend lasts until then. The sha256 installed is kept in
+`deployment.json` (`automations.local` / `.live`: two backends). Four answers: *none* (no file), *unchanged* (no write;
+a difference made on the backend is NAMED), *agree* (a new file the backend already runs: recorded), *replace* (the
+backend's set saved as `automations.before-<time>.json` beside the record, then saved calls → workflows → triggers
+made or changed, then triggers → workflows the file dropped deleted; saved API calls never deleted, as on the VM).
+All or nothing: a refusal part-way puts back what was there. An update keeps a webhook's secret; a new one is minted
+and named; an hmac-sha512 hook the backend lacks is left out and named (BKO-001's seeding rule).
+
+- `tests/p115-hst014-automations-on-redeploy.test.ts` 8/8 on a real `BackendService` seeded from Fixture B's own file;
+  the control is that a seeded backend reads as *agree* (no write). Mutant: the put-back off → the refusal case red.
+- workerd, a copy of Fixture B (`--local --out <scratch>`): first deploy *"the backend already runs the project's (2 and
+  1)"*; **then the drive caught what the suite could not** (P115-HST014-AUTOMATIONSFORGOTTEN): `deploy()` rebuilt the
+  record without the new field, so an unchanged redeploy *replaced* a trigger switched off on the backend. Fixed;
+  re-driven: unchanged → *"the backend keeps its own, which were edited there since: trigger "trg_digest_daily"
+  differs"*, still off; the file changed (07:30, a new workflow) → *"made workflow "thank-you"; changed trigger"*, the
+  previous set kept beside the record, the trigger 07:30 and on.
+- Not live: Campus has no automations file, and a first deploy of Fixture B sends the admin credential (Richard's
+  terminal). Live, it rides with HST-016's night reading.
+
+**The warm-up, measured live** (`wrangler tail --format json` on `hst-campus` during the Campus check + the four
+regex reads, 29 events, all `ok`): the front Worker 0–6 ms CPU (median 0); the object 1–54 ms (sign-in 40–54, scrypt;
+its cold start 16 ms on the first call). A Free Worker's measured cut-off is ~2 s (HST-004 §10.1) and an object's is
+30 s. **Not carried.**
+
+**The refusal alert, measured but not built.** A Durable Object has 30 s of CPU per call, so the 1102 that HST-004 §10
+built for is out of reach on the backend, and the front Worker routes in ≤ 6 ms. What a deployed app can really hit is
+the account's daily allowances (100,000 requests each for Workers and objects, 100,000 rows written, 5M rows read,
+13,000 GB-s; 00:00 UTC). Cloudflare does not publish what an object answers once over one, and measuring it means
+spending the account's allowance for the rest of a UTC day (every Worker on it, HST's spikes included). Also: with
+`run_worker_first = true` every file the page loads runs the Worker (the tail lists `/noodl.deploy.js` and
+`/nodegx-config.json` as Worker events), so one page view is several of the 100,000 requests; how many per view is not
+counted yet. Asked as README §8 R8.
+

@@ -1,6 +1,6 @@
 # HST-007 — The domain
 
-**Opened 2026-10-07.** **Depends on HST-003.** **Status: 📋 not started.** Kind: plumbing.
+**Opened 2026-10-07.** **Depends on HST-003.** **Status: cut by R7 (2026-11-06) to Cloudflare's registrar and a Worker's custom domain; the name ruled 2026-11-07 (`my-hearth.org`, Campus at `campus.my-hearth.org`); `--domain` built (§9); the purchase and the live run are Richard's. The rest (other registrars, the connector buying it, the human steps counted per run) parks with the research at the close.** Kind: plumbing.
 
 ## 1. The person sentence
 
@@ -32,3 +32,19 @@
 ## 5. Not this task
 
 Any registrar but Cloudflare's. Email at the domain (a later row in HST-000's list, if it is there).
+
+## 9. Cut to Cloudflare (session 14, 2026-11-07)
+
+- **The name.** Richard: a domain he will really use, Hearth first, renamed (*"hearth isn't just email"*). RDAP the same
+  day: 26 Hearth .coms taken; he chose **`my-hearth.org`** (free; `my-hearth.io` free too; the .com taken). Campus goes
+  on the sub-address `campus.my-hearth.org`, so the bare name stays for the product.
+- **Built:** `deploy.mjs … --domain <hostname>` (kept in the record for later deploys; `--no-domain` removes it) writes
+  a Worker Custom Domain (`[[routes]] pattern = "…" custom_domain = true`): Cloudflare makes the DNS record and the
+  certificate. The domain's zone must be on the same account; a CNAME already on the hostname refuses it (*Custom
+  Domains*, read 2026-11-07). The site needs no rebuild: the Worker answers `nodegx-config.json` with the address the
+  page was loaded from. Graded: jest (the route, six bad hostnames refused in words) and a `--dry-run`.
+- **Price**, read 2026-11-07: Cloudflare Registrar sells at cost; a .com about $10.44–$11.17 a year (sources disagree
+  after the .com increase of 1 November 2026). The dashboard shows the price before paying.
+- **The human steps**, to count on the day: (1) register the name in the dashboard; (2) turn on email sending for it
+  (HST-017's sender) and verify his own address; (3) one command. Each is counted and timed in NEXT-SESSION-PROMPT §0.
+

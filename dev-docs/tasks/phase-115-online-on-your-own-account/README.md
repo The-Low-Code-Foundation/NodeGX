@@ -144,7 +144,9 @@ The report (HST-008) puts the twelve runs in one table and asks Richard for the 
 | [HST-012](HST-012-FILES-IN-A-BUCKET.md) | **Files in a bucket, and who may upload** (seam 5 + NOFILESRULE). | product | HST-010 |
 | [HST-013](HST-013-CODE-NODES-PRINTED-AT-DEPLOY.md) | **Code nodes printed at deploy** (NOCODEGEN). ✅ session 11 | product | HST-010 |
 | [HST-014](HST-014-THE-DEPLOY-COMMAND.md) | **The deploy command**: one command does what the spike's scripts do by hand, never wiping a live app. ✅ s12: live on `hst-campus`, MUST 1–8 on Richard's phone | product | HST-010…013 |
-| [HST-015](HST-015-THE-THREE-DURABLE-OBJECT-REDS.md) | **The three Durable Object reds** (regex, EXPRDEPTH, NOROLLBACKCASE). ✅ s13: the suite 103/103 in an object on workerd, none declared away; "contains" and friends plain SQL | product | HST-006 §6 |
+| [HST-015](HST-015-THE-THREE-DURABLE-OBJECT-REDS.md) | **The three Durable Object reds** (regex, EXPRDEPTH, NOROLLBACKCASE). ✅ s13: the suite 103/103 in an object on workerd, none declared away; "contains" and friends plain SQL. Live s14 (Richard's redeploy) | product | HST-006 §6 |
+| [HST-016](HST-016-SCHEDULES-ON-THE-OBJECTS-ALARM.md) | **Schedules on the object's alarm** (SLEEPINGSCHEDULE): a schedule fires on a quiet deployed app. ✅ s14 on workerd | product | HST-014 |
+| [HST-017](HST-017-THE-PAGE-SAYS-WHY-AND-THE-BUILDER-IS-TOLD.md) | **The page says why, and the builder is told** (R8): an object that cannot answer is a sentence and one email a day. ✅ s14 on workerd | product | HST-014 |
 
 **Order:** HST-000 and HST-001 first and in parallel (both are measurements; neither waits for P107 to close). Then
 HST-002. Then HST-003 and HST-005 in parallel (plumbing), HST-004 and HST-006 in parallel (experiments). HST-007 after
@@ -199,6 +201,21 @@ Cloudflare account pointed at Campus, about $10 a year, the rest of (b) parked**
 closes on HST-015, the HST-014 §5.4 follow-ups (2: automations on a redeploy; 4: the refusal alert), and HST-007 cut to
 Cloudflare's registrar and a Worker's custom domain. HST-000, 001, 003, 005, 008, 009 and the rest of HST-007 move to a
 parked phase when this one closes; README §7's ACs 3–6 go with them.
+
+**Ruled 2026-11-07, R8 — the refusal alert on the product Worker: catch it, say it, email.** Asked with the
+measurement first (HST-014 §5.6: the backend's object has 30 s of CPU a call and uses ≤ 54 ms, so the CPU refusal the
+Fixture B alert was built for is out of reach; what an app meets is the account's daily allowance, whose wording
+Cloudflare does not publish). Three choices: catch any failure of the object, say it, email once a day through the new
+domain (recommended); the same and trigger it once on purpose (every Worker on the account stopped until midnight
+UTC); leave it out. Richard chose the first. Built as [HST-017](HST-017-THE-PAGE-SAYS-WHY-AND-THE-BUILDER-IS-TOLD.md).
+
+**Ruled 2026-11-07, the domain (HST-007 as cut by R7): `my-hearth.org`.** Richard asked for a name he will really use
+(*"so it's not just 10 USD wasted"*), Hearth first (a cloud version), and for Hearth to be renamed since *"hearth isn't
+just email"*. Measured by the registries' RDAP the same day: every Hearth .com tried was taken (26), as were
+hiveclip.com and hiveclips.com; free were dayhearth.com, tendday.com, mantelday.com, thedaydesk.com and others. Richard
+chose **my-hearth**: `my-hearth.org` free (control: a registered .org answers 200), `my-hearth.io` free too, the .com
+taken. Campus goes on **`campus.my-hearth.org`**, so the bare name stays free for the real product. The purchase is
+his (Cloudflare Registrar, at cost; the dashboard shows the price before paying).
 
 ## 9. Not this phase
 
@@ -263,6 +280,7 @@ Cloudflare-first (shape B, then C on D1), ahead of the VM rows; the twelve-run c
 | 11 | 2026-11-05 | **HST-013 built**: every code node's compile in the cloud runtime (Function, Expression, Logic Builder, REST's two scripts, Map Collection) goes through one seam (`printedcode.ts` `compileCode`) that answers from functions printed at deploy (`printcode.ts`, its own Worker module) and compiles the string as before when no table is installed. On workerd the nine suites of HST-006 §7.3: **76/76** (was 67/76): p127-no-roles 11/11 (AC1), impersonate 3/3; Function/Expression/Logic Builder answer as in Node (AC2); Node 80/80 (AC3). A text that cannot be printed refuses the build by name; a function upload with unprinted code is a 400 by name. NOCODEGEN fixed; SCRIPTFILES filed (low). The Expression's process-wide cache hid a missing printed row until the sabotage arm caught it | [HST-013 §5](HST-013-CODE-NODES-PRINTED-AT-DEPLOY.md) |
 | 12 | 2026-11-06 | **HST-014 built** (`packages/nodegx-backend/cloudflare/`): one command (`deploy.mjs <project> [--local]`) bundles the cloud functions and prints their code, writes the interpreter site (production viewer, hidden files left out, the address answered by the Worker at `nodegx-config.json`), builds the Worker with the backend's own esbuild settings, searches the upload for the admin credential, deploys, and applies the project's collections, rules and roles to the RUNNING backend (never a boot). The service gets `recordEngine` as an option (the last prototype patch gone). Graded on workerd: Fixture C 22/22 readings, then a second run of the command over the same state kept every account, role, record and file (AC2); AC4 by the service's own route table; jest 13/13 with two mutants killed. Found GITIGNOREDPUBLISHED (`nodegx deploy` published `.accounts.json`, medium) and HISTORYTABLES (low). **Live:** Richard ran it to a new Worker (`hst-campus`); 22/22 over HTTP, MUST 1–8 on his phone, and two more runs kept everything (AC1, AC2) | [HST-014 §5](HST-014-THE-DEPLOY-COMMAND.md) |
 | 13 | 2026-11-06 | R7 ruled (what "finished" means: the Cloudflare work plus a domain, the October research parked). **HST-015 built**: the contract's suite **103/103 in a Durable Object on workerd** (was 99/102), none declared away; PostgreSQL and node:sqlite 103/103. (1) Regex was not declared away: reading first showed the nine everyday string filters ("contains", "starts with", "ends with" …) are lowered onto `$regex`, so all of them failed on Cloudflare (STRINGFILTERS, high): the seven shapes the product writes are now plain SQL on a text column, the same rows as the JavaScript function over a 184-ask grid on three engines; a real pattern is refused in words. (2) EXPRDEPTH: paths as one joined step per hop (3 hops → over 60 at depth 100), graded by replaying every statement through SQLite at depth 100. (3) NOROLLBACKCASE: a new contract case red on the engine as it was, green after; the schema code's six blocks through the engine's `transactionSync` (which nests, measured) | [HST-015 §5](HST-015-THE-THREE-DURABLE-OBJECT-REDS.md) |
+| 14 | 2026-11-07 | HST-015 **live** (Richard's redeploy: the three string filters 200, the real pattern a 400 in words, Campus 14/14 kept). **Automations carried by a redeploy** (HST-014 §5.4 item 2, the VM's rule; `applyAutomations.ts`; the workerd drive caught AUTOMATIONSFORGOTTEN, which the suite could not). That showed **a schedule never fired on a quiet deployed app** (SLEEPINGSCHEDULE, high): **HST-016** puts every schedule on the object's alarm (`scheduleWake`), graded on workerd across real stops with a control that skips. **The warm-up measured live and not needed** (front Worker 0–6 ms, object 1–54 ms). R8 ruled and **HST-017** built (any failure of the object answered in words, emailed once a day with Cloudflare's own text; `--alert-to/--alert-from`). `--domain` built; the name ruled: **my-hearth.org** | [HST-014 §5.6](HST-014-THE-DEPLOY-COMMAND.md), [HST-016](HST-016-SCHEDULES-ON-THE-OBJECTS-ALARM.md), [HST-017](HST-017-THE-PAGE-SAYS-WHY-AND-THE-BUILDER-IS-TOLD.md) |
 
 **The estimate after session 1:** the narrow proof stays at 2 (session 2 deploys it on Richard's account and puts a
 cloud function behind the page's form). Full stack moves to **7–8**: a cloud function's code nodes cannot run on a

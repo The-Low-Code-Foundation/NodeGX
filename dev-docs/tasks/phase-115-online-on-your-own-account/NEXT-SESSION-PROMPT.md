@@ -1,166 +1,91 @@
 # Phase 115 — next session prompt
 
-**Written 2026-11-06 at the end of session 13 (Opus 5.5).** Unparked by Richard 2026-11-04 (BOARD lane 10: *"Let's kick
-it off and lift the park. If this can go out with the Beta, it'd be a nice addition"*). A nice-to-have for the Beta,
-never ahead of lanes 9, 2 and 3. Earlier prompts are in git history (`git log -- this file`).
+**Written 2026-11-07 at the end of session 14 (Opus 5.5).** Unparked by Richard 2026-11-04 (BOARD lane 10), a
+nice-to-have for the Beta, never ahead of lanes 9, 2 and 3. Earlier prompts (sessions 1–13, the spike history, the
+build order of HST-010…015) are in git history: `git log -- dev-docs/tasks/phase-115-online-on-your-own-account/NEXT-SESSION-PROMPT.md`.
 
-## 0. What "finished" means now (R7, ruled 2026-11-06, README §8)
+## 0. Richard's steps (the auto-mode classifier refuses a live deploy to a session: "Production Deploy")
 
-Richard chose **the Cloudflare work plus a domain**; the October research plan is parked when the phase closes. What
-is left, in order:
-0. **Richard's terminal: redeploy Campus with HST-015** (the classifier refused it to session 13). From the repo root:
-   `NODEGX_WRANGLER=$PWD/dev-docs/tasks/phase-115-online-on-your-own-account/spike-backend/node_modules/wrangler/bin/wrangler.js node packages/nodegx-backend/cloudflare/deploy.mjs dev-docs/tasks/phase-115-online-on-your-own-account/fixtures/c-campus --name hst-campus --viewer <a folder holding the deployed noodl.deploy.js>`
-   (session 13 copied `~/.nodegx/cloudflare/hst-campus/site/noodl.deploy.js` + its LICENSE into a scratch folder; do
-   not point `--viewer` at the site folder itself, the deploy rewrites it). Then read: `node fixtures/check-campus-deploy.mjs
-   ~/.nodegx/cloudflare/hst-campus` (no `--seed`: everything kept) and the four `$regex` reads of HST-015 §5.6 (before:
-   all 500 `no such function`; after: three answer, the real pattern is a 400 in words).
-1. **HST-014 §5.4 item 2: a changed automation carried by a redeploy.** Workflows and triggers are read at a
-   backend's FIRST start only; a redeploy must upsert them through `/admin/workflow-defs` and `/admin/triggers`
-   (and say what it changed). Grade on `--local` with Fixture B (its `subscribe` + the schedule), then a live
-   redeploy of a Worker that has one (Fixture C has none: add one to a copy, or redeploy Fixture B through the
-   command as a new Worker: a FIRST deploy sends the admin secret, which is Richard's terminal).
-2. **HST-014 §5.4 item 4: the refusal alert on the product Worker** (HST-004 §10's email when Cloudflare refuses a
-   call), and measure whether the warm-up is needed (`wrangler tail --format json` `.cpuTime`) before carrying it.
-3. **HST-007 cut to Cloudflare**: a domain bought on Richard's Cloudflare account (about $10 a year; the purchase is
-   his, behind a price shown first), pointed at `hst-campus` as a Worker custom domain, with the human steps counted.
-   Re-read the registrar price on the day.
-4. Then close: move HST-000, 001, 003, 005, 008, 009 and the rest of HST-007 to a parked phase with README §7's ACs
-   3–6, mark P115 done on the BOARD.
+What "finished" means (R7): the Cloudflare work plus a domain. The Cloudflare work is built and graded on workerd.
+What is left is live, and starts in Richard's dashboard and terminal. Time each step (HST-007's human steps).
 
-## 1. Read first
+**A. Now, no domain needed: carry sessions 14's code to `hst-campus`** (schedules on the alarm, automations on a
+redeploy, the refusal sentence). From the repo root:
 
-00000000. [HST-015 §5](HST-015-THE-THREE-DURABLE-OBJECT-REDS.md): session 13. The suite 103/103 in a Durable Object on
-   workerd; "contains" and the other everyday string filters as plain SQL (they were all failing on Cloudflare:
-   STRINGFILTERS); paths as joined steps; the schema code's blocks through `transactionSync`. **✅ done.**
-0000000. [HST-014 §5](HST-014-THE-DEPLOY-COMMAND.md): session 12. The fifth product piece: the deploy COMMAND
-   (`packages/nodegx-backend/cloudflare/deploy.mjs`), graded on workerd with Fixture C (first deploy 22/22, a second
-   run over the same state kept everything) and Fixture B (a function and the seeded schedule); then LIVE (§5.5):
-   Richard ran it to `hst-campus`, MUST 1–8 on his phone, two more runs kept everything. **✅ done.** Next:
-   [HST-015](HST-015-THE-THREE-DURABLE-OBJECT-REDS.md), or the follow-ups in §5.4 (automations on a redeploy first).
-000000. [HST-013 §5](HST-013-CODE-NODES-PRINTED-AT-DEPLOY.md): session 11. The fourth product piece: every code
-   node's compile through one seam (`noodl-runtime/src/printedcode.ts`), printed at build (`printcode.ts`) into its own
-   Worker module; the nine suites 76/76 on workerd; a function upload with unprinted code refused by name. Then
-   [HST-014](HST-014-THE-DEPLOY-COMMAND.md), the next piece.
-00000. [HST-012 §5](HST-012-FILES-IN-A-BUCKET.md): session 10. The third product piece: files in a bucket the host
-   hands in (`filesBucket`, `BindingDriver`, `kind: 'binding'`), the spike's prototype patch gone, Campus's 4 files
-   moved once and live; `set_file_permissions` (NOFILESRULE fixed), Campus now owner-only upload, live. Then
-   [HST-013](HST-013-CODE-NODES-PRINTED-AT-DEPLOY.md), the next piece.
-0000. [HST-011 §5](HST-011-THE-DATA-DIR-IN-A-STORE.md): session 9. The second product piece: the data dir's own files
-   through one seam (`dataDirStore`), the census that is now a gate, live across two redeploys of Campus. Then
-   [HST-012](HST-012-FILES-IN-A-BUCKET.md), the next piece.
-000. [HST-010 §6](HST-010-THE-BACKEND-CALLS-ITSELF-IN-PROCESS.md): session 8. The first product piece: the backend calls
-   itself through `loopbackFetch`. Then the tickets HST-011…015 (one per piece left).
-00. [HST-006 §8](HST-006-THE-CONTRACT-ON-D1.md): session 7. Fixture C written through the MCP, and online on
-   `hst-backend-spike`: the interpreter site with the production viewer beside the whole service, seam 3 made real.
-0. [HST-006 §0 and §7](HST-006-THE-CONTRACT-ON-D1.md): session 6. The WHOLE backend service in one Durable Object,
-   nine of its own HTTP suites run against it unchanged (67/76 live, 76/76 Node), the four seams, what a sign-in costs.
-1. [HST-006 §6](HST-006-THE-CONTRACT-ON-D1.md): session 5. The record store in a Durable Object (99/102 on
-   Cloudflare), what a create costs on Free, the exit round trip, and the capability table with its ⏳ rows.
-1b. [HST-004 §9](HST-004-A-WORKFLOW-ON-A-WORKER.md): session 4, where a call's CPU goes and the warm-up at startup.
-2. §8 for session 3 (the deploy on Richard's account), §7 for session 2 (§7.5, the deploy commands), §6 for session 1.
-3. README §12: the session log and the estimate.
-4. The bugs: `node scripts/bugs.js --from P115` (**BUNDLEDROPS high**; s7: **EXPORTDATAPATH** medium (the HTML export's, not this phase's), VIEWERTS2554 fixed; **LOOPBACK high**, **NOCODEGEN high** (s6); HST006 NOROLLBACKCASE medium, EXPRDEPTH and ALTERPERCREATE low; RULEFIVE low; HTTPLOOKUP, BLANKREQUIRED, WARMRUNNER fixed).
+```
+NODEGX_WRANGLER=$PWD/dev-docs/tasks/phase-115-online-on-your-own-account/spike-backend/node_modules/wrangler/bin/wrangler.js \
+  node packages/nodegx-backend/cloudflare/deploy.mjs dev-docs/tasks/phase-115-online-on-your-own-account/fixtures/c-campus \
+  --name hst-campus --viewer ~/.nodegx/cloudflare-viewer
+```
 
-## 2. Built vs driven
+(`~/.nodegx/cloudflare-viewer` is a copy of the deployed production engine, same sha256 `27e258fc…`.) Expect step 6:
+*"Workflows and triggers: the project has no nodegx.automations.json, so the backend keeps its own"* and *"The refusal
+email is not set up"*.
 
-| what | built | driven |
+**B. Buy `my-hearth.org`** (ruled 2026-11-07, README §8): Cloudflare dashboard → Domain Registration → Register
+Domains. The price shows before paying (a .org at cost, around $10–11 a year).
+
+**C. Email sending on it:** dashboard → Compute → Email Service → Email Sending → **Onboard Domain** → `my-hearth.org`
+→ Done (Cloudflare adds SPF/DKIM/DMARC records itself; 5–15 minutes on Cloudflare DNS). HST-004 §10.4 named a wrangler
+command for this; Cloudflare's page of 2026-11-07 documents only the dashboard.
+
+**D. Campus on the domain, with the alert:**
+
+```
+… the command of A … --domain campus.my-hearth.org --alert-to <your address> --alert-from alerts@my-hearth.org
+```
+
+Expect *"And at https://campus.my-hearth.org once Cloudflare has made its certificate"* and *"A test email went to
+<your address>"*. If it says the test email was NOT sent with a recipient error, add your address under the
+domain's Email Routing → Destination addresses (verify it from the email Cloudflare sends), then run D again.
+**Look where the test email landed** (HST-004 §10.5: Resend's went to Gmail's All Mail only).
+
+**E. On your phone:** `https://campus.my-hearth.org/home?id=6f468bbd-4091-48c8-90a1-9232f4753a90` (Ada's link, MUST 1),
+and *Count me in* (MUST 2). The passwords are in `fixtures/c-campus/.accounts.json` (never in a commit).
+
+## 1. The session after Richard's steps
+
+1. Read (no seeding): `node fixtures/check-campus-deploy.mjs ~/.nodegx/cloudflare/hst-campus` (it uses the
+   workers.dev address), then the same readings at `https://campus.my-hearth.org`: `nodegx-config.json`'s endpoint must
+   be the domain; MUST 1 and 3–6 over HTTP there. Record in HST-007 §9 and HST-017 §4 (the test email's folder).
+2. **HST-016 live, one night:** on Campus's backend, a workflow `tick` (one `return` step) and a schedule trigger
+   `*/15 * * * *` aimed at it, through `POST /admin/workflow-defs` and `POST /admin/triggers` with the admin token from
+   `~/.nodegx/cloudflare/hst-campus/deployment.json` (if the classifier refuses a live write, Richard adds them on
+   `https://hst-campus…/_admin` → Workflows/Triggers). The next morning: `fireCount` against the quarter hours since,
+   and `lastFiredAt` within seconds of a quarter. Then delete both (Campus's project has no automations file; a later
+   deploy says "keeps its own" for anything left).
+3. **Close the phase** (R7): move HST-000, 001, 003, 005, 008, 009 and the rest of HST-007 to a parked phase with README
+   §7's ACs 3–6 (`dev-docs/parked/`; 🔴 `dev-docs/parked/README.md` had a PEER's staged and unstaged edits on 11-07:
+   commit only your own hunk, through a temporary index). Mark P115 done on the BOARD (lane 10), the README status,
+   memory `phase-115-own-account.md`.
+
+## 2. What session 14 built (all graded on workerd; jest suites named)
+
+| piece | file | reading |
 |---|---|---|
-| Fixture B as an MCP-written NodeGX project + `MUST.md` | ✅ | ✅ rendered (render_report) |
-| `hst-spike-worker` on https://hst-spike-worker.richard-digitalbricks.workers.dev (page, `/functions/*`, `/workflows/*`, cron) | ✅ deployed | ✅ page 200; the function refuses cleanly with no secret; ⏳ with the secret |
-| `hst-stand-in` on https://hst-stand-in.richard-digitalbricks.workers.dev | ✅ deployed | ✅ answers; ⏳ its log of a real call |
-| Call an API's transport (`steps/httpTransport.ts`), the shim deleted | ✅ `ef3f7388a` | ✅ wrangler dev before/after control; jest 27/27 |
-| `MAILCHIMP_KEY` on the Worker | ✅ Richard, from his terminal | ✅ his Subscribe reached the stand-in with the key (fingerprint matched) |
-| `hst-records-spike` (HST-006: `/__conformance`, `/__ops`, `/__exit`, all behind `?key=`, key in `spike-records/.run-key`, gitignored) | ✅ deployed | ✅ 99/102 ×3; ops costs; exit SAME (control DIFFERENT) |
-| `hst-backend-spike` (HST-006 §7: the whole `BackendService` in a Durable Object; doors `/__hst/*` behind `?key=`, key in `spike-backend/.run-key`, gitignored) | ✅ deployed, service STOPPED (answers 503 until a boot) | ✅ 9 suites 67/76 live = local; CPU per call from the tail |
-| Fixture C (`fixtures/c-campus`, MCP-written through `fixtures/mcp-calls.mjs`) + `MUST.md` (8 lines) | ✅ `d3e252055` | ✅ five phone drives (drive_page) on the local backend |
-| Campus on `hst-backend-spike` (`site.mjs`, `seed-campus.mjs`, `check-campus.mjs`; production viewer; data dir in the object's storage) | ✅ deployed `a0c7bb47`, seeded | ✅ every rule over HTTP live; restarts from storage across 2 redeploys; ⏳ Richard's phone (MUST 1–7), the owner's list left EMPTY for his tap |
-| The page in a real browser | — | ❌ never (Chrome hangs in the sandbox): Richard's phone is the reading |
+| HST-015 live | — | Richard's redeploy: `da`/`^Gr`/`ADA`+`i` 200, `^.r` 400 in words; Campus 14/14 kept |
+| automations carried by a redeploy (VM's rule) | `cloudflare/applyAutomations.ts`, `tests/p115-hst014-automations-on-redeploy.test.ts` 8/8 | workerd: agree / unchanged keeps a backend edit (after AUTOMATIONSFORGOTTEN) / changed replaces, the previous set kept beside the record. HST-014 §5.6 |
+| schedules on the object's alarm (SLEEPINGSCHEDULE, high) | `src/triggers/scheduler.ts` `wake`/`fireDue`/`dueAtStart`, `scheduleClock.ts`, `BackendServiceOptions.scheduleWake`, `worker.ts` `alarm()`; `tests/p115-hst016-…` 10/10 | workerd across real stops: fired 09:18 and 09:21 after the object was gone, the control skipped 09:20, on time alive (09:22:00.038). [HST-016](HST-016-SCHEDULES-ON-THE-OBJECTS-ALARM.md) |
+| the warm-up | — | measured live, **not needed**: front Worker 0–6 ms, object 1–54 ms |
+| the refusal alert (R8) | `cloudflare/front.ts`, `refusal.ts`, `--alert-to/--alert-from`; `tests/p115-hst017-refusal.test.ts` 10/10 | workerd: test email through the real `send_email` binding. [HST-017](HST-017-THE-PAGE-SAYS-WHY-AND-THE-BUILDER-IS-TOLD.md) |
+| the domain flag | `wranglerConfig.ts` `domain`, `--domain` | jest + dry run. [HST-007 §9](HST-007-THE-DOMAIN.md) |
 
-## 3. Next, in order
+Commits: `bbe8a72f1` (automations, schedules, domain), `e88ce7445` (refusal alert), and the docs commit after them.
+Neighbouring suites 249/249 (scheduler, backups, triggers, files, overlap, BKO-001, HST-010…014).
 
-1. ✅ The secret is set and Richard's Subscribe reached the stand-in with the email and the key (HST-004 §8.5; 1042
-   answered). MUST 1–5 ✅: his phone, and the empty field says the email is required (after BLANKREQUIRED,
-   `21bb85fc3`).
-2. ✅ (Richard, 2026-11-05: "Done it all") After 08:00 UTC on 2026-11-05: MUST line 6. `npx wrangler tail hst-stand-in -c wrangler.stand-in.toml` only sees live
-   events, so read the dashboard (Workers & Pages → hst-stand-in → Logs, observability is on) for the digest call.
-   A digest run BY HAND reached it at 15:12:59 UTC on 11-04 (session 4's check of the cron path): the reading is the
-   one after 08:00 UTC on 11-05, not that one.
-3. ✅ R6 ruled 2026-11-04: **one Worker**. ✅ CPU measured (HST-004 §9): Cloudflare itself costs 0–1 ms; calls over
-   10 ms are a cold isolate's first calls; warm ones are 1–9 ms. The Worker now warms its runner at STARTUP (live,
-   `dcd1c3ef`, `x-warmed-at-startup: yes`), halving the worst call (33 → 17–18). 337 calls, 52 over 10 ms, every one
-   answered (0 `exceededCpu`). Carry the warm-up into the deploy target (HST-003). Not worth more profiling unless a
-   1102 is ever seen; the left-over (a fresh isolate's real fetch path, ~1 call in 5 for its first ~20) cannot be
-   pre-paid with a stubbed fetch.
-3b. ✅ Refusal alerts built and SENT (HST-004 §10.5): a real 1102 → the page's sentence → report → Resend emailed
-   Richard's Gmail (17:11 UTC 11-04; Resend without a domain only sends to the sign-up address). `ALERT_TO` lives in
-   the working copy only (public repo): keep it there when deploying. ✅ It arrived, but Gmail filed it under All Mail only (not Inbox, not Spam): the shared test sender is not trusted. The product should aim for the builder's own domain as sender.
-   The real Free cut-off measured is ~2 s of CPU per call, so §9's 10–35 ms spikes are far from it.
-4. BUNDLEDROPS (high) belongs to the cloud-deploy owner, not this phase, but it blocks every MCP-written cloud function
-   that wires an HTTP Request's body or auth. Before anyone fixes it: measure the editor's own Deploy button with a
-   viewer running, and a browser export with the same wiring (the bug file says how).
-5. ✅ HST-006 records (s5) and ✅ users and sign-in (s6: the whole service runs in the object; §7). **Next, in order:**
-   ✅ (b) **Fixture C** (s7, HST-006 §8): written, driven, live. Richard ticked 1–4 and 6, 7 read after a redeploy.
-   Line 5 failed first (STALEROWS, fixed in the runtime, live `34f862a8`, §8.6) and **passed on his re-read**: MUST
-   1–7 ✅, line 8 waits on R2. (c) R2 ruled ("go for CF file storage"), built and measured locally as a binding
-   (seam 5, §8.7, `50c7859fc`); **LIVE** (R enabled R2; bucket `hst-campus-files`; `d068aad3`; upload 201 + link 200 over
-   the internet). MUST 8 ✅ on his phone: **Fixture C 8/8.** Next: **ask R3** (the full-stack route, now about a real app: HST-006 §0 +
-   §8), then (d) realtime, (e) the two suites. Product rows the spike stands in for: LOOPBACK, NOCODEGEN, seams 3 and 5,
-   NOFILESRULE, and a deploy target doing what `site.mjs` + `seed-campus.mjs` do by hand. How it was handed to him, for the next run:
-   (Ada's link, *Count me in*, a made-up id, `/owner` as the owner and as the second account, signed out; the
-   passwords are in `fixtures/c-campus/.accounts.json`, give them to him from there, never in a commit). Then line 7:
-   redeploy (`wrangler deploy` in `spike-backend`, NOT `seed-campus.mjs`, which wipes) and his answer must still be on
-   the owner's list. 🔴 The backend's suites boot FRESH on this Worker and wipe Campus: re-seed after them.
-   (c) Files on R2 through `S3Driver` (needs R2 enabled on Richard's account: ask first, it may want a card). (d)
-   Realtime over the object's WebSockets (the service's own `RealtimeHub` is already in the object: try its socket
-   through `httpServerHandler` first). (e) The two suites not run (`auth-linking`, `bmg-004-users`) need a remote
-   mailer fake in `remote/BackendService.js`. Fixture C should be graded on `hst-backend-spike` (the whole service),
-   not on `hst-records-spike`: its cloud functions then need LOOPBACK's seam, and must not use a code node (NOCODEGEN). 🔴 Don't run `/__conformance` on the live Worker for fun: each run reads
-   ~752,000 rows, 15% of the Free day.
+## 3. Traps met this session (also in memory `phase-115-own-account.md`)
 
-## 3b. R3 RULED (2026-11-05): build the Cloudflare route as a product, in this phase
-
-Richard chose "Build it in P115" over a phase of its own. The six pieces the spike scripts stand in for, in the order
-that unblocks the most (each: a product change + its tests + Fixture C still 8/8 on hst-backend-spike):
-1. ✅ **LOOPBACK** → [HST-010](HST-010-THE-BACKEND-CALLS-ITSELF-IN-PROCESS.md), session 8: `BackendServiceOptions.loopbackFetch`
-   → `_noodl_cloudservices.fetch`; the spike passes it (its global `fetch` patch is gone); live `f1887406`, Fixture C
-   unchanged.
-2. ✅ **Seam 3 in the product** → [HST-011](HST-011-THE-DATA-DIR-IN-A-STORE.md), session 9: `BackendServiceOptions.dataDirStore`
-   (sync `list/get/put/delete`); `start()` writes the store's files into the dir, every write through
-   `config/dataDirStore.ts` reaches the store. The spike hands in a table in the object's SQLite (`_nodegx_data_dir`)
-   and moved session 7's `hst:file:*` once (live `1b48270c`, then `16875ec8` from the store alone).
-3. ✅ **Seam 5 in the product** → [HST-012](HST-012-FILES-IN-A-BUCKET.md), session 10: `BackendServiceOptions.filesBucket` →
-   `storage/BindingDriver.ts`, `kind: 'binding'` (a third key space: `driverFor` serves a row from the store it names);
-   the spike passes `env.FILES` and moved session 7's 4 `local` rows to `binding` once (live `d5f4656d`); the Storage
-   page says *This app's bucket*. NOFILESRULE fixed: `set_file_permissions`; Campus owner-only upload live (`d728174c`).
-4. ✅ **NOCODEGEN** → [HST-013](HST-013-CODE-NODES-PRINTED-AT-DEPLOY.md), session 11: `compileCode` looks in a table the host
-   installs (`installPrintedCode(rows, { refuseOthers: true })`) before compiling a string; `collectCode` /
-   `printCodeModule` print it from the same helpers the nodes compile with. Spike: `build.mjs` `HST_PRINT_FROM`,
-   `dist/printed-code.mjs` its own module; `remote/BackendService.js` `HST_CAPTURE_DIR` (a suite whose functions carry
-   code runs twice: capture, then on a Worker built from it). NOT deployed live: Campus has no code node, and the
-   backend's suites would wipe it; HST-014's first live deploy carries it.
-   **Next: piece 5, [HST-014](HST-014-THE-DEPLOY-COMMAND.md)**: one command doing what `site.mjs` + `seed-campus.mjs` +
-   `build.mjs` (now with the printing) + `wrangler deploy` do by hand. Its print step is `collectCode` over the
-   project's cloud functions; a refusal stops the deploy (`refusalSentence`). Read `spike-backend/site.mjs`,
-   `seed-campus.mjs` and `src/worker.ts` first: the command's Worker is that file made a product.
-5. ✅ **The deploy command** ([HST-014](HST-014-THE-DEPLOY-COMMAND.md)), session 12: `packages/nodegx-backend/cloudflare/deploy.mjs`,
-   live on `hst-campus` (record `~/.nodegx/cloudflare/hst-campus/deployment.json`; check with
-   `fixtures/check-campus-deploy.mjs <that folder>`, `--seed` never boots). A redeploy sends no secret, so a session may
-   run it; a FIRST deploy sends the admin credential and is Richard's terminal. 🔴 `--local` needs
-   `NODEGX_WRANGLER=<absolute spike-backend path>/node_modules/wrangler/bin/wrangler.js` and a free `--port`; stop it with
-   BOTH the task stop and `pkill -f -- "--persist-to <out>"`. Follow-ups: HST-014 §5.4.
-6. ✅ **Session 5's three DO reds** ([HST-015](HST-015-THE-THREE-DURABLE-OBJECT-REDS.md)), session 13: regex NOT declared
-   away (the everyday string filters were inside it; now plain SQL), EXPRDEPTH as joined steps, NOROLLBACKCASE a
-   contract case + `transactionSync`. 🔴 Instruments: `nodegx-backend/tests/p115-hst015-durable-object-reds.test.ts`
-   (stand-in object + a Python `sqlite3` replay at depth 100: node:sqlite cannot set the limit); on workerd,
-   `spike-records` `GET /__hst015` under `wrangler dev` (product engine; the spike's own `doEngine.ts` is the
-   "as it was" control). A local PostgreSQL 16 answers `postgres:///nodegx_brg005`, so `brg-005` RUNS here.
-Realtime (d) is measured alongside or after 5. Tickets written (HST-010…015); the BOARD lane 10 line says "building".
-
-## 4. Rulings owed (ask in plain words, recommendation first)
-
-- R1–R5 as in the README §8. R5 (first-load size) is mostly answered: the HTML export is 1.4 MB against ~14.9 MB.
-- R6 (one Worker) ruled 2026-11-04.
-- R2 (files on R2): ask with (c) — it may want a card on his account. MUST line 8 waits on it.
-- ✅ R3 RULED 2026-11-05: build it in P115 (§3b). Was: recommendation updated in HST-006 §0 after s6 (no adapter: the whole service in a Durable Object, plus two
-  product changes and code nodes printed at deploy). Users/sign-in are measured now, so R3 can be asked; ask it once
-  Fixture C is ticked, so the ruling is about a real app.
+- 🔴 **A record rebuilt field by field drops a field added later** (`deploy()`): the suite passed the fingerprint by hand
+  and could not see it; the drive did. Drive a new record field through two real runs.
+- 🔴 **An idle Durable Object loses its timers** (≤ 15 min held, then evicted): anything on `setTimeout` in the
+  backend is unreliable on Cloudflare. Schedules are on the alarm now; a NEW timer-based feature needs the same.
+- 🔴 With the route table unreadable, a page address and a data call look alike (`/classes/Reader` has no dot):
+  decide by `Sec-Fetch-Mode: navigate` / `Accept: text/html`, never by the path alone.
+- 🔴 zsh: `$EXTRA` holding several flags is ONE argument; `${=EXTRA}` splits.
+- `wrangler dev` stopped before a due instant and started after it is a faithful eviction (the alarm is persisted in
+  `--persist-to`); the local run of the command is `scratchpad/b-local.sh` + `cycle.sh` in session 14's scratchpad
+  (gone): `deploy.mjs <copy> --name hst-b-local --out <scratch> --local --port 8791 --allow-development-engine`, stop
+  with `pkill -f -- "--persist-to <out>/.state"`.
+- Cloudflare limits for Durable Objects on Free (read 2026-11-07): 30 s CPU a request; 100,000 requests, 13,000 GB-s,
+  5M rows read, 100,000 rows written a day, reset 00:00 UTC; 5 GB stored. The wording of a daily refusal is
+  unpublished: the first real one arrives quoted in HST-017's email.
