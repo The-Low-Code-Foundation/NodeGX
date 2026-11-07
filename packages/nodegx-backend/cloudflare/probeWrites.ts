@@ -356,7 +356,16 @@ export async function probeWrites(o: ProbeWritesOptions): Promise<ProbeWritesRes
         domainId = dom.j?.result?.id;
         answers['custom domain: attach (workers-routes.write)'] = dom.ok ? 'yes' : `NO (${dom.status} ${errText(dom.j) ?? ''})`;
         if (dom.ok) {
-          await publicDns('public DNS (1.1.1.1) right after the attach');
+          // Run 4 (2026-11-07): looked up ~1 s after the attach, the name did not exist yet (1.1.1.1: NXDOMAIN), and this
+          // Mac kept that "does not exist" for the whole 240 s while 1.1.1.1 had it by the end. So wait on the PUBLIC
+          // answer first and look the name up here only once it exists: the first local lookup is the one cached.
+          const t0 = Date.now();
+          let dns = await publicDns('public DNS (1.1.1.1) right after the attach');
+          while (!dns.startsWith('resolves') && Date.now() - t0 < (o.waitDomainMs ?? 240_000)) {
+            await new Promise((r) => setTimeout(r, pollMs));
+            dns = await publicDns('public DNS (1.1.1.1), waiting');
+          }
+          answers['custom domain: in public DNS after'] = dns.startsWith('resolves') ? `${Math.round((Date.now() - t0) / 1000)} s` : 'not within the wait';
           const d = await poll(`custom domain: ${host} answers`, `${origin(host)}/__probe`, o.waitDomainMs ?? 240_000, (s, t) => s === 200 && t.includes('"stored":"one"'));
           answers['custom domain: answers over https'] = d.ok ? `yes, after ${Math.round(steps[steps.length - 1].ms / 1000)} s` : `not within the wait (${steps[steps.length - 1].note})`;
           answers['custom domain: public DNS (1.1.1.1) after the wait'] = await publicDns('public DNS (1.1.1.1) after the wait');

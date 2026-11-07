@@ -215,3 +215,22 @@ test('the domain label is fresh each run unless named, and a network failure say
   expect(hosts[0]).toMatch(/^odt000-[0-9a-f]{4}\.my-hearth\.org$/);
   expect(hosts[1]).not.toBe(hosts[0]);
 });
+
+test('the domain is not looked up here until public DNS has it (run 4: the first local lookup is the one cached)', async () => {
+  const fake = fakeCloudflare();
+  const order: string[] = [];
+  let dnsAsks = 0;
+  const watched: ProbeFetch = async (url, init) => {
+    if (url.startsWith('https://cloudflare-dns.com/')) {
+      dnsAsks++;
+      order.push(dnsAsks < 3 ? 'dns:nx' : 'dns:yes');
+      return new Response(JSON.stringify(dnsAsks < 3 ? { Status: 3 } : { Status: 0, Answer: [{ data: '104.21.0.1' }] }), { status: 200 });
+    }
+    if (url.includes('odt000.my-hearth.org')) order.push('local');
+    return fake.fetchImpl(url, init);
+  };
+  const r = await probeWrites({ token: TOKEN, api: 'https://api.test/client/v4', zoneName: 'my-hearth.org', label: 'odt000', fetchImpl: watched, origin: (h) => `http://live.test/${h}`, waitWorkersDevMs: 0, waitDomainMs: 5_000, pollMs: 1 });
+  expect(order.slice(0, 4)).toEqual(['dns:nx', 'dns:nx', 'dns:yes', 'local']);
+  expect(r.answers['custom domain: in public DNS after']).toMatch(/^\d+ s$/);
+  expect(r.answers['custom domain: answers over https']).toMatch(/^yes/);
+});

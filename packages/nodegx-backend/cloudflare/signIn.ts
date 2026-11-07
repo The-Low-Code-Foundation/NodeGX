@@ -55,7 +55,11 @@ export const CLOUDFLARE_REVOKE_URL = 'https://dash.cloudflare.com/oauth2/revoke'
  */
 export const NODEGX_CLOUDFLARE_CLIENT_ID = '';
 
-/** Fixed until ODT-000 (a) says whether Cloudflare matches a loopback redirect's port. wrangler uses 8976. */
+/**
+ * Fixed ON PURPOSE, though Cloudflare matches a loopback redirect's port loosely (ODT-000 (a), 2026-11-07: an
+ * unregistered 8978 was accepted): Claude Desktop runs two connector processes, and the taken port is what refuses a
+ * second, parallel sign-in page (`port-busy`). `NODEGX_CF_CALLBACK_PORT=0` lets the system pick. wrangler uses 8976.
+ */
 export const CALLBACK_PORT = 8977;
 export const CALLBACK_PATH = '/oauth/callback';
 

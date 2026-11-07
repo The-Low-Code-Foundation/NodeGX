@@ -21,19 +21,17 @@ packages/nodegx-backend/cloudflare/sign-in.mjs sign-in`, his browser click).
 
 ## 1. The order
 
-1. **Run 4: the custom domain answering.** Run 3's `odt000.my-hearth.org` attached (200) but did not answer this Mac
-   in 240 s ("fetch failed"). Suspect, unproven: session 2's `dig` of that name before the record existed (a local
-   negative cache). `probe-writes` now uses a fresh `odt000-<4 hex>` name each run, records the network cause, and
-   asks 1.1.1.1 over https. Richard runs `node packages/nodegx-backend/cloudflare/sign-in.mjs probe-writes --zone
-   my-hearth.org` (live writes on his account: his yes, the classifier refuses it to the session). 🔴 Do NOT look the
-   name up yourself before or during the run.
-2. ✅ **R3 RULED (Richard, 2026-11-07): the API**, wrangler does not ship (*"370MB extra is a lot"*). Workers
-   **Admin** on the consent page is the accepted cost.
-3. **(a) loose port**: `… sign-in --port 8978` (an unregistered port). Accepted = `CALLBACK_PORT` can become `0`;
-   refused (Cloudflare's own error page) = keep 8977. Then `--host localhost`. One click each, Richard's.
-4. **The Claude Desktop drive of `cloudflare_sign_in`** (ODT-001 AC5's second half), connector built from this
-   checkout with `NODEGX_CLOUDFLARE_CLIENT_ID` set (the constant stays EMPTY until ODT-005). Memory
-   `desktop-built-in-node-is-a-helper.md`: grade the `.mcpb` in Desktop.
+1. ✅ **Run 4** (the custom domain): attaches and answers once public DNS has it; the probe's own early lookup was
+   cached as "does not exist" (ODT-000 §5). The probe now waits on 1.1.1.1 first; ODT-002 owes the same rule.
+2. ✅ **R3 RULED (Richard, 2026-11-07): the API**, wrangler does not ship (*"370MB extra is a lot"*).
+3. ✅ **(a) loose port**: 8978 (unregistered) and `localhost` both accepted; 8977 stays the default as the
+   cross-process guard (ODT-000 §5).
+4. **The Claude Desktop drive of `cloudflare_sign_in`**: half 1 ✅ (the tool reached, `status` right). Half 2: in
+   Desktop, "sign me out of Cloudflare", then "sign in to Cloudflare", Allow, "done", and Claude finds it. Desktop's
+   config has a `nodegx-dev` entry (the checkout's server, Node 22, the client id) added in session 2; the NodeGX
+   extension is OFF while it is there. 🔴 When the drive is done: remove `nodegx-dev` from
+   `~/Library/Application Support/Claude/claude_desktop_config.json` and ask Richard to switch the extension back on.
+   The `.mcpb` itself is graded only after a release carries the tool.
 5. **ODT-002, the deploy through the API**: `probeWrites.ts` is the blueprint (every call it makes is in ODT-000 §5,
    with its status). Replace `deployCloudflare.ts`'s `wrangler deploy` step; the redeploy uses no migration and
    `keep_bindings: ["secret_text"]`. ODT-003 (no bundler on the person's machine) next: (e) says a prebuilt Worker
