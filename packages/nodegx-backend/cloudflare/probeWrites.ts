@@ -27,7 +27,9 @@ export interface ProbeWritesOptions {
   api: string;
   /** The zone the custom domain is attached in, e.g. `my-hearth.org`; null = no custom domain step. */
   zoneName: string | null;
-  /** The label put in front of it: `odt000` → `odt000.my-hearth.org`. */
+  /** The label put in front of it: `odt000` → `odt000.my-hearth.org`. Default: `odt000-<4 hex>`, a name never
+   * looked up before, so no resolver holds a "does not exist" for it (run 3, 2026-11-07: a name looked up before the
+   * record existed did not answer on this Mac within 4 minutes). */
   label?: string;
   name?: string;
   fetchImpl?: ProbeFetch;
@@ -114,6 +116,12 @@ const COMPAT_DATE = '2026-10-01';
  */
 export const assetHash = (content: string, ext: string) => crypto.createHash('sha256').update(Buffer.from(content).toString('base64') + ext).digest('hex').slice(0, 32);
 
+/** undici's "fetch failed" says nothing: the reason (ENOTFOUND, a certificate, a reset) is in `cause`. */
+const netErr = (e: unknown) => {
+  const c = (e as any)?.cause;
+  return `network: ${(e as Error).message}${c ? ` (${[c.code, c.message].filter(Boolean).join(': ')})` : ''}`;
+};
+
 const redact = (p: string) => p.replace(/accounts\/[0-9a-f]{32}/, 'accounts/<id>').replace(/zones\/[0-9a-f]{32}/, 'zones/<id>');
 const errText = (j: any) => (j?.errors ?? []).map((e: any) => (e.code !== undefined ? `${e.code}: ${e.message}` : String(e.message))).join('; ') || undefined;
 
@@ -125,7 +133,7 @@ export async function probeWrites(o: ProbeWritesOptions): Promise<ProbeWritesRes
   const log = o.log ?? (() => {});
   const name = o.name ?? 'odt000-probe';
   const bucket = `${name}-files`;
-  const host = o.zoneName ? `${o.label ?? 'odt000'}.${o.zoneName}` : null;
+  const host = o.zoneName ? `${o.label ?? `odt000-${crypto.randomBytes(2).toString('hex')}`}.${o.zoneName}` : null;
   const origin = o.origin ?? ((h: string) => `https://${h}`);
   const pollMs = o.pollMs ?? 3000;
   const steps: ProbeStep[] = [];
@@ -153,7 +161,7 @@ export async function probeWrites(o: ProbeWritesOptions): Promise<ProbeWritesRes
       }
       errors = errText(j);
     } catch (e) {
-      errors = `network: ${(e as Error).message}`;
+      errors = netErr(e);
     }
     const ok = status >= 200 && status < 300 && j?.success !== false;
     const row: ProbeStep = { step, method, path: redact(p.startsWith('http') ? new URL(p).pathname : p), status, ok, ms: Date.now() - t0, errors };
@@ -174,7 +182,7 @@ export async function probeWrites(o: ProbeWritesOptions): Promise<ProbeWritesRes
         last = { status: res.status, text: await res.text() };
         if (want(last.status, last.text)) break;
       } catch (e) {
-        last = { status: 0, text: `network: ${(e as Error).message}` };
+        last = { status: 0, text: netErr(e) };
       }
       if (Date.now() - t0 >= waitMs) break;
       await new Promise((r) => setTimeout(r, pollMs));
@@ -183,6 +191,25 @@ export async function probeWrites(o: ProbeWritesOptions): Promise<ProbeWritesRes
     steps.push({ step, method: 'GET', path: new URL(url).pathname, status: last.status, ok, ms: Date.now() - t0, note: `${tries} tries; ${ok ? 'answered' : `last: ${last.text.slice(0, 160)}`}` });
     log(`${String(last.status).padEnd(4)} ${step} (${Math.round((Date.now() - t0) / 1000)} s, ${tries} tries)`);
     return { ok, ...last };
+  };
+
+  /** Does the world's DNS have the name (Cloudflare's resolver, over https), whatever this machine's cache says? */
+  const publicDns = async (step: string): Promise<string> => {
+    const t0 = Date.now();
+    let note: string;
+    let status = 0;
+    try {
+      const res = await f(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(host!)}&type=A`, { method: 'GET', headers: { accept: 'application/dns-json' } });
+      status = res.status;
+      const j: any = await res.json();
+      const ips = (j?.Answer ?? []).map((a: any) => a.data);
+      note = ips.length ? `resolves: ${ips.join(' ')}` : `no A record (DNS status ${j?.Status})`;
+    } catch (e) {
+      note = netErr(e);
+    }
+    steps.push({ step, method: 'GET', path: '/dns-query', status, ok: note.startsWith('resolves'), ms: Date.now() - t0, note });
+    log(`${String(status).padEnd(4)} ${step}: ${note}`);
+    return note;
   };
 
   let account: string | undefined;
@@ -255,7 +282,7 @@ export async function probeWrites(o: ProbeWritesOptions): Promise<ProbeWritesRes
     answers['R2: make a bucket (workers-r2.write)'] = r2.ok ? 'yes' : `NO (${r2.status} ${errText(r2.j) ?? ''})`;
 
     const first = await upload(1);
-    answers['(c) upload a Worker with a Durable Object migration (workers-scripts.edit)'] = first ? 'yes' : `NO (${steps[steps.length - 1].status} ${steps[steps.length - 1].errors ?? ''})`;
+    answers['(c) upload a Worker with a Durable Object migration'] = first ? 'yes' : `NO (${steps[steps.length - 1].status} ${steps[steps.length - 1].errors ?? ''})`;
     if (!first) {
       // Refused: which part? The bare Worker (can the scope make ANY Worker?), then the bare Worker with only the
       // SQLite Durable Object and its migration (is it the migration?). Same name, so the clean-up is the same.
@@ -329,8 +356,10 @@ export async function probeWrites(o: ProbeWritesOptions): Promise<ProbeWritesRes
         domainId = dom.j?.result?.id;
         answers['custom domain: attach (workers-routes.write)'] = dom.ok ? 'yes' : `NO (${dom.status} ${errText(dom.j) ?? ''})`;
         if (dom.ok) {
+          await publicDns('public DNS (1.1.1.1) right after the attach');
           const d = await poll(`custom domain: ${host} answers`, `${origin(host)}/__probe`, o.waitDomainMs ?? 240_000, (s, t) => s === 200 && t.includes('"stored":"one"'));
-          answers['custom domain: answers over https'] = d.ok ? `yes, after ${Math.round(steps[steps.length - 1].ms / 1000)} s` : 'not within the wait';
+          answers['custom domain: answers over https'] = d.ok ? `yes, after ${Math.round(steps[steps.length - 1].ms / 1000)} s` : `not within the wait (${steps[steps.length - 1].note})`;
+          answers['custom domain: public DNS (1.1.1.1) after the wait'] = await publicDns('public DNS (1.1.1.1) after the wait');
         }
       } else answers['custom domain: attach (workers-routes.write)'] = `no zone ${o.zoneName} visible`;
     }

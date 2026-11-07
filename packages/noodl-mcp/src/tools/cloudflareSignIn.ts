@@ -47,7 +47,7 @@ const WAIT_MS = 45_000;
 
 /** What each permission lets NodeGX do, in the person's words (for the ones Cloudflare was not asked or did not allow). */
 const WHAT_IT_DOES: Record<string, string> = {
-  'workers-scripts.edit': 'put the app online',
+  'workers-scripts.admin': 'put the app online',
   'workers-r2.write': "store the app's files",
   'workers-kv-storage.write': 'remember when it last emailed an alert',
   'workers-routes.write': 'put the app on its own domain',

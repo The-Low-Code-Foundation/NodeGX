@@ -1,6 +1,6 @@
 # ODT-000 — the measurements, on a private OAuth client on Richard's account
 
-**Phase:** [P135](README.md) · **Kind:** measurement · **State:** 🔨 (a) (b) (d) and the reads of (c) TAKEN 2026-11-07 (§5); (c) writes runs 1–2: R2 yes; ANY Worker upload 403 with `workers-scripts.edit` (§5); run 3 on `workers-scripts.admin`.
+**Phase:** [P135](README.md) · **Kind:** measurement · **State:** 🔨 (a) (b) (d) and the reads of (c) TAKEN 2026-11-07 (§5); (c) writes and (e) ✅ on `workers-scripts.admin` (run 3, §5); `.edit` cannot create any Worker; the custom domain answering is run 4; loose port (a) next.
 
 ## 1. Taken before the client (2026-11-07, read-only)
 
@@ -25,7 +25,7 @@
 
    | id (what `signIn.ts` asks for) | dashboard row → box |
    |---|---|
-   | `workers-scripts.edit` | **Workers** → Edit (the row with Admin / Edit / Content Read / Metadata Read). 🔴 The catalog also lists `workers-scripts.write` ("Workers Scripts Write"), but the dashboard offers NO such row (Richard, 2026-11-07): asked for at first, changed to `.edit`. Whether Edit uploads a Worker with a Durable Object migration, or that needs Admin, is ODT-000 (c) |
+   | `workers-scripts.admin` (was `.edit`: ODT-000 (c) runs 1–3) | **Workers** → **Admin** (the row with Admin / Edit / Content Read / Metadata Read). 🔴 Edit (`workers-scripts.edit`, "Workers Editor") is refused every Worker upload. Older note: 🔴 The catalog also lists `workers-scripts.write` ("Workers Scripts Write"), but the dashboard offers NO such row (Richard, 2026-11-07): asked for at first, changed to `.edit`. Whether Edit uploads a Worker with a Durable Object migration, or that needs Admin, is ODT-000 (c) |
    | `workers-kv-storage.write` | Workers KV Storage → Edit |
    | `workers-r2.write` | Workers R2 Storage → Edit (not R2 Data Catalog, not R2 SQL) |
    | `workers-routes.write` | Workers Routes → Edit |
@@ -77,8 +77,11 @@ R1 done by Richard in the dashboard. Raw readings: `~/.nodegx/cloudflare/odt000-
 | **(c)** writes, run 1 (Richard, 2026-11-07 20:25 UTC, `sign-in.mjs probe-writes --zone my-hearth.org`, `probeWrites.ts`) | R2 bucket **made** (200) and deleted (200): `workers-r2.write` writes. 🔴 **The Worker upload REFUSED: 403 "No access to the specified resource."** (no error code), and the assets upload session before it, same 403. The upload was P115's whole shape (3 modules, SQLite Durable Object + migration v1, secret, R2). Nothing else was made; clean-up complete. Not yet known: whether `workers-scripts.edit` can make ANY Worker or refuses only the migration: run 2 narrows it (a bare one-module Worker, then + the Durable Object) |
 | **(c)** writes, run 2 (Richard, 2026-11-07 20:30 UTC, the same command with the narrowing) | 🔴 **A bare Worker (one module, no bindings, `main_module` + `compatibility_date` only) is refused too: 403 "No access to the specified resource."** So `workers-scripts.edit` cannot create ANY Worker through the API; it is not the migration. R2 made and deleted again; clean-up complete |
 | the Workers scope ids (catalog re-read 2026-11-07 20:3x UTC with NodeGX's own token: 200, 403 scopes) | `workers-scripts.edit` = **"Workers Editor"** (dashboard Workers → Edit), `workers-scripts.admin` = **"Workers Admin"** (Workers → Admin), `workers-scripts.write` = "Workers Scripts Write" (no dashboard row), plus `.read`, `.content_read`, `.metadata_read`. Next: the client given Workers → Admin, a new sign-in asking `workers-scripts.admin`, run 3 |
+| re-sign-in with Admin (Richard, 20:33 UTC) | Workers → Admin ticked in the client; `sign-in --scopes …,workers-scripts.admin,…` (`.edit` dropped): **all 11 granted**, token 3600 s, refresh token yes |
+| **(c)** writes, run 3 (Richard, 2026-11-07 20:38 UTC, `workers-scripts.admin`) | ✅ **P115's whole shape went up through the API, no wrangler**: assets session 200 + content 201 (a **sha256** hash cut to 32 hex was accepted: Cloudflare does not check wrangler's blake3), the Worker 200 (3 modules, SQLite Durable Object + migration v1, secret, assets with `run_worker_first`, R2, observability), workers.dev on 200. Live on workers.dev at the first try (2.7 s): the Durable Object stored a row, R2 through the binding, the secret set, `nodejs_compat`, the page served. **Redeploy (upload 2, no migration, `keep_bindings: ["secret_text"]`): the row AND the secret kept**; the unchanged page was not asked for again (0 files). Custom domain attach 200; `send_email` binding accepted (200). Clean-up: domain 204, Worker 200, bucket 200 |
+| (c) the custom domain answering | ❓ `odt000.my-hearth.org` did not answer this Mac within 240 s (81 tries, "fetch failed", the cause not recorded). Suspect, unproven: this session's `dig` of that name BEFORE the record existed left a "does not exist" in the local resolver. The probe now uses a fresh `odt000-<4 hex>` name each run, records undici's `cause`, and asks 1.1.1.1 over https right after the attach and after the wait: run 4 |
 | **(d)** lifetimes | access token **3599 s**; refresh token **yes** (with `offline_access`); a refresh **ROTATES** the refresh token (the lock in `signIn.ts` is load-bearing) |
-| (e) multi-module upload | not yet: the run-1 upload was refused before it could say (see (c) writes) |
+| **(e)** multi-module upload | ✅ run 3: `worker.mjs` importing `./printed-code.mjs` and `./app.mjs`, each part `application/javascript+module`, `main_module` in the metadata: both modules loaded on the live Worker |
 | the consent page's words | Richard, 2026-11-07: it listed **the 10 permissions ticked in the client** (the 11 granted minus `offline_access`, which has no permission row). The page's name and shield colour were not described |
 
 🔴 **An instrument that refused everything:** probing `/oauth2/auth` scope by scope from Python (no redirects followed) answered **403 with no Location for every scope, `openid` included**: Cloudflare's bot protection, not the client's scopes. Void. Only a browser run reads the client.

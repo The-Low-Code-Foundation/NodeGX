@@ -63,12 +63,17 @@ export const CALLBACK_PATH = '/oauth/callback';
  * What putting an app online, its files, its domain and its email need (P115's deploy and HST-018's purchase), named
  * as Cloudflare's OAuth catalog names them (`GET /oauth/scopes`, 2026-11-07). `offline_access` asks for a refresh
  * token (Hydra's convention; the discovery document lists it).
+ *
+ * 🔴 Workers is `workers-scripts.admin` ("Workers Admin", the dashboard's Workers → Admin box), MEASURED
+ * (ODT-000 (c), 2026-11-07): with `workers-scripts.edit` ("Workers Editor", Workers → Edit) Cloudflare's API refuses
+ * to create ANY Worker, a bare one-module one included (403 "No access to the specified resource."); with Admin the
+ * whole P115 deploy shape went up.
  */
 export const CLOUDFLARE_SCOPES: readonly string[] = [
   'offline_access',
   'user-details.read',
   'account-settings.read',
-  'workers-scripts.edit',
+  'workers-scripts.admin',
   'workers-kv-storage.write',
   'workers-r2.write',
   'workers-routes.write',

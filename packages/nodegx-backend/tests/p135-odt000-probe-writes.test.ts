@@ -32,6 +32,7 @@ function fakeCloudflare(opts: { refuse?: (c: Call) => { status: number; code: nu
   const fetchImpl: ProbeFetch = async (url, init = {}) => {
     const u = new URL(url);
     const method = init.method ?? 'GET';
+    if (u.host === 'cloudflare-dns.com') return json(200, { Status: 0, Answer: [{ data: '104.21.0.1' }] });
     // The live Worker (origin → http://live.test/<host>).
     if (u.host === 'live.test') {
       if (!state.script) return new Response('no worker', { status: 404 });
@@ -83,7 +84,7 @@ function fakeCloudflare(opts: { refuse?: (c: Call) => { status: number; code: nu
 }
 
 const run = (fake: ReturnType<typeof fakeCloudflare>, zoneName: string | null = 'my-hearth.org') =>
-  probeWrites({ token: TOKEN, api: 'https://api.test/client/v4', zoneName, fetchImpl: fake.fetchImpl, origin: (h) => `http://live.test/${h}`, waitWorkersDevMs: 0, waitDomainMs: 0, pollMs: 1 });
+  probeWrites({ token: TOKEN, api: 'https://api.test/client/v4', zoneName, label: 'odt000', fetchImpl: fake.fetchImpl, origin: (h) => `http://live.test/${h}`, waitWorkersDevMs: 0, waitDomainMs: 0, pollMs: 1 });
 
 const writes = (calls: Call[]) => calls.filter((c) => c.method !== 'GET').map((c) => `${c.method} ${c.path.replace(ACC, '<acc>')}`);
 
@@ -126,8 +127,9 @@ test('P115\'s shape goes up, a redeploy keeps the row and the secret, then every
   expect(fake.calls.find((c) => c.path.includes('/assets/upload'))!.auth).toBe('Bearer session-jwt');
   expect(fake.calls.find((c) => c.path.endsWith('/workers/domains') && c.method === 'PUT')!.json).toEqual({ hostname: 'odt000.my-hearth.org', service: 'odt000-probe', zone_id: ZONE, environment: 'production' });
 
+  expect(r.steps.filter((s) => s.step.startsWith('public DNS')).map((s) => s.note)).toEqual(['resolves: 104.21.0.1', 'resolves: 104.21.0.1']);
   expect(r.answers).toMatchObject({
-    '(c) upload a Worker with a Durable Object migration (workers-scripts.edit)': 'yes',
+    '(c) upload a Worker with a Durable Object migration': 'yes',
     '(e) multi-module: the printed module and the app module load': 'true',
     'the Durable Object (SQLite) stores a row': 'true',
     'redeploy keeps the Durable Object\'s row': 'true',
@@ -150,7 +152,7 @@ test('P115\'s shape goes up, a redeploy keeps the row and the secret, then every
 test('the Worker upload refused: the reading says Cloudflare\'s code, and only the bucket it made is deleted', async () => {
   const fake = fakeCloudflare({ refuse: (c) => (c.method === 'PUT' && c.path.endsWith('/scripts/odt000-probe') ? { status: 403, code: 10000, message: 'Authentication error' } : null) });
   const r = await run(fake);
-  expect(r.answers['(c) upload a Worker with a Durable Object migration (workers-scripts.edit)']).toBe('NO (403 10000: Authentication error)');
+  expect(r.answers['(c) upload a Worker with a Durable Object migration']).toBe('NO (403 10000: Authentication error)');
   // Narrowed: the bare Worker is tried and refused too, so the Durable Object one is not.
   expect(r.answers['narrowing: a bare Worker can be made']).toBe('NO (403 10000: Authentication error)');
   expect(r.answers['narrowing: + the Durable Object and its migration']).toBeUndefined();
@@ -165,7 +167,7 @@ test('only the migration refused: the bare Worker goes up, the reading names the
     refuse: (c) => (c.method === 'PUT' && c.path.endsWith('/scripts/odt000-probe') && c.form!.metadata.includes('migrations') ? { status: 403, code: undefined as any, message: 'No access to the specified resource.' } : null)
   });
   const r = await run(fake);
-  expect(r.answers['(c) upload a Worker with a Durable Object migration (workers-scripts.edit)']).toBe('NO (403 No access to the specified resource.)');
+  expect(r.answers['(c) upload a Worker with a Durable Object migration']).toBe('NO (403 No access to the specified resource.)');
   expect(r.answers['narrowing: a bare Worker can be made']).toBe('yes');
   expect(r.answers['narrowing: + the Durable Object and its migration']).toBe('NO (403 No access to the specified resource.)');
   expect(r.answers['narrowing: assets session once the Worker exists']).toBe('yes');
@@ -192,7 +194,24 @@ test('assets refused: the Worker still goes up without them (the other readings 
   const m1 = JSON.parse(fake.calls.find((c) => c.method === 'PUT' && c.path.endsWith('/scripts/odt000-probe'))!.form!.metadata);
   expect(m1.assets).toBeUndefined();
   expect(m1.bindings.some((b: any) => b.type === 'assets')).toBe(false);
-  expect(r.answers['(c) upload a Worker with a Durable Object migration (workers-scripts.edit)']).toBe('yes');
+  expect(r.answers['(c) upload a Worker with a Durable Object migration']).toBe('yes');
   expect(r.steps.find((s) => s.step.includes('assets content'))!.errors).toBe('10100: hash mismatch');
   expect(fake.calls.some((c) => c.path.includes('/workers/domains'))).toBe(false);
+});
+
+test('the domain label is fresh each run unless named, and a network failure says its cause', async () => {
+  const hosts: string[] = [];
+  for (let i = 0; i < 2; i++) {
+    const fake = fakeCloudflare();
+    const failing: ProbeFetch = async (url, init) => {
+      if (url.includes('.my-hearth.org/')) throw Object.assign(new TypeError('fetch failed'), { cause: Object.assign(new Error('getaddrinfo ENOTFOUND x'), { code: 'ENOTFOUND' }) });
+      return fake.fetchImpl(url, init);
+    };
+    const r = await probeWrites({ token: TOKEN, api: 'https://api.test/client/v4', zoneName: 'my-hearth.org', fetchImpl: failing, origin: (h) => (h.endsWith('workers.dev') ? `http://live.test/${h}` : `https://${h}`), waitWorkersDevMs: 0, waitDomainMs: 0, pollMs: 1 });
+    hosts.push(fake.calls.find((c) => c.path.endsWith('/workers/domains') && c.method === 'PUT')!.json.hostname);
+    expect(r.answers['custom domain: answers over https']).toContain('ENOTFOUND');
+    expect(r.answers['clean up: custom domain detached']).toBe('true');
+  }
+  expect(hosts[0]).toMatch(/^odt000-[0-9a-f]{4}\.my-hearth\.org$/);
+  expect(hosts[1]).not.toBe(hosts[0]);
 });
