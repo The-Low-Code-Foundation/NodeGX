@@ -1,7 +1,7 @@
 # ODT-001 — `cloudflare_sign_in`: one browser Allow from Claude Desktop
 
-**Phase:** [P135](README.md) · **Kind:** product · **State:** 🔨 BUILT on a scripted Cloudflare (2026-11-07, session 1);
-the real sign-in waits on ODT-000's readings, which wait on R1 (Richard creates the private client).
+**Phase:** [P135](README.md) · **Kind:** product · **State:** ✅ DONE 2026-11-07 (session 2): every AC, AC5 driven in Claude Desktop by Richard. The client id
+constant stays EMPTY until ODT-005 (public client, R2); the `.mcpb` carries the tool from the next `@nodegx/mcp` release.
 
 ## 1. What it is
 
@@ -63,7 +63,12 @@ no key, no `.env`.
 4. ✅ (scripted) Through MCP: deferred (0 resident tokens: `toolDisclosure` green), found by `find_tools` "cloudflare",
    refused in words with no client, the page, the next call finds the sign-in, `cannot` in words, no token in any answer.
 5. 🔨 **Real**: ✅ from a terminal on Richard's private client, 2026-11-07 (`sign-in.mjs`: signed in, 11/11 scopes, refresh
-   rotates, probes 200; ODT-000 §5). ⏳ from Claude Desktop with the connector built from this checkout.
+   rotates, probes 200; ODT-000 §5). ✅ **from Claude Desktop** (Richard, 2026-11-07 ~21:20 UTC; the checkout's server as a `nodegx-dev` config
+   entry, Node 22, the client id in its env, the extension off): Claude's tool search "cloudflare sign in" loaded
+   the tool; `status` said signed in; "sign me out of Cloudflare" → signed out and revoked at Cloudflare; "sign in to
+   Cloudflare" → **the Cloudflare page opened in the browser** (Richard), Allow, "done" → Claude: signed in. The file
+   read after: `signedInAt` 21:21:41 UTC, 11/11 scopes, renewable, mode 0600. Found beside it: P135-DESKTOP-NOTOOLS
+   (the chat's first message was told NodeGX was not connected).
 6. ✅ Cloudflare granted every scope asked for (ODT-000 (b)), so `cannot` is empty on that client.
 
 ## 5. Not here

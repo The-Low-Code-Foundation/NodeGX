@@ -26,12 +26,9 @@ packages/nodegx-backend/cloudflare/sign-in.mjs sign-in`, his browser click).
 2. ✅ **R3 RULED (Richard, 2026-11-07): the API**, wrangler does not ship (*"370MB extra is a lot"*).
 3. ✅ **(a) loose port**: 8978 (unregistered) and `localhost` both accepted; 8977 stays the default as the
    cross-process guard (ODT-000 §5).
-4. **The Claude Desktop drive of `cloudflare_sign_in`**: half 1 ✅ (the tool reached, `status` right). Half 2: in
-   Desktop, "sign me out of Cloudflare", then "sign in to Cloudflare", Allow, "done", and Claude finds it. Desktop's
-   config has a `nodegx-dev` entry (the checkout's server, Node 22, the client id) added in session 2; the NodeGX
-   extension is OFF while it is there. 🔴 When the drive is done: remove `nodegx-dev` from
-   `~/Library/Application Support/Claude/claude_desktop_config.json` and ask Richard to switch the extension back on.
-   The `.mcpb` itself is graded only after a release carries the tool.
+4. ✅ **The Claude Desktop drive of `cloudflare_sign_in`**: ODT-001 DONE (sign out, sign in, the page opened, Allow,
+   found; ODT-001 AC5). The `nodegx-dev` config entry was removed after it; Richard switches the extension back on.
+   The `.mcpb` is graded when a release carries the tool. P135-DESKTOP-NOTOOLS is open beside it.
 5. **ODT-002, the deploy through the API**: `probeWrites.ts` is the blueprint (every call it makes is in ODT-000 §5,
    with its status). Replace `deployCloudflare.ts`'s `wrangler deploy` step; the redeploy uses no migration and
    `keep_bindings: ["secret_text"]`. ODT-003 (no bundler on the person's machine) next: (e) says a prebuilt Worker
@@ -44,7 +41,7 @@ packages/nodegx-backend/cloudflare/sign-in.mjs sign-in`, his browser click).
 | `nodegx-backend/cloudflare/probeWrites.ts` + `sign-in.mjs probe-writes [--zone]` | ✅ 6 tests (`tests/p135-odt000-probe-writes.test.ts`), 2 mutants caught; run 3 times live by Richard |
 | ODT-000 (c) writes, (e), consent page (the 10 ticked permissions) | ✅ §5 |
 | `CLOUDFLARE_SCOPES` and the connector's words: `workers-scripts.edit` → `.admin` | ✅ backend 21 + noodl-mcp `odt001`/`toolDisclosure` 21 green |
-| the custom domain answering, (a) loose port, the Desktop drive | ❌ not run |
+| run 4 (domain answers once in public DNS), (a) loose port, the Desktop drive (ODT-001 ✅), R3 ruled (API) | ✅ |
 
 ## 3. Traps (also in memory `phase-135-online-from-claude-desktop.md`)
 
