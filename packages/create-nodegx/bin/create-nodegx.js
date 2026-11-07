@@ -112,6 +112,11 @@ const AGENT_NOTE = [
   "Try it the way a person arrives: `drive_page` from the app's start page (leave out `page`) and press through it,",
   'not a page opened on its own.',
   '',
+  // Beta S3 (P115, RS1 2026-11-07): the Cloudflare deploy is on npm as `@nodegx/backend`; the steps are a skill.
+  'If I ask to put an app online, read `nodegx-putting-it-online` (`.claude/skills/nodegx-putting-it-online/SKILL.md`)',
+  "first. On a free Cloudflare account, one command puts the whole app online, its data and accounts included:",
+  "`npx @nodegx/backend deploy cloudflare <the app's folder>`, after `npx @nodegx/backend sign-in cloudflare` once.",
+  '',
   // P112 OWN-007 (R3): the method for building an editor of one's own is a skill in this folder, not a server tool.
   'If I ask for an editor, a viewer or a tool of my own that reads or changes an app here, the guide is the skill',
   '`nodegx-your-own-editor` (`.claude/skills/nodegx-your-own-editor/SKILL.md`). Read it first; any agent can.',

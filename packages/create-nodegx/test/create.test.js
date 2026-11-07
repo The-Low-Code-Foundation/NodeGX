@@ -86,6 +86,7 @@ test('P112 OWN-007 (R3): the folder gets the editor brief as a project skill, na
     path.join('.claude', 'skills', 'nodegx-making-a-game', 'SKILL.md'),
     path.join('.claude', 'skills', 'nodegx-making-a-game', 'traps.md'),
     path.join('.claude', 'skills', 'nodegx-practice-round', 'SKILL.md'),
+    path.join('.claude', 'skills', 'nodegx-putting-it-online', 'SKILL.md'),
     path.join('.claude', 'skills', 'nodegx-your-own-backend-editor', 'SKILL.md'),
     path.join('.claude', 'skills', 'nodegx-your-own-editor', 'SKILL.md')
   ]);
@@ -220,6 +221,7 @@ test("P112 OWN-007: a person's own skill file is never replaced", () => {
     path.join('.claude', 'skills', 'nodegx-making-a-game', 'SKILL.md'),
     path.join('.claude', 'skills', 'nodegx-making-a-game', 'traps.md'),
     path.join('.claude', 'skills', 'nodegx-practice-round', 'SKILL.md'),
+    path.join('.claude', 'skills', 'nodegx-putting-it-online', 'SKILL.md'),
     path.join('.claude', 'skills', 'nodegx-your-own-backend-editor', 'SKILL.md')
   ]);
   assert.equal(fs.readFileSync(skill, 'utf8'), 'mine\n');
@@ -789,4 +791,24 @@ test('P112 OWN-036: a release cut that moves the version stamps the profiles/ it
     assert.equal(pkg.version, stamp.version, wrapper);
     assert.equal(pkg.dependencies['create-nodegx'], stamp.version, wrapper);
   }
+});
+
+test('Beta S3: the folder gets the Cloudflare deploy as a skill, the notes name it, and the practice round no longer says data cannot go there', () => {
+  const dir = path.join(tmp(), 'my-apps');
+  assert.equal(spawnSync(process.execPath, [BIN, dir], { encoding: 'utf8' }).status, 0);
+  const text = fs.readFileSync(path.join(dir, '.claude', 'skills', 'nodegx-putting-it-online', 'SKILL.md'), 'utf8');
+  assert.match(text, /^---\nname: nodegx-putting-it-online\ndescription: "[^"]*LOAD when/);
+  // the one command and the sign-in it needs (wrangler's: NodeGX's own sign-in cannot create a Worker yet)
+  assert.match(text, /npx @nodegx\/backend sign-in cloudflare/);
+  assert.match(text, /npx @nodegx\/backend deploy cloudflare <the app's folder>/);
+  assert.match(text, /don't use it for this/);
+  // the phone check, and the admin credential never shown
+  assert.match(text, /on their phone/);
+  assert.match(text, /Never paste it into the\s+chat/);
+  assert.doesNotMatch(text, /P\d+-|OWN-|HST-|ODT-|dev-docs|vscode_projects/);
+  assert.match(AGENT_NOTE, /`nodegx-putting-it-online` \(`\.claude\/skills\/nodegx-putting-it-online\/SKILL\.md`\)/);
+  const round = fs.readFileSync(path.join(dir, '.claude', 'skills', 'nodegx-practice-round', 'SKILL.md'), 'utf8');
+  assert.doesNotMatch(round, /Storing data there doesn't work yet/);
+  assert.doesNotMatch(round, /An app that saves data goes on a rented server\./);
+  assert.match(round, /npx @nodegx\/backend deploy cloudflare/);
 });

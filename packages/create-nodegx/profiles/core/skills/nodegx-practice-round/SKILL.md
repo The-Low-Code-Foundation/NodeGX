@@ -74,12 +74,14 @@ other people use it, a copy has to run on a computer that's on the internet. The
 - **A rented server** is a computer in a data centre that's on all the time. It costs about $4–7 a month and keeps
   charging until they delete it. It can store the app's data and accounts. Someone has to keep it up to date, which
   can be them with your help.
-- **Cloudflare Workers** means they don't have a computer of their own online. The app's pages and small functions
-  are copied to Cloudflare, which runs a function only when a visitor's request arrives. A free Cloudflare account
-  is never billed: past the free limit, requests are refused rather than charged. NodeGX apps on Workers are still
-  being tested. Storing data there doesn't work yet.
+- **Cloudflare Workers** means they don't have a computer of their own online. The app's pages and its backend are
+  copied to Cloudflare, which keeps its data and runs it only when a visitor's request arrives. A free Cloudflare account
+  is never billed: past the free limit, requests are refused rather than charged. Apps that save data and have
+  accounts work there.
 
-Today, an app that only shows pages can go on a free host. An app that saves data goes on a rented server.
+Today, an app that only shows pages can go on a free host. An app that saves data can go on a free Cloudflare
+account with one command, `npx @nodegx/backend deploy cloudflare`, after a sign-in in the browser. The skill
+`nodegx-putting-it-online` has the steps. It can also go on a rented server.
 `npx nodegx-deploy` writes the folder to upload. The guide for the whole step is
 https://learn.nodegx.io/online/putting-it-online. Don't put the practice game online unless they ask.
 
