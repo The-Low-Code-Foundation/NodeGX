@@ -31,8 +31,8 @@ In `my-apps`: an `AGENTS.md` that tells Cline apps here are NodeGX apps, and one
 
 Outside it, one entry. Cline reads its MCP servers from a single file in your home folder
 (`~/.cline/data/settings/cline_mcp_settings.json`), never from a project folder, so the command adds a server called
-`nodegx` there: `npx -y @nodegx/mcp@<version> --allow-writes --screenshots-to-files`. Your other servers stay as they
-are. If you already have a server called `nodegx` of your own, it is left alone. Running a newer `create-nodegx-cline`
+`nodegx` there: `npx -y -p @nodegx/studio@<version> -p @nodegx/mcp@<version> noodl-mcp --allow-writes
+--screenshots-to-files`, the server with NodeGX Studio fetched beside it. Your other servers stay as they are. If you already have a server called `nodegx` of your own, it is left alone. Running a newer `create-nodegx-cline`
 moves the entry it wrote to the newer server.
 
 It is [`create-nodegx`](https://www.npmjs.com/package/create-nodegx) with its Cline profile: the same server and the
