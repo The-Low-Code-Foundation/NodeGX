@@ -38,6 +38,7 @@ import { registerValidateTools } from './tools/validateTools';
 import { registerCreateProjectTools } from './tools/createProject';
 import { registerOpenProjectTools } from './tools/openProject';
 import { registerProvisionTools } from './tools/provisionTools';
+import { registerCloudflareSignInTools } from './tools/cloudflareSignIn';
 import { registerDeployToVmTools } from './tools/deployToVm';
 import { registerReviewTools } from './tools/review';
 import { registerListProjectsTools, scanFolderProjects } from './tools/listProjects';
@@ -339,6 +340,8 @@ export function createServer(options: ServerOptions): CreatedServer {
     // more so: it installs and restarts a service on another machine. In the deferred `project` group beside
     // `export_react` (0 resident tokens); the door is the keywords 'deploy', 'ship', 'host', 'server', 'vm'.
     registerDeployToVmTools(rec, binding);
+    // P135 ODT-001 — the person's Cloudflare sign-in, from the client with no terminal. Same group and gate as above.
+    registerCloudflareSignInTools(rec);
     // AIX-012. Takes no store: it creates a project at a directory the caller
     // names, which is by definition not the one this server is pointed at.
     //

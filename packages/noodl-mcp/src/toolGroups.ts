@@ -479,6 +479,11 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
       'hand over',
       // P26 DEP-002 s4 — `deploy_to_vm`.
       'server',
+      // P135 ODT-001 — `cloudflare_sign_in`.
+      'cloudflare',
+      'sign in',
+      'login',
+      'oauth',
       'vm',
       'vps',
       'ssh',
@@ -535,6 +540,9 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
       // P26 DEP-002 s4 — `deploy_to_vm`, the other way out: the app running on a server the person owns. Appended on
       // the arithmetic above (0 resident tokens); reached by name and by 'deploy', 'ship', 'host', 'server', 'vm'.
       'deploy_to_vm',
+      // P135 ODT-001 — `cloudflare_sign_in`, the first step of the way out through Cloudflare, beside `deploy_to_vm` on the
+      // same arithmetic (0 resident tokens); by name and by 'cloudflare', 'sign in', 'login', 'oauth', 'online'.
+      'cloudflare_sign_in',
       'session_status',
       // P125 CCN-001 — `open_studio`, appended on the same arithmetic as the three above: 0 resident tokens.
       // The door is by keyword ('studio', 'screen', 'beside', 'watch', 'look') and by name.
@@ -620,6 +628,8 @@ export const WRITE_ONLY_TOOLS: ReadonlySet<string> = new Set<string>([
   'deploy_cloud_functions',
   // P26 DEP-002 s4. Installs and restarts a service on another machine: write-gated like `provision_backend`.
   'deploy_to_vm',
+  // P135 ODT-001. Writes the person's Cloudflare sign-in to ~/.nodegx: a read-only server writes nowhere.
+  'cloudflare_sign_in',
   // Reads the process registry and changes nothing — but it ships in
   // `registerProvisionTools`, which is inside the write gate, so it is
   // write-only in fact whatever it is in spirit. Recorded as observed rather

@@ -16,7 +16,9 @@
  * `email_sending:write`, `email_routing:write`; it cannot buy): `wrangler email sending enable <domain>`, then
  * `wrangler email routing addresses create <to>` (Cloudflare emails the person a link to click: the one human step).
  *
- * Credentials, in order (none is ever printed): `CLOUDFLARE_API_TOKEN`; **the person's sign-in to Cloudflare's own CLI**
+ * Credentials, in order (none is ever printed): `CLOUDFLARE_API_TOKEN`; **NodeGX's own Cloudflare sign-in** (P135
+ * ODT-001, `signIn.ts`: one browser Allow from Claude Desktop, kept in `~/.nodegx/cloudflare/sign-in.json`) when its grant
+ * includes `registrar-domains.admin`; **the person's sign-in to Cloudflare's own CLI**
  * (`cf auth login`, a browser OAuth sign-in whose grant includes `registrar:write` / `registrar-domains.admin`: measured
  * on Richard's account 2026-11-07, HST-018 §5), read from where `cf` keeps it; then an API token in
  * `~/.nodegx/cloudflare/registrar-token` (mode 600). Wrangler's login cannot buy (no registrar scope).
@@ -28,6 +30,7 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
+import { cloudflareAccessToken, readSignIn } from './signIn';
 import {
   buyProblem,
   checkDomains,
@@ -124,6 +127,20 @@ export function readToken(): string {
   );
 }
 
+/**
+ * P135 ODT-001 — the credential for a domain call: an explicit token first, then NodeGX's own sign-in when it was
+ * granted the registrar (refreshed if it is about to run out), then {@link readToken}'s `cf` sign-in and token file.
+ */
+export async function domainCredential(): Promise<string> {
+  if (process.env.CLOUDFLARE_API_TOKEN) return process.env.CLOUDFLARE_API_TOKEN.trim();
+  const ours = readSignIn();
+  if (ours && ours.scopes.includes('registrar-domains.admin')) {
+    const token = await cloudflareAccessToken();
+    if (token) return token;
+  }
+  return readToken();
+}
+
 export function cfCaller(token: string, apiBase = process.env.NODEGX_CF_API || 'https://api.cloudflare.com/client/v4'): CfCall {
   return async (method, p, body, headers = {}) => {
     const res = await fetch(apiBase + p, {
@@ -217,7 +234,7 @@ export async function run(o: ParsedArgs, call?: CfCall): Promise<number> {
 
   // Every name is checked before anything is asked of Cloudflare.
   const names = o.verb === 'find' ? [] : o.rest.map(bare);
-  const c = call ?? cfCaller(readToken());
+  const c = call ?? cfCaller(await domainCredential());
   const account = await accountOf(c, o.account);
 
   if (o.verb === 'find') {

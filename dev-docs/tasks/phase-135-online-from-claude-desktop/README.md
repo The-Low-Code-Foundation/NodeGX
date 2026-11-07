@@ -1,7 +1,7 @@
 # Phase 135 — Online from Claude Desktop
 
 **Scoped:** 2026-11-07, at HEAD `197b35c1d`, on Richard's ruling at the end of P115 session 14 (*"finish P115 and close
-it, THEN scope 'Online from Claude Desktop'"*). **State:** 📋 SCOPED, not started. **Lane 10, after P115**; a
+it, THEN scope 'Online from Claude Desktop'"*). **State:** 🔨 STARTED 2026-11-07 on Richard's ask (*"can we do the parts about enabling the nodegx kit to do the oauth sign stuff directly from Claude Desktop?"*): [ODT-001](ODT-001-CLOUDFLARE-SIGN-IN.md) built on a scripted Cloudflare; [ODT-000](ODT-000-THE-MEASUREMENTS.md)'s pre-client readings taken, R1 done by Richard; **(a), (b), (d) and the reads of (c) answered YES on his private client** (ODT-000 §5). **Lane 10, after P115**; a
 nice-to-have for the Beta, never ahead of lanes 9, 2 and 3. **Prefix: `ODT`.** **Read first:** this page, then
 [P115 HST-018 §5–§7](../phase-115-online-on-your-own-account/HST-018-CLAUDE-FINDS-AND-BUYS-THE-DOMAIN.md), which
 holds the readings this rests on.
@@ -92,6 +92,7 @@ ODT-004, ODT-006 on the private client, and ODT-005 last.
 
 | session | date | what |
 |---|---|---|
+| 1 | 2026-11-07 | ODT-001 built: `nodegx-backend/cloudflare/signIn.ts` (PKCE, loopback callback, 0600 file, refresh under a lock), the `cloudflare_sign_in` tool (deferred `project` group, 0 resident tokens), `sign-in.mjs` for ODT-000, the domain command reads it first. Tests 15 + 3 green, two mutants caught. ODT-000 §1: the scope catalog read (403; every scope asked for is in it); the `cf` sign-in cannot make the client, so R1 stands. R1 done (dashboard); real sign-in: loopback accepted, 11/11 scopes incl. registrar, 3599 s token, refresh rotates, 9 read probes 200. Workers → Edit = `workers-scripts.edit`. |
 | 0 | 2026-11-07 | Scoped (P115 session 15). §3 measured: the bundle's contents, wrangler's size, the deploy's needs, Cloudflare's client rules (two new: public is permanent; the domain is fixed once verified). |
 
 **Estimate:** 5–7 sessions on the private client (ODT-000 1; ODT-001 and ODT-003 1–2; ODT-002 1–2; ODT-004 and
