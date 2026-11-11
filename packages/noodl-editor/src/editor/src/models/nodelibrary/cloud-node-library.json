@@ -1233,7 +1233,7 @@
           "plug": "output",
           "group": "Events",
           "displayName": "Fetched",
-          "description": "Fires when the Id binds a record, and again when a Fetch finishes reading it — a bind has read nothing, so use Done to act on data that is really there"
+          "description": "Fires when the Id binds a record already in memory, when a record the Id names is first read from the backend, and when a Fetch finishes reading it; use Done to act on the answer to a Fetch"
         },
         {
           "name": "changed",
@@ -1408,6 +1408,14 @@
           "group": "General",
           "displayName": "Only If Unchanged",
           "description": "Property names, comma-separated (e.g. version). The update is applied only if these still hold the values the record had when it was read; otherwise Failure fires and nothing is written. Fetch the record again before retrying. Needs a NodeGX backend. Leave empty to always write."
+        },
+        {
+          "name": "addTo",
+          "type": "string",
+          "plug": "input",
+          "group": "General",
+          "displayName": "Add To",
+          "description": "Property names, comma-separated (e.g. points). For these, the value wired in is an amount added to what the backend holds, in one step on the backend, instead of replacing it: two devices adding at once both count. Wire the amount (1, -1, 5). The record then shows the backend's total. Leave empty to write every value as given."
         },
         {
           "name": "idSource",
@@ -8278,7 +8286,7 @@
         },
         {
           "name": "userId",
-          "type": "boolean",
+          "type": "string",
           "plug": "output",
           "group": "Request",
           "displayName": "User Id",
