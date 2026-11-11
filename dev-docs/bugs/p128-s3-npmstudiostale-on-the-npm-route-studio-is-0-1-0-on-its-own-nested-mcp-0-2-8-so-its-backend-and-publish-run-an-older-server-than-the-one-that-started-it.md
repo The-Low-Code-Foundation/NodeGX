@@ -1,7 +1,8 @@
 ---
 id: P128-S3-NPMSTUDIOSTALE
 title: "On the npm route Studio is `@nodegx/studio` 0.1.0 (2026-10-27) on its own nested `@nodegx/mcp` 0.2.8: the Studio a `npm create nodegx` folder opens is older than the `.mcpb`'s, and its backend and publish run the 0.2.8 server's pieces beside the 0.2.10 server that started it"
-status: open
+status: fixed
+commit: "a9c889f91 (create-nodegx 0.2.13) + nodegx-studio 9ac73d0 (@nodegx/studio 0.2.0)"
 severity: medium
 area: "`packages/create-nodegx/bin/create-nodegx.js` `STUDIO_VERSION` ('0.1.0', the only published Studio); nodegx-studio `package.json` `dependencies` (npm 0.1.0 pins `@nodegx/mcp` 0.2.8, `@nodegx/backend-map` 0.1.4, `@nodegx/preview` 0.2.8) and `lib/nodegx.mjs` `npm()` (a dependency is looked for in Studio's own node_modules first)"
 found: Beta sprint S1, 2026-11-07, grading P128-S3-NOSTUDIOFORTHEEDITOR's flip
@@ -39,3 +40,11 @@ create-nodegx `STUDIO_VERSION` → `'0.2.0'`, the three kits 0.2.13. The grade, 
 `open_studio` (through `call_tool`) started `<_npx>/node_modules/@nodegx/studio/editor/serve.mjs`, GET / 200,
 `<title>NodeGX Studio</title>`. Pack sha1 `c4d6597e…`. **Fixed when** Richard publishes Studio 0.2.0 and the kits
 0.2.13 and the same grade passes on the registry spec.
+
+**Fixed on the published route, 2026-11-11.** Richard published `@nodegx/studio` 0.2.0 and create-nodegx, -vibe,
+-cline 0.2.13; every registry shasum equals the graded pack (studio `c4d6597e…`, create-nodegx `f5de14f6…`, vibe
+`6e6c83a3…`, cline `40ea1158…`), served ~8 min after the publish. `npm create -y nodegx@0.2.13` in a fresh folder
+(empty HOME and cache) wrote `-p @nodegx/studio@0.2.0 -p @nodegx/mcp@0.2.10 noodl-mcp --allow-writes`; that
+registration from the registry, `NODEGX_STUDIO_APP=none`: **7/7** — one `@nodegx/mcp` (0.2.10, none under Studio),
+one `@nodegx/preview` (0.2.9), 140 MB; `open_studio` started `<_npx>/node_modules/@nodegx/studio/editor/serve.mjs`,
+GET / 200, `<title>NodeGX Studio</title>`.
