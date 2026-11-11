@@ -63,6 +63,23 @@ classifier refused the tag push) → CI drafts the release with both Mac DMGs an
 registry spec, deploys nodegx.io (the 0.2.13 changelog) and merges nodegx-web `beta-s5-studio-x64` (the Intel card)
 once the x64 DMG answers 200. Then R2, R3 (+ P135-DESKTOP-NOTOOLS's re-run), R4, R5, CCN-007.
 
+**2026-11-11, later: the 0.4.4 release (Richard: "put all that stuff into a release … publish the new editor").**
+✅ Studio 0.2.0 and the kits 0.2.13 published (7/7 from the registry). The release then cut: editor **0.4.4**, Studio
+**0.2.1** (nodegx-studio `b3996a1`, NOT pushed: its lockfile moves once mcp 0.2.11 is on npm, or its main CI breaks),
+`@nodegx/mcp` **0.2.11** + `@nodegx/backend` **0.1.1** (P135 ODT-002/003; the public Cloudflare client is still
+empty, so everyone but Richard deploys through wrangler as before), kits **0.2.14** (`933ec9414`, CHANGELOG 0.4.4
+`1605fc243`, one entry since 0.4.3). Packs `~/vscode_projects/OpenNoodl-worktrees/release-0.4.4-packs/` (mcp
+`06e09e8f…`, backend `ba673190…`, studio `1201439d…`, create-nodegx `60838d2c…`, vibe `9a9aacc8…`, cline
+`bc4e6774…`); Studio 0.2.1 on mcp 0.2.11 7/7 from the packs; backend dry run of Campus clean. 🔴 make-worktree's `dist/`
+symlinks: a pack from such a worktree silently drops the server (27.8 MB instead of 50.5): delete the links first.
+Editor: [PR #54](https://github.com/The-Low-Code-Foundation/NodeGX/pull/54) `release/0.4.4` → main (main merged in;
+catalog + docs regenerated, the lesson self-test's counts, the tsfixme baseline raised in the open); `cline-dev`
+fast-forwarded to it. **Left for R, in order:** (1) ODT-003's live redeploy of hst-campus from the backend pack (the
+classifier refuses it as a production deploy); (2) `scripts/own/publish-npm.sh ~/vscode_projects/OpenNoodl-worktrees/release-0.4.4-packs`
+(mcp, backend, studio, kits); (3) an agent moves Studio's lockfile, pushes, R tags `v0.2.1`, publishes its draft;
+(4) PR #54 green → merge (no squash) → R tags `v0.4.4` on main → smoke-test the editor draft → publish, with the
+notes an agent puts on it; (5) an agent deploys nodegx.io (0.4.4 changelog) and the Intel card.
+
 **Richard's half (the Beta test is his to run).**
 
 | # | what | waits on |
