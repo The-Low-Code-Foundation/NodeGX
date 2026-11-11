@@ -18,7 +18,7 @@ Any free-text entry. Use `type` instead of separate nodes for email/number/passw
 | Available in | browser |
 | SSR compatibility | safe |
 | Provided by | `noodl-viewer-react` |
-| Behaviour spec | version 8 ([under the hood](#under-the-hood)) |
+| Behaviour spec | version 10 ([under the hood](#under-the-hood)) |
 
 ## Inputs
 
@@ -113,6 +113,7 @@ Any free-text entry. Use `type` instead of separate nodes for email/number/passw
 | `placeHolderOpacity` | Number | `0.5` | How faded the placeholder text is, from 0 to 1 |
 | `placeholder` | String | `` | Greyed-out hint shown while the field is empty |
 | `position` | Enum (`relative`, `absolute`, `sticky`, `fixed`) | `relative` | How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space |
+| `repeatWhileSaving` | Boolean | `false` | Off (the default): when Enter starts a save, the next Enter is ignored until the backend has answered, and for at least half a second, so a double press saves once. Controls wired to the same node share this. On: every Enter fires, for a control that saves each quick tap |
 | `runOnChange-startValue` | Boolean | `true` | Whether a new value on Value re-runs this node. On by default; untick to make this input passive so only the control signal runs it |
 | `scrollIntoViewAlign` | Enum (`nearest`, `start`, `center`, `end`) | `nearest` | Where Scroll Into View leaves the element: Nearest edge moves only as far as needed |
 | `sizeMode` | Enum (`explicit`, `contentWidth`, `contentHeight`, `contentSize`) | `contentSize` | Whether Width and Height are used as given, or the element sizes itself to fit its contents |
@@ -231,7 +232,7 @@ Any free-text entry. Use `type` instead of separate nodes for email/number/passw
 
 **Visible** (`visible`)
 
-- always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it
+- always: shown or hidden at once, its space kept; hidden, a Focus does not reach it
 
 **Opacity** (`opacity`)
 
@@ -299,7 +300,7 @@ The port list above is complete — this node mints no ports. It republishes its
 
 ## Ports at runtime
 
-Declared-port-groups: `width`/`height` appear per `sizeMode`, icon ports per `useIcon`/`iconSourceType`, label styling ports when `useLabel` is true, and border/shadow ports per border-style and `boxShadowEnabled` settings. The catalog list is the superset; the editor shows the subset matching current parameters.
+Declared-port-groups: `width`/`height` appear per `sizeMode`, icon ports per `useIcon`/`iconSourceType`, label styling ports when `useLabel` is true, and border/shadow ports per border-style and `boxShadowEnabled` settings. The catalog list is the superset; the editor shows the subset matching current parameters. An `onEnter` that starts a backend save is taken once: a second one is ignored while that save is waiting and for half a second after the press (`repeatWhileSaving` turns this off). There is no need to wire a busy flag back to `enabled` for a double press.
 
 ## Patterns
 
@@ -334,7 +335,7 @@ Exports to React. A project that uses it exports this node as React code.
 
 ## Under the hood
 
-This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 8. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
+This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 10. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
 
 ### What it depends on outside the node
 
@@ -420,6 +421,8 @@ The conformance tests play these acts against it:
 
 - **Version 7**: Two warnings the runtime has always shown are now in this spec: a Focus that arrives while the node is not on the page (until a Focus reaches it), and an Icon Source that is not an icon (until an icon or nothing arrives). Existing projects are not migrated: only the editor is told, and the runtime already told it. Nothing a wire carries changes.
 - **Version 8**: A wired Width in a row, or a wired Height in a column, that is a percent now shows as its warning in this spec: it became a share of the room, not a size. The runtime has always shown it. Existing projects are not migrated: only the editor is told, and the runtime already told it. Nothing a wire carries changes.
+- **Version 9** (runtime commit `cb7e0d6e4`): Repeat While Saving, a new input, off by default: while a Enter has started a save, the next Enter is ignored until the backend has answered, and for at least half a second, so a double press saves once. Before, every Enter fired. A project that sets `repeatWhileSaving` keeps the old behaviour.
+- **Version 10**: No app does anything differently. Visible shows or hides the control at once: a Focus sent in the same moment as Visible going on reaches it (Focused fires), and one sent as Visible goes off does nothing. The version before said Visible waited for the next paint, so it lost the first Focus and kept the second; the runtime never did either. Existing projects are not migrated: the runtime did not change; only the spec stopped saying Visible waits for the next paint. No stored project changes.
 
 ## The full spec {#spec-source}
 
@@ -532,8 +535,10 @@ import { defineNode, said, type Patch } from '../spec';
 import { SELF_REFERENCE } from '../trace';
 import { FIELD_FOCUS_NOT_MOUNTED, focusDiagnostics, focusMissed } from './focus-not-mounted';
 import { focusAndIconSourceChange, iconSourceDiagnostics } from './icon-source';
+import { repeatWhileSavingChange } from './repeat-while-saving';
 import { dataAttributeInput, dataAttributeNames } from './data-attributes';
 import { growChange, sizeAtDefault, sizeReducer, wiredGrowDiagnostic, withGrow, type Sizes } from './wired-grow';
+import { visibleAtOnceChange } from './visible-at-once';
 
 type State = {
   /** text-input.ts :74-91 `props.type` — read at each render and each write; `'text'` by default */
@@ -691,8 +696,9 @@ export const TextInput = defineNode({
   // v6 (P109 ISL-031, P107-D30 ruled "Reset and announce"): a control leaving the page (Mounted off) takes Focused, Hover and Pressed with it — each goes false, sent if it was true, with Blurred and Hover End for the ones that were on
   // v7 (NSP-019 R35): a Focus that finds the node off the page shows as its warning until a Focus reaches it, and an Icon Source that is not an icon shows as one until an icon or nothing arrives (`diagnostics`)
   // v8 (NSP-019 R38): a wired Width in a row, or a wired Height in a column, that is a percent shows as its warning (wired-grow.ts)
-  version: 8,
-  changes: [focusAndIconSourceChange(7), growChange(8)],
+  // v10 (BETA-S7-DROPDOWNFOCUSDIVERGE, the spec correcting itself): Visible reaches the element at once, so a Focus in the same frame meets it (visible-at-once.ts)
+  version: 10,
+  changes: [focusAndIconSourceChange(7), growChange(8), repeatWhileSavingChange(9, 'Enter'), visibleAtOnceChange(10)],
   diagnostics: { ...focusDiagnostics(FIELD_FOCUS_NOT_MOUNTED), ...iconSourceDiagnostics(), ...wiredGrowDiagnostic },
   source: 'packages/noodl-viewer-react/src/nodes/controls/text-input.ts',
   needs: ['person'],
@@ -876,6 +882,9 @@ export const TextInput = defineNode({
     paddingLeft: { type: 'number', default: 0, coerce: 'none', displayName: 'Pad Left', group: 'Margin and padding', description: "Space inside the element's left edge, between it and its content", portability: 'layout-shared', layout: 'padding-left' },
     paddingRight: { type: 'number', default: 0, coerce: 'none', displayName: 'Pad Right', group: 'Margin and padding', description: "Space inside the element's right edge, between it and its content", portability: 'layout-shared', layout: 'padding-right' },
     paddingTop: { type: 'number', default: 0, coerce: 'none', displayName: 'Pad Top', group: 'Margin and padding', description: "Space inside the element's top edge, between it and its content", portability: 'layout-shared', layout: 'padding-top' },
+    // P112 OWN-026 FIX-03 B (controls/utils.ts `addTakenOnceWhileSaving`): read by the press guard, which holds an Enter while a
+    // save an earlier Enter started is waiting. One node starts no save, so in this spec nothing reads it.
+    repeatWhileSaving: { type: 'boolean', default: false, coerce: 'none', displayName: 'Repeat While Saving', group: 'General', description: 'Off (the default): when Enter starts a save, the next Enter is ignored until the backend has answered, and for at least half a second, so a double press saves once. Controls wired to the same node share this. On: every Enter fires, for a control that saves each quick tap', portability: 'logic' },
     placeHolderOpacity: { type: 'number', default: 0.5, coerce: 'none', displayName: 'Placeholder opacity', group: 'Text', description: 'How faded the placeholder text is, from 0 to 1', portability: 'look-shared' },
     position: { type: 'enum', enums: ['relative', 'absolute', 'sticky', 'fixed'], default: 'relative', coerce: 'none', displayName: 'Position', group: 'Layout', description: 'How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space', portability: 'layout-expressible', layout: 'place' },
     sizeMode: { type: 'enum', enums: ['explicit', 'contentWidth', 'contentHeight', 'contentSize'], default: 'contentSize', coerce: 'none', editOnly: true, displayName: 'Size Mode', group: 'Dimensions', description: 'Whether Width and Height are used as given, or the element sizes itself to fit its contents', portability: 'layout-shared', layout: 'size-mode' },
@@ -1011,9 +1020,10 @@ export const TextInput = defineNode({
     // NSP-019 R38 — node.ts :446-458, react-component-node.ts :706-753 (wired-grow.ts)
     width: sizeReducer('width'),
     height: sizeReducer('height'),
-    // node-shared-port-definitions.ts :366-375, :320-328 — the page follows at the next paint (TextInput.tsx :118-120 compares the
-    // Opacity the style holds with the number 0)
-    visible: (_s, v) => ({ says: 'always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it', set: { visible: !!v }, send: [] }),
+    // node-shared-port-definitions.ts :374-388 — written onto the element at once, so a Focus in the same frame meets it
+    // (visible-at-once.ts); Opacity (:320-328) follows at the next paint (TextInput.tsx :118-120 compares the Opacity the style
+    // holds with the number 0)
+    visible: (_s, v) => ({ says: 'always: shown or hidden at once, its space kept; hidden, a Focus does not reach it', set: { visible: !!v, pageVisible: !!v }, send: [] }),
     opacity: (_s, v) => ({ says: 'always: how see-through it is; at exactly 0 it takes no pointer, and an act goes to what is behind it', set: { opacityZero: v === 0 }, send: [] })
   },
   {

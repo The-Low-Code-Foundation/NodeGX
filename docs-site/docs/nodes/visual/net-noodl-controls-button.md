@@ -18,7 +18,7 @@ Any tap/click affordance with a caption. For a custom-drawn clickable area, a Gr
 | Available in | browser |
 | SSR compatibility | safe |
 | Provided by | `noodl-viewer-react` |
-| Behaviour spec | version 5 ([under the hood](#under-the-hood)) |
+| Behaviour spec | version 7 ([under the hood](#under-the-hood)) |
 
 ## Inputs
 
@@ -98,6 +98,7 @@ Any tap/click affordance with a caption. For a custom-drawn clickable area, a Gr
 | `paddingRight` | Number | `0` | Space inside the element's right edge, between it and its content |
 | `paddingTop` | Number | `0` | Space inside the element's top edge, between it and its content |
 | `position` | Enum (`relative`, `absolute`, `sticky`, `fixed`) | `relative` | How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space |
+| `repeatWhileSaving` | Boolean | `false` | Off (the default): when a click starts a save, the next click is ignored until the backend has answered, and for at least half a second, so a double press saves once. Controls wired to the same node share this. On: every click fires, for a control that saves each quick tap |
 | `scrollIntoViewAlign` | Enum (`nearest`, `start`, `center`, `end`) | `nearest` | Where Scroll Into View leaves the element: Nearest edge moves only as far as needed |
 | `sizeMode` | Enum (`explicit`, `contentWidth`, `contentHeight`, `contentSize`) | `contentSize` | Whether Width and Height are used as given, or the element sizes itself to fit its contents |
 | `styleCss` | String | `/* background-color: red; */` | Raw CSS declarations applied to this element, overriding the styling ports above |
@@ -160,7 +161,7 @@ Any tap/click affordance with a caption. For a custom-drawn clickable area, a Gr
 
 **Visible** (`visible`)
 
-- always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it
+- always: shown or hidden at once, its space kept; hidden, a Focus does not reach it
 
 ## Outputs
 
@@ -223,7 +224,7 @@ Declares conditional/expandable port groups whose visibility depends on paramete
 
 ## Ports at runtime
 
-Declared-port-groups: icon ports appear when an icon source is chosen, and each visual state (hover, pressed, disabled, focused) contributes state-scoped styling ports. The catalog list is the superset; the editor shows the subset matching current parameters.
+Declared-port-groups: icon ports appear when an icon source is chosen, and each visual state (hover, pressed, disabled, focused) contributes state-scoped styling ports. The catalog list is the superset; the editor shows the subset matching current parameters. A `onClick` that starts a backend save is taken once: a second one is ignored while that save is waiting and for half a second after the press (`repeatWhileSaving` turns this off). There is no need to wire a busy flag back to `enabled` for a double press.
 
 ## Patterns
 
@@ -251,7 +252,7 @@ Two columns inside the shell, each width 100% so an UNWRAPPED row shrinks them t
 
 **Empty state: what a list shows when it has no rows**
 
-A list with nothing in it should say what it is and what to do, not render nothing. The designed version is small and centred inside a dashed card: an icon in a muted disc, one heading, one line of explanation capped at ~380px, and exactly one action. The switch is one wire: the query's `isEmpty` boolean into the empty state's `mounted` input. Use `mounted`, not `visible` — `mounted` takes the element out of the layout, while `visible` only hides it and keeps the space it occupies, which leaves a page-height hole above your empty state. The list needs no gate at all: a `For Each` over an empty array renders no rows and occupies no height, so nothing has to be inverted and no logic node is involved. Skipping the empty state is the difference between an app that looks unfinished on first run and one that does not, and first run is when it is always seen.
+A list with nothing in it should say what it is and what to do, not render nothing. The designed version is small and centred inside a dashed card: an icon in a muted disc, one heading, one line of explanation capped at ~380px, and exactly one action. The switch is one wire: the query's `isEmpty` boolean into the `mounted` input of a Group that holds the empty state. A placed component has no `mounted` or `visible` of its own, so the wire goes to the Group around it. Use `mounted`, not `visible` — `mounted` takes the element out of the layout, while `visible` only hides it and keeps the space it occupies, which leaves a page-height hole above your empty state. The list needs no gate at all: a `For Each` over an empty array renders no rows and occupies no height, so nothing has to be inverted and no logic node is involved. Skipping the empty state is the difference between an app that looks unfinished on first run and one that does not, and first run is when it is always seen.
 
 ## Related nodes
 
@@ -265,7 +266,7 @@ This node is in the worked example on [How export works](../../how-export-works.
 
 ## Under the hood
 
-This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 5. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
+This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 7. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
 
 ### What it depends on outside the node
 
@@ -336,6 +337,8 @@ The conformance tests play these acts against it:
 
 - **Version 4**: Two warnings the runtime has always shown are now in this spec: a Focus that arrives while the node is not on the page (until a Focus reaches it), and an Icon Source that is not an icon (until an icon or nothing arrives). Existing projects are not migrated: only the editor is told, and the runtime already told it. Nothing a wire carries changes.
 - **Version 5**: A wired Width in a row, or a wired Height in a column, that is a percent now shows as its warning in this spec: it became a share of the room, not a size. The runtime has always shown it. Existing projects are not migrated: only the editor is told, and the runtime already told it. Nothing a wire carries changes.
+- **Version 6** (runtime commit `cb7e0d6e4`): Repeat While Saving, a new input, off by default: while a click has started a save, the next click is ignored until the backend has answered, and for at least half a second, so a double press saves once. Before, every click fired. A project that sets `repeatWhileSaving` keeps the old behaviour.
+- **Version 7**: No app does anything differently. Visible shows or hides the control at once: a Focus sent in the same moment as Visible going on reaches it (Focused fires), and one sent as Visible goes off does nothing. The version before said Visible waited for the next paint, so it lost the first Focus and kept the second; the runtime never did either. Existing projects are not migrated: the runtime did not change; only the spec stopped saying Visible waits for the next paint. No stored project changes.
 
 ## The full spec {#spec-source}
 
@@ -398,7 +401,9 @@ import { defineNode, type Patch } from '../spec';
 import { SELF_REFERENCE } from '../trace';
 import { controlFocusNotMounted, focusDiagnostics, focusMissed } from './focus-not-mounted';
 import { focusAndIconSourceChange, iconSourceDiagnostics } from './icon-source';
+import { repeatWhileSavingChange } from './repeat-while-saving';
 import { growChange, sizeAtDefault, sizeReducer, wiredGrowDiagnostic, withGrow, type Sizes } from './wired-grow';
+import { visibleAtOnceChange } from './visible-at-once';
 
 type State = {
   /** utils.ts :75-89 `_internal.enabled` (true at :377) */
@@ -448,8 +453,9 @@ export const Button = defineNode({
   // v3 (P109 ISL-031, P107-D30 ruled "Reset and announce"): a control leaving the page (Mounted off) takes Focused, Hover and Pressed with it — each goes false, sent if it was true, with Blurred and Hover End for the ones that were on
   // v4 (NSP-019 R35): a Focus that finds the node off the page shows as its warning until a Focus reaches it, and an Icon Source that is not an icon shows as one until an icon or nothing arrives (`diagnostics`)
   // v5 (NSP-019 R38): a wired Width in a row, or a wired Height in a column, that is a percent shows as its warning (wired-grow.ts)
-  version: 5,
-  changes: [focusAndIconSourceChange(4), growChange(5)],
+  // v7 (BETA-S7-DROPDOWNFOCUSDIVERGE, the spec correcting itself): Visible reaches the element at once, so a Focus in the same frame meets it (visible-at-once.ts)
+  version: 7,
+  changes: [focusAndIconSourceChange(4), growChange(5), repeatWhileSavingChange(6, 'click'), visibleAtOnceChange(7)],
   diagnostics: { ...focusDiagnostics(controlFocusNotMounted('button')), ...iconSourceDiagnostics(), ...wiredGrowDiagnostic },
   source: 'packages/noodl-viewer-react/src/nodes/controls/button.ts',
   needs: ['person'],
@@ -478,6 +484,9 @@ export const Button = defineNode({
     // utils.ts :75-89
     enabled: { type: 'boolean', default: true, coerce: 'none', displayName: 'Enabled', group: 'General', description: 'Lets the user interact with this control; when off it still renders and occupies its space but ignores clicks, touches and typing', portability: 'logic' },
     // button.ts :58-66 — read by the component at each press (Button.tsx :122)
+    // P112 OWN-026 FIX-03 B (controls/utils.ts `addTakenOnceWhileSaving`): read by the press guard, which holds a click while a
+    // save an earlier click started is waiting. One node starts no save, so in this spec nothing reads it.
+    repeatWhileSaving: { type: 'boolean', default: false, coerce: 'none', displayName: 'Repeat While Saving', group: 'General', description: 'Off (the default): when a click starts a save, the next click is ignored until the backend has answered, and for at least half a second, so a double press saves once. Controls wired to the same node share this. On: every click fires, for a control that saves each quick tap', portability: 'logic' },
     keepsFocus: { type: 'boolean', default: false, coerce: 'none', displayName: 'Keeps Focus', group: 'General', description: 'Leaves the keyboard where it was when this button is clicked, instead of taking it — what a key on an on-screen keypad needs, so the cursor stays in the field being typed into', portability: 'logic' },
     // react-component-node.ts :2302-2321
     mounted: { type: 'boolean', default: true, coerce: 'none', displayName: 'Mounted', group: 'General', description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind. Wired, it counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen)', portability: 'logic', layout: 'present' },
@@ -637,8 +646,9 @@ export const Button = defineNode({
     // NSP-019 R38 — node.ts :446-458, react-component-node.ts :706-753 (wired-grow.ts)
     width: sizeReducer('width'),
     height: sizeReducer('height'),
-    // node-shared-port-definitions.ts :366-375 — the page follows at the next paint
-    visible: (_s, v) => ({ says: 'always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it', set: { visible: !!v }, send: [] })
+    // node-shared-port-definitions.ts :374-388 — written onto the element at once, so a Focus in the same frame meets it
+    // (visible-at-once.ts)
+    visible: (_s, v) => ({ says: 'always: shown or hidden at once, its space kept; hidden, a Focus does not reach it', set: { visible: !!v, pageVisible: !!v }, send: [] })
   },
   {
     // placed on the page with its params set — the first paint (react-component-node.ts :1740-1743 reads `wantsToBeMounted`):

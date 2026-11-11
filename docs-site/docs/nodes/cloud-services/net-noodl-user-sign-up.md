@@ -18,7 +18,7 @@ The action node behind a registration form. For signing in an existing user use 
 | Available in | browser |
 | SSR compatibility | safe |
 | Provided by | `noodl-viewer-react` |
-| Behaviour spec | version 2 ([under the hood](#under-the-hood)) |
+| Behaviour spec | version 3 ([under the hood](#under-the-hood)) |
 
 ## Inputs
 
@@ -108,7 +108,7 @@ Exports to React. A project that uses it exports this node as React code.
 
 ## Under the hood
 
-This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 2. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
+This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 3. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
 
 ### What it depends on outside the node
 
@@ -135,6 +135,7 @@ Each time Do is triggered, the node reports exactly one of **Done** or **Failure
 ### Version history
 
 - **Version 2**: On the Parse wire the accounts class's ACL column draws no input port any more, as no Record node draws one: it is the account's access rules, not something about the person. Before, the Parse wire drew prop-ACL here (and only on the User family). Existing projects are not migrated: ruled "Hide it, like the Record nodes" (R29). The reach measured on 2026-10-12 was 429 User-family nodes in 58 of Richard's projects and none wired to or from ACL, so no saved wire is dropped.
+- **Version 3**: The property inputs are the columns of the active backend's accounts table (directus_users on Directus, users on PocketBase, none on Supabase), as Set User Properties draws them, less the columns that backend owns. Before, Sign Up always offered the Parse _User's columns, so a Directus app was offered fields its users table does not have. On the Parse wire nothing moves. Existing projects are not migrated: measured in s102: 4 of 721 projects on Richard's machine have a REST backend and none uses Sign Up on one, so no saved wire is dropped. On the Parse wire the ignore list is the same seven names.
 
 ## The full spec {#spec-source}
 
@@ -173,7 +174,7 @@ The spec's source, as the docs were generated. Helpers it imports live beside it
  *
  * NOT GRADED HERE, named:
  *   - the capability gate (`begin`) and each wire's own steps inside a sign-in — world.ts AUTH "Not played";
- *   - Sign Up's ports as the editor offers them (`updatePorts` signup.ts :198-252, from the `systemCollections` metadata —
+ *   - Sign Up's ports as the editor offers them (`updatePorts` signup.ts, the active backend's accounts table —
  *     a viewer-with-editor path, NSP-020's);
  *   - the editor's warnings (`clearWarnings`) and the error-channel raise — not ports.
  */
@@ -181,7 +182,8 @@ The spec's source, as the docs were generated. Helpers it imports live beside it
 import type { BackendAnswerEvent, ValueInputDecl, WorldView } from '../spec';
 import { defineNode } from '../spec';
 import type { BackendScript } from '../world';
-import { recordFieldType } from './record-base';
+import { onParseWire, recordFieldPort } from './record-base';
+import { USER_INPUT_IGNORE_PARSE_BROWSER, USER_INPUT_IGNORE_REST } from './set-user-properties';
 import { USER_FIELDS, userFields } from './user';
 
 /** signup.ts :185-195 — a `prop-<field>` port, held by its field. */
@@ -294,7 +296,8 @@ export const LogIn = defineNode({
 export const SignUp = defineNode({
   type: 'net.noodl.user.SignUp',
   // v2 (P107 s92, P107-S84-USERACL ruled R29): no `prop-ACL` input (signup.ts `_ignoreKeys` names ACL)
-  version: 2,
+  // v3 (P107-S102-SIGNUPBACKEND): the `prop-` inputs are the active backend's accounts table, not the Parse `_User` always
+  version: 3,
   changes: [
     {
       version: 2,
@@ -302,6 +305,14 @@ export const SignUp = defineNode({
       row: 'P107-S84-USERACL (R29)',
       migration: {
         none: 'Ruled "Hide it, like the Record nodes" (R29). The reach measured on 2026-10-12 was 429 User-family nodes in 58 of Richard\'s projects and none wired to or from ACL, so no saved wire is dropped'
+      }
+    },
+    {
+      version: 3,
+      says: 'The property inputs are the columns of the active backend\'s accounts table (directus_users on Directus, users on PocketBase, none on Supabase), as Set User Properties draws them, less the columns that backend owns. Before, Sign Up always offered the Parse _User\'s columns, so a Directus app was offered fields its users table does not have. On the Parse wire nothing moves',
+      row: 'P107-S102-SIGNUPBACKEND',
+      migration: {
+        none: 'Measured in s102: 4 of 721 projects on Richard\'s machine have a REST backend and none uses Sign Up on one, so no saved wire is dropped. On the Parse wire the ignore list is the same seven names'
       }
     }
   ],
@@ -327,12 +338,15 @@ export const SignUp = defineNode({
   },
   {
     derived: {
-      // NSP-020 s84 — what the editor draws (signup.ts `updatePorts` :199-250, from `systemCollections`): one `prop-` per column
-      // of `_User` less the ones a sign-up does not set and every Relation ("cannot be set at sign-up time"), typed by the
-      // Parse table. No Backend picker. At play there is no schema: a write registers each (:185-195)
+      // NSP-020 s84, P107-S102-SIGNUPBACKEND — what the editor draws (signup.ts `updatePorts`, user-ports.ts as Set User
+      // Properties): one `prop-` per column of the ACTIVE backend's accounts class less the ones a browser cannot write
+      // (`USER_INPUT_IGNORE_PARSE_BROWSER`; off the Parse wire `USER_INPUT_IGNORE_REST`) and every Relation. No Backend picker,
+      // and a saved `backendId` is not read (the builder gives this type the active backend's schema). At play there is no
+      // schema: a write registers each (:185-195)
       inputs: (_params, context) => {
         const out: Record<string, ValueInputDecl> = {};
-        for (const [p, decl] of userFields(context, ['authData', 'password', 'username', 'createdAt', 'updatedAt', 'emailVerified', 'email'], '_User')) out['prop-' + p] = { ...signUpProperty(p), type: recordFieldType(decl) };
+        const ignore = onParseWire(context) ? USER_INPUT_IGNORE_PARSE_BROWSER : USER_INPUT_IGNORE_REST;
+        for (const [p, decl] of userFields(context, ignore)) out['prop-' + p] = { ...signUpProperty(p), ...recordFieldPort(decl) };
         return out;
       },
       needs: ['schema'],

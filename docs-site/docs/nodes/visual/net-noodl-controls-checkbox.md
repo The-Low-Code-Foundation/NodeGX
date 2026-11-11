@@ -18,7 +18,7 @@ Boolean choices the user flips directly: settings, consent, done flags. For one-
 | Available in | browser |
 | SSR compatibility | safe |
 | Provided by | `noodl-viewer-react` |
-| Behaviour spec | version 5 ([under the hood](#under-the-hood)) |
+| Behaviour spec | version 6 ([under the hood](#under-the-hood)) |
 
 ## Inputs
 
@@ -167,7 +167,7 @@ Boolean choices the user flips directly: settings, consent, done flags. For one-
 
 **Visible** (`visible`)
 
-- always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it
+- always: shown or hidden at once, its space kept; hidden, a Focus does not reach it
 
 ## Outputs
 
@@ -256,7 +256,7 @@ Exports to React. A project that uses it exports this node as React code.
 
 ## Under the hood
 
-This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 5. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
+This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 6. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
 
 ### What it depends on outside the node
 
@@ -309,6 +309,7 @@ The conformance tests play these acts against it:
 ### Version history
 
 - **Version 5**: Two warnings the runtime has always shown are now in this spec: a Focus that arrives while the node is not on the page (until a Focus reaches it), and an Icon Source that is not an icon (until an icon or nothing arrives). Existing projects are not migrated: only the editor is told, and the runtime already told it. Nothing a wire carries changes.
+- **Version 6**: No app does anything differently. Visible shows or hides the control at once: a Focus sent in the same moment as Visible going on reaches it (Focused fires), and one sent as Visible goes off does nothing. The version before said Visible waited for the next paint, so it lost the first Focus and kept the second; the runtime never did either. Existing projects are not migrated: the runtime did not change; only the spec stopped saying Visible waits for the next paint. No stored project changes.
 
 ## The full spec {#spec-source}
 
@@ -352,6 +353,7 @@ import { defineNode, type Patch } from '../spec';
 import { SELF_REFERENCE } from '../trace';
 import { controlFocusNotMounted, focusDiagnostics, focusMissed } from './focus-not-mounted';
 import { focusAndIconSourceChange, iconSourceDiagnostics } from './icon-source';
+import { visibleAtOnceChange } from './visible-at-once';
 
 type State = {
   /** utils.ts :75-89 `_internal.enabled` */
@@ -399,8 +401,9 @@ export const Checkbox = defineNode({
   // v3 (P109 ISL-031, P107-C64 ruled "Ignore touches, keep hover"): a finger on a disabled control reports nothing — no Pressed, no Pointer Down or Up — as Enabled promises; the pointer's hover still reports
   // v4 (P109 ISL-031, P107-D30 ruled "Reset and announce"): a control leaving the page (Mounted off) takes Focused, Hover and Pressed with it — each goes false, sent if it was true, with Blurred and Hover End for the ones that were on
   // v5 (NSP-019 R35): a Focus that finds the node off the page shows as its warning until a Focus reaches it, and an Icon Source that is not an icon shows as one until an icon or nothing arrives (`diagnostics`)
-  version: 5,
-  changes: [focusAndIconSourceChange(5)],
+  // v6 (BETA-S7-DROPDOWNFOCUSDIVERGE, the spec correcting itself): Visible reaches the element at once, so a Focus in the same frame meets it (visible-at-once.ts)
+  version: 6,
+  changes: [focusAndIconSourceChange(5), visibleAtOnceChange(6)],
   diagnostics: { ...focusDiagnostics(controlFocusNotMounted('checkbox')), ...iconSourceDiagnostics() },
   source: 'packages/noodl-viewer-react/src/nodes/controls/checkbox.ts',
   needs: ['person'],
@@ -590,8 +593,9 @@ export const Checkbox = defineNode({
       return { says: 'it holds the keyboard: it is taken off it, and the Focused state goes false', set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'], outcome: 'done' };
     },
     scrollIntoView: () => ({ says: 'always: the page, or the scrolling Group holding it, scrolls until the box can be seen', send: [] }),
-    // node-shared-port-definitions.ts :366-375 — the page follows at the next paint
-    visible: (_s, v) => ({ says: 'always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it', set: { visible: !!v }, send: [] })
+    // node-shared-port-definitions.ts :374-388 — written onto the element at once, so a Focus in the same frame meets it
+    // (visible-at-once.ts)
+    visible: (_s, v) => ({ says: 'always: shown or hidden at once, its space kept; hidden, a Focus does not reach it', set: { visible: !!v, pageVisible: !!v }, send: [] })
   },
   {
     world: { place: (s) => painted(s) },

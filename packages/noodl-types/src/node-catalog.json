@@ -7858,6 +7858,20 @@
             "example": "changed-Sa1"
           },
           {
+            "pattern": "changed-createdAt",
+            "plug": "output",
+            "group": "Events",
+            "valueType": "signal",
+            "example": "changed-createdAt"
+          },
+          {
+            "pattern": "changed-updatedAt",
+            "plug": "output",
+            "group": "Events",
+            "valueType": "signal",
+            "example": "changed-updatedAt"
+          },
+          {
             "pattern": "collectionName",
             "plug": "input",
             "group": "General",
@@ -7873,6 +7887,20 @@
             "group": "Properties",
             "valueType": "string",
             "example": "prop-Sa1"
+          },
+          {
+            "pattern": "prop-createdAt",
+            "plug": "output",
+            "group": "Properties",
+            "valueType": "date",
+            "example": "prop-createdAt"
+          },
+          {
+            "pattern": "prop-updatedAt",
+            "plug": "output",
+            "group": "Properties",
+            "valueType": "date",
+            "example": "prop-updatedAt"
           }
         ]
       },

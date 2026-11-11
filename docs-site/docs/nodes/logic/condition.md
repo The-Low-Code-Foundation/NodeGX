@@ -73,7 +73,7 @@ Use it to branch signal flow ('when clicked, proceed only if valid') or to deriv
 
 - Wiring `ontrue` (signal) to a boolean input like `visible` delivers only a momentary pulse — use `result` for anything that must stay on.
 - Leaving Run On Value Change on when `ontrue`/`onfalse` DOES something (advance a question, navigate, set a Variable, start a Timer): the gate then fires whenever its input settles, including once while the page loads, before anyone has acted. Set `runOnChange-condition: false` and wire `eval` from the signal that should ask — a Repeat's tick, a button's click, a Timer's finish.
-- Two gates evaluated by one signal, where one gate's On True changes what the other one reads (advancing a question index that the other's 'is the answer right?' compares against): the second can read the changed value. Chain them instead — the reader's `done` → the writer's `eval` — so the reader decides first.
+- Two gates evaluated by one signal, where one gate's On True changes what the other one reads (advancing a question index that the other's 'is the answer right?' compares against): the reader sees the changed value, whichever order the two are wired in, so wire order is no fix. Chain them instead — the reader's `done` → the writer's `eval` — so the reader decides first (example `score-then-move-on`; the Problems panel warns `condition-reads-a-siblings-change`).
 - Expecting a second Evaluate with an unchanged condition to stay silent: every Evaluate fires On True or On False again, whether or not the value changed.
 - A gate left on Run On Value Change fires the moment its condition is true, even for one step in the middle of a chain of Set Variables. A timeout watching 'time is up AND not answered' fires again while moving on if `answered` is cleared while the countdown still reads 0: the next question starts answered and its first tap is refused (a quiz that scored the right answer after a timeout as wrong). Reset the value that makes it true (the countdown back to 10) before the one that holds it off (`answered` back to false).
 
@@ -82,6 +82,10 @@ Use it to branch signal flow ('when clicked, proceed only if valid') or to deriv
 **Validate an input before acting on a click**
 
 The idiomatic gate shape: a Button click does not act directly — it evaluates a Condition. The Condition's boolean comes from an Expression that checks the text input's current value, so the same click either proceeds (ontrue) or reveals an error message (isfalse drives the error Text's visibility as a level, not a pulse). Note the two kinds of flow: text/booleans are values, onClick/eval/ontrue are momentary signals.
+
+**Score an answer, then move on to the next question**
+
+Two gates that act on one press, where the second changes what the first reads: moving on changes the question index, and the 'is the answer right?' check compares against that index. Wire both Evaluates from the press and the scoring gate reads the NEXT question, whichever order the wires are in, so every answer is scored against the wrong question. Chain them instead: the press evaluates the scoring gate, and the scoring gate's Done evaluates the move-on gate, so the score is decided before the index moves. Both gates have Run On Value Change unticked, so only the press asks them.
 
 ## Related nodes
 

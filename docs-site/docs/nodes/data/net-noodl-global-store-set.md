@@ -70,7 +70,7 @@ Any write to shared state: recording a sign-in, appending a streamed message, fl
 
 **Shared state: one store read by two unrelated components**
 
-Two components that are not parent and child, sharing state through a named store instead of prop drilling or a Send/Receive Event pair. Sign In writes `user` with Set Global Store; Header declares the same store by name and renders `state` — no wiring runs between the two components, because naming the store is what connects them. Header also subscribes to just the `user` key, so a write to any other key does not wake it, and uses `previousValue` against `value` to fire only on the signed-out → signed-in transition rather than on every change. Initial State fills gaps without overwriting live state, so Header remounting cannot reset a store Sign In is already using.
+Two components that are not parent and child, sharing state through a named store instead of prop drilling or a Send/Receive Event pair. Sign In writes `user` with Set Global Store; Header declares the same store by name and reads `user` from it — no wiring runs between the two components, because naming the store is what connects them. Header subscribes to just the `user` key, so a write to any other key does not wake it, and puts the value into its greeting through a String Format whose `{user}` tag is the input the wire lands on. The store persists under its storage key, so the greeting survives a reload.
 
 ## Related nodes
 

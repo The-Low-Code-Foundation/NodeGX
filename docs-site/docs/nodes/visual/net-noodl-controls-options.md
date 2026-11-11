@@ -18,7 +18,7 @@ One-of-many choices too numerous or space-constrained for radio buttons: country
 | Available in | browser |
 | SSR compatibility | safe |
 | Provided by | `noodl-viewer-react` |
-| Behaviour spec | version 10 ([under the hood](#under-the-hood)) |
+| Behaviour spec | version 13 ([under the hood](#under-the-hood)) |
 
 ## Inputs
 
@@ -149,12 +149,13 @@ One-of-many choices too numerous or space-constrained for radio buttons: country
 **Items** (`items`)
 
 - nothing handed (undefined): the list it has stays
+- the value is still the placed node's seed and the list does not offer it: the list is kept, and the value is cleared to '' and sent
 - otherwise: the list is kept as handed and drawn at the next paint; the value stays, so a list handed again keeps the pick
 
 **Value** (`value`)
 
 - null: ignored
-- the value it already holds, as text: nothing
+- the value it already holds, as text: nothing (it is no longer the seed)
 - a change: kept as text, Value follows, and the list selects it at the next paint if it names an option — Changed does not fire (only a person's pick fires it)
 
 **Mounted** (`mounted`)
@@ -190,7 +191,7 @@ One-of-many choices too numerous or space-constrained for radio buttons: country
 
 **Visible** (`visible`)
 
-- always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it
+- always: shown or hidden at once, its space kept; hidden, a Focus does not reach it
 
 ## Outputs
 
@@ -277,7 +278,7 @@ Exports to React. A project that uses it exports this node as React code.
 
 ## Under the hood
 
-This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 10. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
+This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 13. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
 
 ### What it depends on outside the node
 
@@ -326,7 +327,8 @@ This node's behaviour is written down as an executable spec in `@nodegx/node-spe
       "Value": "Option 2"
     }
   ],
-  "domSelected": ""
+  "domSelected": "",
+  "seeded": true
 }
 ```
 
@@ -363,6 +365,9 @@ The conformance tests play these acts against it:
 - **Version 8**: A list of plain words wired into Items offers those words: ["Small", "Large"] draws Small and Large, and choosing Large sends "Large" — as typing them into Items does. v7 drew one empty, nameless option per word, each with the value nothing. A list of { Label, Value } rows is drawn as before. Existing projects are not migrated: nothing an app relied on: a word in a wired list drew an option a person could not read, all with the same empty value. No stored project changes — typed Items were already read this way.
 - **Version 9**: Two warnings the runtime has always shown are now in this spec: a Focus that arrives while the node is not on the page (until a Focus reaches it), and an Icon Source that is not an icon (until an icon or nothing arrives). Existing projects are not migrated: only the editor is told, and the runtime already told it. Nothing a wire carries changes.
 - **Version 10**: A wired Width in a row, or a wired Height in a column, that is a percent now shows as its warning in this spec: it became a share of the room, not a size. The runtime has always shown it. Existing projects are not migrated: only the editor is told, and the runtime already told it. Nothing a wire carries changes.
+- **Version 11**: A Dropdown nobody has given a Value or a pick holds the first default option, "Option 1", so a placed node shows a real option. When Items arrive and do not offer it, Value now becomes '' (empty) and is sent, as the list shows its placeholder. Before, Value went on saying "Option 1", an option the list did not have, and a form that checked whether anything was chosen sent it. A Value somebody wrote, or a person's pick, is never changed. Existing projects are not migrated: only a value the screen never showed changes: the placeholder was already drawn, and the community template, which met it, already set Value to '' itself. No stored project changes.
+- **Version 12**: While the Dropdown shows its placeholder because its value is in no option, choosing the first option now chooses it: Value and Changed. Before, the list underneath had already selected that first option (the browser does when the selected option leaves the list, or when options arrive in an empty one), so choosing it did nothing and the placeholder stayed. Every other option was already a pick. Existing projects are not migrated: A pick that did nothing now does what the person asked; nothing an app could rely on, and no stored project changes.
+- **Version 13**: No app does anything differently. Visible shows or hides the control at once: a Focus sent in the same moment as Visible going on reaches it (Focused fires), and one sent as Visible goes off does nothing. The version before said Visible waited for the next paint, so it lost the first Focus and kept the second; the runtime never did either. Existing projects are not migrated: the runtime did not change; only the spec stopped saying Visible waits for the next paint. No stored project changes.
 
 ## The full spec {#spec-source}
 
@@ -430,6 +435,7 @@ import { controlFocusNotMounted, focusDiagnostics, focusMissed } from './focus-n
 import { focusAndIconSourceChange, iconSourceDiagnostics } from './icon-source';
 import { dataAttributeInput, dataAttributeNames } from './data-attributes';
 import { growChange, sizeAtDefault, sizeReducer, wiredGrowDiagnostic, withGrow, type Sizes } from './wired-grow';
+import { visibleAtOnceChange } from './visible-at-once';
 
 type State = {
   /** utils.ts :75-89 `_internal.enabled` */
@@ -451,6 +457,8 @@ type State = {
   onPage: boolean;
   /** v9 — the last Focus found the node off the page: the editor is told (focus-not-mounted.ts) */
   focusMissed: boolean;
+  /** P121-TWO005-DROPDOWNSTALE — options.ts `_internal.valueIsSeed`: the value is still the placed node's seed (nobody wrote Value or picked) */
+  seeded: boolean;
   /** options.ts :107 `_internal.value` — the Value output, and what the `<select>` is told to select; `undefined` after a Value input of undefined (never sent, C3) */
   value: string | undefined;
   /** options.ts :164-168 `_internal.items` — the list as handed */
@@ -493,7 +501,10 @@ export const Dropdown = defineNode({
   // v8 (P107 R21, P107-S88-OPTIONSCAST): a word in a list on Items is an option, labelled and valued by the word — v7 drew an option with no text and the value ''
   // v9 (NSP-019 R35): a Focus that finds the node off the page shows as its warning until a Focus reaches it, and an Icon Source that is not an icon shows as one until an icon or nothing arrives (`diagnostics`)
   // v10 (NSP-019 R38): a wired Width in a row, or a wired Height in a column, that is a percent shows as its warning (wired-grow.ts)
-  version: 10,
+  // v11 (P121-TWO005-DROPDOWNSTALE): Items that do not offer the placed node's seed ("Option 1") clear it to '' and send Value
+  // v12 (BETA-S7-DROPDOWNFIRSTPICK): with the value in no option, the element keeps its hidden empty option selected, so every option is a pick
+  // v13 (BETA-S7-DROPDOWNFOCUSDIVERGE, the spec correcting itself): Visible reaches the element at once, so a Focus in the same frame meets it (visible-at-once.ts)
+  version: 13,
   // NSP-010 — v7 is the spec correcting itself, not the runtime changing
   changes: [
     {
@@ -515,7 +526,26 @@ export const Dropdown = defineNode({
       }
     },
     focusAndIconSourceChange(9),
-    growChange(10)
+    growChange(10),
+    {
+      version: 11,
+      says:
+        'A Dropdown nobody has given a Value or a pick holds the first default option, "Option 1", so a placed node shows a real option. When Items arrive and do not offer it, Value now becomes \'\' (empty) and is sent, as the list shows its placeholder. Before, Value went on saying "Option 1", an option the list did not have, and a form that checked whether anything was chosen sent it. A Value somebody wrote, or a person\'s pick, is never changed',
+      row: 'P121-TWO005-DROPDOWNSTALE',
+      migration: {
+        none: 'Only a value the screen never showed changes: the placeholder was already drawn, and the community template, which met it, already set Value to \'\' itself. No stored project changes'
+      }
+    },
+    {
+      version: 12,
+      says:
+        'While the Dropdown shows its placeholder because its value is in no option, choosing the first option now chooses it: Value and Changed. Before, the list underneath had already selected that first option (the browser does when the selected option leaves the list, or when options arrive in an empty one), so choosing it did nothing and the placeholder stayed. Every other option was already a pick',
+      row: 'BETA-S7-DROPDOWNFIRSTPICK',
+      migration: {
+        none: 'A pick that did nothing now does what the person asked; nothing an app could rely on, and no stored project changes'
+      }
+    },
+    visibleAtOnceChange(13)
   ],
   diagnostics: { ...focusDiagnostics(controlFocusNotMounted('dropdown')), ...iconSourceDiagnostics(), ...wiredGrowDiagnostic },
   source: 'packages/noodl-viewer-react/src/nodes/controls/options.ts',
@@ -527,7 +557,7 @@ export const Dropdown = defineNode({
     sizes: { width: sizeAtDefault(), height: sizeAtDefault() },
     grow: null,
     enabled: true, hover: false, pressed: false, focused: false, mounted: true, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false, focusMissed: false,
-    value: 'Option 1', items: DEFAULT_ITEMS, domSelected: ''
+    value: 'Option 1', items: DEFAULT_ITEMS, domSelected: '', seeded: true
   } as State,
   // utils.ts :402-411 `outcomeOutputs({ done, unchanged })` (addFocusActions)
   outcomes: ['done', 'unchanged'],
@@ -742,10 +772,13 @@ export const Dropdown = defineNode({
     },
     // options.ts :158-171 — `undefined` is no opinion; anything else is kept as handed, drawn at the next paint (`painted`); the
     // node's value stays (R14: a list handed again keeps the pick — the runtime's effect took the author's Value back until P109 ISL-031, row D34)
-    items: (s, v) =>
-      v === undefined
-        ? { says: 'nothing handed (undefined): the list it has stays', send: [] }
-        : { says: 'otherwise: the list is kept as handed and drawn at the next paint; the value stays, so a list handed again keeps the pick', set: { items: v }, send: [] },
+    items: (s, v) => {
+      if (v === undefined) return { says: 'nothing handed (undefined): the list it has stays', send: [] };
+      // P121-TWO005-DROPDOWNSTALE (options.ts Items `set`, `valueIsSeed`)
+      if (s.seeded && !offersValue(v, s.value))
+        return { says: "the value is still the placed node's seed and the list does not offer it: the list is kept, and the value is cleared to '' and sent", set: { items: v, value: '', seeded: false }, send: ['value'] };
+      return { says: 'otherwise: the list is kept as handed and drawn at the next paint; the value stays, so a list handed again keeps the pick', set: { items: v }, send: [] };
+    },
     // options.ts :181-200 — `null` has no `toString` and is ignored (:182-184); what is not text is made text; a change sends
     // Value and never Changed, and the selection follows it at the next paint (R14: the last word wins — the runtime's effect
     // keyed on the author's Value React last rendered, so a write back to it after a pick left the pick on the screen, row C71,
@@ -753,8 +786,8 @@ export const Dropdown = defineNode({
     value: (s, v) => {
       if (v === null) return { says: 'null: ignored', send: [] };
       const value = v === undefined ? undefined : String(v);
-      if (value === s.value) return { says: 'the value it already holds, as text: nothing', send: [] };
-      return { says: 'a change: kept as text, Value follows, and the list selects it at the next paint if it names an option — Changed does not fire (only a person\'s pick fires it)', set: { value }, send: ['value'] };
+      if (value === s.value) return { says: 'the value it already holds, as text: nothing (it is no longer the seed)', set: { seeded: false }, send: [] };
+      return { says: 'a change: kept as text, Value follows, and the list selects it at the next paint if it names an option — Changed does not fire (only a person\'s pick fires it)', set: { value, seeded: false }, send: ['value'] };
     },
     // react-component-node.ts :2310-2320
     mounted: (_s, v) => ({ says: 'always: the list is put on the page (Did Mount), or taken off it (Will Unmount), at the next paint', set: { mounted: !!v }, send: [] }),
@@ -776,8 +809,9 @@ export const Dropdown = defineNode({
     // NSP-019 R38 — node.ts :446-458, react-component-node.ts :706-753 (wired-grow.ts)
     width: sizeReducer('width'),
     height: sizeReducer('height'),
-    // node-shared-port-definitions.ts :366-375 — the page follows at the next paint
-    visible: (_s, v) => ({ says: 'always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it', set: { visible: !!v }, send: [] })
+    // node-shared-port-definitions.ts :374-388 — written onto the element at once, so a Focus in the same frame meets it
+    // (visible-at-once.ts)
+    visible: (_s, v) => ({ says: 'always: shown or hidden at once, its space kept; hidden, a Focus does not reach it', set: { visible: !!v, pageVisible: !!v }, send: [] })
   },
   {
     // react-component-node.ts :785-830 `DATA_ATTRIBUTES_RULE` — one string input per name the Data Attributes list names, written
@@ -819,7 +853,7 @@ export const Dropdown = defineNode({
           const focus = p.elementFocused ? NONE : focusTaken();
           if (p.domSelected === picked) return focus;
           // the paint selected the node's value wherever the list offers it, so an option the element does not select is a change
-          return join(focus, { set: { value: picked, domSelected: picked }, send: ['value'], emit: ['onChange'] });
+          return join(focus, { set: { value: picked, domSelected: picked, seeded: false }, send: ['value'], emit: ['onChange'] });
         }, 'keyboard')
     }
   }
@@ -845,6 +879,21 @@ function readStoredItems(stored: string): { Label: string; Value: string }[] {
 /** options.ts :356-386 `readItems` — the options the EDITOR reads off Items: the stored text form, or the list itself (`value.narrow`). */
 function editorItems(items: unknown): { Label: string; Value: string }[] {
   return typeof items === 'string' ? readStoredItems(items) : itemRows(items);
+}
+
+/**
+ * options.ts Items `set` (P121-TWO005-DROPDOWNSTALE): whether the list as the node reads it (`optionItems`: text is the old
+ * stored list, a word is an option valued by itself, anything else not a list offers nothing) has an item whose `Value` is
+ * exactly this one — the runtime's own comparison, not the editor's reading in `itemRows`.
+ */
+function offersValue(items: unknown, value: string | undefined): boolean {
+  if (!items) return false;
+  const rows: unknown[] = typeof items === 'string' ? readStoredItems(items) : Array.isArray(items) ? items : [];
+  const words = rows.some((item) => item === null || item === undefined || typeof item !== 'object');
+  return rows
+    .filter((item) => item !== null && item !== undefined)
+    .map((item) => (words && typeof item !== 'object' ? { Value: String(item) } : item))
+    .some((item) => typeof item === 'object' && (item as { Value?: unknown }).Value === value);
 }
 
 function itemRows(source: unknown): { Label: string; Value: string }[] {
@@ -890,10 +939,9 @@ function optionsOf(items: unknown): Option[] {
  *   - Enabled and Visible are painted onto the element; Enable Label changes nothing here (v2; the runtime's rebuild was row C80, fixed in P109 ISL-031).
  *   - Mounted off: the element leaves with the keyboard it held; Mounted on: Did Mount, a fresh element on the node's value — a
  *     person's pick included, and nothing on the wire (v3, R14; the runtime took the author's Value back until P109 ISL-031, row D34).
- *   - the selection: the element is told the node's value while it names an option (:210); otherwise the browser keeps what it
- *     had — a fresh element selects the hidden empty option (:217), and a selected option that left the list hands the selection
- *     to the first enabled option (HTML's reset; the hidden one is disabled) — with none, the element selects nothing, and the
- *     next option to arrive is selected as it arrives (v7, P109-S21-DROPDOWNEMPTYRESET).
+ *   - the selection: the element is told the node's value while an option carries it, and '' otherwise, which selects the
+ *     hidden empty option (v12, BETA-S7-DROPDOWNFIRSTPICK: until then the browser kept what it had, and a selected option that
+ *     left the list handed the selection to the first enabled option, under the placeholder).
  */
 function painted(s: Readonly<State>): { set: Partial<State>; send: ValueOut[]; emit: Pulse[] } {
   const set: Partial<State> = { ...(s.pageEnabled === s.enabled ? {} : { pageEnabled: s.enabled }), ...(s.pageVisible === s.visible ? {} : { pageVisible: s.visible }) };
@@ -912,15 +960,10 @@ function painted(s: Readonly<State>): { set: Partial<State>; send: ValueOut[]; e
   const value = s.value;
   const options = optionsOf(s.items);
   const inList = value !== undefined && options.some((o) => o.value === value);
-  const firstEnabled = options.find((o) => !o.disabled)?.value ?? null;
-  let dom = s.domSelected;
-  if (fresh) dom = inList ? (value as string) : '';
-  else if (inList) dom = value as string;
-  // a selected option that left the list: HTML's reset selects the first enabled option, and with none, nothing (the hidden one is disabled)
-  else if (dom !== '' && dom !== null && !options.some((o) => o.value === dom)) dom = firstEnabled;
-  // an option arriving in a `<select>` that selects nothing is selected as it arrives (P109-S21-DROPDOWNEMPTYRESET); the
-  // fresh element's hidden option carries `selected`, so '' is a selection and keeps it
-  else if (dom === null) dom = firstEnabled;
+  // v12 (BETA-S7-DROPDOWNFIRSTPICK): the element is told the node's value while an option carries it and '' otherwise
+  // (Select.tsx `offersValue`), so with none it keeps the hidden empty option selected. Until v12 it was told nothing there,
+  // and HTML's reset handed the selection to the first enabled option, which a person then could not pick (v7's model)
+  const dom = inList ? (value as string) : '';
   if (dom !== s.domSelected) set.domSelected = dom;
   return { set, send: [], emit };
 }
