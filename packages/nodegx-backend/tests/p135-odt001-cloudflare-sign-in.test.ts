@@ -256,7 +256,8 @@ describe('the domain command reads the same sign-in (HST-018 through ODT-001)', 
     writeSignIn({ clientId: 'c', accessToken: 'at-ours', refreshToken: 'rt', expiresAt: new Date(Date.now() + 3600e3).toISOString(), scopes, signedInAt: new Date().toISOString() }, file);
 
   test('granted the registrar: NodeGX\'s sign-in is the credential; an explicit token still wins; without the registrar it is passed over', async () => {
-    const { domainCredential } = await import('../cloudflare/domainCommand');
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { domainCredential }: typeof import('../cloudflare/domainCommand') = require('../cloudflare/domainCommand');
     process.env.NODEGX_CLOUDFLARE_HOME = path.dirname(file);
     delete process.env.CLOUDFLARE_API_TOKEN;
     ours(['workers-scripts.edit', 'registrar-domains.admin']);

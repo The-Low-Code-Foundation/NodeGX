@@ -89,7 +89,7 @@ describe('P112-OWN023-NORANGE — /files/<name> answers a byte range', () => {
   });
 
   it('what one range cannot answer gets the whole file: several ranges, a malformed one, a stale If-Range', async () => {
-    for (const headers of [{ range: 'bytes=0-1,5-6' }, { range: 'bytes=abc' }, { range: 'pages=1-2' }, { range: 'bytes=0-99', 'if-range': '"old"' }]) {
+    for (const headers of [{ range: 'bytes=0-1,5-6' }, { range: 'bytes=abc' }, { range: 'pages=1-2' }, { range: 'bytes=0-99', 'if-range': '"old"' }] as Record<string, string>[]) {
       const whole = await get(headers);
       expect([JSON.stringify(headers), whole.status]).toEqual([JSON.stringify(headers), 200]);
       expect(whole.body.equals(SONG)).toBe(true);

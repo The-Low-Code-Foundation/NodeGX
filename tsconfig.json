@@ -21,6 +21,10 @@
       "@noodl/runtime": ["./packages/noodl-runtime/dist-types/noodl-runtime.d.ts"],
       "@noodl/runtime/src/*": ["./packages/noodl-runtime/dist-types/src/*"],
       "@noodl-viewer-cloud/execution-history": ["./packages/noodl-viewer-cloud/src/execution-history/index.ts"],
+      // The backend's own alias for the cloud runtime (packages/nodegx-backend/tsconfig.json). `typecheck:mcp` reaches
+      // backend workflow and execution sources through src/tools/backendTools.ts and could not resolve it (PR #54).
+      "@cloud-runtime": ["./packages/noodl-viewer-cloud/src/index.ts"],
+      "@cloud-runtime/*": ["./packages/noodl-viewer-cloud/src/*"],
       "@noodl-core-ui/*": ["./packages/noodl-core-ui/src/*"],
       "@noodl-hooks/*": ["./packages/noodl-editor/src/editor/src/hooks/*"],
       "@noodl-utils/*": ["./packages/noodl-editor/src/editor/src/utils/*"],

@@ -553,7 +553,7 @@ export function registerDeployToVmTools(server: McpServer, binding: ProjectBindi
         'for a domain) and root or passwordless sudo. Returns the URL, or the command to see it when there is no domain.',
       inputSchema: deployToVmSchema
     },
-    async (args: DeployToVmArgs, extra?: { _meta?: { progressToken?: string | number }; sendNotification?: (n: unknown) => Promise<void> }) =>
+    async (args: DeployToVmArgs, extra?: { _meta?: { progressToken?: string | number }; sendNotification?(n: unknown): Promise<void> }) =>
       guarded(async (a: DeployToVmArgs) => {
         const store = binding.require();
         const token = extra?._meta?.progressToken;

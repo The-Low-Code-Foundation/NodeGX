@@ -153,12 +153,12 @@ describe('P128 S2 OWN-027 — the validator suggests an option set for typed lit
   });
 
   it('controls: one literal alone, and a Value wired from elsewhere, carry nothing', async () => {
-    const one = await call<Written>(session, 'create_component', { ...header('Components/Solo', ['x']), nodes: header('Components/Solo', ['x']).nodes.map((n) => (n.type === 'Set Variable' ? { ...n, parameters: { ...n.parameters, name: 'mode' } } : n)) });
+    const one = await call<Written>(session, 'create_component', { ...header('Components/Solo', ['x']), nodes: header('Components/Solo', ['x']).nodes.map((n) => (n.type === 'Set Variable' ? { ...n, parameters: { ...(n as { parameters?: Record<string, unknown> }).parameters, name: 'mode' } } : n)) });
     expect(one.isError ? JSON.stringify(one.data).slice(0, 1500) : 'ok').toBe('ok');
     expect(literalDiags(one)).toHaveLength(0);
     const wired = await call<Written>(session, 'create_component', {
       ...header('Components/Wired', ['en', null]),
-      nodes: header('Components/Wired', ['en', null]).nodes.map((n) => (n.type === 'Set Variable' ? { ...n, parameters: { ...n.parameters, name: 'size' } } : n))
+      nodes: header('Components/Wired', ['en', null]).nodes.map((n) => (n.type === 'Set Variable' ? { ...n, parameters: { ...(n as { parameters?: Record<string, unknown> }).parameters, name: 'size' } } : n))
     });
     expect(wired.isError ? JSON.stringify(wired.data).slice(0, 1500) : 'ok').toBe('ok');
     expect(literalDiags(wired)).toHaveLength(0);

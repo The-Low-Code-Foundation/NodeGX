@@ -174,7 +174,10 @@ describe('P115 HST-011 — the data dir kept in a store the host hands in', () =
 
     // After stop() the store is let go: a write to that dir no longer reaches it.
     const before = store.list().length;
-    const { writeDataJSON } = await import('../src/config/dataDirStore');
+    // A require, not import(): this spec is checked as an ECMAScript module, where a relative import() needs
+    // a file extension that ts-jest's own resolution does not want.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { writeDataJSON }: typeof import('../src/config/dataDirStore') = require('../src/config/dataDirStore');
     writeDataJSON(path.join(third.dataDir, 'late.json'), { late: true });
     expect(store.list().length).toBe(before);
   });

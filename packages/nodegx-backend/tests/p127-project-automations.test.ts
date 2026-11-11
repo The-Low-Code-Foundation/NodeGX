@@ -168,8 +168,8 @@ describe('BKO-001 — seeding a backend from the project', () => {
 
   it('🔴 never writes into a backend that has its own, and says how the two differ', () => {
     const r = registries('own');
-    r.triggers.upsert({ ...DAILY, schedule: { cron: '0 10 * * *' } });
-    r.triggers.upsert({ id: 'hand-made', type: 'schedule', target: { kind: 'function', name: 'x' }, schedule: { cron: '* * * * *' } });
+    r.triggers.upsert({ ...DAILY, schedule: { cron: '0 10 * * *' } } as never); // no missedFirePolicy, as a file written by hand has none
+    r.triggers.upsert({ id: 'hand-made', type: 'schedule', target: { kind: 'function', name: 'x' }, schedule: { cron: '* * * * *' } } as never);
     const outcome = seedProjectAutomations({ projectDir: project(FILE, 'own'), ...r });
     expect(outcome.status).toBe('backend-has-its-own');
     expect(r.workflows.list()).toEqual([]);

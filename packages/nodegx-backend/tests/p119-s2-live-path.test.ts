@@ -74,7 +74,7 @@ describe('P119-S2-LIVEPATH — live updates follow a path rule', () => {
   const users: Record<string, Signup> = {};
   const conversation: Record<string, string> = {};
 
-  const make = async (collection: string, data: Record<string, unknown>, headers = admin): Promise<string> => {
+  const make = async (collection: string, data: Record<string, unknown>, headers: Record<string, string> = admin): Promise<string> => {
     const r = await req<{ objectId: string }>('POST', `/classes/${collection}`, data, headers);
     expect([200, 201]).toContain(r.status);
     return r.json.objectId;

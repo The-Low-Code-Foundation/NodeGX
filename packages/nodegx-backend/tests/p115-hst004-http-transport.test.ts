@@ -24,7 +24,13 @@ interface Seen {
   body?: string;
 }
 
-function server(seen: Seen[], route: (path: string, port: number) => { status: number; headers: Record<string, string>; body: string }) {
+interface Reply {
+  status: number;
+  headers: Record<string, string>;
+  body: string;
+}
+
+function server(seen: Seen[], route: (path: string, port: number) => Reply) {
   const s = http.createServer((req, res) => {
     const chunks: Buffer[] = [];
     req.on('data', (c: Buffer) => chunks.push(c));
@@ -50,7 +56,7 @@ let b: { s: http.Server; url: string };
 beforeAll(async () => {
   seen = [];
   b = await server(seen, () => ({ status: 200, headers: { 'content-type': 'application/json' }, body: '{"landed":true}' }));
-  a = await server(seen, (p) => {
+  a = await server(seen, (p): Reply => {
     if (p === '/json') return { status: 200, headers: { 'content-type': 'application/json' }, body: '{"current":{"t":12.5}}' };
     if (p === '/posted') return { status: 200, headers: { 'content-type': 'application/json' }, body: '{"ok":1}' };
     if (p === '/same') return { status: 302, headers: { location: '/json' }, body: '' };

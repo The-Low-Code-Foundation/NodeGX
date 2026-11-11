@@ -78,7 +78,7 @@ describe('P112-OWN026-OPENSTAT — a record a function creates for a signed-in c
   let a: { id: string; token: string };
   let b: { id: string; token: string };
 
-  const as = (who: { token: string } | null) => (who ? { 'x-parse-session-token': who.token } : {});
+  const as = (who: { token: string } | null): Record<string, string> => (who ? { 'x-parse-session-token': who.token } : {});
   const call = async (fn: string, who: { token: string } | null, table: number) => {
     const res = await http.request<{ result: { id?: string; error?: string } }>('POST', `/functions/${fn}`, { body: { table }, headers: as(who) });
     expect(res.status).toBe(200);

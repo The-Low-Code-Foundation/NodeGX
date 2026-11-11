@@ -32,7 +32,13 @@ import {
   type ConformanceReport
 } from '@noodl/backend-contract/conformance';
 
-import localSql from '../../noodl-runtime/src/api/adapters/local-sql';
+// A `require`, as dbchange.test.ts does: an `import` of the runtime's SOURCE puts LocalSQLAdapter.ts in this
+// package's typecheck (`typecheck:backend-tests`) under the backend's stricter settings, 96 errors in a file the
+// runtime's own config passes (PR #54, 2026-11-11).
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const localSql: {
+  LocalSQLAdapter: new (path: string, options?: { engine: unknown }) => { connect(): Promise<void> };
+} = require('../../noodl-runtime/src/api/adapters/local-sql');
 import { durableObjectEngine, newLedger, type DoStorage, type EngineLedger } from '../cloudflare/durableObjectSql';
 import { eightHopsCase, notPlainCase, stringFilterCase } from './helpers/hst015-cases';
 
