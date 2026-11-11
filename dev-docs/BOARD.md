@@ -48,6 +48,21 @@ folded in here: its open rows are S1, S4 and R3.
 | S6 | ✅ **already live** (re-measured 2026-11-07): nodegx.io/ says *"The tools are open source under GPL-3.0. The runtime your app runs on is MIT. The app itself is yours."* (the row's grep for "licen" missed it); it was written for / only. The footer every page shares said "Licensed GPL-3.0, a fork of Noodl." (NPMAUDIT-LICENCE-FOOTER): R ruled "change it" 11-07; built, nodegx-web `c972cda` on main (13 pages, footer only; /start/ and /changelog/ take it at their next render): **R deploys**. **The licence line live.** NPMAUDIT-LICENCE ruled (holder "The NodeGX contributors", nodegx-web `290a7ba`), but the line is not on /, /studio/ or /start/ | A finds where it went; R pushes nodegx-web | not found on those three pages | the page it was written for shows it |
 | S7 | ✅ `b044d6578` (2026-11-07): R double-clicks `NodeGX test projects/Greenhouse BWF-009 — open in Studio.app` (quit any open Studio first): the copy (own id, the two overlap workflows gone), backend `backend_mw6v6ffjxo99j` by `provisionFor` in `~/.noodl/backends` (Studio starts it on open), three plants (Fern, Cactus, Basil), mail caught at http://127.0.0.1:8025/ (catcher left running, `kill $(cat ~/.noodl/bwf009-r2/catcher.pid)`). Re-run: `setup-bwf009-r2.mjs --again`. Still a terminal: part 3's dev editor (installed 0.4.3 predates BWF-008) and brief 3's webhook `curl`. **Agent half of BWF-009's setup** (P132 handoff s22 "Next" 1): the Greenhouse copy, overlap workflows removed, backend by `provisionFor` without `NODEGX_BACKENDS_DIR`, SMTP to a catcher, three plants | A | the agent part of BWF-009 green 11-04 ($3.97) | R2 can start without a terminal |
 
+**2026-11-11 (after R1, on Richard's "carte blanche"):** ✅ nodegx.io deployed (the 0.2.12 changelog, the licence
+footer; from a copy without the uncommitted `site/companies/`), ✅ learn.nodegx.io deployed (the Cloudflare page).
+✅ **Studio 0.2.0** (not 0.1.1: twenty P132 commits since 0.1.0) on nodegx-studio main, **pushed** (`9ac73d0`): mcp
+0.2.10 + preview 0.2.9 pinned, the Intel leg merged, vendor re-cut at `d86840be9` (byte-identical), every Studio gate
+green after two fixes (P123-GH-ADMINRATE: Studio waits out a local backend's 429, `60414ee`; timeline's stale
+assertion, `9ac73d0`). ✅ create-nodegx/-vibe/-cline **0.2.13** with `STUDIO_VERSION` 0.2.0 (`a9c889f91`), graded on
+the packs 7/7 (one mcp in the npx folder, 139 MB, `open_studio` GET / 200); harvest `--gate` exit 0 (27 triaged).
+Packs + sha1s: `~/vscode_projects/OpenNoodl-worktrees/beta-0.2.13-packs/` (studio `c4d6597e…`, create-nodegx
+`f5de14f6…`, vibe `6e6c83a3…`, cline `40ea1158…`). **Left for R, in order:** (1) `git -C ~/vscode_projects/nodegx-studio
+tag -a v0.2.0 -m "NodeGX Studio 0.2.0" 9ac73d0 && git -C ~/vscode_projects/nodegx-studio push origin v0.2.0` (the
+classifier refused the tag push) → CI drafts the release with both Mac DMGs and both `.mcpb`; publish the draft.
+(2) `npm publish` the studio pack, then the three kits (studio first). (3) an agent re-runs the grade on the
+registry spec, deploys nodegx.io (the 0.2.13 changelog) and merges nodegx-web `beta-s5-studio-x64` (the Intel card)
+once the x64 DMG answers 200. Then R2, R3 (+ P135-DESKTOP-NOTOOLS's re-run), R4, R5, CCN-007.
+
 **Richard's half (the Beta test is his to run).**
 
 | # | what | waits on |
