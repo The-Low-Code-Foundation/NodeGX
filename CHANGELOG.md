@@ -17,6 +17,62 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
+## 0.4.4 · 2026-11-11
+
+**You can build a full-stack app with your AI coder, change its backend workflows by hand, and put it online on your
+own Cloudflare account.**
+
+This release is the NodeGX editor 0.4.4, NodeGX Studio 0.2.1, `@nodegx/mcp` 0.2.11, `@nodegx/backend` 0.1.1, and
+`create-nodegx`, `create-nodegx-vibe` and `create-nodegx-cline` at 0.2.14. It gathers everything since 0.4.3 (20
+October). The npm releases since then each have their own entry further down this page.
+
+### New
+
+- **Backend workflows without code, in Studio and in the editor.** A workflow can make, change, delete or find a
+  record. It can call an API, send an email or work out a value with a formula. A step can use what an earlier step
+  found, and you can test a workflow on a sample before it runs for real. In the editor, the Workflows panel and the
+  canvas read the same file as Studio. A change you make in one app shows in the other.
+- **Your app online on your own Cloudflare account.** `npx @nodegx/backend deploy cloudflare <the app's folder>` puts
+  the pages, data, accounts, rules, files and functions on Cloudflare. A free account is enough. An update keeps
+  every record and account, and the address stays the same.
+- **Your app as plain files.** `npx @nodegx/export export --target html <the app's folder> <a new folder>` writes the
+  app as HTML, CSS and JavaScript. Any web server for plain files runs it, with nothing to install or build.
+- **A whole app on your own server.** `nodegx-deploy --full-stack` writes the app, its backend, its cloud functions,
+  its workflows and its access rules into one folder. `./start.sh` runs it.
+- **Studio comes with `npm create nodegx`.** Your agent opens your app in Studio without the desktop app. Studio and
+  your agent use the same NodeGX server.
+- **Studio for Intel Macs.**
+- **Every deployed folder says which licence covers what.** Your app's own files are yours. The runtime it runs on is
+  MIT, and the NodeGX tools are GPL-3.0.
+
+### Changed
+
+- **A new app's backend keeps people's records apart from the first record.** Your agent starts the backend with its
+  privacy rules on. Who owns a record is the server's word, so a caller can't write it.
+- **Studio follows your app.** When the app opens another page by itself, Studio's page picker goes with it.
+
+### Fixed
+
+- **A second person who signs in on one phone no longer sees the first person's rows.**
+- **A "who is signed in" check that answers late no longer brings back the person who signed out.**
+- **Every Record offers the record's created and updated dates.** They arrive as dates.
+- **A press on a text field's padding puts the cursor in the field.**
+- **A Dropdown's first option can be picked.** A placed "Option 1" goes when the wired items don't offer it.
+- **A Video keeps a YouTube or Vimeo player** when its Source Object arrives, and its Click and Hover outputs fire.
+- **Text set to Ellipsis draws the "…".**
+- **An element whose Click is wired is a button** to the keyboard's Tab key and to a screen reader.
+- **An app under a base address lands on the right page** when it navigates by path.
+- **A record deleted for good is gone from every file** in the backend's data folder.
+- **Studio no longer stops at "Rate limit exceeded".** It waits the second the backend asks for and tries again.
+- **An open project no longer redraws the editor's panels all the time.**
+
+### Good to know
+
+- A folder set up with an older `create-nodegx` keeps the versions it was set up with. To move it to this release,
+  delete `.mcp.json` (or `opencode.json`, or `.vibe/config.toml`) and run `npm create nodegx` again.
+- The Cloudflare deploy signs you in with `wrangler`, Cloudflare's own tool. You click Allow once on each computer.
+- On Windows the editor and Studio aren't signed, so SmartScreen asks once.
+
 ## NodeGX Studio 0.2.0 and create-nodegx 0.2.13 · 2026-11-11
 
 **You can build backend workflows by hand in Studio, and Studio now runs on the same server as your agent.**
