@@ -21,7 +21,7 @@ const path = require('path');
 
 /** The server this release sets up. `test/create.test.js` holds it equal to the checkout's `@nodegx/mcp` version. */
 const MCP_PACKAGE = '@nodegx/mcp';
-const MCP_VERSION = '0.2.10';
+const MCP_VERSION = '0.2.11';
 const PREVIEW_PACKAGE = '@nodegx/preview';
 const SERVER_NAME = 'nodegx';
 
@@ -50,7 +50,7 @@ const SERVER_NAME = 'nodegx';
  * MCP_VERSION together: a Studio pinned to another mcp nests its own copy again.
  */
 const STUDIO_PACKAGE = '@nodegx/studio';
-const STUDIO_VERSION = '0.2.0';
+const STUDIO_VERSION = '0.2.1';
 /** `@nodegx/mcp`'s bin (packages/noodl-mcp/package.json): with two `-p` packages npx needs the command named. */
 const MCP_BIN = 'noodl-mcp';
 

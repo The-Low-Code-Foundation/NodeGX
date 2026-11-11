@@ -1,6 +1,6 @@
 {
   "name": "@nodegx/backend",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Put a NodeGX app online on your own Cloudflare account: its pages, its backend, its rules and its functions, on one Worker, the same address every time.",
   "license": "GPL-3.0-only",
   "homepage": "https://nodegx.io",

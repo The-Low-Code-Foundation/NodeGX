@@ -34,7 +34,7 @@ registry_shasum() { # <name> <version> → the published version's shasum, or no
   { curl -fsS -H 'Cache-Control: no-cache' "https://registry.npmjs.org/$(printf %s "$1" | sed 's|/|%2f|')" 2>/dev/null || true; } |
     node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const v=(JSON.parse(s).versions||{})[process.argv[1]];if(v)process.stdout.write(v.dist.shasum)}catch(e){}})' "$2"
 }
-for name in nodegx-node-spec nodegx-project-contract nodegx-canvas-look nodegx-preview nodegx-export nodegx-backend nodegx-mcp create-nodegx create-nodegx-vibe create-nodegx-cline; do
+for name in nodegx-node-spec nodegx-project-contract nodegx-canvas-look nodegx-preview nodegx-export nodegx-backend nodegx-mcp nodegx-studio create-nodegx create-nodegx-vibe create-nodegx-cline; do
   tgz=$(ls "$dir"/"$name"-[0-9]*.tgz 2>/dev/null | head -1 || true)
   [ -n "$tgz" ] || { echo "skip $name: no tarball in $dir"; continue; }
   pkg=$(tar -xzOf "$tgz" package/package.json | node -pe 'const p=JSON.parse(require("fs").readFileSync(0,"utf8")); p.name+"@"+p.version')
