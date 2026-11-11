@@ -6,7 +6,7 @@ severity: medium
 area: packaging / licences
 found: NPMAUDIT stranger audit of the published packages, 2026-10-23
 evidence: dev-docs/reviews/npm-stranger-audit-2026-10-23.md
-launch: beta
+launch: none
 ---
 
 Tools are GPL-3.0-only, node-spec/canvas-look/core MIT, nodegx.io says 'GPL-3.0'. A static export (`nodegx-deploy`) ships `noodl.deploy.js` out of the GPL `@nodegx/preview` with only a third-party LICENSE.txt beside it; the backend is called MIT in the repo README but ships only inside GPL `@nodegx/mcp`; `@nodegx/export`'s generated app has no stated licence while its README says 'It is yours now'. A commercial user cannot tell whether their app is GPL. Ruling: the runtime's licence, stated in the shipped app.
@@ -50,3 +50,7 @@ under GPL-3.0. The runtime your app runs on is MIT. The app itself is yours."; t
 **Not deployed:** it goes live with the next nodegx-web deploy, which waits on Richard (s18's warning: `deploy.sh`
 rsyncs the whole working tree, with others' uncommitted pages in it). Left: `@nodegx/export`'s generated source
 (lane 4, paused). The Beta half closes when the site is deployed.
+
+**2026-11-11: the Beta half is live.** nodegx-web deployed (290a7ba's line and c972cda's footer, NPMAUDIT-LICENCE-FOOTER):
+the homepage's Source card and every page's footer state the split. Left: `@nodegx/export`'s generated source, lane
+4 (paused), so this row leaves the Beta list (`launch: none`).

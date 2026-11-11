@@ -38,3 +38,8 @@ fix: a person never makes 100 admin calls in a second.
 again. The second had no rate-limit toast (the toast still showed an earlier option-set message), and the type's row
 read "Note / on the backend": gone from the project, its table not yet gone (or not yet re-read) within the gate's
 10 s. BWF-011 changes nothing on the Data tab, but this shape has **not** been run at HEAD: it is recorded, not explained.
+
+**2026-11-11, the rate-limit shape:** nodegx-studio `60414ee` (P123-GH-ADMINRATE's fix: Studio's server waits out a
+local backend's short 429 and asks again) is under this gate now; `check:hosted` 46/46 in one full-suite run on
+Studio 0.2.0. One run is not a grade of an intermittent red, and s14's second shape (no toast, the table not yet gone
+within 10 s) is still unexplained, so this row stays open until a few runs say so.

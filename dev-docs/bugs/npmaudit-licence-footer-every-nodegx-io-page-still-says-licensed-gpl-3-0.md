@@ -1,7 +1,8 @@
 ---
 id: NPMAUDIT-LICENCE-FOOTER
 title: Every nodegx.io page's footer still says "Licensed GPL-3.0", against the ruled split
-status: open
+status: fixed
+commit: "nodegx-web c972cda, deployed 2026-11-11"
 severity: low
 area: nodegx.io / licences
 found: Beta sprint S6, 2026-11-07, checking that NPMAUDIT-LICENCE's line is live
@@ -34,3 +35,11 @@ words; the offline `written closer contract opener` checks clean, `written` fire
 13 pages whose only change is the footer (3 lines each). Left to their next render: /start/ and /changelog/ (another
 session's uncommitted edits sit in both). Left: the deploy, Richard's — the 13 pages by rsync, or `ops/deploy.sh` once
 that tree is clean. The render also adds /help/ to `sitemap.xml` (the live one lacks it); not committed here.
+
+## 2026-11-11: live
+
+Deployed with `ops/deploy.sh` from a copy of nodegx-web's tree without the uncommitted `site/companies/` page and its
+homepage card (co-pitch: not to go out without Richard). Before the push every built page was diffed against the live
+one: only the footer moved (3 lines a page) and the changelog gained 0.2.12. After: remote `index.html` md5 =
+local, both neighbours 200; `curl -s https://nodegx.io/` and `/start/` say "The tools are open source under GPL-3.0.
+The runtime your app runs on is MIT."; /companies/ still 404.

@@ -44,9 +44,13 @@ const SERVER_NAME = 'nodegx';
  * the published 0.2.9 said "not installed". Studio 0.1.0's own `@nodegx/mcp` 0.2.8 nests under it (175 MB, cold 6–9 s),
  * and Studio's own pieces (its backend, its server path) read that nested copy first; a Studio pinned to
  * `MCP_VERSION` would share the one server.
+ *
+ * Studio 0.2.0 is that Studio (P128-S3-NPMSTUDIOSTALE, 2026-11-11): it pins `@nodegx/mcp` 0.2.10 and `@nodegx/preview`
+ * 0.2.9, so npx installs one server and Studio's backend start and publish run on it. Move STUDIO_VERSION and
+ * MCP_VERSION together: a Studio pinned to another mcp nests its own copy again.
  */
 const STUDIO_PACKAGE = '@nodegx/studio';
-const STUDIO_VERSION = '0.1.0';
+const STUDIO_VERSION = '0.2.0';
 /** `@nodegx/mcp`'s bin (packages/noodl-mcp/package.json): with two `-p` packages npx needs the command named. */
 const MCP_BIN = 'noodl-mcp';
 

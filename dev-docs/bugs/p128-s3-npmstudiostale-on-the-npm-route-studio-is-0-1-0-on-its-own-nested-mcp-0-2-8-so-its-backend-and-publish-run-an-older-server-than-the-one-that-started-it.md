@@ -28,3 +28,14 @@ server (0.2.10; `@nodegx/backend-kit` 0.1.0 and `@nodegx/backend-map` 0.1.7 are 
 `STUDIO_VERSION` to 0.1.1. One `@nodegx/mcp` in the folder, the same Studio as the `.mcpb`. Grade: the S1 drive
 (`npx -y -p @nodegx/studio@0.1.1 -p @nodegx/mcp@0.2.10 noodl-mcp`, empty HOME) shows no
 `@nodegx/studio/node_modules/@nodegx/mcp`, and GET / is Studio main's page.
+
+**2026-11-11, built and graded on the pack (Beta sprint, after R1):** `@nodegx/studio` **0.2.0**, not 0.1.1 (twenty
+commits of P132 since 0.1.0, the Intel Mac build), from nodegx-studio main `31e74fb` + `60414ee` + `9ac73d0`: pins
+`@nodegx/mcp` 0.2.10 and `@nodegx/preview` 0.2.9; `vendor/` re-cut from NodeGX `d86840be9`, every file
+byte-identical. Every Studio gate green (timeline's one red was a stale assertion, fixed in `9ac73d0`).
+create-nodegx `STUDIO_VERSION` → `'0.2.0'`, the three kits 0.2.13. The grade, `npx -y -p <studio 0.2.0 pack> -p
+@nodegx/mcp@0.2.10 noodl-mcp <todo-list copy>`, empty HOME and npm cache, `NODEGX_STUDIO_APP=none`: **7/7** — one
+`@nodegx/mcp` in the npx folder (0.2.10, none under Studio), one `@nodegx/preview` (0.2.9), 139 MB (175 before);
+`open_studio` (through `call_tool`) started `<_npx>/node_modules/@nodegx/studio/editor/serve.mjs`, GET / 200,
+`<title>NodeGX Studio</title>`. Pack sha1 `c4d6597e…`. **Fixed when** Richard publishes Studio 0.2.0 and the kits
+0.2.13 and the same grade passes on the registry spec.

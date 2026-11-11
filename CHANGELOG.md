@@ -17,6 +17,47 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
+## NodeGX Studio 0.2.0 and create-nodegx 0.2.13 · 2026-11-11
+
+**You can build backend workflows by hand in Studio, and Studio now runs on the same server as your agent.**
+
+This release is `@nodegx/studio` 0.2.0, and `create-nodegx`, `create-nodegx-vibe` and `create-nodegx-cline` at
+0.2.13. `npm create nodegx` now sets up `@nodegx/mcp` 0.2.10 with `@nodegx/studio` 0.2.0 beside it. The other
+packages stay at their versions.
+
+### New
+
+- **Backend workflows you build without code.** In Studio's Backend tab, a workflow's first card says what starts
+  it. You add steps from a menu, and each one has a form. A step can make, change, delete or find a record. It can
+  also call an API, send an email or work out a value with a formula.
+- **Values from earlier steps.** A step's setting can use a value from a step before it. You pick it from a menu or
+  drag it in, and Studio says it in words.
+- **Test a workflow on a sample.** You can run all of it, or only up to one step, and see each step's data.
+- **Saved API calls.** You save a call once and pick it by name in any workflow. Change it once and every workflow
+  that uses it changes too.
+- **Reusable pieces.** Choose some steps on the canvas and make them into a piece. Any workflow can run it by name.
+- **Studio for Intel Macs.** The downloads now include a Mac with an Intel processor.
+
+### Changed
+
+- **One server for Studio and your agent.** Studio 0.1.0 came with its own older copy of the server. It started
+  and published your backend with that copy. Studio 0.2.0 uses the server your agent uses.
+- **Studio follows your app.** When the app opens another page by itself, Studio's page picker goes with it.
+
+### Fixed
+
+- **"Rate limit exceeded" no longer stops you.** The backend on your computer allows 300 admin requests a minute.
+  Studio could use them up on the Data and Backend tabs and then showed the backend's refusal. Now it waits the
+  second the backend asks for and tries again.
+- **A workflow saved in Studio keeps "Ignore privacy rules".**
+- **A menu opened low in the window moves up so you can see all of it.**
+
+### Good to know
+
+- A folder set up with create-nodegx 0.2.12 still has Studio 0.1.0. To move it to 0.2.0, delete `.mcp.json` (or
+  `opencode.json`, or `.vibe/config.toml`) and run `npm create nodegx` again.
+- The desktop app is on the Studio page, nodegx.io/studio/.
+
 ## npm packages 0.2.12 · 2026-11-07
 
 **An app that saves data can go online on your own free Cloudflare account, with one command.**
