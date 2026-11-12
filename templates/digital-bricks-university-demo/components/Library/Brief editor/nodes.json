@@ -1,0 +1,190 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "1e0baa1a-4277-514e-87ef-198deeea9f97",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "be_root",
+      "type": "Group",
+      "label": "Brief",
+      "children": [
+        "be_input",
+        "be_hint",
+        "be_prev_label",
+        "be_prev"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "be_input",
+      "type": "net.noodl.controls.textinput",
+      "label": "The brief, in Markdown",
+      "parent": "be_root",
+      "parameters": {
+        "type": "textArea",
+        "useLabel": true,
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 220,
+          "unit": "px"
+        },
+        "lineHeight": "var(--leading-relaxed)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "be_hint",
+      "type": "Text",
+      "label": "How to format",
+      "parent": "be_root",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--muted-foreground)",
+        "fontFamily": "var(--font-mono)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "be_prev_label",
+      "type": "Text",
+      "label": "What the learner sees",
+      "parent": "be_root",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "color": "var(--foreground)",
+        "marginTop": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "be_prev",
+      "type": "Group",
+      "label": "Preview",
+      "parent": "be_root",
+      "children": [
+        "be_ft"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "minHeight": {
+          "value": 48,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "borderStyle": "dashed",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-strong)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "be_ft",
+      "type": "/Shell/Formatted text",
+      "label": "The brief as the learner sees it",
+      "parent": "be_prev",
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "be_in",
+      "type": "Component Inputs",
+      "label": "Brief in",
+      "ports": [
+        {
+          "name": "value",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "load",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "be_out",
+      "type": "Component Outputs",
+      "label": "Brief out",
+      "ports": [
+        {
+          "name": "value",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "be_t_label",
+      "type": "Translation",
+      "label": "Brief",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.brief"
+      },
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "be_t_hint",
+      "type": "Translation",
+      "label": "How to format",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.briefHint"
+      },
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "be_t_prev",
+      "type": "Translation",
+      "label": "What the learner sees",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.preview"
+      },
+      "x": 410,
+      "y": 640
+    }
+  ],
+  "visualRoots": [
+    "be_root"
+  ]
+}

@@ -1,0 +1,467 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e601787d-3e7c-562c-8524-2a7fc9650239",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ps_root",
+      "type": "Group",
+      "label": "Plan settings",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "ps_head",
+        "ps_fields",
+        "ps_msg",
+        "ps_actions"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      }
+    },
+    {
+      "id": "ps_head",
+      "type": "Text",
+      "label": "Plan settings",
+      "x": 100,
+      "y": 160,
+      "parent": "ps_root",
+      "parameters": {
+        "text": "",
+        "as": "h2",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "ps_fields",
+      "type": "Group",
+      "label": "The fields",
+      "x": 100,
+      "y": 280,
+      "parent": "ps_root",
+      "children": [
+        "ps_title",
+        "ps_meet",
+        "ps_book",
+        "ps_status"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 640,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)"
+      }
+    },
+    {
+      "id": "ps_title",
+      "type": "net.noodl.controls.textinput",
+      "label": "Plan title",
+      "x": 160,
+      "y": 400,
+      "parent": "ps_fields",
+      "parameters": {
+        "type": "text",
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxLength": 140
+      }
+    },
+    {
+      "id": "ps_meet",
+      "type": "net.noodl.controls.textinput",
+      "label": "Meeting link",
+      "x": 160,
+      "y": 520,
+      "parent": "ps_fields",
+      "parameters": {
+        "type": "url",
+        "inputMode": "url",
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "ps_book",
+      "type": "net.noodl.controls.textinput",
+      "label": "Booking link",
+      "x": 160,
+      "y": 640,
+      "parent": "ps_fields",
+      "parameters": {
+        "type": "url",
+        "inputMode": "url",
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "ps_status",
+      "type": "net.noodl.controls.options",
+      "label": "Status",
+      "x": 160,
+      "y": 760,
+      "parent": "ps_fields",
+      "parameters": {
+        "useLabel": true,
+        "value": "",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 220,
+          "unit": "px"
+        }
+      }
+    },
+    {
+      "id": "ps_msg",
+      "type": "Text",
+      "label": "Why it was not saved",
+      "x": 100,
+      "y": 880,
+      "parent": "ps_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--attention)"
+      }
+    },
+    {
+      "id": "ps_actions",
+      "type": "Group",
+      "label": "Save and Cancel",
+      "x": 100,
+      "y": 1000,
+      "parent": "ps_root",
+      "children": [
+        "ps_save",
+        "ps_cancel"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)"
+      }
+    },
+    {
+      "id": "ps_save",
+      "type": "net.noodl.controls.button",
+      "label": "Save settings",
+      "x": 160,
+      "y": 1120,
+      "parent": "ps_actions",
+      "parameters": {
+        "label": ""
+      }
+    },
+    {
+      "id": "ps_cancel",
+      "type": "net.noodl.controls.button",
+      "label": "Cancel",
+      "x": 160,
+      "y": 1240,
+      "parent": "ps_actions",
+      "parameters": {
+        "label": "",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)"
+      }
+    },
+    {
+      "id": "ps_in",
+      "type": "Component Inputs",
+      "label": "The plan",
+      "x": 500,
+      "y": 40,
+      "ports": [
+        {
+          "name": "plan",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "load",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "ps_out",
+      "type": "Component Outputs",
+      "label": "Saved or closed",
+      "x": 500,
+      "y": 1120,
+      "ports": [
+        {
+          "name": "saved",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "closed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "ps_statuses",
+      "type": "/Option sets/Plan statuses",
+      "label": "The statuses on offer",
+      "x": 500,
+      "y": 160
+    },
+    {
+      "id": "ps_open",
+      "type": "JavaScriptFunction",
+      "label": "Open the plan: fill the fields",
+      "x": 500,
+      "y": 280,
+      "parameters": {
+        "runOnChange-in-plan": false,
+        "runOnChange-in-statuses": false,
+        "runOnChange-in-active": false,
+        "runOnChange-in-paused": false,
+        "runOnChange-in-finished": false,
+        "functionScript": "// The status list is the option set, in its order, each in the reader's words.\nconst plan = Inputs.plan && typeof Inputs.plan === 'object' ? Inputs.plan : {};\nconst get = (m, k) => (m && typeof m.get === 'function' ? m.get(k) : m && m[k]);\nconst words = { 'plan.planActive': Inputs.active, 'plan.planPaused': Inputs.paused, 'plan.planFinished': Inputs.finished };\nOutputs.statusItems = (Inputs.statuses || []).map((s) => ({ Label: words[get(s, 'labelKey')] || get(s, 'value'), Value: get(s, 'value') }));\nOutputs.id = plan.id || '';\nOutputs.title = plan.title || '';\nOutputs.meetingLink = plan.meetingLink || '';\nOutputs.bookingLink = plan.bookingLink || '';\nOutputs.status = plan.status || 'active';\nOutputs.opened();\n"
+      },
+      "ports": [
+        {
+          "name": "in-plan",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-statuses",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-active",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-paused",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-finished",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-statusItems",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-meetingLink",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-bookingLink",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-status",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-opened",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "ps_call",
+      "type": "CloudFunction2",
+      "label": "savePlan (staff only)",
+      "x": 500,
+      "y": 760,
+      "parameters": {
+        "function": "savePlan"
+      }
+    },
+    {
+      "id": "ps_msg_sw",
+      "type": "Switch",
+      "label": "Show why, once there is a why",
+      "x": 500,
+      "y": 880,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "ps_t_head",
+      "type": "Translation",
+      "label": "Plan settings",
+      "x": 800,
+      "y": 160,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.settingsEditor.heading"
+      }
+    },
+    {
+      "id": "ps_t_title",
+      "type": "Translation",
+      "label": "Plan title",
+      "x": 800,
+      "y": 220,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.settingsEditor.title"
+      }
+    },
+    {
+      "id": "ps_t_meet",
+      "type": "Translation",
+      "label": "Meeting link",
+      "x": 800,
+      "y": 280,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.settingsEditor.meetingLink"
+      }
+    },
+    {
+      "id": "ps_t_book",
+      "type": "Translation",
+      "label": "Booking link",
+      "x": 800,
+      "y": 340,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.settingsEditor.bookingLink"
+      }
+    },
+    {
+      "id": "ps_t_status",
+      "type": "Translation",
+      "label": "Status",
+      "x": 800,
+      "y": 400,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.settingsEditor.status"
+      }
+    },
+    {
+      "id": "ps_t_save",
+      "type": "Translation",
+      "label": "Save settings",
+      "x": 800,
+      "y": 460,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.settingsEditor.save"
+      }
+    },
+    {
+      "id": "ps_t_cancel",
+      "type": "Translation",
+      "label": "Cancel",
+      "x": 800,
+      "y": 520,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.settingsEditor.cancel"
+      }
+    },
+    {
+      "id": "ps_t_active",
+      "type": "Translation",
+      "label": "Active",
+      "x": 800,
+      "y": 580,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.planActive"
+      }
+    },
+    {
+      "id": "ps_t_paused",
+      "type": "Translation",
+      "label": "Paused",
+      "x": 800,
+      "y": 640,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.planPaused"
+      }
+    },
+    {
+      "id": "ps_t_finished",
+      "type": "Translation",
+      "label": "Finished",
+      "x": 800,
+      "y": 700,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.planFinished"
+      }
+    }
+  ],
+  "visualRoots": [
+    "ps_root"
+  ]
+}

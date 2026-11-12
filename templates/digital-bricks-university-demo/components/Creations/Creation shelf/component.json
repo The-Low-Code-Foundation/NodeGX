@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "5e069497-4abe-57a2-8b81-d72cc586edc4",
+  "name": "Creation shelf",
+  "path": "/Creations/Creation shelf",
+  "type": "visual",
+  "created": "2026-11-12T13:48:29.813Z",
+  "modified": "2026-11-12T13:56:50.193Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A learner's creations as a grid of cards with a filter per kind (DBU-09), and the one opened above the grid. Mode `own` (My creations: Edit on every card, her files through fileLink) or `coach` (read-only, files through fileLinkAsCoach). The page reads the creations and passes them in."
+}

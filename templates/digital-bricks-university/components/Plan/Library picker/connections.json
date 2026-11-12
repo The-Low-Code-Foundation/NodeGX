@@ -1,0 +1,145 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "1dd5f1c2-e79e-5279-8491-3865ac491eaf",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "lp_t_head",
+      "fromProperty": "Translation",
+      "toId": "lp_head",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lp_t_lede",
+      "fromProperty": "Translation",
+      "toId": "lp_lede",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lp_t_search",
+      "fromProperty": "Translation",
+      "toId": "lp_search",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "lp_t_close",
+      "fromProperty": "Translation",
+      "toId": "lp_close",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "lp_t_min",
+      "fromProperty": "Translation",
+      "toId": "lp_shape",
+      "toProperty": "in-minutes"
+    },
+    {
+      "fromId": "lp_in",
+      "fromProperty": "load",
+      "toId": "lp_read",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "lp_in",
+      "fromProperty": "load",
+      "toId": "lp_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "lp_read",
+      "fromProperty": "out-items",
+      "toId": "lp_shape",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "lp_search",
+      "fromProperty": "onTextChanged",
+      "toId": "lp_shape",
+      "toProperty": "in-search"
+    },
+    {
+      "fromId": "lp_shape",
+      "fromProperty": "out-rows",
+      "toId": "lp_rows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "lp_shape",
+      "fromProperty": "out-hasRows",
+      "toId": "lp_list",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lp_shape",
+      "fromProperty": "out-none",
+      "toId": "lp_none",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lp_in",
+      "fromProperty": "planId",
+      "toId": "lp_add",
+      "toProperty": "in-planId"
+    },
+    {
+      "fromId": "lp_rows",
+      "fromProperty": "itemActionItemId",
+      "toId": "lp_add",
+      "toProperty": "in-libraryItemId"
+    },
+    {
+      "fromId": "lp_rows",
+      "fromProperty": "itemOutputSignal-add",
+      "toId": "lp_add",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "lp_add",
+      "fromProperty": "out-stepId",
+      "toId": "lp_out",
+      "toProperty": "addedId"
+    },
+    {
+      "fromId": "lp_add",
+      "fromProperty": "done",
+      "toId": "lp_out",
+      "toProperty": "added"
+    },
+    {
+      "fromId": "lp_add",
+      "fromProperty": "error",
+      "toId": "lp_failed",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lp_add",
+      "fromProperty": "failure",
+      "toId": "lp_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "lp_t_failed",
+      "fromProperty": "Translation",
+      "toId": "lp_failed",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lp_read",
+      "fromProperty": "failure",
+      "toId": "lp_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "lp_fail_sw",
+      "fromProperty": "state",
+      "toId": "lp_failed",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lp_close",
+      "fromProperty": "onClick",
+      "toId": "lp_out",
+      "toProperty": "closed"
+    }
+  ]
+}

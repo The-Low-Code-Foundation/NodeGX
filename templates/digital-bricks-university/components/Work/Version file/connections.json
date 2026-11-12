@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "eec6024a-c3fa-59f0-84f8-5329c05c3bec",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "vf_in",
+      "fromProperty": "fileName",
+      "toId": "vf_name",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "vf_in",
+      "fromProperty": "file",
+      "toId": "vf_viewer",
+      "toProperty": "file"
+    },
+    {
+      "fromId": "vf_in",
+      "fromProperty": "fileName",
+      "toId": "vf_viewer",
+      "toProperty": "fileName"
+    },
+    {
+      "fromId": "vf_in",
+      "fromProperty": "mode",
+      "toId": "vf_viewer",
+      "toProperty": "mode"
+    }
+  ]
+}

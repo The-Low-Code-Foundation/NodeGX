@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d2e8d20d-4568-55f8-8627-5a514656f0f9",
+  "name": "Library pick row",
+  "path": "/Plan/Library pick row",
+  "type": "visual",
+  "created": "2026-11-09T10:46:12.535Z",
+  "modified": "2026-11-09T10:46:12.535Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One library item offered to a plan: its title, its time and tags, and Add, which copies it into the plan as a draft."
+}

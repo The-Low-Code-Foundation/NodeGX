@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "0a03f4c0-3a7a-5bba-8295-aea808f9092d",
+  "name": "Add steps",
+  "path": "/Plan/Add steps",
+  "type": "visual",
+  "created": "2026-11-09T10:44:37.428Z",
+  "modified": "2026-11-09T10:44:37.428Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The buttons under a plan's steps: add a live session, a homework or a check-in as a draft at the end, pick homework from the library, and share everything that's ready. Reports the new step, what changed and, in a sentence, what sharing did."
+}

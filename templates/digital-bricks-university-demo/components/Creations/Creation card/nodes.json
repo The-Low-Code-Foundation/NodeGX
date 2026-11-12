@@ -1,0 +1,412 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7ee5a3e7-c3d2-53b5-8037-aece8a12f809",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "crc_root",
+      "type": "Group",
+      "label": "Card",
+      "children": [
+        "crc_chips",
+        "crc_title",
+        "crc_made",
+        "crc_from",
+        "crc_actions"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-5)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "dataAttributes": "data-testid"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "crc_chips",
+      "type": "Group",
+      "label": "Kind, and used in class",
+      "parent": "crc_root",
+      "children": [
+        "crc_kind",
+        "crc_used_box"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-1)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "crc_kind",
+      "type": "/Plan/Chip",
+      "label": "Kind badge",
+      "parent": "crc_chips",
+      "parameters": {
+        "outlined": false
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "crc_used_box",
+      "type": "Group",
+      "label": "Shown when used in class",
+      "parent": "crc_chips",
+      "children": [
+        "crc_used"
+      ],
+      "parameters": {
+        "mounted": false,
+        "sizeMode": "contentSize",
+        "flexDirection": "row"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "crc_used",
+      "type": "/Plan/Chip",
+      "label": "Used in class",
+      "parent": "crc_used_box",
+      "parameters": {
+        "labelKey": "creations.usedInClass",
+        "bg": "var(--done-bg)",
+        "fg": "var(--done-fg)",
+        "outlined": false
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "crc_title",
+      "type": "Text",
+      "label": "Title",
+      "parent": "crc_root",
+      "parameters": {
+        "text": "",
+        "as": "h3",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "crc_made",
+      "type": "Text",
+      "label": "Made with {madeWith}",
+      "parent": "crc_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "crc_from",
+      "type": "Text",
+      "label": "From your homework: {step}",
+      "parent": "crc_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "crc_actions",
+      "type": "Group",
+      "label": "Open and Edit",
+      "parent": "crc_root",
+      "children": [
+        "crc_open",
+        "crc_edit"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "crc_open",
+      "type": "net.noodl.controls.button",
+      "label": "Open",
+      "parent": "crc_actions",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-eye",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)",
+        "iconColor": "var(--foreground)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "crc_edit",
+      "type": "net.noodl.controls.button",
+      "label": "Edit (its owner only)",
+      "parent": "crc_actions",
+      "parameters": {
+        "mounted": false,
+        "label": "",
+        "sizeMode": "contentSize",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-pencil",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)",
+        "iconColor": "var(--foreground)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "crc_in",
+      "type": "Component Inputs",
+      "label": "The creation",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "kindKey",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "kindBg",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "kindFg",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "madeWith",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "hasMadeWith",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "stepTitle",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "hasStep",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "usedInClass",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "canEdit",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "crc_out",
+      "type": "Component Outputs",
+      "label": "Open or edit it",
+      "ports": [
+        {
+          "name": "open",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "edit",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "crc_testid",
+      "type": "String Format",
+      "label": "creation-{id}, for tests",
+      "parameters": {
+        "format": "creation-{id}"
+      },
+      "x": 470,
+      "y": 40
+    },
+    {
+      "id": "crc_t_made",
+      "type": "Translation",
+      "label": "Made with {madeWith}",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.madeWith"
+      },
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "crc_fill_made",
+      "type": "String Format",
+      "label": "What it was made with, into the line",
+      "parameters": {
+        "format": "{madeWith}"
+      },
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "crc_t_from",
+      "type": "Translation",
+      "label": "From your homework: {step}",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.from"
+      },
+      "x": 470,
+      "y": 1600
+    },
+    {
+      "id": "crc_fill_from",
+      "type": "String Format",
+      "label": "The homework into the line",
+      "parameters": {
+        "format": "{step}"
+      },
+      "x": 470,
+      "y": 880
+    },
+    {
+      "id": "crc_t_open",
+      "type": "Translation",
+      "label": "Open",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.open"
+      },
+      "x": 470,
+      "y": 1240
+    },
+    {
+      "id": "crc_t_edit",
+      "type": "Translation",
+      "label": "Edit",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.edit"
+      },
+      "x": 470,
+      "y": 1360
+    }
+  ],
+  "visualRoots": [
+    "crc_root"
+  ]
+}

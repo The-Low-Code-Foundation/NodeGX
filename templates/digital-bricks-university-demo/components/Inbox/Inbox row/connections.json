@@ -1,0 +1,139 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "a11ea9d8-ae40-585a-8efb-6e40a0f1628d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ir_in",
+      "fromProperty": "kindKey",
+      "toId": "ir_chip",
+      "toProperty": "labelKey"
+    },
+    {
+      "fromId": "ir_in",
+      "fromProperty": "kindBg",
+      "toId": "ir_chip",
+      "toProperty": "bg"
+    },
+    {
+      "fromId": "ir_in",
+      "fromProperty": "kindFg",
+      "toId": "ir_chip",
+      "toProperty": "fg"
+    },
+    {
+      "fromId": "ir_in",
+      "fromProperty": "learner",
+      "toId": "ir_name",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ir_in",
+      "fromProperty": "summaryKey",
+      "toId": "ir_t_sum",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "ir_t_sum",
+      "fromProperty": "Translation",
+      "toId": "ir_fill_sum",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "ir_in",
+      "fromProperty": "title",
+      "toId": "ir_fill_sum",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "ir_in",
+      "fromProperty": "body",
+      "toId": "ir_fill_sum",
+      "toProperty": "body"
+    },
+    {
+      "fromId": "ir_in",
+      "fromProperty": "n",
+      "toId": "ir_fill_sum",
+      "toProperty": "n"
+    },
+    {
+      "fromId": "ir_in",
+      "fromProperty": "days",
+      "toId": "ir_fill_sum",
+      "toProperty": "days"
+    },
+    {
+      "fromId": "ir_in",
+      "fromProperty": "first",
+      "toId": "ir_fill_sum",
+      "toProperty": "first"
+    },
+    {
+      "fromId": "ir_in",
+      "fromProperty": "version",
+      "toId": "ir_fill_sum",
+      "toProperty": "version"
+    },
+    {
+      "fromId": "ir_fill_sum",
+      "fromProperty": "formatted",
+      "toId": "ir_summary",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ir_in",
+      "fromProperty": "ageKey",
+      "toId": "ir_t_age",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "ir_t_age",
+      "fromProperty": "Translation",
+      "toId": "ir_fill_age",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "ir_in",
+      "fromProperty": "ageN",
+      "toId": "ir_fill_age",
+      "toProperty": "n"
+    },
+    {
+      "fromId": "ir_fill_age",
+      "fromProperty": "formatted",
+      "toId": "ir_age",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ir_in",
+      "fromProperty": "selected",
+      "toId": "ir_bg",
+      "toProperty": "selected"
+    },
+    {
+      "fromId": "ir_bg",
+      "fromProperty": "result",
+      "toId": "ir_row",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "ir_in",
+      "fromProperty": "itemId",
+      "toId": "ir_testid",
+      "toProperty": "id"
+    },
+    {
+      "fromId": "ir_testid",
+      "fromProperty": "formatted",
+      "toId": "ir_row",
+      "toProperty": "data-testid"
+    },
+    {
+      "fromId": "ir_row",
+      "fromProperty": "onClick",
+      "toId": "ir_out",
+      "toProperty": "open"
+    }
+  ]
+}

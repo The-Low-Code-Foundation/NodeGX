@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2579363e-9bfa-5354-8478-ca84fad7cfc1",
+  "name": "Demo intro",
+  "path": "/Demo/Demo intro",
+  "type": "visual",
+  "created": "2026-11-12T16:57:24.708Z",
+  "modified": "2026-11-12T16:57:24.708Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The demo's way in (DBU-11): the pitch, what the demo is, and two doors, Camille's view and Richard's view. Shows only in the demo; Sign in places it where the email form is."
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "66b703a7-9464-5f17-8c3c-2b9638b91c14",
+  "name": "Message row",
+  "path": "/Messages/Message row",
+  "type": "visual",
+  "created": "2026-11-12T10:17:10.555Z",
+  "modified": "2026-11-12T10:17:10.555Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One message in a conversation (DBU-07): who wrote it and when, New while unread, the homework it is about, the text (Markdown, HTML off) and its attached files, each shown or downloaded. The coach's messages sit on the live tint."
+}

@@ -1,0 +1,110 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "6b3b40b4-c08a-5620-86ec-8ec08d4fb2b3",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ar_card",
+      "type": "Group",
+      "label": "Ask Richard",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "ar_title",
+        "ar_body",
+        "ar_composer"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-5)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "dataAttributes": "data-testid",
+        "data-testid": "ask-richard"
+      }
+    },
+    {
+      "id": "ar_title",
+      "type": "Text",
+      "label": "Stuck between sessions? Ask Richard",
+      "x": 100,
+      "y": 160,
+      "parent": "ar_card",
+      "parameters": {
+        "text": "",
+        "as": "h2",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "ar_body",
+      "type": "Text",
+      "label": "He gets an email",
+      "x": 100,
+      "y": 280,
+      "parent": "ar_card",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "ar_composer",
+      "type": "/Messages/Composer",
+      "label": "A general message",
+      "x": 100,
+      "y": 400,
+      "parent": "ar_card",
+      "parameters": {
+        "mode": "learner",
+        "canAttach": true,
+        "labelKey": "messages.yourMessage"
+      }
+    },
+    {
+      "id": "ar_t_title",
+      "type": "Translation",
+      "label": "Stuck between sessions? Ask Richard",
+      "x": 520,
+      "y": 160,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.askTitle"
+      }
+    },
+    {
+      "id": "ar_t_body",
+      "type": "Translation",
+      "label": "He gets an email",
+      "x": 520,
+      "y": 280,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.askBody"
+      }
+    }
+  ],
+  "visualRoots": [
+    "ar_card"
+  ]
+}

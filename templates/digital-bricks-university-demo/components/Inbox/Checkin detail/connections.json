@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "fc9ae6e7-a1fe-590c-83dd-656e2eaf14e6",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "icd_t_lead",
+      "fromProperty": "Translation",
+      "toId": "icd_fill_lead",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "icd_in",
+      "fromProperty": "first",
+      "toId": "icd_fill_lead",
+      "toProperty": "first"
+    },
+    {
+      "fromId": "icd_fill_lead",
+      "fromProperty": "formatted",
+      "toId": "icd_lead",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "icd_in",
+      "fromProperty": "responseId",
+      "toId": "icd_answers",
+      "toProperty": "prefix"
+    },
+    {
+      "fromId": "icd_in",
+      "fromProperty": "questions",
+      "toId": "icd_answers",
+      "toProperty": "questions"
+    },
+    {
+      "fromId": "icd_in",
+      "fromProperty": "answers",
+      "toId": "icd_answers",
+      "toProperty": "answers"
+    },
+    {
+      "fromId": "icd_t_done",
+      "fromProperty": "Translation",
+      "toId": "icd_done",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "icd_t_hint",
+      "fromProperty": "Translation",
+      "toId": "icd_hint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "icd_in",
+      "fromProperty": "responseId",
+      "toId": "icd_cf",
+      "toProperty": "in-responseId"
+    },
+    {
+      "fromId": "icd_done",
+      "fromProperty": "onClick",
+      "toId": "icd_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "icd_done",
+      "fromProperty": "onClick",
+      "toId": "icd_cf",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "icd_cf",
+      "fromProperty": "error",
+      "toId": "icd_refused",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "icd_cf",
+      "fromProperty": "failure",
+      "toId": "icd_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "icd_sw",
+      "fromProperty": "state",
+      "toId": "icd_refused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "icd_cf",
+      "fromProperty": "done",
+      "toId": "icd_out",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "icd_cf",
+      "fromProperty": "failure",
+      "toId": "icd_out",
+      "toProperty": "changed"
+    }
+  ]
+}

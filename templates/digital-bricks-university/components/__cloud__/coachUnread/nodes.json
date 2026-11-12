@@ -1,0 +1,72 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "50d639b5-13ce-535d-8483-4bb9898a6bd2",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cu_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach's tabs ask",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "",
+        "allowNoAuth": false
+      }
+    },
+    {
+      "id": "cu_fn",
+      "type": "JavaScriptFunction",
+      "label": "Count unread learner messages",
+      "x": 40,
+      "y": 180,
+      "parameters": {
+        "functionScript": "// How many learner messages nobody on staff has read yet (DBU-07): the count on the Learners tab.\n(async () => {\n  try {\n    const rows = await Noodl.Records.query('Message', { readAt: { exists: false } }, { limit: 1000, plain: true });\n    Outputs.unread = rows.filter((m) => m.author === m.learner && !m.readAt).length;\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:coachUnread]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-failed",
+          "displayName": "failed",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-unread",
+          "displayName": "unread",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "cu_res",
+      "type": "noodl.cloud.response",
+      "label": "The count",
+      "x": 40,
+      "y": 320,
+      "parameters": {
+        "params": "unread"
+      }
+    },
+    {
+      "id": "cu_deny",
+      "type": "noodl.cloud.response",
+      "label": "Could not count",
+      "x": 320,
+      "y": 320,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "Could not count unread messages."
+      }
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0a2a2177-145a-5678-860f-ed580eac4e1b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "vd_in",
+      "fromProperty": "shown",
+      "toId": "vd_root",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "vd_in",
+      "fromProperty": "bg",
+      "toId": "vd_root",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "vd_in",
+      "fromProperty": "border",
+      "toId": "vd_root",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "vd_in",
+      "fromProperty": "fg",
+      "toId": "vd_title",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "vd_in",
+      "fromProperty": "titleKey",
+      "toId": "vd_t_title",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "vd_t_title",
+      "fromProperty": "Translation",
+      "toId": "vd_fill",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "vd_in",
+      "fromProperty": "v",
+      "toId": "vd_fill",
+      "toProperty": "v"
+    },
+    {
+      "fromId": "vd_in",
+      "fromProperty": "when",
+      "toId": "vd_fill",
+      "toProperty": "when"
+    },
+    {
+      "fromId": "vd_fill",
+      "fromProperty": "formatted",
+      "toId": "vd_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "vd_in",
+      "fromProperty": "hasNote",
+      "toId": "vd_note_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "vd_in",
+      "fromProperty": "note",
+      "toId": "vd_note",
+      "toProperty": "markdown"
+    }
+  ]
+}

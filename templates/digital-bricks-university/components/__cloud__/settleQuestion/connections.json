@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "107775b5-def1-54a8-8621-ac0b1251acc7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sx_req",
+      "fromProperty": "pm-messageId",
+      "toId": "sx_fn",
+      "toProperty": "in-messageId"
+    },
+    {
+      "fromId": "sx_req",
+      "fromProperty": "receive",
+      "toId": "sx_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "sx_fn",
+      "fromProperty": "out-done",
+      "toId": "sx_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sx_fn",
+      "fromProperty": "out-why",
+      "toId": "sx_deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "sx_fn",
+      "fromProperty": "out-refuse",
+      "toId": "sx_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sx_fn",
+      "fromProperty": "out-failed",
+      "toId": "sx_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sx_fn",
+      "fromProperty": "failure",
+      "toId": "sx_fail",
+      "toProperty": "send"
+    }
+  ]
+}

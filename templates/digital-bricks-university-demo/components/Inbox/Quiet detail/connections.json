@@ -1,0 +1,199 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "bb2c5885-3821-54c9-889e-2ee7221792cc",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "qq_t_h",
+      "fromProperty": "Translation",
+      "toId": "qq_facts_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "qq_in",
+      "fromProperty": "facts",
+      "toId": "qq_facts",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "qq_in",
+      "fromProperty": "nextKey",
+      "toId": "qq_t_next",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "qq_t_next",
+      "fromProperty": "Translation",
+      "toId": "qq_fill_next",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "qq_in",
+      "fromProperty": "nextTitle",
+      "toId": "qq_fill_next",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "qq_t_nudge",
+      "fromProperty": "Translation",
+      "toId": "qq_fill_nudge",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "qq_in",
+      "fromProperty": "first",
+      "toId": "qq_fill_nudge",
+      "toProperty": "first"
+    },
+    {
+      "fromId": "qq_fill_next",
+      "fromProperty": "formatted",
+      "toId": "qq_fill_nudge",
+      "toProperty": "next"
+    },
+    {
+      "fromId": "qq_fill_nudge",
+      "fromProperty": "formatted",
+      "toId": "qq_nudge",
+      "toProperty": "draft"
+    },
+    {
+      "fromId": "qq_in",
+      "fromProperty": "learnerId",
+      "toId": "qq_nudge",
+      "toProperty": "learnerId"
+    },
+    {
+      "fromId": "qq_in",
+      "fromProperty": "first",
+      "toId": "qq_nudge",
+      "toProperty": "first"
+    },
+    {
+      "fromId": "qq_t_nhint",
+      "fromProperty": "Translation",
+      "toId": "qq_fill_nhint",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "qq_in",
+      "fromProperty": "first",
+      "toId": "qq_fill_nhint",
+      "toProperty": "first"
+    },
+    {
+      "fromId": "qq_fill_nhint",
+      "fromProperty": "formatted",
+      "toId": "qq_nudge_hint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "qq_t_snooze",
+      "fromProperty": "Translation",
+      "toId": "qq_snooze",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "qq_t_shint",
+      "fromProperty": "Translation",
+      "toId": "qq_fill_shint",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "qq_in",
+      "fromProperty": "first",
+      "toId": "qq_fill_shint",
+      "toProperty": "first"
+    },
+    {
+      "fromId": "qq_fill_shint",
+      "fromProperty": "formatted",
+      "toId": "qq_snooze_hint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "qq_in",
+      "fromProperty": "flagId",
+      "toId": "qq_cf_nudged",
+      "toProperty": "in-flagId"
+    },
+    {
+      "fromId": "qq_in",
+      "fromProperty": "flagId",
+      "toId": "qq_cf_snooze",
+      "toProperty": "in-flagId"
+    },
+    {
+      "fromId": "qq_nudge",
+      "fromProperty": "sent",
+      "toId": "qq_cf_nudged",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "qq_snooze",
+      "fromProperty": "onClick",
+      "toId": "qq_cf_snooze",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "qq_snooze",
+      "fromProperty": "onClick",
+      "toId": "qq_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "qq_cf_snooze",
+      "fromProperty": "error",
+      "toId": "qq_refused",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "qq_cf_nudged",
+      "fromProperty": "error",
+      "toId": "qq_refused",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "qq_cf_snooze",
+      "fromProperty": "failure",
+      "toId": "qq_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "qq_cf_nudged",
+      "fromProperty": "failure",
+      "toId": "qq_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "qq_sw",
+      "fromProperty": "state",
+      "toId": "qq_refused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "qq_cf_snooze",
+      "fromProperty": "done",
+      "toId": "qq_out",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "qq_cf_nudged",
+      "fromProperty": "done",
+      "toId": "qq_out",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "qq_cf_snooze",
+      "fromProperty": "failure",
+      "toId": "qq_out",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "qq_cf_nudged",
+      "fromProperty": "failure",
+      "toId": "qq_out",
+      "toProperty": "changed"
+    }
+  ]
+}

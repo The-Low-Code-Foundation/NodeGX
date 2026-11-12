@@ -1,0 +1,141 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "64126eff-6f8a-5012-8d0d-4c9ee6ba9221",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "car_row",
+      "type": "Group",
+      "label": "Question and answer",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-0-5)",
+        "dataAttributes": "data-testid"
+      },
+      "children": [
+        "car_q",
+        "car_a"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "car_q",
+      "type": "Text",
+      "label": "The question",
+      "parent": "car_row",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "car_a",
+      "type": "Text",
+      "label": "The answer",
+      "parent": "car_row",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "car_in",
+      "type": "Component Inputs",
+      "label": "Row in",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "answerKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "max",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "suffix",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "answerFg",
+          "plug": "output",
+          "type": "color"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "car_t",
+      "type": "Translation",
+      "label": "How the answer reads",
+      "parameters": {
+        "Namespace": "pages"
+      },
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "car_fill",
+      "type": "String Format",
+      "label": "Value, the scale's top and the unit into it",
+      "parameters": {
+        "format": "{value}{max}{suffix}"
+      },
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "car_testid",
+      "type": "String Format",
+      "label": "The row's id, for tests",
+      "parameters": {
+        "format": "{id}"
+      },
+      "x": 350,
+      "y": 40
+    }
+  ],
+  "visualRoots": [
+    "car_row"
+  ]
+}

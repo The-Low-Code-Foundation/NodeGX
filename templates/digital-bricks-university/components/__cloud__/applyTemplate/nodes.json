@@ -1,0 +1,107 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "aaf5af89-8b3e-5aee-8ce9-8d06b1be4a28",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "at_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach applies a template",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "planId,templateId",
+        "allowNoAuth": false,
+        "ptype-planId": "string",
+        "preq-planId": true,
+        "ptype-templateId": "string",
+        "preq-templateId": true
+      },
+      "metadata": {
+        "comment": "role:staff in nodegx.security.json."
+      }
+    },
+    {
+      "id": "at_check",
+      "type": "JavaScriptFunction",
+      "label": "Plan and template both there; name an empty plan after it",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "runOnChange-in-planId": false,
+        "runOnChange-in-templateId": false,
+        "functionScript": "// Checked before anything is written, so a missing plan or an archived template adds nothing.\n(async () => {\n  const refuse = (why) => { Outputs.why = why; Outputs.refuse(); };\n  try {\n    const R = Noodl.Records;\n    const q = (c, where) => R.query(c, where, { limit: 2, plain: true });\n    const planId = String(Inputs.planId || '');\n    const templateId = String(Inputs.templateId || '');\n    const plans = planId ? await q('Plan', { objectId: { equalTo: planId } }) : [];\n    if (plans.length !== 1) return refuse('That plan is no longer there. Reload the page.');\n    const templates = templateId ? await q('PlanTemplate', { objectId: { equalTo: templateId } }) : [];\n    if (templates.length !== 1 || templates[0].archived === true) return refuse('That plan template is no longer offered. Reload the page and choose another.');\n    const hasSteps = (await q('Step', { plan: { equalTo: planId } })).length > 0;\n    if (!hasSteps) await R.save(planId, { title: templates[0].title, fromTemplate: templateId }, { className: 'Plan' });\n    Outputs.job = { planId, learnerId: plans[0].learner, templateId };\n  } catch (e) {\n    console.error('[dbu:applyTemplate]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-planId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-templateId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-job",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "out-why",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "at_steps",
+      "type": "/#__cloud__/shared/Steps from template",
+      "label": "The template's steps, as drafts",
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "at_res",
+      "type": "noodl.cloud.response",
+      "label": "How many steps were added",
+      "x": 40,
+      "y": 400,
+      "parameters": {
+        "params": "added"
+      }
+    },
+    {
+      "id": "at_deny",
+      "type": "noodl.cloud.response",
+      "label": "A refusal the coach can act on",
+      "x": 40,
+      "y": 520,
+      "parameters": {
+        "status": "failure"
+      }
+    },
+    {
+      "id": "at_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "x": 40,
+      "y": 640,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "The template could not be applied. Reload the page to see what was added."
+      }
+    }
+  ]
+}

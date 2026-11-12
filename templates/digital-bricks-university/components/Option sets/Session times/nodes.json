@@ -1,0 +1,40 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "91b823aa-f840-5cb0-8dfb-78f57b4aed52",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "stm_data",
+      "type": "Static Data",
+      "label": "Session times",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "type": "json",
+        "json": "[{\"id\":\"time-07:00\",\"value\":\"07:00\"},{\"id\":\"time-07:15\",\"value\":\"07:15\"},{\"id\":\"time-07:30\",\"value\":\"07:30\"},{\"id\":\"time-07:45\",\"value\":\"07:45\"},{\"id\":\"time-08:00\",\"value\":\"08:00\"},{\"id\":\"time-08:15\",\"value\":\"08:15\"},{\"id\":\"time-08:30\",\"value\":\"08:30\"},{\"id\":\"time-08:45\",\"value\":\"08:45\"},{\"id\":\"time-09:00\",\"value\":\"09:00\"},{\"id\":\"time-09:15\",\"value\":\"09:15\"},{\"id\":\"time-09:30\",\"value\":\"09:30\"},{\"id\":\"time-09:45\",\"value\":\"09:45\"},{\"id\":\"time-10:00\",\"value\":\"10:00\"},{\"id\":\"time-10:15\",\"value\":\"10:15\"},{\"id\":\"time-10:30\",\"value\":\"10:30\"},{\"id\":\"time-10:45\",\"value\":\"10:45\"},{\"id\":\"time-11:00\",\"value\":\"11:00\"},{\"id\":\"time-11:15\",\"value\":\"11:15\"},{\"id\":\"time-11:30\",\"value\":\"11:30\"},{\"id\":\"time-11:45\",\"value\":\"11:45\"},{\"id\":\"time-12:00\",\"value\":\"12:00\"},{\"id\":\"time-12:15\",\"value\":\"12:15\"},{\"id\":\"time-12:30\",\"value\":\"12:30\"},{\"id\":\"time-12:45\",\"value\":\"12:45\"},{\"id\":\"time-13:00\",\"value\":\"13:00\"},{\"id\":\"time-13:15\",\"value\":\"13:15\"},{\"id\":\"time-13:30\",\"value\":\"13:30\"},{\"id\":\"time-13:45\",\"value\":\"13:45\"},{\"id\":\"time-14:00\",\"value\":\"14:00\"},{\"id\":\"time-14:15\",\"value\":\"14:15\"},{\"id\":\"time-14:30\",\"value\":\"14:30\"},{\"id\":\"time-14:45\",\"value\":\"14:45\"},{\"id\":\"time-15:00\",\"value\":\"15:00\"},{\"id\":\"time-15:15\",\"value\":\"15:15\"},{\"id\":\"time-15:30\",\"value\":\"15:30\"},{\"id\":\"time-15:45\",\"value\":\"15:45\"},{\"id\":\"time-16:00\",\"value\":\"16:00\"},{\"id\":\"time-16:15\",\"value\":\"16:15\"},{\"id\":\"time-16:30\",\"value\":\"16:30\"},{\"id\":\"time-16:45\",\"value\":\"16:45\"},{\"id\":\"time-17:00\",\"value\":\"17:00\"},{\"id\":\"time-17:15\",\"value\":\"17:15\"},{\"id\":\"time-17:30\",\"value\":\"17:30\"},{\"id\":\"time-17:45\",\"value\":\"17:45\"},{\"id\":\"time-18:00\",\"value\":\"18:00\"},{\"id\":\"time-18:15\",\"value\":\"18:15\"},{\"id\":\"time-18:30\",\"value\":\"18:30\"},{\"id\":\"time-18:45\",\"value\":\"18:45\"},{\"id\":\"time-19:00\",\"value\":\"19:00\"},{\"id\":\"time-19:15\",\"value\":\"19:15\"},{\"id\":\"time-19:30\",\"value\":\"19:30\"},{\"id\":\"time-19:45\",\"value\":\"19:45\"},{\"id\":\"time-20:00\",\"value\":\"20:00\"},{\"id\":\"time-20:15\",\"value\":\"20:15\"},{\"id\":\"time-20:30\",\"value\":\"20:30\"},{\"id\":\"time-20:45\",\"value\":\"20:45\"},{\"id\":\"time-21:00\",\"value\":\"21:00\"},{\"id\":\"time-21:15\",\"value\":\"21:15\"},{\"id\":\"time-21:30\",\"value\":\"21:30\"},{\"id\":\"time-21:45\",\"value\":\"21:45\"}]"
+      },
+      "metadata": {
+        "comment": "A time is not a word: the dropdown shows `value` as it is, so these need no Strings."
+      }
+    },
+    {
+      "id": "stm_out",
+      "type": "Component Outputs",
+      "label": "Times out",
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "items",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        }
+      ]
+    }
+  ]
+}

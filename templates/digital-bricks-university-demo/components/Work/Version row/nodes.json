@@ -1,0 +1,585 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3c15d0b7-2164-5ddb-878c-927d6aa21142",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "vr_root",
+      "type": "Group",
+      "label": "Version",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "dataAttributes": "data-testid"
+      },
+      "children": [
+        "vr_head",
+        "vr_note",
+        "vr_file",
+        "vr_link",
+        "vr_text",
+        "vr_reply",
+        "vr_review_box"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "vr_head",
+      "type": "Group",
+      "label": "Version, when, kind and review",
+      "parent": "vr_root",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "vr_title",
+        "vr_kind",
+        "vr_review"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "vr_title",
+      "type": "Text",
+      "label": "Version 2 · Thu 22 Oct, 19:40",
+      "parent": "vr_head",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "vr_kind",
+      "type": "/Plan/Chip",
+      "label": "Kind",
+      "parent": "vr_head",
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "vr_review",
+      "type": "/Plan/Chip",
+      "label": "Review",
+      "parent": "vr_head",
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "vr_note",
+      "type": "Text",
+      "label": "The learner's note",
+      "parent": "vr_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "vr_file",
+      "type": "Group",
+      "label": "The files",
+      "parent": "vr_root",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)"
+      },
+      "x": 100,
+      "y": 760,
+      "children": [
+        "vr_files"
+      ]
+    },
+    {
+      "id": "vr_link",
+      "type": "Group",
+      "label": "A link",
+      "parent": "vr_root",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "vr_url",
+        "vr_open"
+      ],
+      "x": 100,
+      "y": 1360
+    },
+    {
+      "id": "vr_url",
+      "type": "Text",
+      "label": "The address",
+      "parent": "vr_link",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "wordBreak": "break-all",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "vr_open",
+      "type": "net.noodl.controls.button",
+      "label": "Open link",
+      "parent": "vr_link",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-external-link",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)",
+        "iconColor": "var(--foreground)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-11)"
+      },
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "vr_text",
+      "type": "Group",
+      "label": "The text",
+      "parent": "vr_root",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)"
+      },
+      "children": [
+        "vr_text_ft"
+      ],
+      "x": 100,
+      "y": 1720
+    },
+    {
+      "id": "vr_text_ft",
+      "type": "/Shell/Formatted text",
+      "label": "What they wrote, HTML off",
+      "parent": "vr_text",
+      "x": 160,
+      "y": 1840
+    },
+    {
+      "id": "vr_reply",
+      "type": "Group",
+      "label": "Richard's note",
+      "parent": "vr_root",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)",
+        "backgroundColor": "var(--live-bg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--live-border)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-2)"
+      },
+      "children": [
+        "vr_reply_head",
+        "vr_reply_ft"
+      ],
+      "x": 100,
+      "y": 1960
+    },
+    {
+      "id": "vr_reply_head",
+      "type": "Text",
+      "label": "Richard's note · when",
+      "parent": "vr_reply",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--live-fg)"
+      },
+      "x": 160,
+      "y": 2080
+    },
+    {
+      "id": "vr_reply_ft",
+      "type": "/Shell/Formatted text",
+      "label": "His note, HTML off",
+      "parent": "vr_reply",
+      "x": 160,
+      "y": 2200
+    },
+    {
+      "id": "vr_review_box",
+      "type": "Group",
+      "label": "The review, for the coach",
+      "parent": "vr_root",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "children": [
+        "vr_review_ctl"
+      ],
+      "x": 100,
+      "y": 2320
+    },
+    {
+      "id": "vr_review_ctl",
+      "type": "/Work/Review",
+      "label": "Approve or ask for changes",
+      "parent": "vr_review_box",
+      "x": 160,
+      "y": 2440
+    },
+    {
+      "id": "vr_in",
+      "type": "Component Inputs",
+      "label": "The version",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "mode",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "version",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "when",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "kindKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "kindBg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "kindFg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "reviewKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "reviewBg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "reviewFg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "isFile",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "isLink",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "isText",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "files",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "url",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "text",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "note",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasNote",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "reviewNote",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasReviewNote",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "reviewedWhen",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "canReview",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "metadata": {
+        "comment": "Worked out by Work/Versions; the row only draws and reports."
+      },
+      "x": 470,
+      "y": 400
+    },
+    {
+      "id": "vr_out",
+      "type": "Component Outputs",
+      "label": "Reviewed",
+      "ports": [
+        {
+          "name": "reviewed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 2440
+    },
+    {
+      "id": "vr_t_head",
+      "type": "Translation",
+      "label": "Version {version} · {when}",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "work.versionHead"
+      },
+      "x": 470,
+      "y": 2560
+    },
+    {
+      "id": "vr_fill_head",
+      "type": "String Format",
+      "label": "Number and time into the head",
+      "parameters": {
+        "format": "{version} {when}"
+      },
+      "metadata": {
+        "comment": "The format arrives from the Translation; this default only declares the inputs."
+      },
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "vr_t_note",
+      "type": "Translation",
+      "label": "Note: {note}",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "work.note"
+      },
+      "x": 470,
+      "y": 2680
+    },
+    {
+      "id": "vr_fill_note",
+      "type": "String Format",
+      "label": "The note into its line",
+      "parameters": {
+        "format": "{note}"
+      },
+      "x": 470,
+      "y": 640
+    },
+    {
+      "id": "vr_t_reply",
+      "type": "Translation",
+      "label": "Richard's note · {when}",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "work.reviewHead"
+      },
+      "x": 470,
+      "y": 2800
+    },
+    {
+      "id": "vr_fill_reply",
+      "type": "String Format",
+      "label": "When into the reply's head",
+      "parameters": {
+        "format": "{when}"
+      },
+      "x": 470,
+      "y": 2080
+    },
+    {
+      "id": "vr_t_open",
+      "type": "Translation",
+      "label": "Open link",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "work.openLink"
+      },
+      "x": 470,
+      "y": 1600
+    },
+    {
+      "id": "vr_testid",
+      "type": "String Format",
+      "label": "version-{version}, for tests",
+      "parameters": {
+        "format": "version-{version}"
+      },
+      "x": 470,
+      "y": 40
+    },
+    {
+      "id": "vr_open_fn",
+      "type": "JavaScriptFunction",
+      "label": "Open the link in a new tab",
+      "parameters": {
+        "runOnChange-in-url": false,
+        "functionScript": "// handIn only takes http(s) links. noopener: the opened page gets no handle on this one.\nconst url = String(Inputs.url || '');\nif (url.startsWith('https://') || url.startsWith('http://')) window.open(url, '_blank', 'noopener,noreferrer');"
+      },
+      "ports": [
+        {
+          "name": "in-url",
+          "plug": "input",
+          "type": "*"
+        }
+      ],
+      "x": 470,
+      "y": 1720
+    },
+    {
+      "id": "vr_files",
+      "type": "For Each",
+      "label": "One per file",
+      "x": 160,
+      "y": 880,
+      "parent": "vr_file",
+      "parameters": {
+        "template": "/Work/Version file"
+      }
+    }
+  ],
+  "visualRoots": [
+    "vr_root"
+  ]
+}

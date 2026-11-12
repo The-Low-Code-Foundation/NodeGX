@@ -1,0 +1,283 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7ecd4a9c-937f-5859-8870-c4f826485ebc",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mc_card",
+      "type": "Group",
+      "label": "Things you've made",
+      "children": [
+        "mc_title",
+        "mc_body",
+        "mc_count",
+        "mc_latest",
+        "mc_open"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-5)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "mc_title",
+      "type": "Text",
+      "label": "Things you've made",
+      "parent": "mc_card",
+      "parameters": {
+        "text": "",
+        "as": "h2",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "mc_body",
+      "type": "Text",
+      "label": "What will be kept here",
+      "parent": "mc_card",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "mc_t_title",
+      "type": "Translation",
+      "label": "Things you've made",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.madeTitle"
+      },
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "mc_t_body",
+      "type": "Translation",
+      "label": "What will be kept here",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.madeBody"
+      },
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "mc_count",
+      "type": "Text",
+      "label": "You keep {n} things in My creations",
+      "parent": "mc_card",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "mc_latest",
+      "type": "Text",
+      "label": "Newest: {title}",
+      "parent": "mc_card",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "mc_open",
+      "type": "net.noodl.controls.button",
+      "label": "Open My creations",
+      "parent": "mc_card",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "marginTop": "var(--space-1)"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "mc_read",
+      "type": "CloudFunction2",
+      "label": "myCreations (her own only)",
+      "parameters": {
+        "function": "myCreations"
+      },
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "mc_shape",
+      "type": "JavaScriptFunction",
+      "label": "How many, and the newest",
+      "parameters": {
+        "functionScript": "// The answer is newest first. Keys, not words: the card fills its own sentences.\nconst items = Array.isArray(Inputs.items) ? Inputs.items : [];\nOutputs.none = items.length === 0;\nOutputs.some = items.length > 0;\nOutputs.countKey = items.length === 1 ? 'home.madeCountOne' : 'home.madeCount';\nOutputs.n = String(items.length);\nOutputs.latest = items.length ? String(items[0].title || '') : '';\n"
+      },
+      "ports": [
+        {
+          "name": "in-items",
+          "plug": "input",
+          "type": "*",
+          "displayName": "items",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-none",
+          "plug": "output",
+          "type": "*",
+          "displayName": "none",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-some",
+          "plug": "output",
+          "type": "*",
+          "displayName": "some",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-countKey",
+          "plug": "output",
+          "type": "*",
+          "displayName": "countKey",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-n",
+          "plug": "output",
+          "type": "*",
+          "displayName": "n",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-latest",
+          "plug": "output",
+          "type": "*",
+          "displayName": "latest",
+          "group": "Outputs"
+        }
+      ],
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "mc_t_count",
+      "type": "Translation",
+      "label": "You keep {n} things",
+      "parameters": {
+        "Namespace": "pages"
+      },
+      "x": 350,
+      "y": 880
+    },
+    {
+      "id": "mc_fill_count",
+      "type": "String Format",
+      "label": "How many into the sentence",
+      "parameters": {
+        "format": "{n}"
+      },
+      "x": 350,
+      "y": 520
+    },
+    {
+      "id": "mc_t_latest",
+      "type": "Translation",
+      "label": "Newest: {title}",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.madeLatest"
+      },
+      "x": 350,
+      "y": 1000
+    },
+    {
+      "id": "mc_fill_latest",
+      "type": "String Format",
+      "label": "The title into the line",
+      "parameters": {
+        "format": "{title}"
+      },
+      "x": 350,
+      "y": 640
+    },
+    {
+      "id": "mc_t_open",
+      "type": "Translation",
+      "label": "Open My creations",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.madeOpen"
+      },
+      "x": 350,
+      "y": 760
+    },
+    {
+      "id": "mc_nav",
+      "type": "RouterNavigate",
+      "label": "→ My creations",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/My creations"
+      },
+      "x": 350,
+      "y": 1120
+    }
+  ],
+  "visualRoots": [
+    "mc_card"
+  ]
+}

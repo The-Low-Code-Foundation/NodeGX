@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "351a050e-7d3f-52f8-8bd7-8f0891d0fc58",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ep_req",
+      "fromProperty": "userId",
+      "toId": "ep_fn",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "ep_req",
+      "fromProperty": "pm-state",
+      "toId": "ep_fn",
+      "toProperty": "in-state"
+    },
+    {
+      "fromId": "ep_req",
+      "fromProperty": "receive",
+      "toId": "ep_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ep_fn",
+      "fromProperty": "out-emailOn",
+      "toId": "ep_res",
+      "toProperty": "pm-emailOn"
+    },
+    {
+      "fromId": "ep_fn",
+      "fromProperty": "out-done",
+      "toId": "ep_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ep_fn",
+      "fromProperty": "out-why",
+      "toId": "ep_deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "ep_fn",
+      "fromProperty": "out-refuse",
+      "toId": "ep_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ep_fn",
+      "fromProperty": "out-failed",
+      "toId": "ep_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ep_fn",
+      "fromProperty": "failure",
+      "toId": "ep_fail",
+      "toProperty": "send"
+    }
+  ]
+}

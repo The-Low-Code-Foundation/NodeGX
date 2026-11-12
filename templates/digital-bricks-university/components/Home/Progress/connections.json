@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "44b46eb5-f903-5473-8bb8-6f8d957bc707",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pp_t_title",
+      "fromProperty": "Translation",
+      "toId": "pp_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pp_t_count",
+      "fromProperty": "Translation",
+      "toId": "pp_fill_text",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "pp_in",
+      "fromProperty": "done",
+      "toId": "pp_fill_text",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "pp_in",
+      "fromProperty": "total",
+      "toId": "pp_fill_text",
+      "toProperty": "total"
+    },
+    {
+      "fromId": "pp_fill_text",
+      "fromProperty": "formatted",
+      "toId": "pp_count",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pp_in",
+      "fromProperty": "percent",
+      "toId": "pp_fill",
+      "toProperty": "width"
+    }
+  ]
+}

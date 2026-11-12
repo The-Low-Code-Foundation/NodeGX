@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "093c7f65-eaaf-5d42-862e-335acad7d02c",
+  "name": "library",
+  "path": "/#__cloud__/library",
+  "type": "cloud",
+  "created": "2026-11-07T21:59:33.648Z",
+  "modified": "2026-11-07T21:59:33.648Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach's homework library: every item, archived ones included and flagged, sorted by title, in the shapes the editor writes (security: role:staff)."
+}

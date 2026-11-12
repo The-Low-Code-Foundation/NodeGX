@@ -1,0 +1,253 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "025c0810-fa38-5acb-8519-9001ef2c2123",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "piw_t1",
+      "fromProperty": "Translation",
+      "toId": "piw_words",
+      "toProperty": "in-toBook"
+    },
+    {
+      "fromId": "piw_t2",
+      "fromProperty": "Translation",
+      "toId": "piw_words",
+      "toProperty": "in-minutes"
+    },
+    {
+      "fromId": "piw_t3",
+      "fromProperty": "Translation",
+      "toId": "piw_words",
+      "toProperty": "in-attended"
+    },
+    {
+      "fromId": "piw_t4",
+      "fromProperty": "Translation",
+      "toId": "piw_words",
+      "toProperty": "in-due"
+    },
+    {
+      "fromId": "piw_t5",
+      "fromProperty": "Translation",
+      "toId": "piw_words",
+      "toProperty": "in-noDue"
+    },
+    {
+      "fromId": "piw_t6",
+      "fromProperty": "Translation",
+      "toId": "piw_words",
+      "toProperty": "in-fromLibrary"
+    },
+    {
+      "fromId": "piw_t7",
+      "fromProperty": "Translation",
+      "toId": "piw_words",
+      "toProperty": "in-noBrief"
+    },
+    {
+      "fromId": "piw_t8",
+      "fromProperty": "Translation",
+      "toId": "piw_words",
+      "toProperty": "in-versions"
+    },
+    {
+      "fromId": "piw_t9",
+      "fromProperty": "Translation",
+      "toId": "piw_words",
+      "toProperty": "in-sends"
+    },
+    {
+      "fromId": "piw_t10",
+      "fromProperty": "Translation",
+      "toId": "piw_words",
+      "toProperty": "in-noSend"
+    },
+    {
+      "fromId": "piw_t12",
+      "fromProperty": "Translation",
+      "toId": "piw_words",
+      "toProperty": "in-blank"
+    },
+    {
+      "fromId": "piw_words",
+      "fromProperty": "out-t",
+      "toId": "piw_fn",
+      "toProperty": "in-t"
+    },
+    {
+      "fromId": "piw_in",
+      "fromProperty": "learner",
+      "toId": "piw_fn",
+      "toProperty": "in-learner"
+    },
+    {
+      "fromId": "piw_in",
+      "fromProperty": "plan",
+      "toId": "piw_fn",
+      "toProperty": "in-plan"
+    },
+    {
+      "fromId": "piw_in",
+      "fromProperty": "steps",
+      "toId": "piw_fn",
+      "toProperty": "in-steps"
+    },
+    {
+      "fromId": "piw_in",
+      "fromProperty": "submissions",
+      "toId": "piw_fn",
+      "toProperty": "in-submissions"
+    },
+    {
+      "fromId": "piw_in",
+      "fromProperty": "learnerView",
+      "toId": "piw_fn",
+      "toProperty": "in-learnerView"
+    },
+    {
+      "fromId": "piw_kinds",
+      "fromProperty": "items",
+      "toId": "piw_fn",
+      "toProperty": "in-kinds"
+    },
+    {
+      "fromId": "piw_statuses",
+      "fromProperty": "items",
+      "toId": "piw_fn",
+      "toProperty": "in-statuses"
+    },
+    {
+      "fromId": "piw_fn",
+      "fromProperty": "out-name",
+      "toId": "piw_out",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "piw_fn",
+      "fromProperty": "out-first",
+      "toId": "piw_out",
+      "toProperty": "first"
+    },
+    {
+      "fromId": "piw_fn",
+      "fromProperty": "out-detail",
+      "toId": "piw_out",
+      "toProperty": "detail"
+    },
+    {
+      "fromId": "piw_fn",
+      "fromProperty": "out-planId",
+      "toId": "piw_out",
+      "toProperty": "planId"
+    },
+    {
+      "fromId": "piw_fn",
+      "fromProperty": "out-hasPlan",
+      "toId": "piw_out",
+      "toProperty": "hasPlan"
+    },
+    {
+      "fromId": "piw_fn",
+      "fromProperty": "out-noPlan",
+      "toId": "piw_out",
+      "toProperty": "noPlan"
+    },
+    {
+      "fromId": "piw_fn",
+      "fromProperty": "out-statusKey",
+      "toId": "piw_out",
+      "toProperty": "statusKey"
+    },
+    {
+      "fromId": "piw_fn",
+      "fromProperty": "out-live",
+      "toId": "piw_out",
+      "toProperty": "live"
+    },
+    {
+      "fromId": "piw_fn",
+      "fromProperty": "out-homework",
+      "toId": "piw_out",
+      "toProperty": "homework"
+    },
+    {
+      "fromId": "piw_fn",
+      "fromProperty": "out-hours",
+      "toId": "piw_out",
+      "toProperty": "hours"
+    },
+    {
+      "fromId": "piw_fn",
+      "fromProperty": "out-empty",
+      "toId": "piw_out",
+      "toProperty": "empty"
+    },
+    {
+      "fromId": "piw_fn",
+      "fromProperty": "out-startedFrom",
+      "toId": "piw_out",
+      "toProperty": "startedFrom"
+    },
+    {
+      "fromId": "piw_fn",
+      "fromProperty": "out-suggestedTitle",
+      "toId": "piw_out",
+      "toProperty": "suggestedTitle"
+    },
+    {
+      "fromId": "piw_fn",
+      "fromProperty": "out-rows",
+      "toId": "piw_out",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "piw_fn",
+      "fromProperty": "out-nothingShared",
+      "toId": "piw_out",
+      "toProperty": "nothingShared"
+    },
+    {
+      "fromId": "piw_fn",
+      "fromProperty": "out-done",
+      "toId": "piw_out",
+      "toProperty": "ready"
+    },
+    {
+      "fromId": "piw_t11",
+      "fromProperty": "Translation",
+      "toId": "piw_words",
+      "toProperty": "in-hours"
+    },
+    {
+      "fromId": "piw_t13",
+      "fromProperty": "Translation",
+      "toId": "piw_words",
+      "toProperty": "in-hoursMinutes"
+    },
+    {
+      "fromId": "piw_t14",
+      "fromProperty": "Translation",
+      "toId": "piw_words",
+      "toProperty": "in-after"
+    },
+    {
+      "fromId": "piw_t15",
+      "fromProperty": "Translation",
+      "toId": "piw_words",
+      "toProperty": "in-afterSame"
+    },
+    {
+      "fromId": "piw_t16",
+      "fromProperty": "Translation",
+      "toId": "piw_words",
+      "toProperty": "in-answered"
+    },
+    {
+      "fromId": "piw_in",
+      "fromProperty": "checkins",
+      "toId": "piw_fn",
+      "toProperty": "in-checkins"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "fda61f29-877d-5e62-8e83-25a9ba0c4e3a",
+  "name": "saveCreation",
+  "path": "/#__cloud__/saveCreation",
+  "type": "cloud",
+  "created": "2026-11-12T13:36:52.280Z",
+  "modified": "2026-11-12T13:40:49.876Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Adds a creation (a file, a link or text) or edits one of the caller's own (DBU-09; security: authenticated). A file is checked as handIn checks it. A creation made from a hand-in keeps pointing at it: only its words change here."
+}

@@ -1,0 +1,367 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "538ac351-e5a5-5006-8fc5-45b5c892658a",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "le_t_title",
+      "fromProperty": "Translation",
+      "toId": "le_title",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "le_t_date",
+      "fromProperty": "Translation",
+      "toId": "le_date",
+      "toProperty": "Label"
+    },
+    {
+      "fromId": "le_t_time",
+      "fromProperty": "Translation",
+      "toId": "le_time",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "le_t_dur",
+      "fromProperty": "Translation",
+      "toId": "le_dur",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "le_t_hint",
+      "fromProperty": "Translation",
+      "toId": "le_hint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "le_t_meet",
+      "fromProperty": "Translation",
+      "toId": "le_meet",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "le_t_rec",
+      "fromProperty": "Translation",
+      "toId": "le_rec",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "le_t_sum",
+      "fromProperty": "Translation",
+      "toId": "le_sum",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "le_t_sumhint",
+      "fromProperty": "Translation",
+      "toId": "le_sum_hint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "le_t_save",
+      "fromProperty": "Translation",
+      "toId": "le_save",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "le_t_cancel",
+      "fromProperty": "Translation",
+      "toId": "le_cancel",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "le_in",
+      "fromProperty": "step",
+      "toId": "le_open",
+      "toProperty": "in-step"
+    },
+    {
+      "fromId": "le_times",
+      "fromProperty": "items",
+      "toId": "le_open",
+      "toProperty": "in-times"
+    },
+    {
+      "fromId": "le_root",
+      "fromProperty": "didMount",
+      "toId": "le_open",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "le_open",
+      "fromProperty": "out-timeItems",
+      "toId": "le_time",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "le_open",
+      "fromProperty": "out-time",
+      "toId": "le_time",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "le_open",
+      "fromProperty": "out-title",
+      "toId": "le_title",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "le_open",
+      "fromProperty": "out-duration",
+      "toId": "le_dur",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "le_open",
+      "fromProperty": "out-meetingLink",
+      "toId": "le_meet",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "le_open",
+      "fromProperty": "out-recordingUrl",
+      "toId": "le_rec",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "le_open",
+      "fromProperty": "out-summary",
+      "toId": "le_sum",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "le_open",
+      "fromProperty": "out-opened",
+      "toId": "le_title",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "le_open",
+      "fromProperty": "out-opened",
+      "toId": "le_dur",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "le_open",
+      "fromProperty": "out-opened",
+      "toId": "le_meet",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "le_open",
+      "fromProperty": "out-opened",
+      "toId": "le_rec",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "le_open",
+      "fromProperty": "out-opened",
+      "toId": "le_sum",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "le_open",
+      "fromProperty": "out-date",
+      "toId": "le_date",
+      "toProperty": "Value"
+    },
+    {
+      "fromId": "le_open",
+      "fromProperty": "out-opened",
+      "toId": "le_date",
+      "toProperty": "Reset"
+    },
+    {
+      "fromId": "le_open",
+      "fromProperty": "out-opened",
+      "toId": "le_msg_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "le_open",
+      "fromProperty": "out-id",
+      "toId": "le_gather",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "le_open",
+      "fromProperty": "out-title",
+      "toId": "le_gather",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "le_open",
+      "fromProperty": "out-date",
+      "toId": "le_gather",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "le_open",
+      "fromProperty": "out-time",
+      "toId": "le_gather",
+      "toProperty": "in-time"
+    },
+    {
+      "fromId": "le_open",
+      "fromProperty": "out-duration",
+      "toId": "le_gather",
+      "toProperty": "in-duration"
+    },
+    {
+      "fromId": "le_open",
+      "fromProperty": "out-meetingLink",
+      "toId": "le_gather",
+      "toProperty": "in-meetingLink"
+    },
+    {
+      "fromId": "le_open",
+      "fromProperty": "out-recordingUrl",
+      "toId": "le_gather",
+      "toProperty": "in-recordingUrl"
+    },
+    {
+      "fromId": "le_open",
+      "fromProperty": "out-summary",
+      "toId": "le_gather",
+      "toProperty": "in-summary"
+    },
+    {
+      "fromId": "le_title",
+      "fromProperty": "onTextChanged",
+      "toId": "le_gather",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "le_date",
+      "fromProperty": "Value",
+      "toId": "le_gather",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "le_time",
+      "fromProperty": "value",
+      "toId": "le_gather",
+      "toProperty": "in-time"
+    },
+    {
+      "fromId": "le_dur",
+      "fromProperty": "onTextChanged",
+      "toId": "le_gather",
+      "toProperty": "in-duration"
+    },
+    {
+      "fromId": "le_meet",
+      "fromProperty": "onTextChanged",
+      "toId": "le_gather",
+      "toProperty": "in-meetingLink"
+    },
+    {
+      "fromId": "le_rec",
+      "fromProperty": "onTextChanged",
+      "toId": "le_gather",
+      "toProperty": "in-recordingUrl"
+    },
+    {
+      "fromId": "le_sum",
+      "fromProperty": "onTextChanged",
+      "toId": "le_gather",
+      "toProperty": "in-summary"
+    },
+    {
+      "fromId": "le_save",
+      "fromProperty": "onClick",
+      "toId": "le_gather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "le_save",
+      "fromProperty": "onClick",
+      "toId": "le_msg_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "le_gather",
+      "fromProperty": "out-id",
+      "toId": "le_call",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "le_gather",
+      "fromProperty": "out-title",
+      "toId": "le_call",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "le_gather",
+      "fromProperty": "out-startsAt",
+      "toId": "le_call",
+      "toProperty": "in-startsAt"
+    },
+    {
+      "fromId": "le_gather",
+      "fromProperty": "out-durationMin",
+      "toId": "le_call",
+      "toProperty": "in-durationMin"
+    },
+    {
+      "fromId": "le_gather",
+      "fromProperty": "out-meetingLink",
+      "toId": "le_call",
+      "toProperty": "in-meetingLink"
+    },
+    {
+      "fromId": "le_gather",
+      "fromProperty": "out-recordingUrl",
+      "toId": "le_call",
+      "toProperty": "in-recordingUrl"
+    },
+    {
+      "fromId": "le_gather",
+      "fromProperty": "out-summary",
+      "toId": "le_call",
+      "toProperty": "in-summary"
+    },
+    {
+      "fromId": "le_gather",
+      "fromProperty": "out-go",
+      "toId": "le_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "le_call",
+      "fromProperty": "error",
+      "toId": "le_msg",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "le_call",
+      "fromProperty": "failure",
+      "toId": "le_msg_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "le_msg_sw",
+      "fromProperty": "state",
+      "toId": "le_msg",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "le_gather",
+      "fromProperty": "out-title",
+      "toId": "le_out",
+      "toProperty": "savedTitle"
+    },
+    {
+      "fromId": "le_call",
+      "fromProperty": "done",
+      "toId": "le_out",
+      "toProperty": "saved"
+    },
+    {
+      "fromId": "le_cancel",
+      "fromProperty": "onClick",
+      "toId": "le_out",
+      "toProperty": "closed"
+    }
+  ]
+}

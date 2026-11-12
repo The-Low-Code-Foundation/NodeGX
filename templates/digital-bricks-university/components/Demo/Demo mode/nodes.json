@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "033aa031-4f74-5ee7-8d59-772afe7d83cf",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "dm_fn",
+      "type": "JavaScriptFunction",
+      "label": "Is this the demo?",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "functionScript": "// The demo (DBU-11): window.dbuDemo is made by demo/boot.js, which only the demo's page loads.\nconst d = typeof window !== 'undefined' ? window.dbuDemo : undefined;\nconst say = (supported) => {\n  Outputs.isDemo = !!d;\n  Outputs.notDemo = !d;\n  Outputs.supported = !!d && supported;\n  Outputs.unsupported = !!d && !supported;\n  const persona = (d && d.persona) || '';\n  Outputs.coachView = persona === 'richard';\n  Outputs.learnerView = !!d && persona !== 'richard';\n};\nsay(!!(d && d.supported));\nif (d && d.ready) d.ready.then((ok) => { if (ok === false) say(false); });\n"
+      },
+      "ports": [
+        {
+          "name": "out-isDemo",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-notDemo",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-supported",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-unsupported",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-coachView",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-learnerView",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "metadata": {
+        "comment": "window.dbuDemo exists only when tools/demo/boot.js loaded the page, which only the demo built by tools/build-demo.mjs does. Runs once when the component starts (no Run wired), and again if the demo's backend fails to start."
+      }
+    },
+    {
+      "id": "dm_out",
+      "type": "Component Outputs",
+      "label": "What the demo is",
+      "x": 400,
+      "y": 40,
+      "ports": [
+        {
+          "name": "isDemo",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "notDemo",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "supported",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "unsupported",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "coachView",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "learnerView",
+          "plug": "input",
+          "type": "boolean"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,846 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "6119738f-dd2d-5ebe-8e5e-0b6ba35493da",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cie_root",
+      "type": "Group",
+      "label": "Check-in editor",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "cie_title",
+        "cie_form",
+        "cie_locked",
+        "cie_when_box",
+        "cie_msg",
+        "cie_actions"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 720,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)"
+      }
+    },
+    {
+      "id": "cie_title",
+      "type": "net.noodl.controls.textinput",
+      "label": "Title",
+      "x": 100,
+      "y": 160,
+      "parent": "cie_root",
+      "parameters": {
+        "type": "text",
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxLength": 140
+      }
+    },
+    {
+      "id": "cie_sends",
+      "type": "/Date Picker",
+      "label": "Send date",
+      "x": 100,
+      "y": 280,
+      "parent": "cie_date_box",
+      "parameters": {
+        "Show Label": true,
+        "Width": {
+          "value": 200,
+          "unit": "px"
+        }
+      }
+    },
+    {
+      "id": "cie_hint",
+      "type": "Text",
+      "label": "Sent at 09:00 on that day",
+      "x": 100,
+      "y": 400,
+      "parent": "cie_date_box",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "cie_msg",
+      "type": "Text",
+      "label": "Why it was not saved",
+      "x": 100,
+      "y": 520,
+      "parent": "cie_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--attention)"
+      }
+    },
+    {
+      "id": "cie_actions",
+      "type": "Group",
+      "label": "Save and Cancel",
+      "x": 100,
+      "y": 640,
+      "parent": "cie_root",
+      "children": [
+        "cie_save",
+        "cie_cancel"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)"
+      }
+    },
+    {
+      "id": "cie_save",
+      "type": "net.noodl.controls.button",
+      "label": "Save",
+      "x": 160,
+      "y": 760,
+      "parent": "cie_actions",
+      "parameters": {
+        "label": ""
+      }
+    },
+    {
+      "id": "cie_cancel",
+      "type": "net.noodl.controls.button",
+      "label": "Cancel",
+      "x": 160,
+      "y": 880,
+      "parent": "cie_actions",
+      "parameters": {
+        "label": "",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)"
+      }
+    },
+    {
+      "id": "cie_in",
+      "type": "Component Inputs",
+      "label": "The step",
+      "x": 500,
+      "y": 40,
+      "ports": [
+        {
+          "name": "step",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "anchors",
+          "plug": "output",
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "id": "cie_out",
+      "type": "Component Outputs",
+      "label": "Saved or closed",
+      "x": 500,
+      "y": 760,
+      "ports": [
+        {
+          "name": "saved",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "savedTitle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "closed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "cie_open",
+      "type": "JavaScriptFunction",
+      "label": "Open the step",
+      "x": 500,
+      "y": 160,
+      "parameters": {
+        "runOnChange-in-step": false,
+        "functionScript": "/*\n * Runs when the editor appears (DBU-10). The send day is shown in the coach's zone, Europe/Paris.\n * The form list is the option set's, in the coach's words (a step on a form no longer offered keeps\n * it, by its own title). A check-in goes out on a date, or N days after a live session or a homework\n * of this plan (anchors, from Plan in words). Once it has gone out (not scheduled), only the title\n * can change.\n */\nconst step = Inputs.step && typeof Inputs.step === 'object' ? Inputs.step : {};\nconst get = (m, k) => (m && typeof m.get === 'function' ? m.get(k) : m && m[k]);\nconst words = { 'plan.formAfterSession': Inputs.tAfterSession, 'plan.formEndOfProgramme': Inputs.tEndOfProgramme, 'plan.formSixWeek': Inputs.tSixWeek };\nconst formItems = (Inputs.forms || []).map((f) => ({ Label: words[get(f, 'labelKey')] || get(f, 'value'), Value: get(f, 'value') }));\nconst form = (step.form && step.form.id) || 'after-session';\nif (!formItems.some((f) => f.Value === form)) formItems.push({ Label: String((step.form && step.form.title) || form), Value: form });\nconst after = step.sendAfter && step.sendAfter.step ? step.sendAfter : null;\nOutputs.id = step.id || '';\nOutputs.title = step.title || '';\nOutputs.sends = step.sendsAt ? new Date(step.sendsAt).toLocaleDateString('en-CA', { timeZone: 'Europe/Paris' }) : '';\nOutputs.formItems = formItems;\nOutputs.form = form;\nOutputs.whenItems = [{ Label: Inputs.tWhenDate || 'date', Value: 'date' }, { Label: Inputs.tWhenAfter || 'after', Value: 'after' }];\nOutputs.when = after ? 'after' : 'date';\nOutputs.anchorItems = [{ Label: Inputs.tNoAnchor || '', Value: '' }].concat((Array.isArray(Inputs.anchors) ? Inputs.anchors : []).map((a) => ({ Label: a.label, Value: a.id })));\nOutputs.anchor = after ? after.step : '';\nOutputs.days = after ? String(after.days) : '1';\nOutputs.locked = !!step.status && step.status !== 'scheduled';\nOutputs.unlocked = !Outputs.locked;\nOutputs.opened();",
+        "runOnChange-in-anchors": false,
+        "runOnChange-in-forms": false
+      },
+      "ports": [
+        {
+          "name": "in-step",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "in-anchors",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "in-forms",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "in-tAfterSession",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-tEndOfProgramme",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-tSixWeek",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-tWhenDate",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-tWhenAfter",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-tNoAnchor",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "out-id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-sends",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-formItems",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-form",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-whenItems",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-when",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-anchorItems",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-anchor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-days",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-locked",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-unlocked",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-opened",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "cie_gather",
+      "type": "JavaScriptFunction",
+      "label": "Gather the check-in",
+      "x": 500,
+      "y": 280,
+      "parameters": {
+        "runOnChange-in-id": false,
+        "runOnChange-in-title": false,
+        "runOnChange-in-sends": false,
+        "functionScript": "// Read on Save only. On a date: saveStep sends a date-only day at 09:00 Paris, and an empty step\n// clears any \"after\" rule. After a step: saveStep works the day out from that step (DBU-10).\nconst after = Inputs.when === 'after';\nOutputs.id = String(Inputs.id || '');\nOutputs.title = String(Inputs.title || '').trim();\nOutputs.formId = String(Inputs.form || '');\nOutputs.sendsAt = after ? '' : String(Inputs.sends || '').trim();\nOutputs.sendAfterStep = after ? String(Inputs.anchor || '') : '';\nOutputs.sendAfterDays = after ? String(Inputs.days || '').trim() : '';\nOutputs.go();\n",
+        "runOnChange-in-form": false,
+        "runOnChange-in-when": false,
+        "runOnChange-in-anchor": false,
+        "runOnChange-in-days": false
+      },
+      "ports": [
+        {
+          "name": "in-id",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-sends",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-form",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-when",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-anchor",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-days",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "out-id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-formId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-sendsAt",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-sendAfterStep",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-sendAfterDays",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "cie_call",
+      "type": "CloudFunction2",
+      "label": "saveStep (staff only)",
+      "x": 500,
+      "y": 520,
+      "parameters": {
+        "function": "saveStep"
+      }
+    },
+    {
+      "id": "cie_msg_sw",
+      "type": "Switch",
+      "label": "Show why, once there is a why",
+      "x": 500,
+      "y": 640,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "cie_t_title",
+      "type": "Translation",
+      "label": "Title",
+      "x": 800,
+      "y": 160,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.title"
+      }
+    },
+    {
+      "id": "cie_t_sends",
+      "type": "Translation",
+      "label": "Send date",
+      "x": 800,
+      "y": 220,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.sends"
+      }
+    },
+    {
+      "id": "cie_t_hint",
+      "type": "Translation",
+      "label": "Sent at 09:00",
+      "x": 800,
+      "y": 280,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.sendsHint"
+      }
+    },
+    {
+      "id": "cie_t_save",
+      "type": "Translation",
+      "label": "Save",
+      "x": 800,
+      "y": 340,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.save"
+      }
+    },
+    {
+      "id": "cie_t_cancel",
+      "type": "Translation",
+      "label": "Cancel",
+      "x": 800,
+      "y": 400,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.cancel"
+      }
+    },
+    {
+      "id": "cie_form",
+      "type": "net.noodl.controls.options",
+      "label": "Which questions",
+      "parent": "cie_root",
+      "parameters": {
+        "useLabel": true,
+        "value": "",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 560,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "cie_locked",
+      "type": "Text",
+      "label": "Gone out: questions and date stay",
+      "parent": "cie_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "cie_when_box",
+      "type": "Group",
+      "label": "When it goes out (until it has)",
+      "parent": "cie_root",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "cie_when",
+        "cie_date_box",
+        "cie_after_box"
+      ],
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "cie_when",
+      "type": "net.noodl.controls.options",
+      "label": "On a date, or after a step",
+      "parent": "cie_when_box",
+      "parameters": {
+        "useLabel": true,
+        "value": "date",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 320,
+          "unit": "px"
+        }
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "cie_date_box",
+      "type": "Group",
+      "label": "On a date",
+      "parent": "cie_when_box",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "cie_sends",
+        "cie_hint"
+      ],
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "cie_after_box",
+      "type": "Group",
+      "label": "Some days after another step",
+      "parent": "cie_when_box",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "cie_after_row",
+        "cie_after_hint"
+      ],
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "cie_after_row",
+      "type": "Group",
+      "label": "The step, and how many days",
+      "parent": "cie_after_box",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "flex-end",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "cie_anchor",
+        "cie_days"
+      ],
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "cie_anchor",
+      "type": "net.noodl.controls.options",
+      "label": "After this step",
+      "parent": "cie_after_row",
+      "parameters": {
+        "useLabel": true,
+        "value": "",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 360,
+          "unit": "px"
+        }
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "cie_days",
+      "type": "net.noodl.controls.textinput",
+      "label": "Days after it",
+      "parent": "cie_after_row",
+      "parameters": {
+        "type": "text",
+        "inputMode": "numeric",
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 120,
+          "unit": "px"
+        },
+        "maxLength": 3
+      },
+      "x": 280,
+      "y": 1240
+    },
+    {
+      "id": "cie_after_hint",
+      "type": "Text",
+      "label": "Sent at 09:00, moves with the step",
+      "parent": "cie_after_box",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "cie_forms",
+      "type": "/Option sets/Check-in forms",
+      "label": "The forms on offer",
+      "x": 530,
+      "y": 160
+    },
+    {
+      "id": "cie_t_form",
+      "type": "Translation",
+      "label": "Questions",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.form"
+      },
+      "x": 530,
+      "y": 1000
+    },
+    {
+      "id": "cie_t_locked",
+      "type": "Translation",
+      "label": "Gone out",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.formLocked"
+      },
+      "x": 530,
+      "y": 1120
+    },
+    {
+      "id": "cie_t_when",
+      "type": "Translation",
+      "label": "When it goes out",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.when"
+      },
+      "x": 530,
+      "y": 1240
+    },
+    {
+      "id": "cie_t_wd",
+      "type": "Translation",
+      "label": "On a date",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.whenDate"
+      },
+      "x": 530,
+      "y": 280
+    },
+    {
+      "id": "cie_t_wa",
+      "type": "Translation",
+      "label": "Some days after another step",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.whenAfter"
+      },
+      "x": 530,
+      "y": 400
+    },
+    {
+      "id": "cie_t_astep",
+      "type": "Translation",
+      "label": "After this step",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.afterStep"
+      },
+      "x": 530,
+      "y": 1480
+    },
+    {
+      "id": "cie_t_adays",
+      "type": "Translation",
+      "label": "Days after it",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.afterDays"
+      },
+      "x": 530,
+      "y": 1600
+    },
+    {
+      "id": "cie_t_ahint",
+      "type": "Translation",
+      "label": "Sent at 09:00, moves with the step",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.afterHint"
+      },
+      "x": 530,
+      "y": 1720
+    },
+    {
+      "id": "cie_t_none",
+      "type": "Translation",
+      "label": "Choose a step",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.noAnchor"
+      },
+      "x": 530,
+      "y": 520
+    },
+    {
+      "id": "cie_t_fa",
+      "type": "Translation",
+      "label": "After a session",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.formAfterSession"
+      },
+      "x": 530,
+      "y": 640
+    },
+    {
+      "id": "cie_t_fe",
+      "type": "Translation",
+      "label": "End of programme",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.formEndOfProgramme"
+      },
+      "x": 530,
+      "y": 760
+    },
+    {
+      "id": "cie_t_fs",
+      "type": "Translation",
+      "label": "6-week impact",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.formSixWeek"
+      },
+      "x": 530,
+      "y": 880
+    },
+    {
+      "id": "cie_mode",
+      "type": "JavaScriptFunction",
+      "label": "Date or after a step",
+      "parameters": {
+        "functionScript": "Outputs.isDate = Inputs.when !== 'after';\nOutputs.isAfter = Inputs.when === 'after';"
+      },
+      "ports": [
+        {
+          "name": "in-when",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "out-isDate",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-isAfter",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 530,
+      "y": 1360
+    }
+  ],
+  "visualRoots": [
+    "cie_root"
+  ]
+}

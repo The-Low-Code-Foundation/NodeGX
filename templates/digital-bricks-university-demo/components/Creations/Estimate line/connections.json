@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "cdcccd85-418c-5e80-836f-4f2fcc6876a1",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "el_in",
+      "fromProperty": "estimate",
+      "toId": "el_fn",
+      "toProperty": "in-estimate"
+    },
+    {
+      "fromId": "el_fn",
+      "fromProperty": "out-shown",
+      "toId": "el_row",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "el_in",
+      "fromProperty": "textKey",
+      "toId": "el_t",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "el_t",
+      "fromProperty": "Translation",
+      "toId": "el_fill",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "el_fn",
+      "fromProperty": "out-hours",
+      "toId": "el_fill",
+      "toProperty": "hours"
+    },
+    {
+      "fromId": "el_fn",
+      "fromProperty": "out-date",
+      "toId": "el_fill",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "el_in",
+      "fromProperty": "first",
+      "toId": "el_fill",
+      "toProperty": "first"
+    },
+    {
+      "fromId": "el_fill",
+      "fromProperty": "formatted",
+      "toId": "el_text",
+      "toProperty": "text"
+    }
+  ]
+}

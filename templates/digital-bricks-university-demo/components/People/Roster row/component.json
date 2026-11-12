@@ -1,0 +1,14 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "53573221-6d78-5111-8d88-004a582b1946",
+  "name": "Roster row",
+  "path": "/People/Roster row",
+  "type": "visual",
+  "created": "2026-11-07T21:35:42.988Z",
+  "modified": "2026-11-12T17:14:48.297Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One learner on the coach's roster: name, organisation and address, their plan and how far along it is, and Open plan, which goes to their plan builder.",
+  "ports": {
+    "inputs": []
+  }
+}

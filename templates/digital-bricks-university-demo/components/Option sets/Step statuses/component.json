@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a4131a4e-9f0f-5288-8bcf-d23075ed34a4",
+  "name": "Step statuses",
+  "path": "/Option sets/Step statuses",
+  "type": "visual",
+  "created": "2026-11-09T10:37:17.337Z",
+  "modified": "2026-11-09T10:37:17.337Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Every status a plan step can have, per kind (schema.json stepStatus), with its label key and chip colours by token."
+}

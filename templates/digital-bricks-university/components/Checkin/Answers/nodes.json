@@ -1,0 +1,96 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "a6d0aa5b-5530-5823-8177-3660958bca69",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ca_root",
+      "type": "Group",
+      "label": "Answers",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "ca_rows"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ca_rows",
+      "type": "For Each",
+      "label": "One per question asked",
+      "parent": "ca_root",
+      "parameters": {
+        "template": "/Checkin/Answer row"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ca_in",
+      "type": "Component Inputs",
+      "label": "The answers and their questions",
+      "ports": [
+        {
+          "name": "prefix",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "questions",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "answers",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "ca_fn",
+      "type": "JavaScriptFunction",
+      "label": "Each answer, in words",
+      "parameters": {
+        "functionScript": "/*\n * A check-in's answers in the reader's words (DBU-10). The questions are the answer's own copy of its\n * form, so an old answer always reads against the questions it was given to. A question that was\n * hidden by its condition and has no answer is left out; one that was asked and left empty reads\n * \"No answer\". A pick reads as its option's words; a scale as \"4 of 5\".\n */\nif (Inputs.questions === undefined || Inputs.answers === undefined) return;\nconst prefix = String(Inputs.prefix || 'x');\nconst qs = (Array.isArray(Inputs.questions) ? Inputs.questions : []).filter((q) => q && q.id);\nconst a = Inputs.answers && typeof Inputs.answers === 'object' ? Inputs.answers : {};\nconst has = (v) => !(v === undefined || v === null || v === '' || (Array.isArray(v) && !v.length));\nconst holds = (c) => {\n  if (!c || !c.field) return true;\n  const v = a[c.field];\n  if (Array.isArray(c.value)) return c.value.includes(v);\n  if (c.operator) {\n    const n = Number(v);\n    if (v === undefined || !Number.isFinite(n)) return false;\n    return c.operator === '>' ? n > c.value : c.operator === '<' ? n < c.value : c.operator === '>=' ? n >= c.value : c.operator === '<=' ? n <= c.value : false;\n  }\n  if (c.not !== undefined) return v !== c.not;\n  return v === c.value;\n};\nconst words = (q, v) => {\n  const opts = Array.isArray(q.options) ? q.options : [];\n  const one = (x) => { const o = opts.find((p) => (p && typeof p === 'object' ? p.value : p) === x); return o && typeof o === 'object' ? String(o.label || x) : String(x); };\n  return Array.isArray(v) ? v.map(one).join(', ') : one(v);\n};\nconst rows = [];\nqs.forEach((q) => {\n  const v = a[q.id];\n  const row = { id: 'ca-' + prefix + '-' + q.id, label: String(q.label || q.id), value: '', max: '', suffix: '', answerFg: 'var(--foreground)' };\n  if (!has(v)) {\n    if (!holds(q.condition)) return;\n    rows.push(Object.assign(row, { answerKey: 'checkin.answerNone', answerFg: 'var(--muted-foreground)' }));\n  } else if (q.type === 'scale') {\n    rows.push(Object.assign(row, { answerKey: 'checkin.answerScale', value: String(v), max: String(Number.isFinite(q.max) ? q.max : 5) }));\n  } else if (q.type === 'number') {\n    rows.push(Object.assign(row, { answerKey: q.suffix ? 'checkin.answerNumber' : 'checkin.answerValue', value: String(v), suffix: String(q.suffix || '') }));\n  } else if (q.type === 'radio' || q.type === 'checkbox') {\n    rows.push(Object.assign(row, { answerKey: 'checkin.answerValue', value: words(q, v) }));\n  } else {\n    rows.push(Object.assign(row, { answerKey: 'checkin.answerValue', value: String(v) }));\n  }\n});\nOutputs.rows = rows;"
+      },
+      "ports": [
+        {
+          "name": "in-prefix",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-questions",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "in-answers",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "out-rows",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "ca_root"
+  ]
+}

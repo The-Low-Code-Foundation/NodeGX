@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "43baf556-7926-5796-8e8d-ec05469fa776",
+  "name": "Steps from template",
+  "path": "/#__cloud__/shared/Steps from template",
+  "type": "cloud",
+  "created": "2026-11-09T10:25:00.659Z",
+  "modified": "2026-11-12T14:30:33.995Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Appends a plan template's items to a plan as DRAFT steps: library homework copied in (SCOPE R4), homework due and check-ins sent on the template's day offsets from today. Used by addLearner and applyTemplate, so the two cannot drift."
+}

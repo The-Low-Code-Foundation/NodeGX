@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "21092b56-1838-5c30-84c9-06b3b958a15b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sl_req",
+      "fromProperty": "userId",
+      "toId": "sl_fn",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "sl_req",
+      "fromProperty": "pm-id",
+      "toId": "sl_fn",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "sl_req",
+      "fromProperty": "pm-title",
+      "toId": "sl_fn",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "sl_req",
+      "fromProperty": "pm-brief",
+      "toId": "sl_fn",
+      "toProperty": "in-brief"
+    },
+    {
+      "fromId": "sl_req",
+      "fromProperty": "pm-handInChecklist",
+      "toId": "sl_fn",
+      "toProperty": "in-handInChecklist"
+    },
+    {
+      "fromId": "sl_req",
+      "fromProperty": "pm-resources",
+      "toId": "sl_fn",
+      "toProperty": "in-resources"
+    },
+    {
+      "fromId": "sl_req",
+      "fromProperty": "pm-tags",
+      "toId": "sl_fn",
+      "toProperty": "in-tags"
+    },
+    {
+      "fromId": "sl_req",
+      "fromProperty": "pm-estimatedMinutes",
+      "toId": "sl_fn",
+      "toProperty": "in-estimatedMinutes"
+    },
+    {
+      "fromId": "sl_req",
+      "fromProperty": "receive",
+      "toId": "sl_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "sl_fn",
+      "fromProperty": "out-id",
+      "toId": "sl_res",
+      "toProperty": "pm-id"
+    },
+    {
+      "fromId": "sl_fn",
+      "fromProperty": "out-created",
+      "toId": "sl_res",
+      "toProperty": "pm-created"
+    },
+    {
+      "fromId": "sl_fn",
+      "fromProperty": "out-done",
+      "toId": "sl_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sl_fn",
+      "fromProperty": "out-why",
+      "toId": "sl_deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "sl_fn",
+      "fromProperty": "out-refuse",
+      "toId": "sl_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sl_fn",
+      "fromProperty": "out-failed",
+      "toId": "sl_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sl_fn",
+      "fromProperty": "failure",
+      "toId": "sl_fail",
+      "toProperty": "send"
+    }
+  ]
+}

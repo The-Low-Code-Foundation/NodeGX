@@ -1,0 +1,138 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "27d8f85f-0f13-542a-8f85-98996a470126",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "lh_req",
+      "type": "noodl.cloud.request",
+      "label": "A learner opens Home",
+      "parameters": {
+        "params": "",
+        "allowNoAuth": false
+      },
+      "metadata": {
+        "comment": "No parameters on purpose: there is nothing a caller can send to read someone else's Home. authenticated in nodegx.security.json."
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "lh_fn",
+      "type": "JavaScriptFunction",
+      "label": "Work out Home",
+      "parameters": {
+        "runOnChange-in-userId": false,
+        "functionScript": "/*\n * The learner's Home, worked out here so the page only draws it (DBU-05).\n * Identity is the session's userId. Learners never see a Step that is not shared (SCOPE).\n * The plan's order IS the journey (no milestones):\n *  - up next: the first homework in plan order that is not approved, and the next booked\n *    live session that has not ended (its join link is the step's, else the plan's);\n *  - a step is complete when a live session is done, a homework approved, a check-in done;\n *  - progress is complete steps / shared steps.\n * A check-in (DBU-10) says how many minutes it takes, when it was sent or answered, and, while it\n * has no date because it follows a step not dated yet, that step's title (`afterTitle`, only when\n * that step is shared). It can be answered while it is 'sent'.\n * Times stay ISO (UTC). The page shows them in me.timezone (the learner's profile; the\n * page falls back to the browser's zone when it is empty).\n */\n(async () => {\n  try {\n    const me = String(Inputs.userId || '');\n    if (!me) throw new Error('no session user');\n    const q = (c, where) => Noodl.Records.query(c, where, { limit: 1000, plain: true });\n\n    const users = await q('_User', { objectId: { equalTo: me } });\n    const user = users[0] || {};\n    Outputs.me = { name: user.name || '', timezone: user.timezone || '' };\n\n    const plans = await q('Plan', { learner: { equalTo: me } });\n    const active = plans.filter((p) => p.status === 'active');\n    if (active.length > 1) throw new Error('more than one active plan for ' + me);\n    const byStart = plans.slice().sort((a, b) => String(b.startedOn).localeCompare(String(a.startedOn)));\n    const plan = active[0] || byStart[0] || null;\n\n    const rows = plan ? (await q('Step', { plan: { equalTo: plan.objectId } }))\n      .filter((s) => s.learner === me && s.shared === true)\n      .sort((a, b) => a.position - b.position) : [];\n    const ids = new Set(rows.map((s) => s.objectId));\n    const subs = rows.length ? (await q('Submission', { learner: { equalTo: me } })).filter((s) => ids.has(s.step)) : [];\n    const answers = rows.some((s) => s.kind === 'checkin') ? (await q('CheckinResponse', { learner: { equalTo: me } })).filter((r) => ids.has(r.step)) : [];\n    const lastHandIn = (stepId) => subs.filter((s) => s.step === stepId)\n      .map((s) => s.createdAt).sort().pop() || null;\n\n    const COMPLETE = { live: 'done', homework: 'approved', checkin: 'done' };\n    const counts = { live: 0, homework: 0, checkin: 0 };\n    const steps = rows.map((s) => {\n      counts[s.kind] = (counts[s.kind] || 0) + 1;\n      const minutes = Number.isInteger(s.durationMin) ? s.durationMin : 60;\n      const start = s.startsAt ? Date.parse(s.startsAt) : NaN;\n      const checkin = s.kind === 'checkin';\n      const anchor = checkin && !s.sendsAt && s.sendAfter ? rows.find((x) => x.objectId === s.sendAfter.step) : null;\n      const response = checkin ? answers.find((r) => r.step === s.objectId) : null;\n      return {\n        id: s.objectId,\n        position: s.position,\n        kind: s.kind,\n        number: counts[s.kind],\n        title: s.title || '',\n        status: s.status,\n        complete: COMPLETE[s.kind] === s.status,\n        startsAt: s.startsAt || null,\n        endsAt: isNaN(start) ? null : new Date(start + minutes * 60000).toISOString(),\n        durationMin: minutes,\n        dueAt: s.dueAt || null,\n        sendsAt: s.sendsAt || null,\n        prepNote: s.kind === 'live' ? (s.prepNote || '') : '',\n        meetingLink: s.kind === 'live' ? (s.meetingLink || (plan && plan.meetingLink) || '') : '',\n        handedInAt: s.kind === 'homework' ? lastHandIn(s.objectId) : null,\n        minutesToAnswer: checkin ? (s.form && Number.isInteger(s.form.minutes) ? s.form.minutes : 2) : null,\n        sentAt: checkin ? s.sentAt || null : null,\n        answeredAt: response ? response.createdAt : null,\n        afterTitle: anchor ? anchor.title || '' : '',\n        answerable: checkin && s.status === 'sent'\n      };\n    });\n\n    const now = Date.now();\n    const homework = steps.find((s) => s.kind === 'homework' && s.status !== 'approved') || null;\n    const live = steps\n      .filter((s) => s.kind === 'live' && s.status === 'booked' && s.endsAt && Date.parse(s.endsAt) > now)\n      .sort((a, b) => String(a.startsAt).localeCompare(String(b.startsAt)))[0] || null;\n    const toBook = steps.find((s) => s.kind === 'live' && s.status === 'to_book') || null;\n    steps.forEach((s) => { s.current = !!homework && s.id === homework.id; });\n\n    const complete = steps.filter((s) => s.complete).length;\n    const started = plan && plan.startedOn ? Date.parse(plan.startedOn) : NaN;\n    Outputs.plan = plan ? {\n      title: plan.title || '',\n      status: plan.status,\n      startedOn: plan.startedOn || null,\n      week: isNaN(started) ? null : Math.max(1, Math.floor((now - started) / (7 * 86400000)) + 1)\n    } : null;\n    Outputs.steps = steps;\n    Outputs.upNext = {\n      homework,\n      live,\n      // Offered only when nothing is booked: a session still to book, and a link to book it.\n      bookingLink: !live && toBook && plan && plan.bookingLink ? plan.bookingLink : ''\n    };\n    Outputs.progress = { complete, total: steps.length, percent: steps.length ? Math.round((complete * 100) / steps.length) : 0 };\n    Outputs.counts = counts;\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:learnerHome]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-me",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-plan",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-steps",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-upNext",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-progress",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-counts",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "lh_res",
+      "type": "noodl.cloud.response",
+      "label": "Home",
+      "parameters": {
+        "params": "me,plan,steps,upNext,progress,counts,latest,unread"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "lh_deny",
+      "type": "noodl.cloud.response",
+      "label": "Could not read",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "Your programme could not be read."
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "lh_msg",
+      "type": "JavaScriptFunction",
+      "label": "Latest from Richard, and how many unread",
+      "x": 320,
+      "y": 160,
+      "parameters": {
+        "runOnChange-in-userId": false,
+        "functionScript": "/*\n * Home's \"Latest from Richard\" card (DBU-07): the newest message from the coach in my own\n * conversation, and how many of his I have not read. Runs after Home is worked out; reading\n * Home marks nothing read (only Messages and a homework's thread do).\n */\n(async () => {\n  try {\n    const me = String(Inputs.userId || '');\n    if (!me) throw new Error('no session user');\n    const q = (c, where) => Noodl.Records.query(c, where, { limit: 1000, plain: true });\n    const theirs = (await q('Message', { learner: { equalTo: me } }))\n      .filter((m) => m.author !== me)\n      .sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));\n    const last = theirs[theirs.length - 1] || null;\n    let stepTitle = '';\n    if (last && last.step) {\n      const steps = await q('Step', { objectId: { equalTo: last.step } });\n      if (steps[0] && steps[0].learner === me && steps[0].shared === true) stepTitle = String(steps[0].title || '');\n    }\n    Outputs.latest = last ? { id: last.objectId, body: String(last.body || ''), at: last.createdAt, stepId: stepTitle ? last.step : '', stepTitle, isNew: !last.readAt } : null;\n    Outputs.unread = theirs.filter((m) => !m.readAt).length;\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:learnerHome messages]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-latest",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-unread",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    }
+  ]
+}

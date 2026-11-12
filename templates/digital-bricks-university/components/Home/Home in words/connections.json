@@ -1,0 +1,295 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "3aa77b39-99b4-58e9-838f-1b261ba1193f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hiw_in",
+      "fromProperty": "me",
+      "toId": "hiw_fn",
+      "toProperty": "in-me"
+    },
+    {
+      "fromId": "hiw_in",
+      "fromProperty": "plan",
+      "toId": "hiw_fn",
+      "toProperty": "in-plan"
+    },
+    {
+      "fromId": "hiw_in",
+      "fromProperty": "steps",
+      "toId": "hiw_fn",
+      "toProperty": "in-steps"
+    },
+    {
+      "fromId": "hiw_in",
+      "fromProperty": "upNext",
+      "toId": "hiw_fn",
+      "toProperty": "in-upNext"
+    },
+    {
+      "fromId": "hiw_in",
+      "fromProperty": "progress",
+      "toId": "hiw_fn",
+      "toProperty": "in-progress"
+    },
+    {
+      "fromId": "hiw_in",
+      "fromProperty": "counts",
+      "toId": "hiw_fn",
+      "toProperty": "in-counts"
+    },
+    {
+      "fromId": "hiw_kinds",
+      "fromProperty": "items",
+      "toId": "hiw_fn",
+      "toProperty": "in-kinds"
+    },
+    {
+      "fromId": "hiw_statuses",
+      "fromProperty": "items",
+      "toId": "hiw_fn",
+      "toProperty": "in-statuses"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-rows",
+      "toId": "hiw_out",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-first",
+      "toId": "hiw_out",
+      "toProperty": "first"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-hasPlan",
+      "toId": "hiw_out",
+      "toProperty": "hasPlan"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-planTitle",
+      "toId": "hiw_out",
+      "toProperty": "planTitle"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-week",
+      "toId": "hiw_out",
+      "toProperty": "week"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-preparing",
+      "toId": "hiw_out",
+      "toProperty": "preparing"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-hasSteps",
+      "toId": "hiw_out",
+      "toProperty": "hasSteps"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-countLive",
+      "toId": "hiw_out",
+      "toProperty": "countLive"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-countHomework",
+      "toId": "hiw_out",
+      "toProperty": "countHomework"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-progressDone",
+      "toId": "hiw_out",
+      "toProperty": "progressDone"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-progressTotal",
+      "toId": "hiw_out",
+      "toProperty": "progressTotal"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-progressPercent",
+      "toId": "hiw_out",
+      "toProperty": "progressPercent"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-hwShown",
+      "toId": "hiw_out",
+      "toProperty": "hwShown"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-hwNone",
+      "toId": "hiw_out",
+      "toProperty": "hwNone"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-hwHeadKey",
+      "toId": "hiw_out",
+      "toProperty": "hwHeadKey"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-hwN",
+      "toId": "hiw_out",
+      "toProperty": "hwN"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-hwDate",
+      "toId": "hiw_out",
+      "toProperty": "hwDate"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-hwTitle",
+      "toId": "hiw_out",
+      "toProperty": "hwTitle"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-hwBodyKey",
+      "toId": "hiw_out",
+      "toProperty": "hwBodyKey"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-hwStepId",
+      "toId": "hiw_out",
+      "toProperty": "hwStepId"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-liveShown",
+      "toId": "hiw_out",
+      "toProperty": "liveShown"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-liveNone",
+      "toId": "hiw_out",
+      "toProperty": "liveNone"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-liveN",
+      "toId": "hiw_out",
+      "toProperty": "liveN"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-liveDate",
+      "toId": "hiw_out",
+      "toProperty": "liveDate"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-liveStart",
+      "toId": "hiw_out",
+      "toProperty": "liveStart"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-liveEnd",
+      "toId": "hiw_out",
+      "toProperty": "liveEnd"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-liveTitle",
+      "toId": "hiw_out",
+      "toProperty": "liveTitle"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-livePrep",
+      "toId": "hiw_out",
+      "toProperty": "livePrep"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-hasPrep",
+      "toId": "hiw_out",
+      "toProperty": "hasPrep"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-joinLink",
+      "toId": "hiw_out",
+      "toProperty": "joinLink"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-hasJoin",
+      "toId": "hiw_out",
+      "toProperty": "hasJoin"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-liveStepId",
+      "toId": "hiw_out",
+      "toProperty": "liveStepId"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-liveStartsAt",
+      "toId": "hiw_out",
+      "toProperty": "liveStartsAt"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-liveDuration",
+      "toId": "hiw_out",
+      "toProperty": "liveDuration"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-calDetails",
+      "toId": "hiw_out",
+      "toProperty": "calDetails"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-attendeeName",
+      "toId": "hiw_out",
+      "toProperty": "attendeeName"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-bookingLink",
+      "toId": "hiw_out",
+      "toProperty": "bookingLink"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-canBook",
+      "toId": "hiw_out",
+      "toProperty": "canBook"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-liveNoneKey",
+      "toId": "hiw_out",
+      "toProperty": "liveNoneKey"
+    },
+    {
+      "fromId": "hiw_fn",
+      "fromProperty": "out-ready",
+      "toId": "hiw_out",
+      "toProperty": "ready"
+    }
+  ]
+}

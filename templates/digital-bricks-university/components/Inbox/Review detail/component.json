@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "4c9aaedc-024e-537e-85f5-19846cef7b31",
+  "name": "Review detail",
+  "path": "/Inbox/Review detail",
+  "type": "visual",
+  "created": "2026-11-12T13:12:01.239Z",
+  "modified": "2026-11-12T13:12:01.239Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A hand-in to review, opened in the inbox (DBU-08): every version with the newest previewed and Approve / Ask for changes (Work/Versions, as on the plan), and a message to the learner about this homework."
+}

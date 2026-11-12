@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "38f8299b-c039-5229-8b3a-5502b19da2fe",
+  "name": "addLearner",
+  "path": "/#__cloud__/addLearner",
+  "type": "cloud",
+  "created": "2026-11-07T21:26:45.913Z",
+  "modified": "2026-11-12T18:51:30.511Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach adds a learner: an account with no password (role learner), an active plan (a template's items as draft steps through shared/Steps from template, or empty), and a welcome email with the way to sign in (security: role:staff)."
+}

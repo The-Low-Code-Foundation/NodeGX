@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "75918281-b87c-51d5-8e91-9778f67d4b06",
+  "name": "archiveLibraryItem",
+  "path": "/#__cloud__/archiveLibraryItem",
+  "type": "cloud",
+  "created": "2026-11-07T22:00:36.104Z",
+  "modified": "2026-11-07T22:00:36.104Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach archives a library item (hidden from the plan pickers) or brings it back (security: role:staff). Homework already copied into a plan is not touched."
+}

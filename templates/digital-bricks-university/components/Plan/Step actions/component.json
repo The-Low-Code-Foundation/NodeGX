@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "642b6f98-a806-5ba3-87c4-24cd19b4fc7a",
+  "name": "Step actions",
+  "path": "/Plan/Step actions",
+  "type": "visual",
+  "created": "2026-11-09T10:42:25.444Z",
+  "modified": "2026-11-09T10:42:25.444Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "What the coach can do to one step: Edit (or Close), Share or Unshare, the calendar links once a session has a time, and Remove, which asks first. Tells the row which was pressed."
+}

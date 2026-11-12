@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "9cfc8dab-be55-5526-8442-282237b74d61",
+  "name": "Checklist item",
+  "path": "/Homework/Checklist item",
+  "type": "visual",
+  "created": "2026-11-09T13:11:08.994Z",
+  "modified": "2026-11-09T13:11:08.994Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One 'what to hand in' item on the learner's homework, marked optional when it is (DBU-03: show optional items as optional)."
+}

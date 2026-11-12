@@ -1,0 +1,127 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7ee5a3e7-c3d2-53b5-8037-aece8a12f809",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "crc_in",
+      "fromProperty": "id",
+      "toId": "crc_testid",
+      "toProperty": "id"
+    },
+    {
+      "fromId": "crc_testid",
+      "fromProperty": "formatted",
+      "toId": "crc_root",
+      "toProperty": "data-testid"
+    },
+    {
+      "fromId": "crc_in",
+      "fromProperty": "kindKey",
+      "toId": "crc_kind",
+      "toProperty": "labelKey"
+    },
+    {
+      "fromId": "crc_in",
+      "fromProperty": "kindBg",
+      "toId": "crc_kind",
+      "toProperty": "bg"
+    },
+    {
+      "fromId": "crc_in",
+      "fromProperty": "kindFg",
+      "toId": "crc_kind",
+      "toProperty": "fg"
+    },
+    {
+      "fromId": "crc_in",
+      "fromProperty": "usedInClass",
+      "toId": "crc_used_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "crc_in",
+      "fromProperty": "title",
+      "toId": "crc_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "crc_t_made",
+      "fromProperty": "Translation",
+      "toId": "crc_fill_made",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "crc_in",
+      "fromProperty": "madeWith",
+      "toId": "crc_fill_made",
+      "toProperty": "madeWith"
+    },
+    {
+      "fromId": "crc_fill_made",
+      "fromProperty": "formatted",
+      "toId": "crc_made",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "crc_in",
+      "fromProperty": "hasMadeWith",
+      "toId": "crc_made",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "crc_t_from",
+      "fromProperty": "Translation",
+      "toId": "crc_fill_from",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "crc_in",
+      "fromProperty": "stepTitle",
+      "toId": "crc_fill_from",
+      "toProperty": "step"
+    },
+    {
+      "fromId": "crc_fill_from",
+      "fromProperty": "formatted",
+      "toId": "crc_from",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "crc_in",
+      "fromProperty": "hasStep",
+      "toId": "crc_from",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "crc_t_open",
+      "fromProperty": "Translation",
+      "toId": "crc_open",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "crc_t_edit",
+      "fromProperty": "Translation",
+      "toId": "crc_edit",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "crc_in",
+      "fromProperty": "canEdit",
+      "toId": "crc_edit",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "crc_open",
+      "fromProperty": "onClick",
+      "toId": "crc_out",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "crc_edit",
+      "fromProperty": "onClick",
+      "toId": "crc_out",
+      "toProperty": "edit"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "21826ebc-66c0-5021-870d-f3768dee4dca",
+  "name": "Up next",
+  "path": "/Home/Up next",
+  "type": "visual",
+  "created": "2026-11-09T12:37:18.611Z",
+  "modified": "2026-11-09T12:37:18.611Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The Up next card on the learner's Home: its heading, then the homework owed and the next live session side by side (one above the other when the card is narrow). Each half has its own empty state."
+}

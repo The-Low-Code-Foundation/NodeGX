@@ -1,0 +1,168 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "d2e8d20d-4568-55f8-8627-5a514656f0f9",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "lpr_row",
+      "type": "Group",
+      "label": "Row",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "lpr_text",
+        "lpr_add"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border)"
+      },
+      "metadata": {
+        "comment": "Not wrapped: the words shrink beside Add on a phone."
+      }
+    },
+    {
+      "id": "lpr_text",
+      "type": "Group",
+      "label": "Title and meta",
+      "x": 100,
+      "y": 160,
+      "parent": "lpr_row",
+      "children": [
+        "lpr_title",
+        "lpr_meta"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-0-5)"
+      }
+    },
+    {
+      "id": "lpr_title",
+      "type": "Text",
+      "label": "Title",
+      "x": 160,
+      "y": 280,
+      "parent": "lpr_text",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-medium)",
+        "color": "var(--foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "lpr_meta",
+      "type": "Text",
+      "label": "Time and tags",
+      "x": 160,
+      "y": 400,
+      "parent": "lpr_text",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "lpr_add",
+      "type": "net.noodl.controls.button",
+      "label": "Add",
+      "x": 100,
+      "y": 520,
+      "parent": "lpr_row",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-9)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-plus",
+          "codeAsClass": true
+        },
+        "iconColor": "var(--primary-foreground)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1)"
+      }
+    },
+    {
+      "id": "lpr_in",
+      "type": "Component Inputs",
+      "label": "Row in",
+      "x": 400,
+      "y": 160,
+      "ports": [
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "meta",
+          "plug": "output",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "lpr_out",
+      "type": "Component Outputs",
+      "label": "Row out",
+      "x": 400,
+      "y": 520,
+      "ports": [
+        {
+          "name": "add",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "lpr_t_add",
+      "type": "Translation",
+      "label": "Add",
+      "x": 400,
+      "y": 400,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.picker.add"
+      }
+    }
+  ],
+  "visualRoots": [
+    "lpr_row"
+  ]
+}

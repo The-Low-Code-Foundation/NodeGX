@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "bdc2e35a-4e5c-5fe6-8051-7c0950093cbe",
+  "name": "Formatted text",
+  "path": "/Shell/Formatted text",
+  "type": "visual",
+  "created": "2026-11-07T22:05:47.672Z",
+  "modified": "2026-11-07T22:05:47.672Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Shows text written in Markdown (paragraphs, lists, bold, links) with HTML switched off, so anything typed as a tag shows as text and never runs. Used for homework briefs, in the library and on the learner's homework."
+}

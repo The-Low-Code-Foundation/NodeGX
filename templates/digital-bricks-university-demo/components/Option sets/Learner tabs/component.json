@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a05163cb-1534-5c97-8f93-1e76fe98848d",
+  "name": "Learner tabs",
+  "path": "/Option sets/Learner tabs",
+  "type": "visual",
+  "created": "2026-11-07T20:26:40.478Z",
+  "modified": "2026-11-09T13:25:26.459Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The learner's top-bar tabs, in order. Each has an id (what a page names as current), a label and a URL path."
+}

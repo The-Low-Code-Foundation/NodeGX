@@ -1,0 +1,439 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "612b3c44-b16f-53c7-8dd0-b0c39cb0cdae",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hw_words_in",
+      "type": "Component Inputs",
+      "label": "myHomework's answer",
+      "ports": [
+        {
+          "name": "me",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "list",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "step",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "versions",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "hw_words_statuses",
+      "type": "/Option sets/Step statuses",
+      "label": "Step statuses",
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "hw_words_fn",
+      "type": "JavaScriptFunction",
+      "label": "The homework, in keys and values",
+      "parameters": {
+        "functionScript": "/*\n * The page only draws: everything it shows is worked out here, from one answer.\n * The verdict is the newest version's: with Richard (pending), approved, or changes asked.\n */\nif (Inputs.list === undefined || Inputs.statuses === undefined) return;\nconst get = (m, k) => (m && typeof m.get === 'function' ? m.get(k) : m && m[k]);\nconst statuses = (Inputs.statuses || []).filter((s) => get(s, 'kind') === 'homework')\n  .map((s) => ({ value: get(s, 'value'), labelKey: get(s, 'labelKey'), bg: get(s, 'bg'), fg: get(s, 'fg') }));\nconst statusOf = (v) => statuses.find((s) => s.value === v) || { labelKey: '', bg: 'var(--muted)', fg: 'var(--muted-foreground)' };\nlet tz = String((Inputs.me && Inputs.me.timezone) || '');\ntry { new Date().toLocaleString('en-GB', { timeZone: tz || undefined }); } catch (e) { tz = ''; }\nconst zone = tz || Intl.DateTimeFormat().resolvedOptions().timeZone;\nconst day = (iso) => new Date(iso).toLocaleDateString('en-GB', { timeZone: zone, weekday: 'short', day: 'numeric', month: 'short' });\nconst at = (iso) => {\n  const d = new Date(iso);\n  if (!iso || isNaN(d)) return '';\n  return day(iso) + ', ' + d.toLocaleTimeString('en-GB', { timeZone: zone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });\n};\nconst step = Inputs.step || null;\nconst list = Array.isArray(Inputs.list) ? Inputs.list : [];\nconst versions = Array.isArray(Inputs.versions) ? Inputs.versions : [];\n\nOutputs.timezone = zone;\nOutputs.showList = !step && list.length > 0;\nOutputs.listEmpty = !step && list.length === 0;\nOutputs.listRows = list.map((h) => {\n  const st = statusOf(h.status);\n  return {\n    id: h.id, n: String(h.n), title: h.title,\n    headKey: h.dueAt ? 'home.hwHead' : 'home.hwHeadNoDue', date: h.dueAt ? day(h.dueAt) : '',\n    statusKey: st.labelKey, statusBg: st.bg, statusFg: st.fg\n  };\n});\nOutputs.showOne = !!step;\nOutputs.pageTitleKey = step ? 'homework.titleOne' : 'homework.title';\nOutputs.pageName = step ? step.title : '';\nOutputs.pageLeadKey = step ? '' : 'homework.lead';\nif (!step) {\n  Outputs.verdictShown = false;\n  Outputs.hasVersions = false;\n  Outputs.canHandIn = false;\n  Outputs.done();\n  return;\n}\nconst st = statusOf(step.status);\nOutputs.stepId = step.id;\nOutputs.headKey = step.dueAt ? 'home.hwHead' : 'home.hwHeadNoDue';\nOutputs.n = String(step.n);\nOutputs.date = step.dueAt ? day(step.dueAt) : '';\nOutputs.title = step.title;\nOutputs.statusKey = st.labelKey;\nOutputs.statusBg = st.bg;\nOutputs.statusFg = st.fg;\nOutputs.brief = step.brief || '';\nconst checklist = (step.handInChecklist || []).map((c, i) => ({ id: step.id + '-item-' + i, text: String((c && c.text) || ''), optional: !!c && c.required === false }));\nOutputs.checklist = checklist;\nOutputs.hasChecklist = checklist.length > 0;\nconst resources = (step.resources || []).map((r, i) => ({\n  id: step.id + '-res-' + i, label: String((r && r.label) || (r && (r.fileName || r.url)) || ''),\n  url: (r && r.url) || '', file: (r && r.file) || '', fileName: (r && r.fileName) || '',\n  isFile: !!(r && r.file), isLink: !(r && r.file) && !!(r && r.url), stepId: step.id\n}));\nOutputs.resources = resources;\nOutputs.hasResources = resources.length > 0;\nOutputs.canHandIn = step.canHandIn === true;\nOutputs.nextVersion = String((versions[0] ? versions[0].version : 0) + 1);\nOutputs.versions = versions;\nOutputs.hasVersions = versions.length > 0;\nconst newest = versions[0];\nconst LOOK = {\n  pending: { key: 'homework.verdictPending', bg: 'var(--waiting-bg)', fg: 'var(--foreground)', border: 'var(--border)' },\n  approved: { key: 'homework.verdictApproved', bg: 'var(--done-bg)', fg: 'var(--done-fg)', border: 'var(--done-border)' },\n  changes: { key: 'homework.verdictChanges', bg: 'var(--homework-bg)', fg: 'var(--homework-fg)', border: 'var(--homework-border)' }\n};\nconst look = newest ? LOOK[newest.review] || LOOK.pending : null;\nOutputs.verdictShown = !!look;\nif (look) {\n  Outputs.verdictKey = look.key;\n  Outputs.verdictV = String(newest.version);\n  Outputs.verdictWhen = at(newest.review === 'pending' ? newest.handedInAt : newest.reviewedAt);\n  Outputs.verdictNote = newest.review === 'pending' ? '' : (newest.reviewNote || '');\n  Outputs.verdictHasNote = newest.review !== 'pending' && !!newest.reviewNote;\n  Outputs.verdictBg = look.bg;\n  Outputs.verdictFg = look.fg;\n  Outputs.verdictBorder = look.border;\n}\nOutputs.done();"
+      },
+      "ports": [
+        {
+          "name": "in-me",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-list",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-step",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-versions",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-statuses",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-timezone",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-showList",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-listEmpty",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-listRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-showOne",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-pageTitleKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-pageName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-pageLeadKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-stepId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-headKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-n",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-date",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-statusKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-statusBg",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-statusFg",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-brief",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-checklist",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-hasChecklist",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-resources",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-hasResources",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-canHandIn",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-nextVersion",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-versions",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-hasVersions",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-verdictShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-verdictKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-verdictV",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-verdictWhen",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-verdictNote",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-verdictHasNote",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-verdictBg",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-verdictFg",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-verdictBorder",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "hw_words_out",
+      "type": "Component Outputs",
+      "label": "What the page draws",
+      "ports": [
+        {
+          "name": "timezone",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "showList",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "listEmpty",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "listRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "showOne",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "pageTitleKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pageName",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pageLeadKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "stepId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "headKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "n",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "date",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "statusKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "statusBg",
+          "plug": "input",
+          "type": "color"
+        },
+        {
+          "name": "statusFg",
+          "plug": "input",
+          "type": "color"
+        },
+        {
+          "name": "brief",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "checklist",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasChecklist",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "resources",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasResources",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "canHandIn",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "nextVersion",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "versions",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasVersions",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "verdictShown",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "verdictKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "verdictV",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "verdictWhen",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "verdictNote",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "verdictHasNote",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "verdictBg",
+          "plug": "input",
+          "type": "color"
+        },
+        {
+          "name": "verdictFg",
+          "plug": "input",
+          "type": "color"
+        },
+        {
+          "name": "verdictBorder",
+          "plug": "input",
+          "type": "color"
+        },
+        {
+          "name": "ready",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 400
+    }
+  ]
+}

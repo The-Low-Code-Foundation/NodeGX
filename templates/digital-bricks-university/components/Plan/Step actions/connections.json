@@ -1,0 +1,211 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "642b6f98-a806-5ba3-87c4-24cd19b4fc7a",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sa_t_edit",
+      "fromProperty": "Translation",
+      "toId": "sa_edit",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "sa_t_close",
+      "fromProperty": "Translation",
+      "toId": "sa_close",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "sa_t_share",
+      "fromProperty": "Translation",
+      "toId": "sa_share",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "sa_t_unshare",
+      "fromProperty": "Translation",
+      "toId": "sa_unshare",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "sa_t_remove",
+      "fromProperty": "Translation",
+      "toId": "sa_remove",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "sa_t_yes",
+      "fromProperty": "Translation",
+      "toId": "sa_yes",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "sa_t_keep",
+      "fromProperty": "Translation",
+      "toId": "sa_keep",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "sa_t_ask",
+      "fromProperty": "Translation",
+      "toId": "sa_ask_fill",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "sa_in",
+      "fromProperty": "title",
+      "toId": "sa_ask_fill",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "sa_ask_fill",
+      "fromProperty": "formatted",
+      "toId": "sa_ask",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sa_in",
+      "fromProperty": "open",
+      "toId": "sa_close",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sa_in",
+      "fromProperty": "open",
+      "toId": "sa_not_open",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "sa_not_open",
+      "fromProperty": "result",
+      "toId": "sa_edit",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sa_in",
+      "fromProperty": "shared",
+      "toId": "sa_unshare",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sa_in",
+      "fromProperty": "shared",
+      "toId": "sa_not_shared",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "sa_not_shared",
+      "fromProperty": "result",
+      "toId": "sa_share",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sa_in",
+      "fromProperty": "hasTime",
+      "toId": "sa_cal_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sa_in",
+      "fromProperty": "stepId",
+      "toId": "sa_cal",
+      "toProperty": "stepId"
+    },
+    {
+      "fromId": "sa_in",
+      "fromProperty": "title",
+      "toId": "sa_cal",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "sa_in",
+      "fromProperty": "startsAt",
+      "toId": "sa_cal",
+      "toProperty": "startsAt"
+    },
+    {
+      "fromId": "sa_in",
+      "fromProperty": "durationMin",
+      "toId": "sa_cal",
+      "toProperty": "durationMin"
+    },
+    {
+      "fromId": "sa_in",
+      "fromProperty": "meetingLink",
+      "toId": "sa_cal",
+      "toProperty": "meetingLink"
+    },
+    {
+      "fromId": "sa_in",
+      "fromProperty": "calDetails",
+      "toId": "sa_cal",
+      "toProperty": "details"
+    },
+    {
+      "fromId": "sa_in",
+      "fromProperty": "attendeeName",
+      "toId": "sa_cal",
+      "toProperty": "attendeeName"
+    },
+    {
+      "fromId": "sa_in",
+      "fromProperty": "attendeeEmail",
+      "toId": "sa_cal",
+      "toProperty": "attendeeEmail"
+    },
+    {
+      "fromId": "sa_edit",
+      "fromProperty": "onClick",
+      "toId": "sa_out",
+      "toProperty": "edit"
+    },
+    {
+      "fromId": "sa_close",
+      "fromProperty": "onClick",
+      "toId": "sa_out",
+      "toProperty": "edit"
+    },
+    {
+      "fromId": "sa_share",
+      "fromProperty": "onClick",
+      "toId": "sa_out",
+      "toProperty": "share"
+    },
+    {
+      "fromId": "sa_unshare",
+      "fromProperty": "onClick",
+      "toId": "sa_out",
+      "toProperty": "share"
+    },
+    {
+      "fromId": "sa_remove",
+      "fromProperty": "onClick",
+      "toId": "sa_ask_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "sa_keep",
+      "fromProperty": "onClick",
+      "toId": "sa_ask_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "sa_yes",
+      "fromProperty": "onClick",
+      "toId": "sa_ask_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "sa_yes",
+      "fromProperty": "onClick",
+      "toId": "sa_out",
+      "toProperty": "remove"
+    },
+    {
+      "fromId": "sa_ask_sw",
+      "fromProperty": "state",
+      "toId": "sa_confirm",
+      "toProperty": "mounted"
+    }
+  ]
+}

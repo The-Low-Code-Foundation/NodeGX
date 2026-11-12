@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2b088fc5-9f5f-58a6-8d82-b34b61f45986",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mcr_req",
+      "fromProperty": "userId",
+      "toId": "mcr_read",
+      "toProperty": "learner"
+    },
+    {
+      "fromId": "mcr_read",
+      "fromProperty": "items",
+      "toId": "mcr_res",
+      "toProperty": "pm-items"
+    },
+    {
+      "fromId": "mcr_read",
+      "fromProperty": "done",
+      "toId": "mcr_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mcr_read",
+      "fromProperty": "failed",
+      "toId": "mcr_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mcr_read",
+      "fromProperty": "estimate",
+      "toId": "mcr_res",
+      "toProperty": "pm-estimate"
+    }
+  ]
+}

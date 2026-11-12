@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "workflows": [],
+  "triggers": [
+    {
+      "id": "mail-waiting-messages",
+      "type": "schedule",
+      "name": "Mail waiting messages (DBU-07)",
+      "enabled": true,
+      "target": { "kind": "function", "name": "mailMessages" },
+      "schedule": { "cron": "* * * * *", "missedFirePolicy": "skip", "overlapPolicy": "skip" }
+    },
+    {
+      "id": "morning-round",
+      "type": "schedule",
+      "name": "Gone quiet, and the morning digest (DBU-08)",
+      "enabled": true,
+      "target": { "kind": "function", "name": "morningRound" },
+      "schedule": { "cron": "0 7 * * *", "missedFirePolicy": "run-once-on-start", "overlapPolicy": "skip" }
+    },
+    {
+      "id": "send-checkins",
+      "type": "schedule",
+      "name": "Send check-ins whose day has come (DBU-10)",
+      "enabled": true,
+      "target": { "kind": "function", "name": "sendCheckins" },
+      "schedule": { "cron": "5 * * * *", "missedFirePolicy": "run-once-on-start", "overlapPolicy": "skip" }
+    }
+  ]
+}

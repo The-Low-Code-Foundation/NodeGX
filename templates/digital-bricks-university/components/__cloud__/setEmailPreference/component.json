@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "351a050e-7d3f-52f8-8bd7-8f0891d0fc58",
+  "name": "setEmailPreference",
+  "path": "/#__cloud__/setEmailPreference",
+  "type": "cloud",
+  "created": "2026-11-12T10:11:29.566Z",
+  "modified": "2026-11-12T10:11:29.566Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Turn message emails on or off for the signed-in account (DBU-07). The only way back on; sign-in emails are never affected."
+}

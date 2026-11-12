@@ -1,0 +1,465 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f8c1b5ac-abc1-5858-836e-437908b19b51",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cq_row",
+      "type": "Group",
+      "label": "Question",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-2)",
+        "dataAttributes": "data-testid"
+      },
+      "children": [
+        "cq_label",
+        "cq_hint",
+        "cq_pick",
+        "cq_line_row",
+        "cq_long"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "cq_label",
+      "type": "Text",
+      "label": "The question",
+      "parent": "cq_row",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-medium)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "cq_hint",
+      "type": "Text",
+      "label": "A hint, when there is one",
+      "parent": "cq_row",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "cq_pick",
+      "type": "Group",
+      "label": "Scale points or options, with the scale's two ends",
+      "parent": "cq_row",
+      "parameters": {
+        "mounted": false,
+        "sizeMode": "contentSize",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "column",
+        "rowGap": "var(--space-1-5)"
+      },
+      "children": [
+        "cq_choices",
+        "cq_ends"
+      ],
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "cq_choices",
+      "type": "Group",
+      "label": "The choices",
+      "parent": "cq_pick",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "cq_choice_rows"
+      ],
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "cq_choice_rows",
+      "type": "For Each",
+      "label": "One button per choice",
+      "parent": "cq_choices",
+      "parameters": {
+        "template": "/Checkin/Choice"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "cq_ends",
+      "type": "Group",
+      "label": "What the two ends of the scale mean",
+      "parent": "cq_pick",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "columnGap": "var(--space-4)"
+      },
+      "children": [
+        "cq_min",
+        "cq_max"
+      ],
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "cq_min",
+      "type": "Text",
+      "label": "Low end",
+      "parent": "cq_ends",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "cq_max",
+      "type": "Text",
+      "label": "High end",
+      "parent": "cq_ends",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "cq_line_row",
+      "type": "Group",
+      "label": "A line, and what it counts",
+      "parent": "cq_row",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)"
+      },
+      "children": [
+        "cq_line",
+        "cq_suffix"
+      ],
+      "x": 100,
+      "y": 1120
+    },
+    {
+      "id": "cq_line",
+      "type": "net.noodl.controls.textinput",
+      "label": "A short answer",
+      "parent": "cq_line_row",
+      "parameters": {
+        "type": "text",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 360,
+          "unit": "px"
+        },
+        "maxLength": 500
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "cq_suffix",
+      "type": "Text",
+      "label": "hours a week",
+      "parent": "cq_line_row",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "cq_long",
+      "type": "net.noodl.controls.textinput",
+      "label": "A longer answer",
+      "parent": "cq_row",
+      "parameters": {
+        "mounted": false,
+        "type": "textArea",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 120,
+          "unit": "px"
+        },
+        "lineHeight": "var(--leading-relaxed)",
+        "maxLength": 5000
+      },
+      "x": 100,
+      "y": 1480
+    },
+    {
+      "id": "cq_in",
+      "type": "Component Inputs",
+      "label": "The question, from Checkin/Form",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "qid",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "labelKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hint",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasHint",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "shown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "choices",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hasChoices",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "hasEnds",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "minLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "maxLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "isLine",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "inputMode",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "isLong",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "suffix",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasSuffix",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "text",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 40
+    },
+    {
+      "id": "cq_out",
+      "type": "Component Outputs",
+      "label": "The answer changed",
+      "ports": [
+        {
+          "name": "changed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 1600
+    },
+    {
+      "id": "cq_item",
+      "type": "For Each Actions",
+      "label": "This question's record",
+      "x": 470,
+      "y": 1720
+    },
+    {
+      "id": "cq_t_label",
+      "type": "Translation",
+      "label": "The question, or the question (optional)",
+      "parameters": {
+        "Namespace": "pages"
+      },
+      "x": 470,
+      "y": 1840
+    },
+    {
+      "id": "cq_label_fill",
+      "type": "String Format",
+      "label": "The question's words into it",
+      "parameters": {
+        "format": "{label}"
+      },
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "cq_testid",
+      "type": "String Format",
+      "label": "checkin-q-{qid}, for tests",
+      "parameters": {
+        "format": "checkin-q-{qid}"
+      },
+      "x": 470,
+      "y": 160
+    },
+    {
+      "id": "cq_set_line",
+      "type": "SetModelProperties",
+      "label": "Keep the short answer",
+      "parameters": {
+        "properties": "value",
+        "type-value": "String"
+      },
+      "x": 470,
+      "y": 1240
+    },
+    {
+      "id": "cq_set_long",
+      "type": "SetModelProperties",
+      "label": "Keep the longer answer",
+      "parameters": {
+        "properties": "value",
+        "type-value": "String"
+      },
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "cq_pick_fn",
+      "type": "JavaScriptFunction",
+      "label": "Pick a choice: one, or ticks for several",
+      "parameters": {
+        "runOnChange-in-itemId": false,
+        "runOnChange-in-choiceId": false,
+        "functionScript": "/*\n * A choice was pressed (DBU-10). A scale or radio question keeps that one value; a checkbox question\n * ticks it on or off. The value goes into this question's record (Checkin/Form reads it), and every\n * choice of the question is recoloured: picked ones filled, the rest plain.\n */\nconst qid = String(Inputs.itemId || '');\nconst cid = String(Inputs.choiceId || '');\nif (!qid || !cid) return;\nconst q = Noodl.Model.get(qid);\nconst choices = Array.isArray(q.get('choices')) ? q.get('choices') : [];\nconst c = choices.find((x) => x && x.id === cid);\nif (!c) return;\nlet value;\nif (q.get('type') === 'checkbox') {\n  const now = Array.isArray(q.get('value')) ? q.get('value') : [];\n  value = now.includes(c.value) ? now.filter((v) => v !== c.value) : now.concat([c.value]);\n} else {\n  value = c.value;\n}\nq.set('value', value);\nconst on = (v) => (Array.isArray(value) ? value.includes(v) : value === v);\nchoices.forEach((x) => {\n  const m = Noodl.Model.get(x.id);\n  const picked = on(x.value);\n  m.set('bg', picked ? 'var(--primary)' : 'var(--surface)');\n  m.set('fg', picked ? 'var(--primary-foreground)' : 'var(--foreground)');\n  m.set('border', picked ? 'var(--primary)' : 'var(--border-control)');\n});\nOutputs.changed();"
+      },
+      "ports": [
+        {
+          "name": "in-itemId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-choiceId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "out-changed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "metadata": {
+        "comment": "Writes the answer into this question's record and recolours its choices; Checkin/Form then works out which questions show."
+      },
+      "x": 470,
+      "y": 640
+    }
+  ],
+  "visualRoots": [
+    "cq_row"
+  ]
+}

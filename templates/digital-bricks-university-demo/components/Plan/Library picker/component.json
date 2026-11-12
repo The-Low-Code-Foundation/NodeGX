@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "1dd5f1c2-e79e-5279-8491-3865ac491eaf",
+  "name": "Library picker",
+  "path": "/Plan/Library picker",
+  "type": "visual",
+  "created": "2026-11-09T10:46:14.360Z",
+  "modified": "2026-11-09T10:46:14.360Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Pick homework from the library for a plan: search by title or tag, and Add copies the item into the plan as a draft at the end (SCOPE R4). Archived items are not offered. Tells the page what it added, or why not."
+}

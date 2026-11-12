@@ -1,0 +1,75 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "093c7f65-eaaf-5d42-862e-335acad7d02c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "lb_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach opens the library",
+      "parameters": {
+        "params": "",
+        "allowNoAuth": false
+      },
+      "metadata": {
+        "comment": "role:staff in nodegx.security.json."
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "lb_fn",
+      "type": "JavaScriptFunction",
+      "label": "Every item, in the editor's shapes",
+      "parameters": {
+        "functionScript": "/*\n * Every library item, archived ones too (the page hides them unless asked). Older rows\n * wrote a checklist item as a plain string: read as required, so nothing seeded before\n * DBU-03 changes meaning.\n */\n(async () => {\n  try {\n    const rows = await Noodl.Records.query('LibraryItem', {}, { limit: 1000, plain: true });\n    const checklist = (list) => (Array.isArray(list) ? list : [])\n      .map((c) => (typeof c === 'string' ? { text: c, required: true } : { text: String((c && c.text) || ''), required: !(c && c.required === false) }))\n      .filter((c) => c.text);\n    const resources = (list) => (Array.isArray(list) ? list : [])\n      .filter((r) => r && (r.url || r.file))\n      .map((r) => (r.file\n        ? { label: String(r.label || r.fileName || ''), file: String(r.file), fileName: String(r.fileName || '') }\n        : { label: String(r.label || r.url), url: String(r.url) }));\n    Outputs.items = rows\n      .map((r) => ({\n        id: r.objectId,\n        title: r.title || '',\n        brief: r.brief || '',\n        handInChecklist: checklist(r.handInChecklist),\n        resources: resources(r.resources),\n        tags: Array.isArray(r.tags) ? r.tags.map(String) : [],\n        estimatedMinutes: typeof r.estimatedMinutes === 'number' ? r.estimatedMinutes : null,\n        archived: r.archived === true,\n        updatedAt: r.updatedAt || null\n      }))\n      .sort((a, b) => a.title.localeCompare(b.title));\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:library]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();",
+        "runOnChange-in-userId": false
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-items",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "lb_res",
+      "type": "noodl.cloud.response",
+      "label": "The library",
+      "parameters": {
+        "params": "items"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "lb_deny",
+      "type": "noodl.cloud.response",
+      "label": "Could not read",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "The homework library could not be read."
+      },
+      "x": 40,
+      "y": 400
+    }
+  ]
+}

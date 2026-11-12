@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "3760b289-13de-50c8-8809-2e0e7e0124f6",
+  "name": "Hand-in kinds",
+  "path": "/Option sets/Hand-in kinds",
+  "type": "visual",
+  "created": "2026-11-09T13:07:18.773Z",
+  "modified": "2026-11-09T13:07:18.773Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "What a learner can hand in, in the order the page lists them: one row per allowed file extension (its kind, label key, badge colours and how it previews: frame, sandbox, image, audio, video or none), then a link and text. The page reads this; the handIn function keeps the gate's own copy of the extensions and checks the stored, sniffed type."
+}

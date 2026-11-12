@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b4f82219-f911-5af4-867c-4c273ef000c3",
+  "name": "Tag chip",
+  "path": "/Library/Tag chip",
+  "type": "visual",
+  "created": "2026-11-07T22:08:28.123Z",
+  "modified": "2026-11-07T22:08:28.123Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A small grey pill with one word in it: a tag, or 'Archived'."
+}

@@ -1,0 +1,167 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "931de828-dc53-56d3-8c9d-d47624b6be58",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "nf_page",
+      "type": "Page",
+      "label": "Not found",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "nf_ground"
+      ],
+      "parameters": {
+        "urlPath": "not-found"
+      }
+    },
+    {
+      "id": "nf_ground",
+      "type": "Group",
+      "label": "Ground",
+      "parent": "nf_page",
+      "children": [
+        "nf_column"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "backgroundColor": "var(--background)",
+        "paddingTop": "var(--space-20)",
+        "paddingBottom": "var(--space-20)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "nf_column",
+      "type": "Group",
+      "label": "Column",
+      "parent": "nf_ground",
+      "children": [
+        "nf_name",
+        "nf_empty",
+        "nf_home"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 520,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "rowGap": "var(--space-6)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "nf_name",
+      "type": "Text",
+      "label": "Product name",
+      "parent": "nf_column",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-tight)",
+        "color": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "nf_empty",
+      "type": "/Shell/Empty state",
+      "label": "Nothing here",
+      "parent": "nf_column",
+      "parameters": {
+        "icon": {
+          "class": "lucide",
+          "code": "icon-map-pin-off",
+          "codeAsClass": true
+        },
+        "titleKey": "notFound.title",
+        "bodyKey": "notFound.body"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "nf_home",
+      "type": "net.noodl.controls.button",
+      "label": "Go to your home page",
+      "parent": "nf_column",
+      "parameters": {
+        "label": ""
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "nf_go",
+      "type": "RouterNavigate",
+      "label": "→ Home (App's gate sends a coach on to Learners)",
+      "x": 600,
+      "y": 40,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Home"
+      }
+    },
+    {
+      "id": "nf_t_tab",
+      "type": "Translation",
+      "label": "The browser tab's title",
+      "x": 600,
+      "y": 140,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "notFound.tab"
+      }
+    },
+    {
+      "id": "nf_t_name",
+      "type": "Translation",
+      "label": "Product name",
+      "x": 600,
+      "y": 200,
+      "parameters": {
+        "Namespace": "common",
+        "Key": "productName"
+      }
+    },
+    {
+      "id": "nf_t_home",
+      "type": "Translation",
+      "label": "Go to your home page",
+      "x": 600,
+      "y": 260,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "notFound.home"
+      }
+    }
+  ],
+  "visualRoots": [
+    "nf_page"
+  ]
+}

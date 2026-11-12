@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0d86937c-75d9-5b3b-88e9-2ca65c7a0d3f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ce_in",
+      "fromProperty": "listId",
+      "toId": "ce_arr",
+      "toProperty": "collectionId"
+    },
+    {
+      "fromId": "ce_arr",
+      "fromProperty": "items",
+      "toId": "ce_rows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "ce_t_head",
+      "fromProperty": "Translation",
+      "toId": "ce_head",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ce_t_hint",
+      "fromProperty": "Translation",
+      "toId": "ce_hint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ce_t_add",
+      "fromProperty": "Translation",
+      "toId": "ce_add",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ce_in",
+      "fromProperty": "listId",
+      "toId": "ce_add_fn",
+      "toProperty": "in-listId"
+    },
+    {
+      "fromId": "ce_add",
+      "fromProperty": "onClick",
+      "toId": "ce_add_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ce_in",
+      "fromProperty": "listId",
+      "toId": "ce_remove_fn",
+      "toProperty": "in-listId"
+    },
+    {
+      "fromId": "ce_rows",
+      "fromProperty": "itemActionItemId",
+      "toId": "ce_remove_fn",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "ce_rows",
+      "fromProperty": "itemOutputSignal-remove",
+      "toId": "ce_remove_fn",
+      "toProperty": "run"
+    }
+  ]
+}

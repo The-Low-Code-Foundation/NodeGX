@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "038360db-3fbd-58de-89e7-eea20f32dc56",
+  "name": "sendMessage",
+  "path": "/#__cloud__/sendMessage",
+  "type": "cloud",
+  "created": "2026-11-12T10:09:53.809Z",
+  "modified": "2026-11-12T10:09:53.809Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A learner writes to the coach (DBU-07): her own conversation only, optionally about one of her shared homework steps, with up to 5 checked files. Saves the message, rings her bell, then tells the coach by email."
+}

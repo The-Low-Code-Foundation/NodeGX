@@ -1,0 +1,494 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "873ff58d-c4a2-5094-860f-ef98713fac1b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "as_root",
+      "type": "Group",
+      "label": "Shell",
+      "x": 40,
+      "y": 260,
+      "children": [
+        "as_demo_strip",
+        "as_topband",
+        "as_mainband"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)"
+      }
+    },
+    {
+      "id": "as_topband",
+      "type": "Group",
+      "label": "Top bar band",
+      "parent": "as_root",
+      "children": [
+        "as_topshell"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "backgroundColor": "var(--surface)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border)"
+      },
+      "x": 100,
+      "y": 380
+    },
+    {
+      "id": "as_topshell",
+      "type": "Group",
+      "label": "Top bar",
+      "parent": "as_topband",
+      "children": [
+        "as_left",
+        "as_signout"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 1120,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-8)",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "justifyContent": "space-between"
+      },
+      "x": 160,
+      "y": 500
+    },
+    {
+      "id": "as_brand",
+      "type": "Group",
+      "label": "Product name and side",
+      "parent": "as_left",
+      "children": [
+        "as_name",
+        "as_badge"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)"
+      },
+      "x": 220,
+      "y": 620
+    },
+    {
+      "id": "as_name",
+      "type": "Text",
+      "label": "Product name",
+      "parent": "as_brand",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-tight)",
+        "color": "var(--foreground)"
+      },
+      "x": 280,
+      "y": 740
+    },
+    {
+      "id": "as_badge",
+      "type": "Group",
+      "label": "COACH badge",
+      "parent": "as_brand",
+      "children": [
+        "as_badge_text"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "mounted": false,
+        "backgroundColor": "var(--coach-badge)",
+        "borderRadius": "var(--radius-sm)",
+        "paddingTop": "var(--space-0-5)",
+        "paddingBottom": "var(--space-0-5)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "metadata": {
+        "comment": "Only on the coach side. Which side is drawn is the page's choice; who may see coach pages is the backend's staff role (DBU-02)."
+      },
+      "x": 280,
+      "y": 860
+    },
+    {
+      "id": "as_badge_text",
+      "type": "Text",
+      "label": "COACH",
+      "parent": "as_badge",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "letterSpacing": "var(--tracking-wide)",
+        "color": "var(--coach-badge-foreground)"
+      },
+      "x": 340,
+      "y": 980
+    },
+    {
+      "id": "as_tabs",
+      "type": "Group",
+      "label": "Tabs",
+      "parent": "as_left",
+      "children": [
+        "as_repeat"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-1)",
+        "rowGap": "var(--space-1)"
+      },
+      "x": 220,
+      "y": 1100
+    },
+    {
+      "id": "as_repeat",
+      "type": "For Each",
+      "label": "One tab per row",
+      "parent": "as_tabs",
+      "parameters": {
+        "template": "/Shell/Nav link"
+      },
+      "x": 280,
+      "y": 1220
+    },
+    {
+      "id": "as_mainband",
+      "type": "Group",
+      "label": "Main band",
+      "parent": "as_root",
+      "children": [
+        "as_main"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center"
+      },
+      "x": 100,
+      "y": 1340
+    },
+    {
+      "id": "as_main",
+      "type": "Group",
+      "label": "Main column",
+      "parent": "as_mainband",
+      "children": [
+        "as_slot"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 1120,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-6)",
+        "paddingTop": "var(--space-8)",
+        "paddingBottom": "var(--space-14)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      },
+      "x": 160,
+      "y": 1460
+    },
+    {
+      "id": "as_slot",
+      "type": "Component Children",
+      "label": "The page's content",
+      "parent": "as_main",
+      "x": 220,
+      "y": 1580
+    },
+    {
+      "id": "as_inputs",
+      "type": "Component Inputs",
+      "label": "Shell in",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "coach",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "current",
+          "plug": "output",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "as_learner_tabs",
+      "type": "/Option sets/Learner tabs",
+      "label": "Learner tabs",
+      "x": 420,
+      "y": 40
+    },
+    {
+      "id": "as_coach_tabs",
+      "type": "/Option sets/Coach tabs",
+      "label": "Coach tabs",
+      "x": 420,
+      "y": 140
+    },
+    {
+      "id": "as_mark",
+      "type": "JavaScriptFunction",
+      "label": "This side's tabs, current one marked",
+      "x": 760,
+      "y": 80,
+      "parameters": {
+        "functionScript": "const list = Inputs.coach === true ? Inputs.coachTabs : Inputs.learnerTabs;\nif (list === undefined || Inputs.current === undefined) return;\nconst read = (tab, key) => (typeof tab.get === 'function' ? tab.get(key) : tab[key]);\n// A Static Data row is a Model: its id is the model's own id, not a property get() returns.\nconst idOf = (tab) => (typeof tab.getId === 'function' ? tab.getId() : tab.id);\n// DBU-07: unread messages show on Messages (a learner: Richard's) or Learners (the coach: every learner's).\n// DBU-08: the coach's Inbox shows how many things are waiting on him.\nconst counts = Inputs.coach === true\n  ? { learners: Number(Inputs.unread) || 0, inbox: Number(Inputs.inbox) || 0 }\n  : { messages: Number(Inputs.unread) || 0 };\nOutputs.tabs = list.map((tab) => ({\n  id: idOf(tab),\n  labelKey: read(tab, 'labelKey'),\n  path: read(tab, 'path'),\n  active: idOf(tab) === Inputs.current,\n  count: counts[idOf(tab)] > 0 ? String(counts[idOf(tab)]) : ''\n}));\n"
+      },
+      "ports": [
+        {
+          "name": "in-coach",
+          "displayName": "coach",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-coachTabs",
+          "displayName": "coachTabs",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-learnerTabs",
+          "displayName": "learnerTabs",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-current",
+          "displayName": "current",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-tabs",
+          "displayName": "tabs",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "Waits for `current` as well as the list: a row the repeater has already drawn keeps its id, so a first pass with no current tab would leave every tab unmarked."
+      }
+    },
+    {
+      "id": "as_left",
+      "type": "Group",
+      "label": "Product and tabs",
+      "parent": "as_topshell",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-8)",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "as_brand",
+        "as_tabs"
+      ],
+      "x": 220,
+      "y": 740
+    },
+    {
+      "id": "as_signout",
+      "type": "net.noodl.controls.button",
+      "label": "Sign out",
+      "parent": "as_topshell",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-11)"
+      },
+      "x": 220,
+      "y": 1340,
+      "metadata": {
+        "comment": "Nothing navigates here: App's gate sees the session end and sends the person to Sign in, the same rule as any signed-out visit. 44px tall (space-11) like every tap target on a phone (DBU-05)."
+      }
+    },
+    {
+      "id": "as_logout",
+      "type": "net.noodl.user.LogOut",
+      "label": "End the session",
+      "x": 700,
+      "y": 200,
+      "metadata": {
+        "comment": "Nothing navigates here: App's gate sees the session end and sends the person to Sign in, the same rule as any signed-out visit."
+      }
+    },
+    {
+      "id": "as_t_name",
+      "type": "Translation",
+      "label": "Product name",
+      "x": 700,
+      "y": 40,
+      "parameters": {
+        "Namespace": "common",
+        "Key": "productName"
+      }
+    },
+    {
+      "id": "as_t_badge",
+      "type": "Translation",
+      "label": "COACH",
+      "x": 700,
+      "y": 100,
+      "parameters": {
+        "Namespace": "common",
+        "Key": "coachBadge"
+      }
+    },
+    {
+      "id": "as_t_signout",
+      "type": "Translation",
+      "label": "Sign out",
+      "x": 700,
+      "y": 150,
+      "parameters": {
+        "Namespace": "common",
+        "Key": "signOut"
+      }
+    },
+    {
+      "id": "as_count_go",
+      "type": "JavaScriptFunction",
+      "label": "Count unread: as the learner, or as the coach",
+      "parameters": {
+        "runOnChange-in-coach": false,
+        "functionScript": "// On mount and on every doorbell (a message, or one read): the count on this side's tab.\n// Only for someone signed in: a signed-out visitor sees a page for a beat before the gate (/App)\n// sends them to Sign in, and a count asked for then is refused (403).\nif (!Noodl.Users.Current) return;\nif (Inputs.coach === true) Outputs.countCoach(); else Outputs.countLearner();"
+      },
+      "x": 590,
+      "y": 320
+    },
+    {
+      "id": "as_unread_l",
+      "type": "CloudFunction2",
+      "label": "myUnread (Richard's messages to me)",
+      "parameters": {
+        "function": "myUnread"
+      },
+      "x": 590,
+      "y": 80
+    },
+    {
+      "id": "as_unread_c",
+      "type": "CloudFunction2",
+      "label": "coachUnread (staff only)",
+      "parameters": {
+        "function": "coachUnread"
+      },
+      "x": 590,
+      "y": 200
+    },
+    {
+      "id": "as_bell",
+      "type": "SubscribeToChanges",
+      "label": "The doorbell: count again",
+      "parameters": {
+        "collectionName": "Doorbell"
+      },
+      "x": 590,
+      "y": 440
+    },
+    {
+      "id": "as_inbox_c",
+      "type": "CloudFunction2",
+      "label": "coachInbox, the count only (staff only)",
+      "x": 700,
+      "y": 400,
+      "parameters": {
+        "function": "coachInbox",
+        "in-countOnly": true
+      }
+    },
+    {
+      "id": "as_demo_strip",
+      "type": "/Demo/Demo strip",
+      "label": "The demo's line (only in the demo)",
+      "x": 100,
+      "y": 100,
+      "parent": "as_root"
+    }
+  ],
+  "visualRoots": [
+    "as_root"
+  ]
+}

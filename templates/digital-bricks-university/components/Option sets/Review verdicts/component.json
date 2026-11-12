@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f887b0ef-1a28-5dda-8272-f3e7d98b583f",
+  "name": "Review verdicts",
+  "path": "/Option sets/Review verdicts",
+  "type": "visual",
+  "created": "2026-11-09T13:07:18.974Z",
+  "modified": "2026-11-09T13:19:29.256Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A hand-in's review (schema Submission.review): pending, approved or changes, with the label key and chip colours each shows."
+}

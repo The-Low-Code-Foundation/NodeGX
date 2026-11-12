@@ -1,0 +1,145 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "72a02579-b78d-5a04-80cb-a7b347321397",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ln_t_tab",
+      "fromProperty": "Translation",
+      "toId": "ln_page",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "ln_t_add",
+      "fromProperty": "Translation",
+      "toId": "ln_add",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ln_t_failed",
+      "fromProperty": "Translation",
+      "toId": "ln_failed",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ln_top",
+      "fromProperty": "didMount",
+      "toId": "ln_roster",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ln_add_form",
+      "fromProperty": "added",
+      "toId": "ln_roster",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ln_roster",
+      "fromProperty": "out-learners",
+      "toId": "ln_shape",
+      "toProperty": "in-learners"
+    },
+    {
+      "fromId": "ln_t_progress",
+      "fromProperty": "Translation",
+      "toId": "ln_shape",
+      "toProperty": "in-progress"
+    },
+    {
+      "fromId": "ln_t_drafts",
+      "fromProperty": "Translation",
+      "toId": "ln_shape",
+      "toProperty": "in-drafts"
+    },
+    {
+      "fromId": "ln_t_nosteps",
+      "fromProperty": "Translation",
+      "toId": "ln_shape",
+      "toProperty": "in-noSteps"
+    },
+    {
+      "fromId": "ln_roster",
+      "fromProperty": "done",
+      "toId": "ln_shape",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ln_shape",
+      "fromProperty": "out-rows",
+      "toId": "ln_rows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "ln_shape",
+      "fromProperty": "out-hasRows",
+      "toId": "ln_list",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ln_shape",
+      "fromProperty": "out-none",
+      "toId": "ln_none",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ln_roster",
+      "fromProperty": "out-templates",
+      "toId": "ln_add_form",
+      "toProperty": "templates"
+    },
+    {
+      "fromId": "ln_add",
+      "fromProperty": "onClick",
+      "toId": "ln_add_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "ln_add_form",
+      "fromProperty": "closed",
+      "toId": "ln_add_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ln_add_sw",
+      "fromProperty": "state",
+      "toId": "ln_add_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ln_roster",
+      "fromProperty": "failure",
+      "toId": "ln_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "ln_roster",
+      "fromProperty": "done",
+      "toId": "ln_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ln_fail_sw",
+      "fromProperty": "state",
+      "toId": "ln_failed",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ln_t_unread",
+      "fromProperty": "Translation",
+      "toId": "ln_shape",
+      "toProperty": "in-unread"
+    },
+    {
+      "fromId": "ln_t_creations",
+      "fromProperty": "Translation",
+      "toId": "ln_shape",
+      "toProperty": "in-creations"
+    },
+    {
+      "fromId": "ln_t_creations_one",
+      "fromProperty": "Translation",
+      "toId": "ln_shape",
+      "toProperty": "in-creationsOne"
+    }
+  ]
+}

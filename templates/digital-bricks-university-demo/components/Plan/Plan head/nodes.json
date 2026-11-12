@@ -1,0 +1,756 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "82e0a068-0f99-555c-8ce8-73d797cd7ff9",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "phd_card",
+      "type": "Group",
+      "label": "Plan head",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "phd_top",
+        "phd_counts"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      }
+    },
+    {
+      "id": "phd_top",
+      "type": "Group",
+      "label": "Who, and the three buttons",
+      "x": 100,
+      "y": 160,
+      "parent": "phd_card",
+      "children": [
+        "phd_who",
+        "phd_buttons"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "justifyContent": "space-between",
+        "columnGap": "var(--space-4)",
+        "rowGap": "var(--space-3)"
+      }
+    },
+    {
+      "id": "phd_who",
+      "type": "Group",
+      "label": "Who, and the plan's status",
+      "x": 160,
+      "y": 280,
+      "parent": "phd_top",
+      "children": [
+        "phd_detail",
+        "phd_status"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-1)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "phd_detail",
+      "type": "Text",
+      "label": "Job, organisation, address",
+      "x": 220,
+      "y": 400,
+      "parent": "phd_who",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "metadata": {
+        "comment": "Full width so it wraps on a phone; the status chip sits on the line below."
+      }
+    },
+    {
+      "id": "phd_status",
+      "type": "/Plan/Chip",
+      "label": "Active, paused or finished",
+      "x": 220,
+      "y": 520,
+      "parent": "phd_who"
+    },
+    {
+      "id": "phd_buttons",
+      "type": "Group",
+      "label": "Buttons",
+      "x": 160,
+      "y": 640,
+      "parent": "phd_top",
+      "children": [
+        "phd_settings",
+        "phd_save_tpl",
+        "phd_see",
+        "phd_back"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)"
+      }
+    },
+    {
+      "id": "phd_settings",
+      "type": "net.noodl.controls.button",
+      "label": "Plan settings",
+      "x": 220,
+      "y": 760,
+      "parent": "phd_buttons",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-semibold)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-settings",
+          "codeAsClass": true
+        },
+        "iconColor": "var(--muted-foreground)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)"
+      }
+    },
+    {
+      "id": "phd_save_tpl",
+      "type": "net.noodl.controls.button",
+      "label": "Save as template",
+      "x": 220,
+      "y": 880,
+      "parent": "phd_buttons",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-semibold)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-copy",
+          "codeAsClass": true
+        },
+        "iconColor": "var(--muted-foreground)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)"
+      }
+    },
+    {
+      "id": "phd_see",
+      "type": "net.noodl.controls.button",
+      "label": "See as the learner",
+      "x": 220,
+      "y": 1000,
+      "parent": "phd_buttons",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-semibold)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-eye",
+          "codeAsClass": true
+        },
+        "iconColor": "var(--muted-foreground)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)"
+      }
+    },
+    {
+      "id": "phd_back",
+      "type": "net.noodl.controls.button",
+      "label": "Back to the builder",
+      "x": 220,
+      "y": 1120,
+      "parent": "phd_buttons",
+      "parameters": {
+        "mounted": false,
+        "label": "",
+        "sizeMode": "contentSize",
+        "fontWeight": "var(--font-semibold)",
+        "fontSize": "var(--text-sm)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-pencil",
+          "codeAsClass": true
+        },
+        "iconColor": "var(--primary-foreground)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)"
+      }
+    },
+    {
+      "id": "phd_counts",
+      "type": "net.noodl.visual.columns",
+      "label": "The counts",
+      "x": 100,
+      "y": 1240,
+      "parent": "phd_card",
+      "children": [
+        "phd_live",
+        "phd_hw",
+        "phd_hours",
+        "phd_from"
+      ],
+      "parameters": {
+        "sizing": "autoFit",
+        "minWidth": 170,
+        "marginX": 12,
+        "marginY": 12
+      },
+      "metadata": {
+        "comment": "autoFit: four tiles side by side on a computer, two or one on a phone. Columns is the only node that reflows."
+      }
+    },
+    {
+      "id": "phd_live",
+      "type": "/Plan/Count tile",
+      "label": "Live sessions",
+      "x": 160,
+      "y": 1360,
+      "parent": "phd_counts",
+      "parameters": {
+        "labelKey": "plan.liveCount",
+        "bg": "var(--live-bg)",
+        "fg": "var(--live-fg)"
+      }
+    },
+    {
+      "id": "phd_hw",
+      "type": "/Plan/Count tile",
+      "label": "Homework tasks",
+      "x": 160,
+      "y": 1480,
+      "parent": "phd_counts",
+      "parameters": {
+        "labelKey": "plan.homeworkCount",
+        "bg": "var(--homework-bg)",
+        "fg": "var(--homework-fg)"
+      }
+    },
+    {
+      "id": "phd_hours",
+      "type": "/Plan/Count tile",
+      "label": "Coaching hours",
+      "x": 160,
+      "y": 1600,
+      "parent": "phd_counts",
+      "parameters": {
+        "labelKey": "plan.hours",
+        "bg": "var(--muted)",
+        "fg": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "phd_from",
+      "type": "Group",
+      "label": "Started from",
+      "x": 160,
+      "y": 1720,
+      "parent": "phd_counts",
+      "children": [
+        "phd_from_label",
+        "phd_from_label_empty",
+        "phd_from_text",
+        "phd_start_box"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)",
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)"
+      }
+    },
+    {
+      "id": "phd_from_label",
+      "type": "Text",
+      "label": "Started from",
+      "x": 220,
+      "y": 1840,
+      "parent": "phd_from",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "phd_from_text",
+      "type": "Text",
+      "label": "The template, or Blank plan",
+      "x": 220,
+      "y": 1960,
+      "parent": "phd_from",
+      "parameters": {
+        "text": "",
+        "mounted": false,
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "phd_start_box",
+      "type": "Group",
+      "label": "Start from a template, while empty",
+      "x": 220,
+      "y": 2080,
+      "parent": "phd_from",
+      "children": [
+        "phd_tpl",
+        "phd_start"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-1)"
+      }
+    },
+    {
+      "id": "phd_tpl",
+      "type": "net.noodl.controls.options",
+      "label": "Which template",
+      "x": 280,
+      "y": 2200,
+      "parent": "phd_start_box",
+      "parameters": {
+        "value": "",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "phd_start",
+      "type": "net.noodl.controls.button",
+      "label": "Start from it",
+      "x": 280,
+      "y": 2320,
+      "parent": "phd_start_box",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "fontWeight": "var(--font-semibold)",
+        "fontSize": "var(--text-sm)"
+      }
+    },
+    {
+      "id": "phd_in",
+      "type": "Component Inputs",
+      "label": "The plan, shaped",
+      "x": 560,
+      "y": 40,
+      "ports": [
+        {
+          "name": "planId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "detail",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "statusKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "live",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "homework",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hours",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "startedFrom",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "empty",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "templates",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "firstName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "learnerView",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "id": "phd_out",
+      "type": "Component Outputs",
+      "label": "What was asked for",
+      "x": 560,
+      "y": 760,
+      "ports": [
+        {
+          "name": "settings",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "saveTemplate",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "seeAs",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "changed",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "said",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "saidShow",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "phd_not_empty",
+      "type": "Inverter",
+      "label": "Has steps",
+      "x": 560,
+      "y": 1960
+    },
+    {
+      "id": "phd_not_lv",
+      "type": "Inverter",
+      "label": "Building, not seeing as",
+      "x": 560,
+      "y": 1000
+    },
+    {
+      "id": "phd_see_fill",
+      "type": "String Format",
+      "label": "See as {first}",
+      "x": 560,
+      "y": 1120,
+      "parameters": {
+        "format": "{first}"
+      }
+    },
+    {
+      "id": "phd_opts",
+      "type": "JavaScriptFunction",
+      "label": "The templates on offer",
+      "x": 560,
+      "y": 2200,
+      "parameters": {
+        "functionScript": "// First a 'Choose one' that starts nothing, then the templates the backend offers (not archived).\nif (Inputs.choose === undefined) return;\nconst templates = Array.isArray(Inputs.templates) ? Inputs.templates : [];\nOutputs.items = [{ Label: Inputs.choose, Value: '' }].concat(templates.map((t) => ({ Label: t.title, Value: t.id })));\n"
+      },
+      "ports": [
+        {
+          "name": "in-templates",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-choose",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-items",
+          "plug": "output",
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "id": "phd_apply",
+      "type": "CloudFunction2",
+      "label": "applyTemplate (staff only)",
+      "x": 860,
+      "y": 2320,
+      "parameters": {
+        "function": "applyTemplate"
+      }
+    },
+    {
+      "id": "phd_started",
+      "type": "JavaScriptFunction",
+      "label": "Started from it, in a sentence",
+      "x": 860,
+      "y": 2440,
+      "parameters": {
+        "runOnChange-in-templates": false,
+        "runOnChange-in-templateId": false,
+        "runOnChange-in-added": false,
+        "runOnChange-in-said": false,
+        "functionScript": "const fill = (s, v) => Object.keys(v).reduce((out, k) => out.split('{' + k + '}').join(String(v[k])), String(s || ''));\nconst t = (Inputs.templates || []).find((x) => x.id === Inputs.templateId) || {};\nOutputs.said = fill(Inputs.said, { title: t.title || '', count: Number(Inputs.added) || 0 });\nOutputs.show();\n"
+      },
+      "ports": [
+        {
+          "name": "in-templates",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-templateId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-added",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-said",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-said",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-show",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "phd_t_settings",
+      "type": "Translation",
+      "label": "Plan settings",
+      "x": 860,
+      "y": 760,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.settings"
+      }
+    },
+    {
+      "id": "phd_t_save",
+      "type": "Translation",
+      "label": "Save as template",
+      "x": 860,
+      "y": 820,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.saveAsTemplate"
+      }
+    },
+    {
+      "id": "phd_t_see",
+      "type": "Translation",
+      "label": "See as {first}",
+      "x": 860,
+      "y": 880,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.seeAs"
+      }
+    },
+    {
+      "id": "phd_t_back",
+      "type": "Translation",
+      "label": "Back to the builder",
+      "x": 860,
+      "y": 940,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.stopSeeing"
+      }
+    },
+    {
+      "id": "phd_t_from",
+      "type": "Translation",
+      "label": "Started from",
+      "x": 860,
+      "y": 1840,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.startedFrom"
+      }
+    },
+    {
+      "id": "phd_t_choose",
+      "type": "Translation",
+      "label": "Choose one",
+      "x": 860,
+      "y": 2200,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.noTemplate"
+      }
+    },
+    {
+      "id": "phd_t_start",
+      "type": "Translation",
+      "label": "Start from it",
+      "x": 860,
+      "y": 2260,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.startFrom"
+      }
+    },
+    {
+      "id": "phd_t_started",
+      "type": "Translation",
+      "label": "Started from “{title}”",
+      "x": 1160,
+      "y": 2440,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.started"
+      }
+    },
+    {
+      "id": "phd_from_label_empty",
+      "type": "Text",
+      "label": "Start from a template",
+      "x": 220,
+      "y": 1900,
+      "parent": "phd_from",
+      "parameters": {
+        "text": "",
+        "mounted": false,
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "phd_t_choose_label",
+      "type": "Translation",
+      "label": "Start from a template",
+      "x": 860,
+      "y": 1900,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.chooseTemplate"
+      }
+    }
+  ],
+  "visualRoots": [
+    "phd_card"
+  ]
+}

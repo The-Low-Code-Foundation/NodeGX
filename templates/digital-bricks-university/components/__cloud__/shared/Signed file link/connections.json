@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "1acd8697-6124-5e55-8887-e3d71d1c00c6",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sfl_in",
+      "fromProperty": "name",
+      "toId": "sfl_fn",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "sfl_fn",
+      "fromProperty": "out-url",
+      "toId": "sfl_out",
+      "toProperty": "url"
+    },
+    {
+      "fromId": "sfl_fn",
+      "fromProperty": "out-expiresAt",
+      "toId": "sfl_out",
+      "toProperty": "expiresAt"
+    },
+    {
+      "fromId": "sfl_fn",
+      "fromProperty": "out-reason",
+      "toId": "sfl_out",
+      "toProperty": "reason"
+    },
+    {
+      "fromId": "sfl_fn",
+      "fromProperty": "out-done",
+      "toId": "sfl_out",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "sfl_fn",
+      "fromProperty": "out-failed",
+      "toId": "sfl_out",
+      "toProperty": "failed"
+    }
+  ]
+}

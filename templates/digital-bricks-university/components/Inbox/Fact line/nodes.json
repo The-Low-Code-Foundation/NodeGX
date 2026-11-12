@@ -1,0 +1,117 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2683a27c-8c08-5fb0-80d8-29e554a5d1e5",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "fl_row",
+      "type": "Group",
+      "label": "Fact",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "fl_dot",
+        "fl_text"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "columnGap": "var(--space-2)"
+      }
+    },
+    {
+      "id": "fl_dot",
+      "type": "Text",
+      "label": "Bullet",
+      "x": 40,
+      "y": 160,
+      "parent": "fl_row",
+      "parameters": {
+        "text": "•",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "fl_text",
+      "type": "Text",
+      "label": "The fact",
+      "x": 40,
+      "y": 280,
+      "parent": "fl_row",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "fl_in",
+      "type": "Component Inputs",
+      "label": "Fact in",
+      "x": 400,
+      "y": 40,
+      "ports": [
+        {
+          "name": "key",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "date",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "days",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "first",
+          "plug": "output",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "fl_t",
+      "type": "Translation",
+      "label": "The sentence",
+      "x": 400,
+      "y": 160,
+      "parameters": {
+        "Namespace": "pages"
+      }
+    },
+    {
+      "id": "fl_fill",
+      "type": "String Format",
+      "label": "Its values into it",
+      "x": 400,
+      "y": 280,
+      "parameters": {
+        "format": "{title} {date} {days} {first}"
+      }
+    }
+  ],
+  "visualRoots": [
+    "fl_row"
+  ]
+}

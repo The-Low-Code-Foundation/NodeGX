@@ -1,0 +1,157 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "388e8a9f-6fa1-58d3-8be8-bba6c3a36730",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "si_t_tab",
+      "fromProperty": "Translation",
+      "toId": "si_page",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "si_t_name",
+      "fromProperty": "Translation",
+      "toId": "si_name",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "si_t_title",
+      "fromProperty": "Translation",
+      "toId": "si_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "si_t_lede",
+      "fromProperty": "Translation",
+      "toId": "si_lede",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "si_t_email",
+      "fromProperty": "Translation",
+      "toId": "si_email",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "si_t_send",
+      "fromProperty": "Translation",
+      "toId": "si_send",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "si_t_sent",
+      "fromProperty": "Translation",
+      "toId": "si_sent",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "si_t_failed",
+      "fromProperty": "Translation",
+      "toId": "si_failed",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "si_url",
+      "fromProperty": "pm-email",
+      "toId": "si_email",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "si_url",
+      "fromProperty": "pm-email",
+      "toId": "si_request",
+      "toProperty": "email"
+    },
+    {
+      "fromId": "si_email",
+      "fromProperty": "onTextChanged",
+      "toId": "si_request",
+      "toProperty": "email"
+    },
+    {
+      "fromId": "si_redirect",
+      "fromProperty": "out-redirect",
+      "toId": "si_request",
+      "toProperty": "redirect"
+    },
+    {
+      "fromId": "si_send",
+      "fromProperty": "onClick",
+      "toId": "si_request",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "si_email",
+      "fromProperty": "onEnter",
+      "toId": "si_request",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "si_send",
+      "fromProperty": "onClick",
+      "toId": "si_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "si_request",
+      "fromProperty": "done",
+      "toId": "si_sent_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "si_request",
+      "fromProperty": "failure",
+      "toId": "si_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "si_request",
+      "fromProperty": "failure",
+      "toId": "si_sent_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "si_sent_sw",
+      "fromProperty": "state",
+      "toId": "si_sent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "si_fail_sw",
+      "fromProperty": "state",
+      "toId": "si_failed",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "si_card",
+      "fromProperty": "didMount",
+      "toId": "si_redirect",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "si_demo_mode",
+      "fromProperty": "notDemo",
+      "toId": "si_card",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "si_t_privacy",
+      "fromProperty": "Translation",
+      "toId": "si_privacy",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "si_privacy",
+      "fromProperty": "onClick",
+      "toId": "si_open_privacy",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "si_demo_mode",
+      "fromProperty": "notDemo",
+      "toId": "si_privacy",
+      "toProperty": "mounted"
+    }
+  ]
+}

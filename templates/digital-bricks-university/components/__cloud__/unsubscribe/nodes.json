@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5a801b8a-96c4-51d6-8284-9f1b8650ad2b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "us_req",
+      "type": "noodl.cloud.request",
+      "label": "Somebody presses Stop these emails",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "u,s",
+        "allowNoAuth": true,
+        "ptype-u": "string",
+        "preq-u": true,
+        "ptype-s": "string",
+        "preq-s": true
+      }
+    },
+    {
+      "id": "us_fn",
+      "type": "JavaScriptFunction",
+      "label": "Same signature? Then stop the mail",
+      "x": 40,
+      "y": 180,
+      "parameters": {
+        "runOnChange-in-u": false,
+        "runOnChange-in-s": false,
+        "functionScript": "/*\n * ONE PRESS FROM THE LINK IN A \"RICHARD REPLIED\" EMAIL, WITH NO SESSION (DBU-07).\n * The signature (HMAC-SHA256 with the unsubscribeKey secret over 'dbu-unsubscribe:v1:' + account,\n * made by shared/Message mail) is recomputed and compared in constant time. A match turns message\n * emails off, keeping the first stamp. EVERY OUTCOME ANSWERS THE SAME (a bad signature, an unknown\n * account, a success), so this public door cannot tell anyone which accounts exist, and it can only\n * ever turn mail OFF. It runs on the page's button, never on opening the link: mail scanners follow links.\n */\n(async () => {\n  try {\n    const u = String(Inputs.u || '');\n    const s = String(Inputs.s || '').toLowerCase();\n    const secret = globalThis._noodl_get_secret ? globalThis._noodl_get_secret('unsubscribeKey') : null;\n    const key = secret && secret.found ? String(secret.value) : '';\n    let same = false;\n    if (key && u && u.length < 100) {\n      const k = await crypto.subtle.importKey('raw', new TextEncoder().encode(key), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);\n      const want = Array.from(new Uint8Array(await crypto.subtle.sign('HMAC', k, new TextEncoder().encode('dbu-unsubscribe:v1:' + u))))\n        .map((b) => b.toString(16).padStart(2, '0')).join('');\n      let diff = s.length === want.length ? 0 : 1;\n      for (let i = 0; i < want.length; i++) diff |= (s.charCodeAt(i) || 0) ^ want.charCodeAt(i);\n      same = diff === 0;\n    }\n    if (same) {\n      const users = await Noodl.Records.query('_User', { objectId: { equalTo: u } }, { limit: 2, plain: true });\n      if (users.length === 1 && !users[0].emailOptOutAt) {\n        await Noodl.Records.save(u, { emailOptOutAt: new Date().toISOString() }, { className: '_User' });\n      }\n    } else {\n      console.warn('[dbu:unsubscribe] a link that does not verify');\n    }\n  } catch (e) {\n    console.error('[dbu:unsubscribe]', String((e && e.message) || e));\n  }\n  Outputs.done();\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-u",
+          "displayName": "u",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-s",
+          "displayName": "s",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "us_res",
+      "type": "noodl.cloud.response",
+      "label": "The same answer, whatever happened",
+      "x": 40,
+      "y": 320,
+      "parameters": {
+        "params": ""
+      }
+    }
+  ]
+}

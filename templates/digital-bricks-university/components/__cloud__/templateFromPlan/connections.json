@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ab09038b-746b-58a6-8fb3-eba830a9abbe",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tfp_req",
+      "fromProperty": "pm-planId",
+      "toId": "tfp_fn",
+      "toProperty": "in-planId"
+    },
+    {
+      "fromId": "tfp_req",
+      "fromProperty": "pm-title",
+      "toId": "tfp_fn",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "tfp_req",
+      "fromProperty": "pm-description",
+      "toId": "tfp_fn",
+      "toProperty": "in-description"
+    },
+    {
+      "fromId": "tfp_req",
+      "fromProperty": "receive",
+      "toId": "tfp_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tfp_fn",
+      "fromProperty": "out-id",
+      "toId": "tfp_res",
+      "toProperty": "pm-id"
+    },
+    {
+      "fromId": "tfp_fn",
+      "fromProperty": "out-count",
+      "toId": "tfp_res",
+      "toProperty": "pm-count"
+    },
+    {
+      "fromId": "tfp_fn",
+      "fromProperty": "out-done",
+      "toId": "tfp_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "tfp_fn",
+      "fromProperty": "out-why",
+      "toId": "tfp_deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "tfp_fn",
+      "fromProperty": "out-refuse",
+      "toId": "tfp_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "tfp_fn",
+      "fromProperty": "out-failed",
+      "toId": "tfp_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "tfp_fn",
+      "fromProperty": "failure",
+      "toId": "tfp_fail",
+      "toProperty": "send"
+    }
+  ]
+}

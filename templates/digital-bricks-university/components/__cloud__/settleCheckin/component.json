@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c96234d8-ec8d-587f-8e97-0648a220b7f1",
+  "name": "settleCheckin",
+  "path": "/#__cloud__/settleCheckin",
+  "type": "cloud",
+  "created": "2026-11-12T14:33:09.822Z",
+  "modified": "2026-11-12T14:33:09.822Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach has read a learner's check-in answers and takes the item off the inbox (DBU-10): stamps CheckinResponse.seenAt. Rings the staff's inbox bell (security: role:staff)."
+}

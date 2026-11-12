@@ -1,0 +1,697 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "51b2f524-843a-5d8c-8fc8-54846225f503",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hi_t_title",
+      "fromProperty": "Translation",
+      "toId": "hi_fill_title",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "hi_in",
+      "fromProperty": "nextVersion",
+      "toId": "hi_fill_title",
+      "toProperty": "v"
+    },
+    {
+      "fromId": "hi_fill_title",
+      "fromProperty": "formatted",
+      "toId": "hi_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hi_t_tab_file",
+      "fromProperty": "Translation",
+      "toId": "hi_tab_file",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hi_t_tab_link",
+      "fromProperty": "Translation",
+      "toId": "hi_tab_link",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hi_t_tab_text",
+      "fromProperty": "Translation",
+      "toId": "hi_tab_text",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hi_tab_file",
+      "fromProperty": "onClick",
+      "toId": "hi_tab_state",
+      "toProperty": "to-file"
+    },
+    {
+      "fromId": "hi_tab_link",
+      "fromProperty": "onClick",
+      "toId": "hi_tab_state",
+      "toProperty": "to-link"
+    },
+    {
+      "fromId": "hi_tab_text",
+      "fromProperty": "onClick",
+      "toId": "hi_tab_state",
+      "toProperty": "to-text"
+    },
+    {
+      "fromId": "hi_tab_state",
+      "fromProperty": "fileBg",
+      "toId": "hi_tab_file",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "hi_tab_state",
+      "fromProperty": "fileFg",
+      "toId": "hi_tab_file",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "hi_tab_state",
+      "fromProperty": "fileFg",
+      "toId": "hi_tab_file",
+      "toProperty": "iconColor"
+    },
+    {
+      "fromId": "hi_tab_state",
+      "fromProperty": "linkBg",
+      "toId": "hi_tab_link",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "hi_tab_state",
+      "fromProperty": "linkFg",
+      "toId": "hi_tab_link",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "hi_tab_state",
+      "fromProperty": "linkFg",
+      "toId": "hi_tab_link",
+      "toProperty": "iconColor"
+    },
+    {
+      "fromId": "hi_tab_state",
+      "fromProperty": "textBg",
+      "toId": "hi_tab_text",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "hi_tab_state",
+      "fromProperty": "textFg",
+      "toId": "hi_tab_text",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "hi_tab_state",
+      "fromProperty": "textFg",
+      "toId": "hi_tab_text",
+      "toProperty": "iconColor"
+    },
+    {
+      "fromId": "hi_tab_state",
+      "fromProperty": "showFile",
+      "toId": "hi_file",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hi_tab_state",
+      "fromProperty": "showLink",
+      "toId": "hi_link",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hi_tab_state",
+      "fromProperty": "showText",
+      "toId": "hi_text",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hi_t_drop",
+      "fromProperty": "Translation",
+      "toId": "hi_drop_text",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hi_t_choose",
+      "fromProperty": "Translation",
+      "toId": "hi_choose",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hi_choose",
+      "fromProperty": "onClick",
+      "toId": "hi_picker",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "hi_t_types",
+      "fromProperty": "Translation",
+      "toId": "hi_types",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hi_t_url",
+      "fromProperty": "Translation",
+      "toId": "hi_url",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hi_t_link_hint",
+      "fromProperty": "Translation",
+      "toId": "hi_link_hint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hi_t_text",
+      "fromProperty": "Translation",
+      "toId": "hi_textarea",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hi_t_note",
+      "fromProperty": "Translation",
+      "toId": "hi_note",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hi_t_go",
+      "fromProperty": "Translation",
+      "toId": "hi_go",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hi_tab_state",
+      "fromProperty": "currentState",
+      "toId": "hi_check",
+      "toProperty": "in-tab"
+    },
+    {
+      "fromId": "hi_url",
+      "fromProperty": "onTextChanged",
+      "toId": "hi_check",
+      "toProperty": "in-url"
+    },
+    {
+      "fromId": "hi_textarea",
+      "fromProperty": "onTextChanged",
+      "toId": "hi_check",
+      "toProperty": "in-text"
+    },
+    {
+      "fromId": "hi_go",
+      "fromProperty": "onClick",
+      "toId": "hi_check",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hi_go",
+      "fromProperty": "onClick",
+      "toId": "hi_busy_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "hi_go",
+      "fromProperty": "onClick",
+      "toId": "hi_refused_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "hi_go",
+      "fromProperty": "onClick",
+      "toId": "hi_server_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "hi_go",
+      "fromProperty": "onClick",
+      "toId": "hi_upfail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "hi_go",
+      "fromProperty": "onClick",
+      "toId": "hi_done_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "hi_check",
+      "fromProperty": "out-kind",
+      "toId": "hi_send",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "hi_check",
+      "fromProperty": "out-url",
+      "toId": "hi_send",
+      "toProperty": "in-url"
+    },
+    {
+      "fromId": "hi_check",
+      "fromProperty": "out-text",
+      "toId": "hi_send",
+      "toProperty": "in-text"
+    },
+    {
+      "fromId": "hi_check",
+      "fromProperty": "out-send",
+      "toId": "hi_send",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hi_in",
+      "fromProperty": "stepId",
+      "toId": "hi_cf",
+      "toProperty": "in-stepId"
+    },
+    {
+      "fromId": "hi_send",
+      "fromProperty": "out-kind",
+      "toId": "hi_cf",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "hi_send",
+      "fromProperty": "out-url",
+      "toId": "hi_cf",
+      "toProperty": "in-url"
+    },
+    {
+      "fromId": "hi_send",
+      "fromProperty": "out-text",
+      "toId": "hi_cf",
+      "toProperty": "in-text"
+    },
+    {
+      "fromId": "hi_note",
+      "fromProperty": "onTextChanged",
+      "toId": "hi_cf",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "hi_send",
+      "fromProperty": "out-go",
+      "toId": "hi_cf",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "hi_busy_sw",
+      "fromProperty": "state",
+      "toId": "hi_not_busy",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hi_not_busy",
+      "fromProperty": "result",
+      "toId": "hi_go",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "hi_busy_sw",
+      "fromProperty": "state",
+      "toId": "hi_busy",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hi_check",
+      "fromProperty": "out-refuse",
+      "toId": "hi_busy_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "hi_upload",
+      "fromProperty": "failure",
+      "toId": "hi_busy_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "hi_cf",
+      "fromProperty": "done",
+      "toId": "hi_busy_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "hi_cf",
+      "fromProperty": "failure",
+      "toId": "hi_busy_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "hi_check",
+      "fromProperty": "out-refuse",
+      "toId": "hi_refused_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "hi_refused_sw",
+      "fromProperty": "state",
+      "toId": "hi_refused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hi_check",
+      "fromProperty": "out-whyKey",
+      "toId": "hi_t_refused",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "hi_t_refused",
+      "fromProperty": "Translation",
+      "toId": "hi_refused",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hi_cf",
+      "fromProperty": "failure",
+      "toId": "hi_server_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "hi_server_sw",
+      "fromProperty": "state",
+      "toId": "hi_server",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hi_cf",
+      "fromProperty": "error",
+      "toId": "hi_server",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hi_upload",
+      "fromProperty": "failure",
+      "toId": "hi_upfail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "hi_upfail_sw",
+      "fromProperty": "state",
+      "toId": "hi_upfail",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hi_t_upfail",
+      "fromProperty": "Translation",
+      "toId": "hi_upfail",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hi_cf",
+      "fromProperty": "done",
+      "toId": "hi_done_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "hi_done_sw",
+      "fromProperty": "state",
+      "toId": "hi_done",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hi_t_done",
+      "fromProperty": "Translation",
+      "toId": "hi_fill_done",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "hi_cf",
+      "fromProperty": "out-version",
+      "toId": "hi_fill_done",
+      "toProperty": "v"
+    },
+    {
+      "fromId": "hi_fill_done",
+      "fromProperty": "formatted",
+      "toId": "hi_done",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hi_cf",
+      "fromProperty": "done",
+      "toId": "hi_url",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "hi_cf",
+      "fromProperty": "done",
+      "toId": "hi_textarea",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "hi_cf",
+      "fromProperty": "done",
+      "toId": "hi_note",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "hi_cf",
+      "fromProperty": "done",
+      "toId": "hi_out",
+      "toProperty": "handedIn"
+    },
+    {
+      "fromId": "hi_cf",
+      "fromProperty": "out-version",
+      "toId": "hi_out",
+      "toProperty": "version"
+    },
+    {
+      "fromId": "hi_t_creations",
+      "fromProperty": "Translation",
+      "toId": "hi_creations_box",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hi_t_ph",
+      "fromProperty": "Translation",
+      "toId": "hi_url",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "hi_kinds",
+      "fromProperty": "items",
+      "toId": "hi_files",
+      "toProperty": "kinds"
+    },
+    {
+      "fromId": "hi_files",
+      "fromProperty": "accept",
+      "toId": "hi_picker",
+      "toProperty": "acceptedFileTypes"
+    },
+    {
+      "fromId": "hi_picker",
+      "fromProperty": "file",
+      "toId": "hi_files",
+      "toProperty": "picked"
+    },
+    {
+      "fromId": "hi_picker",
+      "fromProperty": "name",
+      "toId": "hi_files",
+      "toProperty": "pickedName"
+    },
+    {
+      "fromId": "hi_picker",
+      "fromProperty": "sizeInBytes",
+      "toId": "hi_files",
+      "toProperty": "pickedSize"
+    },
+    {
+      "fromId": "hi_picker",
+      "fromProperty": "done",
+      "toId": "hi_files",
+      "toProperty": "addPicked"
+    },
+    {
+      "fromId": "hi_drop",
+      "fromProperty": "droppedFiles",
+      "toId": "hi_files",
+      "toProperty": "dropped"
+    },
+    {
+      "fromId": "hi_drop",
+      "fromProperty": "filesDropped",
+      "toId": "hi_files",
+      "toProperty": "addDropped"
+    },
+    {
+      "fromId": "hi_files",
+      "fromProperty": "items",
+      "toId": "hi_rows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "hi_rows",
+      "fromProperty": "itemActionItemId",
+      "toId": "hi_files",
+      "toProperty": "removeId"
+    },
+    {
+      "fromId": "hi_rows",
+      "fromProperty": "itemOutputSignal-remove",
+      "toId": "hi_files",
+      "toProperty": "remove"
+    },
+    {
+      "fromId": "hi_files",
+      "fromProperty": "hasFiles",
+      "toId": "hi_list",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hi_files",
+      "fromProperty": "whyKey",
+      "toId": "hi_t_bad",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "hi_t_bad",
+      "fromProperty": "Translation",
+      "toId": "hi_fill_bad",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "hi_files",
+      "fromProperty": "whyName",
+      "toId": "hi_fill_bad",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "hi_fill_bad",
+      "fromProperty": "formatted",
+      "toId": "hi_bad",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hi_files",
+      "fromProperty": "refused",
+      "toId": "hi_bad_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "hi_files",
+      "fromProperty": "accepted",
+      "toId": "hi_bad_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "hi_go",
+      "fromProperty": "onClick",
+      "toId": "hi_bad_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "hi_bad_sw",
+      "fromProperty": "state",
+      "toId": "hi_bad",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hi_files",
+      "fromProperty": "hasFiles",
+      "toId": "hi_check",
+      "toProperty": "in-hasFile"
+    },
+    {
+      "fromId": "hi_check",
+      "fromProperty": "out-upload",
+      "toId": "hi_files",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "hi_files",
+      "fromProperty": "current",
+      "toId": "hi_upload",
+      "toProperty": "file"
+    },
+    {
+      "fromId": "hi_files",
+      "fromProperty": "uploadNext",
+      "toId": "hi_upload",
+      "toProperty": "upload"
+    },
+    {
+      "fromId": "hi_upload",
+      "fromProperty": "cloudFile",
+      "toId": "hi_files",
+      "toProperty": "cloudFile"
+    },
+    {
+      "fromId": "hi_upload",
+      "fromProperty": "done",
+      "toId": "hi_files",
+      "toProperty": "uploaded"
+    },
+    {
+      "fromId": "hi_upload",
+      "fromProperty": "failure",
+      "toId": "hi_files",
+      "toProperty": "abort"
+    },
+    {
+      "fromId": "hi_files",
+      "fromProperty": "names",
+      "toId": "hi_send",
+      "toProperty": "in-files"
+    },
+    {
+      "fromId": "hi_files",
+      "fromProperty": "allUploaded",
+      "toId": "hi_send",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hi_send",
+      "fromProperty": "out-files",
+      "toId": "hi_cf",
+      "toProperty": "in-files"
+    },
+    {
+      "fromId": "hi_cf",
+      "fromProperty": "done",
+      "toId": "hi_files",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "hi_files",
+      "fromProperty": "busyKey",
+      "toId": "hi_t_busy",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "hi_t_busy",
+      "fromProperty": "Translation",
+      "toId": "hi_fill_busy",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "hi_files",
+      "fromProperty": "busyI",
+      "toId": "hi_fill_busy",
+      "toProperty": "i"
+    },
+    {
+      "fromId": "hi_files",
+      "fromProperty": "busyN",
+      "toId": "hi_fill_busy",
+      "toProperty": "n"
+    },
+    {
+      "fromId": "hi_fill_busy",
+      "fromProperty": "formatted",
+      "toId": "hi_busy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hi_creations_box",
+      "fromProperty": "checked",
+      "toId": "hi_cf",
+      "toProperty": "in-addToCreations"
+    }
+  ]
+}

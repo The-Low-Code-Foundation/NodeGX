@@ -1,0 +1,210 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "dae4ea23-aa66-57f9-8aa2-98becbd25b4b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "vs_root",
+      "type": "Group",
+      "label": "Versions",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "vs_head",
+        "vs_list"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "vs_head",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "vs_root",
+      "parameters": {
+        "text": "",
+        "as": "h3",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "vs_list",
+      "type": "Group",
+      "label": "The versions",
+      "parent": "vs_root",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "vs_rows"
+      ],
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "vs_rows",
+      "type": "For Each",
+      "label": "One row per version",
+      "parent": "vs_list",
+      "parameters": {
+        "template": "/Work/Version row"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "vs_in",
+      "type": "Component Inputs",
+      "label": "The hand-ins",
+      "ports": [
+        {
+          "name": "submissions",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "mode",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "timezone",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "canReview",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "headKey",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "vs_out",
+      "type": "Component Outputs",
+      "label": "What happened",
+      "ports": [
+        {
+          "name": "reviewed",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        }
+      ],
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "vs_kinds",
+      "type": "/Option sets/Hand-in kinds",
+      "label": "Hand-in kinds",
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "vs_verdicts",
+      "type": "/Option sets/Review verdicts",
+      "label": "Review verdicts",
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "vs_fn",
+      "type": "JavaScriptFunction",
+      "label": "The versions, newest first, in words",
+      "parameters": {
+        "functionScript": "/*\n * One row per version, newest first. Words stay in Strings: a row gets keys and the values\n * for their {tags}. Only the newest version can be reviewed (reviewSubmission refuses any\n * other), and only while it waits; an older one still pending reads as replaced.\n * A file version carries 1 to 5 files: its chip names the kind of a single file, or reads\n * Files for several, and the row draws one Version file each.\n */\nif (Inputs.submissions === undefined || Inputs.kinds === undefined || Inputs.verdicts === undefined) return;\nconst get = (m, k) => (m && typeof m.get === 'function' ? m.get(k) : m && m[k]);\nconst kinds = (Inputs.kinds || []).map((k) => ({ ext: get(k, 'ext'), kind: get(k, 'kind'), labelKey: get(k, 'labelKey'), bg: get(k, 'bg'), fg: get(k, 'fg') }));\nconst verdicts = (Inputs.verdicts || []).map((v) => ({ value: get(v, 'value'), labelKey: get(v, 'labelKey'), bg: get(v, 'bg'), fg: get(v, 'fg') }));\nlet tz = String(Inputs.timezone || '');\ntry { new Date().toLocaleString('en-GB', { timeZone: tz || undefined }); } catch (e) { tz = ''; }\nconst zone = tz || Intl.DateTimeFormat().resolvedOptions().timeZone;\nconst when = (iso) => {\n  const d = new Date(iso);\n  if (!iso || isNaN(d)) return '';\n  return d.toLocaleDateString('en-GB', { timeZone: zone, weekday: 'short', day: 'numeric', month: 'short' }) + ', ' +\n    d.toLocaleTimeString('en-GB', { timeZone: zone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });\n};\nconst MUTED = { bg: 'var(--muted)', fg: 'var(--muted-foreground)' };\nconst filesOf = (s) => (Array.isArray(s.files) ? s.files : []).filter((f) => f && f.file);\nconst kindOf = (s) => {\n  if (s.kind !== 'file') return kinds.find((k) => k.kind === s.kind) || {};\n  const files = filesOf(s);\n  if (files.length > 1) return Object.assign({ labelKey: 'work.kindFiles' }, MUTED);\n  const name = String((files[0] && files[0].fileName) || '');\n  const dot = name.lastIndexOf('.');\n  const ext = dot > 0 ? name.slice(dot + 1).toLowerCase() : '';\n  return kinds.find((k) => ext && k.ext === ext) || Object.assign({ labelKey: 'work.kindFile' }, MUTED);\n};\nconst mode = Inputs.mode === 'coach' ? 'coach' : 'own';\nconst subs = (Array.isArray(Inputs.submissions) ? Inputs.submissions : []).slice().sort((a, b) => b.version - a.version);\nconst rows = subs.map((s, i) => {\n  const k = kindOf(s);\n  const review = s.review || 'pending';\n  const shown = review === 'pending' && i > 0 ? 'superseded' : review;\n  const v = verdicts.find((x) => x.value === shown) || {};\n  return {\n    id: s.id,\n    mode,\n    version: String(s.version),\n    when: when(s.handedInAt),\n    kindKey: k.labelKey || '', kindBg: k.bg || MUTED.bg, kindFg: k.fg || MUTED.fg,\n    reviewKey: v.labelKey || '', reviewBg: v.bg || MUTED.bg, reviewFg: v.fg || MUTED.fg,\n    isFile: s.kind === 'file', isLink: s.kind === 'link', isText: s.kind === 'text',\n    files: filesOf(s).map((f, j) => ({ id: s.id + '-file-' + j, file: f.file, fileName: f.fileName || '', mode })),\n    url: s.url || '', text: s.text || '',\n    note: s.note || '', hasNote: !!s.note,\n    reviewNote: s.reviewNote || '', hasReviewNote: !!s.reviewNote, reviewedWhen: when(s.reviewedAt),\n    canReview: Inputs.canReview === true && i === 0 && review === 'pending'\n  };\n});\nOutputs.rows = rows;\nOutputs.count = rows.length;\nOutputs.hasRows = rows.length > 0;"
+      },
+      "ports": [
+        {
+          "name": "in-submissions",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-mode",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-timezone",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-canReview",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-kinds",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-verdicts",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-count",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "out-hasRows",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "vs_t_head",
+      "type": "Translation",
+      "label": "The heading",
+      "parameters": {
+        "Namespace": "pages"
+      },
+      "x": 410,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "vs_root"
+  ]
+}

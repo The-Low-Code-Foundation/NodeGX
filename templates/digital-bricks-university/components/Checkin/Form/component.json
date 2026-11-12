@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "9a8811bb-e7e1-56b9-8228-811647d7f6c6",
+  "name": "Form",
+  "path": "/Checkin/Form",
+  "type": "visual",
+  "created": "2026-11-12T14:52:58.759Z",
+  "modified": "2026-11-12T14:52:58.759Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The check-in survey: every question of the step's own copy of its form, shown or hidden by its condition, and Send. It does not save; the page sends the answers it gathers to answerCheckin."
+}

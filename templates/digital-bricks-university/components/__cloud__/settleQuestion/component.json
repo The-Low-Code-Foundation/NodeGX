@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "107775b5-def1-54a8-8621-ac0b1251acc7",
+  "name": "settleQuestion",
+  "path": "/#__cloud__/settleQuestion",
+  "type": "cloud",
+  "created": "2026-11-12T13:06:14.679Z",
+  "modified": "2026-11-12T13:06:14.679Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "\"No reply needed\" (DBU-08): the coach marks a learner's newest message as settled, so it leaves the inbox without a reply. Only when the newest message in her conversation is hers."
+}

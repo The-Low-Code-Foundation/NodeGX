@@ -1,0 +1,500 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "642b6f98-a806-5ba3-87c4-24cd19b4fc7a",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sa_root",
+      "type": "Group",
+      "label": "Actions",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "sa_buttons",
+        "sa_confirm"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      }
+    },
+    {
+      "id": "sa_buttons",
+      "type": "Group",
+      "label": "Buttons",
+      "x": 100,
+      "y": 160,
+      "parent": "sa_root",
+      "children": [
+        "sa_edit",
+        "sa_close",
+        "sa_share",
+        "sa_unshare",
+        "sa_cal_box",
+        "sa_remove"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)"
+      }
+    },
+    {
+      "id": "sa_edit",
+      "type": "net.noodl.controls.button",
+      "label": "Edit",
+      "x": 160,
+      "y": 280,
+      "parent": "sa_buttons",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-9)"
+      }
+    },
+    {
+      "id": "sa_close",
+      "type": "net.noodl.controls.button",
+      "label": "Close",
+      "x": 160,
+      "y": 400,
+      "parent": "sa_buttons",
+      "parameters": {
+        "mounted": false,
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-9)"
+      }
+    },
+    {
+      "id": "sa_share",
+      "type": "net.noodl.controls.button",
+      "label": "Share",
+      "x": 160,
+      "y": 520,
+      "parent": "sa_buttons",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-9)"
+      },
+      "metadata": {
+        "comment": "The one filled button on a draft: sharing is what puts the step in front of the learner."
+      }
+    },
+    {
+      "id": "sa_unshare",
+      "type": "net.noodl.controls.button",
+      "label": "Unshare",
+      "x": 160,
+      "y": 640,
+      "parent": "sa_buttons",
+      "parameters": {
+        "mounted": false,
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-9)"
+      }
+    },
+    {
+      "id": "sa_cal_box",
+      "type": "Group",
+      "label": "Shown once the session has a time",
+      "x": 160,
+      "y": 760,
+      "parent": "sa_buttons",
+      "children": [
+        "sa_cal"
+      ],
+      "parameters": {
+        "mounted": false,
+        "sizeMode": "contentSize",
+        "flexDirection": "row"
+      }
+    },
+    {
+      "id": "sa_cal",
+      "type": "/Plan/Calendar links",
+      "label": "Calendar links",
+      "x": 220,
+      "y": 880,
+      "parent": "sa_cal_box"
+    },
+    {
+      "id": "sa_remove",
+      "type": "net.noodl.controls.button",
+      "label": "Remove",
+      "x": 160,
+      "y": 1000,
+      "parent": "sa_buttons",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--attention)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-9)"
+      }
+    },
+    {
+      "id": "sa_confirm",
+      "type": "Group",
+      "label": "Asked before removing",
+      "x": 100,
+      "y": 1120,
+      "parent": "sa_root",
+      "children": [
+        "sa_ask",
+        "sa_yes",
+        "sa_keep"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)"
+      }
+    },
+    {
+      "id": "sa_ask",
+      "type": "Text",
+      "label": "Remove this step?",
+      "x": 160,
+      "y": 1240,
+      "parent": "sa_confirm",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "sa_yes",
+      "type": "net.noodl.controls.button",
+      "label": "Yes, remove it",
+      "x": 220,
+      "y": 1360,
+      "parent": "sa_confirm",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--attention)",
+        "color": "var(--primary-foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-9)"
+      }
+    },
+    {
+      "id": "sa_keep",
+      "type": "net.noodl.controls.button",
+      "label": "Keep it",
+      "x": 220,
+      "y": 1480,
+      "parent": "sa_confirm",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-9)"
+      }
+    },
+    {
+      "id": "sa_in",
+      "type": "Component Inputs",
+      "label": "The step",
+      "x": 500,
+      "y": 40,
+      "ports": [
+        {
+          "name": "open",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "shared",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "hasTime",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "stepId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "startsAt",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "durationMin",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "meetingLink",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "calDetails",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "attendeeName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "attendeeEmail",
+          "plug": "output",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "sa_out",
+      "type": "Component Outputs",
+      "label": "What was pressed",
+      "x": 500,
+      "y": 1000,
+      "ports": [
+        {
+          "name": "edit",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "share",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "remove",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "sa_not_open",
+      "type": "Inverter",
+      "label": "Not open",
+      "x": 500,
+      "y": 280
+    },
+    {
+      "id": "sa_not_shared",
+      "type": "Inverter",
+      "label": "Not shared",
+      "x": 500,
+      "y": 520
+    },
+    {
+      "id": "sa_ask_sw",
+      "type": "Switch",
+      "label": "Asking, or not",
+      "x": 500,
+      "y": 1120,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "sa_ask_fill",
+      "type": "String Format",
+      "label": "Remove “{title}”?",
+      "x": 500,
+      "y": 1240,
+      "parameters": {
+        "format": "{title}"
+      }
+    },
+    {
+      "id": "sa_t_edit",
+      "type": "Translation",
+      "label": "Edit",
+      "x": 800,
+      "y": 280,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.edit"
+      }
+    },
+    {
+      "id": "sa_t_close",
+      "type": "Translation",
+      "label": "Close",
+      "x": 800,
+      "y": 340,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.close"
+      }
+    },
+    {
+      "id": "sa_t_share",
+      "type": "Translation",
+      "label": "Share",
+      "x": 800,
+      "y": 400,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.share"
+      }
+    },
+    {
+      "id": "sa_t_unshare",
+      "type": "Translation",
+      "label": "Unshare",
+      "x": 800,
+      "y": 460,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.unshare"
+      }
+    },
+    {
+      "id": "sa_t_remove",
+      "type": "Translation",
+      "label": "Remove",
+      "x": 800,
+      "y": 520,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.remove"
+      }
+    },
+    {
+      "id": "sa_t_ask",
+      "type": "Translation",
+      "label": "Remove “{title}” from this plan?",
+      "x": 800,
+      "y": 580,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.removeAsk"
+      }
+    },
+    {
+      "id": "sa_t_yes",
+      "type": "Translation",
+      "label": "Yes, remove it",
+      "x": 800,
+      "y": 640,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.removeYes"
+      }
+    },
+    {
+      "id": "sa_t_keep",
+      "type": "Translation",
+      "label": "Keep it",
+      "x": 800,
+      "y": 700,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.keep"
+      }
+    }
+  ],
+  "visualRoots": [
+    "sa_root"
+  ]
+}

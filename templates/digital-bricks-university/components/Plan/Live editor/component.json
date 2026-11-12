@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "538ac351-e5a5-5006-8fc5-45b5c892658a",
+  "name": "Live editor",
+  "path": "/Plan/Live editor",
+  "type": "visual",
+  "created": "2026-11-09T10:40:21.757Z",
+  "modified": "2026-11-09T10:40:21.757Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Edits one live session in place: title, date and start time (or no date while it is to book), length, its own meeting link, the recording link and the summary the learner sees. Saves through saveStep and says why a save was refused."
+}

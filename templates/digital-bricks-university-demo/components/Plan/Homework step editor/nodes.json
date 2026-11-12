@@ -1,0 +1,443 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "cf040904-259b-5143-8951-2a3629179dbd",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hse_root",
+      "type": "Group",
+      "label": "Homework step editor",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "hse_note",
+        "hse_title",
+        "hse_due",
+        "hse_due_hint",
+        "hse_brief",
+        "hse_check",
+        "hse_res",
+        "hse_msg",
+        "hse_actions"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 720,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)"
+      }
+    },
+    {
+      "id": "hse_note",
+      "type": "Text",
+      "label": "This is the learner's own copy",
+      "x": 100,
+      "y": 160,
+      "parent": "hse_root",
+      "parameters": {
+        "text": "",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "hse_title",
+      "type": "net.noodl.controls.textinput",
+      "label": "Title",
+      "x": 100,
+      "y": 280,
+      "parent": "hse_root",
+      "parameters": {
+        "type": "text",
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxLength": 140
+      }
+    },
+    {
+      "id": "hse_due",
+      "type": "/Date Picker",
+      "label": "Due date",
+      "x": 100,
+      "y": 400,
+      "parent": "hse_root",
+      "parameters": {
+        "Show Label": true,
+        "Width": {
+          "value": 200,
+          "unit": "px"
+        }
+      }
+    },
+    {
+      "id": "hse_due_hint",
+      "type": "Text",
+      "label": "Due at 18:00",
+      "x": 100,
+      "y": 520,
+      "parent": "hse_root",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "hse_brief",
+      "type": "/Library/Brief editor",
+      "label": "Brief",
+      "x": 100,
+      "y": 640,
+      "parent": "hse_root"
+    },
+    {
+      "id": "hse_check",
+      "type": "/Library/Checklist editor",
+      "label": "What to hand in",
+      "x": 100,
+      "y": 760,
+      "parent": "hse_root",
+      "parameters": {
+        "listId": "plan-draft-checklist"
+      },
+      "metadata": {
+        "comment": "Its own Array, not the library editor's: the plan builder opens one step editor at a time (Plan/Step list keeps one open), so one app-wide name is safe here (shared on purpose)."
+      }
+    },
+    {
+      "id": "hse_res",
+      "type": "/Library/Resources editor",
+      "label": "Resources",
+      "x": 100,
+      "y": 880,
+      "parent": "hse_root",
+      "parameters": {
+        "listId": "plan-draft-resources"
+      },
+      "metadata": {
+        "comment": "Shared on purpose, as the checklist's. A file uploaded here is the coach's private upload; saveStep accepts it only from the coach, or if it is already on this step."
+      }
+    },
+    {
+      "id": "hse_msg",
+      "type": "Text",
+      "label": "Why it was not saved",
+      "x": 100,
+      "y": 1000,
+      "parent": "hse_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--attention)"
+      }
+    },
+    {
+      "id": "hse_actions",
+      "type": "Group",
+      "label": "Save and Cancel",
+      "x": 100,
+      "y": 1120,
+      "parent": "hse_root",
+      "children": [
+        "hse_save",
+        "hse_cancel"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)"
+      }
+    },
+    {
+      "id": "hse_save",
+      "type": "net.noodl.controls.button",
+      "label": "Save",
+      "x": 160,
+      "y": 1240,
+      "parent": "hse_actions",
+      "parameters": {
+        "label": ""
+      }
+    },
+    {
+      "id": "hse_cancel",
+      "type": "net.noodl.controls.button",
+      "label": "Cancel",
+      "x": 160,
+      "y": 1360,
+      "parent": "hse_actions",
+      "parameters": {
+        "label": "",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)"
+      }
+    },
+    {
+      "id": "hse_in",
+      "type": "Component Inputs",
+      "label": "The step",
+      "x": 500,
+      "y": 40,
+      "ports": [
+        {
+          "name": "step",
+          "plug": "output",
+          "type": "object"
+        }
+      ]
+    },
+    {
+      "id": "hse_out",
+      "type": "Component Outputs",
+      "label": "Saved or closed",
+      "x": 500,
+      "y": 1240,
+      "ports": [
+        {
+          "name": "saved",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "savedTitle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "closed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "hse_open",
+      "type": "JavaScriptFunction",
+      "label": "Open the step: fill the fields and the two lists",
+      "x": 500,
+      "y": 160,
+      "parameters": {
+        "runOnChange-in-step": false,
+        "functionScript": "/*\n * Runs when the editor appears. The two lists are named client-side Arrays, as in the\n * library editor; each row writes its own record as the coach types, and 'Gather' reads\n * them back. Fresh row ids every time, so nothing typed in a previous opening survives.\n */\nconst step = Inputs.step && typeof Inputs.step === 'object' ? Inputs.step : {};\nconst uid = (p) => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);\nNoodl.Arrays['plan-draft-checklist'] = (step.handInChecklist || [])\n  .map((c) => (typeof c === 'string' ? { text: c, required: true } : c))\n  .map((c) => ({ id: uid('pchk-'), text: c.text || '', required: c.required !== false }));\nNoodl.Arrays['plan-draft-resources'] = (step.resources || []).map((r) => ({\n  id: uid('pres-'), label: r.label || '', url: r.url || '', file: r.file || '', fileName: r.fileName || '', isFile: !!r.file\n}));\nOutputs.id = step.id || '';\nOutputs.title = step.title || '';\nOutputs.brief = step.brief || '';\nOutputs.due = step.dueAt ? new Date(step.dueAt).toLocaleDateString('en-CA', { timeZone: 'Europe/Paris' }) : '';\nOutputs.fromLibrary = !!step.fromLibraryItem;\nOutputs.opened();\n"
+      },
+      "ports": [
+        {
+          "name": "in-step",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-brief",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-due",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-fromLibrary",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-opened",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "hse_gather",
+      "type": "JavaScriptFunction",
+      "label": "Gather the homework from the fields and the two lists",
+      "x": 500,
+      "y": 520,
+      "parameters": {
+        "runOnChange-in-id": false,
+        "runOnChange-in-title": false,
+        "runOnChange-in-due": false,
+        "runOnChange-in-brief": false,
+        "functionScript": "// Read on Save only. saveStep tidies and checks everything again.\nconst get = (m, k) => (m && typeof m.get === 'function' ? m.get(k) : m && m[k]);\nOutputs.handInChecklist = (Noodl.Arrays['plan-draft-checklist'] || []).map((m) => ({ text: String(get(m, 'text') || ''), required: get(m, 'required') !== false }));\nOutputs.resources = (Noodl.Arrays['plan-draft-resources'] || []).map((m) => (get(m, 'isFile')\n  ? { label: String(get(m, 'label') || ''), file: String(get(m, 'file') || ''), fileName: String(get(m, 'fileName') || '') }\n  : { label: String(get(m, 'label') || ''), url: String(get(m, 'url') || '') }));\nOutputs.id = String(Inputs.id || '');\nOutputs.title = String(Inputs.title || '').trim();\nOutputs.dueAt = String(Inputs.due || '').trim();\nOutputs.brief = String(Inputs.brief || '');\nOutputs.go();\n"
+      },
+      "ports": [
+        {
+          "name": "in-id",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-due",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-brief",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-dueAt",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-brief",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-handInChecklist",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-resources",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "hse_call",
+      "type": "CloudFunction2",
+      "label": "saveStep (staff only)",
+      "x": 500,
+      "y": 1000,
+      "parameters": {
+        "function": "saveStep"
+      }
+    },
+    {
+      "id": "hse_msg_sw",
+      "type": "Switch",
+      "label": "Show why, once there is a why",
+      "x": 500,
+      "y": 1120,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "hse_t_note",
+      "type": "Translation",
+      "label": "Own copy",
+      "x": 800,
+      "y": 160,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.copyNote"
+      }
+    },
+    {
+      "id": "hse_t_title",
+      "type": "Translation",
+      "label": "Title",
+      "x": 800,
+      "y": 220,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.title"
+      }
+    },
+    {
+      "id": "hse_t_due",
+      "type": "Translation",
+      "label": "Due date",
+      "x": 800,
+      "y": 280,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.due"
+      }
+    },
+    {
+      "id": "hse_t_duehint",
+      "type": "Translation",
+      "label": "Due at 18:00",
+      "x": 800,
+      "y": 340,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.dueHint"
+      }
+    },
+    {
+      "id": "hse_t_save",
+      "type": "Translation",
+      "label": "Save",
+      "x": 800,
+      "y": 400,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.save"
+      }
+    },
+    {
+      "id": "hse_t_cancel",
+      "type": "Translation",
+      "label": "Cancel",
+      "x": 800,
+      "y": 460,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.cancel"
+      }
+    }
+  ],
+  "visualRoots": [
+    "hse_root"
+  ]
+}

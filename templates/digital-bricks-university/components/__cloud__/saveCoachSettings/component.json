@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "348aff7d-346a-552b-84cc-64fb2fd5553b",
+  "name": "saveCoachSettings",
+  "path": "/#__cloud__/saveCoachSettings",
+  "type": "cloud",
+  "created": "2026-11-12T10:11:30.262Z",
+  "modified": "2026-11-12T18:50:49.956Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Save the address that hears about every learner message (DBU-07). Staff only; blank puts the default back."
+}

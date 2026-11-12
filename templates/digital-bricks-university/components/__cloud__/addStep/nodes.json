@@ -1,0 +1,134 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "63897bf7-278c-5a03-8852-70a2e514a432",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "as_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach adds a step",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "planId,kind,title,libraryItemId",
+        "allowNoAuth": false,
+        "ptype-planId": "string",
+        "preq-planId": true,
+        "ptype-kind": "string",
+        "preq-kind": true,
+        "ptype-title": "string",
+        "preq-title": false,
+        "ptype-libraryItemId": "string",
+        "preq-libraryItemId": false
+      },
+      "metadata": {
+        "comment": "role:staff in nodegx.security.json."
+      }
+    },
+    {
+      "id": "as_fn",
+      "type": "JavaScriptFunction",
+      "label": "A draft at the end",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "runOnChange-in-planId": false,
+        "runOnChange-in-kind": false,
+        "runOnChange-in-title": false,
+        "runOnChange-in-libraryItemId": false,
+        "functionScript": "/*\n * A new step is a DRAFT (shared: false) at the end of the plan: the learner sees nothing\n * until the coach shares it. The page sends the default title in the reader's language.\n *  - homework from the library is a COPY (SCOPE R4): brief, hand-in list and resources are\n *    copied now, so a later library edit never reaches it. Archived items are refused.\n *  - a check-in gets a copy of the \"After a session\" form (shared/Checkin forms, DBU-10); the\n *    coach picks another in the builder until it is sent.\n */\n(async () => {\n  const refuse = (why) => { Outputs.why = why; Outputs.refuse(); };\n  try {\n    const R = Noodl.Records;\n    const q = (c, where) => R.query(c, where, { limit: 1000, plain: true });\n    const planId = String(Inputs.planId || '');\n    const plans = planId ? await q('Plan', { objectId: { equalTo: planId } }) : [];\n    if (plans.length !== 1) return refuse('That plan is no longer there. Reload the page.');\n    const kind = String(Inputs.kind || '');\n    const firstStatus = { live: 'to_book', homework: 'not_started', checkin: 'scheduled' };\n    if (!firstStatus[kind]) return refuse('A step is a live session, homework or a check-in.');\n    const steps = await q('Step', { plan: { equalTo: planId } });\n    if (steps.length >= 100) return refuse('A plan holds up to 100 steps.');\n    const last = steps.reduce((m, s) => Math.max(m, Number(s.position) || 0), 0);\n\n    const step = { plan: planId, learner: plans[0].learner, position: last + 1, kind, shared: false, status: firstStatus[kind] };\n    step.title = String(Inputs.title || '').trim().replace(/\\s+/g, ' ').slice(0, 140);\n    const libId = String(Inputs.libraryItemId || '');\n    if (libId) {\n      if (kind !== 'homework') return refuse('Only homework comes from the library.');\n      const lib = await q('LibraryItem', { objectId: { equalTo: libId } });\n      if (lib.length !== 1 || lib[0].archived === true) return refuse('That homework is no longer in the library. Reload the page.');\n      Object.assign(step, { title: lib[0].title, fromLibraryItem: libId, brief: lib[0].brief || '', handInChecklist: lib[0].handInChecklist || [], resources: lib[0].resources || [] });\n    }\n    if (!step.title) return refuse('Give the step a title.');\n    if (kind === 'live') step.durationMin = 60;\n    if (kind === 'homework' && !libId) Object.assign(step, { brief: '', handInChecklist: [], resources: [] });\n    if (kind === 'checkin') {\n      const form = (Array.isArray(Inputs.forms) ? Inputs.forms : []).find((f) => f.id === 'after-session');\n      if (!form) throw new Error('no after-session form');\n      step.form = form;\n    }\n\n    const row = await R.create('Step', step, { plain: true });\n    Outputs.stepId = row.objectId || row.id;\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:addStep]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n",
+        "runOnChange-in-forms": false
+      },
+      "ports": [
+        {
+          "name": "in-planId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-kind",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-libraryItemId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-forms",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-stepId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-why",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "as_res",
+      "type": "noodl.cloud.response",
+      "label": "Added",
+      "x": 40,
+      "y": 280,
+      "parameters": {
+        "params": "stepId"
+      }
+    },
+    {
+      "id": "as_deny",
+      "type": "noodl.cloud.response",
+      "label": "A refusal the coach can act on",
+      "x": 40,
+      "y": 400,
+      "parameters": {
+        "status": "failure"
+      }
+    },
+    {
+      "id": "as_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "x": 40,
+      "y": 520,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "The step could not be added. Try again."
+      }
+    },
+    {
+      "id": "as_forms",
+      "type": "/#__cloud__/shared/Checkin forms",
+      "label": "The check-in forms",
+      "x": 300,
+      "y": 40
+    }
+  ]
+}

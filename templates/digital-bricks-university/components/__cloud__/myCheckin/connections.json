@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "78f855f3-210f-54b2-87d0-4c7f0f1e8063",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mck_req",
+      "fromProperty": "userId",
+      "toId": "mck_fn",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "mck_req",
+      "fromProperty": "pm-stepId",
+      "toId": "mck_fn",
+      "toProperty": "in-stepId"
+    },
+    {
+      "fromId": "mck_req",
+      "fromProperty": "receive",
+      "toId": "mck_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mck_fn",
+      "fromProperty": "out-checkin",
+      "toId": "mck_res",
+      "toProperty": "pm-checkin"
+    },
+    {
+      "fromId": "mck_fn",
+      "fromProperty": "out-me",
+      "toId": "mck_res",
+      "toProperty": "pm-me"
+    },
+    {
+      "fromId": "mck_fn",
+      "fromProperty": "out-done",
+      "toId": "mck_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mck_fn",
+      "fromProperty": "out-why",
+      "toId": "mck_deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "mck_fn",
+      "fromProperty": "out-refuse",
+      "toId": "mck_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mck_fn",
+      "fromProperty": "out-failed",
+      "toId": "mck_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mck_fn",
+      "fromProperty": "failure",
+      "toId": "mck_fail",
+      "toProperty": "send"
+    }
+  ]
+}

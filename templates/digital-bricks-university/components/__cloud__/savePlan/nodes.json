@@ -1,0 +1,115 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "231082ec-9504-5f6e-8428-44342698b435",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sp_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach saves the plan's settings",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "planId,title,meetingLink,bookingLink,status",
+        "allowNoAuth": false,
+        "ptype-planId": "string",
+        "preq-planId": true,
+        "ptype-title": "string",
+        "preq-title": true
+      },
+      "metadata": {
+        "comment": "role:staff in nodegx.security.json."
+      }
+    },
+    {
+      "id": "sp_fn",
+      "type": "JavaScriptFunction",
+      "label": "Check, then save",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "runOnChange-in-planId": false,
+        "runOnChange-in-title": false,
+        "runOnChange-in-meetingLink": false,
+        "runOnChange-in-bookingLink": false,
+        "runOnChange-in-status": false,
+        "functionScript": "// The status values are schema.json's planStatus; links are http(s) or empty.\n// The learner sees the plan's title and links, so a save rings their doorbell.\n(async () => {\n  const refuse = (why) => { Outputs.why = why; Outputs.refuse(); };\n  try {\n    const R = Noodl.Records;\n    const planId = String(Inputs.planId || '');\n    const plans = planId ? await R.query('Plan', { objectId: { equalTo: planId } }, { limit: 2, plain: true }) : [];\n    if (plans.length !== 1) return refuse('That plan is no longer there. Reload the page.');\n    const title = String(Inputs.title || '').trim().replace(/\\s+/g, ' ');\n    if (!title) return refuse('Give the plan a title.');\n    if (title.length > 140) return refuse('Keep the title under 140 characters.');\n    const status = String(Inputs.status || plans[0].status || 'active');\n    if (!['active', 'paused', 'finished'].includes(status)) return refuse('A plan is active, paused or finished.');\n    const link = (v, what) => {\n      const s = String(v || '').trim();\n      if (!s) return '';\n      let u = null;\n      try { u = new URL(s); } catch (e) { u = null; }\n      return u && (u.protocol === 'https:' || u.protocol === 'http:') ? u.href : refuse('The ' + what + ' is not a web address. Links start with https://');\n    };\n    const meetingLink = link(Inputs.meetingLink, 'meeting link');\n    if (meetingLink === undefined) return;\n    const bookingLink = link(Inputs.bookingLink, 'booking link');\n    if (bookingLink === undefined) return;\n    await R.save(planId, { title, status, meetingLink, bookingLink }, { className: 'Plan' });\n    const learner = plans[0].learner;\n    await R.create('Doorbell', { learner, topic: 'plan' }, { acl: { [learner]: { read: true }, 'role:staff': { read: true } } });\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:savePlan]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-planId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-meetingLink",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-bookingLink",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-status",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-why",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "sp_res",
+      "type": "noodl.cloud.response",
+      "label": "Saved",
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "sp_deny",
+      "type": "noodl.cloud.response",
+      "label": "A refusal the coach can act on",
+      "x": 40,
+      "y": 400,
+      "parameters": {
+        "status": "failure"
+      }
+    },
+    {
+      "id": "sp_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "x": 40,
+      "y": 520,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "The plan could not be saved. Try again."
+      }
+    }
+  ]
+}

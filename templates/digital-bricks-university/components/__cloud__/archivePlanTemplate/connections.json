@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6ede8d6d-f9e4-51f6-8f40-ae00595bb882",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tpa_req",
+      "fromProperty": "pm-id",
+      "toId": "tpa_fn",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "tpa_req",
+      "fromProperty": "pm-archived",
+      "toId": "tpa_fn",
+      "toProperty": "in-archived"
+    },
+    {
+      "fromId": "tpa_req",
+      "fromProperty": "receive",
+      "toId": "tpa_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tpa_fn",
+      "fromProperty": "out-archived",
+      "toId": "tpa_res",
+      "toProperty": "pm-archived"
+    },
+    {
+      "fromId": "tpa_fn",
+      "fromProperty": "out-done",
+      "toId": "tpa_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "tpa_fn",
+      "fromProperty": "out-refuse",
+      "toId": "tpa_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "tpa_fn",
+      "fromProperty": "out-failed",
+      "toId": "tpa_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "tpa_fn",
+      "fromProperty": "failure",
+      "toId": "tpa_fail",
+      "toProperty": "send"
+    }
+  ]
+}

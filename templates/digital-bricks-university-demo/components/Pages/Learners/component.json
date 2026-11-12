@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "72a02579-b78d-5a04-80cb-a7b347321397",
+  "name": "Learners",
+  "path": "/Pages/Learners",
+  "type": "page",
+  "created": "2026-11-07T20:28:01.196Z",
+  "modified": "2026-11-12T13:49:57.652Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach's roster: every learner with their plan and progress, Open plan to their plan builder (Pages/Learner plan), and Add a learner."
+}

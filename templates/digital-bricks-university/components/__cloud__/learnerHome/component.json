@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "27d8f85f-0f13-542a-8f85-98996a470126",
+  "name": "learnerHome",
+  "path": "/#__cloud__/learnerHome",
+  "type": "cloud",
+  "created": "2026-11-09T12:30:58.967Z",
+  "modified": "2026-11-12T14:35:48.499Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Everything the signed-in learner's Home shows, worked out once (DBU-05): their name and time zone, the plan, its shared steps in order with their numbers, what is up next (the first homework not approved, the next booked live session), and progress (security: authenticated). Who is asking comes from the session and nothing else."
+}

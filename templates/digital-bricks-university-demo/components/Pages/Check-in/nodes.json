@@ -1,0 +1,529 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3967551f-8600-504f-8b8b-0407fccf05ae",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ci_page",
+      "type": "Page",
+      "label": "Check-in",
+      "parameters": {
+        "urlPath": "checkin"
+      },
+      "children": [
+        "ci_shell"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ci_shell",
+      "type": "/Shell/App shell",
+      "label": "Learner shell",
+      "parent": "ci_page",
+      "parameters": {
+        "coach": false,
+        "current": "home"
+      },
+      "children": [
+        "ci_top",
+        "ci_missing",
+        "ci_content"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ci_top",
+      "type": "Group",
+      "label": "Back and head",
+      "parent": "ci_shell",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "ci_back",
+        "ci_head"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "ci_back",
+      "type": "net.noodl.controls.button",
+      "label": "Home",
+      "parent": "ci_top",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-2)",
+        "minHeight": "var(--space-11)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-arrow-left",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)",
+        "iconColor": "var(--muted-foreground)"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "ci_head",
+      "type": "/Shell/Page head",
+      "label": "Head",
+      "parent": "ci_top",
+      "parameters": {
+        "titleKey": "checkin.title",
+        "leadKey": "checkin.lead"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "ci_missing",
+      "type": "Group",
+      "label": "Shown when this check-in cannot be opened",
+      "parent": "ci_shell",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "children": [
+        "ci_missing_state"
+      ],
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "ci_missing_state",
+      "type": "/Shell/Empty state",
+      "label": "This check-in isn't available",
+      "parent": "ci_missing",
+      "parameters": {
+        "icon": {
+          "class": "lucide",
+          "code": "icon-lock",
+          "codeAsClass": true
+        },
+        "titleKey": "checkin.missingTitle",
+        "bodyKey": "checkin.missingBody"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "ci_content",
+      "type": "Group",
+      "label": "The check-in, unless the read failed",
+      "parent": "ci_shell",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 720,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-6)"
+      },
+      "children": [
+        "ci_waiting",
+        "ci_open",
+        "ci_done"
+      ],
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "ci_waiting",
+      "type": "Group",
+      "label": "Not sent yet",
+      "parent": "ci_content",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "children": [
+        "ci_waiting_state"
+      ],
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "ci_waiting_state",
+      "type": "/Shell/Empty state",
+      "label": "Not open yet",
+      "parent": "ci_waiting",
+      "parameters": {
+        "icon": {
+          "class": "lucide",
+          "code": "icon-clock",
+          "codeAsClass": true
+        },
+        "titleKey": "checkin.waitingTitle",
+        "bodyKey": "checkin.waitingBody"
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "ci_open",
+      "type": "Group",
+      "label": "The questions",
+      "parent": "ci_content",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      },
+      "children": [
+        "ci_form",
+        "ci_msg"
+      ],
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "ci_form",
+      "type": "/Checkin/Form",
+      "label": "The survey",
+      "parent": "ci_open",
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "ci_msg",
+      "type": "Text",
+      "label": "Why it was not sent",
+      "parent": "ci_open",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--attention)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "dataAttributes": "data-testid",
+        "data-testid": "checkin-why"
+      },
+      "x": 280,
+      "y": 1480
+    },
+    {
+      "id": "ci_done",
+      "type": "Group",
+      "label": "Answered: thanks, and what she sent",
+      "parent": "ci_content",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "dataAttributes": "data-testid",
+        "data-testid": "checkin-answered"
+      },
+      "children": [
+        "ci_thanks_h",
+        "ci_thanks_b",
+        "ci_answers"
+      ],
+      "x": 220,
+      "y": 1600
+    },
+    {
+      "id": "ci_thanks_h",
+      "type": "Text",
+      "label": "Thank you!",
+      "parent": "ci_done",
+      "parameters": {
+        "text": "",
+        "as": "h2",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      },
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "ci_thanks_b",
+      "type": "Text",
+      "label": "Richard has your answers",
+      "parent": "ci_done",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-normal)",
+        "color": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 280,
+      "y": 1840
+    },
+    {
+      "id": "ci_answers",
+      "type": "/Checkin/Answers",
+      "label": "What she sent",
+      "parent": "ci_done",
+      "x": 280,
+      "y": 1960
+    },
+    {
+      "id": "ci_t_tab",
+      "type": "Translation",
+      "label": "The browser tab's title",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "checkin.tab"
+      },
+      "x": 530,
+      "y": 40
+    },
+    {
+      "id": "ci_t_back",
+      "type": "Translation",
+      "label": "Home",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "checkin.back"
+      },
+      "x": 530,
+      "y": 400
+    },
+    {
+      "id": "ci_t_thanks_h",
+      "type": "Translation",
+      "label": "Thank you!",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "checkin.thanksTitle"
+      },
+      "x": 530,
+      "y": 1720
+    },
+    {
+      "id": "ci_t_thanks_b",
+      "type": "Translation",
+      "label": "Richard has your answers",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "checkin.thanksBody"
+      },
+      "x": 530,
+      "y": 1840
+    },
+    {
+      "id": "ci_go_home",
+      "type": "RouterNavigate",
+      "label": "→ Home",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Home"
+      },
+      "x": 530,
+      "y": 520
+    },
+    {
+      "id": "ci_url",
+      "type": "PageInputs",
+      "label": "?step= from the email or Home",
+      "parameters": {
+        "queryParams": "step"
+      },
+      "x": 530,
+      "y": 1960
+    },
+    {
+      "id": "ci_step_fn",
+      "type": "JavaScriptFunction",
+      "label": "When ?step= changes, read again",
+      "parameters": {
+        "functionScript": "// The email link and Home's Answer button both open /checkin?step=<id>.\nOutputs.stepId = String(Inputs.step || '');\nOutputs.go();"
+      },
+      "ports": [
+        {
+          "name": "in-step",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "out-stepId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 530,
+      "y": 280
+    },
+    {
+      "id": "ci_read",
+      "type": "CloudFunction2",
+      "label": "myCheckin (only my shared check-in)",
+      "parameters": {
+        "function": "myCheckin"
+      },
+      "x": 530,
+      "y": 2080
+    },
+    {
+      "id": "ci_fail_sw",
+      "type": "Switch",
+      "label": "Remember the read failed",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 530,
+      "y": 760
+    },
+    {
+      "id": "ci_not_failed",
+      "type": "Inverter",
+      "label": "The read did not fail",
+      "x": 530,
+      "y": 880
+    },
+    {
+      "id": "ci_words-2",
+      "type": "JavaScriptFunction",
+      "label": "Which state it is in",
+      "parameters": {
+        "functionScript": "// myCheckin's answer (DBU-10): waiting (not sent yet), open (sent, not answered) or answered.\nconst c = Inputs.checkin && typeof Inputs.checkin === 'object' ? Inputs.checkin : null;\nif (!c) return;\nOutputs.title = String(c.title || '');\nOutputs.stepId = String(c.id || '');\nOutputs.isWaiting = c.state === 'waiting';\nOutputs.isOpen = c.state === 'open';\nOutputs.isAnswered = c.state === 'answered';\nOutputs.questions = Array.isArray(c.questions) ? c.questions : [];\nOutputs.answers = c.answers && typeof c.answers === 'object' ? c.answers : {};"
+      },
+      "ports": [
+        {
+          "name": "in-checkin",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "out-title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-stepId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-isWaiting",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-isOpen",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-isAnswered",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-questions",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-answers",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 530,
+      "y": 640
+    },
+    {
+      "id": "ci_send",
+      "type": "CloudFunction2",
+      "label": "answerCheckin (only mine, only once)",
+      "parameters": {
+        "function": "answerCheckin"
+      },
+      "x": 530,
+      "y": 1480
+    },
+    {
+      "id": "ci_msg_sw",
+      "type": "Switch",
+      "label": "Show why, once there is a why",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 530,
+      "y": 1600
+    }
+  ],
+  "visualRoots": [
+    "ci_page"
+  ]
+}

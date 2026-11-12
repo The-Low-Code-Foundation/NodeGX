@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "5d38081e-dd7e-5669-8b9f-6b7d462ebd32",
+  "name": "Chosen file",
+  "path": "/Homework/Chosen file",
+  "type": "visual",
+  "created": "2026-11-12T08:52:55.402Z",
+  "modified": "2026-11-12T08:52:55.402Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One file chosen for the next version, before it is handed in: its name and size, and Remove. Homework/Hand in draws one per chosen file (up to 5)."
+}

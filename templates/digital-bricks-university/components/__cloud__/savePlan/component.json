@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "231082ec-9504-5f6e-8428-44342698b435",
+  "name": "savePlan",
+  "path": "/#__cloud__/savePlan",
+  "type": "cloud",
+  "created": "2026-11-09T10:27:53.477Z",
+  "modified": "2026-11-09T11:08:35.881Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach changes a plan's settings: its title, the meeting link every live session uses unless it has its own, the booking link, and its status (active, paused, finished) (security: role:staff)."
+}

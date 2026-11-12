@@ -1,0 +1,110 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "fb104ef2-0ac3-5322-8673-f7b3c08b72e3",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ii_in",
+      "type": "Component Inputs",
+      "label": "Asked for the inbox",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "request",
+          "plug": "output",
+          "type": "*"
+        }
+      ]
+    },
+    {
+      "id": "ii_fn",
+      "type": "JavaScriptFunction",
+      "label": "Work out what is waiting",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "runOnChange-in-request": true,
+        "functionScript": "/*\n * WHAT IS WAITING FOR THE COACH (DBU-08): the one owner of the inbox's rules.\n *   request { at }   coachInbox (the Inbox page, the Inbox tab's count) and morningRound (the digest)\n * Answers `items`, oldest first with check-ins last, and `learners`: the facts morningRound decides\n * \"gone quiet\" from. Only learners whose plan is active count.\n *\n *   review    the newest version of a homework's hand-in is pending (the step is handed in).\n *             since = when it was handed in.\n *   question  the newest message in a learner's conversation is hers, and the coach has not marked it\n *             \"No reply needed\" (settledAt). A reply ends it; reading it does not.\n *             since = the first of her messages since the coach last wrote or marked one settled.\n *   quiet     an open QuietFlag (only morningRound raises one), not snoozed, with a reason that still holds:\n *             inactive while she has done nothing after the flag's lastActiveAt; overdue while that\n *             homework is still shared, not started and due when it was flagged.\n *             since = when it was raised, or when its snooze ended.\n *   checkin   (DBU-10) she answered a check-in and the coach has not pressed Done (seenAt). LOW\n *             PRIORITY: listed after every other kind, oldest first among themselves, because nothing\n *             waits on the coach's answer. Carries the response's own copy of the form and the answers.\n *             since = when she answered.\n * Activity is the latest of: the account's lastSeenAt (myUnread stamps it from every learner page),\n * a message she wrote, a version she handed in, a check-in she answered.\n * Fails (`failed`) rather than answer a partial list.\n */\nif (Inputs.request !== undefined && Inputs.request !== null) {\n  (async () => {\n    try {\n      const q = (c, where) => Noodl.Records.query(c, where, { limit: 1000, plain: true });\n      const now = Date.now();\n      const t = (iso) => { const n = Date.parse(iso || ''); return Number.isFinite(n) ? n : 0; };\n      const latest = (list) => list.filter(Boolean).sort((a, b) => t(a) - t(b)).pop() || null;\n      const byCreated = (a, b) => String(a.createdAt).localeCompare(String(b.createdAt));\n      const excerpt = (s) => { const one = String(s || '').replace(/\\s+/g, ' ').trim(); return one.length > 160 ? one.slice(0, 157).trimEnd() + '…' : one; };\n      const pick = (row, fields) => {\n        const out = { id: row.objectId };\n        fields.forEach((f) => { out[f] = row[f] === undefined ? null : row[f]; });\n        return out;\n      };\n      // The same shape learnerAsCoach gives Work/Versions.\n      const pickSub = (s) => Object.assign(pick(s, ['step', 'version', 'kind', 'files', 'url', 'text', 'note', 'review', 'reviewNote', 'reviewedAt']), { handedInAt: s.createdAt });\n\n      const plans = await q('Plan', { status: { equalTo: 'active' } });\n      const learnerIds = [...new Set(plans.map((p) => p.learner).filter(Boolean))];\n      const items = [];\n      const learners = [];\n      if (learnerIds.length) {\n        const inIds = { containedIn: learnerIds };\n        const [users, steps, subs, msgs, checkins, flags] = await Promise.all([\n          q('_User', { objectId: inIds }),\n          q('Step', { learner: inIds }),\n          q('Submission', { learner: inIds }),\n          q('Message', { learner: inIds }),\n          q('CheckinResponse', { learner: inIds }),\n          q('QuietFlag', { learner: inIds })\n        ]);\n        for (const id of learnerIds) {\n          const plan = plans.filter((p) => p.learner === id).sort((a, b) => String(b.startedOn).localeCompare(String(a.startedOn)))[0];\n          const user = users.find((u) => u.objectId === id);\n          if (!user || !plan) continue;\n          const name = String(user.name || user.email || '');\n          const base = { learnerId: id, learner: name, first: name.split(' ')[0] };\n          const mySteps = steps.filter((s) => s.plan === plan.objectId).sort((a, b) => a.position - b.position);\n          const mySubs = subs.filter((s) => s.learner === id);\n          const myMsgs = msgs.filter((m) => m.learner === id).sort(byCreated);\n\n          // To review: the newest version of a handed-in homework, while it waits.\n          for (const s of mySteps) {\n            if (s.kind !== 'homework' || s.status !== 'handed_in') continue;\n            const versions = mySubs.filter((v) => v.step === s.objectId).sort((a, b) => a.version - b.version);\n            const newest = versions[versions.length - 1];\n            if (!newest || newest.review !== 'pending') continue;\n            items.push(Object.assign({\n              id: 'review-' + newest.objectId, kind: 'review', since: newest.createdAt,\n              stepId: s.objectId, title: String(s.title || ''), version: newest.version, submissionKind: newest.kind,\n              submissions: versions.map(pickSub)\n            }, base));\n          }\n\n          // A question: her message is the newest, and not settled.\n          const last = myMsgs[myMsgs.length - 1];\n          if (last && last.author === id && !last.settledAt) {\n            let i = myMsgs.length - 1;\n            while (i > 0 && myMsgs[i - 1].author === id && !myMsgs[i - 1].settledAt) i -= 1; // a settled one closed the last run\n            const step = last.step ? mySteps.find((s) => s.objectId === last.step) : null;\n            items.push(Object.assign({\n              id: 'question-' + last.objectId, kind: 'question', since: myMsgs[i].createdAt,\n              messageId: last.objectId, count: myMsgs.length - i, body: excerpt(last.body),\n              attachments: (Array.isArray(last.attachments) ? last.attachments : []).length,\n              stepId: step ? step.objectId : '', title: step ? String(step.title || '') : ''\n            }, base));\n          }\n\n          // A check-in answered, until the coach presses Done (DBU-10).\n          for (const r of checkins.filter((c) => c.learner === id && !c.seenAt)) {\n            const s = mySteps.find((x) => x.objectId === r.step);\n            if (!s) continue;\n            items.push(Object.assign({\n              id: 'checkin-' + r.objectId, kind: 'checkin', since: r.createdAt,\n              responseId: r.objectId, stepId: s.objectId, title: String(s.title || ''),\n              form: r.form || s.form || { questions: [] }, answers: r.answers || {}\n            }, base));\n          }\n\n          // The facts: what she last did, what is overdue, what is booked.\n          const lastActiveAt = latest([\n            user.lastSeenAt,\n            ...myMsgs.filter((m) => m.author === id).map((m) => m.createdAt),\n            ...mySubs.map((s) => s.createdAt),\n            ...checkins.filter((c) => c.learner === id).map((c) => c.createdAt)\n          ]);\n          const overdue = mySteps\n            .filter((s) => s.kind === 'homework' && s.shared === true && s.status === 'not_started' && s.dueAt && t(s.dueAt) < now)\n            .map((s) => ({ stepId: s.objectId, title: String(s.title || ''), dueAt: s.dueAt }));\n          const booked = mySteps\n            .filter((s) => s.kind === 'live' && s.status === 'booked' && t(s.startsAt) > now)\n            .sort((a, b) => t(a.startsAt) - t(b.startsAt))[0];\n          const facts = {\n            learnerId: id, learner: name, startedOn: plan.startedOn || null, lastSeenAt: user.lastSeenAt || null,\n            lastActiveAt, overdue, nextSession: booked ? booked.startsAt : null\n          };\n          learners.push(facts);\n\n          // Gone quiet: an open flag, not snoozed, with a reason that still holds.\n          for (const f of flags.filter((x) => x.learner === id && !x.closedAt)) {\n            if (f.snoozedUntil && t(f.snoozedUntil) > now) continue;\n            const holding = (Array.isArray(f.reasons) ? f.reasons : []).filter((r) => {\n              if (r && r.kind === 'inactive') return !(lastActiveAt && t(lastActiveAt) > t(r.lastActiveAt));\n              if (r && r.kind === 'overdue') {\n                const s = mySteps.find((x) => x.objectId === r.stepId);\n                return !!s && s.shared === true && s.status === 'not_started' && s.dueAt === r.dueAt;\n              }\n              return false;\n            });\n            if (!holding.length) continue;\n            items.push(Object.assign({\n              id: 'quiet-' + f.objectId, kind: 'quiet', since: latest([f.raisedAt, f.snoozedUntil]),\n              flagId: f.objectId, reasons: holding, nudgedAt: f.nudgedAt || null, facts\n            }, base));\n          }\n        }\n      }\n      const low = (i) => (i.kind === 'checkin' ? 1 : 0);\n      items.sort((a, b) => (low(a) - low(b)) || (t(a.since) - t(b.since)));\n      Outputs.items = items;\n      Outputs.count = items.length;\n      Outputs.learners = learners;\n      Outputs.done();\n    } catch (e) {\n      console.error('[dbu:Inbox items] ' + String((e && e.message) || e));\n      Outputs.failed();\n    }\n  })();\n}\n"
+      },
+      "ports": [
+        {
+          "name": "in-request",
+          "plug": "input",
+          "type": "*",
+          "displayName": "request",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-items",
+          "plug": "output",
+          "type": "*",
+          "displayName": "items",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "plug": "output",
+          "type": "*",
+          "displayName": "count",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-learners",
+          "plug": "output",
+          "type": "*",
+          "displayName": "learners",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "done",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "failed",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "ii_out",
+      "type": "Component Outputs",
+      "label": "The list, and the facts",
+      "x": 40,
+      "y": 320,
+      "ports": [
+        {
+          "name": "items",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "learners",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "failed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    }
+  ]
+}

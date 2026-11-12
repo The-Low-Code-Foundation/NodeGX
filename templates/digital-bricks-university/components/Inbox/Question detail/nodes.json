@@ -1,0 +1,214 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "19f48789-bcd4-5439-878b-03040ecfe8c3",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "qd_root",
+      "type": "Group",
+      "label": "Question",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "qd_settle_row",
+        "qd_refused",
+        "qd_conv"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-5)"
+      }
+    },
+    {
+      "id": "qd_settle_row",
+      "type": "Group",
+      "label": "No reply needed, and what it does",
+      "x": 40,
+      "y": 160,
+      "parent": "qd_root",
+      "children": [
+        "qd_settle",
+        "qd_hint"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-2)"
+      }
+    },
+    {
+      "id": "qd_settle",
+      "type": "net.noodl.controls.button",
+      "label": "No reply needed",
+      "x": 40,
+      "y": 280,
+      "parent": "qd_settle_row",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "minHeight": "var(--space-11)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-check",
+          "codeAsClass": true
+        },
+        "iconColor": "var(--foreground)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)"
+      }
+    },
+    {
+      "id": "qd_hint",
+      "type": "Text",
+      "label": "Takes it off the list without writing back",
+      "x": 40,
+      "y": 400,
+      "parent": "qd_settle_row",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontSize": "var(--text-xs)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--muted-foreground)",
+        "styleCss": "flex: 1 1 220px;"
+      }
+    },
+    {
+      "id": "qd_refused",
+      "type": "Text",
+      "label": "Why it was not settled",
+      "x": 40,
+      "y": 520,
+      "parent": "qd_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "qd_conv",
+      "type": "/Messages/Conversation",
+      "label": "The whole conversation, and a reply",
+      "x": 40,
+      "y": 640,
+      "parent": "qd_root",
+      "parameters": {
+        "mode": "coach",
+        "tagged": true,
+        "titleKey": "messages.coachTitle",
+        "emptyKey": "messages.coachEmpty"
+      }
+    },
+    {
+      "id": "qd_in",
+      "type": "Component Inputs",
+      "label": "The question",
+      "x": 400,
+      "y": 40,
+      "ports": [
+        {
+          "name": "learnerId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "messageId",
+          "plug": "output",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "qd_out",
+      "type": "Component Outputs",
+      "label": "Done something",
+      "x": 400,
+      "y": 640,
+      "ports": [
+        {
+          "name": "changed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "qd_cf",
+      "type": "CloudFunction2",
+      "label": "settleQuestion (staff only)",
+      "x": 400,
+      "y": 280,
+      "parameters": {
+        "function": "settleQuestion"
+      }
+    },
+    {
+      "id": "qd_sw",
+      "type": "Switch",
+      "label": "Show: it was refused",
+      "x": 400,
+      "y": 400,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "qd_t_settle",
+      "type": "Translation",
+      "label": "No reply needed",
+      "x": 700,
+      "y": 160,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "inbox.settle"
+      }
+    },
+    {
+      "id": "qd_t_hint",
+      "type": "Translation",
+      "label": "What it does",
+      "x": 700,
+      "y": 280,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "inbox.settleHint"
+      }
+    }
+  ],
+  "visualRoots": [
+    "qd_root"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d6e7f21c-9534-50a7-8444-cc691e6ae022",
+  "name": "Template row",
+  "path": "/Templates/Template row",
+  "type": "visual",
+  "created": "2026-11-09T11:05:56.827Z",
+  "modified": "2026-11-09T11:05:56.827Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One plan template on the list: its title (with an Archived chip when it is), how many steps and live sessions over how many days, its description, and Edit and Archive or Restore. Tells the list which was pressed."
+}

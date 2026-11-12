@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c68f51bb-93ce-5201-8dbe-4531caf38432",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "lc_req",
+      "fromProperty": "pm-learnerId",
+      "toId": "lc_fn",
+      "toProperty": "in-learnerId"
+    },
+    {
+      "fromId": "lc_req",
+      "fromProperty": "receive",
+      "toId": "lc_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "lc_fn",
+      "fromProperty": "out-learner",
+      "toId": "lc_res",
+      "toProperty": "pm-learner"
+    },
+    {
+      "fromId": "lc_fn",
+      "fromProperty": "out-plans",
+      "toId": "lc_res",
+      "toProperty": "pm-plans"
+    },
+    {
+      "fromId": "lc_fn",
+      "fromProperty": "out-plan",
+      "toId": "lc_res",
+      "toProperty": "pm-plan"
+    },
+    {
+      "fromId": "lc_fn",
+      "fromProperty": "out-steps",
+      "toId": "lc_res",
+      "toProperty": "pm-steps"
+    },
+    {
+      "fromId": "lc_fn",
+      "fromProperty": "out-submissions",
+      "toId": "lc_res",
+      "toProperty": "pm-submissions"
+    },
+    {
+      "fromId": "lc_fn",
+      "fromProperty": "out-notes",
+      "toId": "lc_res",
+      "toProperty": "pm-notes"
+    },
+    {
+      "fromId": "lc_fn",
+      "fromProperty": "out-done",
+      "toId": "lc_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "lc_fn",
+      "fromProperty": "out-failed",
+      "toId": "lc_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "lc_fn",
+      "fromProperty": "failure",
+      "toId": "lc_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "lc_fn",
+      "fromProperty": "out-templates",
+      "toId": "lc_res",
+      "toProperty": "pm-templates"
+    },
+    {
+      "fromId": "lc_fn",
+      "fromProperty": "out-checkins",
+      "toId": "lc_res",
+      "toProperty": "pm-checkins"
+    }
+  ]
+}

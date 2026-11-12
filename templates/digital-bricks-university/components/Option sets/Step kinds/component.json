@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f57de13a-1484-55ca-84e6-8396738d0d3a",
+  "name": "Step kinds",
+  "path": "/Option sets/Step kinds",
+  "type": "visual",
+  "created": "2026-11-09T10:37:17.044Z",
+  "modified": "2026-11-09T12:34:20.045Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The three kinds of plan step, in the order the builder offers them. `value` is schema.json's stepKind; each names its label and a new step's title by key, and its tag colours by token."
+}

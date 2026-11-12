@@ -1,0 +1,337 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c1413ad7-a297-5d70-8956-4fd6c712941e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hw_t_tab",
+      "fromProperty": "Translation",
+      "toId": "hw_page",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "hw_t_back",
+      "fromProperty": "Translation",
+      "toId": "hw_back",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hw_back",
+      "fromProperty": "onClick",
+      "toId": "hw_go_list",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "hw_t_work",
+      "fromProperty": "Translation",
+      "toId": "hw_work_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hw_url",
+      "fromProperty": "pm-step",
+      "toId": "hw_step_fn",
+      "toProperty": "in-step"
+    },
+    {
+      "fromId": "hw_step_fn",
+      "fromProperty": "out-go",
+      "toId": "hw_read",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "hw_bell",
+      "fromProperty": "created",
+      "toId": "hw_read",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "hw_handin",
+      "fromProperty": "handedIn",
+      "toId": "hw_read",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "hw_read",
+      "fromProperty": "failure",
+      "toId": "hw_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "hw_read",
+      "fromProperty": "done",
+      "toId": "hw_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "hw_fail_sw",
+      "fromProperty": "state",
+      "toId": "hw_missing",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hw_read",
+      "fromProperty": "out-me",
+      "toId": "hw_words",
+      "toProperty": "me"
+    },
+    {
+      "fromId": "hw_read",
+      "fromProperty": "out-list",
+      "toId": "hw_words",
+      "toProperty": "list"
+    },
+    {
+      "fromId": "hw_read",
+      "fromProperty": "out-step",
+      "toId": "hw_words",
+      "toProperty": "step"
+    },
+    {
+      "fromId": "hw_read",
+      "fromProperty": "out-versions",
+      "toId": "hw_words",
+      "toProperty": "versions"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "pageTitleKey",
+      "toId": "hw_head",
+      "toProperty": "titleKey"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "pageName",
+      "toId": "hw_head",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "pageLeadKey",
+      "toId": "hw_head",
+      "toProperty": "leadKey"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "showOne",
+      "toId": "hw_back",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "listEmpty",
+      "toId": "hw_empty_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "showList",
+      "toId": "hw_list",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "listRows",
+      "toId": "hw_list_rows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "showOne",
+      "toId": "hw_cols",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "headKey",
+      "toId": "hw_brief",
+      "toProperty": "headKey"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "n",
+      "toId": "hw_brief",
+      "toProperty": "n"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "date",
+      "toId": "hw_brief",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "title",
+      "toId": "hw_brief",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "statusKey",
+      "toId": "hw_brief",
+      "toProperty": "statusKey"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "statusBg",
+      "toId": "hw_brief",
+      "toProperty": "statusBg"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "statusFg",
+      "toId": "hw_brief",
+      "toProperty": "statusFg"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "brief",
+      "toId": "hw_brief",
+      "toProperty": "brief"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "checklist",
+      "toId": "hw_brief",
+      "toProperty": "checklist"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "hasChecklist",
+      "toId": "hw_brief",
+      "toProperty": "hasChecklist"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "resources",
+      "toId": "hw_brief",
+      "toProperty": "resources"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "hasResources",
+      "toId": "hw_brief",
+      "toProperty": "hasResources"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "verdictShown",
+      "toId": "hw_verdict",
+      "toProperty": "shown"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "verdictKey",
+      "toId": "hw_verdict",
+      "toProperty": "titleKey"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "verdictV",
+      "toId": "hw_verdict",
+      "toProperty": "v"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "verdictWhen",
+      "toId": "hw_verdict",
+      "toProperty": "when"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "verdictNote",
+      "toId": "hw_verdict",
+      "toProperty": "note"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "verdictHasNote",
+      "toId": "hw_verdict",
+      "toProperty": "hasNote"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "verdictBg",
+      "toId": "hw_verdict",
+      "toProperty": "bg"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "verdictFg",
+      "toId": "hw_verdict",
+      "toProperty": "fg"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "verdictBorder",
+      "toId": "hw_verdict",
+      "toProperty": "border"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "canHandIn",
+      "toId": "hw_handin_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "stepId",
+      "toId": "hw_handin",
+      "toProperty": "stepId"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "nextVersion",
+      "toId": "hw_handin",
+      "toProperty": "nextVersion"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "hasVersions",
+      "toId": "hw_versions_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "versions",
+      "toId": "hw_versions",
+      "toProperty": "submissions"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "timezone",
+      "toId": "hw_versions",
+      "toProperty": "timezone"
+    },
+    {
+      "fromId": "hw_fail_sw",
+      "fromProperty": "state",
+      "toId": "hw_not_failed",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hw_not_failed",
+      "fromProperty": "result",
+      "toId": "hw_content",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hw_step_fn",
+      "fromProperty": "out-stepId",
+      "toId": "hw_read",
+      "toProperty": "in-stepId"
+    },
+    {
+      "fromId": "hw_top",
+      "fromProperty": "didMount",
+      "toId": "hw_step_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hw_words",
+      "fromProperty": "stepId",
+      "toId": "hw_thread",
+      "toProperty": "stepId"
+    }
+  ]
+}

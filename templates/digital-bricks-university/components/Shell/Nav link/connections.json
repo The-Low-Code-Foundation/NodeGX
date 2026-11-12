@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b6c8a655-33a2-58d7-8996-6dbf27a45893",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "nl_inputs",
+      "fromProperty": "active",
+      "toId": "nl_look",
+      "toProperty": "in-active"
+    },
+    {
+      "fromId": "nl_look",
+      "fromProperty": "out-background",
+      "toId": "nl_button",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "nl_look",
+      "fromProperty": "out-colour",
+      "toId": "nl_button",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "nl_look",
+      "fromProperty": "out-weight",
+      "toId": "nl_button",
+      "toProperty": "fontWeight"
+    },
+    {
+      "fromId": "nl_inputs",
+      "fromProperty": "path",
+      "toId": "nl_go",
+      "toProperty": "path"
+    },
+    {
+      "fromId": "nl_button",
+      "fromProperty": "onClick",
+      "toId": "nl_go",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "nl_inputs",
+      "fromProperty": "labelKey",
+      "toId": "nl_t_label",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "nl_t_count",
+      "fromProperty": "Translation",
+      "toId": "nl_fill_count",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "nl_t_label",
+      "fromProperty": "Translation",
+      "toId": "nl_fill_count",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "nl_inputs",
+      "fromProperty": "count",
+      "toId": "nl_fill_count",
+      "toProperty": "n"
+    },
+    {
+      "fromId": "nl_t_label",
+      "fromProperty": "Translation",
+      "toId": "nl_label_fn",
+      "toProperty": "in-label"
+    },
+    {
+      "fromId": "nl_fill_count",
+      "fromProperty": "formatted",
+      "toId": "nl_label_fn",
+      "toProperty": "in-withCount"
+    },
+    {
+      "fromId": "nl_inputs",
+      "fromProperty": "count",
+      "toId": "nl_label_fn",
+      "toProperty": "in-count"
+    },
+    {
+      "fromId": "nl_label_fn",
+      "fromProperty": "out-label",
+      "toId": "nl_button",
+      "toProperty": "label"
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "97ec95ee-a0d9-51dc-8457-518509e9759a",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "fl_req",
+      "fromProperty": "userId",
+      "toId": "fl_own",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "fl_req",
+      "fromProperty": "pm-name",
+      "toId": "fl_own",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "fl_req",
+      "fromProperty": "receive",
+      "toId": "fl_own",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "fl_own",
+      "fromProperty": "out-name",
+      "toId": "fl_sign",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "fl_own",
+      "fromProperty": "out-refused",
+      "toId": "fl_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "fl_own",
+      "fromProperty": "failure",
+      "toId": "fl_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "fl_sign",
+      "fromProperty": "url",
+      "toId": "fl_res",
+      "toProperty": "pm-url"
+    },
+    {
+      "fromId": "fl_sign",
+      "fromProperty": "expiresAt",
+      "toId": "fl_res",
+      "toProperty": "pm-expiresAt"
+    },
+    {
+      "fromId": "fl_sign",
+      "fromProperty": "done",
+      "toId": "fl_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "fl_sign",
+      "fromProperty": "failed",
+      "toId": "fl_deny",
+      "toProperty": "send"
+    }
+  ]
+}

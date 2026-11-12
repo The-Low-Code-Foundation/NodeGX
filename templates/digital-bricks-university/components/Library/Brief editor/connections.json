@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "1e0baa1a-4277-514e-87ef-198deeea9f97",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "be_in",
+      "fromProperty": "value",
+      "toId": "be_input",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "be_in",
+      "fromProperty": "load",
+      "toId": "be_input",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "be_t_label",
+      "fromProperty": "Translation",
+      "toId": "be_input",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "be_t_hint",
+      "fromProperty": "Translation",
+      "toId": "be_hint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "be_t_prev",
+      "fromProperty": "Translation",
+      "toId": "be_prev_label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "be_input",
+      "fromProperty": "onTextChanged",
+      "toId": "be_ft",
+      "toProperty": "markdown"
+    },
+    {
+      "fromId": "be_input",
+      "fromProperty": "onTextChanged",
+      "toId": "be_out",
+      "toProperty": "value"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d592c8d2-09f8-5527-8bfb-94f804974bb3",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mu_req",
+      "fromProperty": "userId",
+      "toId": "mu_fn",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "mu_req",
+      "fromProperty": "receive",
+      "toId": "mu_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mu_fn",
+      "fromProperty": "out-unread",
+      "toId": "mu_res",
+      "toProperty": "pm-unread"
+    },
+    {
+      "fromId": "mu_fn",
+      "fromProperty": "out-done",
+      "toId": "mu_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mu_fn",
+      "fromProperty": "out-failed",
+      "toId": "mu_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mu_fn",
+      "fromProperty": "failure",
+      "toId": "mu_deny",
+      "toProperty": "send"
+    }
+  ]
+}

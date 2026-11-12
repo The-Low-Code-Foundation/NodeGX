@@ -1,0 +1,223 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8b7845b2-4cd5-5ae3-8bbc-0077ab7484b8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "re_in",
+      "fromProperty": "listId",
+      "toId": "re_arr",
+      "toProperty": "collectionId"
+    },
+    {
+      "fromId": "re_arr",
+      "fromProperty": "items",
+      "toId": "re_rows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "re_t_head",
+      "fromProperty": "Translation",
+      "toId": "re_head",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "re_t_hint",
+      "fromProperty": "Translation",
+      "toId": "re_hint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "re_t_link",
+      "fromProperty": "Translation",
+      "toId": "re_add_link",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "re_t_upload",
+      "fromProperty": "Translation",
+      "toId": "re_upload",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "re_t_busy",
+      "fromProperty": "Translation",
+      "toId": "re_busy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "re_in",
+      "fromProperty": "listId",
+      "toId": "re_add_link_fn",
+      "toProperty": "in-listId"
+    },
+    {
+      "fromId": "re_add_link",
+      "fromProperty": "onClick",
+      "toId": "re_add_link_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "re_upload",
+      "fromProperty": "onClick",
+      "toId": "re_pick",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "re_pick",
+      "fromProperty": "file",
+      "toId": "re_put",
+      "toProperty": "file"
+    },
+    {
+      "fromId": "re_pick",
+      "fromProperty": "done",
+      "toId": "re_put",
+      "toProperty": "upload"
+    },
+    {
+      "fromId": "re_pick",
+      "fromProperty": "done",
+      "toId": "re_busy_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "re_pick",
+      "fromProperty": "done",
+      "toId": "re_err_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "re_busy_sw",
+      "fromProperty": "state",
+      "toId": "re_busy",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "re_in",
+      "fromProperty": "listId",
+      "toId": "re_add_file_fn",
+      "toProperty": "in-listId"
+    },
+    {
+      "fromId": "re_put",
+      "fromProperty": "cloudFile",
+      "toId": "re_add_file_fn",
+      "toProperty": "in-cloudFile"
+    },
+    {
+      "fromId": "re_pick",
+      "fromProperty": "name",
+      "toId": "re_add_file_fn",
+      "toProperty": "in-fileName"
+    },
+    {
+      "fromId": "re_put",
+      "fromProperty": "done",
+      "toId": "re_add_file_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "re_put",
+      "fromProperty": "done",
+      "toId": "re_busy_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "re_put",
+      "fromProperty": "failure",
+      "toId": "re_busy_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "re_t_failed",
+      "fromProperty": "Translation",
+      "toId": "re_why_fn",
+      "toProperty": "in-format"
+    },
+    {
+      "fromId": "re_put",
+      "fromProperty": "error",
+      "toId": "re_why_fn",
+      "toProperty": "in-error"
+    },
+    {
+      "fromId": "re_put",
+      "fromProperty": "failure",
+      "toId": "re_why_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "re_why_fn",
+      "fromProperty": "out-text",
+      "toId": "re_error",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "re_put",
+      "fromProperty": "failure",
+      "toId": "re_err_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "re_err_sw",
+      "fromProperty": "state",
+      "toId": "re_error",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "re_in",
+      "fromProperty": "listId",
+      "toId": "re_up_fn",
+      "toProperty": "in-listId"
+    },
+    {
+      "fromId": "re_rows",
+      "fromProperty": "itemActionItemId",
+      "toId": "re_up_fn",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "re_rows",
+      "fromProperty": "itemOutputSignal-up",
+      "toId": "re_up_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "re_in",
+      "fromProperty": "listId",
+      "toId": "re_down_fn",
+      "toProperty": "in-listId"
+    },
+    {
+      "fromId": "re_rows",
+      "fromProperty": "itemActionItemId",
+      "toId": "re_down_fn",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "re_rows",
+      "fromProperty": "itemOutputSignal-down",
+      "toId": "re_down_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "re_in",
+      "fromProperty": "listId",
+      "toId": "re_remove_fn",
+      "toProperty": "in-listId"
+    },
+    {
+      "fromId": "re_rows",
+      "fromProperty": "itemActionItemId",
+      "toId": "re_remove_fn",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "re_rows",
+      "fromProperty": "itemOutputSignal-remove",
+      "toId": "re_remove_fn",
+      "toProperty": "run"
+    }
+  ]
+}

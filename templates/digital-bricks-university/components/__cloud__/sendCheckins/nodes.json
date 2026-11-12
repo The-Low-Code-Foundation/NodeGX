@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7b13c6ae-a5e8-51a1-8551-6c5f5c26b38e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sc_req-2",
+      "type": "noodl.cloud.request",
+      "label": "The schedule fires",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "",
+        "allowNoAuth": false
+      },
+      "metadata": {
+        "comment": "Rule `nobody` in nodegx.security.json: only the schedule and the admin door run it."
+      }
+    },
+    {
+      "id": "sc_fn-2",
+      "type": "JavaScriptFunction",
+      "label": "Send what is due",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "functionScript": "/*\n * SENDING CHECK-INS (DBU-10). A check-in goes when all of these hold: it is shared, still\n * 'scheduled', its sendsAt has come, and its plan is active (a paused or finished plan sends\n * nothing; it goes once the plan is active again). sendsAt is 09:00 Paris on its day; this runs\n * hourly at :05, so one shared late in the day still goes that day rather than tomorrow.\n *\n * Safe to run twice: each check-in is CLAIMED ('sent', sentAt) before its email, and given back\n * ('scheduled') if the email fails, so the next run tries again and nothing goes twice.\n * With no mailer or no appUrl secret nothing is claimed: a check-in nobody was told about would\n * sit on Home unnoticed. A learner who turned emails off (emailOptOutAt) gets none: it is still\n * sent, and waits on her Home. Plain text; logs carry counts, never an address.\n * Answers {sent, mailed, unsent}: unsent are due but left for the next run.\n * A filter takes one key, so the plans are matched after the query.\n */\n(async () => {\n  let sent = 0;\n  let mailed = 0;\n  let unsent = 0;\n  try {\n    const R = Noodl.Records;\n    const q = (c, where) => R.query(c, where, { limit: 1000, plain: true });\n    const secret = (name) => {\n      const s = globalThis._noodl_get_secret ? globalThis._noodl_get_secret(name) : null;\n      return s && s.found ? String(s.value) : '';\n    };\n    const send = typeof globalThis._noodl_send_email === 'function' ? globalThis._noodl_send_email : null;\n    const appUrl = secret('appUrl').replace(/\\/+$/, '');\n    const now = Date.now();\n\n    const plans = await q('Plan', { status: { equalTo: 'active' } });\n    const planIds = plans.map((p) => p.objectId);\n    const due = planIds.length\n      ? (await q('Step', { kind: { equalTo: 'checkin' } }))\n        .filter((s) => planIds.includes(s.plan) && s.shared === true && s.status === 'scheduled' && s.sendsAt && Date.parse(s.sendsAt) <= now)\n        .sort((a, b) => String(a.sendsAt).localeCompare(String(b.sendsAt)))\n      : [];\n    if (due.length && (!send || !appUrl)) {\n      console.error('[dbu:sendCheckins] ' + due.length + ' due, but no mailer or no appUrl secret (tools/setup-signin.mjs): none sent');\n      Outputs.sent = 0;\n      Outputs.mailed = 0;\n      Outputs.unsent = due.length;\n      Outputs.done();\n      return;\n    }\n\n    const key = secret('unsubscribeKey');\n    const hex = (buf) => Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');\n    const unsubscribeFor = async (userId) => {\n      if (!key) return '';\n      const k = await crypto.subtle.importKey('raw', new TextEncoder().encode(key), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);\n      const sig = hex(await crypto.subtle.sign('HMAC', k, new TextEncoder().encode('dbu-unsubscribe:v1:' + userId)));\n      return appUrl + '/unsubscribe?u=' + encodeURIComponent(userId) + '&s=' + sig;\n    };\n\n    for (const s of due) {\n      // Re-read just before the claim: another run may have taken it since the list was made.\n      const fresh = (await q('Step', { objectId: { equalTo: s.objectId } }))[0];\n      if (!fresh || fresh.status !== 'scheduled' || fresh.shared !== true) continue;\n      const learner = (await q('_User', { objectId: { equalTo: s.learner } }))[0];\n      if (!learner) continue;\n      const stamp = new Date().toISOString();\n      await R.save(s.objectId, { status: 'sent', sentAt: stamp }, { className: 'Step' });\n\n      const address = typeof learner.email === 'string' && learner.email.includes('@') ? learner.email : '';\n      if (learner.emailOptOutAt || !address) {\n        sent += 1;\n      } else {\n        // The coach is whoever writes to her; an email with no conversation yet says \"your coach\".\n        const theirs = (await q('Message', { learner: { equalTo: s.learner } })).filter((m) => m.author !== s.learner)\n          .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));\n        const coach = theirs.length ? (await q('_User', { objectId: { equalTo: theirs[0].author } }))[0] : null;\n        const coachFirst = String((coach && coach.name) || '').split(' ')[0];\n        const first = String(learner.name || '').split(' ')[0] || 'there';\n        const form = s.form && Array.isArray(s.form.questions) ? s.form : { questions: [] };\n        const minutes = Number.isInteger(form.minutes) ? form.minutes : 2;\n        const n = form.questions.filter((x) => !x.condition).length || form.questions.length;\n        const unsubscribe = await unsubscribeFor(learner.objectId);\n        const who = coachFirst || 'Your coach';\n        const text = [\n          'Hello ' + first + ',',\n          '',\n          who + ' would like to know how things are going: ' + n + ' short question' + (n === 1 ? '' : 's') + ', about ' + minutes + ' minutes.',\n          '',\n          '\"' + String(s.title || 'Check-in') + '\"',\n          'Answer here: ' + appUrl + '/checkin?step=' + encodeURIComponent(s.objectId),\n          '',\n          '--',\n          'Replies to this email are not read. Your answers go straight to ' + (coachFirst || 'your coach') + ' when you send them.',\n          unsubscribe ? 'Stop these emails: ' + unsubscribe : 'You can stop these emails on your Messages page.',\n          'Your sign-in emails are not affected.'\n        ].join('\\n');\n        let ok = false;\n        let why = '';\n        try {\n          const res = await send({ to: address, subject: 'A ' + minutes + '-minute check-in' + (coachFirst ? ' from ' + coachFirst : ''), text });\n          ok = !!(res && res.success);\n          why = ok ? '' : String((res && res.error) || 'no answer');\n        } catch (e) {\n          why = String((e && e.message) || e);\n        }\n        if (!ok) {\n          await R.save(s.objectId, { status: 'scheduled', sentAt: null }, { className: 'Step' });\n          unsent += 1;\n          console.error('[dbu:sendCheckins] send failed, left for the next run: ' + why.slice(0, 160).replace(/[^\\s]+@[^\\s]+/g, '<address>'));\n          continue;\n        }\n        sent += 1;\n        mailed += 1;\n      }\n      await R.create('Doorbell', { learner: s.learner, topic: 'plan' }, { acl: { [s.learner]: { read: true }, 'role:staff': { read: true } } });\n    }\n    if (due.length) console.log('[dbu:sendCheckins] due=' + due.length + ' sent=' + sent + ' mailed=' + mailed + ' unsent=' + unsent);\n    Outputs.sent = sent;\n    Outputs.mailed = mailed;\n    Outputs.unsent = unsent;\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:sendCheckins] ' + String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "out-sent",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "out-mailed",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "out-unsent",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "sc_res-2",
+      "type": "noodl.cloud.response",
+      "label": "What it sent",
+      "x": 40,
+      "y": 280,
+      "parameters": {
+        "params": "sent,mailed,unsent"
+      }
+    },
+    {
+      "id": "sc_fail-2",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "x": 40,
+      "y": 400,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "The check-ins could not be sent."
+      }
+    }
+  ]
+}

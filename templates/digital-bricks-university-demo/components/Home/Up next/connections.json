@@ -1,0 +1,175 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "21826ebc-66c0-5021-870d-f3768dee4dca",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "un_t_heading",
+      "fromProperty": "Translation",
+      "toId": "un_heading",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "hwShown",
+      "toId": "un_hw",
+      "toProperty": "shown"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "hwNone",
+      "toId": "un_hw",
+      "toProperty": "none"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "hwHeadKey",
+      "toId": "un_hw",
+      "toProperty": "headKey"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "hwN",
+      "toId": "un_hw",
+      "toProperty": "n"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "hwDate",
+      "toId": "un_hw",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "hwTitle",
+      "toId": "un_hw",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "hwBodyKey",
+      "toId": "un_hw",
+      "toProperty": "bodyKey"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "hwStepId",
+      "toId": "un_hw",
+      "toProperty": "stepId"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "liveShown",
+      "toId": "un_live",
+      "toProperty": "shown"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "liveNone",
+      "toId": "un_live",
+      "toProperty": "none"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "liveN",
+      "toId": "un_live",
+      "toProperty": "n"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "liveDate",
+      "toId": "un_live",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "liveStart",
+      "toId": "un_live",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "liveEnd",
+      "toId": "un_live",
+      "toProperty": "end"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "liveTitle",
+      "toId": "un_live",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "livePrep",
+      "toId": "un_live",
+      "toProperty": "prep"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "hasPrep",
+      "toId": "un_live",
+      "toProperty": "hasPrep"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "joinLink",
+      "toId": "un_live",
+      "toProperty": "joinLink"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "hasJoin",
+      "toId": "un_live",
+      "toProperty": "hasJoin"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "liveStepId",
+      "toId": "un_live",
+      "toProperty": "stepId"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "liveStartsAt",
+      "toId": "un_live",
+      "toProperty": "startsAt"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "liveDuration",
+      "toId": "un_live",
+      "toProperty": "durationMin"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "calDetails",
+      "toId": "un_live",
+      "toProperty": "calDetails"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "attendeeName",
+      "toId": "un_live",
+      "toProperty": "attendeeName"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "liveNoneKey",
+      "toId": "un_live",
+      "toProperty": "noneKey"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "bookingLink",
+      "toId": "un_live",
+      "toProperty": "bookingLink"
+    },
+    {
+      "fromId": "un_in",
+      "fromProperty": "canBook",
+      "toId": "un_live",
+      "toProperty": "canBook"
+    }
+  ]
+}

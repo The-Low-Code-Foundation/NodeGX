@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "033aa031-4f74-5ee7-8d59-772afe7d83cf",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "dm_fn",
+      "fromProperty": "out-isDemo",
+      "toId": "dm_out",
+      "toProperty": "isDemo"
+    },
+    {
+      "fromId": "dm_fn",
+      "fromProperty": "out-notDemo",
+      "toId": "dm_out",
+      "toProperty": "notDemo"
+    },
+    {
+      "fromId": "dm_fn",
+      "fromProperty": "out-supported",
+      "toId": "dm_out",
+      "toProperty": "supported"
+    },
+    {
+      "fromId": "dm_fn",
+      "fromProperty": "out-unsupported",
+      "toId": "dm_out",
+      "toProperty": "unsupported"
+    },
+    {
+      "fromId": "dm_fn",
+      "fromProperty": "out-coachView",
+      "toId": "dm_out",
+      "toProperty": "coachView"
+    },
+    {
+      "fromId": "dm_fn",
+      "fromProperty": "out-learnerView",
+      "toId": "dm_out",
+      "toProperty": "learnerView"
+    }
+  ]
+}

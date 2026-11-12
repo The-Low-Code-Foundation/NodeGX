@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "50d639b5-13ce-535d-8483-4bb9898a6bd2",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cu_req",
+      "fromProperty": "receive",
+      "toId": "cu_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cu_fn",
+      "fromProperty": "out-unread",
+      "toId": "cu_res",
+      "toProperty": "pm-unread"
+    },
+    {
+      "fromId": "cu_fn",
+      "fromProperty": "out-done",
+      "toId": "cu_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "cu_fn",
+      "fromProperty": "out-failed",
+      "toId": "cu_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "cu_fn",
+      "fromProperty": "failure",
+      "toId": "cu_deny",
+      "toProperty": "send"
+    }
+  ]
+}

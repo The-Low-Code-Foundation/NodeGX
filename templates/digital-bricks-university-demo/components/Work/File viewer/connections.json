@@ -1,0 +1,211 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "55ae5f6e-1a90-55a9-86e2-d33cee9e879f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "fv_t_show",
+      "fromProperty": "Translation",
+      "toId": "fv_show",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fv_t_hide",
+      "fromProperty": "Translation",
+      "toId": "fv_hide",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fv_t_dl",
+      "fromProperty": "Translation",
+      "toId": "fv_download",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fv_t_cant",
+      "fromProperty": "Translation",
+      "toId": "fv_cant",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fv_t_failed",
+      "fromProperty": "Translation",
+      "toId": "fv_failed",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fv_in",
+      "fromProperty": "fileName",
+      "toId": "fv_what",
+      "toProperty": "in-fileName"
+    },
+    {
+      "fromId": "fv_kinds",
+      "fromProperty": "items",
+      "toId": "fv_what",
+      "toProperty": "in-kinds"
+    },
+    {
+      "fromId": "fv_showing",
+      "fromProperty": "state",
+      "toId": "fv_what",
+      "toProperty": "in-showing"
+    },
+    {
+      "fromId": "fv_what",
+      "fromProperty": "out-showOpen",
+      "toId": "fv_show",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fv_what",
+      "fromProperty": "out-showHide",
+      "toId": "fv_hide",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fv_what",
+      "fromProperty": "out-cantShow",
+      "toId": "fv_cant",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fv_host",
+      "fromProperty": "this",
+      "toId": "fv_show_fn",
+      "toProperty": "in-host"
+    },
+    {
+      "fromId": "fv_host",
+      "fromProperty": "this",
+      "toId": "fv_hide_fn",
+      "toProperty": "in-host"
+    },
+    {
+      "fromId": "fv_in",
+      "fromProperty": "file",
+      "toId": "fv_show_fn",
+      "toProperty": "in-file"
+    },
+    {
+      "fromId": "fv_in",
+      "fromProperty": "fileName",
+      "toId": "fv_show_fn",
+      "toProperty": "in-fileName"
+    },
+    {
+      "fromId": "fv_in",
+      "fromProperty": "mode",
+      "toId": "fv_show_fn",
+      "toProperty": "in-mode"
+    },
+    {
+      "fromId": "fv_in",
+      "fromProperty": "stepId",
+      "toId": "fv_show_fn",
+      "toProperty": "in-stepId"
+    },
+    {
+      "fromId": "fv_kinds",
+      "fromProperty": "items",
+      "toId": "fv_show_fn",
+      "toProperty": "in-kinds"
+    },
+    {
+      "fromId": "fv_in",
+      "fromProperty": "file",
+      "toId": "fv_dl_fn",
+      "toProperty": "in-file"
+    },
+    {
+      "fromId": "fv_in",
+      "fromProperty": "fileName",
+      "toId": "fv_dl_fn",
+      "toProperty": "in-fileName"
+    },
+    {
+      "fromId": "fv_in",
+      "fromProperty": "mode",
+      "toId": "fv_dl_fn",
+      "toProperty": "in-mode"
+    },
+    {
+      "fromId": "fv_in",
+      "fromProperty": "stepId",
+      "toId": "fv_dl_fn",
+      "toProperty": "in-stepId"
+    },
+    {
+      "fromId": "fv_show",
+      "fromProperty": "onClick",
+      "toId": "fv_show_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "fv_show",
+      "fromProperty": "onClick",
+      "toId": "fv_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "fv_show_fn",
+      "fromProperty": "out-done",
+      "toId": "fv_showing",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "fv_show_fn",
+      "fromProperty": "out-failed",
+      "toId": "fv_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "fv_show_fn",
+      "fromProperty": "out-failed",
+      "toId": "fv_out",
+      "toProperty": "failed"
+    },
+    {
+      "fromId": "fv_hide",
+      "fromProperty": "onClick",
+      "toId": "fv_hide_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "fv_hide",
+      "fromProperty": "onClick",
+      "toId": "fv_showing",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "fv_download",
+      "fromProperty": "onClick",
+      "toId": "fv_dl_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "fv_download",
+      "fromProperty": "onClick",
+      "toId": "fv_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "fv_dl_fn",
+      "fromProperty": "out-failed",
+      "toId": "fv_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "fv_dl_fn",
+      "fromProperty": "out-failed",
+      "toId": "fv_out",
+      "toProperty": "failed"
+    },
+    {
+      "fromId": "fv_fail_sw",
+      "fromProperty": "state",
+      "toId": "fv_failed",
+      "toProperty": "mounted"
+    }
+  ]
+}

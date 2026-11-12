@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "bad6d3ad-f179-5da1-828b-f3fe1b7505c3",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rl_req",
+      "fromProperty": "userId",
+      "toId": "rl_check",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "rl_req",
+      "fromProperty": "pm-stepId",
+      "toId": "rl_check",
+      "toProperty": "in-stepId"
+    },
+    {
+      "fromId": "rl_req",
+      "fromProperty": "pm-file",
+      "toId": "rl_check",
+      "toProperty": "in-file"
+    },
+    {
+      "fromId": "rl_req",
+      "fromProperty": "receive",
+      "toId": "rl_check",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rl_check",
+      "fromProperty": "out-name",
+      "toId": "rl_sign",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "rl_check",
+      "fromProperty": "out-refused",
+      "toId": "rl_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "rl_check",
+      "fromProperty": "failure",
+      "toId": "rl_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "rl_sign",
+      "fromProperty": "url",
+      "toId": "rl_res",
+      "toProperty": "pm-url"
+    },
+    {
+      "fromId": "rl_sign",
+      "fromProperty": "expiresAt",
+      "toId": "rl_res",
+      "toProperty": "pm-expiresAt"
+    },
+    {
+      "fromId": "rl_sign",
+      "fromProperty": "done",
+      "toId": "rl_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "rl_sign",
+      "fromProperty": "failed",
+      "toId": "rl_deny",
+      "toProperty": "send"
+    }
+  ]
+}

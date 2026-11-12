@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "fb104ef2-0ac3-5322-8673-f7b3c08b72e3",
+  "name": "Inbox items",
+  "path": "/#__cloud__/shared/Inbox items",
+  "type": "cloud",
+  "created": "2026-11-12T13:05:37.495Z",
+  "modified": "2026-11-12T14:34:16.255Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The one owner of the inbox's rules (DBU-08): what is waiting for the coach (hand-ins to review, questions, learners gone quiet), oldest first, plus the facts the daily round decides \"gone quiet\" from."
+}

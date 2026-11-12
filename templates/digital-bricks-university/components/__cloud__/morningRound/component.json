@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "aeed8702-7845-51c5-86ef-cf99b097e6e3",
+  "name": "morningRound",
+  "path": "/#__cloud__/morningRound",
+  "type": "cloud",
+  "created": "2026-11-12T13:06:52.283Z",
+  "modified": "2026-11-12T18:50:30.978Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Every morning at 07:00 (DBU-08, schedule in nodegx.automations.json): raises, refreshes and closes \"gone quiet\" flags, then mails the coach one digest if anything new reached the inbox. Safe to run twice. Nobody may call it."
+}

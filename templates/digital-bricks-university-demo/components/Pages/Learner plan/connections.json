@@ -1,0 +1,601 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "44d58feb-0f92-5c71-8a35-6e6e02eac791",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pg_t_tab",
+      "fromProperty": "Translation",
+      "toId": "pg_page",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "pg_t_back",
+      "fromProperty": "Translation",
+      "toId": "pg_back",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "pg_back",
+      "fromProperty": "onClick",
+      "toId": "pg_nav_back",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "pg_url",
+      "fromProperty": "pm-learner",
+      "toId": "pg_read",
+      "toProperty": "in-learnerId"
+    },
+    {
+      "fromId": "pg_top",
+      "fromProperty": "didMount",
+      "toId": "pg_read",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "pg_card",
+      "fromProperty": "changed",
+      "toId": "pg_read",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "pg_list",
+      "fromProperty": "changed",
+      "toId": "pg_read",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "pg_settings",
+      "fromProperty": "saved",
+      "toId": "pg_read",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "pg_pick",
+      "fromProperty": "added",
+      "toId": "pg_read",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "pg_read",
+      "fromProperty": "out-learner",
+      "toId": "pg_words",
+      "toProperty": "learner"
+    },
+    {
+      "fromId": "pg_read",
+      "fromProperty": "out-plan",
+      "toId": "pg_words",
+      "toProperty": "plan"
+    },
+    {
+      "fromId": "pg_read",
+      "fromProperty": "out-steps",
+      "toId": "pg_words",
+      "toProperty": "steps"
+    },
+    {
+      "fromId": "pg_read",
+      "fromProperty": "out-submissions",
+      "toId": "pg_words",
+      "toProperty": "submissions"
+    },
+    {
+      "fromId": "pg_lv_sw",
+      "fromProperty": "state",
+      "toId": "pg_words",
+      "toProperty": "learnerView"
+    },
+    {
+      "fromId": "pg_read",
+      "fromProperty": "failure",
+      "toId": "pg_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "pg_read",
+      "fromProperty": "done",
+      "toId": "pg_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pg_fail_sw",
+      "fromProperty": "state",
+      "toId": "pg_failed",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pg_t_failed",
+      "fromProperty": "Translation",
+      "toId": "pg_failed",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pg_words",
+      "fromProperty": "name",
+      "toId": "pg_head",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "pg_words",
+      "fromProperty": "hasPlan",
+      "toId": "pg_body",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pg_words",
+      "fromProperty": "noPlan",
+      "toId": "pg_noplan",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pg_t_noplan",
+      "fromProperty": "Translation",
+      "toId": "pg_noplan",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pg_words",
+      "fromProperty": "planId",
+      "toId": "pg_card",
+      "toProperty": "planId"
+    },
+    {
+      "fromId": "pg_words",
+      "fromProperty": "detail",
+      "toId": "pg_card",
+      "toProperty": "detail"
+    },
+    {
+      "fromId": "pg_words",
+      "fromProperty": "statusKey",
+      "toId": "pg_card",
+      "toProperty": "statusKey"
+    },
+    {
+      "fromId": "pg_words",
+      "fromProperty": "live",
+      "toId": "pg_card",
+      "toProperty": "live"
+    },
+    {
+      "fromId": "pg_words",
+      "fromProperty": "homework",
+      "toId": "pg_card",
+      "toProperty": "homework"
+    },
+    {
+      "fromId": "pg_words",
+      "fromProperty": "hours",
+      "toId": "pg_card",
+      "toProperty": "hours"
+    },
+    {
+      "fromId": "pg_words",
+      "fromProperty": "startedFrom",
+      "toId": "pg_card",
+      "toProperty": "startedFrom"
+    },
+    {
+      "fromId": "pg_words",
+      "fromProperty": "empty",
+      "toId": "pg_card",
+      "toProperty": "empty"
+    },
+    {
+      "fromId": "pg_read",
+      "fromProperty": "out-templates",
+      "toId": "pg_card",
+      "toProperty": "templates"
+    },
+    {
+      "fromId": "pg_words",
+      "fromProperty": "first",
+      "toId": "pg_card",
+      "toProperty": "firstName"
+    },
+    {
+      "fromId": "pg_lv_sw",
+      "fromProperty": "state",
+      "toId": "pg_card",
+      "toProperty": "learnerView"
+    },
+    {
+      "fromId": "pg_card",
+      "fromProperty": "settings",
+      "toId": "pg_set_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "pg_card",
+      "fromProperty": "settings",
+      "toId": "pg_tpl_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pg_card",
+      "fromProperty": "settings",
+      "toId": "pg_pick_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pg_card",
+      "fromProperty": "settings",
+      "toId": "pg_settings",
+      "toProperty": "load"
+    },
+    {
+      "fromId": "pg_read",
+      "fromProperty": "out-plan",
+      "toId": "pg_settings",
+      "toProperty": "plan"
+    },
+    {
+      "fromId": "pg_settings",
+      "fromProperty": "saved",
+      "toId": "pg_set_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pg_settings",
+      "fromProperty": "closed",
+      "toId": "pg_set_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pg_set_sw",
+      "fromProperty": "state",
+      "toId": "pg_settings_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pg_card",
+      "fromProperty": "saveTemplate",
+      "toId": "pg_tpl_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "pg_card",
+      "fromProperty": "saveTemplate",
+      "toId": "pg_set_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pg_card",
+      "fromProperty": "saveTemplate",
+      "toId": "pg_pick_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pg_card",
+      "fromProperty": "saveTemplate",
+      "toId": "pg_tpl_said_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pg_card",
+      "fromProperty": "saveTemplate",
+      "toId": "pg_tpl",
+      "toProperty": "load"
+    },
+    {
+      "fromId": "pg_words",
+      "fromProperty": "planId",
+      "toId": "pg_tpl",
+      "toProperty": "planId"
+    },
+    {
+      "fromId": "pg_words",
+      "fromProperty": "suggestedTitle",
+      "toId": "pg_tpl",
+      "toProperty": "suggestedTitle"
+    },
+    {
+      "fromId": "pg_tpl",
+      "fromProperty": "saved",
+      "toId": "pg_tpl_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pg_tpl",
+      "fromProperty": "closed",
+      "toId": "pg_tpl_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pg_tpl_sw",
+      "fromProperty": "state",
+      "toId": "pg_tpl_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pg_tpl",
+      "fromProperty": "said",
+      "toId": "pg_tpl_said",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pg_tpl",
+      "fromProperty": "saved",
+      "toId": "pg_tpl_said_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "pg_tpl_said_sw",
+      "fromProperty": "state",
+      "toId": "pg_tpl_said",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pg_card",
+      "fromProperty": "seeAs",
+      "toId": "pg_lv_sw",
+      "toProperty": "flip"
+    },
+    {
+      "fromId": "pg_card",
+      "fromProperty": "seeAs",
+      "toId": "pg_set_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pg_card",
+      "fromProperty": "seeAs",
+      "toId": "pg_tpl_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pg_card",
+      "fromProperty": "seeAs",
+      "toId": "pg_pick_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pg_lv_sw",
+      "fromProperty": "state",
+      "toId": "pg_lv_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pg_lv_sw",
+      "fromProperty": "state",
+      "toId": "pg_list",
+      "toProperty": "readOnly"
+    },
+    {
+      "fromId": "pg_t_lv",
+      "fromProperty": "Translation",
+      "toId": "pg_lv_fill",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "pg_words",
+      "fromProperty": "first",
+      "toId": "pg_lv_fill",
+      "toProperty": "first"
+    },
+    {
+      "fromId": "pg_lv_fill",
+      "fromProperty": "formatted",
+      "toId": "pg_lv_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pg_t_lv_body",
+      "fromProperty": "Translation",
+      "toId": "pg_lv_body",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pg_t_lv_empty",
+      "fromProperty": "Translation",
+      "toId": "pg_lv_empty_fill",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "pg_words",
+      "fromProperty": "first",
+      "toId": "pg_lv_empty_fill",
+      "toProperty": "first"
+    },
+    {
+      "fromId": "pg_lv_empty_fill",
+      "fromProperty": "formatted",
+      "toId": "pg_lv_empty",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pg_words",
+      "fromProperty": "nothingShared",
+      "toId": "pg_lv_empty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pg_list",
+      "fromProperty": "pickLibrary",
+      "toId": "pg_pick_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "pg_list",
+      "fromProperty": "pickLibrary",
+      "toId": "pg_set_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pg_list",
+      "fromProperty": "pickLibrary",
+      "toId": "pg_tpl_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pg_list",
+      "fromProperty": "pickLibrary",
+      "toId": "pg_pick",
+      "toProperty": "load"
+    },
+    {
+      "fromId": "pg_words",
+      "fromProperty": "planId",
+      "toId": "pg_pick",
+      "toProperty": "planId"
+    },
+    {
+      "fromId": "pg_pick",
+      "fromProperty": "added",
+      "toId": "pg_pick_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pg_pick",
+      "fromProperty": "closed",
+      "toId": "pg_pick_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pg_pick_sw",
+      "fromProperty": "state",
+      "toId": "pg_pick_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pg_words",
+      "fromProperty": "rows",
+      "toId": "pg_list",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "pg_words",
+      "fromProperty": "planId",
+      "toId": "pg_list",
+      "toProperty": "planId"
+    },
+    {
+      "fromId": "pg_card",
+      "fromProperty": "said",
+      "toId": "pg_head_said",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pg_card",
+      "fromProperty": "saidShow",
+      "toId": "pg_head_said_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "pg_card",
+      "fromProperty": "saidShow",
+      "toId": "pg_list_said_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pg_head_said_sw",
+      "fromProperty": "state",
+      "toId": "pg_head_said",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pg_list",
+      "fromProperty": "said",
+      "toId": "pg_list_said",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pg_list",
+      "fromProperty": "saidShow",
+      "toId": "pg_list_said_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "pg_list",
+      "fromProperty": "saidShow",
+      "toId": "pg_head_said_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pg_list_said_sw",
+      "fromProperty": "state",
+      "toId": "pg_list_said",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pg_url",
+      "fromProperty": "pm-learner",
+      "toId": "pg_conv",
+      "toProperty": "learnerId"
+    },
+    {
+      "fromId": "pg_t_made_head",
+      "fromProperty": "Translation",
+      "toId": "pg_made_head",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pg_t_made_lead",
+      "fromProperty": "Translation",
+      "toId": "pg_made_lead",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pg_t_made_failed",
+      "fromProperty": "Translation",
+      "toId": "pg_made_failed",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pg_url",
+      "fromProperty": "pm-learner",
+      "toId": "pg_made_read",
+      "toProperty": "in-learnerId"
+    },
+    {
+      "fromId": "pg_top",
+      "fromProperty": "didMount",
+      "toId": "pg_made_read",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "pg_made_read",
+      "fromProperty": "out-items",
+      "toId": "pg_made_shelf",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pg_made_read",
+      "fromProperty": "failure",
+      "toId": "pg_made_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "pg_made_read",
+      "fromProperty": "done",
+      "toId": "pg_made_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pg_made_fail_sw",
+      "fromProperty": "state",
+      "toId": "pg_made_failed",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pg_read",
+      "fromProperty": "out-checkins",
+      "toId": "pg_words",
+      "toProperty": "checkins"
+    },
+    {
+      "fromId": "pg_made_read",
+      "fromProperty": "out-estimate",
+      "toId": "pg_made_est",
+      "toProperty": "estimate"
+    },
+    {
+      "fromId": "pg_words",
+      "fromProperty": "first",
+      "toId": "pg_made_est",
+      "toProperty": "first"
+    }
+  ]
+}

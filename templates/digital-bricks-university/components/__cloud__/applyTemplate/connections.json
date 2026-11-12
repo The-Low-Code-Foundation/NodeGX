@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "aaf5af89-8b3e-5aee-8ce9-8d06b1be4a28",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "at_req",
+      "fromProperty": "pm-planId",
+      "toId": "at_check",
+      "toProperty": "in-planId"
+    },
+    {
+      "fromId": "at_req",
+      "fromProperty": "pm-templateId",
+      "toId": "at_check",
+      "toProperty": "in-templateId"
+    },
+    {
+      "fromId": "at_req",
+      "fromProperty": "receive",
+      "toId": "at_check",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "at_check",
+      "fromProperty": "out-job",
+      "toId": "at_steps",
+      "toProperty": "job"
+    },
+    {
+      "fromId": "at_check",
+      "fromProperty": "out-why",
+      "toId": "at_deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "at_check",
+      "fromProperty": "out-refuse",
+      "toId": "at_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "at_check",
+      "fromProperty": "out-failed",
+      "toId": "at_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "at_check",
+      "fromProperty": "failure",
+      "toId": "at_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "at_steps",
+      "fromProperty": "added",
+      "toId": "at_res",
+      "toProperty": "pm-added"
+    },
+    {
+      "fromId": "at_steps",
+      "fromProperty": "done",
+      "toId": "at_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "at_steps",
+      "fromProperty": "reason",
+      "toId": "at_deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "at_steps",
+      "fromProperty": "missing",
+      "toId": "at_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "at_steps",
+      "fromProperty": "failed",
+      "toId": "at_fail",
+      "toProperty": "send"
+    }
+  ]
+}

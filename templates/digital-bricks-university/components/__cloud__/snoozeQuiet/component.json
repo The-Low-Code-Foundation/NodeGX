@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "48f6b9a3-ee8f-5f00-8787-24ad0847cd54",
+  "name": "snoozeQuiet",
+  "path": "/#__cloud__/snoozeQuiet",
+  "type": "cloud",
+  "created": "2026-11-12T13:06:14.275Z",
+  "modified": "2026-11-12T13:06:14.275Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Hide a \"gone quiet\" item for a week (DBU-08): Snooze a week, or after the coach sends the nudge (nudged). It comes back if the learner is still quiet when the week is up."
+}

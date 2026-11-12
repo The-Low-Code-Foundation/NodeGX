@@ -1,0 +1,101 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "6ede8d6d-f9e4-51f6-8f40-ae00595bb882",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "tpa_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach archives or restores",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "id,archived",
+        "allowNoAuth": false,
+        "ptype-id": "string",
+        "preq-id": true,
+        "ptype-archived": "boolean",
+        "preq-archived": true
+      },
+      "metadata": {
+        "comment": "role:staff in nodegx.security.json."
+      }
+    },
+    {
+      "id": "tpa_fn",
+      "type": "JavaScriptFunction",
+      "label": "Set the flag",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "runOnChange-in-id": false,
+        "runOnChange-in-archived": false,
+        "functionScript": "// Archiving only hides the template from the pickers. Plans started from it hold their own\n// steps, and their 'started from' still names it.\n(async () => {\n  try {\n    const id = String(Inputs.id || '');\n    const found = id ? await Noodl.Records.query('PlanTemplate', { objectId: { equalTo: id } }, { limit: 2, plain: true }) : [];\n    if (found.length !== 1) {\n      Outputs.refuse();\n      return;\n    }\n    const archived = Inputs.archived === true;\n    await Noodl.Records.save(id, { archived }, { className: 'PlanTemplate' });\n    Outputs.archived = archived;\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:archivePlanTemplate]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-id",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-archived",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-archived",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "tpa_res",
+      "type": "noodl.cloud.response",
+      "label": "Done",
+      "x": 40,
+      "y": 280,
+      "parameters": {
+        "params": "archived"
+      }
+    },
+    {
+      "id": "tpa_deny",
+      "type": "noodl.cloud.response",
+      "label": "No such template",
+      "x": 40,
+      "y": 400,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "That template is no longer there. Reload the page."
+      }
+    },
+    {
+      "id": "tpa_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "x": 40,
+      "y": 520,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "The template could not be archived. Try again."
+      }
+    }
+  ]
+}

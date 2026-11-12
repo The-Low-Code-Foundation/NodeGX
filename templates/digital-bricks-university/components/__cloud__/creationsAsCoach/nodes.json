@@ -1,0 +1,48 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "11b3cbe1-a846-5d7e-8857-b44d105fcacf",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cac_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach opens a learner's plan",
+      "parameters": {
+        "params": "learnerId",
+        "allowNoAuth": false,
+        "ptype-learnerId": "string",
+        "preq-learnerId": true
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "cac_read",
+      "type": "/#__cloud__/shared/Creations of",
+      "label": "That learner's creations",
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "cac_res",
+      "type": "noodl.cloud.response",
+      "label": "The creations",
+      "parameters": {
+        "params": "items,estimate"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "cac_deny",
+      "type": "noodl.cloud.response",
+      "label": "Could not read",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "This learner's creations could not be read."
+      },
+      "x": 40,
+      "y": 400
+    }
+  ]
+}

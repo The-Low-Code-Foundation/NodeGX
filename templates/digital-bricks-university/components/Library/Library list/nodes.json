@@ -1,0 +1,403 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f1009616-a916-59c0-8c97-db3e0fc616ba",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ll_root",
+      "type": "Group",
+      "label": "Library list",
+      "children": [
+        "ll_filters",
+        "ll_list",
+        "ll_none",
+        "ll_nomatch"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ll_filters",
+      "type": "Group",
+      "label": "Search and Show archived",
+      "parent": "ll_root",
+      "children": [
+        "ll_search",
+        "ll_arch"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-5)",
+        "rowGap": "var(--space-3)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ll_search",
+      "type": "net.noodl.controls.textinput",
+      "label": "Search",
+      "parent": "ll_filters",
+      "parameters": {
+        "type": "text",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 360,
+          "unit": "px"
+        },
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-search",
+          "codeAsClass": true
+        },
+        "iconColor": "var(--muted-foreground)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-2)",
+        "backgroundColor": "var(--surface)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "ll_arch",
+      "type": "net.noodl.controls.checkbox",
+      "label": "Show archived",
+      "parent": "ll_filters",
+      "parameters": {
+        "useLabel": true,
+        "labelSpacing": "var(--space-2)",
+        "checked": false
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "ll_list",
+      "type": "Group",
+      "label": "The rows",
+      "parent": "ll_root",
+      "children": [
+        "ll_rows"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "clip": true
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "ll_rows",
+      "type": "For Each",
+      "label": "One row per item",
+      "parent": "ll_list",
+      "parameters": {
+        "template": "/Library/Library row"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "ll_none",
+      "type": "Group",
+      "label": "Shown when the library is empty",
+      "parent": "ll_root",
+      "children": [
+        "ll_empty"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "ll_empty",
+      "type": "/Shell/Empty state",
+      "label": "The library is empty",
+      "parent": "ll_none",
+      "parameters": {
+        "icon": {
+          "class": "lucide",
+          "code": "icon-library",
+          "codeAsClass": true
+        },
+        "titleKey": "library.emptyTitle",
+        "bodyKey": "library.emptyBody"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "ll_nomatch",
+      "type": "Group",
+      "label": "Shown when the search finds nothing",
+      "parent": "ll_root",
+      "children": [
+        "ll_nomatch_state"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "ll_nomatch_state",
+      "type": "/Shell/Empty state",
+      "label": "Nothing matches",
+      "parent": "ll_nomatch",
+      "parameters": {
+        "icon": {
+          "class": "lucide",
+          "code": "icon-search",
+          "codeAsClass": true
+        },
+        "titleKey": "library.noMatchTitle",
+        "bodyKey": "library.noMatchBody"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "ll_in",
+      "type": "Component Inputs",
+      "label": "Library list in",
+      "ports": [
+        {
+          "name": "items",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "ll_out",
+      "type": "Component Outputs",
+      "label": "Library list out",
+      "ports": [
+        {
+          "name": "edit",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "duplicate",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "archive",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "itemId",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "ll_shape",
+      "type": "JavaScriptFunction",
+      "label": "The rows to show, in words",
+      "parameters": {
+        "functionScript": "// Filters as the coach types: every word must be in the title or a tag. Archived items\n// show only when asked. The phrases come from Strings with {tags}; this fills them in.\nif (Inputs.items === undefined || Inputs.summary === undefined || Inputs.noTime === undefined) return;\nconst fill = (s, v) => Object.keys(v).reduce((out, k) => out.split('{' + k + '}').join(String(v[k])), String(s || ''));\nconst time = (m) => {\n  if (typeof m !== 'number' || m <= 0) return Inputs.noTime;\n  const h = Math.floor(m / 60);\n  const rest = m % 60;\n  if (!h) return fill(Inputs.minutes, { m: rest });\n  if (!rest) return fill(Inputs.hours, { h });\n  return fill(Inputs.hoursMinutes, { h, m: rest });\n};\nconst words = String(Inputs.query || '').toLowerCase().split(' ').filter(Boolean);\nconst all = Array.isArray(Inputs.items) ? Inputs.items : [];\nconst visible = all.filter((i) => Inputs.showArchived === true || !i.archived);\nconst shown = visible.filter((i) => {\n  const text = [i.title].concat(i.tags || []).join(' ').toLowerCase();\n  return words.every((w) => text.includes(w));\n});\nOutputs.rows = shown.map((i) => ({\n  id: i.id,\n  title: i.title,\n  meta: time(i.estimatedMinutes) + ' · ' + fill(Inputs.summary, { items: (i.handInChecklist || []).length, resources: (i.resources || []).length }),\n  tags: (i.tags || []).length ? i.tags.map((t, n) => ({ id: 'tag-' + i.id + '-' + n, label: t })) : null,\n  archived: i.archived === true\n}));\nOutputs.hasRows = shown.length > 0;\nOutputs.empty = visible.length === 0 && words.length === 0;\nOutputs.noMatch = shown.length === 0 && !(visible.length === 0 && words.length === 0);"
+      },
+      "ports": [
+        {
+          "name": "in-items",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-query",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-showArchived",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-minutes",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-hours",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-hoursMinutes",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-noTime",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-summary",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-hasRows",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-empty",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-noMatch",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "ll_t_search",
+      "type": "Translation",
+      "label": "Search by title or tag",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "library.search"
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "ll_t_arch",
+      "type": "Translation",
+      "label": "Show archived",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "library.showArchived"
+      },
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "ll_t_min",
+      "type": "Translation",
+      "label": "{m} min",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "library.minutes"
+      },
+      "x": 410,
+      "y": 1000
+    },
+    {
+      "id": "ll_t_hours",
+      "type": "Translation",
+      "label": "{h} h",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "library.hours"
+      },
+      "x": 410,
+      "y": 1120
+    },
+    {
+      "id": "ll_t_hm",
+      "type": "Translation",
+      "label": "{h} h {m} min",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "library.hoursMinutes"
+      },
+      "x": 410,
+      "y": 1240
+    },
+    {
+      "id": "ll_t_notime",
+      "type": "Translation",
+      "label": "No time set",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "library.noTime"
+      },
+      "x": 410,
+      "y": 1360
+    },
+    {
+      "id": "ll_t_summary",
+      "type": "Translation",
+      "label": "Hand-in list and resources",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "library.summary"
+      },
+      "x": 410,
+      "y": 1480
+    }
+  ],
+  "visualRoots": [
+    "ll_root"
+  ]
+}

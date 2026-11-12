@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "6119738f-dd2d-5ebe-8e5e-0b6ba35493da",
+  "name": "Check-in editor",
+  "path": "/Plan/Check-in editor",
+  "type": "visual",
+  "created": "2026-11-09T10:41:17.600Z",
+  "modified": "2026-11-12T15:00:22.385Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Edits one check-in in place: its title and the day it is sent. The questions are a placeholder until check-in forms arrive (DBU-10)."
+}

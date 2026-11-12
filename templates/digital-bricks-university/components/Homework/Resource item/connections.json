@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "713305a1-e8b2-537e-8c8d-78e1e251b1f1",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ri_in",
+      "fromProperty": "label",
+      "toId": "ri_label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ri_in",
+      "fromProperty": "isLink",
+      "toId": "ri_icon_link",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ri_in",
+      "fromProperty": "isFile",
+      "toId": "ri_icon_file",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ri_in",
+      "fromProperty": "isLink",
+      "toId": "ri_link",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ri_in",
+      "fromProperty": "url",
+      "toId": "ri_url",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ri_t_open",
+      "fromProperty": "Translation",
+      "toId": "ri_open",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ri_in",
+      "fromProperty": "url",
+      "toId": "ri_open_fn",
+      "toProperty": "in-url"
+    },
+    {
+      "fromId": "ri_open",
+      "fromProperty": "onClick",
+      "toId": "ri_open_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ri_in",
+      "fromProperty": "isFile",
+      "toId": "ri_file",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ri_in",
+      "fromProperty": "fileName",
+      "toId": "ri_file_name",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ri_in",
+      "fromProperty": "file",
+      "toId": "ri_viewer",
+      "toProperty": "file"
+    },
+    {
+      "fromId": "ri_in",
+      "fromProperty": "fileName",
+      "toId": "ri_viewer",
+      "toProperty": "fileName"
+    },
+    {
+      "fromId": "ri_in",
+      "fromProperty": "stepId",
+      "toId": "ri_viewer",
+      "toProperty": "stepId"
+    }
+  ]
+}

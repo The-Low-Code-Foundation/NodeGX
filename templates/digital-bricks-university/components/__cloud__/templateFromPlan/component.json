@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "ab09038b-746b-58a6-8fb3-eba830a9abbe",
+  "name": "templateFromPlan",
+  "path": "/#__cloud__/templateFromPlan",
+  "type": "cloud",
+  "created": "2026-11-09T10:29:14.919Z",
+  "modified": "2026-11-09T10:29:14.919Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach saves a learner's plan as a new template: the steps' order, kinds, titles, durations, library items and day offsets from the plan's start, and never anything of the learner's (no dates, briefs, hand-ins, summaries or links) (security: role:staff)."
+}

@@ -1,0 +1,80 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "d592c8d2-09f8-5527-8bfb-94f804974bb3",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mu_req",
+      "type": "noodl.cloud.request",
+      "label": "A learner's tabs ask",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "",
+        "allowNoAuth": false
+      }
+    },
+    {
+      "id": "mu_fn",
+      "type": "JavaScriptFunction",
+      "label": "Count Richard's unread messages to me",
+      "x": 40,
+      "y": 180,
+      "parameters": {
+        "runOnChange-in-userId": false,
+        "functionScript": "// How many of Richard's messages to me I have not read yet (DBU-07): the count on the Messages tab.\n// DBU-08: every learner page asks this from the shell, so it is also where a visit is noticed:\n// it stamps the account's lastSeenAt (at most every 10 minutes), which ends \"gone quiet\" in the inbox.\n(async () => {\n  try {\n    const me = String(Inputs.userId || '');\n    if (!me) throw new Error('no session user');\n    const rows = await Noodl.Records.query('Message', { learner: { equalTo: me } }, { limit: 1000, plain: true });\n    Outputs.unread = rows.filter((m) => m.author !== me && !m.readAt).length;\n    try {\n      const users = await Noodl.Records.query('_User', { objectId: { equalTo: me } }, { limit: 2, plain: true });\n      const seen = users[0] ? Date.parse(users[0].lastSeenAt || '') : NaN;\n      if (users[0] && !(Date.now() - seen < 10 * 60000)) {\n        await Noodl.Records.save(me, { lastSeenAt: new Date().toISOString() }, { className: '_User' });\n      }\n    } catch (e) {\n      console.error('[dbu:myUnread] lastSeenAt not stamped: ' + String((e && e.message) || e));\n    }\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:myUnread]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "displayName": "userId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-failed",
+          "displayName": "failed",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-unread",
+          "displayName": "unread",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "mu_res",
+      "type": "noodl.cloud.response",
+      "label": "The count",
+      "x": 40,
+      "y": 320,
+      "parameters": {
+        "params": "unread"
+      }
+    },
+    {
+      "id": "mu_deny",
+      "type": "noodl.cloud.response",
+      "label": "Could not count",
+      "x": 320,
+      "y": 320,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "Could not count unread messages."
+      }
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3d7e7a3a-03aa-5940-83b4-5ff06eed1884",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ms_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach moves a step",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "stepId,index",
+        "allowNoAuth": false,
+        "ptype-stepId": "string",
+        "preq-stepId": true,
+        "ptype-index": "number",
+        "preq-index": true
+      },
+      "metadata": {
+        "comment": "role:staff in nodegx.security.json. `index` is where the step lands among the OTHER steps, counted from 0: exactly a drop zone's Drop Index."
+      }
+    },
+    {
+      "id": "ms_fn",
+      "type": "JavaScriptFunction",
+      "label": "Move it, renumber the rest",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "runOnChange-in-stepId": false,
+        "runOnChange-in-index": false,
+        "functionScript": "/*\n * Read the plan's steps as they are NOW, take the step out, put it back at `index` among\n * the others, and write 1..n. Renumbering from the stored order on every move is what makes\n * two quick moves safe: each starts from what the last one left.\n *\n * TWO PASSES: Step has a unique index on (plan, position), checked on every single write,\n * so moving step 3 to place 1 cannot write 1 while another step still holds it. The steps\n * that change are first parked at 100000 + their new place (free, and in the new order\n * among themselves), then written to their new place.\n * TWO MOVES AT ONCE can still meet on a position; the loser's write is refused by that\n * index, so it reads the order again and tries again (up to four times).\n * A shared step that moved rings the learner's doorbell: their timeline order changed.\n */\n(async () => {\n  const refuse = (why) => { Outputs.why = why; Outputs.refuse(); };\n  const R = Noodl.Records;\n  const id = String(Inputs.stepId || '');\n  const attempt = async () => {\n    const found = id ? await R.query('Step', { objectId: { equalTo: id } }, { limit: 2, plain: true }) : [];\n    if (found.length !== 1) return null;\n    const moving = found[0];\n    const steps = (await R.query('Step', { plan: { equalTo: moving.plan } }, { limit: 1000, plain: true }))\n      .sort((a, b) => (a.position - b.position) || String(a.objectId).localeCompare(String(b.objectId)));\n    const others = steps.filter((s) => s.objectId !== id);\n    const index = Math.max(0, Math.min(Math.round(Number(Inputs.index)) || 0, others.length));\n    others.splice(index, 0, moving);\n    const changing = others.map((s, i) => ({ s, to: i + 1 })).filter((x) => x.s.position !== x.to);\n    for (const x of changing) await R.save(x.s.objectId, { plan: x.s.plan, position: 100000 + x.to }, { className: 'Step' });\n    for (const x of changing) await R.save(x.s.objectId, { plan: x.s.plan, position: x.to }, { className: 'Step' });\n    if (changing.length && others.some((s) => s.shared === true)) {\n      await R.create('Doorbell', { learner: moving.learner, topic: 'plan' }, { acl: { [moving.learner]: { read: true }, 'role:staff': { read: true } } });\n    }\n    return others.map((s) => s.objectId);\n  };\n  let lastError = null;\n  for (let tries = 0; tries < 4; tries++) {\n    try {\n      const order = await attempt();\n      if (!order) return refuse('That step is no longer in the plan. Reload the page.');\n      Outputs.order = order;\n      Outputs.done();\n      return;\n    } catch (e) {\n      lastError = e;\n      await new Promise((r) => setTimeout(r, 30 + Math.floor(Math.random() * 120)));\n    }\n  }\n  console.error('[dbu:moveStep]', String((lastError && lastError.message) || lastError));\n  Outputs.failed();\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-stepId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-index",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-order",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-why",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "ms_res",
+      "type": "noodl.cloud.response",
+      "label": "The new order",
+      "x": 40,
+      "y": 280,
+      "parameters": {
+        "params": "order"
+      }
+    },
+    {
+      "id": "ms_deny",
+      "type": "noodl.cloud.response",
+      "label": "A refusal the coach can act on",
+      "x": 40,
+      "y": 400,
+      "parameters": {
+        "status": "failure"
+      }
+    },
+    {
+      "id": "ms_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "x": 40,
+      "y": 520,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "The step could not be moved. Reload the page and try again."
+      }
+    }
+  ]
+}

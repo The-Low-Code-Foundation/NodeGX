@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "9a8811bb-e7e1-56b9-8228-811647d7f6c6",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cfm_arr",
+      "fromProperty": "items",
+      "toId": "cfm_rows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "cfm_in",
+      "fromProperty": "stepId",
+      "toId": "cfm_build",
+      "toProperty": "in-stepId"
+    },
+    {
+      "fromId": "cfm_in",
+      "fromProperty": "questions",
+      "toId": "cfm_build",
+      "toProperty": "in-questions"
+    },
+    {
+      "fromId": "cfm_build",
+      "fromProperty": "out-built",
+      "toId": "cfm_rules",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cfm_rows",
+      "fromProperty": "itemOutputSignal-changed",
+      "toId": "cfm_rules",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cfm_rules",
+      "fromProperty": "out-answers",
+      "toId": "cfm_out",
+      "toProperty": "answers"
+    },
+    {
+      "fromId": "cfm_t_send",
+      "fromProperty": "Translation",
+      "toId": "cfm_send",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "cfm_send",
+      "fromProperty": "onClick",
+      "toId": "cfm_rules",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cfm_send",
+      "fromProperty": "onClick",
+      "toId": "cfm_out",
+      "toProperty": "send"
+    }
+  ]
+}

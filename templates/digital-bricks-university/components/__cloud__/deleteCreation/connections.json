@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2a9c0de0-ea2d-559b-81fa-d1c3bbc24998",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "dc_req",
+      "fromProperty": "userId",
+      "toId": "dc_fn",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "dc_req",
+      "fromProperty": "pm-id",
+      "toId": "dc_fn",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "dc_req",
+      "fromProperty": "receive",
+      "toId": "dc_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "dc_fn",
+      "fromProperty": "out-done",
+      "toId": "dc_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "dc_fn",
+      "fromProperty": "out-why",
+      "toId": "dc_deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "dc_fn",
+      "fromProperty": "out-refuse",
+      "toId": "dc_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "dc_fn",
+      "fromProperty": "out-failed",
+      "toId": "dc_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "dc_fn",
+      "fromProperty": "failure",
+      "toId": "dc_fail",
+      "toProperty": "send"
+    }
+  ]
+}

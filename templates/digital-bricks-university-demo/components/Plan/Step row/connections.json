@@ -1,0 +1,367 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0b2273fc-163d-5042-8dac-7ee74cb469b4",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sr_in",
+      "fromProperty": "id",
+      "toId": "sr_row",
+      "toProperty": "dragValue"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "movable",
+      "toId": "sr_row",
+      "toProperty": "draggable"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "rowBorder",
+      "toId": "sr_row",
+      "toProperty": "borderStyle"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "kindKey",
+      "toId": "sr_kind",
+      "toProperty": "labelKey"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "kindBg",
+      "toId": "sr_kind",
+      "toProperty": "bg"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "kindFg",
+      "toId": "sr_kind",
+      "toProperty": "fg"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "statusKey",
+      "toId": "sr_status",
+      "toProperty": "labelKey"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "statusBg",
+      "toId": "sr_status",
+      "toProperty": "bg"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "statusFg",
+      "toId": "sr_status",
+      "toProperty": "fg"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "sharedKey",
+      "toId": "sr_shared",
+      "toProperty": "labelKey"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "draft",
+      "toId": "sr_shared",
+      "toProperty": "outlined"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "rowBg",
+      "toId": "sr_shared",
+      "toProperty": "bg"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "title",
+      "toId": "sr_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "detail",
+      "toId": "sr_detail",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "editable",
+      "toId": "sr_actions_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "open",
+      "toId": "sr_actions",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "shared",
+      "toId": "sr_actions",
+      "toProperty": "shared"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "hasTime",
+      "toId": "sr_actions",
+      "toProperty": "hasTime"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "title",
+      "toId": "sr_actions",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "id",
+      "toId": "sr_actions",
+      "toProperty": "stepId"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "startsAt",
+      "toId": "sr_actions",
+      "toProperty": "startsAt"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "durationMin",
+      "toId": "sr_actions",
+      "toProperty": "durationMin"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "meetingLink",
+      "toId": "sr_actions",
+      "toProperty": "meetingLink"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "calDetails",
+      "toId": "sr_actions",
+      "toProperty": "calDetails"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "attendeeName",
+      "toId": "sr_actions",
+      "toProperty": "attendeeName"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "attendeeEmail",
+      "toId": "sr_actions",
+      "toProperty": "attendeeEmail"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "open",
+      "toId": "sr_editor_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "isLive",
+      "toId": "sr_live_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "isHomework",
+      "toId": "sr_hw_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "isCheckin",
+      "toId": "sr_ci_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "step",
+      "toId": "sr_live",
+      "toProperty": "step"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "step",
+      "toId": "sr_hw",
+      "toProperty": "step"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "step",
+      "toId": "sr_ci",
+      "toProperty": "step"
+    },
+    {
+      "fromId": "sr_actions",
+      "fromProperty": "edit",
+      "toId": "sr_out",
+      "toProperty": "edit"
+    },
+    {
+      "fromId": "sr_actions",
+      "fromProperty": "share",
+      "toId": "sr_out",
+      "toProperty": "share"
+    },
+    {
+      "fromId": "sr_actions",
+      "fromProperty": "remove",
+      "toId": "sr_out",
+      "toProperty": "remove"
+    },
+    {
+      "fromId": "sr_live",
+      "fromProperty": "saved",
+      "toId": "sr_out",
+      "toProperty": "saved"
+    },
+    {
+      "fromId": "sr_hw",
+      "fromProperty": "saved",
+      "toId": "sr_out",
+      "toProperty": "saved"
+    },
+    {
+      "fromId": "sr_ci",
+      "fromProperty": "saved",
+      "toId": "sr_out",
+      "toProperty": "saved"
+    },
+    {
+      "fromId": "sr_live",
+      "fromProperty": "savedTitle",
+      "toId": "sr_out",
+      "toProperty": "savedTitle"
+    },
+    {
+      "fromId": "sr_hw",
+      "fromProperty": "savedTitle",
+      "toId": "sr_out",
+      "toProperty": "savedTitle"
+    },
+    {
+      "fromId": "sr_ci",
+      "fromProperty": "savedTitle",
+      "toId": "sr_out",
+      "toProperty": "savedTitle"
+    },
+    {
+      "fromId": "sr_live",
+      "fromProperty": "closed",
+      "toId": "sr_out",
+      "toProperty": "closed"
+    },
+    {
+      "fromId": "sr_hw",
+      "fromProperty": "closed",
+      "toId": "sr_out",
+      "toProperty": "closed"
+    },
+    {
+      "fromId": "sr_ci",
+      "fromProperty": "closed",
+      "toId": "sr_out",
+      "toProperty": "closed"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "editable",
+      "toId": "sr_grip_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "id",
+      "toId": "sr_testid",
+      "toProperty": "id"
+    },
+    {
+      "fromId": "sr_testid",
+      "fromProperty": "formatted",
+      "toId": "sr_row",
+      "toProperty": "data-testid"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "hasHandIns",
+      "toId": "sr_work_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "handIns",
+      "toId": "sr_versions",
+      "toProperty": "submissions"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "editable",
+      "toId": "sr_versions",
+      "toProperty": "canReview"
+    },
+    {
+      "fromId": "sr_versions",
+      "fromProperty": "reviewed",
+      "toId": "sr_out",
+      "toProperty": "reviewed"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "anchors",
+      "toId": "sr_ci",
+      "toProperty": "anchors"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "hasAnswers",
+      "toId": "sr_ans_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sr_t_ans",
+      "fromProperty": "Translation",
+      "toId": "sr_ans_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "id",
+      "toId": "sr_answers",
+      "toProperty": "prefix"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "answerQuestions",
+      "toId": "sr_answers",
+      "toProperty": "questions"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "answerValues",
+      "toId": "sr_answers",
+      "toProperty": "answers"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "id",
+      "toId": "sr_ans_testid",
+      "toProperty": "id"
+    },
+    {
+      "fromId": "sr_ans_testid",
+      "fromProperty": "formatted",
+      "toId": "sr_ans_box",
+      "toProperty": "data-testid"
+    }
+  ]
+}

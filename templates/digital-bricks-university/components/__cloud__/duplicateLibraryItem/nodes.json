@@ -1,0 +1,105 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "69d798dc-c3f3-50af-8787-3d5a5459e2d4",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "dl_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach duplicates an item",
+      "parameters": {
+        "params": "id,title",
+        "allowNoAuth": false,
+        "ptype-id": "string",
+        "preq-id": true,
+        "ptype-title": "string",
+        "preq-title": false
+      },
+      "metadata": {
+        "comment": "role:staff. The page sends the new title in the coach's language (Strings: library.copyTitle); with none, the copy keeps the original's title."
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "dl_fn",
+      "type": "JavaScriptFunction",
+      "label": "Copy the row",
+      "parameters": {
+        "functionScript": "// A copy shares the original's resource files: they are the coach's own uploads, and\n// a learner reaches one only through a step that lists it (resourceLink).\n(async () => {\n  const refuse = (why) => { Outputs.why = why; Outputs.refuse(); };\n  try {\n    const id = String(Inputs.id || '');\n    const found = id ? await Noodl.Records.query('LibraryItem', { objectId: { equalTo: id } }, { limit: 2, plain: true }) : [];\n    if (found.length !== 1) return refuse('That homework is no longer in the library. Reload the page.');\n    const src = found[0];\n    const title = (String(Inputs.title || '').trim().replace(/\\s+/g, ' ') || src.title || '').slice(0, 140);\n    const row = await Noodl.Records.create('LibraryItem', {\n      title,\n      brief: src.brief || '',\n      handInChecklist: Array.isArray(src.handInChecklist) ? src.handInChecklist : [],\n      resources: Array.isArray(src.resources) ? src.resources : [],\n      tags: Array.isArray(src.tags) ? src.tags : [],\n      estimatedMinutes: typeof src.estimatedMinutes === 'number' ? src.estimatedMinutes : null,\n      archived: false\n    }, { plain: true });\n    Outputs.id = row.objectId || row.id;\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:duplicateLibraryItem]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();",
+        "runOnChange-in-id": false,
+        "runOnChange-in-title": false
+      },
+      "ports": [
+        {
+          "name": "in-id",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-id",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-why",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "dl_res",
+      "type": "noodl.cloud.response",
+      "label": "The copy",
+      "parameters": {
+        "params": "id"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "dl_deny",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "dl_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "The homework could not be duplicated. Try again."
+      },
+      "x": 40,
+      "y": 520
+    }
+  ]
+}

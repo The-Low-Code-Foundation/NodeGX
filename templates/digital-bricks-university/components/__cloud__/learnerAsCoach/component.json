@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c68f51bb-93ce-5201-8dbe-4531caf38432",
+  "name": "learnerAsCoach",
+  "path": "/#__cloud__/learnerAsCoach",
+  "type": "cloud",
+  "created": "2026-11-07T21:03:50.923Z",
+  "modified": "2026-11-12T14:35:19.769Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One learner as the coach sees them: profile, plans, every step of the current plan (shared or not), hand-ins, private coach notes, and the plan templates on offer (security: role:staff)."
+}

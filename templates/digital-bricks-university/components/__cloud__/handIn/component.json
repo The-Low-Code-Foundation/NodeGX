@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "cf6a1d79-126f-5a91-800b-5b165eb6b441",
+  "name": "handIn",
+  "path": "/#__cloud__/handIn",
+  "type": "cloud",
+  "created": "2026-11-09T13:01:24.907Z",
+  "modified": "2026-11-12T18:51:54.454Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A learner hands in a new version of a homework (DBU-06; security: authenticated): a file they uploaded privately, a link, or text, with an optional note. Checks it is a shared homework of theirs that is not approved, and that a file is theirs, at most 50 MB, of an allowed kind and really what its name says (from the stored, sniffed type). Never overwrites: each hand-in is the next version. Moves the step to handed in and rings the learner's doorbell."
+}

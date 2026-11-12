@@ -1,0 +1,128 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c0a30590-6a25-5309-8c2a-b37c9a286ce8",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ro_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach opens the roster",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "",
+        "allowNoAuth": false
+      },
+      "metadata": {
+        "comment": "role:staff in nodegx.security.json."
+      }
+    },
+    {
+      "id": "ro_list",
+      "type": "noodl.cloud.listusersinrole",
+      "label": "Everyone in the learner role",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "role": "learner",
+        "limit": 1000,
+        "treatUnchangedAs": "done"
+      },
+      "metadata": {
+        "comment": "Who is a learner is the role, never 'every user who is not the coach'."
+      }
+    },
+    {
+      "id": "ro_fn",
+      "type": "JavaScriptFunction",
+      "label": "One row per learner, and the templates",
+      "x": 40,
+      "y": 280,
+      "parameters": {
+        "runOnChange-in-userIds": false,
+        "functionScript": "/*\n * One row per learner, sorted by name: who they are and where their plan stands.\n * The templates ride along because the Add learner form on the same page offers\n * them, and two calls for one page would be two ways to fail. Archived templates\n * are not offered (DBU-04).\n */\n(async () => {\n  try {\n    const ids = Array.isArray(Inputs.userIds) ? Inputs.userIds.map(String) : [];\n    const q = (c, where) => Noodl.Records.query(c, where, { limit: 1000, plain: true });\n    const users = ids.length ? await q('_User', { objectId: { containedIn: ids } }) : [];\n    const plans = ids.length ? await q('Plan', { learner: { containedIn: ids } }) : [];\n    const steps = ids.length ? await q('Step', { learner: { containedIn: ids } }) : [];\n    const finished = ['done', 'approved', 'missed'];\n\n    Outputs.learners = users\n      .map((u) => {\n        const mine = plans.filter((p) => p.learner === u.objectId);\n        const plan = mine.find((p) => p.status === 'active') || mine.sort((a, b) => String(b.startedOn).localeCompare(String(a.startedOn)))[0] || null;\n        const planSteps = plan ? steps.filter((s) => s.plan === plan.objectId) : [];\n        return {\n          id: u.objectId,\n          name: u.name || u.email,\n          email: u.email,\n          organisation: u.organisation || '',\n          jobTitle: u.jobTitle || '',\n          lastSeenAt: u.lastSeenAt || null,\n          planTitle: plan ? plan.title : '',\n          planStatus: plan ? plan.status : '',\n          steps: planSteps.length,\n          shared: planSteps.filter((s) => s.shared === true).length,\n          finished: planSteps.filter((s) => finished.includes(s.status)).length\n        };\n      })\n      .sort((a, b) => a.name.localeCompare(b.name));\n    Outputs.templates = (await q('PlanTemplate', {}))\n      .filter((t) => t.archived !== true)\n      .map((t) => ({ id: t.objectId, title: t.title }))\n      .sort((a, b) => a.title.localeCompare(b.title));\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:roster]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-userIds",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-learners",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-templates",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "ro_res",
+      "type": "noodl.cloud.response",
+      "label": "The roster",
+      "x": 40,
+      "y": 400,
+      "parameters": {
+        "params": "learners,templates"
+      }
+    },
+    {
+      "id": "ro_deny",
+      "type": "noodl.cloud.response",
+      "label": "Could not read",
+      "x": 300,
+      "y": 400,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "The roster could not be read."
+      }
+    },
+    {
+      "id": "ro_unread",
+      "type": "JavaScriptFunction",
+      "label": "Each learner's unread messages and creations",
+      "x": 320,
+      "y": 200,
+      "parameters": {
+        "runOnChange-in-learners": false,
+        "functionScript": "// DBU-07: how many of each learner's messages nobody on staff has read yet, for the roster row.\n// DBU-09: and how many creations each learner keeps.\n(async () => {\n  try {\n    const rows = Array.isArray(Inputs.learners) ? Inputs.learners : [];\n    const waiting = await Noodl.Records.query('Message', { readAt: { exists: false } }, { limit: 1000, plain: true });\n    const ids = rows.map((l) => l.id);\n    const made = ids.length ? await Noodl.Records.query('Creation', { learner: { containedIn: ids } }, { limit: 1000, plain: true }) : [];\n    Outputs.learners = rows.map((l) => Object.assign({}, l, {\n      unread: waiting.filter((m) => m.learner === l.id && m.author === m.learner && !m.readAt).length,\n      creations: made.filter((c) => c.learner === l.id).length\n    }));\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:roster unread]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-learners",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-learners",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    }
+  ]
+}

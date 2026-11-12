@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "1fb80e46-cbde-578f-81e6-c046607b6be1",
+  "name": "messagesAsCoach",
+  "path": "/#__cloud__/messagesAsCoach",
+  "type": "cloud",
+  "created": "2026-11-12T10:10:51.841Z",
+  "modified": "2026-11-12T10:10:51.841Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach reads one learner's conversation (DBU-07); the learner's messages are marked read, and whether she gets reply emails rides along."
+}

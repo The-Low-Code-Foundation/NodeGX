@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2ea952a5-42f1-5615-8dcd-eb939366848d",
+  "name": "coachName",
+  "path": "/#__cloud__/coachName",
+  "type": "cloud",
+  "created": "2026-11-12T18:51:08.889Z",
+  "modified": "2026-11-12T18:51:08.889Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach's name as learners see it (DBU-11): the Setting coachName, or empty when none is set. Public, because the words on every page name the coach, and the Sign in page is read before anyone signs in. It answers the name and nothing else."
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "eb2c2324-7dd6-5022-8a75-3efacd464181",
+  "name": "Creation view",
+  "path": "/Creations/Creation view",
+  "type": "visual",
+  "created": "2026-11-12T13:43:18.171Z",
+  "modified": "2026-11-12T13:43:18.171Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One creation, opened (DBU-09): its title, kind and description, then what it holds. Files go through Work/Version file and so Work/File viewer (DBU-06's rules: HTML only in the sandbox, downloads under the file's own name); a link opens in a new tab; text shows as Markdown with HTML off."
+}

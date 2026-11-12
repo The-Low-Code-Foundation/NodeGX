@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your data · Digital Bricks University</title>
+<!--
+  THE PRIVACY NOTICE FOR training.digitalbricks.io (DBU-12, 2026-11-12). Adapted from
+  digital-bricks-training/privacy/notice.en.json (version 2026-10-03), rewritten for what this app
+  holds: hand-ins and their files, a portfolio, check-in answers, the coach's notes, and messages.
+  build-production-site.mjs publishes it as /privacy.html; the Sign in page links to it.
+
+  It describes THIS deployment (who runs it, Hetzner, Brevo). A copy of the template hosted by
+  someone else must say who they are and where their data lives: change it before publishing.
+  Change the version below whenever anything that matters changes.
+
+  Promises other files keep: the nightly off-box copies are pruned at 156 h (hosting/offsite-backup.sh,
+  OFFSITE_PRUNE_AGE), so "within seven days" holds; NodeGX keeps seven nightly copies on the server.
+-->
+<style>
+  :root { --bg: #ffffff; --ink: #1d1d1f; --muted: #5b5b66; --rule: #e3e3e8; --link: #1f5fbf; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #16161a; --ink: #ececf1; --muted: #a3a3ad; --rule: #2c2c33; --link: #8db4ff; }
+  }
+  :root[data-theme="dark"] { --bg: #16161a; --ink: #ececf1; --muted: #a3a3ad; --rule: #2c2c33; --link: #8db4ff; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 40rem; margin: 0 auto; padding: 48px 16px 64px; }
+  .eyebrow { color: var(--muted); font-size: 14px; letter-spacing: .04em; text-transform: uppercase; margin: 0 0 4px; }
+  h1 { font-size: 32px; line-height: 1.2; margin: 0 0 8px; }
+  .version { color: var(--muted); font-size: 14px; margin: 0 0 24px; }
+  .lede { font-size: 18px; margin: 0 0 32px; }
+  h2 { font-size: 20px; margin: 32px 0 8px; padding-top: 24px; border-top: 1px solid var(--rule); }
+  p { margin: 0 0 12px; }
+  a { color: var(--link); }
+  .back { display: inline-block; margin-top: 40px; }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Privacy</p>
+  <h1>Your data</h1>
+  <p class="version">Version 2026-11-12</p>
+  <p class="lede">What Digital Bricks University holds about you, why, where it lives, and how to have it or have it
+    deleted. It is short, and it is written to be read.</p>
+
+  <h2>Who runs it</h2>
+  <p>Digital Bricks University is run by Digital Bricks (Richard Osborne), who is also your coach. Digital Bricks
+    decides what is held and why, and is the one to write to about any of it.</p>
+
+  <h2>Your account</h2>
+  <p>Your email address and your name, and, if your coach adds them, your organisation, your job title and your time
+    zone (so dates and reminders are in your time). There is no password: to sign in you ask for a link, and we email
+    you one that works once and lasts fifteen minutes. That browser then stays signed in until you sign out, so sign
+    out on a computer you share. We also note when you last opened the course.</p>
+
+  <h2>Your plan</h2>
+  <p>The sessions, homework and check-ins your coach planned for you, with their dates, and how far along you are.</p>
+
+  <h2>What you hand in</h2>
+  <p>Every version of every piece of homework you hand in: the files you attach (up to 50 MB each), the links and
+    notes you write, and when. Your coach's review of each version is kept with it: whether it is approved or needs
+    changes, and the note they wrote you.</p>
+
+  <h2>My creations</h2>
+  <p>The things you choose to keep in your portfolio: files, links and interactive pages, with the titles and notes
+    you give them. A page you upload opens in a closed frame, apart from the rest of the course. You can delete
+    anything there yourself.</p>
+
+  <h2>Check-ins</h2>
+  <p>Your answers to the short check-ins your coach sends, and when you sent them.</p>
+
+  <h2>Messages with your coach</h2>
+  <p>Every message either of you writes, what on your plan it was about, when it was written, and whether the other
+    person has read it. When you write, we email your coach, and the email carries your message. When they reply, we
+    email you, and the email carries their reply, unless you turn those emails off: every one of them has a link that
+    stops them in one press. That link never stops your sign-in links.</p>
+
+  <h2>Your coach's notes</h2>
+  <p>Your coach can keep private notes about your coaching, to prepare your sessions. They are about you, so they are
+    your data too: you can ask for them like everything else here, and they are deleted with your account. The course
+    also notes when you have gone quiet for a while, so your coach can check in.</p>
+
+  <h2>Who can see it</h2>
+  <p>You can see your plan, your hand-ins and their reviews, your creations, your check-in answers and your messages.
+    Your coach can see all of it, and their notes. No other learner can see any of it. The person who runs the server
+    can reach the database to keep it working, and does not read it for anything else.</p>
+
+  <h2>Why we hold it</h2>
+  <p>To coach you. That is the only reason. We do not sell it, share it with advertisers, use it to build a profile of
+    you, or send any of it to an AI model.</p>
+
+  <h2>Where it lives</h2>
+  <p>On one server we rent from Hetzner, in Falkenstein, Germany, with an encrypted copy in Hetzner's storage in
+    Nuremberg, Germany (see the next section). One other company is involved: Brevo, an email service based in
+    France, sends our emails, so it sees your email address and what each email says. That is your sign-in links, an
+    email when your coach replies to you (carrying their reply), an email when a check-in is waiting for you, and,
+    to your coach, an email carrying the message you sent. Apart from that and the encrypted copies, nothing leaves
+    the server.</p>
+
+  <h2>Copies we keep in case something breaks</h2>
+  <p>Every night the server takes a copy of the database and of the files you handed in, and keeps the last seven.
+    It also encrypts that night's copy and stores it in Hetzner's storage in Nuremberg, so that losing the server does
+    not lose your work. The key that opens those copies is not on the server, and Hetzner does not have it. The stored
+    copies are deleted after seven days, the same as the ones on the server.</p>
+
+  <h2>How long we keep it</h2>
+  <p>For as long as you are being coached here. When you ask us to delete your account, or your coaching ends and you
+    ask for it to go, we delete your account and everything listed here within a week of your asking, and tell you
+    when it is done. The nightly copies still hold it until they age out, within seven days after that. Brevo keeps
+    its own record of the emails it sent you, under its own rules.</p>
+
+  <h2>What you can do about it</h2>
+  <p>Ask for a copy of everything we hold about you, ask for something to be corrected, or ask for all of it to be
+    deleted. Write to the address below; there is no form to fill in and no reason to give.</p>
+
+  <h2>Getting in touch</h2>
+  <p>Write to <a href="mailto:richard+dbuniversity@digitalbricks.io">richard+dbuniversity@digitalbricks.io</a>. A
+    person reads it. If you are not happy with how we handled your data, you have the right to complain to your
+    national data-protection authority.</p>
+
+  <h2>When this changes</h2>
+  <p>If anything that matters changes (a new kind of data, a new company handling it, a different period), the
+    version at the top changes, and we tell you by email before it applies.</p>
+
+  <a class="back" href="/">Back to the course</a>
+</main>
+</body>
+</html>

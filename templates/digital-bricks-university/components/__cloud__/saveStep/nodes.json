@@ -1,0 +1,202 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "079eb08c-72f9-529f-8085-c486d992709d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ss_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach saves a step",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "id,title,startsAt,durationMin,meetingLink,recordingUrl,summary,dueAt,brief,handInChecklist,resources,sendsAt,formId,sendAfterStep,sendAfterDays",
+        "allowNoAuth": false,
+        "ptype-id": "string",
+        "preq-id": true,
+        "ptype-title": "string",
+        "preq-title": true
+      },
+      "metadata": {
+        "comment": "role:staff in nodegx.security.json."
+      }
+    },
+    {
+      "id": "ss_fn",
+      "type": "JavaScriptFunction",
+      "label": "Check every field, then save",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "runOnChange-in-userId": false,
+        "runOnChange-in-id": false,
+        "runOnChange-in-title": false,
+        "runOnChange-in-startsAt": false,
+        "runOnChange-in-durationMin": false,
+        "runOnChange-in-meetingLink": false,
+        "runOnChange-in-recordingUrl": false,
+        "runOnChange-in-summary": false,
+        "runOnChange-in-dueAt": false,
+        "runOnChange-in-brief": false,
+        "runOnChange-in-handInChecklist": false,
+        "runOnChange-in-resources": false,
+        "runOnChange-in-sendsAt": false,
+        "functionScript": "/*\n * The one way a step is edited. Only the fields of the step's own kind are written; a field\n * the page did not send is left as it is, and an empty one is cleared.\n *  - Times: the page sends the coach's wall-clock time, \"YYYY-MM-DDTHH:MM\" (a due date may be\n *    \"YYYY-MM-DD\", meaning 18:00), read in the coach's zone, Europe/Paris. Stored as ISO.\n *  - A live session with a time is 'booked'; with none it is 'to book'. Done and missed are\n *    left alone (DBU-05 marks those).\n *  - Links are http(s) only. A resource file must already be on this step (copied from the\n *    library) or be one THIS coach uploaded: never a learner's private hand-in.\n *  - Briefs and summaries are Markdown, stored as typed: pages show them only through\n *    Shell/Formatted text, with HTML off.\n *  - A check-in (DBU-10) takes a form by id (a COPY from shared/Checkin forms) and is sent on a\n *    day at 09:00 Paris, or `sendAfter` {step, days}: N days after a live session's day or a\n *    homework's due day in the same plan. Its sendsAt is worked out now, and again whenever that\n *    step's date changes (below); with no date there yet, it has none. Once a check-in is sent,\n *    its form and date stay as they were: the learner may already be answering it.\n * A shared step rings the learner's doorbell, so their page re-reads.\n */\n(async () => {\n  const refuse = (why) => { Outputs.why = why; Outputs.refuse(); };\n  try {\n    const R = Noodl.Records;\n    const me = String(Inputs.userId || '');\n    const id = String(Inputs.id || '');\n    const found = id ? await R.query('Step', { objectId: { equalTo: id } }, { limit: 2, plain: true }) : [];\n    if (found.length !== 1) return refuse('That step is no longer in the plan. Reload the page.');\n    const step = found[0];\n    const sent = (k) => Inputs[k] !== undefined && Inputs[k] !== null;\n    const text = (k) => String(Inputs[k] || '').replace(/\\r\\n/g, '\\n').trim();\n\n    const TZ = 'Europe/Paris';\n    const offsetMs = (utc) => {\n      const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });\n      const p = Object.fromEntries(fmt.formatToParts(new Date(utc)).map((x) => [x.type, x.value]));\n      return Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second) - utc;\n    };\n    // '' clears; 'YYYY-MM-DD' takes the default hour; 'YYYY-MM-DDTHH:MM' is Paris time; a full ISO time passes.\n    const when = (value, defaultHour) => {\n      const v = String(value || '').trim();\n      if (!v) return null;\n      if (v.endsWith('Z') || v.includes('+')) {\n        const t = new Date(v);\n        return isNaN(t) ? undefined : t.toISOString();\n      }\n      const [date, time] = v.split('T');\n      const [y, m, d] = date.split('-').map(Number);\n      const [hh, mm] = (time || defaultHour).split(':').map(Number);\n      if (![y, m, d, hh, mm].every(Number.isInteger) || m < 1 || m > 12 || d < 1 || d > 31 || hh > 23 || mm > 59) return undefined;\n      const guess = Date.UTC(y, m - 1, d, hh, mm);\n      return new Date(guess - offsetMs(guess)).toISOString();\n    };\n    // A check-in N days after a date: that day in Paris, plus N, at 09:00 Paris. No date, no send date.\n    const daysAfter = (iso, days) => {\n      if (!iso || isNaN(Date.parse(iso))) return null;\n      const [y, m, d] = new Date(iso).toLocaleDateString('en-CA', { timeZone: TZ }).split('-').map(Number);\n      const guess = Date.UTC(y, m - 1, d + days, 9, 0);\n      return new Date(guess - offsetMs(guess)).toISOString();\n    };\n    const dateOf = (s) => (s.kind === 'live' ? s.startsAt : s.kind === 'homework' ? s.dueAt : null) || null;\n    const link = (k, what) => {\n      const v = text(k);\n      if (!v) return '';\n      let u = null;\n      try { u = new URL(v); } catch (e) { u = null; }\n      if (!u || (u.protocol !== 'https:' && u.protocol !== 'http:')) { refuse('The ' + what + ' is not a web address. Links start with https://'); return undefined; }\n      return u.href;\n    };\n\n    const fields = {};\n    const title = text('title').replace(/\\s+/g, ' ');\n    if (!title) return refuse('Give the step a title.');\n    if (title.length > 140) return refuse('Keep the title under 140 characters.');\n    fields.title = title;\n\n    if (step.kind === 'live') {\n      if (sent('startsAt')) {\n        const t = when(Inputs.startsAt, '10:00');\n        if (t === undefined) return refuse('The date and time could not be read. Pick them again.');\n        fields.startsAt = t;\n        if (t && step.status === 'to_book') fields.status = 'booked';\n        if (!t && step.status === 'booked') fields.status = 'to_book';\n      }\n      if (sent('durationMin')) {\n        const n = Number(String(Inputs.durationMin).trim());\n        if (!Number.isInteger(n) || n < 5 || n > 600) return refuse('Give the length as a whole number of minutes, between 5 and 600.');\n        fields.durationMin = n;\n      }\n      if (sent('meetingLink')) { const v = link('meetingLink', 'meeting link'); if (v === undefined) return; fields.meetingLink = v; }\n      if (sent('recordingUrl')) { const v = link('recordingUrl', 'recording link'); if (v === undefined) return; fields.recordingUrl = v; }\n      if (sent('summary')) {\n        const s = text('summary');\n        if (s.length > 20000) return refuse('The summary is too long. Keep it under 20,000 characters.');\n        fields.summary = s;\n      }\n    }\n\n    if (step.kind === 'homework') {\n      if (sent('dueAt')) {\n        const t = when(Inputs.dueAt, '18:00');\n        if (t === undefined) return refuse('The due date could not be read. Pick it again.');\n        fields.dueAt = t;\n      }\n      if (sent('brief')) {\n        const b = text('brief');\n        if (b.length > 20000) return refuse('The brief is too long. Keep it under 20,000 characters, or put the rest in a resource.');\n        fields.brief = b;\n      }\n      if (sent('handInChecklist')) {\n        if (!Array.isArray(Inputs.handInChecklist)) return refuse('The hand-in list could not be read. Reload the page and try again.');\n        const list = Inputs.handInChecklist\n          .map((c) => (typeof c === 'string' ? { text: c, required: true } : { text: String((c && c.text) || ''), required: !(c && c.required === false) }))\n          .map((c) => ({ text: c.text.trim().replace(/\\s+/g, ' '), required: c.required }))\n          .filter((c) => c.text);\n        if (list.length > 30) return refuse('Keep the hand-in list to 30 items or fewer.');\n        if (list.some((c) => c.text.length > 300)) return refuse('Keep each hand-in item under 300 characters.');\n        fields.handInChecklist = list;\n      }\n      if (sent('resources')) {\n        if (!Array.isArray(Inputs.resources)) return refuse('The resources could not be read. Reload the page and try again.');\n        if (Inputs.resources.length > 20) return refuse('Keep the resources to 20 or fewer.');\n        const onStep = new Set((step.resources || []).filter((r) => r && r.file).map((r) => r.file));\n        const resources = [];\n        for (const r of Inputs.resources) {\n          if (!r || typeof r !== 'object') return refuse('A resource could not be read. Remove it and add it again.');\n          const label = String(r.label || '').trim().replace(/\\s+/g, ' ');\n          if (label.length > 200) return refuse('Keep each resource label under 200 characters.');\n          if (r.file) {\n            const file = String(r.file);\n            if (!onStep.has(file)) {\n              const rows = await R.query('_Files', { storedName: { equalTo: file } }, { limit: 2, plain: true });\n              const owner = rows.length === 1 ? rows[0].owner : null;\n              const ownerId = owner && typeof owner === 'object' ? owner.objectId : owner;\n              if (!me || ownerId !== me) return refuse('One of the files is not one you uploaded. Remove it and upload it again.');\n            }\n            const fileName = String(r.fileName || '').trim();\n            resources.push({ label: label || fileName || 'File', file, fileName });\n          } else {\n            const url = String(r.url || '').trim();\n            if (!url && !label) continue;\n            let parsed = null;\n            try { parsed = new URL(url); } catch (e) { parsed = null; }\n            if (!parsed || (parsed.protocol !== 'https:' && parsed.protocol !== 'http:')) return refuse('\"' + (url || label) + '\" is not a web address. Links start with https://');\n            resources.push({ label: label || parsed.hostname, url: parsed.href });\n          }\n        }\n        fields.resources = resources;\n      }\n    }\n\n    if (step.kind === 'checkin') {\n      const open = step.status === 'scheduled';\n      const formId = text('formId');\n      if (sent('formId') && formId && formId !== (step.form && step.form.id)) {\n        if (!open) return refuse('This check-in has already gone out, so its questions can\\'t change now.');\n        const form = (Array.isArray(Inputs.forms) ? Inputs.forms : []).find((f) => f && f.id === formId);\n        if (!form) return refuse('That form is no longer offered. Reload the page.');\n        fields.form = form;\n      }\n      // Once it has gone out, its day is history: the date fields are left as they are.\n      if (open && sent('sendAfterStep') && text('sendAfterStep')) {\n        const anchorId = text('sendAfterStep');\n        if (anchorId === step.objectId) return refuse('A check-in can\\'t be sent after itself. Pick a session or a homework.');\n        const anchors = await R.query('Step', { objectId: { equalTo: anchorId } }, { limit: 2, plain: true });\n        const anchor = anchors.length === 1 && anchors[0].plan === step.plan ? anchors[0] : null;\n        if (!anchor) return refuse('That step is no longer in the plan. Reload the page.');\n        if (anchor.kind !== 'live' && anchor.kind !== 'homework') return refuse('A check-in is sent after a live session or a homework.');\n        const days = Number(text('sendAfterDays'));\n        if (!text('sendAfterDays') || !Number.isInteger(days) || days < 0 || days > 365) return refuse('Give the number of days as a whole number, from 0 to 365.');\n        fields.sendAfter = { step: anchorId, days };\n        fields.sendsAt = daysAfter(dateOf(anchor), days);\n      } else if (open && sent('sendsAt')) {\n        const t = when(Inputs.sendsAt, '09:00');\n        if (t === undefined) return refuse('The send date could not be read. Pick it again.');\n        fields.sendsAt = t;\n        if (sent('sendAfterStep')) fields.sendAfter = null;\n      }\n    }\n\n    await R.save(step.objectId, fields, { className: 'Step' });\n    const ring = new Set();\n    if (step.shared === true) ring.add(step.learner);\n\n    // A check-in sent N days after this step follows its date (DBU-10), while it is still to send.\n    // A filter takes one key, so the kind is matched after the query.\n    const moved = (step.kind === 'live' && fields.startsAt !== undefined) || (step.kind === 'homework' && fields.dueAt !== undefined);\n    if (moved) {\n      const date = step.kind === 'live' ? fields.startsAt : fields.dueAt;\n      const followers = (await R.query('Step', { plan: { equalTo: step.plan } }, { limit: 1000, plain: true }))\n        .filter((c) => c.kind === 'checkin' && c.status === 'scheduled' && c.sendAfter && c.sendAfter.step === step.objectId);\n      for (const c of followers) {\n        const at = daysAfter(date, Number(c.sendAfter.days) || 0);\n        if (at !== (c.sendsAt || null)) {\n          await R.save(c.objectId, { sendsAt: at }, { className: 'Step' });\n          if (c.shared === true) ring.add(c.learner);\n        }\n      }\n    }\n    for (const learner of ring) {\n      await R.create('Doorbell', { learner, topic: 'plan' }, { acl: { [learner]: { read: true }, 'role:staff': { read: true } } });\n    }\n    Outputs.stepId = step.objectId;\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:saveStep]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n",
+        "runOnChange-in-formId": false,
+        "runOnChange-in-sendAfterStep": false,
+        "runOnChange-in-sendAfterDays": false,
+        "runOnChange-in-forms": false
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-id",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-startsAt",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-durationMin",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-meetingLink",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-recordingUrl",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-summary",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-dueAt",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-brief",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-handInChecklist",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-resources",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-sendsAt",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-formId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-sendAfterStep",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-sendAfterDays",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-forms",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-stepId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-why",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "ss_res",
+      "type": "noodl.cloud.response",
+      "label": "Saved",
+      "x": 40,
+      "y": 280,
+      "parameters": {
+        "params": "stepId"
+      }
+    },
+    {
+      "id": "ss_deny",
+      "type": "noodl.cloud.response",
+      "label": "A refusal the coach can act on",
+      "x": 40,
+      "y": 400,
+      "parameters": {
+        "status": "failure"
+      }
+    },
+    {
+      "id": "ss_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "x": 40,
+      "y": 520,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "The step could not be saved. Try again."
+      }
+    },
+    {
+      "id": "ss_forms",
+      "type": "/#__cloud__/shared/Checkin forms",
+      "label": "The check-in forms",
+      "x": 300,
+      "y": 40
+    }
+  ]
+}

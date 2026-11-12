@@ -1,0 +1,112 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c68f51bb-93ce-5201-8dbe-4531caf38432",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "lc_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach opens a learner",
+      "parameters": {
+        "params": "learnerId",
+        "allowNoAuth": false,
+        "ptype-learnerId": "string",
+        "preq-learnerId": true
+      },
+      "metadata": {
+        "comment": "The gate is role:staff in nodegx.security.json; the graph cannot close itself to learners (backend doctrine 'Auth at the boundary')."
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "lc_fn",
+      "type": "JavaScriptFunction",
+      "label": "Read the learner",
+      "parameters": {
+        "functionScript": "/*\n * Everything the coach needs to look after one learner, and to build their plan (DBU-04).\n * Unlike myPlan this returns unshared steps and CoachNote rows: it is staff-only for that\n * reason. The plan templates ride along (not archived) because the plan builder on the same\n * page offers them, and `plan.templateTitle` names the one the plan was started from.\n * `checkins` (DBU-10): every check-in she answered, each with the form it answered (its own copy).\n */\n(async () => {\n  try {\n    const id = String(Inputs.learnerId || '');\n    const q = (c, where) => Noodl.Records.query(c, where, { limit: 1000, plain: true });\n    const pick = (row, fields) => {\n      const out = { id: row.objectId };\n      fields.forEach((f) => { out[f] = row[f] === undefined ? null : row[f]; });\n      return out;\n    };\n    const users = id ? await q('_User', { objectId: { equalTo: id } }) : [];\n    if (users.length !== 1) throw new Error('no learner ' + id);\n\n    const plans = await q('Plan', { learner: { equalTo: id } });\n    const byStart = plans.slice().sort((a, b) => String(b.startedOn).localeCompare(String(a.startedOn)));\n    const plan = plans.find((p) => p.status === 'active') || byStart[0] || null;\n    const steps = plan ? (await q('Step', { plan: { equalTo: plan.objectId } })).sort((a, b) => a.position - b.position) : [];\n    const subs = await q('Submission', { learner: { equalTo: id } });\n    const notes = await q('CoachNote', { learner: { equalTo: id } });\n    const templates = await q('PlanTemplate', {});\n    const responses = await q('CheckinResponse', { learner: { equalTo: id } });\n\n    Outputs.learner = pick(users[0], ['name', 'email', 'organisation', 'jobTitle', 'timezone', 'lastSeenAt']);\n    Outputs.plans = byStart.map((p) => pick(p, ['title', 'status', 'startedOn', 'fromTemplate']));\n    Outputs.plan = plan ? Object.assign(pick(plan, ['title', 'status', 'meetingLink', 'bookingLink', 'startedOn', 'fromTemplate']), {\n      templateTitle: (templates.find((t) => t.objectId === plan.fromTemplate) || {}).title || ''\n    }) : null;\n    Outputs.steps = steps.map((s) => pick(s, [\n      'position', 'kind', 'title', 'shared', 'status', 'startsAt', 'durationMin', 'meetingLink', 'prepNote', 'attended',\n      'recordingUrl', 'summary', 'dueAt', 'brief', 'handInChecklist', 'resources', 'fromLibraryItem', 'form', 'sendsAt',\n      'sendAfter', 'sentAt'\n    ]));\n    Outputs.submissions = subs\n      .map((s) => Object.assign(pick(s, ['step', 'version', 'kind', 'files', 'url', 'text', 'note', 'review', 'reviewNote', 'reviewedAt']), { handedInAt: s.createdAt }))\n      .sort((a, b) => a.version - b.version);\n    Outputs.notes = notes.map((n) => Object.assign(pick(n, ['body']), { writtenAt: n.createdAt }));\n    Outputs.templates = templates\n      .filter((t) => t.archived !== true)\n      .map((t) => ({ id: t.objectId, title: t.title || '', steps: Array.isArray(t.items) ? t.items.length : 0 }))\n      .sort((a, b) => a.title.localeCompare(b.title));\n    Outputs.checkins = responses.map((r) => {\n      const step = steps.find((s) => s.objectId === r.step);\n      return { id: r.objectId, step: r.step, answers: r.answers || {}, form: r.form || (step && step.form) || { questions: [] }, answeredAt: r.createdAt, seenAt: r.seenAt || null };\n    });\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:learnerAsCoach]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n",
+        "runOnChange-in-learnerId": false
+      },
+      "ports": [
+        {
+          "name": "in-learnerId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-learner",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-plans",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-plan",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-steps",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-submissions",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-notes",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-templates",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-checkins",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "lc_res",
+      "type": "noodl.cloud.response",
+      "label": "The learner",
+      "parameters": {
+        "params": "learner,plans,plan,steps,submissions,notes,templates,checkins"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "lc_deny",
+      "type": "noodl.cloud.response",
+      "label": "No such learner",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "This learner could not be read."
+      },
+      "x": 40,
+      "y": 400
+    }
+  ]
+}

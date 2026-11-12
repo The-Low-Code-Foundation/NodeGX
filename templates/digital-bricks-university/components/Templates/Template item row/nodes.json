@@ -1,0 +1,501 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7265982f-c68e-59bc-82e9-2d28a6340c47",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "tir_row",
+      "type": "Group",
+      "label": "Template step",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "tir_top",
+        "tir_fields"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "backgroundColor": "var(--surface)"
+      }
+    },
+    {
+      "id": "tir_top",
+      "type": "Group",
+      "label": "Kind and title",
+      "x": 100,
+      "y": 160,
+      "parent": "tir_row",
+      "children": [
+        "tir_kind",
+        "tir_title"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)"
+      }
+    },
+    {
+      "id": "tir_kind",
+      "type": "/Plan/Chip",
+      "label": "Kind",
+      "x": 160,
+      "y": 280,
+      "parent": "tir_top"
+    },
+    {
+      "id": "tir_title",
+      "type": "net.noodl.controls.textinput",
+      "label": "Title",
+      "x": 160,
+      "y": 400,
+      "parent": "tir_top",
+      "parameters": {
+        "type": "text",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxLength": 140
+      }
+    },
+    {
+      "id": "tir_fields",
+      "type": "Group",
+      "label": "Day, length or library, and the buttons",
+      "x": 100,
+      "y": 520,
+      "parent": "tir_row",
+      "children": [
+        "tir_day",
+        "tir_dur_box",
+        "tir_lib_box",
+        "tir_actions"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "flex-end",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-2)"
+      }
+    },
+    {
+      "id": "tir_day",
+      "type": "net.noodl.controls.textinput",
+      "label": "Day",
+      "x": 160,
+      "y": 640,
+      "parent": "tir_fields",
+      "parameters": {
+        "type": "text",
+        "inputMode": "numeric",
+        "useLabel": true,
+        "sizeMode": "explicit",
+        "width": {
+          "value": 96,
+          "unit": "px"
+        }
+      }
+    },
+    {
+      "id": "tir_dur_box",
+      "type": "Group",
+      "label": "A live session's length",
+      "x": 160,
+      "y": 760,
+      "parent": "tir_fields",
+      "children": [
+        "tir_dur"
+      ],
+      "parameters": {
+        "mounted": false,
+        "sizeMode": "contentSize",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "tir_dur",
+      "type": "net.noodl.controls.textinput",
+      "label": "Minutes",
+      "x": 220,
+      "y": 880,
+      "parent": "tir_dur_box",
+      "parameters": {
+        "type": "text",
+        "inputMode": "numeric",
+        "useLabel": true,
+        "sizeMode": "explicit",
+        "width": {
+          "value": 96,
+          "unit": "px"
+        }
+      }
+    },
+    {
+      "id": "tir_lib_box",
+      "type": "Group",
+      "label": "A homework's library item",
+      "x": 160,
+      "y": 1000,
+      "parent": "tir_fields",
+      "children": [
+        "tir_lib"
+      ],
+      "parameters": {
+        "mounted": false,
+        "sizeMode": "contentSize",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "tir_lib",
+      "type": "net.noodl.controls.options",
+      "label": "From the library",
+      "x": 220,
+      "y": 1120,
+      "parent": "tir_lib_box",
+      "parameters": {
+        "useLabel": true,
+        "value": "",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 320,
+          "unit": "px"
+        },
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "tir_actions",
+      "type": "Group",
+      "label": "Up, Down, Remove",
+      "x": 160,
+      "y": 1240,
+      "parent": "tir_fields",
+      "children": [
+        "tir_up",
+        "tir_down",
+        "tir_remove"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-1)"
+      }
+    },
+    {
+      "id": "tir_up",
+      "type": "net.noodl.controls.button",
+      "label": "Up",
+      "x": 220,
+      "y": 1360,
+      "parent": "tir_actions",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-9)"
+      }
+    },
+    {
+      "id": "tir_down",
+      "type": "net.noodl.controls.button",
+      "label": "Down",
+      "x": 220,
+      "y": 1480,
+      "parent": "tir_actions",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-9)"
+      }
+    },
+    {
+      "id": "tir_remove",
+      "type": "net.noodl.controls.button",
+      "label": "Remove",
+      "x": 220,
+      "y": 1600,
+      "parent": "tir_actions",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "transparent",
+        "color": "var(--attention)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-9)"
+      }
+    },
+    {
+      "id": "tir_in",
+      "type": "Component Inputs",
+      "label": "Step in",
+      "x": 500,
+      "y": 40,
+      "ports": [
+        {
+          "name": "kindKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "kindBg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "kindFg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "isLive",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "isHomework",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "dayOffset",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "durationMin",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "libraryItem",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "libraryOptions",
+          "plug": "output",
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "id": "tir_out",
+      "type": "Component Outputs",
+      "label": "Step out",
+      "x": 500,
+      "y": 1360,
+      "ports": [
+        {
+          "name": "up",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "down",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "remove",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "tir_item",
+      "type": "For Each Actions",
+      "label": "This row's record",
+      "x": 500,
+      "y": 160
+    },
+    {
+      "id": "tir_set_title",
+      "type": "SetModelProperties",
+      "label": "Keep the title",
+      "x": 500,
+      "y": 400,
+      "parameters": {
+        "properties": "title",
+        "type-title": "String"
+      },
+      "metadata": {
+        "comment": "One node per field, as in Library/Checklist row: a node writing two fields would write the other as it stood when this one changed."
+      }
+    },
+    {
+      "id": "tir_set_day",
+      "type": "SetModelProperties",
+      "label": "Keep the day",
+      "x": 500,
+      "y": 640,
+      "parameters": {
+        "properties": "dayOffset",
+        "type-dayOffset": "String"
+      }
+    },
+    {
+      "id": "tir_set_dur",
+      "type": "SetModelProperties",
+      "label": "Keep the length",
+      "x": 500,
+      "y": 880,
+      "parameters": {
+        "properties": "durationMin",
+        "type-durationMin": "String"
+      }
+    },
+    {
+      "id": "tir_set_lib",
+      "type": "SetModelProperties",
+      "label": "Keep the library item",
+      "x": 500,
+      "y": 1120,
+      "parameters": {
+        "properties": "libraryItem",
+        "type-libraryItem": "String"
+      }
+    },
+    {
+      "id": "tir_t_day",
+      "type": "Translation",
+      "label": "Day",
+      "x": 800,
+      "y": 640,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.editor.day"
+      }
+    },
+    {
+      "id": "tir_t_dur",
+      "type": "Translation",
+      "label": "Minutes",
+      "x": 800,
+      "y": 880,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.editor.duration"
+      }
+    },
+    {
+      "id": "tir_t_lib",
+      "type": "Translation",
+      "label": "From the library",
+      "x": 800,
+      "y": 1120,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.editor.library"
+      }
+    },
+    {
+      "id": "tir_t_title",
+      "type": "Translation",
+      "label": "Title (placeholder)",
+      "x": 800,
+      "y": 400,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.editor.stepTitle"
+      }
+    },
+    {
+      "id": "tir_t_up",
+      "type": "Translation",
+      "label": "Up",
+      "x": 800,
+      "y": 1360,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.editor.up"
+      }
+    },
+    {
+      "id": "tir_t_down",
+      "type": "Translation",
+      "label": "Down",
+      "x": 800,
+      "y": 1480,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.editor.down"
+      }
+    },
+    {
+      "id": "tir_t_remove",
+      "type": "Translation",
+      "label": "Remove",
+      "x": 800,
+      "y": 1600,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.editor.remove"
+      }
+    }
+  ],
+  "visualRoots": [
+    "tir_row"
+  ]
+}

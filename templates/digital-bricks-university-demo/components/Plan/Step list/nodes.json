@@ -1,0 +1,455 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "38e0ed2e-20f3-555a-81bf-089e5f544bcf",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sl_root",
+      "type": "Group",
+      "label": "Steps",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "sl_head",
+        "sl_zone",
+        "sl_none",
+        "sl_add_box"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      }
+    },
+    {
+      "id": "sl_head",
+      "type": "Group",
+      "label": "Heading and how to move",
+      "x": 100,
+      "y": 160,
+      "parent": "sl_root",
+      "children": [
+        "sl_h",
+        "sl_hint"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)"
+      }
+    },
+    {
+      "id": "sl_h",
+      "type": "Text",
+      "label": "Steps",
+      "x": 160,
+      "y": 280,
+      "parent": "sl_head",
+      "parameters": {
+        "text": "",
+        "as": "h2",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "sl_hint",
+      "type": "Text",
+      "label": "Drag, or the keyboard; only shared steps are seen",
+      "x": 160,
+      "y": 400,
+      "parent": "sl_head",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "sl_zone",
+      "type": "Group",
+      "label": "The steps (drop zone)",
+      "x": 100,
+      "y": 520,
+      "parent": "sl_root",
+      "children": [
+        "sl_rows"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "acceptDrops": true,
+        "acceptKind": "plan-step",
+        "makeRoom": true
+      },
+      "metadata": {
+        "comment": "Dropped Value is the step's id and Drop Index its place among the OTHER steps, which is exactly what moveStep takes. The engine moves nothing itself: the list is redrawn from the backend's answer."
+      }
+    },
+    {
+      "id": "sl_rows",
+      "type": "For Each",
+      "label": "One row per step",
+      "x": 160,
+      "y": 640,
+      "parent": "sl_zone",
+      "parameters": {
+        "template": "/Plan/Step row"
+      }
+    },
+    {
+      "id": "sl_none",
+      "type": "Group",
+      "label": "Shown while the plan has no steps",
+      "x": 100,
+      "y": 760,
+      "parent": "sl_root",
+      "children": [
+        "sl_empty"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "sl_empty",
+      "type": "/Shell/Empty state",
+      "label": "No steps yet",
+      "x": 160,
+      "y": 880,
+      "parent": "sl_none",
+      "parameters": {
+        "icon": {
+          "class": "lucide",
+          "code": "icon-list-plus",
+          "codeAsClass": true
+        },
+        "titleKey": "plan.emptyTitle",
+        "bodyKey": "plan.emptyBody"
+      }
+    },
+    {
+      "id": "sl_add_box",
+      "type": "Group",
+      "label": "The add buttons, unless read-only",
+      "x": 100,
+      "y": 1000,
+      "parent": "sl_root",
+      "children": [
+        "sl_add"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "sl_add",
+      "type": "/Plan/Add steps",
+      "label": "Add and share",
+      "x": 160,
+      "y": 1120,
+      "parent": "sl_add_box"
+    },
+    {
+      "id": "sl_in",
+      "type": "Component Inputs",
+      "label": "The plan's rows",
+      "x": 500,
+      "y": 40,
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "planId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "readOnly",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "id": "sl_out",
+      "type": "Component Outputs",
+      "label": "What happened",
+      "x": 500,
+      "y": 1120,
+      "ports": [
+        {
+          "name": "changed",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "said",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "saidShow",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "pickLibrary",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "sl_state",
+      "type": "net.noodl.ComponentObject",
+      "label": "Which step is open",
+      "x": 500,
+      "y": 160,
+      "parameters": {
+        "properties": "openId"
+      },
+      "metadata": {
+        "comment": "This list's own state, not a Variable: one editor open at a time, because the homework editor's two lists live in app-wide Arrays."
+      }
+    },
+    {
+      "id": "sl_set_open",
+      "type": "net.noodl.SetComponentObjectProperties",
+      "label": "Open a step",
+      "x": 500,
+      "y": 280,
+      "parameters": {
+        "properties": "openId"
+      }
+    },
+    {
+      "id": "sl_set_close",
+      "type": "net.noodl.SetComponentObjectProperties",
+      "label": "Close the open step",
+      "x": 500,
+      "y": 400,
+      "parameters": {
+        "properties": "openId",
+        "prop-openId": ""
+      }
+    },
+    {
+      "id": "sl_merge",
+      "type": "JavaScriptFunction",
+      "label": "The rows, with the open one marked",
+      "x": 500,
+      "y": 520,
+      "parameters": {
+        "functionScript": "// The page shapes every row; this only marks the open one (and stops it being dragged).\n// Ids stay the steps' own, so the repeater keeps each row as it is.\nif (Inputs.rows === undefined) return;\nconst rows = Array.isArray(Inputs.rows) ? Inputs.rows : [];\nconst openId = String(Inputs.openId || '');\nconst readOnly = Inputs.readOnly === true;\nOutputs.items = rows.map((r) => Object.assign({}, r, {\n  open: !readOnly && r.id === openId,\n  movable: !readOnly && r.id !== openId,\n  editable: !readOnly\n}));\nOutputs.hasRows = rows.length > 0;\nOutputs.showEmpty = rows.length === 0 && !readOnly;\n"
+      },
+      "ports": [
+        {
+          "name": "in-rows",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-openId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-readOnly",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-items",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-hasRows",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-showEmpty",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "id": "sl_toggle",
+      "type": "JavaScriptFunction",
+      "label": "Edit opens a step, or closes it if it is open",
+      "x": 500,
+      "y": 640,
+      "parameters": {
+        "runOnChange-in-id": false,
+        "runOnChange-in-current": false,
+        "functionScript": "const id = String(Inputs.id || '');\nOutputs.next = id && id !== String(Inputs.current || '') ? id : '';\nOutputs.go();\n"
+      },
+      "ports": [
+        {
+          "name": "in-id",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-current",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-next",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "sl_share",
+      "type": "JavaScriptFunction",
+      "label": "Share it, or take it back",
+      "x": 500,
+      "y": 760,
+      "parameters": {
+        "runOnChange-in-id": false,
+        "runOnChange-in-rows": false,
+        "functionScript": "// One button on the row; whether it shares or unshares is the row's own state.\nconst id = String(Inputs.id || '');\nconst row = (Inputs.rows || []).find((r) => r.id === id);\nif (!row) return;\nOutputs.stepIds = [id];\nOutputs.shared = row.shared !== true;\nOutputs.go();\n"
+      },
+      "ports": [
+        {
+          "name": "in-id",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-rows",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-stepIds",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-shared",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "sl_c_share",
+      "type": "CloudFunction2",
+      "label": "shareSteps (staff only)",
+      "x": 800,
+      "y": 760,
+      "parameters": {
+        "function": "shareSteps"
+      }
+    },
+    {
+      "id": "sl_c_remove",
+      "type": "CloudFunction2",
+      "label": "removeStep (staff only)",
+      "x": 800,
+      "y": 880,
+      "parameters": {
+        "function": "removeStep"
+      }
+    },
+    {
+      "id": "sl_c_move",
+      "type": "CloudFunction2",
+      "label": "moveStep (staff only)",
+      "x": 800,
+      "y": 1000,
+      "parameters": {
+        "function": "moveStep"
+      }
+    },
+    {
+      "id": "sl_not_ro",
+      "type": "Inverter",
+      "label": "Not read-only",
+      "x": 500,
+      "y": 1000
+    },
+    {
+      "id": "sl_t_h",
+      "type": "Translation",
+      "label": "Steps",
+      "x": 800,
+      "y": 280,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.steps"
+      }
+    },
+    {
+      "id": "sl_t_hint",
+      "type": "Translation",
+      "label": "How to move a step",
+      "x": 800,
+      "y": 400,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.stepsHint"
+      }
+    }
+  ],
+  "visualRoots": [
+    "sl_root"
+  ]
+}

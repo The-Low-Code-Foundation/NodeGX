@@ -1,0 +1,188 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2f214d08-da97-5897-83a5-be74ccef32a0",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pg2_card",
+      "type": "Group",
+      "label": "Your programme",
+      "children": [
+        "pg2_head",
+        "pg2_list"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pg2_head",
+      "type": "Group",
+      "label": "Heading and counts",
+      "parent": "pg2_card",
+      "children": [
+        "pg2_title",
+        "pg2_counts"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "justifyContent": "space-between",
+        "columnGap": "var(--space-4)",
+        "rowGap": "var(--space-1)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pg2_title",
+      "type": "Text",
+      "label": "Your programme",
+      "parent": "pg2_head",
+      "parameters": {
+        "text": "",
+        "as": "h2",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "pg2_counts",
+      "type": "Text",
+      "label": "Live sessions and homework, set by Richard",
+      "parent": "pg2_head",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "pg2_list",
+      "type": "Group",
+      "label": "The steps, in order",
+      "parent": "pg2_card",
+      "children": [
+        "pg2_rows"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "pg2_rows",
+      "type": "For Each",
+      "label": "One row per shared step",
+      "parent": "pg2_list",
+      "parameters": {
+        "template": "/Home/Programme row"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "pg2_in",
+      "type": "Component Inputs",
+      "label": "The programme",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "live",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "homework",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "pg2_t_title",
+      "type": "Translation",
+      "label": "Your programme",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.programme"
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "pg2_t_counts",
+      "type": "Translation",
+      "label": "Live sessions: {live} · Homework: {homework}",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.counts"
+      },
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "pg2_fill",
+      "type": "String Format",
+      "label": "The counts into the line",
+      "parameters": {
+        "format": "{live} {homework}"
+      },
+      "metadata": {
+        "comment": "The format arrives from the Translation; this default only declares the inputs."
+      },
+      "x": 410,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "pg2_card"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "36b9556f-64c2-50f9-8fb4-1b943ba34a3b",
+  "name": "Calendar links",
+  "path": "/Plan/Calendar links",
+  "type": "visual",
+  "created": "2026-11-09T10:39:29.204Z",
+  "modified": "2026-11-09T12:44:49.101Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "For a booked live session: a calendar file (.ics) to download and a Google Calendar link, both with the session's time, length, title and meeting link. Shown only once the session has a time."
+}

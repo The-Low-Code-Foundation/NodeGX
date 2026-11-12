@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "11b3cbe1-a846-5d7e-8857-b44d105fcacf",
+  "name": "creationsAsCoach",
+  "path": "/#__cloud__/creationsAsCoach",
+  "type": "cloud",
+  "created": "2026-11-12T13:36:12.492Z",
+  "modified": "2026-11-12T14:35:26.377Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One learner's creations for the coach, read-only, on their plan page (DBU-09; security: role:staff)."
+}

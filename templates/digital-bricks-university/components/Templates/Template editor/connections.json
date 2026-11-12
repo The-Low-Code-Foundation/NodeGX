@@ -1,0 +1,397 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "aac6b72f-c0f9-5b27-83df-af5189736159",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "te_t_lede",
+      "fromProperty": "Translation",
+      "toId": "te_lede",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "te_t_title",
+      "fromProperty": "Translation",
+      "toId": "te_title",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "te_t_desc",
+      "fromProperty": "Translation",
+      "toId": "te_desc",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "te_t_steps",
+      "fromProperty": "Translation",
+      "toId": "te_steps_head",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "te_t_none",
+      "fromProperty": "Translation",
+      "toId": "te_none",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "te_t_add_live",
+      "fromProperty": "Translation",
+      "toId": "te_add_live",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "te_t_add_hw",
+      "fromProperty": "Translation",
+      "toId": "te_add_hw",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "te_t_add_ci",
+      "fromProperty": "Translation",
+      "toId": "te_add_ci",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "te_t_save",
+      "fromProperty": "Translation",
+      "toId": "te_save",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "te_t_cancel",
+      "fromProperty": "Translation",
+      "toId": "te_cancel",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "te_in",
+      "fromProperty": "template",
+      "toId": "te_open",
+      "toProperty": "in-template"
+    },
+    {
+      "fromId": "te_in",
+      "fromProperty": "library",
+      "toId": "te_open",
+      "toProperty": "in-library"
+    },
+    {
+      "fromId": "te_kinds",
+      "fromProperty": "items",
+      "toId": "te_open",
+      "toProperty": "in-kinds"
+    },
+    {
+      "fromId": "te_t_new",
+      "fromProperty": "Translation",
+      "toId": "te_open",
+      "toProperty": "in-newHeading"
+    },
+    {
+      "fromId": "te_t_edit",
+      "fromProperty": "Translation",
+      "toId": "te_open",
+      "toProperty": "in-editHeading"
+    },
+    {
+      "fromId": "te_t_nolib",
+      "fromProperty": "Translation",
+      "toId": "te_open",
+      "toProperty": "in-noLibrary"
+    },
+    {
+      "fromId": "te_in",
+      "fromProperty": "load",
+      "toId": "te_open",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "te_open",
+      "fromProperty": "out-heading",
+      "toId": "te_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "te_open",
+      "fromProperty": "out-title",
+      "toId": "te_title",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "te_open",
+      "fromProperty": "out-description",
+      "toId": "te_desc",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "te_open",
+      "fromProperty": "out-opened",
+      "toId": "te_title",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "te_open",
+      "fromProperty": "out-opened",
+      "toId": "te_desc",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "te_open",
+      "fromProperty": "out-opened",
+      "toId": "te_msg_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "te_arr",
+      "fromProperty": "items",
+      "toId": "te_rows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "te_arr",
+      "fromProperty": "count",
+      "toId": "te_empty",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "te_empty",
+      "fromProperty": "result",
+      "toId": "te_none",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "te_t_new_live",
+      "fromProperty": "Translation",
+      "toId": "te_titles",
+      "toProperty": "in-live"
+    },
+    {
+      "fromId": "te_t_new_hw",
+      "fromProperty": "Translation",
+      "toId": "te_titles",
+      "toProperty": "in-homework"
+    },
+    {
+      "fromId": "te_t_new_ci",
+      "fromProperty": "Translation",
+      "toId": "te_titles",
+      "toProperty": "in-checkin"
+    },
+    {
+      "fromId": "te_open",
+      "fromProperty": "out-id",
+      "toId": "te_gather",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "te_open",
+      "fromProperty": "out-title",
+      "toId": "te_gather",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "te_open",
+      "fromProperty": "out-description",
+      "toId": "te_gather",
+      "toProperty": "in-description"
+    },
+    {
+      "fromId": "te_title",
+      "fromProperty": "onTextChanged",
+      "toId": "te_gather",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "te_desc",
+      "fromProperty": "onTextChanged",
+      "toId": "te_gather",
+      "toProperty": "in-description"
+    },
+    {
+      "fromId": "te_save",
+      "fromProperty": "onClick",
+      "toId": "te_gather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "te_save",
+      "fromProperty": "onClick",
+      "toId": "te_msg_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "te_gather",
+      "fromProperty": "out-id",
+      "toId": "te_call",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "te_gather",
+      "fromProperty": "out-title",
+      "toId": "te_call",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "te_gather",
+      "fromProperty": "out-description",
+      "toId": "te_call",
+      "toProperty": "in-description"
+    },
+    {
+      "fromId": "te_gather",
+      "fromProperty": "out-items",
+      "toId": "te_call",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "te_gather",
+      "fromProperty": "out-go",
+      "toId": "te_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "te_call",
+      "fromProperty": "error",
+      "toId": "te_msg",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "te_call",
+      "fromProperty": "failure",
+      "toId": "te_msg_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "te_msg_sw",
+      "fromProperty": "state",
+      "toId": "te_msg",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "te_gather",
+      "fromProperty": "out-title",
+      "toId": "te_out",
+      "toProperty": "savedTitle"
+    },
+    {
+      "fromId": "te_call",
+      "fromProperty": "done",
+      "toId": "te_out",
+      "toProperty": "saved"
+    },
+    {
+      "fromId": "te_cancel",
+      "fromProperty": "onClick",
+      "toId": "te_out",
+      "toProperty": "closed"
+    },
+    {
+      "fromId": "te_titles",
+      "fromProperty": "out-titles",
+      "toId": "te_add_live_fn",
+      "toProperty": "in-titles"
+    },
+    {
+      "fromId": "te_titles",
+      "fromProperty": "out-titles",
+      "toId": "te_add_hw_fn",
+      "toProperty": "in-titles"
+    },
+    {
+      "fromId": "te_titles",
+      "fromProperty": "out-titles",
+      "toId": "te_add_ci_fn",
+      "toProperty": "in-titles"
+    },
+    {
+      "fromId": "te_open",
+      "fromProperty": "out-kindInfo",
+      "toId": "te_add_live_fn",
+      "toProperty": "in-kindInfo"
+    },
+    {
+      "fromId": "te_open",
+      "fromProperty": "out-kindInfo",
+      "toId": "te_add_hw_fn",
+      "toProperty": "in-kindInfo"
+    },
+    {
+      "fromId": "te_open",
+      "fromProperty": "out-kindInfo",
+      "toId": "te_add_ci_fn",
+      "toProperty": "in-kindInfo"
+    },
+    {
+      "fromId": "te_open",
+      "fromProperty": "out-libraryOptions",
+      "toId": "te_add_live_fn",
+      "toProperty": "in-libraryOptions"
+    },
+    {
+      "fromId": "te_open",
+      "fromProperty": "out-libraryOptions",
+      "toId": "te_add_hw_fn",
+      "toProperty": "in-libraryOptions"
+    },
+    {
+      "fromId": "te_open",
+      "fromProperty": "out-libraryOptions",
+      "toId": "te_add_ci_fn",
+      "toProperty": "in-libraryOptions"
+    },
+    {
+      "fromId": "te_add_live",
+      "fromProperty": "onClick",
+      "toId": "te_add_live_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "te_add_hw",
+      "fromProperty": "onClick",
+      "toId": "te_add_hw_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "te_add_ci",
+      "fromProperty": "onClick",
+      "toId": "te_add_ci_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "te_rows",
+      "fromProperty": "itemActionItemId",
+      "toId": "te_up_fn",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "te_rows",
+      "fromProperty": "itemActionItemId",
+      "toId": "te_down_fn",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "te_rows",
+      "fromProperty": "itemActionItemId",
+      "toId": "te_remove_fn",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "te_rows",
+      "fromProperty": "itemOutputSignal-up",
+      "toId": "te_up_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "te_rows",
+      "fromProperty": "itemOutputSignal-down",
+      "toId": "te_down_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "te_rows",
+      "fromProperty": "itemOutputSignal-remove",
+      "toId": "te_remove_fn",
+      "toProperty": "run"
+    }
+  ]
+}

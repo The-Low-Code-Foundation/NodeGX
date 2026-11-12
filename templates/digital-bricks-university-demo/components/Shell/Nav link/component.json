@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b6c8a655-33a2-58d7-8996-6dbf27a45893",
+  "name": "Nav link",
+  "path": "/Shell/Nav link",
+  "type": "visual",
+  "created": "2026-11-07T20:26:40.546Z",
+  "modified": "2026-11-12T10:22:29.773Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One top-bar tab. Tinted indigo when it is the current page; pressing it goes to its path."
+}

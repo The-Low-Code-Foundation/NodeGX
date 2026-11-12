@@ -1,0 +1,2020 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "67205d70-035a-53e6-8928-a11b9b814292",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ce_root-2",
+      "type": "Group",
+      "label": "Add or edit a creation",
+      "children": [
+        "ce_head-2",
+        "ce_tabs",
+        "ce_file",
+        "ce_link",
+        "ce_text",
+        "ce_kept",
+        "ce_fields",
+        "ce_actions",
+        "ce_confirm",
+        "ce_refused",
+        "ce_server",
+        "ce_upfail"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-5)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "dataAttributes": "data-testid",
+        "data-testid": "creation-editor"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ce_head-2",
+      "type": "Text",
+      "label": "Add a creation / Edit a creation",
+      "parent": "ce_root-2",
+      "parameters": {
+        "text": "",
+        "as": "h2",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ce_tabs",
+      "type": "Group",
+      "label": "File, link or text (new only)",
+      "parent": "ce_root-2",
+      "children": [
+        "ce_tab_file",
+        "ce_tab_link",
+        "ce_tab_text"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "ce_tab_file",
+      "type": "net.noodl.controls.button",
+      "label": "Upload a file",
+      "parent": "ce_tabs",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-upload",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "ce_tab_link",
+      "type": "net.noodl.controls.button",
+      "label": "Add a link",
+      "parent": "ce_tabs",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-link",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "ce_tab_text",
+      "type": "net.noodl.controls.button",
+      "label": "Write or paste",
+      "parent": "ce_tabs",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-pencil-line",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "ce_file",
+      "type": "Group",
+      "label": "Upload a file",
+      "parent": "ce_root-2",
+      "children": [
+        "ce_drop",
+        "ce_chosen",
+        "ce_bad",
+        "ce_types"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "ce_drop",
+      "type": "Group",
+      "label": "Drop a file here",
+      "parent": "ce_file",
+      "children": [
+        "ce_drop_icon",
+        "ce_drop_text",
+        "ce_choose"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "backgroundColor": "var(--background)",
+        "borderStyle": "dashed",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-lg)",
+        "acceptFileDrops": true,
+        "dataAttributes": "data-testid",
+        "data-testid": "creation-drop"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "ce_drop_icon",
+      "type": "net.noodl.visual.icon",
+      "label": "Upload icon",
+      "parent": "ce_drop",
+      "parameters": {
+        "iconSize": 24,
+        "iconColor": "var(--muted-foreground)",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-upload",
+          "codeAsClass": true
+        }
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "ce_drop_text",
+      "type": "Text",
+      "label": "Drag a file here, or",
+      "parent": "ce_drop",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "textAlignX": "center"
+      },
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "ce_choose",
+      "type": "net.noodl.controls.button",
+      "label": "Choose a file",
+      "parent": "ce_drop",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)"
+      },
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "ce_chosen",
+      "type": "Text",
+      "label": "{name} · {size}",
+      "parent": "ce_file",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "color": "var(--foreground)",
+        "wordBreak": "break-all",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "dataAttributes": "data-testid",
+        "data-testid": "creation-chosen"
+      },
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "ce_bad",
+      "type": "Text",
+      "label": "Not a file we keep",
+      "parent": "ce_file",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "ce_types",
+      "type": "Text",
+      "label": "What can be kept",
+      "parent": "ce_file",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "ce_link",
+      "type": "Group",
+      "label": "Add a link",
+      "parent": "ce_root-2",
+      "children": [
+        "ce_url"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "x": 100,
+      "y": 1720
+    },
+    {
+      "id": "ce_url",
+      "type": "net.noodl.controls.textinput",
+      "label": "The link",
+      "parent": "ce_link",
+      "parameters": {
+        "type": "url",
+        "inputMode": "url",
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1840
+    },
+    {
+      "id": "ce_text",
+      "type": "Group",
+      "label": "Write or paste",
+      "parent": "ce_root-2",
+      "children": [
+        "ce_textarea"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "x": 100,
+      "y": 1960
+    },
+    {
+      "id": "ce_textarea",
+      "type": "net.noodl.controls.textinput",
+      "label": "The text",
+      "parent": "ce_text",
+      "parameters": {
+        "type": "textArea",
+        "useLabel": true,
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "lineHeight": "var(--leading-relaxed)"
+      },
+      "x": 160,
+      "y": 2080
+    },
+    {
+      "id": "ce_kept",
+      "type": "Text",
+      "label": "What it keeps, when editing",
+      "parent": "ce_root-2",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 2200
+    },
+    {
+      "id": "ce_fields",
+      "type": "Group",
+      "label": "The words around it",
+      "parent": "ce_root-2",
+      "children": [
+        "ce_name",
+        "ce_kind",
+        "ce_made",
+        "ce_desc",
+        "ce_used"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)"
+      },
+      "x": 100,
+      "y": 2320
+    },
+    {
+      "id": "ce_name",
+      "type": "net.noodl.controls.textinput",
+      "label": "Title",
+      "parent": "ce_fields",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxLength": 200
+      },
+      "x": 160,
+      "y": 2440
+    },
+    {
+      "id": "ce_kind",
+      "type": "net.noodl.controls.options",
+      "label": "Kind",
+      "parent": "ce_fields",
+      "parameters": {
+        "useLabel": true,
+        "value": "",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 260,
+          "unit": "px"
+        },
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 2560
+    },
+    {
+      "id": "ce_made",
+      "type": "net.noodl.controls.textinput",
+      "label": "Made with",
+      "parent": "ce_fields",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxLength": 200
+      },
+      "x": 160,
+      "y": 2680
+    },
+    {
+      "id": "ce_desc",
+      "type": "net.noodl.controls.textinput",
+      "label": "A line about it",
+      "parent": "ce_fields",
+      "parameters": {
+        "type": "textArea",
+        "useLabel": true,
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 88,
+          "unit": "px"
+        },
+        "lineHeight": "var(--leading-relaxed)"
+      },
+      "x": 160,
+      "y": 2800
+    },
+    {
+      "id": "ce_used",
+      "type": "net.noodl.controls.checkbox",
+      "label": "I've used it in class",
+      "parent": "ce_fields",
+      "parameters": {
+        "useLabel": true,
+        "checked": false
+      },
+      "x": 160,
+      "y": 2920
+    },
+    {
+      "id": "ce_actions",
+      "type": "Group",
+      "label": "Save, Cancel, Delete",
+      "parent": "ce_root-2",
+      "children": [
+        "ce_save",
+        "ce_cancel",
+        "ce_delete",
+        "ce_busy"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 3040
+    },
+    {
+      "id": "ce_save",
+      "type": "net.noodl.controls.button",
+      "label": "Save",
+      "parent": "ce_actions",
+      "parameters": {
+        "label": ""
+      },
+      "x": 160,
+      "y": 3160
+    },
+    {
+      "id": "ce_cancel",
+      "type": "net.noodl.controls.button",
+      "label": "Cancel",
+      "parent": "ce_actions",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)"
+      },
+      "x": 160,
+      "y": 3280
+    },
+    {
+      "id": "ce_delete",
+      "type": "net.noodl.controls.button",
+      "label": "Delete (editing only)",
+      "parent": "ce_actions",
+      "parameters": {
+        "mounted": false,
+        "label": "",
+        "sizeMode": "contentSize",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-trash-2",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)",
+        "iconColor": "var(--attention)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--attention)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "marginLeft": "var(--space-2)"
+      },
+      "x": 160,
+      "y": 3400
+    },
+    {
+      "id": "ce_busy",
+      "type": "Text",
+      "label": "Saving",
+      "parent": "ce_actions",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 160,
+      "y": 3520
+    },
+    {
+      "id": "ce_confirm",
+      "type": "Group",
+      "label": "Delete it? (asked first)",
+      "parent": "ce_root-2",
+      "children": [
+        "ce_confirm_text",
+        "ce_confirm_row"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "backgroundColor": "var(--background)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-md)",
+        "dataAttributes": "data-testid",
+        "data-testid": "creation-confirm-delete"
+      },
+      "x": 100,
+      "y": 3640
+    },
+    {
+      "id": "ce_confirm_text",
+      "type": "Text",
+      "label": "Delete this creation?",
+      "parent": "ce_confirm",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 3760
+    },
+    {
+      "id": "ce_confirm_row",
+      "type": "Group",
+      "label": "Yes or keep it",
+      "parent": "ce_confirm",
+      "children": [
+        "ce_yes",
+        "ce_no"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 160,
+      "y": 3880
+    },
+    {
+      "id": "ce_yes",
+      "type": "net.noodl.controls.button",
+      "label": "Yes, delete it",
+      "parent": "ce_confirm_row",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--attention)",
+        "color": "var(--primary-foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)"
+      },
+      "x": 220,
+      "y": 4000
+    },
+    {
+      "id": "ce_no",
+      "type": "net.noodl.controls.button",
+      "label": "Keep it",
+      "parent": "ce_confirm_row",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)"
+      },
+      "x": 220,
+      "y": 4120
+    },
+    {
+      "id": "ce_refused",
+      "type": "Text",
+      "label": "Not ready to save",
+      "parent": "ce_root-2",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 4240
+    },
+    {
+      "id": "ce_server",
+      "type": "Text",
+      "label": "Why the server refused",
+      "parent": "ce_root-2",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 4360
+    },
+    {
+      "id": "ce_upfail",
+      "type": "Text",
+      "label": "The upload failed",
+      "parent": "ce_root-2",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 4480
+    },
+    {
+      "id": "ce_in-2",
+      "type": "Component Inputs",
+      "label": "The creation to edit (empty: a new one)",
+      "ports": [
+        {
+          "name": "creation",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "load",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 5920
+    },
+    {
+      "id": "ce_out",
+      "type": "Component Outputs",
+      "label": "Saved, deleted or closed",
+      "ports": [
+        {
+          "name": "saved",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "savedTitle",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "deleted",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "deletedTitle",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "closed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 2800
+    },
+    {
+      "id": "ce_kinds",
+      "type": "/Option sets/Creation kinds",
+      "label": "Creation kinds",
+      "x": 470,
+      "y": 6040
+    },
+    {
+      "id": "ce_hk",
+      "type": "/Option sets/Hand-in kinds",
+      "label": "File kinds that can be kept",
+      "x": 470,
+      "y": 6160
+    },
+    {
+      "id": "ce_tab_state",
+      "type": "States",
+      "label": "Which tab is open",
+      "parameters": {
+        "states": "file,link,text",
+        "values": "showFile,showLink,showText,fileBg,fileFg,linkBg,linkFg,textBg,textFg",
+        "type-showFile": "boolean",
+        "type-showLink": "boolean",
+        "type-showText": "boolean",
+        "type-fileBg": "color",
+        "type-fileFg": "color",
+        "type-linkBg": "color",
+        "type-linkFg": "color",
+        "type-textBg": "color",
+        "type-textFg": "color",
+        "value-file-showFile": true,
+        "value-file-showLink": false,
+        "value-file-showText": false,
+        "value-file-fileBg": "var(--accent)",
+        "value-file-fileFg": "var(--accent-foreground)",
+        "value-file-linkBg": "var(--surface)",
+        "value-file-linkFg": "var(--foreground)",
+        "value-file-textBg": "var(--surface)",
+        "value-file-textFg": "var(--foreground)",
+        "value-link-showFile": false,
+        "value-link-showLink": true,
+        "value-link-showText": false,
+        "value-link-fileBg": "var(--surface)",
+        "value-link-fileFg": "var(--foreground)",
+        "value-link-linkBg": "var(--accent)",
+        "value-link-linkFg": "var(--accent-foreground)",
+        "value-link-textBg": "var(--surface)",
+        "value-link-textFg": "var(--foreground)",
+        "value-text-showFile": false,
+        "value-text-showLink": false,
+        "value-text-showText": true,
+        "value-text-fileBg": "var(--surface)",
+        "value-text-fileFg": "var(--foreground)",
+        "value-text-linkBg": "var(--surface)",
+        "value-text-linkFg": "var(--foreground)",
+        "value-text-textBg": "var(--accent)",
+        "value-text-textFg": "var(--accent-foreground)"
+      },
+      "x": 470,
+      "y": 400
+    },
+    {
+      "id": "ce_open",
+      "type": "JavaScriptFunction",
+      "label": "Open it: fill the fields",
+      "parameters": {
+        "runOnChange-in-creation": false,
+        "runOnChange-in-kinds": false,
+        "functionScript": "// A new creation (no id) or one of hers to edit. The kind list is the option set, in its order, in the reader's words.\nconst c = Inputs.creation && typeof Inputs.creation === 'object' ? Inputs.creation : {};\nconst get = (m, k) => (m && typeof m.get === 'function' ? m.get(k) : m && m[k]);\nconst words = {\n  'creations.kindDocument': Inputs.kDocument, 'creations.kindInteractive': Inputs.kInteractive, 'creations.kindPrompt': Inputs.kPrompt,\n  'creations.kindAudioVideo': Inputs.kAudioVideo, 'creations.kindLink': Inputs.kLink, 'creations.kindOther': Inputs.kOther\n};\nOutputs.kindItems = (Inputs.kinds || []).map((k) => ({ Label: words[get(k, 'labelKey')] || get(k, 'kind'), Value: get(k, 'kind') }));\nconst isNew = !c.id;\nOutputs.id = c.id || '';\nOutputs.isNew = isNew;\nOutputs.headKey = isNew ? 'creations.addHead' : 'creations.editHead';\nOutputs.title = c.title || '';\nOutputs.kind = c.kind || 'document';\nOutputs.madeWith = c.madeWith || '';\nOutputs.description = c.description || '';\nOutputs.usedInClass = c.usedInClass === true;\nOutputs.form = isNew ? '' : String(c.form || '');\nOutputs.fromHandIn = c.fromHandIn === true;\nOutputs.url = !isNew && c.form === 'link' ? String(c.url || '') : '';\nOutputs.text = !isNew && c.form === 'text' ? String(c.text || '') : '';\nconst files = Array.isArray(c.files) ? c.files : [];\nOutputs.keptKey = isNew ? '' : c.fromHandIn === true ? 'creations.keptHandIn' : c.form === 'file' ? 'creations.keptFile' : '';\nOutputs.keptName = files.length ? String(files[0].fileName || '') : '';\nOutputs.showKept = !isNew && (c.fromHandIn === true || c.form === 'file');\nOutputs.canDelete = !isNew;\nOutputs.opened();\nOutputs.toFile();\n"
+      },
+      "ports": [
+        {
+          "name": "in-creation",
+          "plug": "input",
+          "type": "*",
+          "displayName": "creation",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-kinds",
+          "plug": "input",
+          "type": "*",
+          "displayName": "kinds",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-kDocument",
+          "plug": "input",
+          "type": "*",
+          "displayName": "kDocument",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-kInteractive",
+          "plug": "input",
+          "type": "*",
+          "displayName": "kInteractive",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-kPrompt",
+          "plug": "input",
+          "type": "*",
+          "displayName": "kPrompt",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-kAudioVideo",
+          "plug": "input",
+          "type": "*",
+          "displayName": "kAudioVideo",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-kLink",
+          "plug": "input",
+          "type": "*",
+          "displayName": "kLink",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-kOther",
+          "plug": "input",
+          "type": "*",
+          "displayName": "kOther",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-kindItems",
+          "plug": "output",
+          "type": "*",
+          "displayName": "kindItems",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-id",
+          "plug": "output",
+          "type": "*",
+          "displayName": "id",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isNew",
+          "plug": "output",
+          "type": "*",
+          "displayName": "isNew",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-headKey",
+          "plug": "output",
+          "type": "*",
+          "displayName": "headKey",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-title",
+          "plug": "output",
+          "type": "*",
+          "displayName": "title",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-kind",
+          "plug": "output",
+          "type": "*",
+          "displayName": "kind",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-madeWith",
+          "plug": "output",
+          "type": "*",
+          "displayName": "madeWith",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-description",
+          "plug": "output",
+          "type": "*",
+          "displayName": "description",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-usedInClass",
+          "plug": "output",
+          "type": "*",
+          "displayName": "usedInClass",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-form",
+          "plug": "output",
+          "type": "*",
+          "displayName": "form",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-fromHandIn",
+          "plug": "output",
+          "type": "*",
+          "displayName": "fromHandIn",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-url",
+          "plug": "output",
+          "type": "*",
+          "displayName": "url",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-text",
+          "plug": "output",
+          "type": "*",
+          "displayName": "text",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-keptKey",
+          "plug": "output",
+          "type": "*",
+          "displayName": "keptKey",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-keptName",
+          "plug": "output",
+          "type": "*",
+          "displayName": "keptName",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showKept",
+          "plug": "output",
+          "type": "*",
+          "displayName": "showKept",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-canDelete",
+          "plug": "output",
+          "type": "*",
+          "displayName": "canDelete",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-opened",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-toFile",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 3040
+    },
+    {
+      "id": "ce_view",
+      "type": "JavaScriptFunction",
+      "label": "Which parts show",
+      "parameters": {
+        "functionScript": "// New: the tabs, and the open tab's part. Editing: no tabs; her own link or text can be changed,\n// a file or a hand-in cannot (what it keeps is said in a sentence instead).\nconst isNew = Inputs.isNew === true;\nconst own = Inputs.fromHandIn !== true;\nOutputs.showTabs = isNew;\nOutputs.showFile = isNew && Inputs.tabFile === true;\nOutputs.showLink = isNew ? Inputs.tabLink === true : own && Inputs.form === 'link';\nOutputs.showText = isNew ? Inputs.tabText === true : own && Inputs.form === 'text';\nOutputs.showDelete = Inputs.canDelete === true && Inputs.confirming !== true;\n"
+      },
+      "ports": [
+        {
+          "name": "in-isNew",
+          "plug": "input",
+          "type": "*",
+          "displayName": "isNew",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-fromHandIn",
+          "plug": "input",
+          "type": "*",
+          "displayName": "fromHandIn",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-form",
+          "plug": "input",
+          "type": "*",
+          "displayName": "form",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-tabFile",
+          "plug": "input",
+          "type": "*",
+          "displayName": "tabFile",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-tabLink",
+          "plug": "input",
+          "type": "*",
+          "displayName": "tabLink",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-tabText",
+          "plug": "input",
+          "type": "*",
+          "displayName": "tabText",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-canDelete",
+          "plug": "input",
+          "type": "*",
+          "displayName": "canDelete",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-confirming",
+          "plug": "input",
+          "type": "*",
+          "displayName": "confirming",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-showTabs",
+          "plug": "output",
+          "type": "*",
+          "displayName": "showTabs",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showFile",
+          "plug": "output",
+          "type": "*",
+          "displayName": "showFile",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showLink",
+          "plug": "output",
+          "type": "*",
+          "displayName": "showLink",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showText",
+          "plug": "output",
+          "type": "*",
+          "displayName": "showText",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showDelete",
+          "plug": "output",
+          "type": "*",
+          "displayName": "showDelete",
+          "group": "Outputs"
+        }
+      ],
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "ce_guess",
+      "type": "JavaScriptFunction",
+      "label": "First guess at the kind (new only)",
+      "parameters": {
+        "functionScript": "// A link is a link and text is a prompt; a file is what its ending says (Option sets/Creation kinds).\n// Only while adding: an existing creation keeps the kind she gave it. She can always change it.\nif (Inputs.isNew !== true) return;\nconst tab = String(Inputs.tab || 'file');\nOutputs.kind = tab === 'link' ? 'link' : tab === 'text' ? 'prompt' : String(Inputs.fileKind || 'document');\n"
+      },
+      "ports": [
+        {
+          "name": "in-isNew",
+          "plug": "input",
+          "type": "*",
+          "displayName": "isNew",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-tab",
+          "plug": "input",
+          "type": "*",
+          "displayName": "tab",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-fileKind",
+          "plug": "input",
+          "type": "*",
+          "displayName": "fileKind",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-kind",
+          "plug": "output",
+          "type": "*",
+          "displayName": "kind",
+          "group": "Outputs"
+        }
+      ],
+      "x": 470,
+      "y": 3160
+    },
+    {
+      "id": "ce_picker",
+      "type": "Open File Picker",
+      "label": "Choose a file",
+      "x": 470,
+      "y": 1240
+    },
+    {
+      "id": "ce_files",
+      "type": "Javascript2",
+      "label": "The file to keep",
+      "parameters": {
+        "code": "/*\n * The one file a new creation keeps: a kind on the hand-in list (Option sets/Hand-in kinds), up to\n * 50 MB, judged from its name and size before anything is uploaded; saveCreation checks it again,\n * from its bytes. Choosing or dropping another replaces it. `kindGuess` is its creation kind, from\n * the endings Option sets/Creation kinds lists. `start` puts it on `current` for the Upload File\n * node; the node's done comes back as `uploaded`, and `stored` fires with its stored name.\n */\nconst MAX_BYTES = 50 * 1024 * 1024;\nlet chosen = null;\n\nScript.Inputs = { kinds: 'array', creationKinds: 'array', picked: '*', pickedName: 'string', pickedSize: 'number', dropped: 'array', cloudFile: '*' };\nScript.Outputs = {\n  current: '*', hasFile: 'boolean', name: 'string', size: 'string', accept: 'string', kindGuess: 'string',\n  whyKey: 'string', whyName: 'string', refused: 'signal', accepted: 'signal', uploadNow: 'signal', storedName: 'string', stored: 'signal'\n};\n\nconst get = (m, k) => (m && typeof m.get === 'function' ? m.get(k) : m && m[k]);\nconst extOf = (n) => { const s = String(n || ''); const d = s.lastIndexOf('.'); return d > 0 ? s.slice(d + 1).toLowerCase() : ''; };\nconst exts = () => (Script.Inputs.kinds || []).map((k) => get(k, 'ext')).filter(Boolean);\nconst sizeText = (n) => (n >= 1024 * 1024 ? (n / (1024 * 1024)).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB');\n\nfunction publish() {\n  Script.Outputs.hasFile = !!chosen;\n  Script.Outputs.name = chosen ? chosen.name : '';\n  Script.Outputs.size = chosen ? sizeText(chosen.size) : '';\n  const ext = chosen ? extOf(chosen.name) : '';\n  const row = (Script.Inputs.creationKinds || []).find((k) => ext && String(get(k, 'exts') || '').split(',').includes(ext));\n  Script.Outputs.kindGuess = row ? get(row, 'kind') : 'document';\n}\nfunction take(file, rawName, rawSize) {\n  const name = String(rawName || '');\n  const size = Number(rawSize) || 0;\n  if (!file || !name) return;\n  if (!exts().includes(extOf(name))) { Script.Outputs.whyKey = 'creations.badType'; Script.Outputs.whyName = name; Script.Outputs.refused(); return; }\n  if (size > MAX_BYTES) { Script.Outputs.whyKey = 'creations.tooBig'; Script.Outputs.whyName = name; Script.Outputs.refused(); return; }\n  chosen = { file, name, size };\n  publish();\n  Script.Outputs.accepted();\n}\n\nScript.OnInit = function () { publish(); };\nScript.Setters.kinds = function () {\n  Script.Outputs.accept = exts().map((e) => '.' + e).join(',');\n};\nScript.Signals.addPicked = function () { take(Script.Inputs.picked, Script.Inputs.pickedName, Script.Inputs.pickedSize); };\nScript.Signals.addDropped = function () {\n  const f = Array.from(Script.Inputs.dropped || [])[0];\n  if (f) take(f, f.name, f.size);\n};\nScript.Signals.start = function () {\n  if (!chosen) return;\n  Script.Outputs.current = chosen.file;\n  Script.Outputs.uploadNow();\n};\nScript.Signals.uploaded = function () {\n  const f = Script.Inputs.cloudFile;\n  Script.Outputs.storedName = f ? (typeof f.getName === 'function' ? f.getName() : String(f.name || '')) : '';\n  Script.Outputs.stored();\n};\nScript.Signals.clear = function () {\n  chosen = null;\n  publish();\n};\n"
+      },
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "ce_upload",
+      "type": "Upload File",
+      "label": "Upload it privately",
+      "parameters": {
+        "private": true
+      },
+      "x": 470,
+      "y": 6280
+    },
+    {
+      "id": "ce_check",
+      "type": "JavaScriptFunction",
+      "label": "Ready to save?",
+      "parameters": {
+        "runOnChange-in-isNew": false,
+        "runOnChange-in-tab": false,
+        "runOnChange-in-hasFile": false,
+        "runOnChange-in-url": false,
+        "runOnChange-in-text": false,
+        "runOnChange-in-title": false,
+        "runOnChange-in-form": false,
+        "runOnChange-in-fromHandIn": false,
+        "functionScript": "// Words first, then what it holds. A new file is uploaded before saveCreation is called; anything else goes straight there.\nconst refuse = (key) => { Outputs.whyKey = key; Outputs.refuse(); };\nif (!String(Inputs.title || '').trim()) return refuse('creations.needTitle');\nconst isNew = Inputs.isNew === true;\nconst form = isNew ? String(Inputs.tab || 'file') : String(Inputs.form || '');\nconst own = isNew || Inputs.fromHandIn !== true;\nif (isNew && form === 'file') {\n  if (!Inputs.hasFile) return refuse('creations.needFile');\n  Outputs.upload();\n  return;\n}\nif (own && form === 'link' && !String(Inputs.url || '').trim()) return refuse('creations.needLink');\nif (own && form === 'text' && !String(Inputs.text || '').trim()) return refuse('creations.needText');\nOutputs.send();\n"
+      },
+      "ports": [
+        {
+          "name": "in-isNew",
+          "plug": "input",
+          "type": "*",
+          "displayName": "isNew",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-tab",
+          "plug": "input",
+          "type": "*",
+          "displayName": "tab",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-hasFile",
+          "plug": "input",
+          "type": "*",
+          "displayName": "hasFile",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-url",
+          "plug": "input",
+          "type": "*",
+          "displayName": "url",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-text",
+          "plug": "input",
+          "type": "*",
+          "displayName": "text",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "*",
+          "displayName": "title",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-form",
+          "plug": "input",
+          "type": "*",
+          "displayName": "form",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-fromHandIn",
+          "plug": "input",
+          "type": "*",
+          "displayName": "fromHandIn",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-whyKey",
+          "plug": "output",
+          "type": "*",
+          "displayName": "whyKey",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-upload",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-send",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 2080
+    },
+    {
+      "id": "ce_send",
+      "type": "JavaScriptFunction",
+      "label": "What goes to saveCreation",
+      "parameters": {
+        "runOnChange-in-id": false,
+        "runOnChange-in-isNew": false,
+        "runOnChange-in-tab": false,
+        "runOnChange-in-form": false,
+        "runOnChange-in-storedName": false,
+        "runOnChange-in-url": false,
+        "runOnChange-in-text": false,
+        "functionScript": "// Runs once the file is uploaded (a new file) or straight from the check, and fires go in the same run.\nconst isNew = Inputs.isNew === true;\nconst form = isNew ? String(Inputs.tab || 'file') : String(Inputs.form || '');\nOutputs.id = isNew ? '' : String(Inputs.id || '');\nOutputs.form = form;\nOutputs.file = isNew && form === 'file' ? String(Inputs.storedName || '') : '';\nOutputs.url = form === 'link' ? String(Inputs.url || '') : '';\nOutputs.text = form === 'text' ? String(Inputs.text || '') : '';\nOutputs.go();\n"
+      },
+      "ports": [
+        {
+          "name": "in-id",
+          "plug": "input",
+          "type": "*",
+          "displayName": "id",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-isNew",
+          "plug": "input",
+          "type": "*",
+          "displayName": "isNew",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-tab",
+          "plug": "input",
+          "type": "*",
+          "displayName": "tab",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-form",
+          "plug": "input",
+          "type": "*",
+          "displayName": "form",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-storedName",
+          "plug": "input",
+          "type": "*",
+          "displayName": "storedName",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-url",
+          "plug": "input",
+          "type": "*",
+          "displayName": "url",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-text",
+          "plug": "input",
+          "type": "*",
+          "displayName": "text",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-id",
+          "plug": "output",
+          "type": "*",
+          "displayName": "id",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-form",
+          "plug": "output",
+          "type": "*",
+          "displayName": "form",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-file",
+          "plug": "output",
+          "type": "*",
+          "displayName": "file",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-url",
+          "plug": "output",
+          "type": "*",
+          "displayName": "url",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-text",
+          "plug": "output",
+          "type": "*",
+          "displayName": "text",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 2200
+    },
+    {
+      "id": "ce_cf",
+      "type": "CloudFunction2",
+      "label": "saveCreation (her own only)",
+      "parameters": {
+        "function": "saveCreation"
+      },
+      "x": 470,
+      "y": 5320
+    },
+    {
+      "id": "ce_del_cf",
+      "type": "CloudFunction2",
+      "label": "deleteCreation (her own only; never the hand-in)",
+      "parameters": {
+        "function": "deleteCreation"
+      },
+      "x": 470,
+      "y": 5440
+    },
+    {
+      "id": "ce_busy_sw",
+      "type": "Switch",
+      "label": "Saving, or not",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 470,
+      "y": 4360
+    },
+    {
+      "id": "ce_not_busy",
+      "type": "Inverter",
+      "label": "Not saving",
+      "x": 470,
+      "y": 3880
+    },
+    {
+      "id": "ce_confirm_sw",
+      "type": "Switch",
+      "label": "Asking: delete it?",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 470,
+      "y": 4600
+    },
+    {
+      "id": "ce_refused_sw",
+      "type": "Switch",
+      "label": "Show: not ready",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 470,
+      "y": 5080
+    },
+    {
+      "id": "ce_server_sw",
+      "type": "Switch",
+      "label": "Show: the server refused",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 470,
+      "y": 5560
+    },
+    {
+      "id": "ce_upfail_sw",
+      "type": "Switch",
+      "label": "Show: upload failed",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 470,
+      "y": 5680
+    },
+    {
+      "id": "ce_bad_sw",
+      "type": "Switch",
+      "label": "Show: that file was not taken",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 470,
+      "y": 1720
+    },
+    {
+      "id": "ce_t_head-2",
+      "type": "Translation",
+      "label": "Add a creation / Edit a creation",
+      "parameters": {
+        "Namespace": "pages"
+      },
+      "x": 470,
+      "y": 160
+    },
+    {
+      "id": "ce_t_tab_file",
+      "type": "Translation",
+      "label": "Upload a file",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "work.tabFile"
+      },
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "ce_t_tab_link",
+      "type": "Translation",
+      "label": "Add a link",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "work.tabLink"
+      },
+      "x": 470,
+      "y": 640
+    },
+    {
+      "id": "ce_t_tab_text",
+      "type": "Translation",
+      "label": "Write or paste",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "work.tabText"
+      },
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "ce_t_drop",
+      "type": "Translation",
+      "label": "Drag a file here, or",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.dropHere"
+      },
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "ce_t_choose",
+      "type": "Translation",
+      "label": "Choose a file",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.choose"
+      },
+      "x": 470,
+      "y": 1360
+    },
+    {
+      "id": "ce_t_chosen",
+      "type": "Translation",
+      "label": "{name} · {size}",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "work.chosen"
+      },
+      "x": 470,
+      "y": 6400
+    },
+    {
+      "id": "ce_fill_chosen",
+      "type": "String Format",
+      "label": "Name and size",
+      "parameters": {
+        "format": "{name} {size}"
+      },
+      "x": 470,
+      "y": 1600
+    },
+    {
+      "id": "ce_t_bad",
+      "type": "Translation",
+      "label": "Why that file was not taken",
+      "parameters": {
+        "Namespace": "pages"
+      },
+      "x": 470,
+      "y": 6520
+    },
+    {
+      "id": "ce_fill_bad",
+      "type": "String Format",
+      "label": "The file's name into the sentence",
+      "parameters": {
+        "format": "{name}"
+      },
+      "x": 470,
+      "y": 1840
+    },
+    {
+      "id": "ce_t_types",
+      "type": "Translation",
+      "label": "What can be kept",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.types"
+      },
+      "x": 470,
+      "y": 1960
+    },
+    {
+      "id": "ce_t_url",
+      "type": "Translation",
+      "label": "Link",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "work.linkLabel"
+      },
+      "x": 470,
+      "y": 2320
+    },
+    {
+      "id": "ce_t_ph",
+      "type": "Translation",
+      "label": "https://",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "work.linkPlaceholder"
+      },
+      "x": 470,
+      "y": 2440
+    },
+    {
+      "id": "ce_t_text",
+      "type": "Translation",
+      "label": "Your text",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.textLabel"
+      },
+      "x": 470,
+      "y": 2560
+    },
+    {
+      "id": "ce_t_kept",
+      "type": "Translation",
+      "label": "What it keeps",
+      "parameters": {
+        "Namespace": "pages"
+      },
+      "x": 470,
+      "y": 6640
+    },
+    {
+      "id": "ce_fill_kept",
+      "type": "String Format",
+      "label": "The file's name into the sentence",
+      "parameters": {
+        "format": "{name}"
+      },
+      "x": 470,
+      "y": 2680
+    },
+    {
+      "id": "ce_t_name",
+      "type": "Translation",
+      "label": "Title",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.titleLabel"
+      },
+      "x": 470,
+      "y": 2920
+    },
+    {
+      "id": "ce_t_kind",
+      "type": "Translation",
+      "label": "What kind of thing is it?",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.kindLabel"
+      },
+      "x": 470,
+      "y": 3280
+    },
+    {
+      "id": "ce_t_made",
+      "type": "Translation",
+      "label": "Made with (optional)",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.madeWithLabel"
+      },
+      "x": 470,
+      "y": 3400
+    },
+    {
+      "id": "ce_t_made_ph",
+      "type": "Translation",
+      "label": "Claude, Canva, a custom GPT…",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.madeWithPlaceholder"
+      },
+      "x": 470,
+      "y": 3520
+    },
+    {
+      "id": "ce_t_desc",
+      "type": "Translation",
+      "label": "A line about it (optional)",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.descriptionLabel"
+      },
+      "x": 470,
+      "y": 3640
+    },
+    {
+      "id": "ce_t_used",
+      "type": "Translation",
+      "label": "I've used it in class",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.usedLabel"
+      },
+      "x": 470,
+      "y": 3760
+    },
+    {
+      "id": "ce_t_save",
+      "type": "Translation",
+      "label": "Save",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.save"
+      },
+      "x": 470,
+      "y": 4000
+    },
+    {
+      "id": "ce_t_busy",
+      "type": "Translation",
+      "label": "Saving…",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.saving"
+      },
+      "x": 470,
+      "y": 4480
+    },
+    {
+      "id": "ce_t_cancel",
+      "type": "Translation",
+      "label": "Cancel",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.cancel"
+      },
+      "x": 470,
+      "y": 4120
+    },
+    {
+      "id": "ce_t_delete",
+      "type": "Translation",
+      "label": "Delete",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.delete"
+      },
+      "x": 470,
+      "y": 4240
+    },
+    {
+      "id": "ce_t_confirm",
+      "type": "Translation",
+      "label": "Delete this creation?",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.deleteConfirm"
+      },
+      "x": 470,
+      "y": 4720
+    },
+    {
+      "id": "ce_t_yes",
+      "type": "Translation",
+      "label": "Yes, delete it",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.deleteYes"
+      },
+      "x": 470,
+      "y": 4840
+    },
+    {
+      "id": "ce_t_no",
+      "type": "Translation",
+      "label": "Keep it",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.deleteNo"
+      },
+      "x": 470,
+      "y": 4960
+    },
+    {
+      "id": "ce_t_refused",
+      "type": "Translation",
+      "label": "Not ready, in a sentence",
+      "parameters": {
+        "Namespace": "pages"
+      },
+      "x": 470,
+      "y": 5200
+    },
+    {
+      "id": "ce_t_upfail",
+      "type": "Translation",
+      "label": "The upload failed",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "work.uploadFailed"
+      },
+      "x": 470,
+      "y": 5800
+    },
+    {
+      "id": "ce_t_k_doc",
+      "type": "Translation",
+      "label": "Document",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.kindDocument"
+      },
+      "x": 470,
+      "y": 6760
+    },
+    {
+      "id": "ce_t_k_int",
+      "type": "Translation",
+      "label": "Interactive page",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.kindInteractive"
+      },
+      "x": 470,
+      "y": 6880
+    },
+    {
+      "id": "ce_t_k_prompt",
+      "type": "Translation",
+      "label": "Prompt",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.kindPrompt"
+      },
+      "x": 470,
+      "y": 7000
+    },
+    {
+      "id": "ce_t_k_av",
+      "type": "Translation",
+      "label": "Audio or video",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.kindAudioVideo"
+      },
+      "x": 470,
+      "y": 7120
+    },
+    {
+      "id": "ce_t_k_link",
+      "type": "Translation",
+      "label": "Link",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.kindLink"
+      },
+      "x": 470,
+      "y": 7240
+    },
+    {
+      "id": "ce_t_k_other",
+      "type": "Translation",
+      "label": "Other",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.kindOther"
+      },
+      "x": 470,
+      "y": 7360
+    }
+  ],
+  "visualRoots": [
+    "ce_root-2"
+  ]
+}

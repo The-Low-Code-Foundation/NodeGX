@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d709eee3-2e20-587b-8aa6-c6731aad618f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "bc_in",
+      "fromProperty": "headKey",
+      "toId": "bc_t_head",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "bc_t_head",
+      "fromProperty": "Translation",
+      "toId": "bc_fill",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "bc_in",
+      "fromProperty": "n",
+      "toId": "bc_fill",
+      "toProperty": "n"
+    },
+    {
+      "fromId": "bc_in",
+      "fromProperty": "date",
+      "toId": "bc_fill",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "bc_fill",
+      "fromProperty": "formatted",
+      "toId": "bc_head_text",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "bc_in",
+      "fromProperty": "statusKey",
+      "toId": "bc_status",
+      "toProperty": "labelKey"
+    },
+    {
+      "fromId": "bc_in",
+      "fromProperty": "statusBg",
+      "toId": "bc_status",
+      "toProperty": "bg"
+    },
+    {
+      "fromId": "bc_in",
+      "fromProperty": "statusFg",
+      "toId": "bc_status",
+      "toProperty": "fg"
+    },
+    {
+      "fromId": "bc_in",
+      "fromProperty": "title",
+      "toId": "bc_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "bc_t_brief",
+      "fromProperty": "Translation",
+      "toId": "bc_brief_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "bc_in",
+      "fromProperty": "brief",
+      "toId": "bc_brief",
+      "toProperty": "markdown"
+    },
+    {
+      "fromId": "bc_in",
+      "fromProperty": "hasChecklist",
+      "toId": "bc_list_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "bc_t_list",
+      "fromProperty": "Translation",
+      "toId": "bc_list_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "bc_in",
+      "fromProperty": "checklist",
+      "toId": "bc_list_rows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "bc_in",
+      "fromProperty": "hasResources",
+      "toId": "bc_res_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "bc_t_res",
+      "fromProperty": "Translation",
+      "toId": "bc_res_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "bc_in",
+      "fromProperty": "resources",
+      "toId": "bc_res_rows",
+      "toProperty": "items"
+    }
+  ]
+}

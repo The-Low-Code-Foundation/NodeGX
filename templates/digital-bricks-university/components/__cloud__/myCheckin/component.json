@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "78f855f3-210f-54b2-87d0-4c7f0f1e8063",
+  "name": "myCheckin",
+  "path": "/#__cloud__/myCheckin",
+  "type": "cloud",
+  "created": "2026-11-12T14:32:56.528Z",
+  "modified": "2026-11-12T14:32:56.528Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A learner opens one of her check-ins (DBU-10): its form and, once answered, her answers. Only her own shared check-ins; one still to send says when it opens (security: authenticated)."
+}

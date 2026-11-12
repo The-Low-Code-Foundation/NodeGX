@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "4006af83-03e3-593c-8e12-1e677cd14a90",
+  "name": "Add learner",
+  "path": "/People/Add learner",
+  "type": "visual",
+  "created": "2026-11-07T21:36:13.315Z",
+  "modified": "2026-11-07T21:36:13.315Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach adds a learner by name, address, organisation and a starting plan; says in one sentence what happened, and tells the page so it can refresh the roster."
+}

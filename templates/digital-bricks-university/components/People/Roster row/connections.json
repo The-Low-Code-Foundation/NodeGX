@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "53573221-6d78-5111-8d88-004a582b1946",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rr_in",
+      "fromProperty": "name",
+      "toId": "rr_name",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rr_in",
+      "fromProperty": "detail",
+      "toId": "rr_detail",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rr_in",
+      "fromProperty": "plan",
+      "toId": "rr_plan",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rr_in",
+      "fromProperty": "progress",
+      "toId": "rr_progress",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rr_t_open",
+      "fromProperty": "Translation",
+      "toId": "rr_open",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "rr_in",
+      "fromProperty": "learnerId",
+      "toId": "rr_to_plan",
+      "toProperty": "pm-learner"
+    },
+    {
+      "fromId": "rr_open",
+      "fromProperty": "onClick",
+      "toId": "rr_to_plan",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "rr_in",
+      "fromProperty": "unread",
+      "toId": "rr_unread",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rr_in",
+      "fromProperty": "hasUnread",
+      "toId": "rr_unread",
+      "toProperty": "mounted"
+    }
+  ]
+}

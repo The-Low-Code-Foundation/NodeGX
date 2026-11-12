@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "58a0a17d-6480-52df-8f44-38b3d54aa77d",
+  "name": "Resource row",
+  "path": "/Library/Resource row",
+  "type": "visual",
+  "created": "2026-11-07T22:10:01.012Z",
+  "modified": "2026-11-07T22:10:01.012Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One resource being edited: a link (its label and address) or an uploaded file (its label, and the file's name), with Up, Down and Remove. Writes the label and address onto its own record as they change."
+}

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "69d798dc-c3f3-50af-8787-3d5a5459e2d4",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "dl_req",
+      "fromProperty": "pm-id",
+      "toId": "dl_fn",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "dl_req",
+      "fromProperty": "pm-title",
+      "toId": "dl_fn",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "dl_req",
+      "fromProperty": "receive",
+      "toId": "dl_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "dl_fn",
+      "fromProperty": "out-id",
+      "toId": "dl_res",
+      "toProperty": "pm-id"
+    },
+    {
+      "fromId": "dl_fn",
+      "fromProperty": "out-done",
+      "toId": "dl_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "dl_fn",
+      "fromProperty": "out-why",
+      "toId": "dl_deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "dl_fn",
+      "fromProperty": "out-refuse",
+      "toId": "dl_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "dl_fn",
+      "fromProperty": "out-failed",
+      "toId": "dl_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "dl_fn",
+      "fromProperty": "failure",
+      "toId": "dl_fail",
+      "toProperty": "send"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "31d348e6-1de7-5cc3-8276-cdd0d5e3e75d",
+  "name": "mailMessages",
+  "path": "/#__cloud__/mailMessages",
+  "type": "cloud",
+  "created": "2026-11-12T10:11:38.839Z",
+  "modified": "2026-11-12T10:11:38.839Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The every-minute flush (DBU-07, nodegx.automations.json): mails every message still waiting whose 5-minute hold is over. No client may call it (rule nobody); only the schedule does."
+}

@@ -1,0 +1,505 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "4006af83-03e3-593c-8e12-1e677cd14a90",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ad_card",
+      "type": "Group",
+      "label": "Add a learner",
+      "children": [
+        "ad_h",
+        "ad_lede",
+        "ad_fields",
+        "ad_actions",
+        "ad_msg"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ad_h",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "ad_card",
+      "parameters": {
+        "text": "",
+        "as": "h2",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ad_lede",
+      "type": "Text",
+      "label": "What adding does",
+      "parent": "ad_card",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "maxWidth": {
+          "value": 560,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "ad_fields",
+      "type": "Group",
+      "label": "The fields",
+      "parent": "ad_card",
+      "children": [
+        "ad_name",
+        "ad_email",
+        "ad_org",
+        "ad_tpl"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 480,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "ad_name",
+      "type": "net.noodl.controls.textinput",
+      "label": "Name",
+      "parent": "ad_fields",
+      "parameters": {
+        "type": "text",
+        "useLabel": true,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "ad_email",
+      "type": "net.noodl.controls.textinput",
+      "label": "Email address",
+      "parent": "ad_fields",
+      "parameters": {
+        "type": "email",
+        "useLabel": true,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "ad_org",
+      "type": "net.noodl.controls.textinput",
+      "label": "Organisation",
+      "parent": "ad_fields",
+      "parameters": {
+        "type": "text",
+        "useLabel": true,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "ad_tpl",
+      "type": "net.noodl.controls.options",
+      "label": "Start their plan from",
+      "parent": "ad_fields",
+      "parameters": {
+        "useLabel": true,
+        "value": "",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "ad_actions",
+      "type": "Group",
+      "label": "Actions",
+      "parent": "ad_card",
+      "children": [
+        "ad_submit",
+        "ad_close"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)"
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "ad_submit",
+      "type": "net.noodl.controls.button",
+      "label": "Add learner",
+      "parent": "ad_actions",
+      "parameters": {
+        "label": ""
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "ad_close",
+      "type": "net.noodl.controls.button",
+      "label": "Close",
+      "parent": "ad_actions",
+      "parameters": {
+        "label": "",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "ad_msg",
+      "type": "Text",
+      "label": "What happened, in a sentence",
+      "parent": "ad_card",
+      "parameters": {
+        "text": "",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 1360
+    },
+    {
+      "id": "ad_in",
+      "type": "Component Inputs",
+      "label": "Add learner in",
+      "x": 700,
+      "y": 20,
+      "ports": [
+        {
+          "name": "templates",
+          "plug": "output",
+          "type": "array",
+          "displayName": "Templates ({id, title})"
+        }
+      ]
+    },
+    {
+      "id": "ad_out",
+      "type": "Component Outputs",
+      "label": "Add learner out",
+      "x": 700,
+      "y": 760,
+      "ports": [
+        {
+          "name": "added",
+          "plug": "input",
+          "type": "signal",
+          "displayName": "Added (or found)"
+        },
+        {
+          "name": "closed",
+          "plug": "input",
+          "type": "signal",
+          "displayName": "Closed"
+        }
+      ]
+    },
+    {
+      "id": "ad_opts",
+      "type": "JavaScriptFunction",
+      "label": "The templates as choices, empty plan first",
+      "x": 700,
+      "y": 100,
+      "parameters": {
+        "functionScript": "if (Inputs.emptyLabel === undefined) return;\nconst templates = Array.isArray(Inputs.templates) ? Inputs.templates : [];\nOutputs.items = [{ Label: Inputs.emptyLabel, Value: '' }].concat(templates.map((t) => ({ Label: t.title, Value: t.id })));\n"
+      },
+      "ports": [
+        {
+          "name": "in-templates",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-emptyLabel",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-items",
+          "plug": "output",
+          "type": "*"
+        }
+      ]
+    },
+    {
+      "id": "ad_call",
+      "type": "CloudFunction2",
+      "label": "addLearner (staff only)",
+      "x": 700,
+      "y": 220,
+      "parameters": {
+        "function": "addLearner"
+      }
+    },
+    {
+      "id": "ad_say",
+      "type": "JavaScriptFunction",
+      "label": "Added, already there, or added without the email",
+      "x": 700,
+      "y": 340,
+      "parameters": {
+        "runOnChange-in-created": false,
+        "runOnChange-in-mailed": false,
+        "runOnChange-in-name": false,
+        "runOnChange-in-email": false,
+        "runOnChange-in-added": false,
+        "runOnChange-in-addedNoMail": false,
+        "runOnChange-in-already": false,
+        "functionScript": "// Say which, because 'already there' means nothing was changed: a coach who mistyped a\n// name on a second press needs to know it was ignored.\nconst fill = (s) => String(s || '').split('{name}').join(String(Inputs.name || '').trim()).split('{email}').join(String(Inputs.email || '').trim().toLowerCase());\nif (Inputs.created !== true) Outputs.text = fill(Inputs.already);\nelse if (Inputs.mailed !== true) Outputs.text = fill(Inputs.addedNoMail);\nelse Outputs.text = fill(Inputs.added);\n"
+      },
+      "ports": [
+        {
+          "name": "in-created",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-mailed",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-name",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-email",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-added",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-addedNoMail",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-already",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-text",
+          "plug": "output",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "ad_msg_sw",
+      "type": "Switch",
+      "label": "Show the sentence once there is one",
+      "x": 700,
+      "y": 460,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "ad_t_h",
+      "type": "Translation",
+      "label": "Add a learner",
+      "x": 1000,
+      "y": 20,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "addLearner.heading"
+      }
+    },
+    {
+      "id": "ad_t_lede",
+      "type": "Translation",
+      "label": "What adding does",
+      "x": 1000,
+      "y": 80,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "addLearner.lede"
+      }
+    },
+    {
+      "id": "ad_t_name",
+      "type": "Translation",
+      "label": "Name",
+      "x": 1000,
+      "y": 140,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "addLearner.name"
+      }
+    },
+    {
+      "id": "ad_t_email",
+      "type": "Translation",
+      "label": "Email address",
+      "x": 1000,
+      "y": 200,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "addLearner.email"
+      }
+    },
+    {
+      "id": "ad_t_org",
+      "type": "Translation",
+      "label": "Organisation",
+      "x": 1000,
+      "y": 260,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "addLearner.organisation"
+      }
+    },
+    {
+      "id": "ad_t_tpl",
+      "type": "Translation",
+      "label": "Start their plan from",
+      "x": 1000,
+      "y": 320,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "addLearner.template"
+      }
+    },
+    {
+      "id": "ad_t_empty",
+      "type": "Translation",
+      "label": "An empty plan",
+      "x": 1000,
+      "y": 380,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "addLearner.emptyPlan"
+      }
+    },
+    {
+      "id": "ad_t_submit",
+      "type": "Translation",
+      "label": "Add learner",
+      "x": 1000,
+      "y": 440,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "addLearner.submit"
+      }
+    },
+    {
+      "id": "ad_t_close",
+      "type": "Translation",
+      "label": "Close",
+      "x": 1000,
+      "y": 500,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "addLearner.cancel"
+      }
+    },
+    {
+      "id": "ad_t_added",
+      "type": "Translation",
+      "label": "Added",
+      "x": 1000,
+      "y": 560,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "addLearner.added"
+      }
+    },
+    {
+      "id": "ad_t_nomail",
+      "type": "Translation",
+      "label": "Added, no email",
+      "x": 1000,
+      "y": 620,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "addLearner.addedNoMail"
+      }
+    },
+    {
+      "id": "ad_t_already",
+      "type": "Translation",
+      "label": "Already one of yours",
+      "x": 1000,
+      "y": 680,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "addLearner.already"
+      }
+    }
+  ],
+  "visualRoots": [
+    "ad_card"
+  ]
+}

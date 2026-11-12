@@ -1,0 +1,181 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "30ec139f-f500-5cfd-8fe2-6ce8abdc8720",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pr_in",
+      "fromProperty": "stepId",
+      "toId": "pr_testid",
+      "toProperty": "id"
+    },
+    {
+      "fromId": "pr_testid",
+      "fromProperty": "formatted",
+      "toId": "pr_row",
+      "toProperty": "data-testid"
+    },
+    {
+      "fromId": "pr_in",
+      "fromProperty": "rowBg",
+      "toId": "pr_row",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "pr_in",
+      "fromProperty": "rowBorder",
+      "toId": "pr_row",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "pr_in",
+      "fromProperty": "iconBg",
+      "toId": "pr_tile",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "pr_in",
+      "fromProperty": "iconFg",
+      "toId": "pr_icon",
+      "toProperty": "iconColor"
+    },
+    {
+      "fromId": "pr_in",
+      "fromProperty": "icon",
+      "toId": "pr_icon",
+      "toProperty": "iconIconSource"
+    },
+    {
+      "fromId": "pr_in",
+      "fromProperty": "kindKey",
+      "toId": "pr_t_kind",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "pr_t_kind",
+      "fromProperty": "Translation",
+      "toId": "pr_kind_fill",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "pr_in",
+      "fromProperty": "n",
+      "toId": "pr_kind_fill",
+      "toProperty": "n"
+    },
+    {
+      "fromId": "pr_kind_fill",
+      "fromProperty": "formatted",
+      "toId": "pr_kind",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pr_in",
+      "fromProperty": "title",
+      "toId": "pr_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pr_in",
+      "fromProperty": "whenKey",
+      "toId": "pr_t_when",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "pr_t_when",
+      "fromProperty": "Translation",
+      "toId": "pr_when_fill",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "pr_in",
+      "fromProperty": "date",
+      "toId": "pr_when_fill",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "pr_in",
+      "fromProperty": "time",
+      "toId": "pr_when_fill",
+      "toProperty": "time"
+    },
+    {
+      "fromId": "pr_when_fill",
+      "fromProperty": "formatted",
+      "toId": "pr_when",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pr_in",
+      "fromProperty": "statusKey",
+      "toId": "pr_chip",
+      "toProperty": "labelKey"
+    },
+    {
+      "fromId": "pr_in",
+      "fromProperty": "statusBg",
+      "toId": "pr_chip",
+      "toProperty": "bg"
+    },
+    {
+      "fromId": "pr_in",
+      "fromProperty": "statusFg",
+      "toId": "pr_chip",
+      "toProperty": "fg"
+    },
+    {
+      "fromId": "pr_t_open",
+      "fromProperty": "Translation",
+      "toId": "pr_open",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "pr_in",
+      "fromProperty": "opens",
+      "toId": "pr_open",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pr_in",
+      "fromProperty": "stepId",
+      "toId": "pr_go",
+      "toProperty": "pm-step"
+    },
+    {
+      "fromId": "pr_open",
+      "fromProperty": "onClick",
+      "toId": "pr_go",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "pr_in",
+      "fromProperty": "what",
+      "toId": "pr_when_fill",
+      "toProperty": "what"
+    },
+    {
+      "fromId": "pr_t_answer",
+      "fromProperty": "Translation",
+      "toId": "pr_answer",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "pr_in",
+      "fromProperty": "answers",
+      "toId": "pr_answer",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pr_in",
+      "fromProperty": "stepId",
+      "toId": "pr_go_ci",
+      "toProperty": "pm-step"
+    },
+    {
+      "fromId": "pr_answer",
+      "fromProperty": "onClick",
+      "toId": "pr_go_ci",
+      "toProperty": "navigate"
+    }
+  ]
+}

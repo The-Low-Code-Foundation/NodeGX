@@ -1,0 +1,305 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "a11ea9d8-ae40-585a-8efb-6e40a0f1628d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ir_row",
+      "type": "Group",
+      "label": "Row (press to open)",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "ir_top",
+        "ir_summary"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border)",
+        "backgroundColor": "var(--surface)",
+        "dataAttributes": "data-testid",
+        "styleCss": "cursor: pointer;"
+      }
+    },
+    {
+      "id": "ir_top",
+      "type": "Group",
+      "label": "Kind and who, then how long",
+      "x": 40,
+      "y": 160,
+      "parent": "ir_row",
+      "children": [
+        "ir_who",
+        "ir_age"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "justifyContent": "space-between",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-1)"
+      }
+    },
+    {
+      "id": "ir_who",
+      "type": "Group",
+      "label": "Kind and who",
+      "x": 40,
+      "y": 280,
+      "parent": "ir_top",
+      "children": [
+        "ir_chip",
+        "ir_name"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-1)"
+      }
+    },
+    {
+      "id": "ir_chip",
+      "type": "/Plan/Chip",
+      "label": "Kind",
+      "x": 40,
+      "y": 400,
+      "parent": "ir_who",
+      "parameters": {
+        "outlined": false
+      }
+    },
+    {
+      "id": "ir_name",
+      "type": "Text",
+      "label": "Learner",
+      "x": 40,
+      "y": 520,
+      "parent": "ir_who",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "ir_age",
+      "type": "Text",
+      "label": "How long it has waited",
+      "x": 40,
+      "y": 640,
+      "parent": "ir_top",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "ir_summary",
+      "type": "Text",
+      "label": "What it is, in a line",
+      "x": 40,
+      "y": 760,
+      "parent": "ir_row",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "ir_in",
+      "type": "Component Inputs",
+      "label": "Row in",
+      "x": 400,
+      "y": 40,
+      "ports": [
+        {
+          "name": "itemId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "kindKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "kindBg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "kindFg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "learner",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "summaryKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "body",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "n",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "days",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "first",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "version",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "ageKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "ageN",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "selected",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "id": "ir_out",
+      "type": "Component Outputs",
+      "label": "Row out",
+      "x": 400,
+      "y": 760,
+      "ports": [
+        {
+          "name": "open",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "ir_t_sum",
+      "type": "Translation",
+      "label": "The summary sentence",
+      "x": 400,
+      "y": 280,
+      "parameters": {
+        "Namespace": "pages"
+      }
+    },
+    {
+      "id": "ir_fill_sum",
+      "type": "String Format",
+      "label": "Its values into it",
+      "x": 400,
+      "y": 400,
+      "parameters": {
+        "format": "{title} {body} {n} {days} {first} {version}"
+      }
+    },
+    {
+      "id": "ir_t_age",
+      "type": "Translation",
+      "label": "How long, in words",
+      "x": 700,
+      "y": 280,
+      "parameters": {
+        "Namespace": "pages"
+      }
+    },
+    {
+      "id": "ir_fill_age",
+      "type": "String Format",
+      "label": "The number into it",
+      "x": 700,
+      "y": 400,
+      "parameters": {
+        "format": "{n}"
+      }
+    },
+    {
+      "id": "ir_bg",
+      "type": "Expression",
+      "label": "Tinted while open",
+      "x": 700,
+      "y": 40,
+      "parameters": {
+        "expression": "selected ? 'var(--accent)' : 'var(--surface)'"
+      }
+    },
+    {
+      "id": "ir_testid",
+      "type": "String Format",
+      "label": "inbox-<id>, for tests",
+      "x": 700,
+      "y": 520,
+      "parameters": {
+        "format": "inbox-{id}"
+      }
+    }
+  ],
+  "visualRoots": [
+    "ir_row"
+  ]
+}

@@ -1,0 +1,153 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "cdcccd85-418c-5e80-836f-4f2fcc6876a1",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "el_row",
+      "type": "Group",
+      "label": "The estimate",
+      "parameters": {
+        "mounted": false,
+        "sizeMode": "contentSize",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-4)",
+        "borderRadius": "var(--radius-lg)",
+        "backgroundColor": "var(--checkin-bg)",
+        "dataAttributes": "data-testid",
+        "data-testid": "creations-estimate"
+      },
+      "children": [
+        "el_icon",
+        "el_text"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "el_icon",
+      "type": "net.noodl.visual.icon",
+      "label": "Clock",
+      "parent": "el_row",
+      "parameters": {
+        "iconSize": 16,
+        "iconColor": "var(--checkin-fg)",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-clock",
+          "codeAsClass": true
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "el_text",
+      "type": "Text",
+      "label": "About {hours} hours a week saved",
+      "parent": "el_row",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--checkin-fg)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "el_in",
+      "type": "Component Inputs",
+      "label": "The estimate, and whose words",
+      "ports": [
+        {
+          "name": "estimate",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "textKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "first",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "el_fn",
+      "type": "JavaScriptFunction",
+      "label": "Hours and the day, in words",
+      "parameters": {
+        "functionScript": "// shared/Creations of answers estimate {hours, at} from the latest 6-week check-in, or null (DBU-10).\nconst e = Inputs.estimate && typeof Inputs.estimate === 'object' ? Inputs.estimate : null;\nconst n = e ? Number(e.hours) : NaN;\nOutputs.shown = Number.isFinite(n);\nOutputs.hours = Number.isFinite(n) ? String(Math.round(n * 10) / 10) : '';\nOutputs.date = e && e.at ? new Date(e.at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';"
+      },
+      "ports": [
+        {
+          "name": "in-estimate",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "out-shown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-hours",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-date",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "el_t",
+      "type": "Translation",
+      "label": "Your estimate, or theirs",
+      "parameters": {
+        "Namespace": "pages"
+      },
+      "x": 350,
+      "y": 520
+    },
+    {
+      "id": "el_fill",
+      "type": "String Format",
+      "label": "Hours, day and name into it",
+      "parameters": {
+        "format": "{hours}{date}{first}"
+      },
+      "x": 350,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "el_row"
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "3d7e7a3a-03aa-5940-83b4-5ff06eed1884",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ms_req",
+      "fromProperty": "pm-stepId",
+      "toId": "ms_fn",
+      "toProperty": "in-stepId"
+    },
+    {
+      "fromId": "ms_req",
+      "fromProperty": "pm-index",
+      "toId": "ms_fn",
+      "toProperty": "in-index"
+    },
+    {
+      "fromId": "ms_req",
+      "fromProperty": "receive",
+      "toId": "ms_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ms_fn",
+      "fromProperty": "out-order",
+      "toId": "ms_res",
+      "toProperty": "pm-order"
+    },
+    {
+      "fromId": "ms_fn",
+      "fromProperty": "out-done",
+      "toId": "ms_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ms_fn",
+      "fromProperty": "out-why",
+      "toId": "ms_deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "ms_fn",
+      "fromProperty": "out-refuse",
+      "toId": "ms_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ms_fn",
+      "fromProperty": "out-failed",
+      "toId": "ms_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ms_fn",
+      "fromProperty": "failure",
+      "toId": "ms_fail",
+      "toProperty": "send"
+    }
+  ]
+}

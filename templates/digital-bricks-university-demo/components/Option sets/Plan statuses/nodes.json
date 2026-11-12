@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "572cfe9e-2cff-536a-8131-028800b16348",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pst_data",
+      "type": "Static Data",
+      "label": "Plan statuses",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "type": "json",
+        "json": "[{\"id\":\"plan-active\",\"value\":\"active\",\"labelKey\":\"plan.planActive\"},{\"id\":\"plan-paused\",\"value\":\"paused\",\"labelKey\":\"plan.planPaused\"},{\"id\":\"plan-finished\",\"value\":\"finished\",\"labelKey\":\"plan.planFinished\"}]"
+      }
+    },
+    {
+      "id": "pst_out",
+      "type": "Component Outputs",
+      "label": "Statuses out",
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "items",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        }
+      ]
+    }
+  ]
+}

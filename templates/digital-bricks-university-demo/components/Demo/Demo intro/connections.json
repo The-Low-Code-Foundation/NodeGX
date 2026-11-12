@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2579363e-9bfa-5354-8478-ca84fad7cfc1",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "di_mode",
+      "fromProperty": "isDemo",
+      "toId": "di_card",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "di_mode",
+      "fromProperty": "supported",
+      "toId": "di_doors",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "di_mode",
+      "fromProperty": "unsupported",
+      "toId": "di_unsupported",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "di_learner",
+      "fromProperty": "onClick",
+      "toId": "di_go_learner",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "di_coach",
+      "fromProperty": "onClick",
+      "toId": "di_go_coach",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "di_template",
+      "fromProperty": "onClick",
+      "toId": "di_open_template",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "di_t_url",
+      "fromProperty": "Translation",
+      "toId": "di_open_template",
+      "toProperty": "link"
+    },
+    {
+      "fromId": "di_t_pitch",
+      "fromProperty": "Translation",
+      "toId": "di_pitch",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "di_t_lede",
+      "fromProperty": "Translation",
+      "toId": "di_lede",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "di_t_learner",
+      "fromProperty": "Translation",
+      "toId": "di_learner",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "di_t_coach",
+      "fromProperty": "Translation",
+      "toId": "di_coach",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "di_t_unsupported",
+      "fromProperty": "Translation",
+      "toId": "di_unsupported",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "di_t_template",
+      "fromProperty": "Translation",
+      "toId": "di_template",
+      "toProperty": "label"
+    }
+  ]
+}

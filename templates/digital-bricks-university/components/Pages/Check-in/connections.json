@@ -1,0 +1,199 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "3967551f-8600-504f-8b8b-0407fccf05ae",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ci_t_tab",
+      "fromProperty": "Translation",
+      "toId": "ci_page",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "ci_t_back",
+      "fromProperty": "Translation",
+      "toId": "ci_back",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ci_back",
+      "fromProperty": "onClick",
+      "toId": "ci_go_home",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "ci_t_thanks_h",
+      "fromProperty": "Translation",
+      "toId": "ci_thanks_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ci_t_thanks_b",
+      "fromProperty": "Translation",
+      "toId": "ci_thanks_b",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ci_url",
+      "fromProperty": "pm-step",
+      "toId": "ci_step_fn",
+      "toProperty": "in-step"
+    },
+    {
+      "fromId": "ci_top",
+      "fromProperty": "didMount",
+      "toId": "ci_step_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ci_step_fn",
+      "fromProperty": "out-stepId",
+      "toId": "ci_read",
+      "toProperty": "in-stepId"
+    },
+    {
+      "fromId": "ci_step_fn",
+      "fromProperty": "out-go",
+      "toId": "ci_read",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ci_read",
+      "fromProperty": "failure",
+      "toId": "ci_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "ci_read",
+      "fromProperty": "done",
+      "toId": "ci_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ci_fail_sw",
+      "fromProperty": "state",
+      "toId": "ci_missing",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ci_fail_sw",
+      "fromProperty": "state",
+      "toId": "ci_not_failed",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "ci_not_failed",
+      "fromProperty": "result",
+      "toId": "ci_content",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ci_read",
+      "fromProperty": "out-checkin",
+      "toId": "ci_words-2",
+      "toProperty": "in-checkin"
+    },
+    {
+      "fromId": "ci_words-2",
+      "fromProperty": "out-title",
+      "toId": "ci_head",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "ci_words-2",
+      "fromProperty": "out-isWaiting",
+      "toId": "ci_waiting",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ci_words-2",
+      "fromProperty": "out-isOpen",
+      "toId": "ci_open",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ci_words-2",
+      "fromProperty": "out-isAnswered",
+      "toId": "ci_done",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ci_words-2",
+      "fromProperty": "out-stepId",
+      "toId": "ci_form",
+      "toProperty": "stepId"
+    },
+    {
+      "fromId": "ci_words-2",
+      "fromProperty": "out-questions",
+      "toId": "ci_form",
+      "toProperty": "questions"
+    },
+    {
+      "fromId": "ci_words-2",
+      "fromProperty": "out-stepId",
+      "toId": "ci_answers",
+      "toProperty": "prefix"
+    },
+    {
+      "fromId": "ci_words-2",
+      "fromProperty": "out-questions",
+      "toId": "ci_answers",
+      "toProperty": "questions"
+    },
+    {
+      "fromId": "ci_words-2",
+      "fromProperty": "out-answers",
+      "toId": "ci_answers",
+      "toProperty": "answers"
+    },
+    {
+      "fromId": "ci_words-2",
+      "fromProperty": "out-stepId",
+      "toId": "ci_send",
+      "toProperty": "in-stepId"
+    },
+    {
+      "fromId": "ci_form",
+      "fromProperty": "answers",
+      "toId": "ci_send",
+      "toProperty": "in-answers"
+    },
+    {
+      "fromId": "ci_form",
+      "fromProperty": "send",
+      "toId": "ci_msg_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ci_form",
+      "fromProperty": "send",
+      "toId": "ci_send",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ci_send",
+      "fromProperty": "error",
+      "toId": "ci_msg",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ci_send",
+      "fromProperty": "failure",
+      "toId": "ci_msg_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "ci_msg_sw",
+      "fromProperty": "state",
+      "toId": "ci_msg",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ci_send",
+      "fromProperty": "done",
+      "toId": "ci_read",
+      "toProperty": "call"
+    }
+  ]
+}

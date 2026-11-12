@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "27d8f85f-0f13-542a-8f85-98996a470126",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "lh_req",
+      "fromProperty": "userId",
+      "toId": "lh_fn",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "lh_req",
+      "fromProperty": "receive",
+      "toId": "lh_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "lh_fn",
+      "fromProperty": "out-me",
+      "toId": "lh_res",
+      "toProperty": "pm-me"
+    },
+    {
+      "fromId": "lh_fn",
+      "fromProperty": "out-plan",
+      "toId": "lh_res",
+      "toProperty": "pm-plan"
+    },
+    {
+      "fromId": "lh_fn",
+      "fromProperty": "out-steps",
+      "toId": "lh_res",
+      "toProperty": "pm-steps"
+    },
+    {
+      "fromId": "lh_fn",
+      "fromProperty": "out-upNext",
+      "toId": "lh_res",
+      "toProperty": "pm-upNext"
+    },
+    {
+      "fromId": "lh_fn",
+      "fromProperty": "out-progress",
+      "toId": "lh_res",
+      "toProperty": "pm-progress"
+    },
+    {
+      "fromId": "lh_fn",
+      "fromProperty": "out-counts",
+      "toId": "lh_res",
+      "toProperty": "pm-counts"
+    },
+    {
+      "fromId": "lh_fn",
+      "fromProperty": "out-failed",
+      "toId": "lh_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "lh_fn",
+      "fromProperty": "failure",
+      "toId": "lh_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "lh_fn",
+      "fromProperty": "out-done",
+      "toId": "lh_msg",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "lh_req",
+      "fromProperty": "userId",
+      "toId": "lh_msg",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "lh_msg",
+      "fromProperty": "out-latest",
+      "toId": "lh_res",
+      "toProperty": "pm-latest"
+    },
+    {
+      "fromId": "lh_msg",
+      "fromProperty": "out-unread",
+      "toId": "lh_res",
+      "toProperty": "pm-unread"
+    },
+    {
+      "fromId": "lh_msg",
+      "fromProperty": "out-done",
+      "toId": "lh_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "lh_msg",
+      "fromProperty": "out-failed",
+      "toId": "lh_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "lh_msg",
+      "fromProperty": "failure",
+      "toId": "lh_deny",
+      "toProperty": "send"
+    }
+  ]
+}

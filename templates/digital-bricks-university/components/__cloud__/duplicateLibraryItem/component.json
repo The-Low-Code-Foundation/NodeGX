@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "69d798dc-c3f3-50af-8787-3d5a5459e2d4",
+  "name": "duplicateLibraryItem",
+  "path": "/#__cloud__/duplicateLibraryItem",
+  "type": "cloud",
+  "created": "2026-11-07T22:00:36.037Z",
+  "modified": "2026-11-07T22:00:36.037Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach duplicates a library item under a new title: same brief, hand-in list, resources (the same files), tags and time; never archived (security: role:staff)."
+}

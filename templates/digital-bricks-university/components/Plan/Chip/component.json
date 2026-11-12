@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "17ddcc12-2493-533c-83f1-93543a5f529f",
+  "name": "Chip",
+  "path": "/Plan/Chip",
+  "type": "visual",
+  "created": "2026-11-09T10:38:43.810Z",
+  "modified": "2026-11-09T10:38:49.033Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A small rounded label (a step's kind, its status, Draft or Shared) in the colours it is given. Outlined with a dashed edge when it marks something not shared yet."
+}

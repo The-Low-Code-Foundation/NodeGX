@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "fa0b25ba-f0ab-5c24-8b14-c8027f2cec0a",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ack_req",
+      "fromProperty": "userId",
+      "toId": "ack_fn",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "ack_req",
+      "fromProperty": "pm-stepId",
+      "toId": "ack_fn",
+      "toProperty": "in-stepId"
+    },
+    {
+      "fromId": "ack_req",
+      "fromProperty": "pm-answers",
+      "toId": "ack_fn",
+      "toProperty": "in-answers"
+    },
+    {
+      "fromId": "ack_req",
+      "fromProperty": "receive",
+      "toId": "ack_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ack_fn",
+      "fromProperty": "out-answeredAt",
+      "toId": "ack_res",
+      "toProperty": "pm-answeredAt"
+    },
+    {
+      "fromId": "ack_fn",
+      "fromProperty": "out-done",
+      "toId": "ack_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ack_fn",
+      "fromProperty": "out-why",
+      "toId": "ack_deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "ack_fn",
+      "fromProperty": "out-refuse",
+      "toId": "ack_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ack_fn",
+      "fromProperty": "out-failed",
+      "toId": "ack_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ack_fn",
+      "fromProperty": "failure",
+      "toId": "ack_fail",
+      "toProperty": "send"
+    }
+  ]
+}

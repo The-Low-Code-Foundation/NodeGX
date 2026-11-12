@@ -1,0 +1,40 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e0364ec7-b180-52c6-83db-83c595005efe",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ct_data",
+      "type": "Static Data",
+      "label": "Coach tabs",
+      "parameters": {
+        "type": "json",
+        "json": "[{\"id\":\"learners\",\"labelKey\":\"tabs.learners\",\"path\":\"/coach/learners\"},{\"id\":\"inbox\",\"labelKey\":\"tabs.inbox\",\"path\":\"/coach/inbox\"},{\"id\":\"templates\",\"labelKey\":\"tabs.templates\",\"path\":\"/coach/templates\"},{\"id\":\"library\",\"labelKey\":\"tabs.library\",\"path\":\"/coach/library\"},{\"id\":\"settings\",\"labelKey\":\"tabs.settings\",\"path\":\"/coach/settings\"}]"
+      },
+      "x": 40,
+      "y": 40,
+      "metadata": {
+        "comment": "Each tab names its words by key (common namespace, in Strings): the words themselves live there, in every language."
+      }
+    },
+    {
+      "id": "ct_out",
+      "type": "Component Outputs",
+      "label": "Tabs out",
+      "ports": [
+        {
+          "name": "items",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    }
+  ]
+}

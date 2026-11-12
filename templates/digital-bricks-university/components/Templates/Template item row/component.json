@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "7265982f-c68e-59bc-82e9-2d28a6340c47",
+  "name": "Template item row",
+  "path": "/Templates/Template item row",
+  "type": "visual",
+  "created": "2026-11-09T11:02:56.506Z",
+  "modified": "2026-11-09T11:02:56.506Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One step of a template being edited: its kind, title, the day it falls on, its length (a live session) or the library homework it copies (a homework), and Up, Down and Remove. Writes each field onto its own record as it changes."
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "68e318af-c791-55de-833a-560a52a2ef1e",
+  "name": "Inbox kinds",
+  "path": "/Option sets/Inbox kinds",
+  "type": "logic",
+  "created": "2026-11-12T13:09:27.726Z",
+  "modified": "2026-11-12T14:59:36.286Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "What can be waiting in the coach's inbox (DBU-08): a hand-in to review, a question, a learner gone quiet, with the label key and chip colours each shows."
+}

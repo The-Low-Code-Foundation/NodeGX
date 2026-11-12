@@ -1,0 +1,14 @@
+[Unit]
+Description=Move last night's Digital Bricks University backup off this box (encrypted)
+After=dbuniversity-backend.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+EnvironmentFile=/etc/dbuniversity/backup.env
+ExecStart=/opt/dbuniversity/ops/offsite-backup.sh
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/backups/dbuniversity

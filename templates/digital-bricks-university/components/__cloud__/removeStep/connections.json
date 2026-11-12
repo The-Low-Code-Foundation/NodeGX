@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "1480cfda-0ee5-5045-8eec-f040bc350bd8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rs_req-2",
+      "fromProperty": "pm-stepId",
+      "toId": "rs_fn-2",
+      "toProperty": "in-stepId"
+    },
+    {
+      "fromId": "rs_req-2",
+      "fromProperty": "receive",
+      "toId": "rs_fn-2",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rs_fn-2",
+      "fromProperty": "out-title",
+      "toId": "rs_res-2",
+      "toProperty": "pm-title"
+    },
+    {
+      "fromId": "rs_fn-2",
+      "fromProperty": "out-done",
+      "toId": "rs_res-2",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "rs_fn-2",
+      "fromProperty": "out-why",
+      "toId": "rs_deny-2",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "rs_fn-2",
+      "fromProperty": "out-refuse",
+      "toId": "rs_deny-2",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "rs_fn-2",
+      "fromProperty": "out-failed",
+      "toId": "rs_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "rs_fn-2",
+      "fromProperty": "failure",
+      "toId": "rs_fail",
+      "toProperty": "send"
+    }
+  ]
+}

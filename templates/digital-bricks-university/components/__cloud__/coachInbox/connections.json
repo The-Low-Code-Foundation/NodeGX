@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "14abae7d-efb1-5cf4-8530-0b0bcdada0b0",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ci_req",
+      "fromProperty": "receive",
+      "toId": "ci_ask",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ci_req",
+      "fromProperty": "pm-countOnly",
+      "toId": "ci_shape",
+      "toProperty": "in-countOnly"
+    },
+    {
+      "fromId": "ci_ask",
+      "fromProperty": "out-request",
+      "toId": "ci_items",
+      "toProperty": "request"
+    },
+    {
+      "fromId": "ci_items",
+      "fromProperty": "items",
+      "toId": "ci_shape",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "ci_items",
+      "fromProperty": "done",
+      "toId": "ci_shape",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ci_shape",
+      "fromProperty": "out-items",
+      "toId": "ci_res",
+      "toProperty": "pm-items"
+    },
+    {
+      "fromId": "ci_shape",
+      "fromProperty": "out-count",
+      "toId": "ci_res",
+      "toProperty": "pm-count"
+    },
+    {
+      "fromId": "ci_shape",
+      "fromProperty": "out-go",
+      "toId": "ci_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ci_items",
+      "fromProperty": "failed",
+      "toId": "ci_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ci_ask",
+      "fromProperty": "failure",
+      "toId": "ci_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ci_shape",
+      "fromProperty": "failure",
+      "toId": "ci_fail",
+      "toProperty": "send"
+    }
+  ]
+}

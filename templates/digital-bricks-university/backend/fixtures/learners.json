@@ -1,0 +1,322 @@
+{
+  "_about": [
+    "The demo world (DBU-01): the coach and six learners at different points of their programmes. Every person, company, address and link is fictional (example.com).",
+    "TIMES ARE OFFSETS FROM TODAY, in the coach's time zone (Europe/Paris): \"-24d 10:00\" is 24 days ago at 10:00, \"+3d 18:00\" three days from now. tools/lib/seed.mjs turns them into ISO strings at reset, so the demo never goes stale.",
+    "`key` is a readable id. It becomes the row's objectId (\"step-camille-5\"), and a user's key is resolved to the objectId the backend mints for them.",
+    "A homework step with `fromLibraryItem` takes its brief, checklist and resources from that library item unless it gives its own: adding from the library copies (SCOPE R4).",
+    "A `file` starting with @ is a file under fixtures/files/, uploaded privately AS ITS OWNER at reset; the row holds the stored name the backend answers with.",
+    "`at` on a submission or message is when it was sent (the row's createdAt).",
+    "A check-in's `form` is the id of a built-in form (components/__cloud__/shared/Checkin forms), copied onto the step at reset as addStep would; an object is an older form kept as it was. `sendAfter.step` is a position in the same plan. A `response` is her answers (`at`, `answers`, and `seenAt` when the coach pressed Done)."
+  ],
+  "coach": {
+    "key": "richard",
+    "email": "coach@example.com",
+    "name": "Richard Osborne",
+    "organisation": "Digital Bricks",
+    "jobTitle": "Coach",
+    "timezone": "Europe/Paris",
+    "lastSeenAt": "-1d 17:00"
+  },
+  "learners": [
+    {
+      "key": "camille",
+      "email": "camille.laurent@example.com",
+      "name": "Camille Laurent",
+      "organisation": "Lumière Langues",
+      "jobTitle": "French trainer",
+      "timezone": "Europe/Paris",
+      "lastSeenAt": "-1d 18:25",
+      "story": "Week 4. Homework 2 has changes asked; session 3 is booked. A check-in about session 2 went out yesterday and waits for her answer.",
+      "plan": {
+        "title": "AI for language trainers",
+        "status": "active",
+        "startedOn": "-24d",
+        "fromTemplate": "tpl-language-trainers",
+        "meetingLink": "https://meet.example.com/richard-camille",
+        "bookingLink": "https://book.example.com/richard"
+      },
+      "steps": [
+        {
+          "kind": "live", "title": "Kick-off: where AI fits in your teaching", "status": "done",
+          "startsAt": "-24d 10:00", "durationMin": 60, "attended": true,
+          "summary": "We looked at where Camille spends most of her preparation time: vocabulary and writing feedback. Agreed to start with a profile prompt."
+        },
+        {
+          "kind": "homework", "fromLibraryItem": "lib-profile-prompt", "title": "Write your teaching profile prompt",
+          "status": "approved", "dueAt": "-17d 18:00",
+          "submissions": [
+            {
+              "at": "-18d 21:10", "kind": "text",
+              "text": "You are helping me prepare French lessons for adults at B1 level who work in hotels in Lyon. Keep instructions in simple French, give examples from hotel work, and never invent grammar rules.",
+              "note": "First go. I kept it short on purpose.",
+              "review": "approved", "reviewedAt": "-17d 09:30", "reviewNote": "Clear and reusable. The 'never invent grammar rules' line is a good one."
+            }
+          ]
+        },
+        {
+          "kind": "live", "title": "Prompting for lesson materials", "status": "done",
+          "startsAt": "-14d 10:00", "durationMin": 60, "attended": true,
+          "recordingUrl": "https://recordings.example.com/camille-2",
+          "summary": "Built a first vocabulary list together from her profile prompt. Talked about checking every example sentence before class."
+        },
+        {
+          "kind": "checkin", "title": "Two-minute check-in", "status": "done", "sendsAt": "-10d 08:00",
+          "form": { "questions": [
+            { "id": "confidence", "type": "scale", "label": "How confident do you feel using AI to prepare a lesson?", "min": 1, "max": 5 },
+            { "id": "stuck", "type": "text", "label": "Is anything getting in the way?" }
+          ] },
+          "sentAt": "-10d 08:00",
+          "response": { "at": "-9d 19:05", "seenAt": "-9d 21:00", "answers": { "confidence": 3, "stuck": "Finding time to try things between classes." } }
+        },
+        {
+          "kind": "homework", "fromLibraryItem": "lib-vocab-activity", "title": "Build a vocabulary activity with Claude",
+          "status": "changes_asked", "dueAt": "-3d 18:00",
+          "submissions": [
+            {
+              "at": "-4d 19:40", "kind": "file", "file": "@camille-vocab-activity-v1.pdf",
+              "note": "Hotel check-in vocabulary for my B1 group.",
+              "review": "changes", "reviewedAt": "-2d 11:00",
+              "reviewNote": "Good start. Two of the example sentences use the passé simple, which your group hasn't met: rewrite those two, and add the answer key on a separate page."
+            }
+          ]
+        },
+        {
+          "kind": "live", "title": "Feedback on student writing", "status": "booked",
+          "startsAt": "+3d 10:00", "durationMin": 60,
+          "prepNote": "Bring two short pieces of writing from your learners (names removed)."
+        },
+        { "kind": "homework", "fromLibraryItem": "lib-interactive-page", "title": "Turn a lesson into an interactive page", "status": "not_started", "dueAt": "+10d 18:00" },
+        { "kind": "live", "title": "Wrap-up and what next", "status": "to_book", "durationMin": 45 },
+        {
+          "kind": "homework", "title": "Portfolio review: pick your best three", "status": "not_started", "shared": false, "dueAt": "+20d 18:00",
+          "brief": "Choose the three things you made that you would show a colleague, and say in a sentence each why."
+        },
+        {
+          "kind": "checkin", "title": "Six weeks on", "form": "six-week-impact", "status": "scheduled",
+          "sendAfter": { "step": 8, "days": 42 }
+        },
+        {
+          "kind": "checkin", "title": "After session 2", "form": "after-session", "status": "sent",
+          "sendsAt": "-1d 09:00", "sentAt": "-1d 09:05"
+        }
+      ],
+      "messages": [
+        { "at": "-23d 09:00", "from": "coach", "body": "Welcome, Camille. Your first homework is up: the profile prompt. Ask me anything here, any time.", "readAt": "-23d 12:40" },
+        { "at": "-2d 11:02", "from": "coach", "step": 5, "body": "I've left notes on your vocabulary activity. Nearly there: just the two sentences and the answer key.", "readAt": "-1d 18:15" },
+        { "at": "-1d 18:20", "from": "learner", "step": 5, "body": "Thanks! I'll send version 2 on Monday.", "readAt": "-1d 19:02", "settledAt": "-1d 19:02" }
+      ],
+      "creations": [
+        { "title": "Profile prompt for B1 hotel French", "kind": "prompt", "fromStep": 2, "fromSubmission": 1, "madeWith": "Claude", "usedInClass": false,
+          "description": "The prompt I start every lesson-planning chat with." },
+        { "title": "Café vocabulary flashcards", "kind": "interactive", "url": "https://cards.example.com/camille/cafe", "madeWith": "Claude and a flashcard site", "usedInClass": true },
+        { "title": "Hotel check-in lesson pack", "kind": "document", "file": "@camille-hotel-lesson-pack.docx", "madeWith": "Claude and Word", "usedInClass": true,
+          "description": "A 60-minute B1 lesson for reception staff: dialogue, useful phrases, role-play and an exit ticket." },
+        { "title": "Gap-fill: at the reception desk", "kind": "interactive", "file": "@camille-gap-fill-reception.html", "madeWith": "Claude", "usedInClass": false,
+          "description": "Five gaps from a check-in dialogue, with a Check button." },
+        { "title": "Listening: a guest asks the way", "kind": "audio_video", "file": "@camille-listening-directions.mp3", "madeWith": "a text-to-speech voice", "usedInClass": false },
+        { "title": "Hotel French helper", "kind": "link", "url": "https://chat.example.com/g/hotel-french-helper", "madeWith": "a custom GPT", "usedInClass": false,
+          "description": "Answers my learners' questions about hotel French between sessions, in simple French." }
+      ],
+      "notes": ["Strong on materials, less sure about feedback on writing. Start session 3 from her own learners' texts."]
+    },
+    {
+      "key": "jonas",
+      "email": "jonas.weber@example.com",
+      "name": "Jonas Weber",
+      "organisation": "Weber Sprachtraining",
+      "jobTitle": "English trainer",
+      "timezone": "Europe/Berlin",
+      "lastSeenAt": "-1d 20:46",
+      "story": "Early on, with an open question.",
+      "plan": {
+        "title": "AI for language trainers",
+        "status": "active",
+        "startedOn": "-5d",
+        "fromTemplate": "tpl-language-trainers",
+        "meetingLink": "https://meet.example.com/richard-jonas",
+        "bookingLink": "https://book.example.com/richard"
+      },
+      "steps": [
+        { "kind": "live", "title": "Kick-off: where AI fits in your teaching", "status": "done", "startsAt": "-4d 14:00", "durationMin": 60, "attended": true },
+        { "kind": "homework", "fromLibraryItem": "lib-profile-prompt", "title": "Write your teaching profile prompt", "status": "not_started", "dueAt": "+3d 18:00" },
+        { "kind": "live", "title": "Prompting for lesson materials", "status": "to_book", "durationMin": 60 }
+      ],
+      "messages": [
+        { "at": "-4d 16:00", "from": "coach", "body": "Good to meet you today, Jonas. The profile prompt is your first homework; no rush, it's due on Tuesday.", "readAt": "-4d 17:10" },
+        { "at": "-1d 20:45", "from": "learner", "step": 2, "body": "Quick question before I start: my learners are German speakers. Should I write the profile prompt in German or in English?", "readAt": null }
+      ],
+      "creations": [],
+      "notes": []
+    },
+    {
+      "key": "ana",
+      "email": "ana.ruiz@example.com",
+      "name": "Ana Ruiz",
+      "organisation": "Ruiz Idiomas",
+      "jobTitle": "Spanish and English trainer",
+      "timezone": "Europe/Madrid",
+      "lastSeenAt": "-1d 22:06",
+      "story": "A hand-in waiting for review.",
+      "plan": {
+        "title": "AI for language trainers",
+        "status": "active",
+        "startedOn": "-15d",
+        "fromTemplate": "tpl-language-trainers",
+        "meetingLink": "https://meet.example.com/richard-ana",
+        "bookingLink": "https://book.example.com/richard"
+      },
+      "steps": [
+        { "kind": "live", "title": "Kick-off: where AI fits in your teaching", "status": "done", "startsAt": "-15d 11:00", "durationMin": 60, "attended": true },
+        {
+          "kind": "homework", "fromLibraryItem": "lib-profile-prompt", "title": "Write your teaching profile prompt", "status": "approved", "dueAt": "-8d 18:00",
+          "submissions": [
+            { "at": "-9d 08:15", "kind": "text", "text": "I teach English to A2 adults in Valencia, mostly restaurant staff. Use short sentences, real menus and real customer questions. Don't use American spelling.", "review": "approved", "reviewedAt": "-8d 10:00" }
+          ]
+        },
+        { "kind": "live", "title": "Prompting for lesson materials", "status": "done", "startsAt": "-7d 11:00", "durationMin": 60, "attended": true },
+        {
+          "kind": "checkin", "title": "After your second session", "form": "after-session", "status": "sent",
+          "sendAfter": { "step": 3, "days": 1 }, "sendsAt": "-6d 09:00", "sentAt": "-6d 09:05"
+        },
+        {
+          "kind": "homework", "fromLibraryItem": "lib-vocab-activity", "title": "Build a vocabulary activity with Claude", "status": "handed_in", "dueAt": "-1d 18:00",
+          "submissions": [
+            {
+              "at": "-1d 22:05", "kind": "file",
+              "files": ["@ana-taking-an-order.mp3", "@ana-taking-an-order-script.docx"],
+              "note": "A day late, sorry. The recording is my two A2 waiters doing the role play; the script is what Claude and I wrote for them. I wasn't sure whether to include the answer key.",
+              "review": "pending"
+            }
+          ]
+        },
+        { "kind": "live", "title": "Feedback on student writing", "status": "to_book", "durationMin": 60 }
+      ],
+      "messages": [
+        { "at": "-14d 09:00", "from": "coach", "body": "Welcome, Ana. Your profile prompt is the first homework.", "readAt": "-14d 09:30" }
+      ],
+      "creations": [],
+      "notes": ["Works with restaurant staff; very practical. Pairs well with the role-play ideas."]
+    },
+    {
+      "key": "tomasz",
+      "email": "tomasz.nowak@example.com",
+      "name": "Tomasz Nowak",
+      "organisation": "Nowak Event Studio",
+      "jobTitle": "Event manager",
+      "timezone": "Europe/Warsaw",
+      "lastSeenAt": "-2d 16:45",
+      "story": "An 'Automation for Events' plan, with a link hand-in waiting for review.",
+      "plan": {
+        "title": "Automation for Events",
+        "status": "active",
+        "startedOn": "-20d",
+        "fromTemplate": "tpl-events",
+        "meetingLink": "https://meet.example.com/richard-tomasz",
+        "bookingLink": "https://book.example.com/richard"
+      },
+      "steps": [
+        { "kind": "live", "title": "Kick-off: your event workflow", "status": "done", "startsAt": "-20d 15:00", "durationMin": 60, "attended": true },
+        {
+          "kind": "homework", "title": "Map one event workflow", "status": "approved", "dueAt": "-13d 18:00",
+          "brief": "Pick one event you run every year and draw every step from 'registration opens' to 'thank-you email sent'. Mark the steps you do by hand.",
+          "handInChecklist": ["Every step, in order", "Which steps are by hand", "Roughly how long each one takes"],
+          "submissions": [
+            {
+              "at": "-14d 17:30", "kind": "link", "url": "https://boards.example.com/nowak/registration-flow",
+              "note": "The spring conference. The red boxes are the ones I do by hand.",
+              "review": "approved", "reviewedAt": "-13d 10:15", "reviewNote": "Very clear. The badge-printing step is the one to automate first."
+            }
+          ]
+        },
+        { "kind": "live", "title": "Automating registrations", "status": "done", "startsAt": "-6d 15:00", "durationMin": 60, "attended": true },
+        {
+          "kind": "checkin", "title": "Is it saving you time?", "form": "six-week-impact", "status": "done", "sendsAt": "-5d 09:00", "sentAt": "-5d 09:05",
+          "response": { "at": "-4d 20:10", "answers": {
+            "still_using": "weekly", "hours_per_week": 3,
+            "story": "The registration follow-up already saved me an evening during the spring conference: no more copying names into the badge sheet by hand."
+          } }
+        },
+        {
+          "kind": "homework", "title": "Build a registration follow-up", "status": "handed_in", "dueAt": "+5d 18:00",
+          "brief": "Build the follow-up email that goes out when someone registers: what they get, when, and what happens if they cancel.",
+          "handInChecklist": ["A link to the automation or a screenshot", "The email text"],
+          "submissions": [
+            {
+              "at": "-2d 16:40", "kind": "link", "url": "https://flows.example.com/nowak/registration-follow-up",
+              "note": "It goes 10 minutes after someone registers. A cancellation sends a different one; the email text is in the second step.",
+              "review": "pending"
+            }
+          ]
+        },
+        { "kind": "live", "title": "Review and next steps", "status": "to_book", "durationMin": 45 }
+      ],
+      "messages": [
+        { "at": "-19d 10:00", "from": "coach", "body": "Welcome, Tomasz. Start with the workflow map: any tool is fine, a photo of paper too.", "readAt": "-19d 11:00" }
+      ],
+      "creations": [
+        { "title": "Spring conference registration flow", "kind": "link", "fromStep": 2, "fromSubmission": 1, "madeWith": "A whiteboard tool", "usedInClass": false }
+      ],
+      "notes": []
+    },
+    {
+      "key": "mei",
+      "email": "mei.lin@example.com",
+      "name": "Mei Lin",
+      "organisation": "Lin Language Studio",
+      "jobTitle": "Mandarin trainer",
+      "timezone": "Europe/London",
+      "lastSeenAt": "-9d 17:20",
+      "story": "Enrolled 9 days ago; nothing done.",
+      "plan": {
+        "title": "AI for language trainers",
+        "status": "active",
+        "startedOn": "-9d",
+        "fromTemplate": "tpl-language-trainers",
+        "meetingLink": "https://meet.example.com/richard-mei",
+        "bookingLink": "https://book.example.com/richard"
+      },
+      "steps": [
+        { "kind": "live", "title": "Kick-off: where AI fits in your teaching", "status": "to_book", "durationMin": 60 },
+        { "kind": "homework", "fromLibraryItem": "lib-profile-prompt", "title": "Write your teaching profile prompt", "status": "not_started", "dueAt": "-2d 18:00" },
+        { "kind": "live", "title": "Prompting for lesson materials", "status": "to_book", "durationMin": 60 }
+      ],
+      "messages": [
+        { "at": "-9d 17:00", "from": "coach", "body": "Welcome, Mei. First step: book the kick-off with the link on your home page.", "readAt": null }
+      ],
+      "creations": [],
+      "notes": ["Hasn't booked the kick-off. Email her on Monday if nothing changes."]
+    },
+    {
+      "key": "sarah",
+      "email": "sarah.oneill@example.com",
+      "name": "Sarah O'Neill",
+      "organisation": "Shannon Business English",
+      "jobTitle": "Business English trainer",
+      "timezone": "Europe/Dublin",
+      "lastSeenAt": "-1d 13:31",
+      "story": "A custom 3-step plan, with a question and a PDF.",
+      "plan": {
+        "title": "AI for exam preparation",
+        "status": "active",
+        "startedOn": "-6d",
+        "fromTemplate": null,
+        "meetingLink": "https://meet.example.com/richard-sarah",
+        "bookingLink": "https://book.example.com/richard"
+      },
+      "steps": [
+        { "kind": "live", "title": "Kick-off: your exam classes", "status": "done", "startsAt": "-6d 09:00", "durationMin": 60, "attended": true },
+        {
+          "kind": "homework", "title": "Draft an exam-practice prompt set", "status": "not_started", "dueAt": "+4d 18:00",
+          "brief": "Write three prompts that turn a past exam task into fresh practice at the same level: one for reading, one for writing, one for speaking.",
+          "handInChecklist": ["Three prompts", "The exam and level they are for", "One output you would really use"]
+        },
+        { "kind": "live", "title": "Review your prompt set", "status": "booked", "startsAt": "+8d 09:00", "durationMin": 45, "prepNote": "Bring the outputs you liked least as well as the best." }
+      ],
+      "messages": [
+        { "at": "-1d 13:30", "from": "learner", "step": 2, "body": "Is this the right format for the exam prompts? I've attached my first try before I go any further.", "attachments": ["@sarah-exam-prompts-draft.pdf"], "readAt": null }
+      ],
+      "creations": [],
+      "notes": []
+    }
+  ]
+}

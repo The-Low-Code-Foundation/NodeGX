@@ -1,0 +1,58 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "bdc2e35a-4e5c-5fe6-8051-7c0950093cbe",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ft_root",
+      "type": "Group",
+      "label": "Formatted text",
+      "children": [
+        "ft_md"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ft_md",
+      "type": "Markdown",
+      "label": "The text, HTML off",
+      "parent": "ft_root",
+      "parameters": {
+        "allowDangerousHtml": false,
+        "openLinksInNewTab": true,
+        "className": "dbu-prose"
+      },
+      "metadata": {
+        "comment": "Allow HTML OFF is the safety rule (DBU-03): a learner-facing brief must never run a tag the coach (or anyone who reached his account) typed. react-markdown also turns javascript: links into javascript:void(0)."
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ft_in",
+      "type": "Component Inputs",
+      "label": "Formatted text in",
+      "ports": [
+        {
+          "name": "markdown",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "ft_root"
+  ]
+}

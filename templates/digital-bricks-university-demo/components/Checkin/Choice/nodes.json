@@ -1,0 +1,92 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "d67a4fcb-08d3-560d-881d-7cf7e25057fe",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cc_btn",
+      "type": "net.noodl.controls.button",
+      "label": "The choice",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "minHeight": "var(--space-11)",
+        "minWidth": "var(--space-11)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderColor": "var(--border-control)",
+        "dataAttributes": "data-testid"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "cc_in",
+      "type": "Component Inputs",
+      "label": "Choice in",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "bg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "fg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "border",
+          "plug": "output",
+          "type": "color"
+        }
+      ],
+      "x": 290,
+      "y": 40
+    },
+    {
+      "id": "cc_out",
+      "type": "Component Outputs",
+      "label": "Picked",
+      "ports": [
+        {
+          "name": "pick",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 290,
+      "y": 160
+    },
+    {
+      "id": "cc_testid",
+      "type": "String Format",
+      "label": "checkin-choice-{id}, for tests",
+      "parameters": {
+        "format": "{id}"
+      },
+      "x": 290,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "cc_btn"
+  ]
+}

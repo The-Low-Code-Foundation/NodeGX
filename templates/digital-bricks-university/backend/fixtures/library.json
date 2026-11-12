@@ -1,0 +1,185 @@
+{
+  "_about": "The coach's homework library and plan templates (DBU-01). All fictional. A plan step copied from a library item names it in `fromLibraryItem`; the step keeps its own copy of the text (SCOPE R4). Checklist items are {text, required} (DBU-03). A resource is {label, url} or {label, file: \"@name\"}: a file under files/, uploaded privately by the coach.",
+  "libraryItems": [
+    {
+      "key": "lib-profile-prompt",
+      "title": "Write your teaching profile prompt",
+      "brief": "Write **one prompt** that tells an AI assistant who you teach, what level they are, and how you like materials to look. You will paste it at the start of every conversation from now on, so make it something you would be happy to reuse.\n\nCover at least:\n\n- who your learners are\n- the tone and format you want back\n- one thing the AI must never do",
+      "handInChecklist": [
+        {
+          "text": "Who your learners are (level, job, goals)",
+          "required": true
+        },
+        {
+          "text": "The tone and format you want back",
+          "required": true
+        },
+        {
+          "text": "One thing the AI must never do",
+          "required": true
+        }
+      ],
+      "resources": [
+        {
+          "label": "Example profile prompt",
+          "url": "https://resources.example.com/profile-prompt"
+        }
+      ],
+      "tags": [
+        "prompting",
+        "first week"
+      ],
+      "estimatedMinutes": 30
+    },
+    {
+      "key": "lib-vocab-activity",
+      "title": "Build a vocabulary activity with Claude",
+      "brief": "Pick a lesson you teach next week. Use your profile prompt to have Claude draft a vocabulary activity for it, then edit it until you would really use it in class. Hand in the activity and two lines on what you changed and why.",
+      "handInChecklist": [
+        {
+          "text": "The activity, as you would give it to learners",
+          "required": true
+        },
+        {
+          "text": "What you changed from the first draft, and why",
+          "required": true
+        },
+        {
+          "text": "The level and lesson it is for",
+          "required": false
+        }
+      ],
+      "resources": [
+        {
+          "label": "Checklist: is this activity ready for class?",
+          "url": "https://resources.example.com/activity-checklist"
+        },
+        {
+          "label": "Worked example: a B1 vocabulary activity",
+          "file": "@activity-example.pdf"
+        }
+      ],
+      "tags": [
+        "materials",
+        "vocabulary"
+      ],
+      "estimatedMinutes": 60
+    },
+    {
+      "key": "lib-interactive-page",
+      "title": "Turn a lesson into an interactive page",
+      "brief": "Take one exercise you already use on paper and turn it into a page learners can open on their phone: a gap fill, a matching task or a quiz. Any tool is fine. Hand in the page itself or a link to it.",
+      "handInChecklist": [
+        {
+          "text": "The page or a link to it",
+          "required": true
+        },
+        {
+          "text": "Which class you will try it with",
+          "required": true
+        },
+        {
+          "text": "What you expect learners to find hard",
+          "required": false
+        }
+      ],
+      "resources": [],
+      "tags": [
+        "materials",
+        "interactive"
+      ],
+      "estimatedMinutes": 90
+    }
+  ],
+  "planTemplates": [
+    {
+      "key": "tpl-language-trainers",
+      "title": "AI for language trainers",
+      "description": "Six weeks for a language trainer starting with AI: a profile prompt, materials, feedback on writing, and one interactive page.",
+      "items": [
+        {
+          "kind": "live",
+          "title": "Kick-off: where AI fits in your teaching",
+          "durationMin": 60,
+          "dayOffset": 0
+        },
+        {
+          "kind": "homework",
+          "title": "Write your teaching profile prompt",
+          "libraryItem": "lib-profile-prompt",
+          "dayOffset": 7
+        },
+        {
+          "kind": "live",
+          "title": "Prompting for lesson materials",
+          "durationMin": 60,
+          "dayOffset": 10
+        },
+        {
+          "kind": "checkin",
+          "title": "Two-minute check-in",
+          "dayOffset": 14
+        },
+        {
+          "kind": "homework",
+          "title": "Build a vocabulary activity with Claude",
+          "libraryItem": "lib-vocab-activity",
+          "dayOffset": 21
+        },
+        {
+          "kind": "live",
+          "title": "Feedback on student writing",
+          "durationMin": 60,
+          "dayOffset": 27
+        },
+        {
+          "kind": "homework",
+          "title": "Turn a lesson into an interactive page",
+          "libraryItem": "lib-interactive-page",
+          "dayOffset": 34
+        },
+        {
+          "kind": "live",
+          "title": "Wrap-up and what next",
+          "durationMin": 45,
+          "dayOffset": 42
+        }
+      ]
+    },
+    {
+      "key": "tpl-events",
+      "title": "Automation for Events",
+      "description": "Four weeks for an event organiser: map one workflow, automate registrations, then follow-ups.",
+      "items": [
+        {
+          "kind": "live",
+          "title": "Kick-off: your event workflow",
+          "durationMin": 60,
+          "dayOffset": 0
+        },
+        {
+          "kind": "homework",
+          "title": "Map one event workflow",
+          "dayOffset": 7
+        },
+        {
+          "kind": "live",
+          "title": "Automating registrations",
+          "durationMin": 60,
+          "dayOffset": 14
+        },
+        {
+          "kind": "homework",
+          "title": "Build a registration follow-up",
+          "dayOffset": 25
+        },
+        {
+          "kind": "live",
+          "title": "Review and next steps",
+          "durationMin": 45,
+          "dayOffset": 28
+        }
+      ]
+    }
+  ]
+}

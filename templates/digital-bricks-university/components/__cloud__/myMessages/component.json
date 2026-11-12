@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b909d224-1b39-5523-8a2b-30049fbb6c5e",
+  "name": "myMessages",
+  "path": "/#__cloud__/myMessages",
+  "type": "cloud",
+  "created": "2026-11-12T10:10:26.318Z",
+  "modified": "2026-11-12T18:51:30.832Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A learner reads her conversation with the coach (DBU-07), all of it or one homework's thread, and the coach's messages shown are marked read."
+}

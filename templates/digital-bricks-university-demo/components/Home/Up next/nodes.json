@@ -1,0 +1,246 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "21826ebc-66c0-5021-870d-f3768dee4dca",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "un_card",
+      "type": "Group",
+      "label": "Up next",
+      "children": [
+        "un_heading",
+        "un_cols"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "un_heading",
+      "type": "Text",
+      "label": "Up next",
+      "parent": "un_card",
+      "parameters": {
+        "text": "",
+        "as": "h2",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "un_cols",
+      "type": "net.noodl.visual.columns",
+      "label": "The two halves",
+      "parent": "un_card",
+      "children": [
+        "un_hw",
+        "un_live"
+      ],
+      "parameters": {
+        "sizing": "autoFit",
+        "minWidth": 260,
+        "marginX": 16,
+        "marginY": 16
+      },
+      "metadata": {
+        "comment": "autoFit: side by side when the card has room for two 260px halves, one above the other on a phone. Columns is the only node that reflows."
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "un_hw",
+      "type": "/Home/Homework next",
+      "label": "The homework owed",
+      "parent": "un_cols",
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "un_live",
+      "type": "/Home/Session next",
+      "label": "The next live session",
+      "parent": "un_cols",
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "un_t_heading",
+      "type": "Translation",
+      "label": "Up next",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.upNext"
+      },
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "un_in",
+      "type": "Component Inputs",
+      "label": "What is up next",
+      "ports": [
+        {
+          "name": "hwShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "hwNone",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "hwHeadKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hwN",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hwDate",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hwTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hwBodyKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hwStepId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "liveShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "liveNone",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "liveN",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "liveDate",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "liveStart",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "liveEnd",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "liveTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "livePrep",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasPrep",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "joinLink",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasJoin",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "liveStepId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "liveStartsAt",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "liveDuration",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "calDetails",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "attendeeName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "liveNoneKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "bookingLink",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "canBook",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "un_card"
+  ]
+}

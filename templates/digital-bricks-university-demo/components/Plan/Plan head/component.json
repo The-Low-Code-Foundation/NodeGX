@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "82e0a068-0f99-555c-8ce8-73d797cd7ff9",
+  "name": "Plan head",
+  "path": "/Plan/Plan head",
+  "type": "visual",
+  "created": "2026-11-09T10:48:28.072Z",
+  "modified": "2026-11-09T11:07:50.088Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The top of a learner's plan: who they are, Plan settings, Save as template and See as them; then the counts (live sessions, homework tasks, coaching hours) and where the plan started from. An empty plan offers to start from a template instead."
+}

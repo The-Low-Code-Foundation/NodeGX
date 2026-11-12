@@ -1,0 +1,304 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "be485cfe-a196-59ad-89c4-b2f5d20a931d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rv_root",
+      "type": "Group",
+      "label": "Review",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-3)",
+        "borderTopStyle": "solid",
+        "borderTopWidth": "var(--border-1)",
+        "borderTopColor": "var(--border)"
+      },
+      "children": [
+        "rv_note",
+        "rv_actions",
+        "rv_need",
+        "rv_failed"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rv_note",
+      "type": "net.noodl.controls.textinput",
+      "label": "The coach's note",
+      "parent": "rv_root",
+      "parameters": {
+        "type": "textArea",
+        "useLabel": true,
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 120,
+          "unit": "px"
+        },
+        "lineHeight": "var(--leading-relaxed)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "rv_actions",
+      "type": "Group",
+      "label": "Approve, Ask for changes",
+      "parent": "rv_root",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "rv_approve",
+        "rv_changes"
+      ],
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "rv_approve",
+      "type": "net.noodl.controls.button",
+      "label": "Approve",
+      "parent": "rv_actions",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-check",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)",
+        "iconColor": "var(--primary-foreground)"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "rv_changes",
+      "type": "net.noodl.controls.button",
+      "label": "Ask for changes",
+      "parent": "rv_actions",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-pencil",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)",
+        "iconColor": "var(--foreground)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "rv_need",
+      "type": "Text",
+      "label": "Say what to change first",
+      "parent": "rv_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "rv_failed",
+      "type": "Text",
+      "label": "Why it was refused",
+      "parent": "rv_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "rv_in",
+      "type": "Component Inputs",
+      "label": "The hand-in",
+      "ports": [
+        {
+          "name": "submissionId",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 1240
+    },
+    {
+      "id": "rv_out",
+      "type": "Component Outputs",
+      "label": "Reviewed",
+      "ports": [
+        {
+          "name": "reviewed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 1360
+    },
+    {
+      "id": "rv_cf_ok",
+      "type": "CloudFunction2",
+      "label": "reviewSubmission: approved (staff only)",
+      "parameters": {
+        "function": "reviewSubmission",
+        "in-verdict": "approved"
+      },
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "rv_cf_ch",
+      "type": "CloudFunction2",
+      "label": "reviewSubmission: changes (staff only)",
+      "parameters": {
+        "function": "reviewSubmission",
+        "in-verdict": "changes"
+      },
+      "metadata": {
+        "comment": "reviewSubmission refuses changes with no note too; this page says so before asking."
+      },
+      "x": 410,
+      "y": 1000
+    },
+    {
+      "id": "rv_check",
+      "type": "JavaScriptFunction",
+      "label": "Asking for changes needs a note",
+      "parameters": {
+        "runOnChange-in-note": false,
+        "functionScript": "// The learner works from this note, so \"changes asked\" with nothing to go on is refused here first.\nif (String(Inputs.note || '').trim()) Outputs.go();\nelse Outputs.empty();"
+      },
+      "ports": [
+        {
+          "name": "in-note",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-empty",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "rv_need_sw",
+      "type": "Switch",
+      "label": "Show: say what to change",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "rv_fail_sw",
+      "type": "Switch",
+      "label": "Show why it was refused",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 410,
+      "y": 1120
+    },
+    {
+      "id": "rv_t_label",
+      "type": "Translation",
+      "label": "Your note",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "work.reviewLabel"
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "rv_t_ok",
+      "type": "Translation",
+      "label": "Approve",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "work.approve"
+      },
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "rv_t_ch",
+      "type": "Translation",
+      "label": "Ask for changes",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "work.askChanges"
+      },
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "rv_t_need",
+      "type": "Translation",
+      "label": "Say what to change first",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "work.needNote"
+      },
+      "x": 410,
+      "y": 760
+    }
+  ],
+  "visualRoots": [
+    "rv_root"
+  ]
+}

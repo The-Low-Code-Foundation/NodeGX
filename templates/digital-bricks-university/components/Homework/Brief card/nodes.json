@@ -1,0 +1,446 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "d709eee3-2e20-587b-8aa6-c6731aad618f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "bc_root",
+      "type": "Group",
+      "label": "The homework",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-5)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      },
+      "children": [
+        "bc_top",
+        "bc_brief_box",
+        "bc_list_box",
+        "bc_res_box"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "bc_top",
+      "type": "Group",
+      "label": "Number, due date, status and title",
+      "parent": "bc_root",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "bc_head",
+        "bc_title"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "bc_head",
+      "type": "Group",
+      "label": "Number, due date and status",
+      "parent": "bc_top",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)"
+      },
+      "children": [
+        "bc_icon",
+        "bc_head_text",
+        "bc_status"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "bc_icon",
+      "type": "net.noodl.visual.icon",
+      "label": "Homework icon",
+      "parent": "bc_head",
+      "parameters": {
+        "iconSize": 18,
+        "iconColor": "var(--homework-fg)",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-pencil",
+          "codeAsClass": true
+        }
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "bc_head_text",
+      "type": "Text",
+      "label": "Homework 2 · due Fri 6 Nov",
+      "parent": "bc_head",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--homework-fg)",
+        "styleCss": "flex: 0 1 auto;"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "bc_status",
+      "type": "/Plan/Chip",
+      "label": "Status",
+      "parent": "bc_head",
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "bc_title",
+      "type": "Text",
+      "label": "Title",
+      "parent": "bc_top",
+      "parameters": {
+        "text": "",
+        "as": "h2",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "bc_brief_box",
+      "type": "Group",
+      "label": "The brief",
+      "parent": "bc_root",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "bc_brief_h",
+        "bc_brief"
+      ],
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "bc_brief_h",
+      "type": "Text",
+      "label": "The brief (heading)",
+      "parent": "bc_brief_box",
+      "parameters": {
+        "text": "",
+        "as": "h3",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "bc_brief",
+      "type": "/Shell/Formatted text",
+      "label": "The brief, HTML off",
+      "parent": "bc_brief_box",
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "bc_list_box",
+      "type": "Group",
+      "label": "What to hand in",
+      "parent": "bc_root",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "bc_list_h",
+        "bc_list"
+      ],
+      "x": 100,
+      "y": 1240
+    },
+    {
+      "id": "bc_list_h",
+      "type": "Text",
+      "label": "What to hand in (heading)",
+      "parent": "bc_list_box",
+      "parameters": {
+        "text": "",
+        "as": "h3",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "bc_list",
+      "type": "Group",
+      "label": "The items",
+      "parent": "bc_list_box",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "bc_list_rows"
+      ],
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "bc_list_rows",
+      "type": "For Each",
+      "label": "One row per item",
+      "parent": "bc_list",
+      "parameters": {
+        "template": "/Homework/Checklist item"
+      },
+      "x": 220,
+      "y": 1600
+    },
+    {
+      "id": "bc_res_box",
+      "type": "Group",
+      "label": "Resources",
+      "parent": "bc_root",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "bc_res_h",
+        "bc_res"
+      ],
+      "x": 100,
+      "y": 1720
+    },
+    {
+      "id": "bc_res_h",
+      "type": "Text",
+      "label": "Resources (heading)",
+      "parent": "bc_res_box",
+      "parameters": {
+        "text": "",
+        "as": "h3",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 1840
+    },
+    {
+      "id": "bc_res",
+      "type": "Group",
+      "label": "The resources",
+      "parent": "bc_res_box",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "bc_res_rows"
+      ],
+      "x": 160,
+      "y": 1960
+    },
+    {
+      "id": "bc_res_rows",
+      "type": "For Each",
+      "label": "One row per resource",
+      "parent": "bc_res",
+      "parameters": {
+        "template": "/Homework/Resource item"
+      },
+      "x": 220,
+      "y": 2080
+    },
+    {
+      "id": "bc_in",
+      "type": "Component Inputs",
+      "label": "The homework",
+      "ports": [
+        {
+          "name": "headKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "n",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "date",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "statusKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "statusBg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "statusFg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "brief",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "checklist",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hasChecklist",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "resources",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hasResources",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 470,
+      "y": 640
+    },
+    {
+      "id": "bc_t_head",
+      "type": "Translation",
+      "label": "Homework {n} · due {date}",
+      "parameters": {
+        "Namespace": "pages"
+      },
+      "x": 470,
+      "y": 1960
+    },
+    {
+      "id": "bc_fill",
+      "type": "String Format",
+      "label": "Number and due date into the head",
+      "parameters": {
+        "format": "{n} {date}"
+      },
+      "metadata": {
+        "comment": "The format arrives from the Translation; this default only declares the inputs."
+      },
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "bc_t_brief",
+      "type": "Translation",
+      "label": "The brief",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "homework.brief"
+      },
+      "x": 470,
+      "y": 1000
+    },
+    {
+      "id": "bc_t_list",
+      "type": "Translation",
+      "label": "What to hand in",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "homework.checklist"
+      },
+      "x": 470,
+      "y": 1360
+    },
+    {
+      "id": "bc_t_res",
+      "type": "Translation",
+      "label": "Resources",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "homework.resources"
+      },
+      "x": 470,
+      "y": 1840
+    }
+  ],
+  "visualRoots": [
+    "bc_root"
+  ]
+}

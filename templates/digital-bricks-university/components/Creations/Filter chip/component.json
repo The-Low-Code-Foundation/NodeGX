@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "ea070a19-b2b2-5605-894b-6a11a704dfac",
+  "name": "Filter chip",
+  "path": "/Creations/Filter chip",
+  "type": "visual",
+  "created": "2026-11-12T13:47:54.172Z",
+  "modified": "2026-11-12T13:47:54.172Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One filter above the My creations grid: \"All\" or a kind, with how many there are, marked when chosen."
+}

@@ -1,0 +1,123 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "348aff7d-346a-552b-84cc-64fb2fd5553b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ss_req-2",
+      "type": "noodl.cloud.request",
+      "label": "The coach saves Settings",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "coachEmail,coachName",
+        "allowNoAuth": false,
+        "ptype-coachEmail": "string",
+        "preq-coachEmail": false,
+        "ptype-coachName": "string",
+        "preq-coachName": false
+      }
+    },
+    {
+      "id": "ss_fn-2",
+      "type": "JavaScriptFunction",
+      "label": "Check the address, then keep it",
+      "x": 40,
+      "y": 180,
+      "parameters": {
+        "runOnChange-in-coachEmail": false,
+        "functionScript": "/*\n * The coach's settings (DBU-07, DBU-11). Staff only. One Setting row per key, updated in place.\n *  - coachEmail: the address that hears about every learner message. Trimmed and lower-cased; blank\n *    puts the default back (a placeholder: the real address belongs here).\n *  - coachName: the name learners see on every page (\"Ask Sam anything\"). Trimmed, at most 60\n *    characters; blank means learners see \"your coach\".\n * A key the request leaves out is left as it is.\n */\n(async () => {\n  try {\n    const R = Noodl.Records;\n    const DEFAULT = 'coach@example.com';\n    const put = async (key, value) => {\n      const rows = await R.query('Setting', { key: { equalTo: key } }, { limit: 2, plain: true });\n      if (rows.length) await R.save(rows[0].objectId, { value }, { className: 'Setting' });\n      else await R.create('Setting', { key, value }, { plain: true });\n    };\n    const read = async (key) => {\n      const rows = await R.query('Setting', { key: { equalTo: key } }, { limit: 2, plain: true });\n      return rows[0] ? String(rows[0].value || '').trim() : '';\n    };\n    if (Inputs.coachEmail !== undefined && Inputs.coachEmail !== null) {\n      const email = String(Inputs.coachEmail || '').trim().toLowerCase();\n      const looksLikeEmail = email.length <= 254 && email.split('@').length === 2 && email.split('@')[1].includes('.') && !/\\s/.test(email);\n      if (email && !looksLikeEmail) { Outputs.why = 'That does not look like an email address. Check it and try again.'; Outputs.refuse(); return; }\n      await put('coachEmail', email || DEFAULT);\n    }\n    if (Inputs.coachName !== undefined && Inputs.coachName !== null) {\n      const name = String(Inputs.coachName || '').replace(/\\s+/g, ' ').trim();\n      if (name.length > 60) { Outputs.why = 'Keep the name under 60 characters: learners see it in the middle of sentences.'; Outputs.refuse(); return; }\n      await put('coachName', name);\n    }\n    Outputs.coachEmail = (await read('coachEmail')) || DEFAULT;\n    Outputs.coachName = await read('coachName');\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:saveCoachSettings]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n",
+        "runOnChange-in-coachName": false
+      },
+      "ports": [
+        {
+          "name": "in-coachEmail",
+          "plug": "input",
+          "type": "*",
+          "displayName": "coachEmail",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-coachName",
+          "plug": "input",
+          "type": "*",
+          "displayName": "coachName",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "refuse",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "done",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "failed",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-why",
+          "plug": "output",
+          "type": "*",
+          "displayName": "why",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-coachEmail",
+          "plug": "output",
+          "type": "*",
+          "displayName": "coachEmail",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-coachName",
+          "plug": "output",
+          "type": "*",
+          "displayName": "coachName",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "ss_res-2",
+      "type": "noodl.cloud.response",
+      "label": "Saved",
+      "x": 40,
+      "y": 320,
+      "parameters": {
+        "params": "coachEmail,coachName"
+      }
+    },
+    {
+      "id": "ss_deny-2",
+      "type": "noodl.cloud.response",
+      "label": "Not an address",
+      "x": 320,
+      "y": 320,
+      "parameters": {
+        "status": "failure"
+      }
+    },
+    {
+      "id": "ss_fail-2",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "x": 600,
+      "y": 320,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "The settings could not be saved. Try again in a moment."
+      }
+    }
+  ]
+}

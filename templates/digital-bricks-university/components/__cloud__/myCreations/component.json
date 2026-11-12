@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2b088fc5-9f5f-58a6-8d82-b34b61f45986",
+  "name": "myCreations",
+  "path": "/#__cloud__/myCreations",
+  "type": "cloud",
+  "created": "2026-11-12T13:36:12.080Z",
+  "modified": "2026-11-12T14:35:24.861Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The caller's own creations (DBU-09), newest first (security: authenticated). Whose they are comes from the session, never from anything sent."
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c0a30590-6a25-5309-8c2a-b37c9a286ce8",
+  "name": "roster",
+  "path": "/#__cloud__/roster",
+  "type": "cloud",
+  "created": "2026-11-07T21:27:02.981Z",
+  "modified": "2026-11-12T13:37:35.214Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach's roster: every learner with their organisation and current plan, plus the plan templates the Add learner form offers (security: role:staff)."
+}

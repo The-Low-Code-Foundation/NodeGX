@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2f214d08-da97-5897-83a5-be74ccef32a0",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pg2_t_title",
+      "fromProperty": "Translation",
+      "toId": "pg2_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pg2_t_counts",
+      "fromProperty": "Translation",
+      "toId": "pg2_fill",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "pg2_in",
+      "fromProperty": "live",
+      "toId": "pg2_fill",
+      "toProperty": "live"
+    },
+    {
+      "fromId": "pg2_in",
+      "fromProperty": "homework",
+      "toId": "pg2_fill",
+      "toProperty": "homework"
+    },
+    {
+      "fromId": "pg2_fill",
+      "fromProperty": "formatted",
+      "toId": "pg2_counts",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pg2_in",
+      "fromProperty": "rows",
+      "toId": "pg2_rows",
+      "toProperty": "items"
+    }
+  ]
+}

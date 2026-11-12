@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "27191227-bd45-501a-8693-e73092ae6f82",
+  "name": "Inbox in words",
+  "path": "/Inbox/Inbox in words",
+  "type": "logic",
+  "created": "2026-11-12T13:11:11.031Z",
+  "modified": "2026-11-12T14:59:16.386Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Turns coachInbox's answer into what the Inbox page draws (DBU-08): one row per item in Strings keys and values, and the open item's parts. On a wide screen the first item opens by itself; on a narrow one the list and the item are separate screens."
+}

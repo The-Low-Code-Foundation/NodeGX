@@ -1,0 +1,40 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f57de13a-1484-55ca-84e6-8396738d0d3a",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sk_data",
+      "type": "Static Data",
+      "label": "Step kinds",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "type": "json",
+        "json": "[{\"id\":\"kind-live\",\"value\":\"live\",\"labelKey\":\"plan.kindLive\",\"learnerKey\":\"home.kindLive\",\"newTitleKey\":\"plan.newLive\",\"bg\":\"var(--live-bg)\",\"fg\":\"var(--live-fg)\",\"icon\":{\"class\":\"lucide\",\"code\":\"icon-video\",\"codeAsClass\":true}},{\"id\":\"kind-homework\",\"value\":\"homework\",\"labelKey\":\"plan.kindHomework\",\"learnerKey\":\"home.kindHomework\",\"newTitleKey\":\"plan.newHomework\",\"bg\":\"var(--homework-bg)\",\"fg\":\"var(--homework-fg)\",\"icon\":{\"class\":\"lucide\",\"code\":\"icon-pencil\",\"codeAsClass\":true}},{\"id\":\"kind-checkin\",\"value\":\"checkin\",\"labelKey\":\"plan.kindCheckin\",\"learnerKey\":\"home.kindCheckin\",\"newTitleKey\":\"plan.newCheckin\",\"bg\":\"var(--checkin-bg)\",\"fg\":\"var(--checkin-fg)\",\"icon\":{\"class\":\"lucide\",\"code\":\"icon-clipboard-check\",\"codeAsClass\":true}}]"
+      },
+      "metadata": {
+        "comment": "Ids are prefixed (kind-homework) because a Static Data row is a Model named by its id for the whole app, and the learner tabs already have one called 'homework'. The schema value is `value`. `labelKey` is the coach's short word (Live); `learnerKey` is the learner's, numbered on Home (Live session {n}); `icon` is the glyph Home draws on the kind's tint."
+      }
+    },
+    {
+      "id": "sk_out",
+      "type": "Component Outputs",
+      "label": "Kinds out",
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "items",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        }
+      ]
+    }
+  ]
+}

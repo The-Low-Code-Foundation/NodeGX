@@ -1,0 +1,492 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "55ae5f6e-1a90-55a9-86e2-d33cee9e879f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "fv_root",
+      "type": "Group",
+      "label": "File viewer",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "fv_actions",
+        "fv_cant",
+        "fv_failed",
+        "fv_host"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "fv_actions",
+      "type": "Group",
+      "label": "Show, Hide, Download",
+      "parent": "fv_root",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "fv_show",
+        "fv_hide",
+        "fv_download"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "fv_show",
+      "type": "net.noodl.controls.button",
+      "label": "Show it here",
+      "parent": "fv_actions",
+      "parameters": {
+        "mounted": false,
+        "label": "",
+        "sizeMode": "contentSize",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-eye",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)",
+        "iconColor": "var(--foreground)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-11)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "fv_hide",
+      "type": "net.noodl.controls.button",
+      "label": "Hide",
+      "parent": "fv_actions",
+      "parameters": {
+        "mounted": false,
+        "label": "",
+        "sizeMode": "contentSize",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-eye-off",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)",
+        "iconColor": "var(--foreground)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-11)"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "fv_download",
+      "type": "net.noodl.controls.button",
+      "label": "Download",
+      "parent": "fv_actions",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-download",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)",
+        "iconColor": "var(--foreground)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-11)"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "fv_cant",
+      "type": "Text",
+      "label": "Opens in its own app",
+      "parent": "fv_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "fv_failed",
+      "type": "Text",
+      "label": "Could not open it",
+      "parent": "fv_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "fv_host",
+      "type": "Group",
+      "label": "Where the file is shown",
+      "parent": "fv_root",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "metadata": {
+        "comment": "Empty on purpose: the Show function puts the frame, image or player in here itself, because no node draws an iframe or an audio player."
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "fv_in",
+      "type": "Component Inputs",
+      "label": "The file",
+      "ports": [
+        {
+          "name": "file",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "fileName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "mode",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "stepId",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 1600
+    },
+    {
+      "id": "fv_out",
+      "type": "Component Outputs",
+      "label": "What went wrong",
+      "ports": [
+        {
+          "name": "failed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 1720
+    },
+    {
+      "id": "fv_kinds",
+      "type": "/Option sets/Hand-in kinds",
+      "label": "Hand-in kinds",
+      "x": 410,
+      "y": 1840
+    },
+    {
+      "id": "fv_showing",
+      "type": "Switch",
+      "label": "Showing, or not",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "fv_fail_sw",
+      "type": "Switch",
+      "label": "Show why it failed",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 410,
+      "y": 1120
+    },
+    {
+      "id": "fv_what",
+      "type": "JavaScriptFunction",
+      "label": "Can it be shown here?",
+      "parameters": {
+        "functionScript": "// From the file's own name: Office files only download; everything else in Hand-in kinds can be shown.\nif (Inputs.kinds === undefined) return;\nconst get = (m, k) => (m && typeof m.get === 'function' ? m.get(k) : m && m[k]);\nconst name = String(Inputs.fileName || '');\nconst dot = name.lastIndexOf('.');\nconst ext = dot > 0 ? name.slice(dot + 1).toLowerCase() : '';\nconst row = (Inputs.kinds || []).find((k) => ext && get(k, 'ext') === ext);\nconst can = !!row && get(row, 'preview') !== 'none';\nconst showing = Inputs.showing === true;\nOutputs.showOpen = can && !showing;\nOutputs.showHide = can && showing;\nOutputs.cantShow = !can;"
+      },
+      "ports": [
+        {
+          "name": "in-fileName",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-kinds",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-showing",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-showOpen",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-showHide",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-cantShow",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "fv_show_fn",
+      "type": "JavaScriptFunction",
+      "label": "Fetch a link and show the file",
+      "parameters": {
+        "runOnChange-in-host": false,
+        "runOnChange-in-file": false,
+        "runOnChange-in-fileName": false,
+        "runOnChange-in-mode": false,
+        "runOnChange-in-stepId": false,
+        "runOnChange-in-kinds": false,
+        "functionScript": "/*\n * Shows a stored file inside this part, never as a page of its own (PLATFORM.md feature 5).\n * HTML only in an iframe sandboxed to allow-scripts: an opaque origin, no cookies, storage or\n * parent. Never allow-same-origin. PDFs in a plain frame (Chrome's viewer does not run in a\n * sandbox; handIn has checked the bytes really are a PDF); images, audio and video in their\n * own elements. The link is minted now by the function that checks who may have it, lasts\n * 5 minutes and is never stored.\n */\nconst get = (m, k) => (m && typeof m.get === 'function' ? m.get(k) : m && m[k]);\nconst host = Inputs.host && typeof Inputs.host.getDOMElement === 'function' ? Inputs.host.getDOMElement() : null;\nconst name = String(Inputs.fileName || '');\nconst dot = name.lastIndexOf('.');\nconst ext = dot > 0 ? name.slice(dot + 1).toLowerCase() : '';\nconst row = (Inputs.kinds || []).find((k) => ext && get(k, 'ext') === ext);\nconst preview = row ? get(row, 'preview') : 'none';\nconst FUNCTIONS = { own: 'fileLink', coach: 'fileLinkAsCoach', resource: 'resourceLink' };\nconst fn = FUNCTIONS[Inputs.mode];\nif (!host || !Inputs.file || !fn || preview === 'none') return;\nconst params = Inputs.mode === 'resource'\n  ? { stepId: String(Inputs.stepId || ''), file: String(Inputs.file) }\n  : { name: String(Inputs.file) };\n(async () => {\n  try {\n    const answer = await Noodl.CloudFunctions.run(fn, params);\n    const base = String((Noodl.getMetaData('cloudservices') || {}).endpoint || '').replace(/\\/+$/, '');\n    let el;\n    if (preview === 'image') {\n      el = document.createElement('img');\n      el.alt = name;\n      el.style.cssText = 'display:block;max-width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-md)';\n    } else if (preview === 'audio' || preview === 'video') {\n      el = document.createElement(preview);\n      el.controls = true;\n      el.preload = 'metadata';\n      el.style.cssText = preview === 'video'\n        ? 'display:block;width:100%;max-height:70vh;background:var(--foreground);border-radius:var(--radius-md)'\n        : 'display:block;width:100%';\n    } else {\n      el = document.createElement('iframe');\n      if (preview === 'sandbox') el.setAttribute('sandbox', 'allow-scripts');\n      el.title = name;\n      el.referrerPolicy = 'no-referrer';\n      el.style.cssText = 'display:block;width:100%;height:min(70vh,720px);border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface)';\n    }\n    el.setAttribute('data-testid', 'file-preview');\n    el.src = base + answer.url;\n    host.replaceChildren(el);\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:File viewer]', (e && e.error) || e);\n    Outputs.failed();\n  }\n})();"
+      },
+      "ports": [
+        {
+          "name": "in-host",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-file",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-fileName",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-mode",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-stepId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-kinds",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 1360
+    },
+    {
+      "id": "fv_hide_fn",
+      "type": "JavaScriptFunction",
+      "label": "Take the preview away",
+      "parameters": {
+        "runOnChange-in-host": false,
+        "functionScript": "const host = Inputs.host && typeof Inputs.host.getDOMElement === 'function' ? Inputs.host.getDOMElement() : null;\nif (host) host.replaceChildren();"
+      },
+      "ports": [
+        {
+          "name": "in-host",
+          "plug": "input",
+          "type": "*"
+        }
+      ],
+      "x": 410,
+      "y": 1480
+    },
+    {
+      "id": "fv_dl_fn",
+      "type": "JavaScriptFunction",
+      "label": "Download it under its own name",
+      "parameters": {
+        "runOnChange-in-file": false,
+        "runOnChange-in-fileName": false,
+        "runOnChange-in-mode": false,
+        "runOnChange-in-stepId": false,
+        "functionScript": "/*\n * A plain link would save the stored name (<16 hex>_essay.docx) and could open an HTML file\n * as a page on the backend's origin (PLATFORM.md D2, D5). So: fetch the bytes through a\n * fresh signed link, then hand them over as a download under the file's own name.\n */\nconst FUNCTIONS = { own: 'fileLink', coach: 'fileLinkAsCoach', resource: 'resourceLink' };\nconst fn = FUNCTIONS[Inputs.mode];\nconst name = String(Inputs.fileName || 'file');\nif (!Inputs.file || !fn) return;\nconst params = Inputs.mode === 'resource'\n  ? { stepId: String(Inputs.stepId || ''), file: String(Inputs.file) }\n  : { name: String(Inputs.file) };\n(async () => {\n  try {\n    const answer = await Noodl.CloudFunctions.run(fn, params);\n    const base = String((Noodl.getMetaData('cloudservices') || {}).endpoint || '').replace(/\\/+$/, '');\n    const res = await fetch(base + answer.url);\n    if (!res.ok) throw new Error('download answered ' + res.status);\n    const blob = new Blob([await res.blob()], { type: 'application/octet-stream' });\n    const url = URL.createObjectURL(blob);\n    const a = document.createElement('a');\n    a.href = url;\n    a.download = name;\n    document.body.appendChild(a);\n    a.click();\n    document.body.removeChild(a);\n    setTimeout(() => URL.revokeObjectURL(url), 1000);\n  } catch (e) {\n    console.error('[dbu:File viewer download]', (e && e.error) || e);\n    Outputs.failed();\n  }\n})();"
+      },
+      "ports": [
+        {
+          "name": "in-file",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-fileName",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-mode",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-stepId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "fv_t_show",
+      "type": "Translation",
+      "label": "Show it here",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "work.show"
+      },
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "fv_t_hide",
+      "type": "Translation",
+      "label": "Hide",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "work.hide"
+      },
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "fv_t_dl",
+      "type": "Translation",
+      "label": "Download",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "work.download"
+      },
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "fv_t_cant",
+      "type": "Translation",
+      "label": "Opens in its own app",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "work.cantShow"
+      },
+      "x": 410,
+      "y": 1000
+    },
+    {
+      "id": "fv_t_failed",
+      "type": "Translation",
+      "label": "Could not open it",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "work.openFailed"
+      },
+      "x": 410,
+      "y": 1240
+    }
+  ],
+  "visualRoots": [
+    "fv_root"
+  ]
+}

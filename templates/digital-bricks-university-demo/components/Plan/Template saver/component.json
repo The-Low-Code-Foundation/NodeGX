@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f42e8c4f-5a78-5174-8542-08d18874064d",
+  "name": "Template saver",
+  "path": "/Plan/Template saver",
+  "type": "visual",
+  "created": "2026-11-09T10:47:26.288Z",
+  "modified": "2026-11-09T10:47:26.288Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Saves a learner's plan as a new template: a title and an optional description; the shape only, never the learner's data (templateFromPlan). Says what it saved."
+}

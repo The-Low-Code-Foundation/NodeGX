@@ -1,0 +1,154 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "aeed8702-7845-51c5-86ef-cf99b097e6e3",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mr_req",
+      "type": "noodl.cloud.request",
+      "label": "The schedule fires",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "",
+        "allowNoAuth": false
+      }
+    },
+    {
+      "id": "mr_ask1",
+      "type": "JavaScriptFunction",
+      "label": "Ask for the facts",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "functionScript": "// A fresh request object, so shared/Inbox items works the facts out once per fire.\nOutputs.request = { at: Date.now(), for: 'facts' };\n"
+      },
+      "ports": [
+        {
+          "name": "out-request",
+          "plug": "output",
+          "type": "*",
+          "displayName": "request",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "mr_facts",
+      "type": "/#__cloud__/shared/Inbox items",
+      "label": "Every learner's facts",
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "mr_quiet",
+      "type": "JavaScriptFunction",
+      "label": "Raise, refresh or close each flag",
+      "x": 40,
+      "y": 400,
+      "parameters": {
+        "runOnChange-in-learners": false,
+        "functionScript": "/*\n * GONE QUIET (DBU-08), once a day. QUIET is the one settings object for it.\n * For each learner on an active plan, the reasons that hold now:\n *   inactive  nothing for QUIET.inactiveDays, counted from her last activity, or from her plan's start if\n *             that is later (a learner enrolled yesterday is not quiet)\n *   overdue   a shared homework, not started, QUIET.overdueDays past its due time\n * One open flag per learner. No reasons: close it. Reasons and an open flag: refresh its reasons\n * (raisedAt, the snooze and the nudge stay). Reasons and no flag: raise one. A flag for someone no\n * longer on an active plan is closed. So a second run in a day changes nothing.\n * Rings a staff-only bell when anything changed, so an open inbox re-reads.\n */\n(async () => {\n  try {\n    const QUIET = { inactiveDays: 7, overdueDays: 2 };\n    const DAY = 86400000;\n    const now = Date.now();\n    const t = (iso) => { const n = Date.parse(iso || ''); return Number.isFinite(n) ? n : 0; };\n    const R = Noodl.Records;\n    const learners = Array.isArray(Inputs.learners) ? Inputs.learners : [];\n    const open = (await R.query('QuietFlag', {}, { limit: 1000, plain: true })).filter((f) => !f.closedAt);\n    const stamp = new Date(now).toISOString();\n    let raised = 0;\n    let closed = 0;\n    let refreshed = 0;\n    const bell = (learner) => R.create('Doorbell', { learner, topic: 'inbox' }, { acl: { 'role:staff': { read: true } } });\n\n    for (const l of learners) {\n      const reasons = [];\n      const quietSince = Math.max(t(l.lastActiveAt), t(l.startedOn));\n      if (now - quietSince >= QUIET.inactiveDays * DAY) reasons.push({ kind: 'inactive', lastActiveAt: l.lastActiveAt || null });\n      for (const o of l.overdue || []) {\n        if (now - t(o.dueAt) >= QUIET.overdueDays * DAY) reasons.push({ kind: 'overdue', stepId: o.stepId, title: o.title, dueAt: o.dueAt });\n      }\n      const mine = open.filter((f) => f.learner === l.learnerId);\n      const [flag, ...extra] = mine;\n      for (const x of extra) { await R.save(x.objectId, { closedAt: stamp }, { className: 'QuietFlag' }); closed += 1; }\n      if (!reasons.length) {\n        if (flag) { await R.save(flag.objectId, { closedAt: stamp }, { className: 'QuietFlag' }); closed += 1; await bell(l.learnerId); }\n        continue;\n      }\n      if (flag) {\n        if (JSON.stringify(flag.reasons || []) !== JSON.stringify(reasons)) {\n          await R.save(flag.objectId, { reasons }, { className: 'QuietFlag' });\n          refreshed += 1;\n          await bell(l.learnerId);\n        }\n        continue;\n      }\n      await R.create('QuietFlag', { learner: l.learnerId, reasons, raisedAt: stamp, snoozedUntil: null, nudgedAt: null, closedAt: null }, { plain: true });\n      raised += 1;\n      await bell(l.learnerId);\n    }\n    const active = new Set(learners.map((l) => l.learnerId));\n    for (const f of open.filter((x) => !active.has(x.learner))) {\n      await R.save(f.objectId, { closedAt: stamp }, { className: 'QuietFlag' });\n      closed += 1;\n    }\n    console.log('[dbu:morningRound] quiet: raised=' + raised + ' refreshed=' + refreshed + ' closed=' + closed);\n    Outputs.raised = raised;\n    Outputs.closed = closed;\n    Outputs.request = { at: now, for: 'digest' };\n  } catch (e) {\n    console.error('[dbu:morningRound] quiet: ' + String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-learners",
+          "plug": "input",
+          "type": "*",
+          "displayName": "learners",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-raised",
+          "plug": "output",
+          "type": "*",
+          "displayName": "raised",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-closed",
+          "plug": "output",
+          "type": "*",
+          "displayName": "closed",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-request",
+          "plug": "output",
+          "type": "*",
+          "displayName": "request",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "failed",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "mr_items",
+      "type": "/#__cloud__/shared/Inbox items",
+      "label": "The inbox, with today's flags",
+      "x": 40,
+      "y": 540
+    },
+    {
+      "id": "mr_digest",
+      "type": "JavaScriptFunction",
+      "label": "Mail the digest if anything is new",
+      "x": 40,
+      "y": 660,
+      "parameters": {
+        "runOnChange-in-items": false,
+        "functionScript": "/*\n * THE MORNING DIGEST (DBU-08): one email to the coach when anything reached the inbox since the last\n * digest (Setting digestSentAt; the first ever looks back one day). Nothing new: nothing sent, and the\n * stamp stays. The stamp is claimed before the send and put back if the send fails, so a second run\n * the same morning sends nothing. To the coach address (Setting coachEmail, else the default), as\n * message mail is. Plain text; logs carry counts, never an address. Days are calendar days in Paris.\n * A check-in answered (DBU-10) is a line too; shared/Inbox items already lists those last.\n */\n(async () => {\n  let digest = 'none';\n  try {\n    const R = Noodl.Records;\n    const q = (c, where) => R.query(c, where, { limit: 1000, plain: true });\n    const t = (iso) => { const n = Date.parse(iso || ''); return Number.isFinite(n) ? n : 0; };\n    const dayNo = (ms) => Date.parse(new Date(ms).toLocaleDateString('en-CA', { timeZone: 'Europe/Paris' }) + 'T00:00:00Z') / 86400000;\n    const secret = (name) => {\n      const s = globalThis._noodl_get_secret ? globalThis._noodl_get_secret(name) : null;\n      return s && s.found ? String(s.value) : '';\n    };\n    const send = typeof globalThis._noodl_send_email === 'function' ? globalThis._noodl_send_email : null;\n    const appUrl = secret('appUrl').replace(/\\/+$/, '');\n    const DEFAULT_COACH = 'coach@example.com';\n    const now = new Date();\n    const items = Array.isArray(Inputs.items) ? Inputs.items : [];\n\n    const stampRows = await q('Setting', { key: { equalTo: 'digestSentAt' } });\n    const row = stampRows[0] || null;\n    const lastAt = row && row.value ? t(row.value) : now.getTime() - 86400000;\n    const fresh = items.filter((i) => t(i.since) > lastAt);\n    if (!fresh.length) {\n      digest = 'nothing new';\n    } else if (!send || !appUrl) {\n      digest = 'no mailer or no appUrl secret';\n      console.error('[dbu:morningRound] digest: no mailer or no appUrl secret (tools/setup-signin.mjs): nothing sent');\n    } else {\n      const settings = await q('Setting', { key: { equalTo: 'coachEmail' } });\n      const to = (settings[0] && String(settings[0].value || '').trim()) || DEFAULT_COACH;\n      const line = (i) => {\n        if (i.kind === 'review') return '- ' + i.learner + ' handed in \"' + i.title + '\"' + (i.version > 1 ? ' (version ' + i.version + ')' : '');\n        if (i.kind === 'question') return '- ' + i.learner + (i.count > 1 ? ' wrote ' + i.count + ' messages: \"' : ' asked: \"') + i.body + '\"';\n        if (i.kind === 'checkin') return '- ' + i.learner + ' answered the check-in \"' + i.title + '\"';\n        const days = dayNo(now.getTime()) - dayNo(Math.max(t(i.facts && i.facts.lastActiveAt), t(i.facts && i.facts.startedOn)));\n        const overdue = (i.reasons || []).filter((r) => r.kind === 'overdue').map((r) => '\"' + r.title + '\"');\n        const parts = [];\n        if ((i.reasons || []).some((r) => r.kind === 'inactive')) parts.push('no sign of ' + i.first + ' for ' + days + ' days');\n        if (overdue.length) parts.push(overdue.join(', ') + ' overdue');\n        return '- ' + i.learner + ' has gone quiet: ' + parts.join('; ');\n      };\n      const subject = fresh.length === 1 ? '1 new thing in your inbox' : fresh.length + ' new things in your inbox';\n      const text = [\n        'Good morning. New since the last digest:',\n        '',\n        ...fresh.map(line),\n        '',\n        items.length === fresh.length ? '' : items.length + ' waiting in all.',\n        'Open your inbox: ' + appUrl + '/coach/inbox',\n        '',\n        '--',\n        'Sent once a morning by Digital Bricks University, only when something new is waiting.'\n      ].filter((x, k, a) => !(x === '' && a[k - 1] === '')).join('\\n');\n\n      const claim = async (value) => {\n        if (row) await R.save(row.objectId, { value }, { className: 'Setting' });\n        else if (value) await R.create('Setting', { key: 'digestSentAt', value }, { plain: true });\n      };\n      await claim(now.toISOString());\n      let ok = false;\n      let why = '';\n      try {\n        const res = await send({ to, subject, text });\n        ok = !!(res && res.success);\n        why = ok ? '' : String((res && res.error) || 'no answer');\n      } catch (e) {\n        why = String((e && e.message) || e);\n      }\n      if (ok) digest = 'sent ' + fresh.length;\n      else {\n        if (row) await claim(row.value || '');\n        else {\n          const made = await q('Setting', { key: { equalTo: 'digestSentAt' } });\n          for (const m of made) await R.save(m.objectId, { value: '' }, { className: 'Setting' });\n        }\n        digest = 'send failed';\n        console.error('[dbu:morningRound] digest send failed, tomorrow tries again: ' + why.slice(0, 160).replace(/[^\\s]+@[^\\s]+/g, '<address>'));\n      }\n    }\n  } catch (e) {\n    digest = 'failed';\n    console.error('[dbu:morningRound] digest: ' + String((e && e.message) || e));\n  }\n  console.log('[dbu:morningRound] digest: ' + digest);\n  Outputs.digest = digest;\n  Outputs.done();\n})();"
+      },
+      "ports": [
+        {
+          "name": "in-items",
+          "plug": "input",
+          "type": "*",
+          "displayName": "items",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-digest",
+          "plug": "output",
+          "type": "*",
+          "displayName": "digest",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "done",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "mr_res",
+      "type": "noodl.cloud.response",
+      "label": "What the round did",
+      "x": 40,
+      "y": 800,
+      "parameters": {
+        "params": "raised,closed,digest"
+      }
+    },
+    {
+      "id": "mr_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "x": 320,
+      "y": 800,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "The morning round failed."
+      }
+    }
+  ]
+}

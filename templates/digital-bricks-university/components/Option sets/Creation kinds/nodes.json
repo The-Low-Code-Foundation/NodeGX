@@ -1,0 +1,40 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "061e6d82-30e0-5367-8d3c-ee2d0069d649",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ck_data",
+      "type": "Static Data",
+      "label": "Creation kinds",
+      "parameters": {
+        "type": "json",
+        "json": "[{\"id\":\"ck-document\",\"kind\":\"document\",\"labelKey\":\"creations.kindDocument\",\"filterKey\":\"creations.filterDocument\",\"bg\":\"var(--file-doc-bg)\",\"fg\":\"var(--file-doc-fg)\",\"exts\":\"docx,pptx,xlsx,pdf\"},{\"id\":\"ck-interactive\",\"kind\":\"interactive\",\"labelKey\":\"creations.kindInteractive\",\"filterKey\":\"creations.filterInteractive\",\"bg\":\"var(--file-html-bg)\",\"fg\":\"var(--file-html-fg)\",\"exts\":\"html,htm\"},{\"id\":\"ck-prompt\",\"kind\":\"prompt\",\"labelKey\":\"creations.kindPrompt\",\"filterKey\":\"creations.filterPrompt\",\"bg\":\"var(--file-prompt-bg)\",\"fg\":\"var(--file-prompt-fg)\",\"exts\":\"\"},{\"id\":\"ck-audio_video\",\"kind\":\"audio_video\",\"labelKey\":\"creations.kindAudioVideo\",\"filterKey\":\"creations.filterAudioVideo\",\"bg\":\"var(--file-audio-bg)\",\"fg\":\"var(--file-audio-fg)\",\"exts\":\"mp3,m4a,mp4,webm\"},{\"id\":\"ck-link\",\"kind\":\"link\",\"labelKey\":\"creations.kindLink\",\"filterKey\":\"creations.filterLink\",\"bg\":\"var(--file-link-bg)\",\"fg\":\"var(--file-link-fg)\",\"exts\":\"\"},{\"id\":\"ck-other\",\"kind\":\"other\",\"labelKey\":\"creations.kindOther\",\"filterKey\":\"creations.filterOther\",\"bg\":\"var(--muted)\",\"fg\":\"var(--muted-foreground)\",\"exts\":\"png,jpg,jpeg,webp\"}]"
+      },
+      "x": 40,
+      "y": 40,
+      "metadata": {
+        "comment": "Each row is a Model named by its id for the whole app, and Model.get('id') answers nothing, so ids are prefixed ck- and the value saved on a Creation is `kind`."
+      }
+    },
+    {
+      "id": "ck_out",
+      "type": "Component Outputs",
+      "label": "Creation kinds out",
+      "ports": [
+        {
+          "name": "items",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "*"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    }
+  ]
+}

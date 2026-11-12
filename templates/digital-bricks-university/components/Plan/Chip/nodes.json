@@ -1,0 +1,101 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "17ddcc12-2493-533c-83f1-93543a5f529f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pc_root",
+      "type": "Group",
+      "label": "Chip",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "pc_text"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "borderRadius": "var(--radius-full)",
+        "paddingLeft": "var(--space-2-5)",
+        "paddingRight": "var(--space-2-5)",
+        "paddingTop": "var(--space-0-5)",
+        "paddingBottom": "var(--space-0-5)",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderStyle": "dashed",
+        "backgroundColor": "var(--muted)"
+      },
+      "metadata": {
+        "comment": "The edge is dashed here and switched off by 'Dashed edge when outlined' for every chip that is not marking a draft."
+      }
+    },
+    {
+      "id": "pc_text",
+      "type": "Text",
+      "label": "Label",
+      "x": 100,
+      "y": 160,
+      "parent": "pc_root",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "pc_in",
+      "type": "Component Inputs",
+      "label": "Chip in",
+      "x": 400,
+      "y": 40,
+      "ports": [
+        {
+          "name": "labelKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "bg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "fg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "outlined",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "id": "pc_t",
+      "type": "Translation",
+      "label": "The chip's words",
+      "x": 400,
+      "y": 160,
+      "parameters": {
+        "Namespace": "pages"
+      }
+    },
+    {
+      "id": "pc_edge",
+      "type": "Expression",
+      "label": "Dashed edge when outlined",
+      "x": 400,
+      "y": 280,
+      "parameters": {
+        "expression": "outlined ? 'dashed' : 'none'"
+      }
+    }
+  ],
+  "visualRoots": [
+    "pc_root"
+  ]
+}

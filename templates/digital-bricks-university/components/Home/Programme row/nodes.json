@@ -1,0 +1,450 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "30ec139f-f500-5cfd-8fe2-6ce8abdc8720",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pr_row",
+      "type": "Group",
+      "label": "Step",
+      "children": [
+        "pr_tile",
+        "pr_text",
+        "pr_open",
+        "pr_answer"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--surface)",
+        "backgroundColor": "var(--surface)",
+        "dataAttributes": "data-testid"
+      },
+      "metadata": {
+        "comment": "Not wrapped: the words shrink beside the icon and Open on a phone, and the when and status sit under the title so nothing is pushed off the edge."
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pr_tile",
+      "type": "Group",
+      "label": "Kind icon on its tint",
+      "parent": "pr_row",
+      "children": [
+        "pr_icon"
+      ],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 36,
+          "unit": "px"
+        },
+        "height": {
+          "value": 36,
+          "unit": "px"
+        },
+        "borderRadius": "var(--radius-lg)",
+        "backgroundColor": "var(--muted)",
+        "alignItems": "center",
+        "justifyContent": "center"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pr_icon",
+      "type": "net.noodl.visual.icon",
+      "label": "Kind icon",
+      "parent": "pr_tile",
+      "parameters": {
+        "iconSize": 18,
+        "iconColor": "var(--muted-foreground)",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-circle",
+          "codeAsClass": true
+        }
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "pr_text",
+      "type": "Group",
+      "label": "Kind, title, when and status",
+      "parent": "pr_row",
+      "children": [
+        "pr_kind",
+        "pr_title",
+        "pr_meta"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-0-5)"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "pr_kind",
+      "type": "Text",
+      "label": "Homework 2",
+      "parent": "pr_text",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "pr_title",
+      "type": "Text",
+      "label": "Title",
+      "parent": "pr_text",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-medium)",
+        "color": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "pr_meta",
+      "type": "Group",
+      "label": "When, and the status",
+      "parent": "pr_text",
+      "children": [
+        "pr_when",
+        "pr_chip"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-1)",
+        "paddingTop": "var(--space-1)"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "pr_when",
+      "type": "Text",
+      "label": "When",
+      "parent": "pr_meta",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "pr_chip",
+      "type": "/Plan/Chip",
+      "label": "Status",
+      "parent": "pr_meta",
+      "parameters": {
+        "outlined": false
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "pr_open",
+      "type": "net.noodl.controls.button",
+      "label": "Open",
+      "parent": "pr_row",
+      "parameters": {
+        "label": "",
+        "mounted": false,
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-chevron-right",
+          "codeAsClass": true
+        },
+        "iconPlacement": "right",
+        "iconColor": "var(--muted-foreground)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1)"
+      },
+      "metadata": {
+        "comment": "A real button rather than a clickable row, so a keyboard reaches it; 44px tall from the element style."
+      },
+      "x": 100,
+      "y": 1120
+    },
+    {
+      "id": "pr_in",
+      "type": "Component Inputs",
+      "label": "Row in",
+      "ports": [
+        {
+          "name": "stepId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "kindKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "n",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "whenKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "date",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "time",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "what",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "statusKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "statusBg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "statusFg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "icon",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "iconBg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "iconFg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "rowBg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "rowBorder",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "opens",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "answers",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 470,
+      "y": 40
+    },
+    {
+      "id": "pr_testid",
+      "type": "String Format",
+      "label": "home-step-{id}, for tests",
+      "parameters": {
+        "format": "home-step-{id}"
+      },
+      "x": 470,
+      "y": 160
+    },
+    {
+      "id": "pr_t_kind",
+      "type": "Translation",
+      "label": "The numbered kind",
+      "parameters": {
+        "Namespace": "pages"
+      },
+      "x": 470,
+      "y": 1360
+    },
+    {
+      "id": "pr_kind_fill",
+      "type": "String Format",
+      "label": "Number into the kind",
+      "parameters": {
+        "format": "{n}"
+      },
+      "metadata": {
+        "comment": "The format arrives from the Translation; a kind with no {n} (Check-in) passes through unchanged."
+      },
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "pr_t_when",
+      "type": "Translation",
+      "label": "When, in words",
+      "parameters": {
+        "Namespace": "pages"
+      },
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "pr_when_fill",
+      "type": "String Format",
+      "label": "Day and time into when",
+      "parameters": {
+        "format": "{date} {time} {what}"
+      },
+      "metadata": {
+        "comment": "The format arrives from the Translation; this default only declares the inputs."
+      },
+      "x": 470,
+      "y": 880
+    },
+    {
+      "id": "pr_t_open",
+      "type": "Translation",
+      "label": "Open",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.open"
+      },
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "pr_go",
+      "type": "RouterNavigate",
+      "label": "→ This homework",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Homework"
+      },
+      "x": 470,
+      "y": 1240
+    },
+    {
+      "id": "pr_answer",
+      "type": "net.noodl.controls.button",
+      "label": "Answer (a check-in that has gone out)",
+      "parent": "pr_row",
+      "parameters": {
+        "label": "",
+        "mounted": false,
+        "sizeMode": "contentSize",
+        "minHeight": "var(--space-11)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "fontWeight": "var(--font-medium)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-chevron-right",
+          "codeAsClass": true
+        },
+        "iconPlacement": "right",
+        "iconColor": "var(--primary-foreground)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1)"
+      },
+      "x": 100,
+      "y": 1240
+    },
+    {
+      "id": "pr_t_answer",
+      "type": "Translation",
+      "label": "Answer",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.answer"
+      },
+      "x": 470,
+      "y": 1600
+    },
+    {
+      "id": "pr_go_ci",
+      "type": "RouterNavigate",
+      "label": "→ This check-in",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Check-in"
+      },
+      "x": 470,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "pr_row"
+  ]
+}

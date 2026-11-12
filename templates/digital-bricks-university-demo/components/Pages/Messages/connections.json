@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "54776c6c-7879-560d-8e28-2c3e5d90f475",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ms_t_tab",
+      "fromProperty": "Translation",
+      "toId": "ms_page",
+      "toProperty": "title"
+    }
+  ]
+}

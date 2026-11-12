@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "079eb08c-72f9-529f-8085-c486d992709d",
+  "name": "saveStep",
+  "path": "/#__cloud__/saveStep",
+  "type": "cloud",
+  "created": "2026-11-09T10:26:43.587Z",
+  "modified": "2026-11-12T14:38:35.198Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach edits one step of a plan: a live session's title, time (or to book), duration, meeting and recording links and shared summary; a homework's title, due date, brief, hand-in list and resources; a check-in's title, form and send day (a date, or N days after a session or homework, kept in step when that step moves). Checks every field and refuses in a sentence (security: role:staff)."
+}

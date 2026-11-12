@@ -1,0 +1,357 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "260f91a8-a346-57f7-8d56-01df5190f556",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "home_page",
+      "type": "Page",
+      "label": "Home",
+      "children": [
+        "home_shell"
+      ],
+      "parameters": {
+        "urlPath": "home"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "home_shell",
+      "type": "/Shell/App shell",
+      "label": "Learner shell",
+      "parent": "home_page",
+      "children": [
+        "home_top",
+        "home_prep",
+        "home_failed",
+        "home_cols"
+      ],
+      "parameters": {
+        "coach": false,
+        "current": "home"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "home_top",
+      "type": "Group",
+      "label": "Greeting and plan",
+      "parent": "home_shell",
+      "children": [
+        "home_head",
+        "home_planline"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1-5)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "home_head",
+      "type": "/Shell/Page head",
+      "label": "Head",
+      "parent": "home_top",
+      "parameters": {
+        "titleKey": "home.title"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "home_planline",
+      "type": "Text",
+      "label": "Plan, coach and week",
+      "parent": "home_top",
+      "parameters": {
+        "text": "",
+        "mounted": false,
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-normal)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "home_prep",
+      "type": "Group",
+      "label": "Shown while nothing is shared yet",
+      "parent": "home_shell",
+      "children": [
+        "home_empty"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "metadata": {
+        "comment": "Starts hidden: it shows on learnerHome's answer, never before it, so a learner with a programme never sees it flash."
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "home_empty",
+      "type": "/Shell/Empty state",
+      "label": "Richard is preparing your programme",
+      "parent": "home_prep",
+      "parameters": {
+        "icon": {
+          "class": "lucide",
+          "code": "icon-route",
+          "codeAsClass": true
+        },
+        "titleKey": "home.preparingTitle",
+        "bodyKey": "home.preparingBody"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "home_failed",
+      "type": "Text",
+      "label": "The programme could not be read",
+      "parent": "home_shell",
+      "parameters": {
+        "text": "",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "home_cols",
+      "type": "net.noodl.visual.columns",
+      "label": "Programme, and beside it progress",
+      "parent": "home_shell",
+      "children": [
+        "home_main",
+        "home_side"
+      ],
+      "parameters": {
+        "mounted": false,
+        "sizing": "layoutString",
+        "layoutString": "2 1",
+        "smallBreakpoint": 900,
+        "smallLayout": "1",
+        "marginX": 24,
+        "marginY": 24
+      },
+      "metadata": {
+        "comment": "Two thirds and one third on a computer; one column under 900px of room (a tablet or a phone), Up next first. Columns is the only node that reflows."
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "home_main",
+      "type": "Group",
+      "label": "Up next and the programme",
+      "parent": "home_cols",
+      "children": [
+        "home_upnext",
+        "home_programme"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-6)"
+      },
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "home_upnext",
+      "type": "/Home/Up next",
+      "label": "Up next",
+      "parent": "home_main",
+      "x": 280,
+      "y": 1240
+    },
+    {
+      "id": "home_programme",
+      "type": "/Home/Programme",
+      "label": "Your programme",
+      "parent": "home_main",
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "home_side",
+      "type": "Group",
+      "label": "Progress and things made",
+      "parent": "home_cols",
+      "children": [
+        "home_latest",
+        "home_ask",
+        "home_progress",
+        "home_made"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-6)"
+      },
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "home_progress",
+      "type": "/Home/Progress",
+      "label": "Progress",
+      "parent": "home_side",
+      "x": 280,
+      "y": 1600
+    },
+    {
+      "id": "home_made",
+      "type": "/Home/Made card",
+      "label": "Things you've made",
+      "parent": "home_side",
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "home_t_tab",
+      "type": "Translation",
+      "label": "The browser tab's title",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.tab"
+      },
+      "x": 530,
+      "y": 40
+    },
+    {
+      "id": "home_read",
+      "type": "CloudFunction2",
+      "label": "learnerHome (only what is shared with me)",
+      "parameters": {
+        "function": "learnerHome"
+      },
+      "x": 530,
+      "y": 280
+    },
+    {
+      "id": "home_bell",
+      "type": "SubscribeToChanges",
+      "label": "My doorbell: Richard changed something I see",
+      "parameters": {
+        "collectionName": "Doorbell"
+      },
+      "metadata": {
+        "comment": "The bell carries no content (PLATFORM.md 4): it only says read again. Its row ACL means only this learner's bells (and the coach's) arrive."
+      },
+      "x": 530,
+      "y": 1120
+    },
+    {
+      "id": "home_words",
+      "type": "/Home/Home in words",
+      "label": "Home, in keys and values",
+      "x": 530,
+      "y": 400
+    },
+    {
+      "id": "home_t_plan",
+      "type": "Translation",
+      "label": "{plan} · 1:1 coaching with Richard · Week {week}",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.planLine"
+      },
+      "x": 530,
+      "y": 1240
+    },
+    {
+      "id": "home_plan_fill",
+      "type": "String Format",
+      "label": "Plan and week into the line",
+      "parameters": {
+        "format": "{plan} {week}"
+      },
+      "metadata": {
+        "comment": "The format arrives from the Translation; this default only declares the inputs."
+      },
+      "x": 530,
+      "y": 520
+    },
+    {
+      "id": "home_t_failed",
+      "type": "Translation",
+      "label": "Could not read",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.failed"
+      },
+      "x": 530,
+      "y": 880
+    },
+    {
+      "id": "home_fail_sw",
+      "type": "Switch",
+      "label": "Remember the read failed",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 530,
+      "y": 1000
+    },
+    {
+      "id": "home_latest",
+      "type": "/Home/Latest from Richard",
+      "label": "Latest from Richard",
+      "parent": "home_side",
+      "x": 280,
+      "y": 1840
+    },
+    {
+      "id": "home_ask",
+      "type": "/Home/Ask Richard",
+      "label": "Stuck between sessions? Ask Richard",
+      "parent": "home_side",
+      "x": 280,
+      "y": 1960
+    },
+    {
+      "id": "home_go",
+      "type": "JavaScriptFunction",
+      "label": "Only for someone signed in",
+      "x": 380,
+      "y": 200,
+      "parameters": {
+        "functionScript": "// Read the programme only for someone signed in. A signed-out visitor sees this page for a beat\n// before the gate (/App) sends them to Sign in, and a read then is refused.\nif (!Noodl.Users.Current) return;\nOutputs.go();"
+      },
+      "metadata": {
+        "comment": "The page mounts a beat before the app's gate sends a signed-out visitor to Sign in; asking then is refused (403) and logged. Measured on the demo at nodegx.io."
+      }
+    }
+  ],
+  "visualRoots": [
+    "home_page"
+  ]
+}

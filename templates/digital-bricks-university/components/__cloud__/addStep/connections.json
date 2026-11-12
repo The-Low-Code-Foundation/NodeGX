@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "63897bf7-278c-5a03-8852-70a2e514a432",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "as_req",
+      "fromProperty": "pm-planId",
+      "toId": "as_fn",
+      "toProperty": "in-planId"
+    },
+    {
+      "fromId": "as_req",
+      "fromProperty": "pm-kind",
+      "toId": "as_fn",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "as_req",
+      "fromProperty": "pm-title",
+      "toId": "as_fn",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "as_req",
+      "fromProperty": "pm-libraryItemId",
+      "toId": "as_fn",
+      "toProperty": "in-libraryItemId"
+    },
+    {
+      "fromId": "as_fn",
+      "fromProperty": "out-stepId",
+      "toId": "as_res",
+      "toProperty": "pm-stepId"
+    },
+    {
+      "fromId": "as_fn",
+      "fromProperty": "out-done",
+      "toId": "as_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "as_fn",
+      "fromProperty": "out-why",
+      "toId": "as_deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "as_fn",
+      "fromProperty": "out-refuse",
+      "toId": "as_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "as_fn",
+      "fromProperty": "out-failed",
+      "toId": "as_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "as_fn",
+      "fromProperty": "failure",
+      "toId": "as_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "as_req",
+      "fromProperty": "receive",
+      "toId": "as_forms",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "as_forms",
+      "fromProperty": "done",
+      "toId": "as_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "as_forms",
+      "fromProperty": "forms",
+      "toId": "as_fn",
+      "toProperty": "in-forms"
+    }
+  ]
+}

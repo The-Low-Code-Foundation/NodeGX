@@ -1,0 +1,193 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "9a8811bb-e7e1-56b9-8228-811647d7f6c6",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cfm_root",
+      "type": "Group",
+      "label": "Check-in form",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-6)"
+      },
+      "children": [
+        "cfm_list",
+        "cfm_send"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "cfm_list",
+      "type": "Group",
+      "label": "The questions",
+      "parent": "cfm_root",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-6)"
+      },
+      "children": [
+        "cfm_rows"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "cfm_rows",
+      "type": "For Each",
+      "label": "One per question",
+      "parent": "cfm_list",
+      "parameters": {
+        "template": "/Checkin/Question"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "cfm_send",
+      "type": "net.noodl.controls.button",
+      "label": "Send my answers",
+      "parent": "cfm_root",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "minHeight": "var(--space-11)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-send",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)",
+        "iconColor": "var(--primary-foreground)",
+        "dataAttributes": "data-testid",
+        "data-testid": "checkin-send"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "cfm_in",
+      "type": "Component Inputs",
+      "label": "The check-in",
+      "ports": [
+        {
+          "name": "stepId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "questions",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "cfm_out",
+      "type": "Component Outputs",
+      "label": "Send, with the answers",
+      "ports": [
+        {
+          "name": "send",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "answers",
+          "plug": "input",
+          "type": "object"
+        }
+      ],
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "cfm_arr",
+      "type": "Collection2",
+      "label": "The questions being answered",
+      "parameters": {
+        "collectionId": "checkin-questions"
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "cfm_t_send",
+      "type": "Translation",
+      "label": "Send my answers",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "checkin.send"
+      },
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "cfm_build",
+      "type": "JavaScriptFunction",
+      "label": "One record per question",
+      "parameters": {
+        "functionScript": "/*\n * The step's own copy of its form (DBU-10), as one record per question for Checkin/Question.\n * Ids carry the step, so two check-ins with the same form never share an answer. Reading the\n * check-in again keeps what is already typed or picked.\n */\nif (Inputs.stepId === undefined || Inputs.questions === undefined) return;\nconst step = String(Inputs.stepId || '');\nconst qs = (Array.isArray(Inputs.questions) ? Inputs.questions : []).filter((q) => q && q.id);\nconst OFF = { bg: 'var(--surface)', fg: 'var(--foreground)', border: 'var(--border-control)' };\nconst ON = { bg: 'var(--primary)', fg: 'var(--primary-foreground)', border: 'var(--primary)' };\nconst before = {};\n(Noodl.Arrays['checkin-questions'] || []).forEach((m) => { before[m.getId()] = m.get('value'); });\nconst rows = qs.map((q) => {\n  const id = 'cq-' + step + '-' + q.id;\n  const type = String(q.type || 'text');\n  const kept = before[id];\n  const value = kept !== undefined ? kept : (type === 'checkbox' ? [] : '');\n  const on = (v) => (Array.isArray(value) ? value.includes(v) : value === v);\n  let choices = [];\n  if (type === 'scale') {\n    const lo = Number.isFinite(q.min) ? q.min : 1;\n    const hi = Number.isFinite(q.max) ? q.max : 5;\n    for (let n = lo; n <= hi; n += 1) choices.push({ id: id + '-' + n, label: String(n), value: n });\n  } else if (type === 'radio' || type === 'checkbox') {\n    choices = (Array.isArray(q.options) ? q.options : []).map((o) => {\n      const v = o && typeof o === 'object' ? o.value : o;\n      return { id: id + '-' + v, label: String(o && typeof o === 'object' ? (o.label || v) : v), value: v };\n    });\n  }\n  choices = choices.map((c) => Object.assign(c, on(c.value) ? ON : OFF));\n  return {\n    id, qid: q.id, type, condition: q.condition || null, value,\n    labelKey: q.required ? 'checkin.qRequired' : 'checkin.qOptional',\n    label: String(q.label || q.id), hint: String(q.hint || ''), hasHint: !!q.hint,\n    shown: true, choices, hasChoices: choices.length > 0,\n    hasEnds: type === 'scale' && !!(q.minLabel || q.maxLabel),\n    minLabel: String(q.minLabel || ''), maxLabel: String(q.maxLabel || ''),\n    isLine: type === 'text' || type === 'number', inputMode: type === 'number' ? 'decimal' : 'text',\n    isLong: type === 'textarea', suffix: String(q.suffix || ''), hasSuffix: !!q.suffix,\n    text: typeof value === 'string' ? value : ''\n  };\n});\nNoodl.Arrays['checkin-questions'] = rows;\nOutputs.built();"
+      },
+      "ports": [
+        {
+          "name": "in-stepId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-questions",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "out-built",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "cfm_rules",
+      "type": "JavaScriptFunction",
+      "label": "Which questions show, and the answers so far",
+      "parameters": {
+        "functionScript": "/*\n * WHICH QUESTIONS SHOW (DBU-10): the Hub's SurveyForm rules, the same as answerCheckin's, so the\n * page never asks what the server would drop. In question order, a question shows when its condition\n * holds on the answers above it that show: {field, value | [values]}, {field, not}, {field, operator, value}.\n * The answers gathered are only the shown, non-empty ones. A number is sent as typed (the server\n * reads a comma as a point); a scale point and a pick are sent as their values.\n */\nconst list = Noodl.Arrays['checkin-questions'] || [];\nconst empty = (v) => v === undefined || v === null || (typeof v === 'string' && !v.trim()) || (Array.isArray(v) && !v.length);\nconst holds = (c, sofar) => {\n  if (!c || !c.field) return true;\n  const v = sofar[c.field];\n  if (Array.isArray(c.value)) return c.value.includes(v);\n  if (c.operator) {\n    const n = Number(v);\n    if (v === undefined || !Number.isFinite(n)) return false;\n    if (c.operator === '>') return n > c.value;\n    if (c.operator === '<') return n < c.value;\n    if (c.operator === '>=') return n >= c.value;\n    if (c.operator === '<=') return n <= c.value;\n    return false;\n  }\n  if (c.not !== undefined) return v !== c.not;\n  return v === c.value;\n};\nconst sofar = {};\nconst answers = {};\nlist.forEach((m) => {\n  const show = holds(m.get('condition'), sofar);\n  if (m.get('shown') !== show) m.set('shown', show);\n  const v = m.get('value');\n  if (!show || empty(v)) return;\n  const qid = m.get('qid');\n  if (m.get('type') === 'number') {\n    const n = Number(String(v).trim().replace(',', '.'));\n    sofar[qid] = Number.isFinite(n) ? n : v;\n    answers[qid] = String(v).trim();\n  } else {\n    sofar[qid] = typeof v === 'string' ? v.trim() : v;\n    answers[qid] = sofar[qid];\n  }\n});\nOutputs.answers = answers;"
+      },
+      "ports": [
+        {
+          "name": "out-answers",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "metadata": {
+        "comment": "The same rules as answerCheckin on the server: change both together."
+      },
+      "x": 410,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "cfm_root"
+  ]
+}

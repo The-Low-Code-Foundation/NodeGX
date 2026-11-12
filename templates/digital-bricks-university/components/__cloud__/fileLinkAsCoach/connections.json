@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "45a0bfbf-5e12-5db6-8158-d06f0af7e063",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "fc_req",
+      "fromProperty": "pm-name",
+      "toId": "fc_find",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "fc_req",
+      "fromProperty": "receive",
+      "toId": "fc_find",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "fc_find",
+      "fromProperty": "out-name",
+      "toId": "fc_sign",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "fc_find",
+      "fromProperty": "out-refused",
+      "toId": "fc_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "fc_find",
+      "fromProperty": "failure",
+      "toId": "fc_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "fc_sign",
+      "fromProperty": "url",
+      "toId": "fc_res",
+      "toProperty": "pm-url"
+    },
+    {
+      "fromId": "fc_sign",
+      "fromProperty": "expiresAt",
+      "toId": "fc_res",
+      "toProperty": "pm-expiresAt"
+    },
+    {
+      "fromId": "fc_sign",
+      "fromProperty": "done",
+      "toId": "fc_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "fc_sign",
+      "fromProperty": "failed",
+      "toId": "fc_deny",
+      "toProperty": "send"
+    }
+  ]
+}

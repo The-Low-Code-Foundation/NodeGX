@@ -1,0 +1,86 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "0e0aa5d0-cd3e-5e92-8f67-542a6940efce",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mm_in",
+      "type": "Component Inputs",
+      "label": "Whose waiting messages to mail",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "request",
+          "plug": "output",
+          "type": "*"
+        }
+      ]
+    },
+    {
+      "id": "mm_fn",
+      "type": "JavaScriptFunction",
+      "label": "Group, hold or send, then stamp",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "runOnChange-in-request": true,
+        "functionScript": "/*\n * THE ONE OWNER OF MESSAGE MAIL (DBU-07). Nothing else mails about messages.\n *\n *   request { learnerId, to: 'coach' | 'learner' }  sendMessage / replyAsCoach, right after saving\n *   request { all: true }                            mailMessages, the every-minute flush\n *\n * WHAT. Every message saved with mailPending: true, grouped per learner and direction: one email\n * carries all of a learner's waiting messages to the coach, or all the coach's waiting replies to her.\n * WHEN. At once, unless an email already went the same way for this learner in the last HOLD\n * (5 minutes; the secret mailHoldSeconds, which only tools/check-mail.mjs lowers). Then the messages\n * wait, and the flush sends them together when the 5 minutes are up. So the first message reaches\n * the coach within a minute, and a burst of messages is one more email, not a stream.\n * WHO. To the coach: Setting coachEmail, else DEFAULT_COACH (a placeholder: set the real address in\n * Settings). To the learner: her account address,\n * unless she turned message emails off (emailOptOutAt): then nothing is sent and the messages are\n * marked dealt with, so they are never mailed later.\n * A MAIL NEVER FAILS A WRITE: this always answers done. The messages are claimed (mailPending false)\n * before the send and given back if it fails, so the flush tries again. Logs carry ids and counts,\n * never an address or a message.\n */\nif (Inputs.request !== undefined && Inputs.request !== null) {\n  (async () => {\n    const r = Inputs.request || {};\n    let sent = 0;\n    let held = 0;\n    try {\n      const R = Noodl.Records;\n      const q = (c, where) => R.query(c, where, { limit: 1000, plain: true });\n      const secret = (name) => {\n        const s = globalThis._noodl_get_secret ? globalThis._noodl_get_secret(name) : null;\n        return s && s.found ? String(s.value) : '';\n      };\n      const send = typeof globalThis._noodl_send_email === 'function' ? globalThis._noodl_send_email : null;\n      const appUrl = secret('appUrl').replace(/\\/+$/, '');\n      if (!send || !appUrl) {\n        console.error('[dbu:Message mail] no mailer or no appUrl secret (tools/setup-signin.mjs): nothing sent');\n        Outputs.sent = 0;\n        Outputs.held = 0;\n        Outputs.done();\n        return;\n      }\n      const holdSetting = Number(secret('mailHoldSeconds'));\n      const HOLD_MS = (Number.isFinite(holdSetting) && secret('mailHoldSeconds') !== '' ? holdSetting : 300) * 1000;\n      const DEFAULT_COACH = 'coach@example.com';\n      const key = secret('unsubscribeKey');\n\n      const pending = r.all === true\n        ? await q('Message', { mailPending: { equalTo: true } })\n        : (await q('Message', { learner: { equalTo: String(r.learnerId || '') } })).filter((m) => m.mailPending === true);\n      const groups = new Map();\n      for (const m of pending) {\n        const to = m.author === m.learner ? 'coach' : 'learner';\n        if (r.all !== true && r.to && r.to !== to) continue;\n        const k = m.learner + '|' + to;\n        if (!groups.has(k)) groups.set(k, { learner: m.learner, to, list: [] });\n        groups.get(k).list.push(m);\n      }\n\n      const settings = await q('Setting', { key: { equalTo: 'coachEmail' } });\n      const coachAddress = (settings[0] && String(settings[0].value || '').trim()) || DEFAULT_COACH;\n      const hex = (buf) => Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');\n      const unsubscribeFor = async (userId) => {\n        if (!key) return '';\n        const k = await crypto.subtle.importKey('raw', new TextEncoder().encode(key), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);\n        const sig = hex(await crypto.subtle.sign('HMAC', k, new TextEncoder().encode('dbu-unsubscribe:v1:' + userId)));\n        return appUrl + '/unsubscribe?u=' + encodeURIComponent(userId) + '&s=' + sig;\n      };\n\n      for (const g of groups.values()) {\n        const tag = '[dbu:Message mail] to=' + g.to + ' learner=' + g.learner;\n        const everything = await q('Message', { learner: { equalTo: g.learner } });\n        const sameWay = everything.filter((m) => (m.author === m.learner) === (g.to === 'coach'));\n        const last = sameWay.map((m) => m.mailedAt).filter(Boolean).sort().pop();\n        if (last && Date.now() - Date.parse(last) < HOLD_MS) {\n          held += g.list.length;\n          continue;\n        }\n        const users = await q('_User', { objectId: { equalTo: g.learner } });\n        const learner = users[0];\n        if (!learner) {\n          console.error(tag + ' no such account: not sent');\n          continue;\n        }\n        const list = g.list.slice().sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));\n        const stamp = new Date().toISOString();\n        const claim = (pendingNow) => Promise.all(list.map((m) =>\n          R.save(m.objectId, pendingNow ? { mailPending: true, mailedAt: null } : { mailPending: false, mailedAt: stamp }, { className: 'Message' })));\n\n        const address = typeof learner.email === 'string' && learner.email.includes('@') ? learner.email : '';\n        if (g.to === 'learner' && (learner.emailOptOutAt || !address)) {\n          await claim(false);\n          console.log(tag + ' not sent: the learner turned message emails off (' + list.length + ' message(s))');\n          continue;\n        }\n\n        const stepIds = [...new Set(list.map((m) => m.step).filter(Boolean))];\n        const steps = stepIds.length ? await q('Step', { objectId: { containedIn: stepIds } }) : [];\n        const titleOf = (id) => { const s = steps.find((x) => x.objectId === id); return s ? String(s.title || '') : ''; };\n        const learnerName = String(learner.name || learner.email || 'A learner');\n        const learnerFirst = learnerName.split(' ')[0];\n        const lines = [];\n        for (const m of list) {\n          const title = m.step ? titleOf(m.step) : '';\n          if (title) lines.push((g.to === 'coach' ? 'About the homework \"' : 'About your homework \"') + title + '\":');\n          if (String(m.body || '').trim()) lines.push(String(m.body).trim());\n          const att = (Array.isArray(m.attachments) ? m.attachments : []).map((a) => a && a.name).filter(Boolean);\n          if (att.length) lines.push('Attached: ' + att.join(', '));\n          lines.push('');\n        }\n\n        let to, subject, text;\n        if (g.to === 'coach') {\n          to = coachAddress;\n          subject = list.length === 1 ? learnerName + ' sent you a message' : learnerName + ' sent you ' + list.length + ' messages';\n          text = [\n            learnerName + (list.length === 1 ? ' wrote:' : ' wrote ' + list.length + ' messages:'),\n            '',\n            ...lines,\n            'Reply to ' + learnerFirst + ': ' + appUrl + '/coach/plan?learner=' + encodeURIComponent(g.learner),\n            '',\n            '--',\n            'Replies to this email are not read. Answer on Digital Bricks University, and ' + learnerFirst + ' will see it there.'\n          ].join('\\n');\n        } else {\n          const authors = [...new Set(list.map((m) => m.author))];\n          const coaches = await q('_User', { objectId: { containedIn: authors } });\n          const coachFirst = String((coaches[0] && coaches[0].name) || 'Your coach').split(' ')[0];\n          const oneStep = stepIds.length === 1 && list.every((m) => m.step === stepIds[0]);\n          const link = oneStep ? appUrl + '/homework?step=' + encodeURIComponent(stepIds[0]) : appUrl + '/messages';\n          const unsubscribe = await unsubscribeFor(learner.objectId);\n          if (!unsubscribe) console.error(tag + ' no unsubscribeKey secret (tools/setup-signin.mjs): the footer has no link');\n          to = address;\n          subject = coachFirst + ' replied';\n          text = [\n            'Hello ' + learnerFirst + ',',\n            '',\n            coachFirst + (list.length === 1 ? ' replied:' : ' sent you ' + list.length + ' messages:'),\n            '',\n            ...lines,\n            'Read it and answer: ' + link,\n            '',\n            '--',\n            'Replies to this email are not read. Answer on Digital Bricks University, and ' + coachFirst + ' will see it there.',\n            unsubscribe ? 'Stop these emails: ' + unsubscribe : 'You can stop these emails on your Messages page.',\n            'Your sign-in emails are not affected.'\n          ].join('\\n');\n        }\n\n        await claim(false);\n        let ok = false;\n        let why = '';\n        try {\n          const res = await send({ to, subject, text });\n          ok = !!(res && res.success);\n          why = ok ? '' : String((res && res.error) || 'no answer');\n        } catch (e) {\n          why = String((e && e.message) || e);\n        }\n        if (ok) sent += 1;\n        else {\n          await claim(true);\n          console.error(tag + ' send failed, left for the next flush: ' + why.slice(0, 160).replace(/[^\\s]+@[^\\s]+/g, '<address>'));\n        }\n      }\n      if (sent || held) console.log('[dbu:Message mail] sent=' + sent + ' held=' + held);\n    } catch (e) {\n      console.error('[dbu:Message mail] ' + String((e && e.message) || e));\n    }\n    Outputs.sent = sent;\n    Outputs.held = held;\n    Outputs.done();\n  })();\n}"
+      },
+      "ports": [
+        {
+          "name": "in-request",
+          "displayName": "request",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sent",
+          "displayName": "sent",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-held",
+          "displayName": "held",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "mm_out",
+      "type": "Component Outputs",
+      "label": "How many went, how many wait",
+      "x": 40,
+      "y": 300,
+      "ports": [
+        {
+          "name": "sent",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "held",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "be485cfe-a196-59ad-89c4-b2f5d20a931d",
+  "name": "Review",
+  "path": "/Work/Review",
+  "type": "visual",
+  "created": "2026-11-09T13:08:22.972Z",
+  "modified": "2026-11-09T13:08:22.972Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach's verdict on the newest hand-in (SCOPE R6): a note, Approve, or Ask for changes, which needs a note saying what to change. Through reviewSubmission, the only way a verdict is set; tells the row when it is recorded."
+}

@@ -1,0 +1,151 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7ac14f14-cdd5-8f31-9c7c-1520274e56b4",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "72895c0b-9c3a-91d3-16b9-e6affe03ffa7",
+      "fromProperty": "this",
+      "toId": "9e99c4f7-6fbe-0807-2cc4-631a1a47fc70",
+      "toProperty": "in-host"
+    },
+    {
+      "fromId": "72895c0b-9c3a-91d3-16b9-e6affe03ffa7",
+      "fromProperty": "didMount",
+      "toId": "49c33781-5c07-0431-8ac0-3cd0db1248c0",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "49c33781-5c07-0431-8ac0-3cd0db1248c0",
+      "fromProperty": "out-mounts",
+      "toId": "9e99c4f7-6fbe-0807-2cc4-631a1a47fc70",
+      "toProperty": "in-mounted"
+    },
+    {
+      "fromId": "a7f1bc7c-1899-b690-638b-9c562f3bed7a",
+      "fromProperty": "Reset",
+      "toId": "e3bf39c6-d3c8-e0d8-7ee6-f39fb2e51c28",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "e3bf39c6-d3c8-e0d8-7ee6-f39fb2e51c28",
+      "fromProperty": "out-resets",
+      "toId": "9e99c4f7-6fbe-0807-2cc4-631a1a47fc70",
+      "toProperty": "in-resets"
+    },
+    {
+      "fromId": "a7f1bc7c-1899-b690-638b-9c562f3bed7a",
+      "fromProperty": "Value",
+      "toId": "9e99c4f7-6fbe-0807-2cc4-631a1a47fc70",
+      "toProperty": "in-value"
+    },
+    {
+      "fromId": "a7f1bc7c-1899-b690-638b-9c562f3bed7a",
+      "fromProperty": "Label",
+      "toId": "9e99c4f7-6fbe-0807-2cc4-631a1a47fc70",
+      "toProperty": "in-label"
+    },
+    {
+      "fromId": "a7f1bc7c-1899-b690-638b-9c562f3bed7a",
+      "fromProperty": "Min",
+      "toId": "9e99c4f7-6fbe-0807-2cc4-631a1a47fc70",
+      "toProperty": "in-min"
+    },
+    {
+      "fromId": "a7f1bc7c-1899-b690-638b-9c562f3bed7a",
+      "fromProperty": "Max",
+      "toId": "9e99c4f7-6fbe-0807-2cc4-631a1a47fc70",
+      "toProperty": "in-max"
+    },
+    {
+      "fromId": "a7f1bc7c-1899-b690-638b-9c562f3bed7a",
+      "fromProperty": "Disabled",
+      "toId": "9e99c4f7-6fbe-0807-2cc4-631a1a47fc70",
+      "toProperty": "in-disabled"
+    },
+    {
+      "fromId": "a7f1bc7c-1899-b690-638b-9c562f3bed7a",
+      "fromProperty": "First Day Of Week",
+      "toId": "9e99c4f7-6fbe-0807-2cc4-631a1a47fc70",
+      "toProperty": "in-firstDayOfWeek"
+    },
+    {
+      "fromId": "a7f1bc7c-1899-b690-638b-9c562f3bed7a",
+      "fromProperty": "Width",
+      "toId": "fbec297c-0560-f83e-3808-8e45c3dab36d",
+      "toProperty": "width"
+    },
+    {
+      "fromId": "a7f1bc7c-1899-b690-638b-9c562f3bed7a",
+      "fromProperty": "Align X",
+      "toId": "fbec297c-0560-f83e-3808-8e45c3dab36d",
+      "toProperty": "alignX"
+    },
+    {
+      "fromId": "a7f1bc7c-1899-b690-638b-9c562f3bed7a",
+      "fromProperty": "Align Y",
+      "toId": "fbec297c-0560-f83e-3808-8e45c3dab36d",
+      "toProperty": "alignY"
+    },
+    {
+      "fromId": "a7f1bc7c-1899-b690-638b-9c562f3bed7a",
+      "fromProperty": "Margin Top",
+      "toId": "fbec297c-0560-f83e-3808-8e45c3dab36d",
+      "toProperty": "marginTop"
+    },
+    {
+      "fromId": "a7f1bc7c-1899-b690-638b-9c562f3bed7a",
+      "fromProperty": "Margin Right",
+      "toId": "fbec297c-0560-f83e-3808-8e45c3dab36d",
+      "toProperty": "marginRight"
+    },
+    {
+      "fromId": "a7f1bc7c-1899-b690-638b-9c562f3bed7a",
+      "fromProperty": "Margin Bottom",
+      "toId": "fbec297c-0560-f83e-3808-8e45c3dab36d",
+      "toProperty": "marginBottom"
+    },
+    {
+      "fromId": "a7f1bc7c-1899-b690-638b-9c562f3bed7a",
+      "fromProperty": "Margin Left",
+      "toId": "fbec297c-0560-f83e-3808-8e45c3dab36d",
+      "toProperty": "marginLeft"
+    },
+    {
+      "fromId": "a7f1bc7c-1899-b690-638b-9c562f3bed7a",
+      "fromProperty": "Position",
+      "toId": "fbec297c-0560-f83e-3808-8e45c3dab36d",
+      "toProperty": "position"
+    },
+    {
+      "fromId": "a7f1bc7c-1899-b690-638b-9c562f3bed7a",
+      "fromProperty": "Label",
+      "toId": "cdba806c-2891-84da-5b3a-f2efbbcb0ead",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "a7f1bc7c-1899-b690-638b-9c562f3bed7a",
+      "fromProperty": "Show Label",
+      "toId": "cdba806c-2891-84da-5b3a-f2efbbcb0ead",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "9e99c4f7-6fbe-0807-2cc4-631a1a47fc70",
+      "fromProperty": "out-value",
+      "toId": "535b13b9-e0e5-d9a0-4023-d1c9cc305374",
+      "toProperty": "Value"
+    },
+    {
+      "fromId": "9e99c4f7-6fbe-0807-2cc4-631a1a47fc70",
+      "fromProperty": "out-date",
+      "toId": "535b13b9-e0e5-d9a0-4023-d1c9cc305374",
+      "toProperty": "Date"
+    },
+    {
+      "fromId": "9e99c4f7-6fbe-0807-2cc4-631a1a47fc70",
+      "fromProperty": "out-changed",
+      "toId": "535b13b9-e0e5-d9a0-4023-d1c9cc305374",
+      "toProperty": "Changed"
+    }
+  ]
+}

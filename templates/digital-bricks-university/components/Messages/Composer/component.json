@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "ddfbfbb9-06cd-566f-8a9e-de05151fea56",
+  "name": "Composer",
+  "path": "/Messages/Composer",
+  "type": "visual",
+  "created": "2026-11-12T10:18:44.452Z",
+  "modified": "2026-11-12T13:09:55.243Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Write a message and send it (DBU-07). A learner's goes through sendMessage (optionally about one homework, with up to 5 files uploaded privately first); the coach's goes through replyAsCoach to the learner named. Says why it cannot send, and fires sent once it has."
+}

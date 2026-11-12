@@ -1,0 +1,383 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "27191227-bd45-501a-8693-e73092ae6f82",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "iw_in",
+      "type": "Component Inputs",
+      "label": "coachInbox's answer, and what is open",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "items",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "selectedId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "narrow",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "id": "iw_kinds",
+      "type": "/Option sets/Inbox kinds",
+      "label": "Inbox kinds",
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "iw_fn",
+      "type": "JavaScriptFunction",
+      "label": "The inbox, in keys and values",
+      "x": 40,
+      "y": 280,
+      "parameters": {
+        "runOnChange-in-items": true,
+        "runOnChange-in-selectedId": true,
+        "runOnChange-in-narrow": true,
+        "runOnChange-in-kinds": true,
+        "functionScript": "/*\n * THE INBOX IN KEYS AND VALUES (DBU-08). coachInbox decides what is waiting; this only words it.\n * Every sentence is a Strings key plus the values for its {tags}. Times are the coach's (Europe/Paris).\n * Which item is open: the one chosen, if it is still there. Otherwise, on a wide screen, the oldest\n * (so dealing with one brings up the next); on a narrow screen none, which shows the list.\n * A check-in answered (DBU-10) carries its answers with the answer's own copy of its questions.\n */\nif (Inputs.items === undefined || Inputs.kinds === undefined) return;\nconst get = (m, k) => (m && typeof m.get === 'function' ? m.get(k) : m && m[k]);\nconst kinds = (Inputs.kinds || []).map((k) => ({ value: get(k, 'value'), labelKey: get(k, 'labelKey'), bg: get(k, 'bg'), fg: get(k, 'fg') }));\nconst kindOf = (v) => kinds.find((k) => k.value === v) || { labelKey: '', bg: 'var(--muted)', fg: 'var(--muted-foreground)' };\nconst items = Array.isArray(Inputs.items) ? Inputs.items : [];\nconst narrow = Inputs.narrow === true;\nconst DAY = 86400000;\nconst now = Date.now();\nconst t = (iso) => { const n = Date.parse(iso || ''); return Number.isFinite(n) ? n : 0; };\nconst ZONE = 'Europe/Paris';\nconst date = (iso) => (t(iso) ? new Date(iso).toLocaleDateString('en-GB', { timeZone: ZONE, weekday: 'short', day: 'numeric', month: 'short' }) : '');\n// Days are calendar days in the coach's zone: something from yesterday evening is \"Yesterday\", not \"16 h ago\".\nconst dayNo = (ms) => Date.parse(new Date(ms).toLocaleDateString('en-CA', { timeZone: ZONE }) + 'T00:00:00Z') / DAY;\nconst daysSince = (iso) => (t(iso) ? dayNo(now) - dayNo(t(iso)) : 0);\nconst quietDays = (i) => daysSince(new Date(Math.max(t(i.facts && i.facts.lastActiveAt), t(i.facts && i.facts.startedOn))).toISOString());\nconst overdueOf = (i) => (i.reasons || []).filter((r) => r && r.kind === 'overdue');\nconst inactive = (i) => (i.reasons || []).some((r) => r && r.kind === 'inactive');\n\nconst age = (iso) => {\n  const ms = Math.max(0, now - t(iso));\n  const days = daysSince(iso);\n  if (days >= 2) return { ageKey: 'inbox.ageDays', ageN: String(days) };\n  if (days === 1) return { ageKey: 'inbox.ageYesterday', ageN: '' };\n  if (ms < 3600000) return { ageKey: 'inbox.ageMinutes', ageN: String(Math.max(1, Math.floor(ms / 60000))) };\n  return { ageKey: 'inbox.ageHours', ageN: String(Math.floor(ms / 3600000)) };\n};\nconst summary = (i) => {\n  const v = { title: i.title || '', body: i.body || '', n: String(i.count || ''), days: '', first: i.first || '', version: String(i.version || '') };\n  if (i.kind === 'review') return Object.assign(v, { summaryKey: i.version > 1 ? 'inbox.sumReviewAgain' : 'inbox.sumReview' });\n  if (i.kind === 'checkin') return Object.assign(v, { summaryKey: 'inbox.sumCheckin' });\n  if (i.kind === 'question') {\n    if (!v.body) return Object.assign(v, { summaryKey: 'inbox.sumQuestionFiles' });\n    return Object.assign(v, { summaryKey: i.count > 1 ? 'inbox.sumQuestions' : 'inbox.sumQuestion' });\n  }\n  if (inactive(i)) return Object.assign(v, { summaryKey: 'inbox.sumQuiet', days: String(quietDays(i)) });\n  const o = overdueOf(i)[0] || {};\n  return Object.assign(v, { summaryKey: 'inbox.sumOverdue', title: o.title || '', days: String(daysSince(o.dueAt)) });\n};\n\nconst chosen = String(Inputs.selectedId || '');\nconst current = items.find((i) => i.id === chosen) || (!narrow && items.length ? items[0] : null);\n\nOutputs.rows = items.map((i) => {\n  const k = kindOf(i.kind);\n  return Object.assign({ id: i.id, itemId: i.id, kindKey: k.labelKey, kindBg: k.bg, kindFg: k.fg, learner: i.learner, selected: !!current && current.id === i.id }, summary(i), age(i.since));\n});\nOutputs.hasItems = items.length > 0;\nOutputs.none = items.length === 0;\nOutputs.showList = items.length > 0 && (!narrow || !current);\nOutputs.showDetail = !!current;\nOutputs.showBack = narrow && !!current;\n\nconst c = current || {};\nconst k = kindOf(c.kind);\nOutputs.curId = c.id || '';\nOutputs.curLearnerId = c.learnerId || '';\nOutputs.curLearner = c.learner || '';\nOutputs.curFirst = c.first || '';\nOutputs.curKindKey = k.labelKey;\nOutputs.curKindBg = k.bg;\nOutputs.curKindFg = k.fg;\nOutputs.isReview = c.kind === 'review';\nOutputs.isQuestion = c.kind === 'question';\nOutputs.isQuiet = c.kind === 'quiet';\nOutputs.isCheckin = c.kind === 'checkin';\nOutputs.hasTitle = c.kind === 'review' || c.kind === 'checkin';\nOutputs.curTitle = c.title || '';\nOutputs.curStepId = c.kind === 'review' ? c.stepId || '' : '';\nOutputs.curSubmissions = c.kind === 'review' ? c.submissions || [] : [];\nOutputs.curMessageId = c.kind === 'question' ? c.messageId || '' : '';\nOutputs.curFlagId = c.kind === 'quiet' ? c.flagId || '' : '';\nOutputs.curResponseId = c.kind === 'checkin' ? c.responseId || '' : '';\nOutputs.curQuestions = c.kind === 'checkin' && c.form && Array.isArray(c.form.questions) ? c.form.questions : [];\nOutputs.curAnswers = c.kind === 'checkin' && c.answers ? c.answers : {};\n\n// Gone quiet: the facts, one sentence each, and what the nudge says next.\nconst facts = [];\nif (c.kind === 'quiet') {\n  const f = c.facts || {};\n  const fact = (key, v) => facts.push(Object.assign({ id: c.id + '-fact-' + facts.length, key, title: '', date: '', days: '', first: c.first || '' }, v));\n  if (f.startedOn) fact('inbox.factStarted', { date: date(f.startedOn) });\n  if (f.lastSeenAt) fact('inbox.factSeen', { date: date(f.lastSeenAt), days: String(daysSince(f.lastSeenAt)) });\n  else fact('inbox.factNeverSeen', {});\n  if (f.lastActiveAt && f.lastActiveAt !== f.lastSeenAt) fact('inbox.factActive', { date: date(f.lastActiveAt) });\n  if (f.nextSession) fact('inbox.factSession', { date: date(f.nextSession) });\n  else fact('inbox.factNoSession', {});\n  overdueOf(c).forEach((o) => fact('inbox.factOverdue', { title: o.title || '', date: date(o.dueAt) }));\n  if (c.nudgedAt) fact('inbox.factNudged', { date: date(c.nudgedAt) });\n}\nOutputs.curFacts = facts;\nconst firstOverdue = overdueOf(c)[0];\nOutputs.curNextKey = firstOverdue ? 'inbox.nudgeNextOverdue' : 'inbox.nudgeNextPlan';\nOutputs.curNextTitle = firstOverdue ? firstOverdue.title || '' : '';\nOutputs.go();"
+      },
+      "ports": [
+        {
+          "name": "in-items",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "in-selectedId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-narrow",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "in-kinds",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "out-rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-hasItems",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-none",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-showList",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-showDetail",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-showBack",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-curId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-curLearnerId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-curLearner",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-curFirst",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-curKindKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-curKindBg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "out-curKindFg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "out-isReview",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-isQuestion",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-isQuiet",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-isCheckin",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-hasTitle",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-curTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-curStepId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-curSubmissions",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-curMessageId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-curFlagId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-curResponseId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-curQuestions",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-curAnswers",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "out-curFacts",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-curNextKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-curNextTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "iw_out",
+      "type": "Component Outputs",
+      "label": "What the Inbox page draws",
+      "x": 40,
+      "y": 420,
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasItems",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "none",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "showList",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "showDetail",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "showBack",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "curId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "curLearnerId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "curLearner",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "curFirst",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "curKindKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "curKindBg",
+          "plug": "input",
+          "type": "color"
+        },
+        {
+          "name": "curKindFg",
+          "plug": "input",
+          "type": "color"
+        },
+        {
+          "name": "isReview",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "isQuestion",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "isQuiet",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "isCheckin",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "hasTitle",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "curTitle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "curStepId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "curSubmissions",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "curMessageId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "curFlagId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "curResponseId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "curQuestions",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "curAnswers",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "curFacts",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "curNextKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "curNextTitle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "changed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    }
+  ]
+}

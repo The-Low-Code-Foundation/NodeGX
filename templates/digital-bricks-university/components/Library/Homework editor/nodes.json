@@ -1,0 +1,576 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2f6524c0-2798-543d-84e3-53c64dff6066",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "he_card",
+      "type": "Group",
+      "label": "Homework editor",
+      "children": [
+        "he_headbox",
+        "he_fields",
+        "he_msg",
+        "he_actions"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-5)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "he_headbox",
+      "type": "Group",
+      "label": "Heading",
+      "parent": "he_card",
+      "children": [
+        "he_h",
+        "he_lede"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "he_h",
+      "type": "Text",
+      "label": "New or Edit homework",
+      "parent": "he_headbox",
+      "parameters": {
+        "text": "",
+        "as": "h2",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "he_lede",
+      "type": "Text",
+      "label": "Copies are not changed",
+      "parent": "he_headbox",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "maxWidth": {
+          "value": 640,
+          "unit": "px"
+        }
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "he_fields",
+      "type": "Group",
+      "label": "The fields",
+      "parent": "he_card",
+      "children": [
+        "he_title",
+        "he_min",
+        "he_tags",
+        "he_brief",
+        "he_check",
+        "he_res"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 720,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-5)"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "he_title",
+      "type": "net.noodl.controls.textinput",
+      "label": "Title",
+      "parent": "he_fields",
+      "parameters": {
+        "type": "text",
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxLength": 140
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "he_min",
+      "type": "net.noodl.controls.textinput",
+      "label": "Estimated time in minutes",
+      "parent": "he_fields",
+      "parameters": {
+        "type": "text",
+        "inputMode": "numeric",
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 240,
+          "unit": "px"
+        }
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "he_tags",
+      "type": "net.noodl.controls.textinput",
+      "label": "Tags",
+      "parent": "he_fields",
+      "parameters": {
+        "type": "text",
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "he_brief",
+      "type": "/Library/Brief editor",
+      "label": "Brief",
+      "parent": "he_fields",
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "he_check",
+      "type": "/Library/Checklist editor",
+      "label": "What to hand in",
+      "parent": "he_fields",
+      "parameters": {
+        "listId": "library-draft-checklist"
+      },
+      "metadata": {
+        "comment": "The same id as in 'Open the item': the Array the rows live in while editing. One editor exists, on one page, so an app-wide id is safe here (shared on purpose)."
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "he_res",
+      "type": "/Library/Resources editor",
+      "label": "Resources",
+      "parent": "he_fields",
+      "parameters": {
+        "listId": "library-draft-resources"
+      },
+      "metadata": {
+        "comment": "Shared on purpose, as the checklist's."
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "he_msg",
+      "type": "Text",
+      "label": "Why it was not saved",
+      "parent": "he_card",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--attention)"
+      },
+      "x": 100,
+      "y": 1360
+    },
+    {
+      "id": "he_actions",
+      "type": "Group",
+      "label": "Save and Cancel",
+      "parent": "he_card",
+      "children": [
+        "he_save",
+        "he_cancel"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)"
+      },
+      "x": 100,
+      "y": 1480
+    },
+    {
+      "id": "he_save",
+      "type": "net.noodl.controls.button",
+      "label": "Save",
+      "parent": "he_actions",
+      "parameters": {
+        "label": ""
+      },
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "he_cancel",
+      "type": "net.noodl.controls.button",
+      "label": "Cancel",
+      "parent": "he_actions",
+      "parameters": {
+        "label": "",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)"
+      },
+      "x": 160,
+      "y": 1720
+    },
+    {
+      "id": "he_in",
+      "type": "Component Inputs",
+      "label": "Homework editor in",
+      "ports": [
+        {
+          "name": "item",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "load",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 1960
+    },
+    {
+      "id": "he_out",
+      "type": "Component Outputs",
+      "label": "Homework editor out",
+      "ports": [
+        {
+          "name": "saved",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "savedTitle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "closed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 1720
+    },
+    {
+      "id": "he_open",
+      "type": "JavaScriptFunction",
+      "label": "Open the item: fill the fields and the two lists",
+      "parameters": {
+        "functionScript": "/*\n * Runs each time the page opens the editor, for a new item ({}) or an existing one.\n * The two lists are named client-side Arrays; each row writes its own record as the coach\n * types (Library/Checklist row, Library/Resource row), and 'Gather the item' reads them back.\n * Fresh row ids every time, so nothing typed in a previous opening survives.\n */\nconst item = Inputs.item && typeof Inputs.item === 'object' ? Inputs.item : {};\nconst uid = (p) => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);\nNoodl.Arrays['library-draft-checklist'] = (item.handInChecklist || []).map((c) => ({ id: uid('chk-'), text: c.text || '', required: c.required !== false }));\nNoodl.Arrays['library-draft-resources'] = (item.resources || []).map((r) => ({\n  id: uid('res-'), label: r.label || '', url: r.url || '', file: r.file || '', fileName: r.fileName || '', isFile: !!r.file\n}));\nOutputs.id = item.id || '';\nOutputs.title = item.title || '';\nOutputs.brief = item.brief || '';\nOutputs.tags = (item.tags || []).join(', ');\nOutputs.minutes = typeof item.estimatedMinutes === 'number' ? String(item.estimatedMinutes) : '';\nOutputs.heading = item.id ? Inputs.editHeading : Inputs.newHeading;\nOutputs.opened();",
+        "runOnChange-in-item": false,
+        "runOnChange-in-newHeading": false,
+        "runOnChange-in-editHeading": false
+      },
+      "ports": [
+        {
+          "name": "in-item",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-newHeading",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-editHeading",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-brief",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-tags",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-minutes",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-heading",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-opened",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "he_gather",
+      "type": "JavaScriptFunction",
+      "label": "Gather the item from the fields and the two lists",
+      "parameters": {
+        "functionScript": "// Read on Save only. The server tidies and checks everything again (saveLibraryItem).\nconst get = (m, k) => (m && typeof m.get === 'function' ? m.get(k) : m && m[k]);\nOutputs.handInChecklist = (Noodl.Arrays['library-draft-checklist'] || []).map((m) => ({ text: String(get(m, 'text') || ''), required: get(m, 'required') !== false }));\nOutputs.resources = (Noodl.Arrays['library-draft-resources'] || []).map((m) => (get(m, 'isFile')\n  ? { label: String(get(m, 'label') || ''), file: String(get(m, 'file') || ''), fileName: String(get(m, 'fileName') || '') }\n  : { label: String(get(m, 'label') || ''), url: String(get(m, 'url') || '') }));\nOutputs.id = String(Inputs.id || '');\nOutputs.title = String(Inputs.title || '').trim();\nOutputs.brief = String(Inputs.brief || '');\nOutputs.minutes = String(Inputs.minutes || '').trim();\nOutputs.tags = String(Inputs.tags || '').split(',').map((t) => t.trim()).filter(Boolean);\nOutputs.go();",
+        "runOnChange-in-id": false,
+        "runOnChange-in-title": false,
+        "runOnChange-in-brief": false,
+        "runOnChange-in-minutes": false,
+        "runOnChange-in-tags": false
+      },
+      "ports": [
+        {
+          "name": "in-id",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-brief",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-minutes",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-tags",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-brief",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-minutes",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-tags",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-handInChecklist",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-resources",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "he_call",
+      "type": "CloudFunction2",
+      "label": "saveLibraryItem (staff only)",
+      "parameters": {
+        "function": "saveLibraryItem"
+      },
+      "x": 410,
+      "y": 1360
+    },
+    {
+      "id": "he_msg_sw",
+      "type": "Switch",
+      "label": "Show why, once there is a why",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 410,
+      "y": 1480
+    },
+    {
+      "id": "he_t_new",
+      "type": "Translation",
+      "label": "New homework",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.newHeading"
+      },
+      "x": 410,
+      "y": 2080
+    },
+    {
+      "id": "he_t_edit",
+      "type": "Translation",
+      "label": "Edit homework",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.editHeading"
+      },
+      "x": 410,
+      "y": 2200
+    },
+    {
+      "id": "he_t_lede",
+      "type": "Translation",
+      "label": "Copies are not changed",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.lede"
+      },
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "he_t_title",
+      "type": "Translation",
+      "label": "Title",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.title"
+      },
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "he_t_min",
+      "type": "Translation",
+      "label": "Estimated time",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.minutes"
+      },
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "he_t_tags",
+      "type": "Translation",
+      "label": "Tags",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.tags"
+      },
+      "x": 410,
+      "y": 1000
+    },
+    {
+      "id": "he_t_save",
+      "type": "Translation",
+      "label": "Save",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.save"
+      },
+      "x": 410,
+      "y": 1600
+    },
+    {
+      "id": "he_t_cancel",
+      "type": "Translation",
+      "label": "Cancel",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.cancel"
+      },
+      "x": 410,
+      "y": 1840
+    }
+  ],
+  "visualRoots": [
+    "he_card"
+  ]
+}

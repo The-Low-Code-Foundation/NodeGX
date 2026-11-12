@@ -1,0 +1,193 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5edacb88-2351-5980-82c5-8a9a8a6f4957",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "st_t_tab",
+      "fromProperty": "Translation",
+      "toId": "st_page",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "st_t_email",
+      "fromProperty": "Translation",
+      "toId": "st_email",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "st_t_hint",
+      "fromProperty": "Translation",
+      "toId": "st_hint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "st_t_save",
+      "fromProperty": "Translation",
+      "toId": "st_save",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "st_t_failed",
+      "fromProperty": "Translation",
+      "toId": "st_failed",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "st_t_saved",
+      "fromProperty": "Translation",
+      "toId": "st_fill_saved",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "st_fill_saved",
+      "fromProperty": "formatted",
+      "toId": "st_saved",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "st_body",
+      "fromProperty": "didMount",
+      "toId": "st_read",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "st_read",
+      "fromProperty": "out-coachEmail",
+      "toId": "st_email",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "st_read",
+      "fromProperty": "out-coachEmail",
+      "toId": "st_write",
+      "toProperty": "in-coachEmail"
+    },
+    {
+      "fromId": "st_read",
+      "fromProperty": "done",
+      "toId": "st_loaded_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "st_read",
+      "fromProperty": "failure",
+      "toId": "st_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "st_loaded_sw",
+      "fromProperty": "state",
+      "toId": "st_card",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "st_email",
+      "fromProperty": "onTextChanged",
+      "toId": "st_write",
+      "toProperty": "in-coachEmail"
+    },
+    {
+      "fromId": "st_save",
+      "fromProperty": "onClick",
+      "toId": "st_write",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "st_save",
+      "fromProperty": "onClick",
+      "toId": "st_saved_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "st_save",
+      "fromProperty": "onClick",
+      "toId": "st_refused_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "st_write",
+      "fromProperty": "out-coachEmail",
+      "toId": "st_fill_saved",
+      "toProperty": "email"
+    },
+    {
+      "fromId": "st_write",
+      "fromProperty": "out-coachEmail",
+      "toId": "st_email",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "st_write",
+      "fromProperty": "done",
+      "toId": "st_saved_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "st_write",
+      "fromProperty": "failure",
+      "toId": "st_refused_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "st_write",
+      "fromProperty": "error",
+      "toId": "st_refused",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "st_saved_sw",
+      "fromProperty": "state",
+      "toId": "st_saved",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "st_refused_sw",
+      "fromProperty": "state",
+      "toId": "st_refused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "st_fail_sw",
+      "fromProperty": "state",
+      "toId": "st_failed",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "st_t_name",
+      "fromProperty": "Translation",
+      "toId": "st_name",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "st_t_name_hint",
+      "fromProperty": "Translation",
+      "toId": "st_name_hint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "st_read",
+      "fromProperty": "out-coachName",
+      "toId": "st_name",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "st_read",
+      "fromProperty": "out-coachName",
+      "toId": "st_write",
+      "toProperty": "in-coachName"
+    },
+    {
+      "fromId": "st_name",
+      "fromProperty": "onTextChanged",
+      "toId": "st_write",
+      "toProperty": "in-coachName"
+    },
+    {
+      "fromId": "st_write",
+      "fromProperty": "out-coachName",
+      "toId": "st_name",
+      "toProperty": "startValue"
+    }
+  ]
+}

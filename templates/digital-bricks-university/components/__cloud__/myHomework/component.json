@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "0f6b2ea3-f8cb-5875-8aef-a8070ab7030c",
+  "name": "myHomework",
+  "path": "/#__cloud__/myHomework",
+  "type": "cloud",
+  "created": "2026-11-09T13:00:52.006Z",
+  "modified": "2026-11-12T08:48:04.080Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The signed-in learner's homework (DBU-06; security: authenticated). With a stepId: that homework (brief, hand-in list, resources, due date, status, its number) and every version they handed in, newest first. Without one: their shared homework, in plan order, for the Homework tab. Refuses a step that is not a shared homework of the caller's; who is asking comes from the session and nothing else."
+}

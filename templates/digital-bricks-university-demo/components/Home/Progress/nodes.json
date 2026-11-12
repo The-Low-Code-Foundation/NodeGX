@@ -1,0 +1,204 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "44b46eb5-f903-5473-8bb8-6f8d957bc707",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pp_card",
+      "type": "Group",
+      "label": "Progress",
+      "children": [
+        "pp_head",
+        "pp_track"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-5)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "dataAttributes": "data-testid",
+        "data-testid": "home-progress"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pp_head",
+      "type": "Group",
+      "label": "Heading and count",
+      "parent": "pp_card",
+      "children": [
+        "pp_title",
+        "pp_count"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "justifyContent": "space-between",
+        "columnGap": "var(--space-3)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pp_title",
+      "type": "Text",
+      "label": "Progress",
+      "parent": "pp_head",
+      "parameters": {
+        "text": "",
+        "as": "h2",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "pp_count",
+      "type": "Text",
+      "label": "3 of 8 steps",
+      "parent": "pp_head",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--accent-foreground)"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "pp_track",
+      "type": "Group",
+      "label": "The bar",
+      "parent": "pp_card",
+      "children": [
+        "pp_fill"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 8,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "flexDirection": "column",
+        "borderRadius": "var(--radius-full)",
+        "backgroundColor": "var(--border)",
+        "clip": true
+      },
+      "metadata": {
+        "comment": "A column, so the fill's width is across it: a wired percentage on a row's own axis would become flex-grow, not a width."
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "pp_fill",
+      "type": "Group",
+      "label": "Filled to the share done",
+      "parent": "pp_track",
+      "parameters": {
+        "width": {
+          "value": 0,
+          "unit": "%"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "explicit",
+        "borderRadius": "var(--radius-full)",
+        "backgroundColor": "var(--primary)"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "pp_in",
+      "type": "Component Inputs",
+      "label": "Progress in",
+      "ports": [
+        {
+          "name": "done",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "total",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "percent",
+          "plug": "output",
+          "type": "number"
+        }
+      ],
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "pp_t_title",
+      "type": "Translation",
+      "label": "Progress",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.progress"
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "pp_t_count",
+      "type": "Translation",
+      "label": "{done} of {total} steps",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.progressOf"
+      },
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "pp_fill_text",
+      "type": "String Format",
+      "label": "The numbers into the count",
+      "parameters": {
+        "format": "{done} {total}"
+      },
+      "metadata": {
+        "comment": "The format arrives from the Translation; this default only declares the inputs."
+      },
+      "x": 410,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "pp_card"
+  ]
+}

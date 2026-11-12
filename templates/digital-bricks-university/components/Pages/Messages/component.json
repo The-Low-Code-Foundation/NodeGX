@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "54776c6c-7879-560d-8e28-2c3e5d90f475",
+  "name": "Messages",
+  "path": "/Pages/Messages",
+  "type": "page",
+  "created": "2026-11-07T20:28:01.118Z",
+  "modified": "2026-11-12T10:20:48.579Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The learner's thread with Richard: empty until DBU-07."
+}

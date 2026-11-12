@@ -1,0 +1,205 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "3c15d0b7-2164-5ddb-878c-927d6aa21142",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "vr_in",
+      "fromProperty": "version",
+      "toId": "vr_testid",
+      "toProperty": "version"
+    },
+    {
+      "fromId": "vr_testid",
+      "fromProperty": "formatted",
+      "toId": "vr_root",
+      "toProperty": "data-testid"
+    },
+    {
+      "fromId": "vr_t_head",
+      "fromProperty": "Translation",
+      "toId": "vr_fill_head",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "vr_in",
+      "fromProperty": "version",
+      "toId": "vr_fill_head",
+      "toProperty": "version"
+    },
+    {
+      "fromId": "vr_in",
+      "fromProperty": "when",
+      "toId": "vr_fill_head",
+      "toProperty": "when"
+    },
+    {
+      "fromId": "vr_fill_head",
+      "fromProperty": "formatted",
+      "toId": "vr_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "vr_in",
+      "fromProperty": "kindKey",
+      "toId": "vr_kind",
+      "toProperty": "labelKey"
+    },
+    {
+      "fromId": "vr_in",
+      "fromProperty": "kindBg",
+      "toId": "vr_kind",
+      "toProperty": "bg"
+    },
+    {
+      "fromId": "vr_in",
+      "fromProperty": "kindFg",
+      "toId": "vr_kind",
+      "toProperty": "fg"
+    },
+    {
+      "fromId": "vr_in",
+      "fromProperty": "reviewKey",
+      "toId": "vr_review",
+      "toProperty": "labelKey"
+    },
+    {
+      "fromId": "vr_in",
+      "fromProperty": "reviewBg",
+      "toId": "vr_review",
+      "toProperty": "bg"
+    },
+    {
+      "fromId": "vr_in",
+      "fromProperty": "reviewFg",
+      "toId": "vr_review",
+      "toProperty": "fg"
+    },
+    {
+      "fromId": "vr_in",
+      "fromProperty": "hasNote",
+      "toId": "vr_note",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "vr_t_note",
+      "fromProperty": "Translation",
+      "toId": "vr_fill_note",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "vr_in",
+      "fromProperty": "note",
+      "toId": "vr_fill_note",
+      "toProperty": "note"
+    },
+    {
+      "fromId": "vr_fill_note",
+      "fromProperty": "formatted",
+      "toId": "vr_note",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "vr_in",
+      "fromProperty": "isFile",
+      "toId": "vr_file",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "vr_in",
+      "fromProperty": "isLink",
+      "toId": "vr_link",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "vr_in",
+      "fromProperty": "url",
+      "toId": "vr_url",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "vr_t_open",
+      "fromProperty": "Translation",
+      "toId": "vr_open",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "vr_in",
+      "fromProperty": "url",
+      "toId": "vr_open_fn",
+      "toProperty": "in-url"
+    },
+    {
+      "fromId": "vr_open",
+      "fromProperty": "onClick",
+      "toId": "vr_open_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "vr_in",
+      "fromProperty": "isText",
+      "toId": "vr_text",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "vr_in",
+      "fromProperty": "text",
+      "toId": "vr_text_ft",
+      "toProperty": "markdown"
+    },
+    {
+      "fromId": "vr_in",
+      "fromProperty": "hasReviewNote",
+      "toId": "vr_reply",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "vr_t_reply",
+      "fromProperty": "Translation",
+      "toId": "vr_fill_reply",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "vr_in",
+      "fromProperty": "reviewedWhen",
+      "toId": "vr_fill_reply",
+      "toProperty": "when"
+    },
+    {
+      "fromId": "vr_fill_reply",
+      "fromProperty": "formatted",
+      "toId": "vr_reply_head",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "vr_in",
+      "fromProperty": "reviewNote",
+      "toId": "vr_reply_ft",
+      "toProperty": "markdown"
+    },
+    {
+      "fromId": "vr_in",
+      "fromProperty": "canReview",
+      "toId": "vr_review_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "vr_in",
+      "fromProperty": "id",
+      "toId": "vr_review_ctl",
+      "toProperty": "submissionId"
+    },
+    {
+      "fromId": "vr_review_ctl",
+      "fromProperty": "reviewed",
+      "toId": "vr_out",
+      "toProperty": "reviewed"
+    },
+    {
+      "fromId": "vr_in",
+      "fromProperty": "files",
+      "toId": "vr_files",
+      "toProperty": "items"
+    }
+  ]
+}

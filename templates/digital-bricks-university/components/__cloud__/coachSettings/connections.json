@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "42489d9a-facc-5aae-8769-2488bfcf1b37",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cs_req",
+      "fromProperty": "receive",
+      "toId": "cs_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cs_fn",
+      "fromProperty": "out-coachEmail",
+      "toId": "cs_res",
+      "toProperty": "pm-coachEmail"
+    },
+    {
+      "fromId": "cs_fn",
+      "fromProperty": "out-defaultCoachEmail",
+      "toId": "cs_res",
+      "toProperty": "pm-defaultCoachEmail"
+    },
+    {
+      "fromId": "cs_fn",
+      "fromProperty": "out-done",
+      "toId": "cs_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "cs_fn",
+      "fromProperty": "out-failed",
+      "toId": "cs_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "cs_fn",
+      "fromProperty": "failure",
+      "toId": "cs_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "cs_fn",
+      "fromProperty": "out-coachName",
+      "toId": "cs_res",
+      "toProperty": "pm-coachName"
+    }
+  ]
+}

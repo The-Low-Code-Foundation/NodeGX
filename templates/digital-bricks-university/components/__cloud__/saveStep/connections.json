@@ -1,0 +1,157 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "079eb08c-72f9-529f-8085-c486d992709d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ss_req",
+      "fromProperty": "userId",
+      "toId": "ss_fn",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "ss_req",
+      "fromProperty": "pm-id",
+      "toId": "ss_fn",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "ss_req",
+      "fromProperty": "pm-title",
+      "toId": "ss_fn",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "ss_req",
+      "fromProperty": "pm-startsAt",
+      "toId": "ss_fn",
+      "toProperty": "in-startsAt"
+    },
+    {
+      "fromId": "ss_req",
+      "fromProperty": "pm-durationMin",
+      "toId": "ss_fn",
+      "toProperty": "in-durationMin"
+    },
+    {
+      "fromId": "ss_req",
+      "fromProperty": "pm-meetingLink",
+      "toId": "ss_fn",
+      "toProperty": "in-meetingLink"
+    },
+    {
+      "fromId": "ss_req",
+      "fromProperty": "pm-recordingUrl",
+      "toId": "ss_fn",
+      "toProperty": "in-recordingUrl"
+    },
+    {
+      "fromId": "ss_req",
+      "fromProperty": "pm-summary",
+      "toId": "ss_fn",
+      "toProperty": "in-summary"
+    },
+    {
+      "fromId": "ss_req",
+      "fromProperty": "pm-dueAt",
+      "toId": "ss_fn",
+      "toProperty": "in-dueAt"
+    },
+    {
+      "fromId": "ss_req",
+      "fromProperty": "pm-brief",
+      "toId": "ss_fn",
+      "toProperty": "in-brief"
+    },
+    {
+      "fromId": "ss_req",
+      "fromProperty": "pm-handInChecklist",
+      "toId": "ss_fn",
+      "toProperty": "in-handInChecklist"
+    },
+    {
+      "fromId": "ss_req",
+      "fromProperty": "pm-resources",
+      "toId": "ss_fn",
+      "toProperty": "in-resources"
+    },
+    {
+      "fromId": "ss_req",
+      "fromProperty": "pm-sendsAt",
+      "toId": "ss_fn",
+      "toProperty": "in-sendsAt"
+    },
+    {
+      "fromId": "ss_fn",
+      "fromProperty": "out-stepId",
+      "toId": "ss_res",
+      "toProperty": "pm-stepId"
+    },
+    {
+      "fromId": "ss_fn",
+      "fromProperty": "out-done",
+      "toId": "ss_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ss_fn",
+      "fromProperty": "out-why",
+      "toId": "ss_deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "ss_fn",
+      "fromProperty": "out-refuse",
+      "toId": "ss_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ss_fn",
+      "fromProperty": "out-failed",
+      "toId": "ss_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ss_fn",
+      "fromProperty": "failure",
+      "toId": "ss_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ss_req",
+      "fromProperty": "receive",
+      "toId": "ss_forms",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "ss_forms",
+      "fromProperty": "done",
+      "toId": "ss_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ss_forms",
+      "fromProperty": "forms",
+      "toId": "ss_fn",
+      "toProperty": "in-forms"
+    },
+    {
+      "fromId": "ss_req",
+      "fromProperty": "pm-formId",
+      "toId": "ss_fn",
+      "toProperty": "in-formId"
+    },
+    {
+      "fromId": "ss_req",
+      "fromProperty": "pm-sendAfterStep",
+      "toId": "ss_fn",
+      "toProperty": "in-sendAfterStep"
+    },
+    {
+      "fromId": "ss_req",
+      "fromProperty": "pm-sendAfterDays",
+      "toId": "ss_fn",
+      "toProperty": "in-sendAfterDays"
+    }
+  ]
+}

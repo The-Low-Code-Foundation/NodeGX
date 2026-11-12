@@ -1,0 +1,253 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6ef85a2d-a40a-5394-8850-9d87d5b74ccb",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cr_t_tab",
+      "fromProperty": "Translation",
+      "toId": "cr_page",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "cr_t_add",
+      "fromProperty": "Translation",
+      "toId": "cr_add",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "cr_t_failed",
+      "fromProperty": "Translation",
+      "toId": "cr_failed",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cr_top",
+      "fromProperty": "didMount",
+      "toId": "cr_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "cr_editor",
+      "fromProperty": "saved",
+      "toId": "cr_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "cr_editor",
+      "fromProperty": "deleted",
+      "toId": "cr_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "cr_call",
+      "fromProperty": "out-items",
+      "toId": "cr_shelf",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "cr_call",
+      "fromProperty": "failure",
+      "toId": "cr_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "cr_call",
+      "fromProperty": "done",
+      "toId": "cr_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "cr_fail_sw",
+      "fromProperty": "state",
+      "toId": "cr_failed",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cr_add",
+      "fromProperty": "onClick",
+      "toId": "cr_new_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cr_new_fn",
+      "fromProperty": "out-item",
+      "toId": "cr_editor",
+      "toProperty": "creation"
+    },
+    {
+      "fromId": "cr_new_fn",
+      "fromProperty": "out-open",
+      "toId": "cr_editor",
+      "toProperty": "load"
+    },
+    {
+      "fromId": "cr_new_fn",
+      "fromProperty": "out-open",
+      "toId": "cr_edit_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "cr_shelf",
+      "fromProperty": "editItem",
+      "toId": "cr_editor",
+      "toProperty": "creation"
+    },
+    {
+      "fromId": "cr_shelf",
+      "fromProperty": "edit",
+      "toId": "cr_editor",
+      "toProperty": "load"
+    },
+    {
+      "fromId": "cr_shelf",
+      "fromProperty": "edit",
+      "toId": "cr_edit_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "cr_editor",
+      "fromProperty": "closed",
+      "toId": "cr_edit_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "cr_editor",
+      "fromProperty": "saved",
+      "toId": "cr_edit_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "cr_editor",
+      "fromProperty": "deleted",
+      "toId": "cr_edit_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "cr_edit_sw",
+      "fromProperty": "state",
+      "toId": "cr_edit_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cr_edit_sw",
+      "fromProperty": "state",
+      "toId": "cr_not_editing",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cr_not_editing",
+      "fromProperty": "result",
+      "toId": "cr_shelf_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cr_not_editing",
+      "fromProperty": "result",
+      "toId": "cr_add",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cr_t_saved",
+      "fromProperty": "Translation",
+      "toId": "cr_fill_saved",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "cr_editor",
+      "fromProperty": "savedTitle",
+      "toId": "cr_fill_saved",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "cr_fill_saved",
+      "fromProperty": "formatted",
+      "toId": "cr_saved",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cr_t_deleted",
+      "fromProperty": "Translation",
+      "toId": "cr_fill_deleted",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "cr_editor",
+      "fromProperty": "deletedTitle",
+      "toId": "cr_fill_deleted",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "cr_fill_deleted",
+      "fromProperty": "formatted",
+      "toId": "cr_deleted",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cr_editor",
+      "fromProperty": "saved",
+      "toId": "cr_saved_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "cr_editor",
+      "fromProperty": "saved",
+      "toId": "cr_deleted_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "cr_editor",
+      "fromProperty": "deleted",
+      "toId": "cr_deleted_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "cr_editor",
+      "fromProperty": "deleted",
+      "toId": "cr_saved_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "cr_add",
+      "fromProperty": "onClick",
+      "toId": "cr_saved_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "cr_add",
+      "fromProperty": "onClick",
+      "toId": "cr_deleted_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "cr_shelf",
+      "fromProperty": "edit",
+      "toId": "cr_saved_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "cr_shelf",
+      "fromProperty": "edit",
+      "toId": "cr_deleted_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "cr_saved_sw",
+      "fromProperty": "state",
+      "toId": "cr_saved",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cr_deleted_sw",
+      "fromProperty": "state",
+      "toId": "cr_deleted",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cr_call",
+      "fromProperty": "out-estimate",
+      "toId": "cr_estimate",
+      "toProperty": "estimate"
+    }
+  ]
+}

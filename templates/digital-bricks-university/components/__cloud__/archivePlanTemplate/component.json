@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "6ede8d6d-f9e4-51f6-8f40-ae00595bb882",
+  "name": "archivePlanTemplate",
+  "path": "/#__cloud__/archivePlanTemplate",
+  "type": "cloud",
+  "created": "2026-11-09T10:29:14.999Z",
+  "modified": "2026-11-09T10:29:14.999Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach archives a plan template (hidden from the plan builder and Add learner) or brings it back. Nothing is deleted, and no plan started from it changes (security: role:staff)."
+}

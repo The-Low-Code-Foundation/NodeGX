@@ -1,0 +1,433 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "72a02579-b78d-5a04-80cb-a7b347321397",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ln_page",
+      "type": "Page",
+      "label": "Learners",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "ln_shell"
+      ],
+      "parameters": {
+        "urlPath": "coach/learners"
+      }
+    },
+    {
+      "id": "ln_shell",
+      "type": "/Shell/App shell",
+      "label": "Coach shell",
+      "parent": "ln_page",
+      "children": [
+        "ln_top",
+        "ln_add_box",
+        "ln_list",
+        "ln_none",
+        "ln_failed"
+      ],
+      "parameters": {
+        "coach": true,
+        "current": "learners"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ln_top",
+      "type": "Group",
+      "label": "Head and the add button",
+      "parent": "ln_shell",
+      "children": [
+        "ln_head_box",
+        "ln_add"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "flex-end",
+        "justifyContent": "space-between",
+        "columnGap": "var(--space-6)",
+        "rowGap": "var(--space-4)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "ln_head_box",
+      "type": "Group",
+      "label": "Head",
+      "parent": "ln_top",
+      "children": [
+        "ln_head"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "column"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "ln_head",
+      "type": "/Shell/Page head",
+      "label": "Head",
+      "parent": "ln_head_box",
+      "parameters": {
+        "titleKey": "learners.title",
+        "leadKey": "learners.lead"
+      },
+      "x": 280,
+      "y": 520
+    },
+    {
+      "id": "ln_add",
+      "type": "net.noodl.controls.button",
+      "label": "+ Add learner",
+      "parent": "ln_top",
+      "parameters": {
+        "label": "",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-user-plus",
+          "codeAsClass": true
+        },
+        "iconColor": "var(--primary-foreground)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-2)"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "ln_add_box",
+      "type": "Group",
+      "label": "Shown while adding",
+      "parent": "ln_shell",
+      "children": [
+        "ln_add_form"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "ln_add_form",
+      "type": "/People/Add learner",
+      "label": "Add a learner",
+      "parent": "ln_add_box",
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "ln_list",
+      "type": "Group",
+      "label": "The roster",
+      "parent": "ln_shell",
+      "children": [
+        "ln_rows"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "clip": true
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "ln_rows",
+      "type": "For Each",
+      "label": "One row per learner",
+      "parent": "ln_list",
+      "parameters": {
+        "template": "/People/Roster row"
+      },
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "ln_none",
+      "type": "Group",
+      "label": "Shown when there is nobody yet",
+      "parent": "ln_shell",
+      "children": [
+        "ln_empty"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "ln_empty",
+      "type": "/Shell/Empty state",
+      "label": "No learners yet",
+      "parent": "ln_none",
+      "parameters": {
+        "icon": {
+          "class": "lucide",
+          "code": "icon-users",
+          "codeAsClass": true
+        },
+        "titleKey": "learners.emptyTitle",
+        "bodyKey": "learners.emptyBody"
+      },
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "ln_failed",
+      "type": "Text",
+      "label": "The roster could not be read",
+      "parent": "ln_shell",
+      "parameters": {
+        "text": "",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)"
+      },
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "ln_roster",
+      "type": "CloudFunction2",
+      "label": "roster (staff only)",
+      "x": 700,
+      "y": 40,
+      "parameters": {
+        "function": "roster"
+      }
+    },
+    {
+      "id": "ln_shape",
+      "type": "JavaScriptFunction",
+      "label": "Roster rows, in words",
+      "x": 700,
+      "y": 160,
+      "parameters": {
+        "runOnChange-in-learners": false,
+        "runOnChange-in-progress": false,
+        "runOnChange-in-drafts": false,
+        "runOnChange-in-noSteps": false,
+        "functionScript": "// One row per learner, in the reader's words. The phrases come from Strings with {tags};\n// this fills them in, so the roster row only draws. The row's own id is prefixed (a row\n// is a Model named by its id for the whole app); `learnerId` is the account, for Open plan.\nconst fill = (s, v) => Object.keys(v).reduce((out, k) => out.split('{' + k + '}').join(String(v[k])), String(s || ''));\nconst learners = Array.isArray(Inputs.learners) ? Inputs.learners : [];\nOutputs.rows = learners.map((l) => {\n  const drafts = l.steps - l.shared;\n  const parts = [];\n  if (!l.steps) parts.push(Inputs.noSteps);\n  else parts.push(fill(Inputs.progress, { finished: l.finished, steps: l.steps }));\n  if (drafts > 0) parts.push(fill(Inputs.drafts, { drafts }));\n  // DBU-09: what they keep in My creations.\n  const made = Number(l.creations) || 0;\n  if (made > 0) parts.push(made === 1 ? Inputs.creationsOne : fill(Inputs.creations, { n: made }));\n  const unread = Number(l.unread) || 0;\n  return {\n    id: 'learner-' + l.id,\n    learnerId: l.id,\n    name: l.name,\n    detail: [l.organisation, l.email].filter(Boolean).join(' · '),\n    plan: l.planTitle,\n    progress: parts.join(' · '),\n    // DBU-07: messages from this learner the coach has not opened yet.\n    unread: unread > 0 ? fill(Inputs.unread, { n: unread }) : '',\n    hasUnread: unread > 0\n  };\n});\nOutputs.hasRows = learners.length > 0;\nOutputs.none = learners.length === 0;\n",
+        "runOnChange-in-unread": false,
+        "runOnChange-in-creations": false,
+        "runOnChange-in-creationsOne": false
+      },
+      "ports": [
+        {
+          "name": "in-learners",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-progress",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-drafts",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-noSteps",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-unread",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-creations",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-creationsOne",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-rows",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-hasRows",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-none",
+          "plug": "output",
+          "type": "*"
+        }
+      ]
+    },
+    {
+      "id": "ln_add_sw",
+      "type": "Switch",
+      "label": "Adding, or not",
+      "x": 700,
+      "y": 300,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "ln_fail_sw",
+      "type": "Switch",
+      "label": "Remember the read failed",
+      "x": 700,
+      "y": 380,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "ln_t_tab",
+      "type": "Translation",
+      "label": "The browser tab's title",
+      "x": 1000,
+      "y": 40,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "learners.tab"
+      }
+    },
+    {
+      "id": "ln_t_add",
+      "type": "Translation",
+      "label": "Add learner",
+      "x": 1000,
+      "y": 100,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "learners.add"
+      }
+    },
+    {
+      "id": "ln_t_progress",
+      "type": "Translation",
+      "label": "{finished} of {steps} steps done",
+      "x": 1000,
+      "y": 160,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "learners.progress"
+      }
+    },
+    {
+      "id": "ln_t_drafts",
+      "type": "Translation",
+      "label": "{drafts} not shared yet",
+      "x": 1000,
+      "y": 220,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "learners.drafts"
+      }
+    },
+    {
+      "id": "ln_t_nosteps",
+      "type": "Translation",
+      "label": "No steps yet",
+      "x": 1000,
+      "y": 280,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "learners.noSteps"
+      }
+    },
+    {
+      "id": "ln_t_failed",
+      "type": "Translation",
+      "label": "Could not read",
+      "x": 1000,
+      "y": 340,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "learners.failed"
+      }
+    },
+    {
+      "id": "ln_t_unread",
+      "type": "Translation",
+      "label": "{n} unread",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "learners.unread"
+      },
+      "x": 530,
+      "y": 160
+    },
+    {
+      "id": "ln_t_creations",
+      "type": "Translation",
+      "label": "{n} creations",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "learners.creations"
+      },
+      "x": 530,
+      "y": 280
+    },
+    {
+      "id": "ln_t_creations_one",
+      "type": "Translation",
+      "label": "1 creation",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "learners.creationsOne"
+      },
+      "x": 530,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "ln_page"
+  ]
+}

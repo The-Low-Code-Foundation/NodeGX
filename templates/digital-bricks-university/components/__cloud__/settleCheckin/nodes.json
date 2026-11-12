@@ -1,0 +1,92 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c96234d8-ec8d-587f-8e97-0648a220b7f1",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "stc_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach is done with a check-in",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "responseId",
+        "allowNoAuth": false,
+        "ptype-responseId": "string",
+        "preq-responseId": true
+      },
+      "metadata": {
+        "comment": "role:staff in nodegx.security.json."
+      }
+    },
+    {
+      "id": "stc_fn",
+      "type": "JavaScriptFunction",
+      "label": "Mark the answers seen",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "runOnChange-in-responseId": false,
+        "functionScript": "/*\n * \"CHECK-IN ANSWERED\" ENDS WHEN THE COACH SAYS SO (DBU-10). Reading the answers is the whole of\n * the work here, so unlike a question, the item ends on \"Done\", which stamps seenAt. A second press\n * keeps the first stamp. Rings a staff-only bell so every open inbox re-reads.\n */\n(async () => {\n  const refuse = (why) => { Outputs.why = why; Outputs.refuse(); };\n  try {\n    const q = (c, where) => Noodl.Records.query(c, where, { limit: 2, plain: true });\n    const id = String(Inputs.responseId || '');\n    const found = id ? await q('CheckinResponse', { objectId: { equalTo: id } }) : [];\n    const r = found[0];\n    if (!r) return refuse('These answers could not be found. Reload the page.');\n    if (!r.seenAt) await Noodl.Records.save(r.objectId, { seenAt: new Date().toISOString() }, { className: 'CheckinResponse' });\n    await Noodl.Records.create('Doorbell', { learner: r.learner, topic: 'inbox' }, { acl: { 'role:staff': { read: true } } });\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:settleCheckin]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-responseId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-why",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "stc_res",
+      "type": "noodl.cloud.response",
+      "label": "Done",
+      "x": 40,
+      "y": 280,
+      "parameters": {
+        "params": ""
+      }
+    },
+    {
+      "id": "stc_deny",
+      "type": "noodl.cloud.response",
+      "label": "A refusal the coach can act on",
+      "x": 40,
+      "y": 400,
+      "parameters": {
+        "status": "failure"
+      }
+    },
+    {
+      "id": "stc_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "x": 40,
+      "y": 520,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "This could not be saved. Try again in a moment."
+      }
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "231082ec-9504-5f6e-8428-44342698b435",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sp_req",
+      "fromProperty": "pm-planId",
+      "toId": "sp_fn",
+      "toProperty": "in-planId"
+    },
+    {
+      "fromId": "sp_req",
+      "fromProperty": "pm-title",
+      "toId": "sp_fn",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "sp_req",
+      "fromProperty": "pm-meetingLink",
+      "toId": "sp_fn",
+      "toProperty": "in-meetingLink"
+    },
+    {
+      "fromId": "sp_req",
+      "fromProperty": "pm-bookingLink",
+      "toId": "sp_fn",
+      "toProperty": "in-bookingLink"
+    },
+    {
+      "fromId": "sp_req",
+      "fromProperty": "pm-status",
+      "toId": "sp_fn",
+      "toProperty": "in-status"
+    },
+    {
+      "fromId": "sp_req",
+      "fromProperty": "receive",
+      "toId": "sp_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "sp_fn",
+      "fromProperty": "out-done",
+      "toId": "sp_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sp_fn",
+      "fromProperty": "out-why",
+      "toId": "sp_deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "sp_fn",
+      "fromProperty": "out-refuse",
+      "toId": "sp_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sp_fn",
+      "fromProperty": "out-failed",
+      "toId": "sp_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sp_fn",
+      "fromProperty": "failure",
+      "toId": "sp_fail",
+      "toProperty": "send"
+    }
+  ]
+}

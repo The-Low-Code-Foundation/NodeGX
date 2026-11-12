@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d709eee3-2e20-587b-8aa6-c6731aad618f",
+  "name": "Brief card",
+  "path": "/Homework/Brief card",
+  "type": "visual",
+  "created": "2026-11-09T13:11:53.582Z",
+  "modified": "2026-11-09T13:17:08.928Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The homework itself, as a card: its number, due date and status; its title; the brief (Markdown, HTML off); what to hand in, optional items marked; and the resources."
+}

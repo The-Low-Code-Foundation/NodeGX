@@ -1,0 +1,74 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e789b66d-a7fa-5100-889a-645bf4c64b7c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pt_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach lists templates",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "",
+        "allowNoAuth": false
+      },
+      "metadata": {
+        "comment": "role:staff in nodegx.security.json."
+      }
+    },
+    {
+      "id": "pt_res",
+      "type": "noodl.cloud.response",
+      "label": "The templates",
+      "x": 40,
+      "y": 280,
+      "parameters": {
+        "params": "templates,library"
+      }
+    },
+    {
+      "id": "pt_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "x": 40,
+      "y": 400,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "The templates could not be read. Reload the page."
+      }
+    },
+    {
+      "id": "pt_fn",
+      "type": "JavaScriptFunction",
+      "label": "Templates, and the library they name",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "functionScript": "// The library rides along because the template editor's homework items pick from it,\n// and two reads for one page would be two ways to fail.\n(async () => {\n  try {\n    const q = (c) => Noodl.Records.query(c, {}, { limit: 1000, plain: true });\n    const library = await q('LibraryItem');\n    const titleOf = (id) => (library.find((l) => l.objectId === id) || {}).title || '';\n    Outputs.templates = (await q('PlanTemplate'))\n      .map((t) => ({\n        id: t.objectId,\n        title: t.title || '',\n        description: t.description || '',\n        archived: t.archived === true,\n        items: (Array.isArray(t.items) ? t.items : []).map((i) => ({\n          kind: i.kind,\n          title: i.title || '',\n          durationMin: Number.isInteger(i.durationMin) ? i.durationMin : null,\n          libraryItem: i.libraryItem || '',\n          libraryTitle: i.libraryItem ? titleOf(i.libraryItem) : '',\n          dayOffset: Number.isInteger(i.dayOffset) ? i.dayOffset : 0\n        }))\n      }))\n      .sort((a, b) => a.title.localeCompare(b.title));\n    Outputs.library = library\n      .map((l) => ({ id: l.objectId, title: l.title || '', archived: l.archived === true }))\n      .sort((a, b) => a.title.localeCompare(b.title));\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:planTemplates]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "out-templates",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-library",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    }
+  ]
+}

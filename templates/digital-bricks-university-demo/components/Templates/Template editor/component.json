@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "aac6b72f-c0f9-5b27-83df-af5189736159",
+  "name": "Template editor",
+  "path": "/Templates/Template editor",
+  "type": "visual",
+  "created": "2026-11-09T11:04:15.762Z",
+  "modified": "2026-11-09T11:04:43.075Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Create or edit a plan template: title, description and its steps in order (kind, title, day, length or library homework), with add, Up, Down and Remove. Saves through savePlanTemplate and says why a save was refused."
+}

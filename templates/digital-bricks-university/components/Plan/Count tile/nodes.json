@@ -1,0 +1,104 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "de741eae-1c8b-5598-8095-91582811c7c7",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ctl_root",
+      "type": "Group",
+      "label": "Tile",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "ctl_label",
+        "ctl_value"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "backgroundColor": "var(--muted)"
+      }
+    },
+    {
+      "id": "ctl_label",
+      "type": "Text",
+      "label": "What is counted",
+      "x": 100,
+      "y": 160,
+      "parent": "ctl_root",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "ctl_value",
+      "type": "Text",
+      "label": "The number",
+      "x": 100,
+      "y": 280,
+      "parent": "ctl_root",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-bold)",
+        "lineHeight": "var(--leading-tight)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "ctl_in",
+      "type": "Component Inputs",
+      "label": "Tile in",
+      "x": 400,
+      "y": 40,
+      "ports": [
+        {
+          "name": "labelKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "bg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "fg",
+          "plug": "output",
+          "type": "color"
+        }
+      ]
+    },
+    {
+      "id": "ctl_t",
+      "type": "Translation",
+      "label": "The label's words",
+      "x": 400,
+      "y": 160,
+      "parameters": {
+        "Namespace": "pages"
+      }
+    }
+  ],
+  "visualRoots": [
+    "ctl_root"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "de741eae-1c8b-5598-8095-91582811c7c7",
+  "name": "Count tile",
+  "path": "/Plan/Count tile",
+  "type": "visual",
+  "created": "2026-11-09T10:38:57.283Z",
+  "modified": "2026-11-09T10:38:57.283Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One number at the top of a plan (live sessions, homework tasks, coaching hours) on a tinted tile, with its label above it."
+}

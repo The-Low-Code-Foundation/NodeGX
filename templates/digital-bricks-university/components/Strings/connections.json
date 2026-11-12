@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "3d62436c-2b33-57c4-86bb-16726851b7cb",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "str_in",
+      "fromProperty": "coachWords",
+      "toId": "str_pages",
+      "toProperty": "ResourceBundleObject"
+    },
+    {
+      "fromId": "str_in",
+      "fromProperty": "addCoachWords",
+      "toId": "str_pages",
+      "toProperty": "AddBundleObject"
+    },
+    {
+      "fromId": "str_in",
+      "fromProperty": "coachWords",
+      "toId": "str_common",
+      "toProperty": "ResourceBundleObject"
+    },
+    {
+      "fromId": "str_in",
+      "fromProperty": "addCoachWords",
+      "toId": "str_common",
+      "toProperty": "AddBundleObject"
+    }
+  ]
+}

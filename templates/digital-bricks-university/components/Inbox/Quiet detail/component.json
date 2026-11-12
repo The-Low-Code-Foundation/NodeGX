@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "bb2c5885-3821-54c9-889e-2ee7221792cc",
+  "name": "Quiet detail",
+  "path": "/Inbox/Quiet detail",
+  "type": "visual",
+  "created": "2026-11-12T13:12:01.553Z",
+  "modified": "2026-11-12T13:12:01.553Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A learner gone quiet, opened in the inbox (DBU-08): the facts, a prewritten nudge the coach edits and sends as a message (which snoozes the item a week), and Snooze a week."
+}

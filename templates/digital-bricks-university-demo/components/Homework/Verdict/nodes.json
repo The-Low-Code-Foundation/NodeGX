@@ -1,0 +1,156 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "0a2a2177-145a-5678-860f-ed580eac4e1b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "vd_root",
+      "type": "Group",
+      "label": "Verdict",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "dataAttributes": "data-testid",
+        "data-testid": "homework-verdict"
+      },
+      "children": [
+        "vd_title",
+        "vd_note_box"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "vd_title",
+      "type": "Text",
+      "label": "Richard approved version 2 · when",
+      "parent": "vd_root",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-snug)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "vd_note_box",
+      "type": "Group",
+      "label": "His note",
+      "parent": "vd_root",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "children": [
+        "vd_note"
+      ],
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "vd_note",
+      "type": "/Shell/Formatted text",
+      "label": "His note, HTML off",
+      "parent": "vd_note_box",
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "vd_in",
+      "type": "Component Inputs",
+      "label": "The verdict",
+      "ports": [
+        {
+          "name": "shown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "titleKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "v",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "when",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "note",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasNote",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "bg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "fg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "border",
+          "plug": "output",
+          "type": "color"
+        }
+      ],
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "vd_t_title",
+      "type": "Translation",
+      "label": "The verdict, in words",
+      "parameters": {
+        "Namespace": "pages"
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "vd_fill",
+      "type": "String Format",
+      "label": "Version and when into the sentence",
+      "parameters": {
+        "format": "{v} {when}"
+      },
+      "x": 410,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "vd_root"
+  ]
+}

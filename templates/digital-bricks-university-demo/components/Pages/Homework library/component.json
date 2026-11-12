@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "48ee755b-c2b6-5631-848c-d065ae775821",
+  "name": "Homework library",
+  "path": "/Pages/Homework library",
+  "type": "page",
+  "created": "2026-11-07T20:28:01.340Z",
+  "modified": "2026-11-07T22:12:43.882Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach's homework library: empty until DBU-03."
+}

@@ -1,0 +1,199 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4006af83-03e3-593c-8e12-1e677cd14a90",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ad_t_h",
+      "fromProperty": "Translation",
+      "toId": "ad_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ad_t_lede",
+      "fromProperty": "Translation",
+      "toId": "ad_lede",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ad_t_name",
+      "fromProperty": "Translation",
+      "toId": "ad_name",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ad_t_email",
+      "fromProperty": "Translation",
+      "toId": "ad_email",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ad_t_org",
+      "fromProperty": "Translation",
+      "toId": "ad_org",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ad_t_tpl",
+      "fromProperty": "Translation",
+      "toId": "ad_tpl",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ad_t_submit",
+      "fromProperty": "Translation",
+      "toId": "ad_submit",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ad_t_close",
+      "fromProperty": "Translation",
+      "toId": "ad_close",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ad_in",
+      "fromProperty": "templates",
+      "toId": "ad_opts",
+      "toProperty": "in-templates"
+    },
+    {
+      "fromId": "ad_t_empty",
+      "fromProperty": "Translation",
+      "toId": "ad_opts",
+      "toProperty": "in-emptyLabel"
+    },
+    {
+      "fromId": "ad_opts",
+      "fromProperty": "out-items",
+      "toId": "ad_tpl",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "ad_name",
+      "fromProperty": "onTextChanged",
+      "toId": "ad_call",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "ad_email",
+      "fromProperty": "onTextChanged",
+      "toId": "ad_call",
+      "toProperty": "in-email"
+    },
+    {
+      "fromId": "ad_org",
+      "fromProperty": "onTextChanged",
+      "toId": "ad_call",
+      "toProperty": "in-organisation"
+    },
+    {
+      "fromId": "ad_tpl",
+      "fromProperty": "value",
+      "toId": "ad_call",
+      "toProperty": "in-templateId"
+    },
+    {
+      "fromId": "ad_submit",
+      "fromProperty": "onClick",
+      "toId": "ad_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ad_submit",
+      "fromProperty": "onClick",
+      "toId": "ad_msg_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ad_call",
+      "fromProperty": "out-created",
+      "toId": "ad_say",
+      "toProperty": "in-created"
+    },
+    {
+      "fromId": "ad_call",
+      "fromProperty": "out-mailed",
+      "toId": "ad_say",
+      "toProperty": "in-mailed"
+    },
+    {
+      "fromId": "ad_name",
+      "fromProperty": "onTextChanged",
+      "toId": "ad_say",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "ad_email",
+      "fromProperty": "onTextChanged",
+      "toId": "ad_say",
+      "toProperty": "in-email"
+    },
+    {
+      "fromId": "ad_t_added",
+      "fromProperty": "Translation",
+      "toId": "ad_say",
+      "toProperty": "in-added"
+    },
+    {
+      "fromId": "ad_t_nomail",
+      "fromProperty": "Translation",
+      "toId": "ad_say",
+      "toProperty": "in-addedNoMail"
+    },
+    {
+      "fromId": "ad_t_already",
+      "fromProperty": "Translation",
+      "toId": "ad_say",
+      "toProperty": "in-already"
+    },
+    {
+      "fromId": "ad_call",
+      "fromProperty": "done",
+      "toId": "ad_say",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ad_say",
+      "fromProperty": "out-text",
+      "toId": "ad_msg",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ad_call",
+      "fromProperty": "error",
+      "toId": "ad_msg",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ad_call",
+      "fromProperty": "done",
+      "toId": "ad_msg_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "ad_call",
+      "fromProperty": "failure",
+      "toId": "ad_msg_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "ad_msg_sw",
+      "fromProperty": "state",
+      "toId": "ad_msg",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ad_call",
+      "fromProperty": "done",
+      "toId": "ad_out",
+      "toProperty": "added"
+    },
+    {
+      "fromId": "ad_close",
+      "fromProperty": "onClick",
+      "toId": "ad_out",
+      "toProperty": "closed"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6b3b40b4-c08a-5620-86ec-8ec08d4fb2b3",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ar_t_title",
+      "fromProperty": "Translation",
+      "toId": "ar_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ar_t_body",
+      "fromProperty": "Translation",
+      "toId": "ar_body",
+      "toProperty": "text"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "30ec139f-f500-5cfd-8fe2-6ce8abdc8720",
+  "name": "Programme row",
+  "path": "/Home/Programme row",
+  "type": "visual",
+  "created": "2026-11-09T12:37:19.383Z",
+  "modified": "2026-11-12T14:55:53.368Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One shared step on the learner's programme: the kind's icon on its tint, the numbered kind (Homework 2), the title, when (due, handed in, the day or the time), its status chip, and for homework an Open button to its page. The current homework is tinted."
+}

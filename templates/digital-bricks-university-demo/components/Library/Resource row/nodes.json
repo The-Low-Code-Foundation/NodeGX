@@ -1,0 +1,376 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "58a0a17d-6480-52df-8f44-38b3d54aa77d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rr_box",
+      "type": "Group",
+      "label": "Resource",
+      "children": [
+        "rr_top",
+        "rr_url",
+        "rr_file",
+        "rr_actions"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "backgroundColor": "var(--background)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-md)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rr_top",
+      "type": "Group",
+      "label": "Kind and label",
+      "parent": "rr_box",
+      "children": [
+        "rr_icon_file",
+        "rr_icon_link",
+        "rr_label"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "rr_icon_file",
+      "type": "net.noodl.visual.icon",
+      "label": "A file",
+      "parent": "rr_top",
+      "parameters": {
+        "mounted": false,
+        "iconSize": 18,
+        "iconColor": "var(--muted-foreground)",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-file-text",
+          "codeAsClass": true
+        }
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "rr_icon_link",
+      "type": "net.noodl.visual.icon",
+      "label": "A link",
+      "parent": "rr_top",
+      "parameters": {
+        "mounted": false,
+        "iconSize": 18,
+        "iconColor": "var(--muted-foreground)",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-link",
+          "codeAsClass": true
+        }
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "rr_label",
+      "type": "net.noodl.controls.textinput",
+      "label": "Label",
+      "parent": "rr_top",
+      "parameters": {
+        "type": "text",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "rr_url",
+      "type": "net.noodl.controls.textinput",
+      "label": "Link",
+      "parent": "rr_box",
+      "parameters": {
+        "mounted": false,
+        "type": "url",
+        "inputMode": "url",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "rr_file",
+      "type": "Text",
+      "label": "The file's name",
+      "parent": "rr_box",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "wordBreak": "break-all"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "rr_actions",
+      "type": "Group",
+      "label": "Up, Down, Remove",
+      "parent": "rr_box",
+      "children": [
+        "rr_up",
+        "rr_down",
+        "rr_remove"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-1)",
+        "rowGap": "var(--space-1)"
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "rr_up",
+      "type": "net.noodl.controls.button",
+      "label": "Up",
+      "parent": "rr_actions",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "minHeight": "var(--space-8)"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "rr_down",
+      "type": "net.noodl.controls.button",
+      "label": "Down",
+      "parent": "rr_actions",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "minHeight": "var(--space-8)"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "rr_remove",
+      "type": "net.noodl.controls.button",
+      "label": "Remove",
+      "parent": "rr_actions",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "minHeight": "var(--space-8)"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "rr_in-2",
+      "type": "Component Inputs",
+      "label": "Resource in",
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "url",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "fileName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "isFile",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "rr_out",
+      "type": "Component Outputs",
+      "label": "Resource out",
+      "ports": [
+        {
+          "name": "up",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "down",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "remove",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 1120
+    },
+    {
+      "id": "rr_is_link",
+      "type": "Inverter",
+      "label": "A link, not a file",
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "rr_item",
+      "type": "For Each Actions",
+      "label": "This row's record",
+      "x": 410,
+      "y": 1600
+    },
+    {
+      "id": "rr_set_label",
+      "type": "SetModelProperties",
+      "label": "Keep the label",
+      "parameters": {
+        "properties": "label",
+        "type-label": "String"
+      },
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "rr_set_url",
+      "type": "SetModelProperties",
+      "label": "Keep the address",
+      "parameters": {
+        "properties": "url",
+        "type-url": "String"
+      },
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "rr_t_label",
+      "type": "Translation",
+      "label": "Label",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.label"
+      },
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "rr_t_url",
+      "type": "Translation",
+      "label": "Link, starting https://",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.url"
+      },
+      "x": 410,
+      "y": 1000
+    },
+    {
+      "id": "rr_t_up",
+      "type": "Translation",
+      "label": "Up",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.up"
+      },
+      "x": 410,
+      "y": 1240
+    },
+    {
+      "id": "rr_t_down",
+      "type": "Translation",
+      "label": "Down",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.down"
+      },
+      "x": 410,
+      "y": 1360
+    },
+    {
+      "id": "rr_t_remove",
+      "type": "Translation",
+      "label": "Remove",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.remove"
+      },
+      "x": 410,
+      "y": 1480
+    }
+  ],
+  "visualRoots": [
+    "rr_box"
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b4f82219-f911-5af4-867c-4c273ef000c3",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "tc_root",
+      "type": "Group",
+      "label": "Chip",
+      "children": [
+        "tc_text"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-full)",
+        "paddingLeft": "var(--space-2-5)",
+        "paddingRight": "var(--space-2-5)",
+        "paddingTop": "var(--space-0-5)",
+        "paddingBottom": "var(--space-0-5)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "tc_text",
+      "type": "Text",
+      "label": "Word",
+      "parent": "tc_root",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-medium)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "tc_in",
+      "type": "Component Inputs",
+      "label": "Chip in",
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "tc_root"
+  ]
+}

@@ -1,0 +1,521 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3aa77b39-99b4-58e9-838f-1b261ba1193f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hiw_in",
+      "type": "Component Inputs",
+      "label": "learnerHome's answer",
+      "ports": [
+        {
+          "name": "me",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "plan",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "steps",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "upNext",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "progress",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "counts",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "hiw_kinds",
+      "type": "/Option sets/Step kinds",
+      "label": "Step kinds",
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "hiw_statuses",
+      "type": "/Option sets/Step statuses",
+      "label": "Step statuses",
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "hiw_fn",
+      "type": "JavaScriptFunction",
+      "label": "Home, in keys and values",
+      "parameters": {
+        "functionScript": "/*\n * Home in the reader's words (DBU-05). learnerHome has already decided what is up next, what\n * is complete and the order; this turns it into Strings keys plus the values that fill their\n * {tags} (each part fills its own sentence), dates in the learner's time zone, and the option\n * sets' words, icons and colours. A row's id is prefixed: a row is a Model named by its id.\n * A check-in (DBU-10) reads \"Check-in, 2 minutes\": its n is the minutes it takes. Once sent and\n * not answered it carries an Answer button (answerable).\n */\nif (Inputs.steps === undefined || Inputs.upNext === undefined || Inputs.progress === undefined ||\n  Inputs.counts === undefined || Inputs.kinds === undefined || Inputs.statuses === undefined) return;\nconst get = (m, k) => (m && typeof m.get === 'function' ? m.get(k) : m && m[k]);\nconst kinds = (Inputs.kinds || []).map((k) => ({ value: get(k, 'value'), learnerKey: get(k, 'learnerKey'), bg: get(k, 'bg'), fg: get(k, 'fg'), icon: get(k, 'icon') }));\nconst statuses = (Inputs.statuses || []).map((s) => ({ value: get(s, 'value'), kind: get(s, 'kind'), labelKey: get(s, 'labelKey'), bg: get(s, 'bg'), fg: get(s, 'fg') }));\nconst me = Inputs.me || {};\nconst plan = Inputs.plan || null;\nconst up = Inputs.upNext || {};\n\n// The learner's own zone (their profile), else the browser's.\nlet zone = 'UTC';\ntry { zone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch (e) { zone = 'UTC'; }\nif (me.timezone) {\n  try { new Intl.DateTimeFormat('en-GB', { timeZone: me.timezone }); zone = me.timezone; } catch (e) { /* keep the browser's */ }\n}\nconst day = (iso) => (iso ? new Date(iso).toLocaleDateString('en-GB', { timeZone: zone, weekday: 'short', day: 'numeric', month: 'short' }) : '');\nconst time = (iso) => (iso ? new Date(iso).toLocaleTimeString('en-GB', { timeZone: zone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }) : '');\n\nconst whenOf = (s) => {\n  if (s.kind === 'live') {\n    if (!s.startsAt) return { key: 'home.whenToBook', date: '', time: '' };\n    if (s.status === 'booked') return { key: 'home.whenAt', date: day(s.startsAt), time: time(s.startsAt) };\n    return { key: 'home.whenDay', date: day(s.startsAt), time: '' };\n  }\n  if (s.kind === 'homework') {\n    if ((s.status === 'approved' || s.status === 'handed_in') && s.handedInAt) return { key: 'home.whenHandedIn', date: day(s.handedInAt), time: '' };\n    return { key: s.dueAt ? 'home.whenDue' : 'home.whenDay', date: day(s.dueAt), time: '' };\n  }\n  if (s.answeredAt) return { key: 'home.whenAnswered', date: day(s.answeredAt), time: '' };\n  if (s.sentAt) return { key: 'home.whenSent', date: day(s.sentAt), time: '' };\n  if (s.sendsAt) return { key: 'home.whenDay', date: day(s.sendsAt), time: '' };\n  if (s.afterTitle) return { key: 'home.whenAfter', date: '', time: '', what: s.afterTitle };\n  return { key: 'home.whenLater', date: '', time: '' };\n};\n\nconst steps = Array.isArray(Inputs.steps) ? Inputs.steps : [];\nOutputs.rows = steps.map((s) => {\n  const kind = kinds.find((k) => k.value === s.kind) || {};\n  const status = statuses.find((x) => x.kind === s.kind && x.value === s.status) || {};\n  const when = whenOf(s);\n  return {\n    id: 'home-step-' + s.id,\n    stepId: s.id,\n    kindKey: kind.learnerKey || '',\n    n: String(s.kind === 'checkin' ? (s.minutesToAnswer || 2) : s.number),\n    title: s.title || '',\n    whenKey: when.key,\n    date: when.date,\n    time: when.time,\n    what: when.what || '',\n    statusKey: status.labelKey || '',\n    statusBg: status.bg || 'var(--muted)',\n    statusFg: status.fg || 'var(--muted-foreground)',\n    icon: kind.icon || null,\n    iconBg: kind.bg || 'var(--muted)',\n    iconFg: kind.fg || 'var(--muted-foreground)',\n    rowBg: s.current ? 'var(--homework-bg)' : 'var(--surface)',\n    rowBorder: s.current ? 'var(--homework-border)' : 'var(--surface)',\n    opens: s.kind === 'homework',\n    answers: s.answerable === true\n  };\n});\n\nOutputs.first = String(me.name || '').trim().split(' ')[0];\nOutputs.hasPlan = !!plan;\nOutputs.planTitle = plan ? plan.title : '';\nOutputs.week = plan && plan.week ? String(plan.week) : '';\nOutputs.preparing = steps.length === 0;\nOutputs.hasSteps = steps.length > 0;\nOutputs.countLive = String((Inputs.counts && Inputs.counts.live) || 0);\nOutputs.countHomework = String((Inputs.counts && Inputs.counts.homework) || 0);\nOutputs.progressDone = String(Inputs.progress.complete || 0);\nOutputs.progressTotal = String(Inputs.progress.total || 0);\nOutputs.progressPercent = Number(Inputs.progress.percent) || 0;\n\nconst hw = up.homework || null;\nOutputs.hwShown = !!hw;\nOutputs.hwNone = !hw;\nOutputs.hwHeadKey = hw && hw.dueAt ? 'home.hwHead' : 'home.hwHeadNoDue';\nOutputs.hwN = hw ? String(hw.number) : '';\nOutputs.hwDate = hw ? day(hw.dueAt) : '';\nOutputs.hwTitle = hw ? hw.title : '';\nOutputs.hwBodyKey = hw ? ({ changes_asked: 'home.hwChangesAsked', handed_in: 'home.hwHandedIn' }[hw.status] || 'home.hwNotStarted') : '';\nOutputs.hwStepId = hw ? hw.id : '';\n\nconst lv = up.live || null;\nOutputs.liveShown = !!lv;\nOutputs.liveNone = !lv;\nOutputs.liveN = lv ? String(lv.number) : '';\nOutputs.liveDate = lv ? day(lv.startsAt) : '';\nOutputs.liveStart = lv ? time(lv.startsAt) : '';\nOutputs.liveEnd = lv ? time(lv.endsAt) : '';\nOutputs.liveTitle = lv ? lv.title : '';\nOutputs.livePrep = lv ? lv.prepNote : '';\nOutputs.hasPrep = !!(lv && lv.prepNote);\nOutputs.joinLink = lv ? lv.meetingLink : '';\nOutputs.hasJoin = !!(lv && lv.meetingLink);\nOutputs.liveStepId = lv ? lv.id : '';\nOutputs.liveStartsAt = lv ? lv.startsAt : '';\nOutputs.liveDuration = lv ? lv.durationMin : 60;\nOutputs.calDetails = plan ? plan.title : '';\nOutputs.attendeeName = String(me.name || '');\nOutputs.bookingLink = up.bookingLink || '';\nOutputs.canBook = !!up.bookingLink;\nOutputs.liveNoneKey = up.bookingLink ? 'home.liveNoneBook' : 'home.liveNoneWait';\nOutputs.ready();"
+      },
+      "ports": [
+        {
+          "name": "in-me",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-plan",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-steps",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-upNext",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-progress",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-counts",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-kinds",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-statuses",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-first",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-hasPlan",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-planTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-week",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-preparing",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-hasSteps",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-countLive",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-countHomework",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-progressDone",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-progressTotal",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-progressPercent",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "out-hwShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-hwNone",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-hwHeadKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-hwN",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-hwDate",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-hwTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-hwBodyKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-hwStepId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-liveShown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-liveNone",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-liveN",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-liveDate",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-liveStart",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-liveEnd",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-liveTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-livePrep",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-hasPrep",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-joinLink",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-hasJoin",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-liveStepId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-liveStartsAt",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-liveDuration",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "out-calDetails",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-attendeeName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-bookingLink",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-canBook",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-liveNoneKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-ready",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "hiw_out",
+      "type": "Component Outputs",
+      "label": "What Home draws",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "first",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hasPlan",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "planTitle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "week",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "preparing",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "hasSteps",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "countLive",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "countHomework",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "progressDone",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "progressTotal",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "progressPercent",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "hwShown",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "hwNone",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "hwHeadKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hwN",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hwDate",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hwTitle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hwBodyKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hwStepId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "liveShown",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "liveNone",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "liveN",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "liveDate",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "liveStart",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "liveEnd",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "liveTitle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "livePrep",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hasPrep",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "joinLink",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hasJoin",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "liveStepId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "liveStartsAt",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "liveDuration",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "calDetails",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "attendeeName",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "bookingLink",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "canBook",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "liveNoneKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "ready",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 520
+    }
+  ]
+}

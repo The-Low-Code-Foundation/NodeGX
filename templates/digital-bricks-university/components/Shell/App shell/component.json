@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "873ff58d-c4a2-5094-860f-ef98713fac1b",
+  "name": "App shell",
+  "path": "/Shell/App shell",
+  "type": "visual",
+  "created": "2026-11-07T20:27:17.805Z",
+  "modified": "2026-11-12T19:35:52.197Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The frame every signed-in page sits in: white top bar with the product name, a COACH badge on the coach side, that side's tabs, and a centred main column where the page's own content lands."
+}

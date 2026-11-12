@@ -1,0 +1,316 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "713305a1-e8b2-537e-8c8d-78e1e251b1f1",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ri_root",
+      "type": "Group",
+      "label": "Resource",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "backgroundColor": "var(--background)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-md)"
+      },
+      "children": [
+        "ri_top",
+        "ri_link",
+        "ri_file"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ri_top",
+      "type": "Group",
+      "label": "Kind and label",
+      "parent": "ri_root",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)"
+      },
+      "children": [
+        "ri_icon_link",
+        "ri_icon_file",
+        "ri_label"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ri_icon_link",
+      "type": "net.noodl.visual.icon",
+      "label": "A link",
+      "parent": "ri_top",
+      "parameters": {
+        "mounted": false,
+        "iconSize": 16,
+        "iconColor": "var(--muted-foreground)",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-link",
+          "codeAsClass": true
+        }
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "ri_icon_file",
+      "type": "net.noodl.visual.icon",
+      "label": "A file",
+      "parent": "ri_top",
+      "parameters": {
+        "mounted": false,
+        "iconSize": 16,
+        "iconColor": "var(--muted-foreground)",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-file-text",
+          "codeAsClass": true
+        }
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "ri_label",
+      "type": "Text",
+      "label": "Label",
+      "parent": "ri_top",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "color": "var(--foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "ri_link",
+      "type": "Group",
+      "label": "Open the link",
+      "parent": "ri_root",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "ri_url",
+        "ri_open"
+      ],
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "ri_url",
+      "type": "Text",
+      "label": "Address",
+      "parent": "ri_link",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "wordBreak": "break-all",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "ri_open",
+      "type": "net.noodl.controls.button",
+      "label": "Open link",
+      "parent": "ri_link",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-external-link",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)",
+        "iconColor": "var(--foreground)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-11)"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "ri_file",
+      "type": "Group",
+      "label": "Richard's file",
+      "parent": "ri_root",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "ri_file_name",
+        "ri_viewer"
+      ],
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "ri_file_name",
+      "type": "Text",
+      "label": "File name",
+      "parent": "ri_file",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "wordBreak": "break-all",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "ri_viewer",
+      "type": "/Work/File viewer",
+      "label": "Show or download it",
+      "parent": "ri_file",
+      "parameters": {
+        "mode": "resource"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "ri_in",
+      "type": "Component Inputs",
+      "label": "The resource",
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "url",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "isLink",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "isFile",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "file",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "fileName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "stepId",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "ri_t_open",
+      "type": "Translation",
+      "label": "Open link",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "work.openLink"
+      },
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "ri_open_fn",
+      "type": "JavaScriptFunction",
+      "label": "Open the link in a new tab",
+      "parameters": {
+        "runOnChange-in-url": false,
+        "functionScript": "// saveStep only keeps http(s) links. noopener: the opened page gets no handle on this one.\nconst url = String(Inputs.url || '');\nif (url.startsWith('https://') || url.startsWith('http://')) window.open(url, '_blank', 'noopener,noreferrer');"
+      },
+      "ports": [
+        {
+          "name": "in-url",
+          "plug": "input",
+          "type": "*"
+        }
+      ],
+      "x": 410,
+      "y": 1000
+    }
+  ],
+  "visualRoots": [
+    "ri_root"
+  ]
+}

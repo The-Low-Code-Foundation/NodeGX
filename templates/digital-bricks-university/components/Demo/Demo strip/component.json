@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "97e73bb8-251d-5675-85f1-8e7561acf2d1",
+  "name": "Demo strip",
+  "path": "/Demo/Demo strip",
+  "type": "visual",
+  "created": "2026-11-12T16:58:04.319Z",
+  "modified": "2026-11-12T16:58:04.319Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A thin line above the app bar in the demo only (DBU-11): it says the people are made up and nothing leaves the browser, switches to the other person, and resets the demo."
+}

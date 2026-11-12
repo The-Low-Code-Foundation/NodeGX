@@ -1,0 +1,485 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8b7845b2-4cd5-5ae3-8bbc-0077ab7484b8",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "re_root",
+      "type": "Group",
+      "label": "Resources",
+      "children": [
+        "re_head",
+        "re_hint",
+        "re_list",
+        "re_actions",
+        "re_busy",
+        "re_error"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "re_head",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "re_root",
+      "parameters": {
+        "text": "",
+        "as": "h3",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "re_hint",
+      "type": "Text",
+      "label": "Hint",
+      "parent": "re_root",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "re_list",
+      "type": "Group",
+      "label": "The resources",
+      "parent": "re_root",
+      "children": [
+        "re_rows"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "re_rows",
+      "type": "For Each",
+      "label": "One row per resource",
+      "parent": "re_list",
+      "parameters": {
+        "template": "/Library/Resource row"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "re_actions",
+      "type": "Group",
+      "label": "Add a link, Upload a file",
+      "parent": "re_root",
+      "children": [
+        "re_add_link",
+        "re_upload"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "re_add_link",
+      "type": "net.noodl.controls.button",
+      "label": "Add a link",
+      "parent": "re_actions",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-link",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)",
+        "iconColor": "var(--foreground)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-9)"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "re_upload",
+      "type": "net.noodl.controls.button",
+      "label": "Upload a file",
+      "parent": "re_actions",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-upload",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)",
+        "iconColor": "var(--foreground)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-9)"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "re_busy",
+      "type": "Text",
+      "label": "Uploading",
+      "parent": "re_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "re_error",
+      "type": "Text",
+      "label": "Why the upload failed",
+      "parent": "re_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)"
+      },
+      "x": 100,
+      "y": 1120
+    },
+    {
+      "id": "re_in",
+      "type": "Component Inputs",
+      "label": "Resources editor in",
+      "ports": [
+        {
+          "name": "listId",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 1960
+    },
+    {
+      "id": "re_arr",
+      "type": "Collection2",
+      "label": "The resources being edited",
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "re_pick",
+      "type": "Open File Picker",
+      "label": "Choose a file",
+      "x": 410,
+      "y": 1240
+    },
+    {
+      "id": "re_put",
+      "type": "Upload File",
+      "label": "Upload it privately",
+      "parameters": {
+        "private": true
+      },
+      "metadata": {
+        "comment": "Private: the backend reads it to nobody but its uploader (files.read is nobody). A learner gets a 5-minute link through resourceLink, and only from a shared step that lists it."
+      },
+      "x": 410,
+      "y": 2080
+    },
+    {
+      "id": "re_busy_sw",
+      "type": "Switch",
+      "label": "Uploading, or not",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 410,
+      "y": 1480
+    },
+    {
+      "id": "re_err_sw",
+      "type": "Switch",
+      "label": "Show why it failed",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 410,
+      "y": 1720
+    },
+    {
+      "id": "re_add_link_fn",
+      "type": "JavaScriptFunction",
+      "label": "Add an empty link",
+      "parameters": {
+        "functionScript": "const id = String(Inputs.listId || '');\nif (!id) return;\nNoodl.Arrays[id] = (Noodl.Arrays[id] || []).concat([{ id: 'res-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7), label: '', url: '', file: '', fileName: '', isFile: false }]);",
+        "runOnChange-in-listId": false
+      },
+      "ports": [
+        {
+          "name": "in-listId",
+          "plug": "input",
+          "type": "*"
+        }
+      ],
+      "x": 410,
+      "y": 1000
+    },
+    {
+      "id": "re_add_file_fn",
+      "type": "JavaScriptFunction",
+      "label": "Add the uploaded file",
+      "parameters": {
+        "functionScript": "// The label starts as the file's own name without its extension; the coach can change it.\nconst id = String(Inputs.listId || '');\nconst f = Inputs.cloudFile;\nif (!id || !f) return;\nconst stored = typeof f.getName === 'function' ? f.getName() : String(f.name || '');\nconst original = String(Inputs.fileName || stored);\nconst dot = original.lastIndexOf('.');\nconst label = dot > 0 ? original.slice(0, dot) : original;\nNoodl.Arrays[id] = (Noodl.Arrays[id] || []).concat([{ id: 'res-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7), label, url: '', file: stored, fileName: original, isFile: true }]);",
+        "runOnChange-in-listId": false,
+        "runOnChange-in-cloudFile": false,
+        "runOnChange-in-fileName": false
+      },
+      "ports": [
+        {
+          "name": "in-listId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-cloudFile",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-fileName",
+          "plug": "input",
+          "type": "*"
+        }
+      ],
+      "x": 410,
+      "y": 2200
+    },
+    {
+      "id": "re_up_fn",
+      "type": "JavaScriptFunction",
+      "label": "Move the row up",
+      "parameters": {
+        "functionScript": "const id = String(Inputs.listId || '');\nconst list = (Noodl.Arrays[id] || []).slice();\nconst i = list.findIndex((m) => m.getId() === String(Inputs.itemId || ''));\nif (i < 1) return;\nconst moved = list.splice(i, 1)[0];\nlist.splice(i - 1, 0, moved);\nNoodl.Arrays[id] = list;",
+        "runOnChange-in-listId": false,
+        "runOnChange-in-itemId": false
+      },
+      "ports": [
+        {
+          "name": "in-listId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-itemId",
+          "plug": "input",
+          "type": "*"
+        }
+      ],
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "re_down_fn",
+      "type": "JavaScriptFunction",
+      "label": "Move the row down",
+      "parameters": {
+        "functionScript": "const id = String(Inputs.listId || '');\nconst list = (Noodl.Arrays[id] || []).slice();\nconst i = list.findIndex((m) => m.getId() === String(Inputs.itemId || ''));\nif (i < 0 || i >= list.length - 1) return;\nconst moved = list.splice(i, 1)[0];\nlist.splice(i + 1, 0, moved);\nNoodl.Arrays[id] = list;",
+        "runOnChange-in-listId": false,
+        "runOnChange-in-itemId": false
+      },
+      "ports": [
+        {
+          "name": "in-listId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-itemId",
+          "plug": "input",
+          "type": "*"
+        }
+      ],
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "re_remove_fn",
+      "type": "JavaScriptFunction",
+      "label": "Remove the row that asked",
+      "parameters": {
+        "functionScript": "const id = String(Inputs.listId || '');\nconst gone = String(Inputs.itemId || '');\nif (!id || !gone) return;\nNoodl.Arrays[id] = (Noodl.Arrays[id] || []).filter((m) => m.getId() !== gone);",
+        "runOnChange-in-listId": false,
+        "runOnChange-in-itemId": false
+      },
+      "ports": [
+        {
+          "name": "in-listId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-itemId",
+          "plug": "input",
+          "type": "*"
+        }
+      ],
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "re_why_fn",
+      "type": "JavaScriptFunction",
+      "label": "Why the upload failed, in a sentence",
+      "parameters": {
+        "functionScript": "Outputs.text = String(Inputs.format || '').split('{error}').join(String(Inputs.error || ''));",
+        "runOnChange-in-format": false,
+        "runOnChange-in-error": false
+      },
+      "ports": [
+        {
+          "name": "in-format",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-error",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-text",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 1840
+    },
+    {
+      "id": "re_t_head",
+      "type": "Translation",
+      "label": "Resources",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.resources"
+      },
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "re_t_hint",
+      "type": "Translation",
+      "label": "Hint",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.resourcesHint"
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "re_t_link",
+      "type": "Translation",
+      "label": "Add a link",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.addLink"
+      },
+      "x": 410,
+      "y": 1120
+    },
+    {
+      "id": "re_t_upload",
+      "type": "Translation",
+      "label": "Upload a file",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.upload"
+      },
+      "x": 410,
+      "y": 1360
+    },
+    {
+      "id": "re_t_busy",
+      "type": "Translation",
+      "label": "Uploading",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.uploading"
+      },
+      "x": 410,
+      "y": 1600
+    },
+    {
+      "id": "re_t_failed",
+      "type": "Translation",
+      "label": "The file could not be uploaded",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.uploadFailed"
+      },
+      "x": 410,
+      "y": 2320
+    }
+  ],
+  "visualRoots": [
+    "re_root"
+  ]
+}

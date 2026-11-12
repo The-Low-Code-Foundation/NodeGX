@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d6e7f21c-9534-50a7-8444-cc691e6ae022",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tr_in",
+      "fromProperty": "title",
+      "toId": "tr_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tr_in",
+      "fromProperty": "meta",
+      "toId": "tr_meta",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tr_in",
+      "fromProperty": "description",
+      "toId": "tr_desc",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tr_in",
+      "fromProperty": "description",
+      "toId": "tr_desc",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tr_in",
+      "fromProperty": "archived",
+      "toId": "tr_arch_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tr_in",
+      "fromProperty": "archived",
+      "toId": "tr_restore",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tr_in",
+      "fromProperty": "archived",
+      "toId": "tr_not_arch",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tr_not_arch",
+      "fromProperty": "result",
+      "toId": "tr_archive",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tr_t_edit",
+      "fromProperty": "Translation",
+      "toId": "tr_edit",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tr_t_arch",
+      "fromProperty": "Translation",
+      "toId": "tr_archive",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tr_t_restore",
+      "fromProperty": "Translation",
+      "toId": "tr_restore",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tr_t_chip",
+      "fromProperty": "Translation",
+      "toId": "tr_arch_chip",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tr_edit",
+      "fromProperty": "onClick",
+      "toId": "tr_out",
+      "toProperty": "edit"
+    },
+    {
+      "fromId": "tr_archive",
+      "fromProperty": "onClick",
+      "toId": "tr_out",
+      "toProperty": "archive"
+    },
+    {
+      "fromId": "tr_restore",
+      "fromProperty": "onClick",
+      "toId": "tr_out",
+      "toProperty": "archive"
+    }
+  ]
+}

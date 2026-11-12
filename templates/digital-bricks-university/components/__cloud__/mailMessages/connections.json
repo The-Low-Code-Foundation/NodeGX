@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "31d348e6-1de7-5cc3-8276-cdd0d5e3e75d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mf_req",
+      "fromProperty": "receive",
+      "toId": "mf_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mf_fn",
+      "fromProperty": "out-request",
+      "toId": "mf_mail",
+      "toProperty": "request"
+    },
+    {
+      "fromId": "mf_mail",
+      "fromProperty": "sent",
+      "toId": "mf_res",
+      "toProperty": "pm-sent"
+    },
+    {
+      "fromId": "mf_mail",
+      "fromProperty": "held",
+      "toId": "mf_res",
+      "toProperty": "pm-held"
+    },
+    {
+      "fromId": "mf_mail",
+      "fromProperty": "done",
+      "toId": "mf_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mf_fn",
+      "fromProperty": "failure",
+      "toId": "mf_fail",
+      "toProperty": "send"
+    }
+  ]
+}

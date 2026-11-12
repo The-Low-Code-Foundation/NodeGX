@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "44b46eb5-f903-5473-8bb8-6f8d957bc707",
+  "name": "Progress",
+  "path": "/Home/Progress",
+  "type": "visual",
+  "created": "2026-11-09T12:38:03.821Z",
+  "modified": "2026-11-09T12:38:03.821Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The Progress card: \"X of N steps\" and a bar filled to the same share. Complete means a live session done, a homework approved or a check-in done (learnerHome counts it)."
+}

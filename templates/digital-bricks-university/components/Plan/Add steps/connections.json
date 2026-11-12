@@ -1,0 +1,265 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0a03f4c0-3a7a-5bba-8295-aea808f9092d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ads_t_live",
+      "fromProperty": "Translation",
+      "toId": "ads_live",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ads_t_hw",
+      "fromProperty": "Translation",
+      "toId": "ads_hw",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ads_t_ci",
+      "fromProperty": "Translation",
+      "toId": "ads_ci",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ads_t_pick",
+      "fromProperty": "Translation",
+      "toId": "ads_pick",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ads_t_ready",
+      "fromProperty": "Translation",
+      "toId": "ads_ready",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ads_in",
+      "fromProperty": "planId",
+      "toId": "ads_c_live",
+      "toProperty": "in-planId"
+    },
+    {
+      "fromId": "ads_in",
+      "fromProperty": "planId",
+      "toId": "ads_c_hw",
+      "toProperty": "in-planId"
+    },
+    {
+      "fromId": "ads_in",
+      "fromProperty": "planId",
+      "toId": "ads_c_ci",
+      "toProperty": "in-planId"
+    },
+    {
+      "fromId": "ads_in",
+      "fromProperty": "planId",
+      "toId": "ads_c_ready",
+      "toProperty": "in-planId"
+    },
+    {
+      "fromId": "ads_t_new_live",
+      "fromProperty": "Translation",
+      "toId": "ads_c_live",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "ads_t_new_hw",
+      "fromProperty": "Translation",
+      "toId": "ads_c_hw",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "ads_t_new_ci",
+      "fromProperty": "Translation",
+      "toId": "ads_c_ci",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "ads_live",
+      "fromProperty": "onClick",
+      "toId": "ads_c_live",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ads_hw",
+      "fromProperty": "onClick",
+      "toId": "ads_c_hw",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ads_ci",
+      "fromProperty": "onClick",
+      "toId": "ads_c_ci",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ads_ready",
+      "fromProperty": "onClick",
+      "toId": "ads_c_ready",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ads_pick",
+      "fromProperty": "onClick",
+      "toId": "ads_out",
+      "toProperty": "pickLibrary"
+    },
+    {
+      "fromId": "ads_c_live",
+      "fromProperty": "out-stepId",
+      "toId": "ads_out",
+      "toProperty": "addedId"
+    },
+    {
+      "fromId": "ads_c_hw",
+      "fromProperty": "out-stepId",
+      "toId": "ads_out",
+      "toProperty": "addedId"
+    },
+    {
+      "fromId": "ads_c_ci",
+      "fromProperty": "out-stepId",
+      "toId": "ads_out",
+      "toProperty": "addedId"
+    },
+    {
+      "fromId": "ads_c_live",
+      "fromProperty": "done",
+      "toId": "ads_out",
+      "toProperty": "added"
+    },
+    {
+      "fromId": "ads_c_hw",
+      "fromProperty": "done",
+      "toId": "ads_out",
+      "toProperty": "added"
+    },
+    {
+      "fromId": "ads_c_ci",
+      "fromProperty": "done",
+      "toId": "ads_out",
+      "toProperty": "added"
+    },
+    {
+      "fromId": "ads_c_live",
+      "fromProperty": "done",
+      "toId": "ads_out",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "ads_c_hw",
+      "fromProperty": "done",
+      "toId": "ads_out",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "ads_c_ci",
+      "fromProperty": "done",
+      "toId": "ads_out",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "ads_c_ready",
+      "fromProperty": "out-changed",
+      "toId": "ads_ready_say",
+      "toProperty": "in-changed"
+    },
+    {
+      "fromId": "ads_c_ready",
+      "fromProperty": "out-left",
+      "toId": "ads_ready_say",
+      "toProperty": "in-left"
+    },
+    {
+      "fromId": "ads_t_one",
+      "fromProperty": "Translation",
+      "toId": "ads_ready_say",
+      "toProperty": "in-one"
+    },
+    {
+      "fromId": "ads_t_some",
+      "fromProperty": "Translation",
+      "toId": "ads_ready_say",
+      "toProperty": "in-some"
+    },
+    {
+      "fromId": "ads_t_none",
+      "fromProperty": "Translation",
+      "toId": "ads_ready_say",
+      "toProperty": "in-none"
+    },
+    {
+      "fromId": "ads_c_ready",
+      "fromProperty": "done",
+      "toId": "ads_ready_say",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ads_c_ready",
+      "fromProperty": "done",
+      "toId": "ads_out",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "ads_ready_say",
+      "fromProperty": "out-said",
+      "toId": "ads_out",
+      "toProperty": "said"
+    },
+    {
+      "fromId": "ads_ready_say",
+      "fromProperty": "out-show",
+      "toId": "ads_out",
+      "toProperty": "saidShow"
+    },
+    {
+      "fromId": "ads_c_live",
+      "fromProperty": "error",
+      "toId": "ads_out",
+      "toProperty": "said"
+    },
+    {
+      "fromId": "ads_c_hw",
+      "fromProperty": "error",
+      "toId": "ads_out",
+      "toProperty": "said"
+    },
+    {
+      "fromId": "ads_c_ci",
+      "fromProperty": "error",
+      "toId": "ads_out",
+      "toProperty": "said"
+    },
+    {
+      "fromId": "ads_c_ready",
+      "fromProperty": "error",
+      "toId": "ads_out",
+      "toProperty": "said"
+    },
+    {
+      "fromId": "ads_c_live",
+      "fromProperty": "failure",
+      "toId": "ads_out",
+      "toProperty": "saidShow"
+    },
+    {
+      "fromId": "ads_c_hw",
+      "fromProperty": "failure",
+      "toId": "ads_out",
+      "toProperty": "saidShow"
+    },
+    {
+      "fromId": "ads_c_ci",
+      "fromProperty": "failure",
+      "toId": "ads_out",
+      "toProperty": "saidShow"
+    },
+    {
+      "fromId": "ads_c_ready",
+      "fromProperty": "failure",
+      "toId": "ads_out",
+      "toProperty": "saidShow"
+    }
+  ]
+}

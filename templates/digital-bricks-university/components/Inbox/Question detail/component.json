@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "19f48789-bcd4-5439-878b-03040ecfe8c3",
+  "name": "Question detail",
+  "path": "/Inbox/Question detail",
+  "type": "visual",
+  "created": "2026-11-12T13:12:01.415Z",
+  "modified": "2026-11-12T13:12:01.415Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A learner's question, opened in the inbox (DBU-08): the whole conversation with a reply box (Messages/Conversation, as on the plan), and No reply needed for a message that needs no answer."
+}

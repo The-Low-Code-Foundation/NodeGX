@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7ecd4a9c-937f-5859-8870-c4f826485ebc",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mc_t_title",
+      "fromProperty": "Translation",
+      "toId": "mc_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mc_t_body",
+      "fromProperty": "Translation",
+      "toId": "mc_body",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mc_card",
+      "fromProperty": "didMount",
+      "toId": "mc_read",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "mc_read",
+      "fromProperty": "out-items",
+      "toId": "mc_shape",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "mc_shape",
+      "fromProperty": "out-none",
+      "toId": "mc_body",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mc_shape",
+      "fromProperty": "out-some",
+      "toId": "mc_count",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mc_shape",
+      "fromProperty": "out-some",
+      "toId": "mc_latest",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mc_shape",
+      "fromProperty": "out-countKey",
+      "toId": "mc_t_count",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "mc_t_count",
+      "fromProperty": "Translation",
+      "toId": "mc_fill_count",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "mc_shape",
+      "fromProperty": "out-n",
+      "toId": "mc_fill_count",
+      "toProperty": "n"
+    },
+    {
+      "fromId": "mc_fill_count",
+      "fromProperty": "formatted",
+      "toId": "mc_count",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mc_t_latest",
+      "fromProperty": "Translation",
+      "toId": "mc_fill_latest",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "mc_shape",
+      "fromProperty": "out-latest",
+      "toId": "mc_fill_latest",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "mc_fill_latest",
+      "fromProperty": "formatted",
+      "toId": "mc_latest",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mc_t_open",
+      "fromProperty": "Translation",
+      "toId": "mc_open",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "mc_open",
+      "fromProperty": "onClick",
+      "toId": "mc_nav",
+      "toProperty": "navigate"
+    }
+  ]
+}

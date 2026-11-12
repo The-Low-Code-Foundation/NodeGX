@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "4c5aa248-0310-52b9-810c-8da98b997ae8",
+  "name": "Homework next",
+  "path": "/Home/Homework next",
+  "type": "visual",
+  "created": "2026-11-09T12:36:36.973Z",
+  "modified": "2026-11-09T12:36:36.973Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The homework half of Up next: which homework and when it is due, its title, one sentence for where it stands, and Open homework (to the homework page with ?step=). When nothing is owed, a quiet card says so."
+}

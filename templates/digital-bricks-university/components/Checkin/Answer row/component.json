@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "64126eff-6f8a-5012-8d0d-4c9ee6ba9221",
+  "name": "Answer row",
+  "path": "/Checkin/Answer row",
+  "type": "visual",
+  "created": "2026-11-12T14:53:11.366Z",
+  "modified": "2026-11-12T14:53:11.366Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One question and the answer given to it, read-only."
+}

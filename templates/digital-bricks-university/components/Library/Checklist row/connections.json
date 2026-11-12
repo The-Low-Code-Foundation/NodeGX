@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e3cc6058-ba3b-56a0-85ef-9f9c8acfc694",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cr_in",
+      "fromProperty": "text",
+      "toId": "cr_text",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "cr_in",
+      "fromProperty": "required",
+      "toId": "cr_req",
+      "toProperty": "checked"
+    },
+    {
+      "fromId": "cr_t_ph",
+      "fromProperty": "Translation",
+      "toId": "cr_text",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "cr_t_req",
+      "fromProperty": "Translation",
+      "toId": "cr_req",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "cr_t_remove",
+      "fromProperty": "Translation",
+      "toId": "cr_remove",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "cr_item",
+      "fromProperty": "itemId",
+      "toId": "cr_set_text",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "cr_item",
+      "fromProperty": "itemId",
+      "toId": "cr_set_req",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "cr_text",
+      "fromProperty": "onTextChanged",
+      "toId": "cr_set_text",
+      "toProperty": "prop-text"
+    },
+    {
+      "fromId": "cr_text",
+      "fromProperty": "textChanged",
+      "toId": "cr_set_text",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "cr_req",
+      "fromProperty": "checked",
+      "toId": "cr_set_req",
+      "toProperty": "prop-required"
+    },
+    {
+      "fromId": "cr_req",
+      "fromProperty": "onChange",
+      "toId": "cr_set_req",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "cr_remove",
+      "fromProperty": "onClick",
+      "toId": "cr_out",
+      "toProperty": "remove"
+    }
+  ]
+}

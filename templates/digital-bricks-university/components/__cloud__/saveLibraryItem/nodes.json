@@ -1,0 +1,151 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "21092b56-1838-5c30-84c9-06b3b958a15b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sl_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach saves a library item",
+      "parameters": {
+        "params": "id,title,brief,handInChecklist,resources,tags,estimatedMinutes",
+        "allowNoAuth": false,
+        "ptype-id": "string",
+        "preq-id": false,
+        "ptype-title": "string",
+        "preq-title": false,
+        "ptype-brief": "string",
+        "preq-brief": false
+      },
+      "metadata": {
+        "comment": "role:staff in nodegx.security.json. Checklist, resources, tags and minutes are left untyped so a malformed value reaches the check below and is refused in a sentence, not as a bare 400."
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "sl_fn",
+      "type": "JavaScriptFunction",
+      "label": "Check every field, then create or update",
+      "parameters": {
+        "functionScript": "/*\n * The one way a library item is written. Every field is checked here, on the server,\n * because a page is only the caller's word.\n *  - brief: Markdown, kept as typed. Pages render it with HTML switched off\n *    (Shell/Formatted text), so a tag in it shows as text and never runs.\n *  - resources: a link must be http(s). A file must be one THIS coach uploaded\n *    (_Files.owner, written by the backend from the uploader's session), or one already\n *    on this item: otherwise a learner's private hand-in could be attached here and handed\n *    to every learner who later gets this homework.\n *  - Editing never reaches a plan: steps hold their own copy (SCOPE R4).\n */\n(async () => {\n  const refuse = (why) => { Outputs.why = why; Outputs.refuse(); };\n  try {\n    const R = Noodl.Records;\n    const me = String(Inputs.userId || '');\n    if (!me) throw new Error('no session user');\n    const id = String(Inputs.id || '').trim();\n\n    let existing = null;\n    if (id) {\n      const found = await R.query('LibraryItem', { objectId: { equalTo: id } }, { limit: 2, plain: true });\n      if (found.length !== 1) return refuse('That homework is no longer in the library. Reload the page.');\n      existing = found[0];\n    }\n\n    const title = String(Inputs.title || '').trim().replace(/\\s+/g, ' ');\n    if (!title) return refuse('Give the homework a title.');\n    if (title.length > 140) return refuse('Keep the title under 140 characters.');\n\n    const brief = String(Inputs.brief || '').replace(/\\r\\n/g, '\\n').trim();\n    if (brief.length > 20000) return refuse('The brief is too long. Keep it under 20,000 characters, or put the rest in a resource.');\n\n    const rawList = Inputs.handInChecklist === undefined || Inputs.handInChecklist === null ? [] : Inputs.handInChecklist;\n    if (!Array.isArray(rawList)) return refuse('The hand-in list could not be read. Reload the page and try again.');\n    const handInChecklist = rawList\n      .map((c) => (typeof c === 'string' ? { text: c, required: true } : { text: String((c && c.text) || ''), required: !(c && c.required === false) }))\n      .map((c) => ({ text: c.text.trim().replace(/\\s+/g, ' '), required: c.required }))\n      .filter((c) => c.text);\n    if (handInChecklist.length > 30) return refuse('Keep the hand-in list to 30 items or fewer.');\n    if (handInChecklist.some((c) => c.text.length > 300)) return refuse('Keep each hand-in item under 300 characters.');\n\n    const rawRes = Inputs.resources === undefined || Inputs.resources === null ? [] : Inputs.resources;\n    if (!Array.isArray(rawRes)) return refuse('The resources could not be read. Reload the page and try again.');\n    if (rawRes.length > 20) return refuse('Keep the resources to 20 or fewer.');\n    const onItem = new Set(((existing && existing.resources) || []).filter((r) => r && r.file).map((r) => r.file));\n    const resources = [];\n    for (const r of rawRes) {\n      if (!r || typeof r !== 'object') return refuse('A resource could not be read. Remove it and add it again.');\n      const label = String(r.label || '').trim().replace(/\\s+/g, ' ');\n      if (label.length > 200) return refuse('Keep each resource label under 200 characters.');\n      if (r.file) {\n        const file = String(r.file);\n        if (!onItem.has(file)) {\n          const rows = await R.query('_Files', { storedName: { equalTo: file } }, { limit: 2, plain: true });\n          const owner = rows.length === 1 ? rows[0].owner : null;\n          const ownerId = owner && typeof owner === 'object' ? owner.objectId : owner;\n          if (ownerId !== me) return refuse('One of the files is not one you uploaded. Remove it and upload it again.');\n        }\n        const fileName = String(r.fileName || '').trim();\n        resources.push({ label: label || fileName || 'File', file, fileName });\n      } else {\n        const url = String(r.url || '').trim();\n        if (!url && !label) continue;\n        let parsed = null;\n        try { parsed = new URL(url); } catch (e) { parsed = null; }\n        if (!parsed || (parsed.protocol !== 'https:' && parsed.protocol !== 'http:')) {\n          return refuse('\"' + (url || label) + '\" is not a web address. Links start with https://');\n        }\n        resources.push({ label: label || parsed.hostname, url: parsed.href });\n      }\n    }\n\n    const rawTags = Inputs.tags === undefined || Inputs.tags === null ? [] : Inputs.tags;\n    const tagList = Array.isArray(rawTags) ? rawTags : String(rawTags).split(',');\n    const tags = [];\n    for (const t of tagList) {\n      const tag = String(t || '').trim().replace(/\\s+/g, ' ');\n      if (tag && !tags.some((x) => x.toLowerCase() === tag.toLowerCase())) tags.push(tag);\n    }\n    if (tags.length > 12) return refuse('Keep it to 12 tags or fewer.');\n    if (tags.some((t) => t.length > 40)) return refuse('Keep each tag under 40 characters.');\n\n    const m = Inputs.estimatedMinutes;\n    let estimatedMinutes = null;\n    if (m !== undefined && m !== null && String(m).trim() !== '') {\n      estimatedMinutes = Number(String(m).trim());\n      if (!Number.isInteger(estimatedMinutes) || estimatedMinutes < 1 || estimatedMinutes > 6000) {\n        return refuse('Give the estimated time as a whole number of minutes, or leave it empty.');\n      }\n    }\n\n    const fields = { title, brief, handInChecklist, resources, tags, estimatedMinutes };\n    if (existing) {\n      await R.save(existing.objectId, fields, { className: 'LibraryItem' });\n      Outputs.id = existing.objectId;\n      Outputs.created = false;\n    } else {\n      const row = await R.create('LibraryItem', Object.assign({ archived: false }, fields), { plain: true });\n      Outputs.id = row.objectId || row.id;\n      Outputs.created = true;\n    }\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:saveLibraryItem]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();",
+        "runOnChange-in-userId": false,
+        "runOnChange-in-id": false,
+        "runOnChange-in-title": false,
+        "runOnChange-in-brief": false,
+        "runOnChange-in-handInChecklist": false,
+        "runOnChange-in-resources": false,
+        "runOnChange-in-tags": false,
+        "runOnChange-in-estimatedMinutes": false
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-id",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-brief",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-handInChecklist",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-resources",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-tags",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-estimatedMinutes",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-id",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-created",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-why",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "metadata": {
+        "comment": "Only the coach who uploaded a file may attach it, so a learner's private hand-in can never become a resource every learner is given."
+      },
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "sl_res",
+      "type": "noodl.cloud.response",
+      "label": "Saved",
+      "parameters": {
+        "params": "id,created"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "sl_deny",
+      "type": "noodl.cloud.response",
+      "label": "A refusal the coach can act on",
+      "parameters": {
+        "status": "failure"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "sl_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "The homework could not be saved. Try again."
+      },
+      "x": 40,
+      "y": 520
+    }
+  ]
+}

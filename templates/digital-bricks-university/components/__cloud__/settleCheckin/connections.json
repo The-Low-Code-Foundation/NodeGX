@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c96234d8-ec8d-587f-8e97-0648a220b7f1",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "stc_req",
+      "fromProperty": "pm-responseId",
+      "toId": "stc_fn",
+      "toProperty": "in-responseId"
+    },
+    {
+      "fromId": "stc_req",
+      "fromProperty": "receive",
+      "toId": "stc_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "stc_fn",
+      "fromProperty": "out-done",
+      "toId": "stc_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "stc_fn",
+      "fromProperty": "out-why",
+      "toId": "stc_deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "stc_fn",
+      "fromProperty": "out-refuse",
+      "toId": "stc_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "stc_fn",
+      "fromProperty": "out-failed",
+      "toId": "stc_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "stc_fn",
+      "fromProperty": "failure",
+      "toId": "stc_fail",
+      "toProperty": "send"
+    }
+  ]
+}

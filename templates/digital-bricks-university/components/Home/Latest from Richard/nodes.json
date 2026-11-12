@@ -1,0 +1,370 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "cf11fb08-069f-59f4-8292-578d6520a542",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "lr_card",
+      "type": "Group",
+      "label": "Latest from Richard",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "lr_head",
+        "lr_when",
+        "lr_tag",
+        "lr_body",
+        "lr_none",
+        "lr_open"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-5)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "dataAttributes": "data-testid",
+        "data-testid": "latest-from-richard"
+      }
+    },
+    {
+      "id": "lr_head",
+      "type": "Group",
+      "label": "Title and New",
+      "x": 100,
+      "y": 160,
+      "parent": "lr_card",
+      "children": [
+        "lr_title-2",
+        "lr_new_box"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-1)"
+      }
+    },
+    {
+      "id": "lr_title-2",
+      "type": "Text",
+      "label": "Latest from Richard",
+      "x": 160,
+      "y": 280,
+      "parent": "lr_head",
+      "parameters": {
+        "text": "",
+        "as": "h2",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "lr_new_box",
+      "type": "Group",
+      "label": "New, while unread",
+      "x": 160,
+      "y": 400,
+      "parent": "lr_head",
+      "children": [
+        "lr_new"
+      ],
+      "parameters": {
+        "mounted": false,
+        "sizeMode": "contentSize"
+      }
+    },
+    {
+      "id": "lr_new",
+      "type": "/Plan/Chip",
+      "label": "New",
+      "x": 220,
+      "y": 520,
+      "parent": "lr_new_box",
+      "parameters": {
+        "labelKey": "messages.new",
+        "bg": "var(--primary)",
+        "fg": "var(--primary-foreground)"
+      }
+    },
+    {
+      "id": "lr_when",
+      "type": "Text",
+      "label": "When he sent it",
+      "x": 100,
+      "y": 640,
+      "parent": "lr_card",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "lr_tag",
+      "type": "Text",
+      "label": "About the homework: …",
+      "x": 100,
+      "y": 760,
+      "parent": "lr_card",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "lr_body",
+      "type": "Text",
+      "label": "What he wrote (the start of it)",
+      "x": 100,
+      "y": 880,
+      "parent": "lr_card",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "lr_none",
+      "type": "Text",
+      "label": "Nothing from Richard yet",
+      "x": 100,
+      "y": 1000,
+      "parent": "lr_card",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "lr_open",
+      "type": "net.noodl.controls.button",
+      "label": "Open messages",
+      "x": 100,
+      "y": 1120,
+      "parent": "lr_card",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "minHeight": "var(--space-11)"
+      }
+    },
+    {
+      "id": "lr_in-2",
+      "type": "Component Inputs",
+      "label": "The newest coach message",
+      "x": 520,
+      "y": 40,
+      "ports": [
+        {
+          "name": "latest",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "me",
+          "plug": "output",
+          "type": "*"
+        }
+      ]
+    },
+    {
+      "id": "lr_fn",
+      "type": "JavaScriptFunction",
+      "label": "The message, in values",
+      "x": 520,
+      "y": 160,
+      "parameters": {
+        "functionScript": "// learnerHome's `latest` (null when Richard has written nothing yet) and `me` (for the time zone).\n// Long messages are cut: Messages has the rest.\nconst m = Inputs.latest || null;\nlet tz = String((Inputs.me && Inputs.me.timezone) || '');\ntry { new Date().toLocaleString('en-GB', { timeZone: tz || undefined }); } catch (e) { tz = ''; }\nconst zone = tz || Intl.DateTimeFormat().resolvedOptions().timeZone;\nconst d = m ? new Date(m.at) : null;\nOutputs.has = !!m;\nOutputs.none = !m;\nOutputs.when = d && !isNaN(d) ? d.toLocaleDateString('en-GB', { timeZone: zone, weekday: 'short', day: 'numeric', month: 'short' }) + ', ' +\n  d.toLocaleTimeString('en-GB', { timeZone: zone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }) : '';\nconst body = m ? String(m.body || '').trim() : '';\nOutputs.body = body.length > 280 ? body.slice(0, 277).trimEnd() + '…' : body;\nOutputs.hasBody = !!body;\nOutputs.isNew = !!(m && m.isNew);\nOutputs.tag = m ? String(m.stepTitle || '') : '';\nOutputs.hasTag = !!(m && m.stepTitle);"
+      },
+      "ports": [
+        {
+          "name": "in-latest",
+          "displayName": "latest",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-timezone",
+          "displayName": "timezone",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-has",
+          "displayName": "has",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-none",
+          "displayName": "none",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-when",
+          "displayName": "when",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-body",
+          "displayName": "body",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasBody",
+          "displayName": "hasBody",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isNew",
+          "displayName": "isNew",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tag",
+          "displayName": "tag",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasTag",
+          "displayName": "hasTag",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "lr_t_title",
+      "type": "Translation",
+      "label": "Latest from Richard",
+      "x": 760,
+      "y": 280,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.latestTitle"
+      }
+    },
+    {
+      "id": "lr_t_about",
+      "type": "Translation",
+      "label": "About the homework: {title}",
+      "x": 760,
+      "y": 760,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "messages.about"
+      }
+    },
+    {
+      "id": "lr_fill_tag",
+      "type": "String Format",
+      "label": "The homework into the tag",
+      "x": 1000,
+      "y": 760,
+      "parameters": {
+        "format": "{title}"
+      }
+    },
+    {
+      "id": "lr_t_none",
+      "type": "Translation",
+      "label": "Nothing from Richard yet",
+      "x": 760,
+      "y": 1000,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.latestNone"
+      }
+    },
+    {
+      "id": "lr_t_open",
+      "type": "Translation",
+      "label": "Open messages",
+      "x": 760,
+      "y": 1120,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.latestOpen"
+      }
+    },
+    {
+      "id": "lr_go",
+      "type": "RouterNavigate",
+      "label": "→ Messages",
+      "x": 1000,
+      "y": 1120,
+      "parameters": {
+        "target": "/Pages/Messages"
+      }
+    }
+  ],
+  "visualRoots": [
+    "lr_card"
+  ]
+}

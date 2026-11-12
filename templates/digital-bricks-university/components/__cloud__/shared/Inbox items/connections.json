@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "fb104ef2-0ac3-5322-8673-f7b3c08b72e3",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ii_in",
+      "fromProperty": "request",
+      "toId": "ii_fn",
+      "toProperty": "in-request"
+    },
+    {
+      "fromId": "ii_fn",
+      "fromProperty": "out-items",
+      "toId": "ii_out",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "ii_fn",
+      "fromProperty": "out-count",
+      "toId": "ii_out",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "ii_fn",
+      "fromProperty": "out-learners",
+      "toId": "ii_out",
+      "toProperty": "learners"
+    },
+    {
+      "fromId": "ii_fn",
+      "fromProperty": "out-done",
+      "toId": "ii_out",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "ii_fn",
+      "fromProperty": "out-failed",
+      "toId": "ii_out",
+      "toProperty": "failed"
+    }
+  ]
+}

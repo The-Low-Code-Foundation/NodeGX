@@ -1,0 +1,117 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "df16bbea-14e8-5ae0-8ff9-54195cc22a7e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "tps_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach saves a template",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "id,title,description,items",
+        "allowNoAuth": false,
+        "ptype-id": "string",
+        "preq-id": false,
+        "ptype-title": "string",
+        "preq-title": true
+      },
+      "metadata": {
+        "comment": "role:staff in nodegx.security.json."
+      }
+    },
+    {
+      "id": "tps_fn",
+      "type": "JavaScriptFunction",
+      "label": "Check the template and its items, then save",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "runOnChange-in-id": false,
+        "runOnChange-in-title": false,
+        "runOnChange-in-description": false,
+        "runOnChange-in-items": false,
+        "functionScript": "/*\n * A template is a plan's SHAPE and nothing else: each item keeps only kind, title,\n * duration (live), library item (homework) and day offset. Anything else a page sends is\n * dropped, so no learner's data can ride into a template.\n * Editing a template never changes a plan already started from it: those steps are copies.\n */\n(async () => {\n  const refuse = (why) => { Outputs.why = why; Outputs.refuse(); };\n  try {\n    const R = Noodl.Records;\n    const id = String(Inputs.id || '').trim();\n    let existing = null;\n    if (id) {\n      const found = await R.query('PlanTemplate', { objectId: { equalTo: id } }, { limit: 2, plain: true });\n      if (found.length !== 1) return refuse('That template is no longer there. Reload the page.');\n      existing = found[0];\n    }\n    const title = String(Inputs.title || '').trim().replace(/\\s+/g, ' ');\n    if (!title) return refuse('Give the template a title.');\n    if (title.length > 140) return refuse('Keep the title under 140 characters.');\n    const description = String(Inputs.description || '').trim();\n    if (description.length > 2000) return refuse('Keep the description under 2,000 characters.');\n\n    const raw = Inputs.items === undefined || Inputs.items === null ? [] : Inputs.items;\n    if (!Array.isArray(raw)) return refuse('The steps could not be read. Reload the page and try again.');\n    if (raw.length > 100) return refuse('A template holds up to 100 steps.');\n    const libIds = raw.map((i) => i && i.libraryItem).filter(Boolean).map(String);\n    const library = libIds.length ? await R.query('LibraryItem', { objectId: { containedIn: libIds } }, { limit: 1000, plain: true }) : [];\n    const items = [];\n    for (let n = 0; n < raw.length; n++) {\n      const i = raw[n] || {};\n      const which = 'Step ' + (n + 1);\n      const kind = String(i.kind || '');\n      if (!['live', 'homework', 'checkin'].includes(kind)) return refuse(which + ' is not a live session, homework or a check-in.');\n      const itemTitle = String(i.title || '').trim().replace(/\\s+/g, ' ');\n      if (!itemTitle) return refuse(which + ' needs a title.');\n      if (itemTitle.length > 140) return refuse(which + ': keep the title under 140 characters.');\n      const dayOffset = String(i.dayOffset === undefined || i.dayOffset === null ? '0' : i.dayOffset).trim() === '' ? 0 : Number(i.dayOffset);\n      if (!Number.isInteger(dayOffset) || dayOffset < 0 || dayOffset > 730) return refuse(which + ': the day must be a whole number from 0 to 730.');\n      const item = { kind, title: itemTitle, dayOffset };\n      if (kind === 'live') {\n        const d = i.durationMin === undefined || i.durationMin === null || String(i.durationMin).trim() === '' ? 60 : Number(i.durationMin);\n        if (!Number.isInteger(d) || d < 5 || d > 600) return refuse(which + ': give the length as a whole number of minutes, between 5 and 600.');\n        item.durationMin = d;\n      }\n      if (kind === 'homework' && i.libraryItem) {\n        if (!library.some((l) => l.objectId === String(i.libraryItem))) return refuse(which + ': that homework is no longer in the library.');\n        item.libraryItem = String(i.libraryItem);\n      }\n      items.push(item);\n    }\n\n    const fields = { title, description, items };\n    if (existing) {\n      await R.save(existing.objectId, fields, { className: 'PlanTemplate' });\n      Outputs.id = existing.objectId;\n    } else {\n      const row = await R.create('PlanTemplate', Object.assign({ archived: false }, fields), { plain: true });\n      Outputs.id = row.objectId || row.id;\n    }\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:savePlanTemplate]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-id",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-description",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-items",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-why",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "tps_res",
+      "type": "noodl.cloud.response",
+      "label": "Saved",
+      "x": 40,
+      "y": 280,
+      "parameters": {
+        "params": "id"
+      }
+    },
+    {
+      "id": "tps_deny",
+      "type": "noodl.cloud.response",
+      "label": "A refusal the coach can act on",
+      "x": 40,
+      "y": 400,
+      "parameters": {
+        "status": "failure"
+      }
+    },
+    {
+      "id": "tps_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "x": 40,
+      "y": 520,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "The template could not be saved. Try again."
+      }
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "48f6b9a3-ee8f-5f00-8787-24ad0847cd54",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sq_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach snoozes, or has nudged",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "flagId,nudged",
+        "allowNoAuth": false,
+        "ptype-flagId": "string",
+        "preq-flagId": true,
+        "ptype-nudged": "boolean",
+        "preq-nudged": false
+      }
+    },
+    {
+      "id": "sq_fn",
+      "type": "JavaScriptFunction",
+      "label": "Snooze it a week",
+      "x": 40,
+      "y": 180,
+      "parameters": {
+        "runOnChange-in-flagId": false,
+        "runOnChange-in-nudged": false,
+        "functionScript": "/*\n * SNOOZE A \"GONE QUIET\" ITEM FOR A WEEK (DBU-08). role:staff is checked by nodegx.security.json.\n * Only an open flag. `nudged` records that the coach wrote to the learner (the inbox's nudge), which\n * also snoozes it: the list empties, and the item is back in a week if she is still quiet.\n * morningRound closes the flag earlier if she becomes active. Rings a staff-only bell, so every open\n * inbox and the Inbox tab re-read.\n */\n(async () => {\n  const refuse = (why) => { Outputs.why = why; Outputs.refuse(); };\n  try {\n    const SNOOZE_DAYS = 7;\n    const id = String(Inputs.flagId || '');\n    const found = id ? await Noodl.Records.query('QuietFlag', { objectId: { equalTo: id } }, { limit: 2, plain: true }) : [];\n    const flag = found[0];\n    if (!flag || flag.closedAt) return refuse('This item has already gone from the inbox. Reload the page.');\n    const now = new Date();\n    const until = new Date(now.getTime() + SNOOZE_DAYS * 86400000).toISOString();\n    const change = { snoozedUntil: until };\n    if (Inputs.nudged === true) change.nudgedAt = now.toISOString();\n    await Noodl.Records.save(flag.objectId, change, { className: 'QuietFlag' });\n    await Noodl.Records.create('Doorbell', { learner: flag.learner, topic: 'inbox' }, { acl: { 'role:staff': { read: true } } });\n    Outputs.snoozedUntil = until;\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:snoozeQuiet]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-flagId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "flagId",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-nudged",
+          "plug": "input",
+          "type": "*",
+          "displayName": "nudged",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-snoozedUntil",
+          "plug": "output",
+          "type": "*",
+          "displayName": "snoozedUntil",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "done",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-why",
+          "plug": "output",
+          "type": "*",
+          "displayName": "why",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "refuse",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "failed",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "sq_res",
+      "type": "noodl.cloud.response",
+      "label": "Snoozed",
+      "x": 40,
+      "y": 320,
+      "parameters": {
+        "params": "snoozedUntil"
+      }
+    },
+    {
+      "id": "sq_deny",
+      "type": "noodl.cloud.response",
+      "label": "A refusal the coach can act on",
+      "x": 320,
+      "y": 320,
+      "parameters": {
+        "status": "failure"
+      }
+    },
+    {
+      "id": "sq_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "x": 600,
+      "y": 320,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "This could not be snoozed. Try again in a moment."
+      }
+    }
+  ]
+}

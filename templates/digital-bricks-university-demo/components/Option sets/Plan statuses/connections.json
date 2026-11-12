@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "572cfe9e-2cff-536a-8131-028800b16348",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pst_data",
+      "fromProperty": "items",
+      "toId": "pst_out",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pst_data",
+      "fromProperty": "count",
+      "toId": "pst_out",
+      "toProperty": "count"
+    }
+  ]
+}

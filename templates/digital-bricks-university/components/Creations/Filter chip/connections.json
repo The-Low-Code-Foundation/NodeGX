@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ea070a19-b2b2-5605-894b-6a11a704dfac",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "fc_in",
+      "fromProperty": "labelKey",
+      "toId": "fc_t_label",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "fc_t_count",
+      "fromProperty": "Translation",
+      "toId": "fc_fill",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "fc_t_label",
+      "fromProperty": "Translation",
+      "toId": "fc_fill",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fc_in",
+      "fromProperty": "n",
+      "toId": "fc_fill",
+      "toProperty": "n"
+    },
+    {
+      "fromId": "fc_fill",
+      "fromProperty": "formatted",
+      "toId": "fc_btn",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fc_in",
+      "fromProperty": "selected",
+      "toId": "fc_bg",
+      "toProperty": "selected"
+    },
+    {
+      "fromId": "fc_in",
+      "fromProperty": "selected",
+      "toId": "fc_fg",
+      "toProperty": "selected"
+    },
+    {
+      "fromId": "fc_bg",
+      "fromProperty": "result",
+      "toId": "fc_btn",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "fc_fg",
+      "fromProperty": "result",
+      "toId": "fc_btn",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "fc_in",
+      "fromProperty": "kind",
+      "toId": "fc_testid",
+      "toProperty": "kind"
+    },
+    {
+      "fromId": "fc_testid",
+      "fromProperty": "formatted",
+      "toId": "fc_btn",
+      "toProperty": "data-testid"
+    },
+    {
+      "fromId": "fc_btn",
+      "fromProperty": "onClick",
+      "toId": "fc_out",
+      "toProperty": "pick"
+    }
+  ]
+}

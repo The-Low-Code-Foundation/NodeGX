@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "75918281-b87c-51d5-8e91-9778f67d4b06",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ar_req",
+      "fromProperty": "pm-id",
+      "toId": "ar_fn",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "ar_req",
+      "fromProperty": "pm-archived",
+      "toId": "ar_fn",
+      "toProperty": "in-archived"
+    },
+    {
+      "fromId": "ar_req",
+      "fromProperty": "receive",
+      "toId": "ar_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ar_fn",
+      "fromProperty": "out-archived",
+      "toId": "ar_res",
+      "toProperty": "pm-archived"
+    },
+    {
+      "fromId": "ar_fn",
+      "fromProperty": "out-done",
+      "toId": "ar_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ar_fn",
+      "fromProperty": "out-refuse",
+      "toId": "ar_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ar_fn",
+      "fromProperty": "out-failed",
+      "toId": "ar_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ar_fn",
+      "fromProperty": "failure",
+      "toId": "ar_fail",
+      "toProperty": "send"
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f1009616-a916-59c0-8c97-db3e0fc616ba",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ll_t_search",
+      "fromProperty": "Translation",
+      "toId": "ll_search",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "ll_t_arch",
+      "fromProperty": "Translation",
+      "toId": "ll_arch",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ll_in",
+      "fromProperty": "items",
+      "toId": "ll_shape",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "ll_search",
+      "fromProperty": "onTextChanged",
+      "toId": "ll_shape",
+      "toProperty": "in-query"
+    },
+    {
+      "fromId": "ll_arch",
+      "fromProperty": "checked",
+      "toId": "ll_shape",
+      "toProperty": "in-showArchived"
+    },
+    {
+      "fromId": "ll_t_min",
+      "fromProperty": "Translation",
+      "toId": "ll_shape",
+      "toProperty": "in-minutes"
+    },
+    {
+      "fromId": "ll_t_hours",
+      "fromProperty": "Translation",
+      "toId": "ll_shape",
+      "toProperty": "in-hours"
+    },
+    {
+      "fromId": "ll_t_hm",
+      "fromProperty": "Translation",
+      "toId": "ll_shape",
+      "toProperty": "in-hoursMinutes"
+    },
+    {
+      "fromId": "ll_t_notime",
+      "fromProperty": "Translation",
+      "toId": "ll_shape",
+      "toProperty": "in-noTime"
+    },
+    {
+      "fromId": "ll_t_summary",
+      "fromProperty": "Translation",
+      "toId": "ll_shape",
+      "toProperty": "in-summary"
+    },
+    {
+      "fromId": "ll_shape",
+      "fromProperty": "out-rows",
+      "toId": "ll_rows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "ll_shape",
+      "fromProperty": "out-hasRows",
+      "toId": "ll_list",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ll_shape",
+      "fromProperty": "out-empty",
+      "toId": "ll_none",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ll_shape",
+      "fromProperty": "out-noMatch",
+      "toId": "ll_nomatch",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ll_rows",
+      "fromProperty": "itemOutputSignal-edit",
+      "toId": "ll_out",
+      "toProperty": "edit"
+    },
+    {
+      "fromId": "ll_rows",
+      "fromProperty": "itemOutputSignal-duplicate",
+      "toId": "ll_out",
+      "toProperty": "duplicate"
+    },
+    {
+      "fromId": "ll_rows",
+      "fromProperty": "itemOutputSignal-archive",
+      "toId": "ll_out",
+      "toProperty": "archive"
+    },
+    {
+      "fromId": "ll_rows",
+      "fromProperty": "itemActionItemId",
+      "toId": "ll_out",
+      "toProperty": "itemId"
+    }
+  ]
+}

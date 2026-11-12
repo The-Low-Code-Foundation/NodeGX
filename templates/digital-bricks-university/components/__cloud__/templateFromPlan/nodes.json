@@ -1,0 +1,116 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "ab09038b-746b-58a6-8fb3-eba830a9abbe",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "tfp_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach saves a plan as a template",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "planId,title,description",
+        "allowNoAuth": false,
+        "ptype-planId": "string",
+        "preq-planId": true,
+        "ptype-title": "string",
+        "preq-title": true
+      },
+      "metadata": {
+        "comment": "role:staff in nodegx.security.json."
+      }
+    },
+    {
+      "id": "tfp_fn",
+      "type": "JavaScriptFunction",
+      "label": "The plan's shape, as a new template",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "runOnChange-in-planId": false,
+        "runOnChange-in-title": false,
+        "runOnChange-in-description": false,
+        "functionScript": "/*\n * Only the SHAPE leaves the plan: kind, title, duration (live), library item (homework,\n * if it still exists) and a day offset. A step's day is its session time, due date or send\n * date in the coach's zone (Europe/Paris), counted from the plan's start; a step with no\n * date takes the day of the step before it. Briefs, summaries, links, hand-ins and dates\n * stay with the learner.\n */\n(async () => {\n  const refuse = (why) => { Outputs.why = why; Outputs.refuse(); };\n  try {\n    const R = Noodl.Records;\n    const q = (c, where) => R.query(c, where, { limit: 1000, plain: true });\n    const planId = String(Inputs.planId || '');\n    const plans = planId ? await q('Plan', { objectId: { equalTo: planId } }) : [];\n    if (plans.length !== 1) return refuse('That plan is no longer there. Reload the page.');\n    const title = String(Inputs.title || '').trim().replace(/\\s+/g, ' ');\n    if (!title) return refuse('Give the template a title.');\n    if (title.length > 140) return refuse('Keep the title under 140 characters.');\n    const description = String(Inputs.description || '').trim();\n    if (description.length > 2000) return refuse('Keep the description under 2,000 characters.');\n    const steps = (await q('Step', { plan: { equalTo: planId } })).sort((a, b) => a.position - b.position);\n    if (!steps.length) return refuse('This plan has no steps yet, so there is nothing to save.');\n\n    const parisDay = (iso) => new Date(iso).toLocaleDateString('en-CA', { timeZone: 'Europe/Paris' });\n    const dayNumber = (ymd) => { const [y, m, d] = ymd.split('-').map(Number); return Date.UTC(y, m - 1, d) / 86400000; };\n    const dated = steps.map((s) => s.startsAt || s.dueAt || s.sendsAt).filter(Boolean).map(parisDay).sort();\n    const start = plans[0].startedOn || dated[0];\n    const libIds = steps.map((s) => s.fromLibraryItem).filter(Boolean);\n    const library = libIds.length ? await q('LibraryItem', { objectId: { containedIn: libIds } }) : [];\n\n    let previous = 0;\n    const items = steps.map((s) => {\n      const when = s.startsAt || s.dueAt || s.sendsAt;\n      const day = when && start ? Math.max(0, dayNumber(parisDay(when)) - dayNumber(start)) : previous;\n      previous = day;\n      const item = { kind: s.kind, title: s.title || '', dayOffset: day };\n      if (s.kind === 'live') item.durationMin = Number.isInteger(s.durationMin) ? s.durationMin : 60;\n      if (s.kind === 'homework' && library.some((l) => l.objectId === s.fromLibraryItem)) item.libraryItem = s.fromLibraryItem;\n      return item;\n    });\n    const row = await R.create('PlanTemplate', { title, description, items, archived: false }, { plain: true });\n    Outputs.id = row.objectId || row.id;\n    Outputs.count = items.length;\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:templateFromPlan]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-planId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-description",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-count",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "out-why",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "tfp_res",
+      "type": "noodl.cloud.response",
+      "label": "The new template",
+      "x": 40,
+      "y": 280,
+      "parameters": {
+        "params": "id,count"
+      }
+    },
+    {
+      "id": "tfp_deny",
+      "type": "noodl.cloud.response",
+      "label": "A refusal the coach can act on",
+      "x": 40,
+      "y": 400,
+      "parameters": {
+        "status": "failure"
+      }
+    },
+    {
+      "id": "tfp_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "x": 40,
+      "y": 520,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "The template could not be saved. Try again."
+      }
+    }
+  ]
+}

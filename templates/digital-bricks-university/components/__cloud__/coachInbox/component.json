@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "14abae7d-efb1-5cf4-8530-0b0bcdada0b0",
+  "name": "coachInbox",
+  "path": "/#__cloud__/coachInbox",
+  "type": "cloud",
+  "created": "2026-11-12T13:05:48.649Z",
+  "modified": "2026-11-12T13:05:48.649Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach's inbox (DBU-08): everything waiting on him across all learners, oldest first, through shared/Inbox items. With countOnly, just the count (the Inbox tab)."
+}

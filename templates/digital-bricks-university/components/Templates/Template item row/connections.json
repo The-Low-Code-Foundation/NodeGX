@@ -1,0 +1,199 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7265982f-c68e-59bc-82e9-2d28a6340c47",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tir_in",
+      "fromProperty": "kindKey",
+      "toId": "tir_kind",
+      "toProperty": "labelKey"
+    },
+    {
+      "fromId": "tir_in",
+      "fromProperty": "kindBg",
+      "toId": "tir_kind",
+      "toProperty": "bg"
+    },
+    {
+      "fromId": "tir_in",
+      "fromProperty": "kindFg",
+      "toId": "tir_kind",
+      "toProperty": "fg"
+    },
+    {
+      "fromId": "tir_in",
+      "fromProperty": "isLive",
+      "toId": "tir_dur_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tir_in",
+      "fromProperty": "isHomework",
+      "toId": "tir_lib_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tir_in",
+      "fromProperty": "title",
+      "toId": "tir_title",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "tir_in",
+      "fromProperty": "dayOffset",
+      "toId": "tir_day",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "tir_in",
+      "fromProperty": "durationMin",
+      "toId": "tir_dur",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "tir_in",
+      "fromProperty": "libraryOptions",
+      "toId": "tir_lib",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "tir_in",
+      "fromProperty": "libraryItem",
+      "toId": "tir_lib",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tir_t_title",
+      "fromProperty": "Translation",
+      "toId": "tir_title",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "tir_t_day",
+      "fromProperty": "Translation",
+      "toId": "tir_day",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tir_t_dur",
+      "fromProperty": "Translation",
+      "toId": "tir_dur",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tir_t_lib",
+      "fromProperty": "Translation",
+      "toId": "tir_lib",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tir_t_up",
+      "fromProperty": "Translation",
+      "toId": "tir_up",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tir_t_down",
+      "fromProperty": "Translation",
+      "toId": "tir_down",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tir_t_remove",
+      "fromProperty": "Translation",
+      "toId": "tir_remove",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tir_item",
+      "fromProperty": "itemId",
+      "toId": "tir_set_title",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "tir_item",
+      "fromProperty": "itemId",
+      "toId": "tir_set_day",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "tir_item",
+      "fromProperty": "itemId",
+      "toId": "tir_set_dur",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "tir_item",
+      "fromProperty": "itemId",
+      "toId": "tir_set_lib",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "tir_title",
+      "fromProperty": "onTextChanged",
+      "toId": "tir_set_title",
+      "toProperty": "prop-title"
+    },
+    {
+      "fromId": "tir_title",
+      "fromProperty": "textChanged",
+      "toId": "tir_set_title",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "tir_day",
+      "fromProperty": "onTextChanged",
+      "toId": "tir_set_day",
+      "toProperty": "prop-dayOffset"
+    },
+    {
+      "fromId": "tir_day",
+      "fromProperty": "textChanged",
+      "toId": "tir_set_day",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "tir_dur",
+      "fromProperty": "onTextChanged",
+      "toId": "tir_set_dur",
+      "toProperty": "prop-durationMin"
+    },
+    {
+      "fromId": "tir_dur",
+      "fromProperty": "textChanged",
+      "toId": "tir_set_dur",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "tir_lib",
+      "fromProperty": "value",
+      "toId": "tir_set_lib",
+      "toProperty": "prop-libraryItem"
+    },
+    {
+      "fromId": "tir_lib",
+      "fromProperty": "onChange",
+      "toId": "tir_set_lib",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "tir_up",
+      "fromProperty": "onClick",
+      "toId": "tir_out",
+      "toProperty": "up"
+    },
+    {
+      "fromId": "tir_down",
+      "fromProperty": "onClick",
+      "toId": "tir_out",
+      "toProperty": "down"
+    },
+    {
+      "fromId": "tir_remove",
+      "fromProperty": "onClick",
+      "toId": "tir_out",
+      "toProperty": "remove"
+    }
+  ]
+}

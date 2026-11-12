@@ -1,0 +1,704 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "0b2273fc-163d-5042-8dac-7ee74cb469b4",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sr_row",
+      "type": "Group",
+      "label": "Step",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "sr_top",
+        "sr_actions_box",
+        "sr_work_box",
+        "sr_ans_box",
+        "sr_editor_box"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-4)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "backgroundColor": "var(--surface)",
+        "dragKind": "plan-step",
+        "draggable": true,
+        "dataAttributes": "data-testid"
+      },
+      "metadata": {
+        "comment": "The whole row is what is picked up (Groups have no drag handle); the grip says so. Dragging is off while the row's editor is open, so selecting text in a field never starts a drag. Every row is white: a draft is marked by its dashed edge and its Draft chip (rowBg tints the chip)."
+      }
+    },
+    {
+      "id": "sr_top",
+      "type": "Group",
+      "label": "Grip and words",
+      "x": 100,
+      "y": 160,
+      "parent": "sr_row",
+      "children": [
+        "sr_grip_box",
+        "sr_text"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "columnGap": "var(--space-2)"
+      },
+      "metadata": {
+        "comment": "Not wrapped, so the words column shrinks to what the grip leaves on a phone instead of dropping below it."
+      }
+    },
+    {
+      "id": "sr_grip_box",
+      "type": "Group",
+      "label": "Grip, when it can be moved",
+      "x": 160,
+      "y": 280,
+      "parent": "sr_top",
+      "children": [
+        "sr_grip"
+      ],
+      "parameters": {
+        "mounted": false,
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "paddingTop": "var(--space-0-5)"
+      }
+    },
+    {
+      "id": "sr_grip",
+      "type": "net.noodl.visual.icon",
+      "label": "Grip",
+      "x": 220,
+      "y": 400,
+      "parent": "sr_grip_box",
+      "parameters": {
+        "iconSize": 18,
+        "iconColor": "var(--subtle-foreground)",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-grip-vertical",
+          "codeAsClass": true
+        }
+      }
+    },
+    {
+      "id": "sr_text",
+      "type": "Group",
+      "label": "Chips, title and detail",
+      "x": 160,
+      "y": 520,
+      "parent": "sr_top",
+      "children": [
+        "sr_chips",
+        "sr_title",
+        "sr_detail"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)"
+      }
+    },
+    {
+      "id": "sr_chips",
+      "type": "Group",
+      "label": "Kind, status, draft or shared",
+      "x": 220,
+      "y": 640,
+      "parent": "sr_text",
+      "children": [
+        "sr_kind",
+        "sr_status",
+        "sr_shared"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-1)"
+      }
+    },
+    {
+      "id": "sr_kind",
+      "type": "/Plan/Chip",
+      "label": "Kind",
+      "x": 280,
+      "y": 760,
+      "parent": "sr_chips"
+    },
+    {
+      "id": "sr_status",
+      "type": "/Plan/Chip",
+      "label": "Status",
+      "x": 280,
+      "y": 880,
+      "parent": "sr_chips"
+    },
+    {
+      "id": "sr_shared",
+      "type": "/Plan/Chip",
+      "label": "Draft or Shared",
+      "x": 280,
+      "y": 1000,
+      "parent": "sr_chips"
+    },
+    {
+      "id": "sr_title",
+      "type": "Text",
+      "label": "Title",
+      "x": 220,
+      "y": 1120,
+      "parent": "sr_text",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-medium)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "sr_detail",
+      "type": "Text",
+      "label": "Detail",
+      "x": 220,
+      "y": 1240,
+      "parent": "sr_text",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "sr_actions_box",
+      "type": "Group",
+      "label": "Actions, unless read-only",
+      "x": 100,
+      "y": 1360,
+      "parent": "sr_row",
+      "children": [
+        "sr_actions"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "paddingLeft": "var(--space-6)"
+      }
+    },
+    {
+      "id": "sr_actions",
+      "type": "/Plan/Step actions",
+      "label": "Actions",
+      "x": 160,
+      "y": 1480,
+      "parent": "sr_actions_box"
+    },
+    {
+      "id": "sr_editor_box",
+      "type": "Group",
+      "label": "The editor, while open",
+      "x": 100,
+      "y": 1600,
+      "parent": "sr_row",
+      "children": [
+        "sr_live_box",
+        "sr_hw_box",
+        "sr_ci_box"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "paddingTop": "var(--space-4)",
+        "paddingLeft": "var(--space-6)",
+        "borderTopStyle": "solid",
+        "borderTopWidth": "var(--border-1)",
+        "borderTopColor": "var(--border)"
+      }
+    },
+    {
+      "id": "sr_live_box",
+      "type": "Group",
+      "label": "A live session",
+      "x": 160,
+      "y": 1720,
+      "parent": "sr_editor_box",
+      "children": [
+        "sr_live"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "sr_live",
+      "type": "/Plan/Live editor",
+      "label": "Live session editor",
+      "x": 220,
+      "y": 1840,
+      "parent": "sr_live_box"
+    },
+    {
+      "id": "sr_hw_box",
+      "type": "Group",
+      "label": "A homework",
+      "x": 160,
+      "y": 1960,
+      "parent": "sr_editor_box",
+      "children": [
+        "sr_hw"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "sr_hw",
+      "type": "/Plan/Homework step editor",
+      "label": "Homework editor",
+      "x": 220,
+      "y": 2080,
+      "parent": "sr_hw_box"
+    },
+    {
+      "id": "sr_ci_box",
+      "type": "Group",
+      "label": "A check-in",
+      "x": 160,
+      "y": 2200,
+      "parent": "sr_editor_box",
+      "children": [
+        "sr_ci"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "sr_ci",
+      "type": "/Plan/Check-in editor",
+      "label": "Check-in editor",
+      "x": 220,
+      "y": 2320,
+      "parent": "sr_ci_box"
+    },
+    {
+      "id": "sr_in",
+      "type": "Component Inputs",
+      "label": "The row",
+      "x": 560,
+      "y": 40,
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "kindKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "kindBg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "kindFg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "statusKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "statusBg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "statusFg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "sharedKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "shared",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "draft",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "detail",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rowBg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "rowBorder",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "movable",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "editable",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "open",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "isLive",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "isHomework",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "isCheckin",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "step",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "hasTime",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "startsAt",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "durationMin",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "meetingLink",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "calDetails",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "attendeeName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "attendeeEmail",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "handIns",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hasHandIns",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "anchors",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hasAnswers",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "answerQuestions",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "answerValues",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "metadata": {
+        "comment": "Every value is worked out by the page ('Plan rows, in words'); the row only draws and reports."
+      }
+    },
+    {
+      "id": "sr_out",
+      "type": "Component Outputs",
+      "label": "What happened to it",
+      "x": 560,
+      "y": 1480,
+      "ports": [
+        {
+          "name": "edit",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "share",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "remove",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "saved",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "savedTitle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "closed",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "reviewed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "sr_testid",
+      "type": "String Format",
+      "label": "step-{id}, for tests",
+      "x": 560,
+      "y": 1600,
+      "parameters": {
+        "format": "step-{id}"
+      }
+    },
+    {
+      "id": "sr_work_box",
+      "type": "Group",
+      "label": "Hand-ins, when there are any",
+      "parent": "sr_row",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "paddingTop": "var(--space-3)",
+        "paddingLeft": "var(--space-6)",
+        "borderTopStyle": "solid",
+        "borderTopWidth": "var(--border-1)",
+        "borderTopColor": "var(--border)"
+      },
+      "metadata": {
+        "comment": "Every version, newest first (DBU-06); the newest one waiting gets Approve and Ask for changes, unless the list is read-only (See as the learner)."
+      },
+      "children": [
+        "sr_versions"
+      ],
+      "x": 100,
+      "y": 1720
+    },
+    {
+      "id": "sr_versions",
+      "type": "/Work/Versions",
+      "label": "Hand-ins, newest first",
+      "parent": "sr_work_box",
+      "parameters": {
+        "mode": "coach",
+        "timezone": "Europe/Paris",
+        "headKey": "work.handIns"
+      },
+      "x": 160,
+      "y": 1840
+    },
+    {
+      "id": "sr_ans_box",
+      "type": "Group",
+      "label": "A check-in's answers, once answered",
+      "parent": "sr_row",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-3)",
+        "paddingLeft": "var(--space-6)",
+        "borderTopStyle": "solid",
+        "borderTopWidth": "var(--border-1)",
+        "borderTopColor": "var(--border)",
+        "dataAttributes": "data-testid"
+      },
+      "children": [
+        "sr_ans_h",
+        "sr_answers"
+      ],
+      "x": 100,
+      "y": 1960
+    },
+    {
+      "id": "sr_ans_h",
+      "type": "Text",
+      "label": "Answers",
+      "parent": "sr_ans_box",
+      "parameters": {
+        "text": "",
+        "as": "h3",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 2080
+    },
+    {
+      "id": "sr_answers",
+      "type": "/Checkin/Answers",
+      "label": "What they answered",
+      "parent": "sr_ans_box",
+      "x": 160,
+      "y": 2320
+    },
+    {
+      "id": "sr_t_ans",
+      "type": "Translation",
+      "label": "Answers",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.answersHead"
+      },
+      "x": 530,
+      "y": 2080
+    },
+    {
+      "id": "sr_ans_testid",
+      "type": "String Format",
+      "label": "plan-answers-{id}, for tests",
+      "parameters": {
+        "format": "plan-answers-{id}"
+      },
+      "x": 530,
+      "y": 1960
+    }
+  ],
+  "visualRoots": [
+    "sr_row"
+  ]
+}

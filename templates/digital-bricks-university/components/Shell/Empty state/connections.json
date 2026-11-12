@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ac5b7167-ff7b-5d40-8aca-c0f70f68a939",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "es_inputs",
+      "fromProperty": "icon",
+      "toId": "es_icon",
+      "toProperty": "iconIconSource"
+    },
+    {
+      "fromId": "es_inputs",
+      "fromProperty": "titleKey",
+      "toId": "es_t_title",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "es_t_title",
+      "fromProperty": "Translation",
+      "toId": "es_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "es_inputs",
+      "fromProperty": "bodyKey",
+      "toId": "es_t_body",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "es_t_body",
+      "fromProperty": "Translation",
+      "toId": "es_body",
+      "toProperty": "text"
+    }
+  ]
+}

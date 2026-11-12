@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e601787d-3e7c-562c-8524-2a7fc9650239",
+  "name": "Plan settings",
+  "path": "/Plan/Plan settings",
+  "type": "visual",
+  "created": "2026-11-09T10:47:25.272Z",
+  "modified": "2026-11-09T10:47:25.272Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A plan's settings: its title, the meeting link every live session uses unless it has its own, the booking link, and whether it is active, paused or finished. Saves through savePlan."
+}

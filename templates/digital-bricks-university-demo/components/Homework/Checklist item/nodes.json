@@ -1,0 +1,130 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "9cfc8dab-be55-5526-8442-282237b74d61",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ci_root",
+      "type": "Group",
+      "label": "Hand-in item",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "columnGap": "var(--space-2)"
+      },
+      "children": [
+        "ci_icon",
+        "ci_words"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ci_icon",
+      "type": "net.noodl.visual.icon",
+      "label": "Tick box",
+      "parent": "ci_root",
+      "parameters": {
+        "iconSize": 16,
+        "iconColor": "var(--muted-foreground)",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-square-check",
+          "codeAsClass": true
+        },
+        "marginTop": "var(--space-0-5)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ci_words",
+      "type": "Group",
+      "label": "Words",
+      "parent": "ci_root",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-1-5)"
+      },
+      "children": [
+        "ci_text",
+        "ci_optional"
+      ],
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "ci_text",
+      "type": "Text",
+      "label": "The item",
+      "parent": "ci_words",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "ci_optional",
+      "type": "Text",
+      "label": "(optional)",
+      "parent": "ci_words",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "ci_in",
+      "type": "Component Inputs",
+      "label": "The item",
+      "ports": [
+        {
+          "name": "text",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "optional",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "ci_t_optional",
+      "type": "Translation",
+      "label": "(optional)",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "homework.optional"
+      },
+      "x": 410,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "ci_root"
+  ]
+}

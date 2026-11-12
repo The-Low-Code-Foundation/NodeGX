@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "eec6024a-c3fa-59f0-84f8-5329c05c3bec",
+  "name": "Version file",
+  "path": "/Work/Version file",
+  "type": "visual",
+  "created": "2026-11-12T08:52:55.141Z",
+  "modified": "2026-11-12T08:52:55.141Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One file of a handed-in version: its name, and the file shown in place or downloaded (Work/File viewer). Work/Version row draws one per file; a version carries 1 to 5."
+}

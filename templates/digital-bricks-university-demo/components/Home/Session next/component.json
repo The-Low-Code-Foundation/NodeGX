@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d7496402-417b-51f7-8624-b9028ea99d7b",
+  "name": "Session next",
+  "path": "/Home/Session next",
+  "type": "visual",
+  "created": "2026-11-09T12:36:37.224Z",
+  "modified": "2026-11-09T12:36:37.224Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The live-session half of Up next: which session, its date and times in the learner's zone, title, the prep note, Join call (opens the meeting in a new tab) and the calendar links (.ics and Google Calendar). With nothing booked, a quiet card says so and offers the plan's booking link when there is one."
+}

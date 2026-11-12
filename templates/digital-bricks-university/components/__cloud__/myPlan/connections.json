@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "9120a10d-5903-50a7-83ab-6d24c1142b85",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mp_req",
+      "fromProperty": "userId",
+      "toId": "mp_fn",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "mp_req",
+      "fromProperty": "receive",
+      "toId": "mp_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mp_fn",
+      "fromProperty": "out-plan",
+      "toId": "mp_res",
+      "toProperty": "pm-plan"
+    },
+    {
+      "fromId": "mp_fn",
+      "fromProperty": "out-steps",
+      "toId": "mp_res",
+      "toProperty": "pm-steps"
+    },
+    {
+      "fromId": "mp_fn",
+      "fromProperty": "out-submissions",
+      "toId": "mp_res",
+      "toProperty": "pm-submissions"
+    },
+    {
+      "fromId": "mp_fn",
+      "fromProperty": "out-done",
+      "toId": "mp_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mp_fn",
+      "fromProperty": "out-failed",
+      "toId": "mp_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mp_fn",
+      "fromProperty": "failure",
+      "toId": "mp_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mp_fn",
+      "fromProperty": "out-me",
+      "toId": "mp_res",
+      "toProperty": "pm-me"
+    }
+  ]
+}

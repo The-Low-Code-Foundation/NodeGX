@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "931de828-dc53-56d3-8c9d-d47624b6be58",
+  "name": "Not found",
+  "path": "/Pages/Not found",
+  "type": "page",
+  "created": "2026-11-07T21:35:06.109Z",
+  "modified": "2026-11-07T21:35:06.109Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "What anyone sees at an address that is not a page they can open, including a learner at a coach's URL: no error, no hint of what is there."
+}

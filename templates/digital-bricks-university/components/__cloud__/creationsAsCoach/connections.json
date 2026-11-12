@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "11b3cbe1-a846-5d7e-8857-b44d105fcacf",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cac_req",
+      "fromProperty": "pm-learnerId",
+      "toId": "cac_read",
+      "toProperty": "learner"
+    },
+    {
+      "fromId": "cac_read",
+      "fromProperty": "items",
+      "toId": "cac_res",
+      "toProperty": "pm-items"
+    },
+    {
+      "fromId": "cac_read",
+      "fromProperty": "done",
+      "toId": "cac_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "cac_read",
+      "fromProperty": "failed",
+      "toId": "cac_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "cac_read",
+      "fromProperty": "estimate",
+      "toId": "cac_res",
+      "toProperty": "pm-estimate"
+    }
+  ]
+}

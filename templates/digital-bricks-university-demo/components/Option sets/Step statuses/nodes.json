@@ -1,0 +1,40 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "a4131a4e-9f0f-5288-8bcf-d23075ed34a4",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ss2_data",
+      "type": "Static Data",
+      "label": "Step statuses",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "type": "json",
+        "json": "[{\"id\":\"status-live-to_book\",\"value\":\"to_book\",\"kind\":\"live\",\"labelKey\":\"plan.statusToBook\",\"bg\":\"var(--muted)\",\"fg\":\"var(--muted-foreground)\"},{\"id\":\"status-live-booked\",\"value\":\"booked\",\"kind\":\"live\",\"labelKey\":\"plan.statusBooked\",\"bg\":\"var(--live-bg)\",\"fg\":\"var(--live-fg)\"},{\"id\":\"status-live-done\",\"value\":\"done\",\"kind\":\"live\",\"labelKey\":\"plan.statusDone\",\"bg\":\"var(--done-bg)\",\"fg\":\"var(--done-fg)\"},{\"id\":\"status-live-missed\",\"value\":\"missed\",\"kind\":\"live\",\"labelKey\":\"plan.statusMissed\",\"bg\":\"var(--muted)\",\"fg\":\"var(--muted-foreground)\"},{\"id\":\"status-homework-not_started\",\"value\":\"not_started\",\"kind\":\"homework\",\"labelKey\":\"plan.statusNotStarted\",\"bg\":\"var(--muted)\",\"fg\":\"var(--muted-foreground)\"},{\"id\":\"status-homework-handed_in\",\"value\":\"handed_in\",\"kind\":\"homework\",\"labelKey\":\"plan.statusHandedIn\",\"bg\":\"var(--waiting-bg)\",\"fg\":\"var(--waiting-fg)\"},{\"id\":\"status-homework-changes_asked\",\"value\":\"changes_asked\",\"kind\":\"homework\",\"labelKey\":\"plan.statusChangesAsked\",\"bg\":\"var(--homework-bg)\",\"fg\":\"var(--homework-fg)\"},{\"id\":\"status-homework-approved\",\"value\":\"approved\",\"kind\":\"homework\",\"labelKey\":\"plan.statusApproved\",\"bg\":\"var(--done-bg)\",\"fg\":\"var(--done-fg)\"},{\"id\":\"status-checkin-scheduled\",\"value\":\"scheduled\",\"kind\":\"checkin\",\"labelKey\":\"plan.statusScheduled\",\"bg\":\"var(--muted)\",\"fg\":\"var(--muted-foreground)\"},{\"id\":\"status-checkin-sent\",\"value\":\"sent\",\"kind\":\"checkin\",\"labelKey\":\"plan.statusSent\",\"bg\":\"var(--live-bg)\",\"fg\":\"var(--live-fg)\"},{\"id\":\"status-checkin-done\",\"value\":\"done\",\"kind\":\"checkin\",\"labelKey\":\"plan.statusDone\",\"bg\":\"var(--done-bg)\",\"fg\":\"var(--done-fg)\"}]"
+      },
+      "metadata": {
+        "comment": "Ids carry the kind (status-live-done) because 'done' is a status of both live sessions and check-ins, and a Static Data id names one Model for the whole app."
+      }
+    },
+    {
+      "id": "ss2_out",
+      "type": "Component Outputs",
+      "label": "Statuses out",
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "items",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        }
+      ]
+    }
+  ]
+}

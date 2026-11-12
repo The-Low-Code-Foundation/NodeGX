@@ -1,0 +1,222 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "0d86937c-75d9-5b3b-88e9-2ca65c7a0d3f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ce_root",
+      "type": "Group",
+      "label": "What to hand in",
+      "children": [
+        "ce_head",
+        "ce_hint",
+        "ce_list",
+        "ce_add"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ce_head",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "ce_root",
+      "parameters": {
+        "text": "",
+        "as": "h3",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ce_hint",
+      "type": "Text",
+      "label": "Hint",
+      "parent": "ce_root",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "ce_list",
+      "type": "Group",
+      "label": "The items",
+      "parent": "ce_root",
+      "children": [
+        "ce_rows"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "ce_rows",
+      "type": "For Each",
+      "label": "One row per item",
+      "parent": "ce_list",
+      "parameters": {
+        "template": "/Library/Checklist row"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "ce_add",
+      "type": "net.noodl.controls.button",
+      "label": "Add an item",
+      "parent": "ce_root",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-plus",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)",
+        "iconColor": "var(--foreground)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-9)"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "ce_in",
+      "type": "Component Inputs",
+      "label": "Checklist editor in",
+      "ports": [
+        {
+          "name": "listId",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 1000
+    },
+    {
+      "id": "ce_arr",
+      "type": "Collection2",
+      "label": "The items being edited",
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "ce_add_fn",
+      "type": "JavaScriptFunction",
+      "label": "Add an empty, required item",
+      "parameters": {
+        "functionScript": "const id = String(Inputs.listId || '');\nif (!id) return;\nconst list = Noodl.Arrays[id] || [];\nNoodl.Arrays[id] = list.concat([{ id: 'chk-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7), text: '', required: true }]);",
+        "runOnChange-in-listId": false
+      },
+      "ports": [
+        {
+          "name": "in-listId",
+          "plug": "input",
+          "type": "*"
+        }
+      ],
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "ce_remove_fn",
+      "type": "JavaScriptFunction",
+      "label": "Remove the row that asked",
+      "parameters": {
+        "functionScript": "const id = String(Inputs.listId || '');\nconst gone = String(Inputs.itemId || '');\nif (!id || !gone) return;\nNoodl.Arrays[id] = (Noodl.Arrays[id] || []).filter((m) => m.getId() !== gone);",
+        "runOnChange-in-listId": false,
+        "runOnChange-in-itemId": false
+      },
+      "ports": [
+        {
+          "name": "in-listId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-itemId",
+          "plug": "input",
+          "type": "*"
+        }
+      ],
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "ce_t_head",
+      "type": "Translation",
+      "label": "What to hand in",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.checklist"
+      },
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "ce_t_hint",
+      "type": "Translation",
+      "label": "Hint",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.checklistHint"
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "ce_t_add",
+      "type": "Translation",
+      "label": "Add an item",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.addItem"
+      },
+      "x": 410,
+      "y": 880
+    }
+  ],
+  "visualRoots": [
+    "ce_root"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "6b3b40b4-c08a-5620-86ec-8ec08d4fb2b3",
+  "name": "Ask Richard",
+  "path": "/Home/Ask Richard",
+  "type": "visual",
+  "created": "2026-11-12T10:21:56.561Z",
+  "modified": "2026-11-12T10:21:56.561Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Stuck between sessions? Ask Richard, on the learner's Home (DBU-07): a general message (no homework) through the same composer as Messages, files included."
+}

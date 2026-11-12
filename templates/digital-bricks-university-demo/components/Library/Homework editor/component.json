@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2f6524c0-2798-543d-84e3-53c64dff6066",
+  "name": "Homework editor",
+  "path": "/Library/Homework editor",
+  "type": "visual",
+  "created": "2026-11-07T22:11:58.304Z",
+  "modified": "2026-11-07T22:11:58.304Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Create or edit one library item: title, time, tags, the brief with its preview, the hand-in list and the resources. Saves through saveLibraryItem and says in a sentence why a save was refused; tells the page when it saved or closed."
+}

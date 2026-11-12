@@ -1,0 +1,72 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2ea952a5-42f1-5615-8dcd-eb939366848d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cn_req",
+      "type": "noodl.cloud.request",
+      "label": "Any page loads",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "",
+        "allowNoAuth": true
+      }
+    },
+    {
+      "id": "cn_fn",
+      "type": "JavaScriptFunction",
+      "label": "Read the name",
+      "x": 40,
+      "y": 180,
+      "parameters": {
+        "functionScript": "// The name learners see (Setting coachName), trimmed and at most 60 characters; '' when none is set,\n// and the words then say \"your coach\". Public: the name only, never an address or anything else.\n(async () => {\n  try {\n    const rows = await Noodl.Records.query('Setting', { key: { equalTo: 'coachName' } }, { limit: 2, plain: true });\n    Outputs.name = rows[0] ? String(rows[0].value || '').replace(/\\s+/g, ' ').trim().slice(0, 60) : '';\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:coachName]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "done",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "failed",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-name",
+          "plug": "output",
+          "type": "*",
+          "displayName": "name",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "cn_res",
+      "type": "noodl.cloud.response",
+      "label": "The name",
+      "x": 40,
+      "y": 320,
+      "parameters": {
+        "params": "name"
+      }
+    },
+    {
+      "id": "cn_fail",
+      "type": "noodl.cloud.response",
+      "label": "Could not read",
+      "x": 320,
+      "y": 320,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "The coach's name could not be read."
+      }
+    }
+  ]
+}

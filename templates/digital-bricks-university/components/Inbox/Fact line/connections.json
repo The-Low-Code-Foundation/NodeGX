@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2683a27c-8c08-5fb0-80d8-29e554a5d1e5",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "fl_in",
+      "fromProperty": "key",
+      "toId": "fl_t",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "fl_t",
+      "fromProperty": "Translation",
+      "toId": "fl_fill",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "fl_in",
+      "fromProperty": "title",
+      "toId": "fl_fill",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "fl_in",
+      "fromProperty": "date",
+      "toId": "fl_fill",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "fl_in",
+      "fromProperty": "days",
+      "toId": "fl_fill",
+      "toProperty": "days"
+    },
+    {
+      "fromId": "fl_in",
+      "fromProperty": "first",
+      "toId": "fl_fill",
+      "toProperty": "first"
+    },
+    {
+      "fromId": "fl_fill",
+      "fromProperty": "formatted",
+      "toId": "fl_text",
+      "toProperty": "text"
+    }
+  ]
+}

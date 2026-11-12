@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4b916c63-0daa-5950-872f-c26c3c3e38ad",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "fff776b7-5899-43e9-85b4-49747de82807",
+      "fromProperty": "currentPageComponent",
+      "toId": "app_gate",
+      "toProperty": "in-page"
+    },
+    {
+      "fromId": "app_user",
+      "fromProperty": "authenticated",
+      "toId": "app_gate",
+      "toProperty": "in-signedIn"
+    },
+    {
+      "fromId": "app_user",
+      "fromProperty": "roles",
+      "toId": "app_gate",
+      "toProperty": "in-roles"
+    },
+    {
+      "fromId": "app_gate",
+      "fromProperty": "out-toSignIn",
+      "toId": "app_to_signin",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "app_gate",
+      "fromProperty": "out-toHome",
+      "toId": "app_to_home",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "app_gate",
+      "fromProperty": "out-toLearners",
+      "toId": "app_to_learners",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "app_gate",
+      "fromProperty": "out-toNotFound",
+      "toId": "app_to_notfound",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "app_coach",
+      "fromProperty": "out-words",
+      "toId": "app_strings",
+      "toProperty": "coachWords"
+    },
+    {
+      "fromId": "app_coach",
+      "fromProperty": "out-ready",
+      "toId": "app_strings",
+      "toProperty": "addCoachWords"
+    },
+    {
+      "fromId": "app_user",
+      "fromProperty": "authenticated",
+      "toId": "app_coach",
+      "toProperty": "in-signedIn"
+    }
+  ]
+}

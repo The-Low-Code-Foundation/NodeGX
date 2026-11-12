@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "43baf556-7926-5796-8e8d-ec05469fa776",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sft_in",
+      "fromProperty": "job",
+      "toId": "sft_fn",
+      "toProperty": "in-job"
+    },
+    {
+      "fromId": "sft_fn",
+      "fromProperty": "out-added",
+      "toId": "sft_out",
+      "toProperty": "added"
+    },
+    {
+      "fromId": "sft_fn",
+      "fromProperty": "out-reason",
+      "toId": "sft_out",
+      "toProperty": "reason"
+    },
+    {
+      "fromId": "sft_fn",
+      "fromProperty": "out-done",
+      "toId": "sft_out",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "sft_fn",
+      "fromProperty": "out-missing",
+      "toId": "sft_out",
+      "toProperty": "missing"
+    },
+    {
+      "fromId": "sft_fn",
+      "fromProperty": "out-failed",
+      "toId": "sft_out",
+      "toProperty": "failed"
+    },
+    {
+      "fromId": "sft_in",
+      "fromProperty": "job",
+      "toId": "sft_ask",
+      "toProperty": "in-job"
+    },
+    {
+      "fromId": "sft_ask",
+      "fromProperty": "out-go",
+      "toId": "sft_forms",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "sft_forms",
+      "fromProperty": "done",
+      "toId": "sft_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "sft_forms",
+      "fromProperty": "forms",
+      "toId": "sft_fn",
+      "toProperty": "in-forms"
+    }
+  ]
+}

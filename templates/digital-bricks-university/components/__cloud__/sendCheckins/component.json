@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "7b13c6ae-a5e8-51a1-8551-6c5f5c26b38e",
+  "name": "sendCheckins",
+  "path": "/#__cloud__/sendCheckins",
+  "type": "cloud",
+  "created": "2026-11-12T14:31:37.297Z",
+  "modified": "2026-11-12T14:38:34.215Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The schedule (nodegx.automations.json, every hour at :05): every shared check-in whose day has come, on an active plan, goes 'scheduled' → 'sent' and its learner gets one email with a link to answer. Safe to run twice (security: nobody)."
+}

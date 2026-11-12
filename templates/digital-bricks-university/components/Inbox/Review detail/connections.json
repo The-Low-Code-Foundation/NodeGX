@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4c9aaedc-024e-537e-85f5-19846cef7b31",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rd_t_lead",
+      "fromProperty": "Translation",
+      "toId": "rd_fill_lead",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "rd_in",
+      "fromProperty": "first",
+      "toId": "rd_fill_lead",
+      "toProperty": "first"
+    },
+    {
+      "fromId": "rd_fill_lead",
+      "fromProperty": "formatted",
+      "toId": "rd_lead",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rd_in",
+      "fromProperty": "submissions",
+      "toId": "rd_versions",
+      "toProperty": "submissions"
+    },
+    {
+      "fromId": "rd_in",
+      "fromProperty": "learnerId",
+      "toId": "rd_reply",
+      "toProperty": "learnerId"
+    },
+    {
+      "fromId": "rd_in",
+      "fromProperty": "stepId",
+      "toId": "rd_reply",
+      "toProperty": "stepId"
+    },
+    {
+      "fromId": "rd_in",
+      "fromProperty": "first",
+      "toId": "rd_reply",
+      "toProperty": "first"
+    },
+    {
+      "fromId": "rd_versions",
+      "fromProperty": "reviewed",
+      "toId": "rd_out",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "rd_reply",
+      "fromProperty": "sent",
+      "toId": "rd_out",
+      "toProperty": "changed"
+    }
+  ]
+}

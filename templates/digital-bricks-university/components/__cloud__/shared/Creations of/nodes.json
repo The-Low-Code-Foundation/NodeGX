@@ -1,0 +1,88 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "0947f180-df4a-5b5e-818f-cf83e7b2bccf",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "co_in-2",
+      "type": "Component Inputs",
+      "label": "Whose creations",
+      "ports": [
+        {
+          "name": "learner",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "co_fn",
+      "type": "JavaScriptFunction",
+      "label": "Read and shape them",
+      "parameters": {
+        "runOnChange-in-learner": true,
+        "functionScript": "/*\n * A creation that points at a hand-in (`submission`) takes what it holds from that version, so a\n * hand-in's files are never stored twice (SCOPE R7). Anything else holds its own file, link or text.\n * The pointer is honoured only when the version and the step are the same learner's.\n * `estimate` (DBU-10): the hours a week she said she saves, from her LATEST answered 6-week impact\n * check-in (form id six-week-impact, question id hours_per_week), or null: none answered, or the\n * latest did not give hours (\"Not really\"). Her own estimate, shown as such.\n */\nif (Inputs.learner !== undefined) {\n  (async () => {\n    try {\n      const me = String(Inputs.learner || '');\n      if (!me) throw new Error('no learner');\n      const q = (c, where) => Noodl.Records.query(c, where, { limit: 1000, plain: true });\n      const when = (v) => (v && typeof v === 'object' && v.iso ? v.iso : v instanceof Date ? v.toISOString() : String(v || ''));\n      const rows = await q('Creation', { learner: { equalTo: me } });\n      const subIds = rows.map((r) => r.submission).filter(Boolean);\n      const stepIds = rows.map((r) => r.fromStep).filter(Boolean);\n      const subs = subIds.length ? await q('Submission', { objectId: { containedIn: subIds } }) : [];\n      const steps = stepIds.length ? await q('Step', { objectId: { containedIn: stepIds } }) : [];\n      Outputs.items = rows.map((c) => {\n        const sub = c.submission ? subs.find((s) => s.objectId === c.submission && s.learner === me) : null;\n        const step = c.fromStep ? steps.find((s) => s.objectId === c.fromStep && s.learner === me && s.shared === true) : null;\n        let form = '';\n        let files = [];\n        let url = '';\n        let text = '';\n        if (sub) {\n          form = sub.kind === 'file' ? 'file' : sub.kind;\n          files = sub.kind === 'file' && Array.isArray(sub.files) ? sub.files.map((f) => ({ file: f.file, fileName: f.fileName })) : [];\n          url = sub.kind === 'link' ? String(sub.url || '') : '';\n          text = sub.kind === 'text' ? String(sub.text || '') : '';\n        } else if (c.file) {\n          form = 'file';\n          files = [{ file: c.file, fileName: c.fileName || 'file' }];\n        } else if (c.url) {\n          form = 'link';\n          url = String(c.url);\n        } else if (c.text) {\n          form = 'text';\n          text = String(c.text);\n        }\n        return {\n          id: c.objectId,\n          title: c.title || '',\n          kind: c.kind || 'other',\n          form,\n          files,\n          url,\n          text,\n          madeWith: c.madeWith || '',\n          description: c.description || '',\n          usedInClass: c.usedInClass === true,\n          fromHandIn: !!sub,\n          version: sub ? Number(sub.version) || null : null,\n          stepId: step ? step.objectId : '',\n          stepTitle: step ? step.title || '' : '',\n          createdAt: when(c.createdAt)\n        };\n      }).sort((a, b) => b.createdAt.localeCompare(a.createdAt));\n\n      const impact = (await q('CheckinResponse', { learner: { equalTo: me } }))\n        .filter((r) => r.form && r.form.id === 'six-week-impact')\n        .sort((a, b) => when(b.createdAt).localeCompare(when(a.createdAt)))[0];\n      const hours = impact && impact.answers ? Number(impact.answers.hours_per_week) : NaN;\n      Outputs.estimate = impact && impact.answers && impact.answers.hours_per_week !== undefined && Number.isFinite(hours)\n        ? { hours, at: when(impact.createdAt) }\n        : null;\n      Outputs.done();\n    } catch (e) {\n      console.error('[dbu:Creations of]', String((e && e.message) || e));\n      Outputs.failed();\n    }\n  })();\n}\n"
+      },
+      "ports": [
+        {
+          "name": "in-learner",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-items",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-estimate",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "co_out-2",
+      "type": "Component Outputs",
+      "label": "The creations",
+      "ports": [
+        {
+          "name": "items",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "estimate",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "failed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

@@ -1,0 +1,155 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b6c8a655-33a2-58d7-8996-6dbf27a45893",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "nl_button",
+      "type": "net.noodl.controls.button",
+      "label": "Tab",
+      "x": 40,
+      "y": 200,
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)"
+      },
+      "stateParameters": {
+        "hover": {
+          "backgroundColor": "var(--muted)"
+        }
+      }
+    },
+    {
+      "id": "nl_inputs",
+      "type": "Component Inputs",
+      "label": "Tab in",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "labelKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "active",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "path",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "count",
+          "plug": "output",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "nl_look",
+      "type": "JavaScriptFunction",
+      "label": "Look of the tab",
+      "x": 420,
+      "y": 120,
+      "parameters": {
+        "functionScript": "const active = Inputs.active === true;\nOutputs.background = active ? 'var(--accent)' : 'transparent';\nOutputs.colour = active ? 'var(--accent-foreground)' : 'var(--muted-foreground)';\nOutputs.weight = active ? 'var(--font-semibold)' : 'var(--font-medium)';"
+      },
+      "metadata": {
+        "comment": "Current tab: accent ground and accent text at semibold. Others: muted text at medium. Token strings only, so the palette stays in the Styles panel."
+      },
+      "ports": [
+        {
+          "name": "in-active",
+          "displayName": "active",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-background",
+          "displayName": "background",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-colour",
+          "displayName": "colour",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-weight",
+          "displayName": "weight",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "nl_go",
+      "type": "PageStackNavigateToPath",
+      "label": "Go to the tab's page",
+      "x": 420,
+      "y": 320
+    },
+    {
+      "id": "nl_t_label",
+      "type": "Translation",
+      "label": "The tab's word, in the reader's language",
+      "x": 400,
+      "y": 300,
+      "parameters": {
+        "Namespace": "common"
+      }
+    },
+    {
+      "id": "nl_t_count",
+      "type": "Translation",
+      "label": "{label} ({n})",
+      "parameters": {
+        "Namespace": "common",
+        "Key": "tabs.count"
+      },
+      "x": 290,
+      "y": 440
+    },
+    {
+      "id": "nl_fill_count",
+      "type": "String Format",
+      "label": "The word and the count",
+      "parameters": {
+        "format": "{label} {n}"
+      },
+      "x": 290,
+      "y": 320
+    },
+    {
+      "id": "nl_label_fn",
+      "type": "JavaScriptFunction",
+      "label": "With the unread count, when there is one",
+      "parameters": {
+        "functionScript": "// DBU-07: Messages (2) for a learner, Learners (3) for the coach; the bare word when nothing is unread.\nOutputs.label = Inputs.count ? String(Inputs.withCount || '') : String(Inputs.label || '');"
+      },
+      "x": 290,
+      "y": 200
+    }
+  ],
+  "visualRoots": [
+    "nl_button"
+  ]
+}

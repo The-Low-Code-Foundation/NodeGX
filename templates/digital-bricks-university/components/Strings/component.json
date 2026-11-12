@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "3d62436c-2b33-57c4-86bb-16726851b7cb",
+  "name": "Strings",
+  "path": "/Strings",
+  "type": "logic",
+  "created": "2026-11-07T21:32:44.287Z",
+  "modified": "2026-11-12T19:42:19.674Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Every word on screen, in English, owned here and nowhere else. Pages and shell parts name a key (\"home.title\"); a second language is a second set of bundles with Language set to its code."
+}

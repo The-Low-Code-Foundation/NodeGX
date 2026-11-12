@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0f6b2ea3-f8cb-5875-8aef-a8070ab7030c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mh_req",
+      "fromProperty": "userId",
+      "toId": "mh_fn",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "mh_req",
+      "fromProperty": "pm-stepId",
+      "toId": "mh_fn",
+      "toProperty": "in-stepId"
+    },
+    {
+      "fromId": "mh_req",
+      "fromProperty": "receive",
+      "toId": "mh_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mh_fn",
+      "fromProperty": "out-me",
+      "toId": "mh_res",
+      "toProperty": "pm-me"
+    },
+    {
+      "fromId": "mh_fn",
+      "fromProperty": "out-list",
+      "toId": "mh_res",
+      "toProperty": "pm-list"
+    },
+    {
+      "fromId": "mh_fn",
+      "fromProperty": "out-step",
+      "toId": "mh_res",
+      "toProperty": "pm-step"
+    },
+    {
+      "fromId": "mh_fn",
+      "fromProperty": "out-versions",
+      "toId": "mh_res",
+      "toProperty": "pm-versions"
+    },
+    {
+      "fromId": "mh_fn",
+      "fromProperty": "out-done",
+      "toId": "mh_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mh_fn",
+      "fromProperty": "out-failed",
+      "toId": "mh_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mh_fn",
+      "fromProperty": "failure",
+      "toId": "mh_deny",
+      "toProperty": "send"
+    }
+  ]
+}

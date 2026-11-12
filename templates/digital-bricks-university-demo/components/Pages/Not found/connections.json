@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "931de828-dc53-56d3-8c9d-d47624b6be58",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "nf_t_tab",
+      "fromProperty": "Translation",
+      "toId": "nf_page",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "nf_t_name",
+      "fromProperty": "Translation",
+      "toId": "nf_name",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nf_t_home",
+      "fromProperty": "Translation",
+      "toId": "nf_home",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "nf_home",
+      "fromProperty": "onClick",
+      "toId": "nf_go",
+      "toProperty": "navigate"
+    }
+  ]
+}

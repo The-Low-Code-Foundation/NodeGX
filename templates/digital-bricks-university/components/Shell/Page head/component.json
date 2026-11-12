@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "15e80bed-0c2e-51e7-8a36-17ddf85f00b4",
+  "name": "Page head",
+  "path": "/Shell/Page head",
+  "type": "visual",
+  "created": "2026-11-07T20:26:40.566Z",
+  "modified": "2026-11-07T21:32:54.182Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A page's title and one plain sentence under it."
+}

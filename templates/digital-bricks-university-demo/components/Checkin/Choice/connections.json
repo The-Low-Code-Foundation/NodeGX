@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d67a4fcb-08d3-560d-881d-7cf7e25057fe",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cc_in",
+      "fromProperty": "label",
+      "toId": "cc_btn",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "cc_in",
+      "fromProperty": "bg",
+      "toId": "cc_btn",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "cc_in",
+      "fromProperty": "fg",
+      "toId": "cc_btn",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "cc_in",
+      "fromProperty": "border",
+      "toId": "cc_btn",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "cc_in",
+      "fromProperty": "id",
+      "toId": "cc_testid",
+      "toProperty": "id"
+    },
+    {
+      "fromId": "cc_testid",
+      "fromProperty": "formatted",
+      "toId": "cc_btn",
+      "toProperty": "data-testid"
+    },
+    {
+      "fromId": "cc_btn",
+      "fromProperty": "onClick",
+      "toId": "cc_out",
+      "toProperty": "pick"
+    }
+  ]
+}

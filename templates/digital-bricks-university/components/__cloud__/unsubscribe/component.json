@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "5a801b8a-96c4-51d6-8284-9f1b8650ad2b",
+  "name": "unsubscribe",
+  "path": "/#__cloud__/unsubscribe",
+  "type": "cloud",
+  "created": "2026-11-12T10:11:29.764Z",
+  "modified": "2026-11-12T10:11:29.764Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One press from the link in a reply email, with no session (DBU-07): a verified link turns that account's message emails off. Every outcome answers the same."
+}

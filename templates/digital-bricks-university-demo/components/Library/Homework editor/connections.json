@@ -1,0 +1,277 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2f6524c0-2798-543d-84e3-53c64dff6066",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "he_t_lede",
+      "fromProperty": "Translation",
+      "toId": "he_lede",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "he_t_title",
+      "fromProperty": "Translation",
+      "toId": "he_title",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "he_t_min",
+      "fromProperty": "Translation",
+      "toId": "he_min",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "he_t_tags",
+      "fromProperty": "Translation",
+      "toId": "he_tags",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "he_t_save",
+      "fromProperty": "Translation",
+      "toId": "he_save",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "he_t_cancel",
+      "fromProperty": "Translation",
+      "toId": "he_cancel",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "he_in",
+      "fromProperty": "item",
+      "toId": "he_open",
+      "toProperty": "in-item"
+    },
+    {
+      "fromId": "he_t_new",
+      "fromProperty": "Translation",
+      "toId": "he_open",
+      "toProperty": "in-newHeading"
+    },
+    {
+      "fromId": "he_t_edit",
+      "fromProperty": "Translation",
+      "toId": "he_open",
+      "toProperty": "in-editHeading"
+    },
+    {
+      "fromId": "he_in",
+      "fromProperty": "load",
+      "toId": "he_open",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "he_open",
+      "fromProperty": "out-heading",
+      "toId": "he_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "he_open",
+      "fromProperty": "out-title",
+      "toId": "he_title",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "he_open",
+      "fromProperty": "out-minutes",
+      "toId": "he_min",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "he_open",
+      "fromProperty": "out-tags",
+      "toId": "he_tags",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "he_open",
+      "fromProperty": "out-opened",
+      "toId": "he_title",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "he_open",
+      "fromProperty": "out-opened",
+      "toId": "he_min",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "he_open",
+      "fromProperty": "out-opened",
+      "toId": "he_tags",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "he_open",
+      "fromProperty": "out-brief",
+      "toId": "he_brief",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "he_open",
+      "fromProperty": "out-opened",
+      "toId": "he_brief",
+      "toProperty": "load"
+    },
+    {
+      "fromId": "he_open",
+      "fromProperty": "out-opened",
+      "toId": "he_msg_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "he_open",
+      "fromProperty": "out-id",
+      "toId": "he_gather",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "he_open",
+      "fromProperty": "out-title",
+      "toId": "he_gather",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "he_open",
+      "fromProperty": "out-minutes",
+      "toId": "he_gather",
+      "toProperty": "in-minutes"
+    },
+    {
+      "fromId": "he_open",
+      "fromProperty": "out-tags",
+      "toId": "he_gather",
+      "toProperty": "in-tags"
+    },
+    {
+      "fromId": "he_open",
+      "fromProperty": "out-brief",
+      "toId": "he_gather",
+      "toProperty": "in-brief"
+    },
+    {
+      "fromId": "he_title",
+      "fromProperty": "onTextChanged",
+      "toId": "he_gather",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "he_min",
+      "fromProperty": "onTextChanged",
+      "toId": "he_gather",
+      "toProperty": "in-minutes"
+    },
+    {
+      "fromId": "he_tags",
+      "fromProperty": "onTextChanged",
+      "toId": "he_gather",
+      "toProperty": "in-tags"
+    },
+    {
+      "fromId": "he_brief",
+      "fromProperty": "value",
+      "toId": "he_gather",
+      "toProperty": "in-brief"
+    },
+    {
+      "fromId": "he_save",
+      "fromProperty": "onClick",
+      "toId": "he_gather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "he_save",
+      "fromProperty": "onClick",
+      "toId": "he_msg_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "he_gather",
+      "fromProperty": "out-id",
+      "toId": "he_call",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "he_gather",
+      "fromProperty": "out-title",
+      "toId": "he_call",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "he_gather",
+      "fromProperty": "out-brief",
+      "toId": "he_call",
+      "toProperty": "in-brief"
+    },
+    {
+      "fromId": "he_gather",
+      "fromProperty": "out-minutes",
+      "toId": "he_call",
+      "toProperty": "in-estimatedMinutes"
+    },
+    {
+      "fromId": "he_gather",
+      "fromProperty": "out-tags",
+      "toId": "he_call",
+      "toProperty": "in-tags"
+    },
+    {
+      "fromId": "he_gather",
+      "fromProperty": "out-handInChecklist",
+      "toId": "he_call",
+      "toProperty": "in-handInChecklist"
+    },
+    {
+      "fromId": "he_gather",
+      "fromProperty": "out-resources",
+      "toId": "he_call",
+      "toProperty": "in-resources"
+    },
+    {
+      "fromId": "he_gather",
+      "fromProperty": "out-go",
+      "toId": "he_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "he_call",
+      "fromProperty": "error",
+      "toId": "he_msg",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "he_call",
+      "fromProperty": "failure",
+      "toId": "he_msg_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "he_msg_sw",
+      "fromProperty": "state",
+      "toId": "he_msg",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "he_gather",
+      "fromProperty": "out-title",
+      "toId": "he_out",
+      "toProperty": "savedTitle"
+    },
+    {
+      "fromId": "he_call",
+      "fromProperty": "done",
+      "toId": "he_out",
+      "toProperty": "saved"
+    },
+    {
+      "fromId": "he_cancel",
+      "fromProperty": "onClick",
+      "toId": "he_out",
+      "toProperty": "closed"
+    }
+  ]
+}

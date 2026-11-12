@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ddc1aed2-995b-5a22-8f66-fdc3484b5781",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "lr_in",
+      "fromProperty": "title",
+      "toId": "lr_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lr_in",
+      "fromProperty": "meta",
+      "toId": "lr_meta",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lr_in",
+      "fromProperty": "tags",
+      "toId": "lr_tag_rows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "lr_in",
+      "fromProperty": "tags",
+      "toId": "lr_tags",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lr_in",
+      "fromProperty": "archived",
+      "toId": "lr_arch_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lr_in",
+      "fromProperty": "archived",
+      "toId": "lr_restore",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lr_in",
+      "fromProperty": "archived",
+      "toId": "lr_not_arch",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "lr_not_arch",
+      "fromProperty": "result",
+      "toId": "lr_archive",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lr_t_edit",
+      "fromProperty": "Translation",
+      "toId": "lr_edit",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "lr_t_dup",
+      "fromProperty": "Translation",
+      "toId": "lr_dup",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "lr_t_arch",
+      "fromProperty": "Translation",
+      "toId": "lr_archive",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "lr_t_restore",
+      "fromProperty": "Translation",
+      "toId": "lr_restore",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "lr_t_chip",
+      "fromProperty": "Translation",
+      "toId": "lr_arch_chip",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "lr_edit",
+      "fromProperty": "onClick",
+      "toId": "lr_out",
+      "toProperty": "edit"
+    },
+    {
+      "fromId": "lr_dup",
+      "fromProperty": "onClick",
+      "toId": "lr_out",
+      "toProperty": "duplicate"
+    },
+    {
+      "fromId": "lr_archive",
+      "fromProperty": "onClick",
+      "toId": "lr_out",
+      "toProperty": "archive"
+    },
+    {
+      "fromId": "lr_restore",
+      "fromProperty": "onClick",
+      "toId": "lr_out",
+      "toProperty": "archive"
+    }
+  ]
+}

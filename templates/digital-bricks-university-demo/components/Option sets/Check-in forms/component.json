@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f110ff80-e095-528a-8e16-b4e0657ab20c",
+  "name": "Check-in forms",
+  "path": "/Option sets/Check-in forms",
+  "type": "logic",
+  "created": "2026-11-12T14:51:41.577Z",
+  "modified": "2026-11-12T14:51:41.577Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The three built-in check-in forms Richard can pick for a check-in step. The questions themselves live in the cloud helper shared/Checkin forms; this is only the list and its words."
+}

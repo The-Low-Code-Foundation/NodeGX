@@ -1,0 +1,136 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "ea070a19-b2b2-5605-894b-6a11a704dfac",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "fc_btn",
+      "type": "net.noodl.controls.button",
+      "label": "Filter",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-full)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "dataAttributes": "data-testid"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "fc_in",
+      "type": "Component Inputs",
+      "label": "The filter",
+      "ports": [
+        {
+          "name": "kind",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "labelKey",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "n",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "selected",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 290,
+      "y": 640
+    },
+    {
+      "id": "fc_out",
+      "type": "Component Outputs",
+      "label": "Chosen",
+      "ports": [
+        {
+          "name": "pick",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 290,
+      "y": 40
+    },
+    {
+      "id": "fc_t_label",
+      "type": "Translation",
+      "label": "The kind's words",
+      "parameters": {
+        "Namespace": "pages"
+      },
+      "x": 290,
+      "y": 760
+    },
+    {
+      "id": "fc_t_count",
+      "type": "Translation",
+      "label": "{label} ({n})",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.filterCount"
+      },
+      "x": 290,
+      "y": 880
+    },
+    {
+      "id": "fc_fill",
+      "type": "String Format",
+      "label": "Words and count",
+      "parameters": {
+        "format": "{label} {n}"
+      },
+      "x": 290,
+      "y": 160
+    },
+    {
+      "id": "fc_bg",
+      "type": "Expression",
+      "label": "Accent when chosen",
+      "parameters": {
+        "expression": "selected ? 'var(--accent)' : 'var(--surface)'"
+      },
+      "x": 290,
+      "y": 280
+    },
+    {
+      "id": "fc_fg",
+      "type": "Expression",
+      "label": "Accent words when chosen",
+      "parameters": {
+        "expression": "selected ? 'var(--accent-foreground)' : 'var(--foreground)'"
+      },
+      "x": 290,
+      "y": 400
+    },
+    {
+      "id": "fc_testid",
+      "type": "String Format",
+      "label": "filter-{kind}, for tests",
+      "parameters": {
+        "format": "filter-{kind}"
+      },
+      "x": 290,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "fc_btn"
+  ]
+}

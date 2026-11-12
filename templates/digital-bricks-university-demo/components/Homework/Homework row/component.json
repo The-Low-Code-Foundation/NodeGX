@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c4d53d98-3c24-54c3-820e-92f6936aed1f",
+  "name": "Homework row",
+  "path": "/Homework/Homework row",
+  "type": "visual",
+  "created": "2026-11-09T13:11:53.928Z",
+  "modified": "2026-11-09T13:17:08.329Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One homework on the Homework tab's list: its number and due date, title and status chip, and Open, which goes to it (/homework?step=)."
+}

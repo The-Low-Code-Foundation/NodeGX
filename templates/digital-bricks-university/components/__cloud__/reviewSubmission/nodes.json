@@ -1,0 +1,114 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "d36c76b1-aa34-5649-8c7c-e8b977b66258",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rs_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach gives a verdict",
+      "parameters": {
+        "params": "submissionId,verdict,note",
+        "allowNoAuth": false,
+        "ptype-submissionId": "string",
+        "preq-submissionId": true,
+        "ptype-verdict": "string",
+        "preq-verdict": true,
+        "ptype-note": "string"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rs_fn",
+      "type": "JavaScriptFunction",
+      "label": "Record the verdict",
+      "parameters": {
+        "functionScript": "/*\n * approved -> step approved; changes -> step changes_asked.\n * Asking for changes needs a note saying what to change (DBU-06): a learner told only\n * \"changes asked\" cannot act on it. Approving takes an optional note.\n * The step is saved only if it is still handed_in (ifMatch), so a verdict can\n * never move a step that something else has already moved.\n */\n(async () => {\n  try {\n    const verdicts = { approved: 'approved', changes: 'changes_asked' };\n    const verdict = String(Inputs.verdict || '');\n    if (!verdicts[verdict]) throw new Error('verdict must be approved or changes');\n    const note = String(Inputs.note || '').trim();\n    if (verdict === 'changes' && !note) throw new Error('asking for changes needs a note');\n    if (note.length > 5000) throw new Error('note too long');\n    const id = String(Inputs.submissionId || '');\n    const q = (c, where) => Noodl.Records.query(c, where, { limit: 1000, plain: true });\n\n    const found = id ? await q('Submission', { objectId: { equalTo: id } }) : [];\n    if (found.length !== 1) throw new Error('no submission ' + id);\n    const sub = found[0];\n    if (sub.review !== 'pending') throw new Error('already reviewed');\n    const versions = await q('Submission', { step: { equalTo: sub.step } });\n    if (versions.some((v) => v.version > sub.version)) throw new Error('not the newest version');\n    const steps = await q('Step', { objectId: { equalTo: sub.step } });\n    if (steps.length !== 1 || steps[0].kind !== 'homework') throw new Error('no homework step for ' + id);\n\n    const now = new Date().toISOString();\n    await Noodl.Records.save(sub.objectId, { review: verdict, reviewNote: note || null, reviewedAt: now },\n      { className: 'Submission', ifMatch: { review: 'pending' } });\n    await Noodl.Records.save(steps[0].objectId, { status: verdicts[verdict] },\n      { className: 'Step', ifMatch: { status: 'handed_in' } });\n    await Noodl.Records.create('Doorbell', { learner: sub.learner, topic: 'submission' },\n      { acl: { [sub.learner]: { read: true }, 'role:staff': { read: true } } });\n\n    Outputs.review = verdict;\n    Outputs.stepStatus = verdicts[verdict];\n    Outputs.reviewedAt = now;\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:reviewSubmission]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();",
+        "runOnChange-in-submissionId": false,
+        "runOnChange-in-verdict": false,
+        "runOnChange-in-note": false
+      },
+      "ports": [
+        {
+          "name": "in-submissionId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "submissionId",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-verdict",
+          "plug": "input",
+          "type": "*",
+          "displayName": "verdict",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-note",
+          "plug": "input",
+          "type": "*",
+          "displayName": "note",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-review",
+          "plug": "output",
+          "type": "*",
+          "displayName": "review",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stepStatus",
+          "plug": "output",
+          "type": "*",
+          "displayName": "stepStatus",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-reviewedAt",
+          "plug": "output",
+          "type": "*",
+          "displayName": "reviewedAt",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "Only the newest version of a hand-in, and only while it is pending: an old version or a second verdict is refused rather than overwriting what the learner has already been told."
+      },
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "rs_res",
+      "type": "noodl.cloud.response",
+      "label": "Verdict recorded",
+      "parameters": {
+        "params": "review,stepStatus,reviewedAt"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "rs_deny",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "This hand-in could not be reviewed. It may already have a verdict or a newer version, or you asked for changes without saying what to change."
+      },
+      "x": 40,
+      "y": 400
+    }
+  ]
+}

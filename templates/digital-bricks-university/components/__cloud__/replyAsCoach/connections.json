@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "26c05a54-322e-58a6-8a24-5898312893a8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rc_req",
+      "fromProperty": "userId",
+      "toId": "rc_fn",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "rc_req",
+      "fromProperty": "pm-learnerId",
+      "toId": "rc_fn",
+      "toProperty": "in-learnerId"
+    },
+    {
+      "fromId": "rc_req",
+      "fromProperty": "pm-body",
+      "toId": "rc_fn",
+      "toProperty": "in-body"
+    },
+    {
+      "fromId": "rc_req",
+      "fromProperty": "pm-stepId",
+      "toId": "rc_fn",
+      "toProperty": "in-stepId"
+    },
+    {
+      "fromId": "rc_req",
+      "fromProperty": "receive",
+      "toId": "rc_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rc_fn",
+      "fromProperty": "out-mail",
+      "toId": "rc_mail",
+      "toProperty": "request"
+    },
+    {
+      "fromId": "rc_fn",
+      "fromProperty": "out-messageId",
+      "toId": "rc_res",
+      "toProperty": "pm-messageId"
+    },
+    {
+      "fromId": "rc_mail",
+      "fromProperty": "done",
+      "toId": "rc_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "rc_fn",
+      "fromProperty": "out-why",
+      "toId": "rc_deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "rc_fn",
+      "fromProperty": "out-refuse",
+      "toId": "rc_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "rc_fn",
+      "fromProperty": "out-failed",
+      "toId": "rc_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "rc_fn",
+      "fromProperty": "failure",
+      "toId": "rc_fail",
+      "toProperty": "send"
+    }
+  ]
+}

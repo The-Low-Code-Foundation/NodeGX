@@ -1,0 +1,384 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f42e8c4f-5a78-5174-8542-08d18874064d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "tsv_root",
+      "type": "Group",
+      "label": "Save as template",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "tsv_head",
+        "tsv_lede",
+        "tsv_fields",
+        "tsv_msg",
+        "tsv_actions"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      }
+    },
+    {
+      "id": "tsv_head",
+      "type": "Text",
+      "label": "Save this plan as a template",
+      "x": 100,
+      "y": 160,
+      "parent": "tsv_root",
+      "parameters": {
+        "text": "",
+        "as": "h2",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "tsv_lede",
+      "type": "Text",
+      "label": "What a template keeps",
+      "x": 100,
+      "y": 280,
+      "parent": "tsv_root",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "maxWidth": {
+          "value": 640,
+          "unit": "px"
+        }
+      }
+    },
+    {
+      "id": "tsv_fields",
+      "type": "Group",
+      "label": "The fields",
+      "x": 100,
+      "y": 400,
+      "parent": "tsv_root",
+      "children": [
+        "tsv_title",
+        "tsv_desc"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 640,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)"
+      }
+    },
+    {
+      "id": "tsv_title",
+      "type": "net.noodl.controls.textinput",
+      "label": "Template title",
+      "x": 160,
+      "y": 520,
+      "parent": "tsv_fields",
+      "parameters": {
+        "type": "text",
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxLength": 140
+      }
+    },
+    {
+      "id": "tsv_desc",
+      "type": "net.noodl.controls.textinput",
+      "label": "Description",
+      "x": 160,
+      "y": 640,
+      "parent": "tsv_fields",
+      "parameters": {
+        "type": "textArea",
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "tsv_msg",
+      "type": "Text",
+      "label": "Why it was not saved",
+      "x": 100,
+      "y": 760,
+      "parent": "tsv_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--attention)"
+      }
+    },
+    {
+      "id": "tsv_actions",
+      "type": "Group",
+      "label": "Save and Cancel",
+      "x": 100,
+      "y": 880,
+      "parent": "tsv_root",
+      "children": [
+        "tsv_save",
+        "tsv_cancel"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)"
+      }
+    },
+    {
+      "id": "tsv_save",
+      "type": "net.noodl.controls.button",
+      "label": "Save template",
+      "x": 160,
+      "y": 1000,
+      "parent": "tsv_actions",
+      "parameters": {
+        "label": ""
+      }
+    },
+    {
+      "id": "tsv_cancel",
+      "type": "net.noodl.controls.button",
+      "label": "Cancel",
+      "x": 160,
+      "y": 1120,
+      "parent": "tsv_actions",
+      "parameters": {
+        "label": "",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)"
+      }
+    },
+    {
+      "id": "tsv_in",
+      "type": "Component Inputs",
+      "label": "Which plan",
+      "x": 500,
+      "y": 40,
+      "ports": [
+        {
+          "name": "planId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "suggestedTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "load",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "tsv_out",
+      "type": "Component Outputs",
+      "label": "Saved or closed",
+      "x": 500,
+      "y": 1000,
+      "ports": [
+        {
+          "name": "saved",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "said",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "closed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "tsv_open",
+      "type": "JavaScriptFunction",
+      "label": "Start from the plan's title",
+      "x": 500,
+      "y": 280,
+      "parameters": {
+        "runOnChange-in-suggestedTitle": false,
+        "functionScript": "Outputs.title = String(Inputs.suggestedTitle || '');\nOutputs.description = '';\nOutputs.opened();\n"
+      },
+      "ports": [
+        {
+          "name": "in-suggestedTitle",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-description",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-opened",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "tsv_call",
+      "type": "CloudFunction2",
+      "label": "templateFromPlan (staff only)",
+      "x": 500,
+      "y": 640,
+      "parameters": {
+        "function": "templateFromPlan"
+      }
+    },
+    {
+      "id": "tsv_said",
+      "type": "String Format",
+      "label": "“{title}” is saved, with {count} steps",
+      "x": 500,
+      "y": 880,
+      "parameters": {
+        "format": "{title}{count}"
+      }
+    },
+    {
+      "id": "tsv_msg_sw",
+      "type": "Switch",
+      "label": "Show why, once there is a why",
+      "x": 500,
+      "y": 760,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "tsv_t_head",
+      "type": "Translation",
+      "label": "Save this plan as a template",
+      "x": 800,
+      "y": 160,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.templateSaver.heading"
+      }
+    },
+    {
+      "id": "tsv_t_lede",
+      "type": "Translation",
+      "label": "What a template keeps",
+      "x": 800,
+      "y": 220,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.templateSaver.lede"
+      }
+    },
+    {
+      "id": "tsv_t_title",
+      "type": "Translation",
+      "label": "Template title",
+      "x": 800,
+      "y": 280,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.templateSaver.title"
+      }
+    },
+    {
+      "id": "tsv_t_desc",
+      "type": "Translation",
+      "label": "Description",
+      "x": 800,
+      "y": 340,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.templateSaver.description"
+      }
+    },
+    {
+      "id": "tsv_t_save",
+      "type": "Translation",
+      "label": "Save template",
+      "x": 800,
+      "y": 400,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.templateSaver.save"
+      }
+    },
+    {
+      "id": "tsv_t_cancel",
+      "type": "Translation",
+      "label": "Cancel",
+      "x": 800,
+      "y": 460,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.templateSaver.cancel"
+      }
+    },
+    {
+      "id": "tsv_t_saved",
+      "type": "Translation",
+      "label": "Saved, in a sentence",
+      "x": 800,
+      "y": 880,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.templateSaver.saved"
+      }
+    }
+  ],
+  "visualRoots": [
+    "tsv_root"
+  ]
+}

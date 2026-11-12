@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2683a27c-8c08-5fb0-80d8-29e554a5d1e5",
+  "name": "Fact line",
+  "path": "/Inbox/Fact line",
+  "type": "visual",
+  "created": "2026-11-12T13:09:28.090Z",
+  "modified": "2026-11-12T13:09:28.090Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One fact about a learner who has gone quiet (DBU-08), such as when they started or what is overdue: a sentence from Strings with its values."
+}

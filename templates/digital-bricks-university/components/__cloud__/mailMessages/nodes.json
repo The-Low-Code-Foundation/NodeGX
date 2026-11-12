@@ -1,0 +1,65 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "31d348e6-1de7-5cc3-8276-cdd0d5e3e75d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mf_req",
+      "type": "noodl.cloud.request",
+      "label": "The schedule fires",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "",
+        "allowNoAuth": false
+      }
+    },
+    {
+      "id": "mf_fn",
+      "type": "JavaScriptFunction",
+      "label": "Ask for everything waiting",
+      "x": 40,
+      "y": 180,
+      "parameters": {
+        "functionScript": "// A fresh request each run (a new object), so shared/Message mail runs once per fire.\nOutputs.request = { all: true, at: Date.now() };\n"
+      },
+      "ports": [
+        {
+          "name": "out-request",
+          "displayName": "request",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "mf_mail",
+      "type": "/#__cloud__/shared/Message mail",
+      "label": "Send what waited long enough",
+      "x": 40,
+      "y": 300
+    },
+    {
+      "id": "mf_res",
+      "type": "noodl.cloud.response",
+      "label": "How many went, how many still wait",
+      "x": 40,
+      "y": 420,
+      "parameters": {
+        "params": "sent,held"
+      }
+    },
+    {
+      "id": "mf_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "x": 320,
+      "y": 420,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "The mail flush failed."
+      }
+    }
+  ]
+}

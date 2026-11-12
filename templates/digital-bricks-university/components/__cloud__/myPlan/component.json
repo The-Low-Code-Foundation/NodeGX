@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "9120a10d-5903-50a7-83ab-6d24c1142b85",
+  "name": "myPlan",
+  "path": "/#__cloud__/myPlan",
+  "type": "cloud",
+  "created": "2026-11-07T21:03:34.496Z",
+  "modified": "2026-11-12T08:47:44.935Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The signed-in learner's plan, its shared steps in order, and their own hand-ins (security: authenticated). Who is asking comes from the session and nothing else; unshared steps and coach notes never leave here."
+}

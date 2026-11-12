@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "63897bf7-278c-5a03-8852-70a2e514a432",
+  "name": "addStep",
+  "path": "/#__cloud__/addStep",
+  "type": "cloud",
+  "created": "2026-11-09T10:26:03.354Z",
+  "modified": "2026-11-12T14:26:38.899Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach adds a DRAFT step at the end of a learner's plan: a live session, a homework (blank, or copied from the library, SCOPE R4) or a check-in with a placeholder form (security: role:staff)."
+}

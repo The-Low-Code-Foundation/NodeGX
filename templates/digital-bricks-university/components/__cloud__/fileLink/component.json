@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "97ec95ee-a0d9-51dc-8457-518509e9759a",
+  "name": "fileLink",
+  "path": "/#__cloud__/fileLink",
+  "type": "cloud",
+  "created": "2026-11-07T21:04:25.053Z",
+  "modified": "2026-11-07T21:04:25.053Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A 5-minute link to one of the caller's own private files (security: authenticated). Refuses any file the caller did not upload, whoever's row it is attached to."
+}

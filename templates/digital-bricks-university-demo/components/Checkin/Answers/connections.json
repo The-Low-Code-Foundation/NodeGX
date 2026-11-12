@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "a6d0aa5b-5530-5823-8177-3660958bca69",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ca_in",
+      "fromProperty": "prefix",
+      "toId": "ca_fn",
+      "toProperty": "in-prefix"
+    },
+    {
+      "fromId": "ca_in",
+      "fromProperty": "questions",
+      "toId": "ca_fn",
+      "toProperty": "in-questions"
+    },
+    {
+      "fromId": "ca_in",
+      "fromProperty": "answers",
+      "toId": "ca_fn",
+      "toProperty": "in-answers"
+    },
+    {
+      "fromId": "ca_fn",
+      "fromProperty": "out-rows",
+      "toId": "ca_rows",
+      "toProperty": "items"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "cf11fb08-069f-59f4-8292-578d6520a542",
+  "name": "Latest from Richard",
+  "path": "/Home/Latest from Richard",
+  "type": "visual",
+  "created": "2026-11-12T10:21:56.351Z",
+  "modified": "2026-11-12T10:22:13.052Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Latest from Richard, on the learner's Home (DBU-07): the newest message from the coach, when he sent it, New while unread, the homework it is about, and a button to Messages. Reading Home marks nothing read."
+}

@@ -1,0 +1,124 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b4539501-93fe-5c1e-8bb2-7d0b0c592792",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sh_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach shares or unshares",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "planId,stepIds,shared,allReady",
+        "allowNoAuth": false,
+        "ptype-planId": "string",
+        "preq-planId": true,
+        "ptype-shared": "boolean",
+        "preq-shared": true,
+        "ptype-allReady": "boolean",
+        "preq-allReady": false
+      },
+      "metadata": {
+        "comment": "role:staff in nodegx.security.json."
+      }
+    },
+    {
+      "id": "sh_fn",
+      "type": "JavaScriptFunction",
+      "label": "Share what is ready, refuse what is not",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "runOnChange-in-planId": false,
+        "runOnChange-in-stepIds": false,
+        "runOnChange-in-shared": false,
+        "runOnChange-in-allReady": false,
+        "functionScript": "/*\n * Sharing is what puts a step in front of the learner (SCOPE: learners never see a step\n * that is not shared), so a step is only shared when it can stand on its own:\n *  - every step needs a title;\n *  - homework needs a brief and a due date;\n *  - a check-in needs a send date, or \"N days after\" a step (DBU-10: that step may not have\n *    its date yet; the check-in goes once it has one).\n * A live session is ready as it is: \"to book\" is a state the learner can act on.\n * Named steps that are not ready are refused in a sentence; `allReady` shares every\n * ready draft and says how many it left. Unsharing is always allowed.\n * One doorbell for the learner, so their page re-reads once.\n */\n(async () => {\n  const refuse = (why) => { Outputs.why = why; Outputs.refuse(); };\n  try {\n    const R = Noodl.Records;\n    const planId = String(Inputs.planId || '');\n    const plans = planId ? await R.query('Plan', { objectId: { equalTo: planId } }, { limit: 2, plain: true }) : [];\n    if (plans.length !== 1) return refuse('That plan is no longer there. Reload the page.');\n    const learner = plans[0].learner;\n    const steps = await R.query('Step', { plan: { equalTo: planId } }, { limit: 1000, plain: true });\n    const share = Inputs.shared === true;\n    const missing = (s) => {\n      if (!String(s.title || '').trim()) return 'a title';\n      if (s.kind === 'homework' && !String(s.brief || '').trim() && !s.dueAt) return 'a brief and a due date';\n      if (s.kind === 'homework' && !String(s.brief || '').trim()) return 'a brief';\n      if (s.kind === 'homework' && !s.dueAt) return 'a due date';\n      if (s.kind === 'checkin' && !s.sendsAt && !(s.sendAfter && s.sendAfter.step)) return 'a send date';\n      return '';\n    };\n\n    let chosen;\n    let left = 0;\n    if (Inputs.allReady === true && share) {\n      const drafts = steps.filter((s) => s.shared !== true);\n      chosen = drafts.filter((s) => !missing(s));\n      left = drafts.length - chosen.length;\n    } else {\n      const ids = Array.isArray(Inputs.stepIds) ? Inputs.stepIds.map(String) : [];\n      chosen = steps.filter((s) => ids.includes(s.objectId));\n      if (!ids.length || chosen.length !== ids.length) return refuse('That step is no longer in the plan. Reload the page.');\n      if (share) {\n        const notReady = chosen.find((s) => missing(s));\n        if (notReady) return refuse('Give “' + (notReady.title || 'this step') + '” ' + missing(notReady) + ' before you share it.');\n      }\n    }\n\n    let changed = 0;\n    for (const s of chosen) {\n      if ((s.shared === true) !== share) {\n        await R.save(s.objectId, { shared: share }, { className: 'Step' });\n        changed++;\n      }\n    }\n    if (changed) {\n      await R.create('Doorbell', { learner, topic: 'plan' }, { acl: { [learner]: { read: true }, 'role:staff': { read: true } } });\n    }\n    Outputs.changed = changed;\n    Outputs.left = left;\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:shareSteps]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-planId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-stepIds",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-shared",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-allReady",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-changed",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "out-left",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "out-why",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "sh_res",
+      "type": "noodl.cloud.response",
+      "label": "How many changed, how many are not ready",
+      "x": 40,
+      "y": 280,
+      "parameters": {
+        "params": "changed,left"
+      }
+    },
+    {
+      "id": "sh_deny",
+      "type": "noodl.cloud.response",
+      "label": "A refusal the coach can act on",
+      "x": 40,
+      "y": 400,
+      "parameters": {
+        "status": "failure"
+      }
+    },
+    {
+      "id": "sh_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "x": 40,
+      "y": 520,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "Nothing was shared. Try again."
+      }
+    }
+  ]
+}

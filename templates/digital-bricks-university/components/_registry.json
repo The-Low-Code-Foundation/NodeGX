@@ -1,0 +1,1340 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/registry-v2.json",
+  "version": 1,
+  "lastUpdated": "2026-11-12T19:42:20.085Z",
+  "components": {
+    "App": {
+      "path": "App",
+      "type": "root",
+      "nodeCount": 9,
+      "connectionCount": 10,
+      "modified": "2026-11-12T19:25:13.864Z",
+      "created": "2026-11-07T20:22:55.715Z"
+    },
+    "Pages/Home": {
+      "path": "Pages/Home",
+      "type": "page",
+      "nodeCount": 26,
+      "connectionCount": 57,
+      "modified": "2026-11-12T19:35:44.560Z",
+      "created": "2026-11-07T20:22:55.715Z"
+    },
+    "Option sets/Learner tabs": {
+      "path": "Option sets/Learner tabs",
+      "type": "visual",
+      "nodeCount": 2,
+      "connectionCount": 2,
+      "modified": "2026-11-09T13:25:26.676Z",
+      "created": "2026-11-07T20:28:03.608Z"
+    },
+    "Option sets/Coach tabs": {
+      "path": "Option sets/Coach tabs",
+      "type": "visual",
+      "nodeCount": 2,
+      "connectionCount": 2,
+      "modified": "2026-11-07T21:33:27.271Z",
+      "created": "2026-11-07T20:28:03.609Z"
+    },
+    "Shell/Nav link": {
+      "path": "Shell/Nav link",
+      "type": "visual",
+      "nodeCount": 8,
+      "connectionCount": 14,
+      "modified": "2026-11-12T10:22:30.006Z",
+      "created": "2026-11-07T20:28:03.610Z"
+    },
+    "Shell/App shell": {
+      "path": "Shell/App shell",
+      "type": "visual",
+      "nodeCount": 28,
+      "connectionCount": 19,
+      "modified": "2026-11-12T19:35:52.497Z",
+      "created": "2026-11-07T20:28:03.611Z"
+    },
+    "Shell/Page head": {
+      "path": "Shell/Page head",
+      "type": "visual",
+      "nodeCount": 7,
+      "connectionCount": 7,
+      "modified": "2026-11-07T21:32:54.339Z",
+      "created": "2026-11-07T20:28:03.612Z"
+    },
+    "Shell/Empty state": {
+      "path": "Shell/Empty state",
+      "type": "visual",
+      "nodeCount": 8,
+      "connectionCount": 5,
+      "modified": "2026-11-07T21:33:27.170Z",
+      "created": "2026-11-07T20:28:03.613Z"
+    },
+    "Pages/Homework": {
+      "path": "Pages/Homework",
+      "type": "page",
+      "nodeCount": 34,
+      "connectionCount": 55,
+      "modified": "2026-11-12T10:21:08.598Z",
+      "created": "2026-11-07T20:28:03.614Z"
+    },
+    "Pages/My creations": {
+      "path": "Pages/My creations",
+      "type": "page",
+      "nodeCount": 28,
+      "connectionCount": 41,
+      "modified": "2026-11-12T15:00:15.432Z",
+      "created": "2026-11-07T20:28:03.615Z"
+    },
+    "Pages/Messages": {
+      "path": "Pages/Messages",
+      "type": "page",
+      "nodeCount": 5,
+      "connectionCount": 1,
+      "modified": "2026-11-12T10:20:48.842Z",
+      "created": "2026-11-07T20:28:03.616Z"
+    },
+    "Pages/Sign in": {
+      "path": "Pages/Sign in",
+      "type": "page",
+      "nodeCount": 29,
+      "connectionCount": 25,
+      "modified": "2026-11-12T19:15:36.827Z",
+      "created": "2026-11-07T20:28:03.617Z"
+    },
+    "Pages/Learners": {
+      "path": "Pages/Learners",
+      "type": "page",
+      "nodeCount": 26,
+      "connectionCount": 23,
+      "modified": "2026-11-12T13:49:58.893Z",
+      "created": "2026-11-07T20:28:03.618Z"
+    },
+    "Pages/Inbox": {
+      "path": "Pages/Inbox",
+      "type": "page",
+      "nodeCount": 39,
+      "connectionCount": 53,
+      "modified": "2026-11-12T14:59:45.090Z",
+      "created": "2026-11-07T20:28:03.619Z"
+    },
+    "Pages/Plan templates": {
+      "path": "Pages/Plan templates",
+      "type": "page",
+      "nodeCount": 36,
+      "connectionCount": 55,
+      "modified": "2026-11-09T11:09:06.555Z",
+      "created": "2026-11-07T20:28:03.620Z"
+    },
+    "Pages/Homework library": {
+      "path": "Pages/Homework library",
+      "type": "page",
+      "nodeCount": 32,
+      "connectionCount": 61,
+      "modified": "2026-11-07T22:12:47.854Z",
+      "created": "2026-11-07T20:28:03.621Z"
+    },
+    "Pages/Settings": {
+      "path": "Pages/Settings",
+      "type": "page",
+      "nodeCount": 29,
+      "connectionCount": 31,
+      "modified": "2026-11-12T18:54:31.165Z",
+      "created": "2026-11-07T20:28:03.622Z"
+    },
+    "__cloud__/shared/Signed file link": {
+      "path": "__cloud__/shared/Signed file link",
+      "type": "cloud",
+      "nodeCount": 3,
+      "connectionCount": 6,
+      "modified": "2026-11-07T21:03:05.693Z",
+      "created": "2026-11-07T21:03:05.693Z"
+    },
+    "__cloud__/myPlan": {
+      "path": "__cloud__/myPlan",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 9,
+      "modified": "2026-11-12T08:47:46.192Z",
+      "created": "2026-11-07T21:03:34.540Z"
+    },
+    "__cloud__/learnerAsCoach": {
+      "path": "__cloud__/learnerAsCoach",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 13,
+      "modified": "2026-11-12T14:35:22.014Z",
+      "created": "2026-11-07T21:03:51.037Z"
+    },
+    "__cloud__/reviewSubmission": {
+      "path": "__cloud__/reviewSubmission",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 10,
+      "modified": "2026-11-09T13:01:53.070Z",
+      "created": "2026-11-07T21:04:06.940Z"
+    },
+    "__cloud__/fileLink": {
+      "path": "__cloud__/fileLink",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 10,
+      "modified": "2026-11-07T21:04:25.096Z",
+      "created": "2026-11-07T21:04:25.096Z"
+    },
+    "__cloud__/fileLinkAsCoach": {
+      "path": "__cloud__/fileLinkAsCoach",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 9,
+      "modified": "2026-11-07T21:04:25.128Z",
+      "created": "2026-11-07T21:04:25.128Z"
+    },
+    "__cloud__/addLearner": {
+      "path": "__cloud__/addLearner",
+      "type": "cloud",
+      "nodeCount": 12,
+      "connectionCount": 53,
+      "modified": "2026-11-12T18:51:30.806Z",
+      "created": "2026-11-07T21:26:45.986Z"
+    },
+    "__cloud__/roster": {
+      "path": "__cloud__/roster",
+      "type": "cloud",
+      "nodeCount": 6,
+      "connectionCount": 14,
+      "modified": "2026-11-12T13:37:36.325Z",
+      "created": "2026-11-07T21:27:03.005Z"
+    },
+    "Strings": {
+      "path": "Strings",
+      "type": "logic",
+      "nodeCount": 3,
+      "connectionCount": 4,
+      "modified": "2026-11-12T19:42:20.085Z",
+      "created": "2026-11-07T21:32:44.491Z"
+    },
+    "Pages/Not found": {
+      "path": "Pages/Not found",
+      "type": "page",
+      "nodeCount": 10,
+      "connectionCount": 4,
+      "modified": "2026-11-07T21:35:06.171Z",
+      "created": "2026-11-07T21:35:06.171Z"
+    },
+    "People/Roster row": {
+      "path": "People/Roster row",
+      "type": "visual",
+      "nodeCount": 12,
+      "connectionCount": 9,
+      "modified": "2026-11-12T17:14:48.589Z",
+      "created": "2026-11-07T21:35:43.012Z"
+    },
+    "People/Add learner": {
+      "path": "People/Add learner",
+      "type": "visual",
+      "nodeCount": 30,
+      "connectionCount": 32,
+      "modified": "2026-11-07T21:36:13.358Z",
+      "created": "2026-11-07T21:36:13.358Z"
+    },
+    "__cloud__/library": {
+      "path": "__cloud__/library",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 6,
+      "modified": "2026-11-07T21:59:33.701Z",
+      "created": "2026-11-07T21:59:33.701Z"
+    },
+    "__cloud__/saveLibraryItem": {
+      "path": "__cloud__/saveLibraryItem",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 16,
+      "modified": "2026-11-07T22:00:06.636Z",
+      "created": "2026-11-07T22:00:06.636Z"
+    },
+    "__cloud__/duplicateLibraryItem": {
+      "path": "__cloud__/duplicateLibraryItem",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 9,
+      "modified": "2026-11-07T22:00:36.092Z",
+      "created": "2026-11-07T22:00:36.092Z"
+    },
+    "__cloud__/archiveLibraryItem": {
+      "path": "__cloud__/archiveLibraryItem",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 8,
+      "modified": "2026-11-07T22:00:36.154Z",
+      "created": "2026-11-07T22:00:36.154Z"
+    },
+    "__cloud__/resourceLink": {
+      "path": "__cloud__/resourceLink",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 11,
+      "modified": "2026-11-07T22:00:36.203Z",
+      "created": "2026-11-07T22:00:36.203Z"
+    },
+    "Shell/Formatted text": {
+      "path": "Shell/Formatted text",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 1,
+      "modified": "2026-11-07T22:05:47.705Z",
+      "created": "2026-11-07T22:05:47.705Z"
+    },
+    "Library/Tag chip": {
+      "path": "Library/Tag chip",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 1,
+      "modified": "2026-11-07T22:12:47.835Z",
+      "created": "2026-11-07T22:12:47.835Z"
+    },
+    "Library/Library row": {
+      "path": "Library/Library row",
+      "type": "visual",
+      "nodeCount": 21,
+      "connectionCount": 17,
+      "modified": "2026-11-07T22:16:29.320Z",
+      "created": "2026-11-07T22:12:47.836Z"
+    },
+    "Library/Library list": {
+      "path": "Library/Library list",
+      "type": "visual",
+      "nodeCount": 20,
+      "connectionCount": 18,
+      "modified": "2026-11-07T22:12:47.837Z",
+      "created": "2026-11-07T22:12:47.837Z"
+    },
+    "Library/Checklist row": {
+      "path": "Library/Checklist row",
+      "type": "visual",
+      "nodeCount": 13,
+      "connectionCount": 12,
+      "modified": "2026-11-07T22:16:29.429Z",
+      "created": "2026-11-07T22:12:47.839Z"
+    },
+    "Library/Resource row": {
+      "path": "Library/Resource row",
+      "type": "visual",
+      "nodeCount": 22,
+      "connectionCount": 22,
+      "modified": "2026-11-07T22:12:47.840Z",
+      "created": "2026-11-07T22:12:47.840Z"
+    },
+    "Library/Checklist editor": {
+      "path": "Library/Checklist editor",
+      "type": "visual",
+      "nodeCount": 13,
+      "connectionCount": 10,
+      "modified": "2026-11-07T22:16:53.163Z",
+      "created": "2026-11-07T22:12:47.843Z"
+    },
+    "Library/Resources editor": {
+      "path": "Library/Resources editor",
+      "type": "visual",
+      "nodeCount": 28,
+      "connectionCount": 36,
+      "modified": "2026-11-07T22:12:47.846Z",
+      "created": "2026-11-07T22:12:47.846Z"
+    },
+    "Library/Brief editor": {
+      "path": "Library/Brief editor",
+      "type": "visual",
+      "nodeCount": 11,
+      "connectionCount": 7,
+      "modified": "2026-11-07T22:12:47.850Z",
+      "created": "2026-11-07T22:12:47.850Z"
+    },
+    "Library/Homework editor": {
+      "path": "Library/Homework editor",
+      "type": "visual",
+      "nodeCount": 29,
+      "connectionCount": 45,
+      "modified": "2026-11-07T22:12:47.852Z",
+      "created": "2026-11-07T22:12:47.852Z"
+    },
+    "__cloud__/shared/Steps from template": {
+      "path": "__cloud__/shared/Steps from template",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 10,
+      "modified": "2026-11-12T14:30:36.310Z",
+      "created": "2026-11-09T10:25:01.275Z"
+    },
+    "__cloud__/addStep": {
+      "path": "__cloud__/addStep",
+      "type": "cloud",
+      "nodeCount": 6,
+      "connectionCount": 13,
+      "modified": "2026-11-12T14:26:53.352Z",
+      "created": "2026-11-09T10:26:03.450Z"
+    },
+    "__cloud__/saveStep": {
+      "path": "__cloud__/saveStep",
+      "type": "cloud",
+      "nodeCount": 6,
+      "connectionCount": 25,
+      "modified": "2026-11-12T14:38:36.084Z",
+      "created": "2026-11-09T10:26:43.665Z"
+    },
+    "__cloud__/moveStep": {
+      "path": "__cloud__/moveStep",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 9,
+      "modified": "2026-11-09T10:32:33.630Z",
+      "created": "2026-11-09T10:27:10.098Z"
+    },
+    "__cloud__/removeStep": {
+      "path": "__cloud__/removeStep",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 8,
+      "modified": "2026-11-12T14:30:12.095Z",
+      "created": "2026-11-09T10:27:10.362Z"
+    },
+    "__cloud__/shareSteps": {
+      "path": "__cloud__/shareSteps",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 12,
+      "modified": "2026-11-12T14:29:51.708Z",
+      "created": "2026-11-09T10:27:53.460Z"
+    },
+    "__cloud__/savePlan": {
+      "path": "__cloud__/savePlan",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 11,
+      "modified": "2026-11-09T11:08:36.041Z",
+      "created": "2026-11-09T10:27:53.536Z"
+    },
+    "__cloud__/applyTemplate": {
+      "path": "__cloud__/applyTemplate",
+      "type": "cloud",
+      "nodeCount": 6,
+      "connectionCount": 13,
+      "modified": "2026-11-09T10:28:19.148Z",
+      "created": "2026-11-09T10:28:19.148Z"
+    },
+    "__cloud__/planTemplates": {
+      "path": "__cloud__/planTemplates",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 6,
+      "modified": "2026-11-09T10:28:30.924Z",
+      "created": "2026-11-09T10:28:19.210Z"
+    },
+    "__cloud__/savePlanTemplate": {
+      "path": "__cloud__/savePlanTemplate",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 11,
+      "modified": "2026-11-09T10:29:14.896Z",
+      "created": "2026-11-09T10:29:14.896Z"
+    },
+    "__cloud__/templateFromPlan": {
+      "path": "__cloud__/templateFromPlan",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 11,
+      "modified": "2026-11-09T10:29:14.982Z",
+      "created": "2026-11-09T10:29:14.982Z"
+    },
+    "__cloud__/archivePlanTemplate": {
+      "path": "__cloud__/archivePlanTemplate",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 8,
+      "modified": "2026-11-09T10:29:15.074Z",
+      "created": "2026-11-09T10:29:15.074Z"
+    },
+    "Date Picker": {
+      "path": "Date Picker",
+      "type": "visual",
+      "nodeCount": 8,
+      "connectionCount": 24,
+      "modified": "2026-11-09T10:33:53.258Z",
+      "created": "2026-11-09T10:33:53.258Z"
+    },
+    "Option sets/Step kinds": {
+      "path": "Option sets/Step kinds",
+      "type": "visual",
+      "nodeCount": 2,
+      "connectionCount": 2,
+      "modified": "2026-11-09T12:34:20.217Z",
+      "created": "2026-11-09T10:37:17.275Z"
+    },
+    "Option sets/Step statuses": {
+      "path": "Option sets/Step statuses",
+      "type": "visual",
+      "nodeCount": 2,
+      "connectionCount": 2,
+      "modified": "2026-11-09T10:37:17.536Z",
+      "created": "2026-11-09T10:37:17.536Z"
+    },
+    "Option sets/Plan statuses": {
+      "path": "Option sets/Plan statuses",
+      "type": "visual",
+      "nodeCount": 2,
+      "connectionCount": 2,
+      "modified": "2026-11-09T10:37:17.887Z",
+      "created": "2026-11-09T10:37:17.887Z"
+    },
+    "Option sets/Session times": {
+      "path": "Option sets/Session times",
+      "type": "visual",
+      "nodeCount": 2,
+      "connectionCount": 2,
+      "modified": "2026-11-09T10:37:18.459Z",
+      "created": "2026-11-09T10:37:18.459Z"
+    },
+    "Plan/Chip": {
+      "path": "Plan/Chip",
+      "type": "visual",
+      "nodeCount": 5,
+      "connectionCount": 6,
+      "modified": "2026-11-09T10:38:49.139Z",
+      "created": "2026-11-09T10:38:43.917Z"
+    },
+    "Plan/Count tile": {
+      "path": "Plan/Count tile",
+      "type": "visual",
+      "nodeCount": 5,
+      "connectionCount": 5,
+      "modified": "2026-11-09T10:38:57.358Z",
+      "created": "2026-11-09T10:38:57.358Z"
+    },
+    "Plan/Calendar links": {
+      "path": "Plan/Calendar links",
+      "type": "visual",
+      "nodeCount": 8,
+      "connectionCount": 17,
+      "modified": "2026-11-09T12:44:49.291Z",
+      "created": "2026-11-09T10:39:29.295Z"
+    },
+    "Plan/Live editor": {
+      "path": "Plan/Live editor",
+      "type": "visual",
+      "nodeCount": 33,
+      "connectionCount": 60,
+      "modified": "2026-11-09T10:40:21.872Z",
+      "created": "2026-11-09T10:40:21.872Z"
+    },
+    "Plan/Homework step editor": {
+      "path": "Plan/Homework step editor",
+      "type": "visual",
+      "nodeCount": 24,
+      "connectionCount": 38,
+      "modified": "2026-11-09T10:41:17.583Z",
+      "created": "2026-11-09T10:41:17.583Z"
+    },
+    "Plan/Check-in editor": {
+      "path": "Plan/Check-in editor",
+      "type": "visual",
+      "nodeCount": 43,
+      "connectionCount": 69,
+      "modified": "2026-11-12T15:00:23.514Z",
+      "created": "2026-11-09T10:41:17.661Z"
+    },
+    "Plan/Step actions": {
+      "path": "Plan/Step actions",
+      "type": "visual",
+      "nodeCount": 27,
+      "connectionCount": 34,
+      "modified": "2026-11-09T10:42:25.553Z",
+      "created": "2026-11-09T10:42:25.553Z"
+    },
+    "Plan/Step row": {
+      "path": "Plan/Step row",
+      "type": "visual",
+      "nodeCount": 30,
+      "connectionCount": 60,
+      "modified": "2026-11-12T14:58:22.170Z",
+      "created": "2026-11-09T10:43:14.918Z"
+    },
+    "Plan/Add steps": {
+      "path": "Plan/Add steps",
+      "type": "visual",
+      "nodeCount": 24,
+      "connectionCount": 43,
+      "modified": "2026-11-09T10:44:37.852Z",
+      "created": "2026-11-09T10:44:37.852Z"
+    },
+    "Plan/Step list": {
+      "path": "Plan/Step list",
+      "type": "visual",
+      "nodeCount": 24,
+      "connectionCount": 49,
+      "modified": "2026-11-09T13:14:49.248Z",
+      "created": "2026-11-09T10:45:26.402Z"
+    },
+    "Plan/Library pick row": {
+      "path": "Plan/Library pick row",
+      "type": "visual",
+      "nodeCount": 8,
+      "connectionCount": 4,
+      "modified": "2026-11-09T10:46:13.538Z",
+      "created": "2026-11-09T10:46:13.538Z"
+    },
+    "Plan/Library picker": {
+      "path": "Plan/Library picker",
+      "type": "visual",
+      "nodeCount": 22,
+      "connectionCount": 23,
+      "modified": "2026-11-09T10:46:15.185Z",
+      "created": "2026-11-09T10:46:15.185Z"
+    },
+    "Plan/Plan settings": {
+      "path": "Plan/Plan settings",
+      "type": "visual",
+      "nodeCount": 27,
+      "connectionCount": 38,
+      "modified": "2026-11-09T10:47:25.892Z",
+      "created": "2026-11-09T10:47:25.892Z"
+    },
+    "Plan/Template saver": {
+      "path": "Plan/Template saver",
+      "type": "visual",
+      "nodeCount": 23,
+      "connectionCount": 30,
+      "modified": "2026-11-09T10:47:26.625Z",
+      "created": "2026-11-09T10:47:26.625Z"
+    },
+    "Plan/Plan head": {
+      "path": "Plan/Plan head",
+      "type": "visual",
+      "nodeCount": 38,
+      "connectionCount": 45,
+      "modified": "2026-11-09T11:07:50.249Z",
+      "created": "2026-11-09T10:48:28.458Z"
+    },
+    "Plan/Plan in words": {
+      "path": "Plan/Plan in words",
+      "type": "logic",
+      "nodeCount": 22,
+      "connectionCount": 41,
+      "modified": "2026-11-12T14:58:01.598Z",
+      "created": "2026-11-09T10:49:31.957Z"
+    },
+    "Pages/Learner plan": {
+      "path": "Pages/Learner plan",
+      "type": "page",
+      "nodeCount": 57,
+      "connectionCount": 99,
+      "modified": "2026-11-12T15:00:17.574Z",
+      "created": "2026-11-09T10:50:52.788Z"
+    },
+    "Templates/Template item row": {
+      "path": "Templates/Template item row",
+      "type": "visual",
+      "nodeCount": 28,
+      "connectionCount": 32,
+      "modified": "2026-11-09T11:02:56.614Z",
+      "created": "2026-11-09T11:02:56.614Z"
+    },
+    "Templates/Template editor": {
+      "path": "Templates/Template editor",
+      "type": "visual",
+      "nodeCount": 51,
+      "connectionCount": 65,
+      "modified": "2026-11-09T11:04:43.260Z",
+      "created": "2026-11-09T11:04:15.901Z"
+    },
+    "Templates/Template row": {
+      "path": "Templates/Template row",
+      "type": "visual",
+      "nodeCount": 18,
+      "connectionCount": 15,
+      "modified": "2026-11-09T11:05:56.956Z",
+      "created": "2026-11-09T11:05:56.956Z"
+    },
+    "__cloud__/learnerHome": {
+      "path": "__cloud__/learnerHome",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 17,
+      "modified": "2026-11-12T14:35:50.158Z",
+      "created": "2026-11-09T12:30:59.109Z"
+    },
+    "Home/Home in words": {
+      "path": "Home/Home in words",
+      "type": "visual",
+      "nodeCount": 5,
+      "connectionCount": 48,
+      "modified": "2026-11-12T14:55:53.202Z",
+      "created": "2026-11-09T12:38:48.390Z"
+    },
+    "Home/Homework next": {
+      "path": "Home/Homework next",
+      "type": "visual",
+      "nodeCount": 19,
+      "connectionCount": 15,
+      "modified": "2026-11-09T12:38:48.394Z",
+      "created": "2026-11-09T12:38:48.394Z"
+    },
+    "Home/Session next": {
+      "path": "Home/Session next",
+      "type": "visual",
+      "nodeCount": 23,
+      "connectionCount": 29,
+      "modified": "2026-11-09T12:38:48.398Z",
+      "created": "2026-11-09T12:38:48.398Z"
+    },
+    "Home/Up next": {
+      "path": "Home/Up next",
+      "type": "visual",
+      "nodeCount": 7,
+      "connectionCount": 28,
+      "modified": "2026-11-09T12:38:48.401Z",
+      "created": "2026-11-09T12:38:48.401Z"
+    },
+    "Home/Programme row": {
+      "path": "Home/Programme row",
+      "type": "visual",
+      "nodeCount": 21,
+      "connectionCount": 29,
+      "modified": "2026-11-12T14:55:55.455Z",
+      "created": "2026-11-09T12:38:48.404Z"
+    },
+    "Home/Programme": {
+      "path": "Home/Programme",
+      "type": "visual",
+      "nodeCount": 10,
+      "connectionCount": 6,
+      "modified": "2026-11-09T12:38:48.408Z",
+      "created": "2026-11-09T12:38:48.408Z"
+    },
+    "Home/Progress": {
+      "path": "Home/Progress",
+      "type": "visual",
+      "nodeCount": 10,
+      "connectionCount": 6,
+      "modified": "2026-11-09T12:38:48.410Z",
+      "created": "2026-11-09T12:38:48.410Z"
+    },
+    "Home/Made card": {
+      "path": "Home/Made card",
+      "type": "visual",
+      "nodeCount": 16,
+      "connectionCount": 16,
+      "modified": "2026-11-12T13:50:21.964Z",
+      "created": "2026-11-09T12:38:48.413Z"
+    },
+    "__cloud__/myHomework": {
+      "path": "__cloud__/myHomework",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 10,
+      "modified": "2026-11-12T08:48:04.483Z",
+      "created": "2026-11-09T13:00:52.191Z"
+    },
+    "__cloud__/handIn": {
+      "path": "__cloud__/handIn",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 17,
+      "modified": "2026-11-12T18:51:54.758Z",
+      "created": "2026-11-09T13:01:25.059Z"
+    },
+    "Option sets/Hand-in kinds": {
+      "path": "Option sets/Hand-in kinds",
+      "type": "visual",
+      "nodeCount": 2,
+      "connectionCount": 2,
+      "modified": "2026-11-09T13:13:56.111Z",
+      "created": "2026-11-09T13:13:56.111Z"
+    },
+    "Option sets/Review verdicts": {
+      "path": "Option sets/Review verdicts",
+      "type": "visual",
+      "nodeCount": 2,
+      "connectionCount": 2,
+      "modified": "2026-11-09T13:19:29.891Z",
+      "created": "2026-11-09T13:13:56.113Z"
+    },
+    "Work/File viewer": {
+      "path": "Work/File viewer",
+      "type": "visual",
+      "nodeCount": 22,
+      "connectionCount": 34,
+      "modified": "2026-11-09T13:17:43.299Z",
+      "created": "2026-11-09T13:13:56.114Z"
+    },
+    "Work/Review": {
+      "path": "Work/Review",
+      "type": "visual",
+      "nodeCount": 18,
+      "connectionCount": 25,
+      "modified": "2026-11-09T13:13:56.116Z",
+      "created": "2026-11-09T13:13:56.116Z"
+    },
+    "Work/Version row": {
+      "path": "Work/Version row",
+      "type": "visual",
+      "nodeCount": 29,
+      "connectionCount": 33,
+      "modified": "2026-11-12T08:53:07.312Z",
+      "created": "2026-11-09T13:13:56.117Z"
+    },
+    "Work/Versions": {
+      "path": "Work/Versions",
+      "type": "visual",
+      "nodeCount": 10,
+      "connectionCount": 11,
+      "modified": "2026-11-12T08:53:25.083Z",
+      "created": "2026-11-09T13:13:56.119Z"
+    },
+    "Homework/Hand in": {
+      "path": "Homework/Hand in",
+      "type": "visual",
+      "nodeCount": 70,
+      "connectionCount": 115,
+      "modified": "2026-11-12T13:49:59.760Z",
+      "created": "2026-11-09T13:13:56.121Z"
+    },
+    "Homework/Checklist item": {
+      "path": "Homework/Checklist item",
+      "type": "visual",
+      "nodeCount": 7,
+      "connectionCount": 3,
+      "modified": "2026-11-09T13:13:56.123Z",
+      "created": "2026-11-09T13:13:56.123Z"
+    },
+    "Homework/Resource item": {
+      "path": "Homework/Resource item",
+      "type": "visual",
+      "nodeCount": 14,
+      "connectionCount": 13,
+      "modified": "2026-11-09T13:13:56.124Z",
+      "created": "2026-11-09T13:13:56.124Z"
+    },
+    "Homework/Brief card": {
+      "path": "Homework/Brief card",
+      "type": "visual",
+      "nodeCount": 24,
+      "connectionCount": 17,
+      "modified": "2026-11-09T13:17:09.518Z",
+      "created": "2026-11-09T13:13:56.126Z"
+    },
+    "Homework/Verdict": {
+      "path": "Homework/Verdict",
+      "type": "visual",
+      "nodeCount": 7,
+      "connectionCount": 11,
+      "modified": "2026-11-09T13:13:56.127Z",
+      "created": "2026-11-09T13:13:56.127Z"
+    },
+    "Homework/Homework row": {
+      "path": "Homework/Homework row",
+      "type": "visual",
+      "nodeCount": 12,
+      "connectionCount": 14,
+      "modified": "2026-11-09T13:17:08.875Z",
+      "created": "2026-11-09T13:13:56.128Z"
+    },
+    "Homework/Homework in words": {
+      "path": "Homework/Homework in words",
+      "type": "visual",
+      "nodeCount": 4,
+      "connectionCount": 40,
+      "modified": "2026-11-09T13:13:56.130Z",
+      "created": "2026-11-09T13:13:56.130Z"
+    },
+    "Work/Version file": {
+      "path": "Work/Version file",
+      "type": "visual",
+      "nodeCount": 6,
+      "connectionCount": 4,
+      "modified": "2026-11-12T08:52:55.358Z",
+      "created": "2026-11-12T08:52:55.358Z"
+    },
+    "Homework/Chosen file": {
+      "path": "Homework/Chosen file",
+      "type": "visual",
+      "nodeCount": 9,
+      "connectionCount": 6,
+      "modified": "2026-11-12T08:52:55.667Z",
+      "created": "2026-11-12T08:52:55.667Z"
+    },
+    "__cloud__/shared/Message mail": {
+      "path": "__cloud__/shared/Message mail",
+      "type": "cloud",
+      "nodeCount": 3,
+      "connectionCount": 4,
+      "modified": "2026-11-12T18:50:05.392Z",
+      "created": "2026-11-12T10:09:30.806Z"
+    },
+    "__cloud__/sendMessage": {
+      "path": "__cloud__/sendMessage",
+      "type": "cloud",
+      "nodeCount": 6,
+      "connectionCount": 12,
+      "modified": "2026-11-12T10:09:53.984Z",
+      "created": "2026-11-12T10:09:53.984Z"
+    },
+    "__cloud__/replyAsCoach": {
+      "path": "__cloud__/replyAsCoach",
+      "type": "cloud",
+      "nodeCount": 6,
+      "connectionCount": 12,
+      "modified": "2026-11-12T10:10:10.701Z",
+      "created": "2026-11-12T10:10:10.701Z"
+    },
+    "__cloud__/myMessages": {
+      "path": "__cloud__/myMessages",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 10,
+      "modified": "2026-11-12T18:51:31.092Z",
+      "created": "2026-11-12T10:10:26.465Z"
+    },
+    "__cloud__/messagesAsCoach": {
+      "path": "__cloud__/messagesAsCoach",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 11,
+      "modified": "2026-11-12T10:10:51.979Z",
+      "created": "2026-11-12T10:10:51.979Z"
+    },
+    "__cloud__/myUnread": {
+      "path": "__cloud__/myUnread",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 6,
+      "modified": "2026-11-12T13:07:00.493Z",
+      "created": "2026-11-12T10:10:52.129Z"
+    },
+    "__cloud__/coachUnread": {
+      "path": "__cloud__/coachUnread",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 5,
+      "modified": "2026-11-12T10:10:52.265Z",
+      "created": "2026-11-12T10:10:52.265Z"
+    },
+    "__cloud__/setEmailPreference": {
+      "path": "__cloud__/setEmailPreference",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 9,
+      "modified": "2026-11-12T10:11:29.738Z",
+      "created": "2026-11-12T10:11:29.738Z"
+    },
+    "__cloud__/unsubscribe": {
+      "path": "__cloud__/unsubscribe",
+      "type": "cloud",
+      "nodeCount": 3,
+      "connectionCount": 5,
+      "modified": "2026-11-12T10:11:29.881Z",
+      "created": "2026-11-12T10:11:29.881Z"
+    },
+    "__cloud__/coachSettings": {
+      "path": "__cloud__/coachSettings",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 7,
+      "modified": "2026-11-12T18:50:58.305Z",
+      "created": "2026-11-12T10:11:30.237Z"
+    },
+    "__cloud__/saveCoachSettings": {
+      "path": "__cloud__/saveCoachSettings",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 10,
+      "modified": "2026-11-12T18:50:50.244Z",
+      "created": "2026-11-12T10:11:30.384Z"
+    },
+    "__cloud__/mailMessages": {
+      "path": "__cloud__/mailMessages",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 6,
+      "modified": "2026-11-12T10:11:38.977Z",
+      "created": "2026-11-12T10:11:38.977Z"
+    },
+    "Messages/Message row": {
+      "path": "Messages/Message row",
+      "type": "visual",
+      "nodeCount": 15,
+      "connectionCount": 15,
+      "modified": "2026-11-12T10:17:10.708Z",
+      "created": "2026-11-12T10:17:10.708Z"
+    },
+    "Messages/Composer": {
+      "path": "Messages/Composer",
+      "type": "visual",
+      "nodeCount": 44,
+      "connectionCount": 92,
+      "modified": "2026-11-12T13:09:55.475Z",
+      "created": "2026-11-12T10:18:44.606Z"
+    },
+    "Messages/Conversation": {
+      "path": "Messages/Conversation",
+      "type": "visual",
+      "nodeCount": 29,
+      "connectionCount": 59,
+      "modified": "2026-11-12T10:21:08.338Z",
+      "created": "2026-11-12T10:20:44.053Z"
+    },
+    "Home/Latest from Richard": {
+      "path": "Home/Latest from Richard",
+      "type": "visual",
+      "nodeCount": 18,
+      "connectionCount": 16,
+      "modified": "2026-11-12T10:22:13.281Z",
+      "created": "2026-11-12T10:21:56.537Z"
+    },
+    "Home/Ask Richard": {
+      "path": "Home/Ask Richard",
+      "type": "visual",
+      "nodeCount": 6,
+      "connectionCount": 2,
+      "modified": "2026-11-12T10:21:56.690Z",
+      "created": "2026-11-12T10:21:56.690Z"
+    },
+    "Pages/Unsubscribe": {
+      "path": "Pages/Unsubscribe",
+      "type": "page",
+      "nodeCount": 23,
+      "connectionCount": 23,
+      "modified": "2026-11-12T10:27:57.701Z",
+      "created": "2026-11-12T10:27:57.701Z"
+    },
+    "__cloud__/shared/Inbox items": {
+      "path": "__cloud__/shared/Inbox items",
+      "type": "cloud",
+      "nodeCount": 3,
+      "connectionCount": 6,
+      "modified": "2026-11-12T14:34:16.877Z",
+      "created": "2026-11-12T13:05:37.768Z"
+    },
+    "__cloud__/coachInbox": {
+      "path": "__cloud__/coachInbox",
+      "type": "cloud",
+      "nodeCount": 6,
+      "connectionCount": 11,
+      "modified": "2026-11-12T13:05:48.852Z",
+      "created": "2026-11-12T13:05:48.852Z"
+    },
+    "__cloud__/snoozeQuiet": {
+      "path": "__cloud__/snoozeQuiet",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 9,
+      "modified": "2026-11-12T13:06:14.587Z",
+      "created": "2026-11-12T13:06:14.587Z"
+    },
+    "__cloud__/settleQuestion": {
+      "path": "__cloud__/settleQuestion",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 7,
+      "modified": "2026-11-12T13:06:14.837Z",
+      "created": "2026-11-12T13:06:14.837Z"
+    },
+    "__cloud__/morningRound": {
+      "path": "__cloud__/morningRound",
+      "type": "cloud",
+      "nodeCount": 8,
+      "connectionCount": 17,
+      "modified": "2026-11-12T18:50:31.288Z",
+      "created": "2026-11-12T13:06:52.473Z"
+    },
+    "Option sets/Inbox kinds": {
+      "path": "Option sets/Inbox kinds",
+      "type": "logic",
+      "nodeCount": 2,
+      "connectionCount": 2,
+      "modified": "2026-11-12T14:59:37.524Z",
+      "created": "2026-11-12T13:09:27.924Z"
+    },
+    "Inbox/Fact line": {
+      "path": "Inbox/Fact line",
+      "type": "visual",
+      "nodeCount": 6,
+      "connectionCount": 7,
+      "modified": "2026-11-12T13:09:28.207Z",
+      "created": "2026-11-12T13:09:28.207Z"
+    },
+    "Inbox/Inbox row": {
+      "path": "Inbox/Inbox row",
+      "type": "visual",
+      "nodeCount": 15,
+      "connectionCount": 22,
+      "modified": "2026-11-12T13:09:46.462Z",
+      "created": "2026-11-12T13:09:46.462Z"
+    },
+    "Inbox/Inbox in words": {
+      "path": "Inbox/Inbox in words",
+      "type": "logic",
+      "nodeCount": 4,
+      "connectionCount": 34,
+      "modified": "2026-11-12T14:59:17.689Z",
+      "created": "2026-11-12T13:11:11.219Z"
+    },
+    "Inbox/Review detail": {
+      "path": "Inbox/Review detail",
+      "type": "visual",
+      "nodeCount": 9,
+      "connectionCount": 9,
+      "modified": "2026-11-12T13:12:01.393Z",
+      "created": "2026-11-12T13:12:01.393Z"
+    },
+    "Inbox/Question detail": {
+      "path": "Inbox/Question detail",
+      "type": "visual",
+      "nodeCount": 12,
+      "connectionCount": 11,
+      "modified": "2026-11-12T13:12:01.530Z",
+      "created": "2026-11-12T13:12:01.530Z"
+    },
+    "Inbox/Quiet detail": {
+      "path": "Inbox/Quiet detail",
+      "type": "visual",
+      "nodeCount": 26,
+      "connectionCount": 32,
+      "modified": "2026-11-12T13:12:01.677Z",
+      "created": "2026-11-12T13:12:01.677Z"
+    },
+    "__cloud__/shared/Creations of": {
+      "path": "__cloud__/shared/Creations of",
+      "type": "cloud",
+      "nodeCount": 3,
+      "connectionCount": 5,
+      "modified": "2026-11-12T14:35:24.696Z",
+      "created": "2026-11-12T13:36:03.688Z"
+    },
+    "__cloud__/myCreations": {
+      "path": "__cloud__/myCreations",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 5,
+      "modified": "2026-11-12T14:35:26.263Z",
+      "created": "2026-11-12T13:36:12.446Z"
+    },
+    "__cloud__/creationsAsCoach": {
+      "path": "__cloud__/creationsAsCoach",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 5,
+      "modified": "2026-11-12T14:35:27.867Z",
+      "created": "2026-11-12T13:36:12.781Z"
+    },
+    "__cloud__/saveCreation": {
+      "path": "__cloud__/saveCreation",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 18,
+      "modified": "2026-11-12T13:40:50.575Z",
+      "created": "2026-11-12T13:36:52.618Z"
+    },
+    "__cloud__/deleteCreation": {
+      "path": "__cloud__/deleteCreation",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 8,
+      "modified": "2026-11-12T13:36:52.916Z",
+      "created": "2026-11-12T13:36:52.916Z"
+    },
+    "Option sets/Creation kinds": {
+      "path": "Option sets/Creation kinds",
+      "type": "logic",
+      "nodeCount": 2,
+      "connectionCount": 2,
+      "modified": "2026-11-12T13:56:20.745Z",
+      "created": "2026-11-12T13:42:05.153Z"
+    },
+    "Creations/Creation card": {
+      "path": "Creations/Creation card",
+      "type": "visual",
+      "nodeCount": 20,
+      "connectionCount": 20,
+      "modified": "2026-11-12T13:42:46.503Z",
+      "created": "2026-11-12T13:42:46.503Z"
+    },
+    "Creations/Creation view": {
+      "path": "Creations/Creation view",
+      "type": "visual",
+      "nodeCount": 26,
+      "connectionCount": 25,
+      "modified": "2026-11-12T13:43:18.770Z",
+      "created": "2026-11-12T13:43:18.770Z"
+    },
+    "Creations/Creation editor": {
+      "path": "Creations/Creation editor",
+      "type": "visual",
+      "nodeCount": 97,
+      "connectionCount": 180,
+      "modified": "2026-11-12T13:56:50.080Z",
+      "created": "2026-11-12T13:47:19.755Z"
+    },
+    "Creations/Filter chip": {
+      "path": "Creations/Filter chip",
+      "type": "visual",
+      "nodeCount": 9,
+      "connectionCount": 12,
+      "modified": "2026-11-12T13:47:54.566Z",
+      "created": "2026-11-12T13:47:54.566Z"
+    },
+    "Creations/Creation shelf": {
+      "path": "Creations/Creation shelf",
+      "type": "visual",
+      "nodeCount": 15,
+      "connectionCount": 39,
+      "modified": "2026-11-12T13:56:51.340Z",
+      "created": "2026-11-12T13:48:30.271Z"
+    },
+    "__cloud__/shared/Checkin forms": {
+      "path": "__cloud__/shared/Checkin forms",
+      "type": "cloud",
+      "nodeCount": 3,
+      "connectionCount": 3,
+      "modified": "2026-11-12T14:26:19.685Z",
+      "created": "2026-11-12T14:26:19.685Z"
+    },
+    "__cloud__/sendCheckins": {
+      "path": "__cloud__/sendCheckins",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 7,
+      "modified": "2026-11-12T14:38:35.124Z",
+      "created": "2026-11-12T14:31:38.218Z"
+    },
+    "__cloud__/myCheckin": {
+      "path": "__cloud__/myCheckin",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 10,
+      "modified": "2026-11-12T14:32:57.003Z",
+      "created": "2026-11-12T14:32:57.003Z"
+    },
+    "__cloud__/answerCheckin": {
+      "path": "__cloud__/answerCheckin",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 10,
+      "modified": "2026-11-12T14:32:57.346Z",
+      "created": "2026-11-12T14:32:57.346Z"
+    },
+    "__cloud__/settleCheckin": {
+      "path": "__cloud__/settleCheckin",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 7,
+      "modified": "2026-11-12T14:33:10.189Z",
+      "created": "2026-11-12T14:33:10.189Z"
+    },
+    "Option sets/Check-in forms": {
+      "path": "Option sets/Check-in forms",
+      "type": "logic",
+      "nodeCount": 2,
+      "connectionCount": 2,
+      "modified": "2026-11-12T14:51:42.962Z",
+      "created": "2026-11-12T14:51:42.962Z"
+    },
+    "Checkin/Choice": {
+      "path": "Checkin/Choice",
+      "type": "visual",
+      "nodeCount": 4,
+      "connectionCount": 7,
+      "modified": "2026-11-12T14:51:51.798Z",
+      "created": "2026-11-12T14:51:51.798Z"
+    },
+    "Checkin/Question": {
+      "path": "Checkin/Question",
+      "type": "visual",
+      "nodeCount": 22,
+      "connectionCount": 33,
+      "modified": "2026-11-12T14:52:28.406Z",
+      "created": "2026-11-12T14:52:23.310Z"
+    },
+    "Checkin/Form": {
+      "path": "Checkin/Form",
+      "type": "visual",
+      "nodeCount": 10,
+      "connectionCount": 9,
+      "modified": "2026-11-12T14:52:59.759Z",
+      "created": "2026-11-12T14:52:59.759Z"
+    },
+    "Checkin/Answer row": {
+      "path": "Checkin/Answer row",
+      "type": "visual",
+      "nodeCount": 7,
+      "connectionCount": 10,
+      "modified": "2026-11-12T14:53:12.411Z",
+      "created": "2026-11-12T14:53:12.411Z"
+    },
+    "Checkin/Answers": {
+      "path": "Checkin/Answers",
+      "type": "visual",
+      "nodeCount": 4,
+      "connectionCount": 4,
+      "modified": "2026-11-12T14:53:30.030Z",
+      "created": "2026-11-12T14:53:30.030Z"
+    },
+    "Pages/Check-in": {
+      "path": "Pages/Check-in",
+      "type": "page",
+      "nodeCount": 30,
+      "connectionCount": 32,
+      "modified": "2026-11-12T14:54:12.368Z",
+      "created": "2026-11-12T14:54:12.368Z"
+    },
+    "Inbox/Checkin detail": {
+      "path": "Inbox/Checkin detail",
+      "type": "visual",
+      "nodeCount": 15,
+      "connectionCount": 16,
+      "modified": "2026-11-12T14:59:38.318Z",
+      "created": "2026-11-12T14:59:38.318Z"
+    },
+    "Creations/Estimate line": {
+      "path": "Creations/Estimate line",
+      "type": "visual",
+      "nodeCount": 7,
+      "connectionCount": 8,
+      "modified": "2026-11-12T15:00:13.788Z",
+      "created": "2026-11-12T15:00:13.788Z"
+    },
+    "Demo/Demo mode": {
+      "path": "Demo/Demo mode",
+      "type": "logic",
+      "nodeCount": 2,
+      "connectionCount": 6,
+      "modified": "2026-11-12T16:56:43.699Z",
+      "created": "2026-11-12T16:56:43.699Z"
+    },
+    "Demo/Demo intro": {
+      "path": "Demo/Demo intro",
+      "type": "visual",
+      "nodeCount": 19,
+      "connectionCount": 13,
+      "modified": "2026-11-12T16:57:24.951Z",
+      "created": "2026-11-12T16:57:24.951Z"
+    },
+    "Demo/Demo strip": {
+      "path": "Demo/Demo strip",
+      "type": "visual",
+      "nodeCount": 15,
+      "connectionCount": 10,
+      "modified": "2026-11-12T16:58:04.546Z",
+      "created": "2026-11-12T16:58:04.546Z"
+    },
+    "__cloud__/coachName": {
+      "path": "__cloud__/coachName",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 5,
+      "modified": "2026-11-12T18:51:09.068Z",
+      "created": "2026-11-12T18:51:09.068Z"
+    }
+  },
+  "stats": {
+    "totalComponents": 166,
+    "totalNodes": 2231,
+    "totalConnections": 3328
+  }
+}

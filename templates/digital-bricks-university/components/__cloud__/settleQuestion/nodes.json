@@ -1,0 +1,99 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "107775b5-def1-54a8-8621-ac0b1251acc7",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sx_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach says no reply is needed",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "messageId",
+        "allowNoAuth": false,
+        "ptype-messageId": "string",
+        "preq-messageId": true
+      }
+    },
+    {
+      "id": "sx_fn",
+      "type": "JavaScriptFunction",
+      "label": "Settle her newest message",
+      "x": 40,
+      "y": 180,
+      "parameters": {
+        "runOnChange-in-messageId": false,
+        "functionScript": "/*\n * \"NO REPLY NEEDED\" (DBU-08). role:staff is checked by nodegx.security.json.\n * The message must be the newest in its conversation and the learner's own: a question that has\n * since been answered, or followed by another of hers, is refused (the page re-reads and shows the\n * newer one). Settling also marks it read. Rings a staff-only bell so every open inbox re-reads.\n */\n(async () => {\n  const refuse = (why) => { Outputs.why = why; Outputs.refuse(); };\n  try {\n    const q = (c, where) => Noodl.Records.query(c, where, { limit: 1000, plain: true });\n    const id = String(Inputs.messageId || '');\n    const found = id ? await q('Message', { objectId: { equalTo: id } }) : [];\n    const m = found[0];\n    if (!m || m.author !== m.learner) return refuse('This message could not be found. Reload the page.');\n    const all = (await q('Message', { learner: { equalTo: m.learner } })).sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));\n    if (all[all.length - 1].objectId !== m.objectId) return refuse('Something newer has arrived in this conversation. Reload the page.');\n    const now = new Date().toISOString();\n    await Noodl.Records.save(m.objectId, { settledAt: m.settledAt || now, readAt: m.readAt || now }, { className: 'Message' });\n    await Noodl.Records.create('Doorbell', { learner: m.learner, topic: 'inbox' }, { acl: { 'role:staff': { read: true } } });\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:settleQuestion]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-messageId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "messageId",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "done",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-why",
+          "plug": "output",
+          "type": "*",
+          "displayName": "why",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "refuse",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "failed",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "sx_res",
+      "type": "noodl.cloud.response",
+      "label": "Settled",
+      "x": 40,
+      "y": 320,
+      "parameters": {
+        "params": ""
+      }
+    },
+    {
+      "id": "sx_deny",
+      "type": "noodl.cloud.response",
+      "label": "A refusal the coach can act on",
+      "x": 320,
+      "y": 320,
+      "parameters": {
+        "status": "failure"
+      }
+    },
+    {
+      "id": "sx_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "x": 600,
+      "y": 320,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "This could not be saved. Try again in a moment."
+      }
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+# What a DEPLOY of this project must not publish (DBU-12; the reference template's lesson, TASK-L183).
+# nodegx-deploy copies every file no rule excludes into the public site.
+backend/
+tools/
+hosting/
+docs/
+.previews/
+# The policy and the schedules belong to the backend (hosting/provision.sh installs them).
+nodegx.security.json
+nodegx.automations.json

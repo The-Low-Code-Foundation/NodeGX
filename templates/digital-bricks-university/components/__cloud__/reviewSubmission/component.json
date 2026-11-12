@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d36c76b1-aa34-5649-8c7c-e8b977b66258",
+  "name": "reviewSubmission",
+  "path": "/#__cloud__/reviewSubmission",
+  "type": "cloud",
+  "created": "2026-11-07T21:04:06.894Z",
+  "modified": "2026-11-09T13:01:52.881Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach approves a hand-in or asks for changes (SCOPE R6), which also moves the homework step's status and rings the learner's doorbell (security: role:staff). The only way a verdict is ever set. Only the newest version, only once, and asking for changes needs a note."
+}

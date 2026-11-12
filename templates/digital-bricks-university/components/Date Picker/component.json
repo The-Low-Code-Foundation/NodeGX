@@ -1,0 +1,8 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "7ac14f14-cdd5-8f31-9c7c-1520274e56b4",
+  "name": "Date Picker",
+  "path": "/Date Picker",
+  "type": "visual",
+  "modified": "2026-11-09T10:33:53.249Z"
+}

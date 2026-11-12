@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "3967551f-8600-504f-8b8b-0407fccf05ae",
+  "name": "Check-in",
+  "path": "/Pages/Check-in",
+  "type": "page",
+  "created": "2026-11-12T14:54:10.864Z",
+  "modified": "2026-11-12T14:54:10.864Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A learner answers one of her check-ins (/checkin?step=, the link in the email and on Home): not open yet, the questions with Send, or her answers once sent."
+}

@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "36b9556f-64c2-50f9-8fb4-1b943ba34a3b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cal_t_ics",
+      "fromProperty": "Translation",
+      "toId": "cal_ics",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "cal_t_g",
+      "fromProperty": "Translation",
+      "toId": "cal_google",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "cal_in",
+      "fromProperty": "stepId",
+      "toId": "cal_ics_fn",
+      "toProperty": "in-stepId"
+    },
+    {
+      "fromId": "cal_in",
+      "fromProperty": "title",
+      "toId": "cal_ics_fn",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "cal_in",
+      "fromProperty": "startsAt",
+      "toId": "cal_ics_fn",
+      "toProperty": "in-startsAt"
+    },
+    {
+      "fromId": "cal_in",
+      "fromProperty": "durationMin",
+      "toId": "cal_ics_fn",
+      "toProperty": "in-durationMin"
+    },
+    {
+      "fromId": "cal_in",
+      "fromProperty": "meetingLink",
+      "toId": "cal_ics_fn",
+      "toProperty": "in-meetingLink"
+    },
+    {
+      "fromId": "cal_in",
+      "fromProperty": "details",
+      "toId": "cal_ics_fn",
+      "toProperty": "in-details"
+    },
+    {
+      "fromId": "cal_in",
+      "fromProperty": "attendeeName",
+      "toId": "cal_ics_fn",
+      "toProperty": "in-attendeeName"
+    },
+    {
+      "fromId": "cal_in",
+      "fromProperty": "attendeeEmail",
+      "toId": "cal_ics_fn",
+      "toProperty": "in-attendeeEmail"
+    },
+    {
+      "fromId": "cal_ics",
+      "fromProperty": "onClick",
+      "toId": "cal_ics_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cal_in",
+      "fromProperty": "title",
+      "toId": "cal_g_fn",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "cal_in",
+      "fromProperty": "startsAt",
+      "toId": "cal_g_fn",
+      "toProperty": "in-startsAt"
+    },
+    {
+      "fromId": "cal_in",
+      "fromProperty": "durationMin",
+      "toId": "cal_g_fn",
+      "toProperty": "in-durationMin"
+    },
+    {
+      "fromId": "cal_in",
+      "fromProperty": "meetingLink",
+      "toId": "cal_g_fn",
+      "toProperty": "in-meetingLink"
+    },
+    {
+      "fromId": "cal_in",
+      "fromProperty": "details",
+      "toId": "cal_g_fn",
+      "toProperty": "in-details"
+    },
+    {
+      "fromId": "cal_google",
+      "fromProperty": "onClick",
+      "toId": "cal_g_fn",
+      "toProperty": "run"
+    }
+  ]
+}

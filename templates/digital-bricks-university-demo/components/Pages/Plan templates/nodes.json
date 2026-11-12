@@ -1,0 +1,634 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "bc63d8c9-c7ca-550e-812a-df5cd185c3cf",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pt_page",
+      "type": "Page",
+      "label": "Plan templates",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "pt_shell"
+      ],
+      "parameters": {
+        "urlPath": "coach/templates"
+      }
+    },
+    {
+      "id": "pt_shell",
+      "type": "/Shell/App shell",
+      "label": "Coach shell",
+      "x": 100,
+      "y": 160,
+      "parent": "pt_page",
+      "children": [
+        "pt_top",
+        "pt_said",
+        "pt_edit_box",
+        "pt_list_box",
+        "pt_failed"
+      ],
+      "parameters": {
+        "coach": true,
+        "current": "templates"
+      }
+    },
+    {
+      "id": "pt_top",
+      "type": "Group",
+      "label": "Head and the new button",
+      "x": 160,
+      "y": 280,
+      "parent": "pt_shell",
+      "children": [
+        "pt_head_box",
+        "pt_new"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "flex-end",
+        "justifyContent": "space-between",
+        "columnGap": "var(--space-6)",
+        "rowGap": "var(--space-4)"
+      }
+    },
+    {
+      "id": "pt_head_box",
+      "type": "Group",
+      "label": "Head",
+      "x": 220,
+      "y": 400,
+      "parent": "pt_top",
+      "children": [
+        "pt_head"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "pt_head",
+      "type": "/Shell/Page head",
+      "label": "Head",
+      "x": 280,
+      "y": 520,
+      "parent": "pt_head_box",
+      "parameters": {
+        "titleKey": "templates.title",
+        "leadKey": "templates.lead"
+      }
+    },
+    {
+      "id": "pt_new",
+      "type": "net.noodl.controls.button",
+      "label": "+ New template",
+      "x": 220,
+      "y": 640,
+      "parent": "pt_top",
+      "parameters": {
+        "label": "",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-plus",
+          "codeAsClass": true
+        },
+        "iconColor": "var(--primary-foreground)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-2)"
+      }
+    },
+    {
+      "id": "pt_said",
+      "type": "Text",
+      "label": "What just happened, in a sentence",
+      "x": 160,
+      "y": 760,
+      "parent": "pt_shell",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "pt_edit_box",
+      "type": "Group",
+      "label": "Shown while editing",
+      "x": 160,
+      "y": 880,
+      "parent": "pt_shell",
+      "children": [
+        "pt_editor"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "pt_editor",
+      "type": "/Templates/Template editor",
+      "label": "The editor",
+      "x": 220,
+      "y": 1000,
+      "parent": "pt_edit_box"
+    },
+    {
+      "id": "pt_list_box",
+      "type": "Group",
+      "label": "Shown when not editing",
+      "x": 160,
+      "y": 1120,
+      "parent": "pt_shell",
+      "children": [
+        "pt_arch_cb",
+        "pt_list",
+        "pt_none"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)"
+      }
+    },
+    {
+      "id": "pt_arch_cb",
+      "type": "net.noodl.controls.checkbox",
+      "label": "Show archived",
+      "x": 220,
+      "y": 1240,
+      "parent": "pt_list_box",
+      "parameters": {
+        "useLabel": true,
+        "labelSpacing": "var(--space-2)",
+        "checked": false
+      }
+    },
+    {
+      "id": "pt_list",
+      "type": "Group",
+      "label": "The templates",
+      "x": 220,
+      "y": 1360,
+      "parent": "pt_list_box",
+      "children": [
+        "pt_rows"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "clip": true
+      }
+    },
+    {
+      "id": "pt_rows",
+      "type": "For Each",
+      "label": "One row per template",
+      "x": 280,
+      "y": 1480,
+      "parent": "pt_list",
+      "parameters": {
+        "template": "/Templates/Template row"
+      }
+    },
+    {
+      "id": "pt_none",
+      "type": "Group",
+      "label": "Shown when there are none",
+      "x": 220,
+      "y": 1600,
+      "parent": "pt_list_box",
+      "children": [
+        "pt_empty"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "pt_empty",
+      "type": "/Shell/Empty state",
+      "label": "No templates yet",
+      "x": 280,
+      "y": 1720,
+      "parent": "pt_none",
+      "parameters": {
+        "icon": {
+          "class": "lucide",
+          "code": "icon-list-ordered",
+          "codeAsClass": true
+        },
+        "titleKey": "templates.emptyTitle",
+        "bodyKey": "templates.emptyBody"
+      }
+    },
+    {
+      "id": "pt_failed",
+      "type": "Text",
+      "label": "The templates could not be read",
+      "x": 160,
+      "y": 1840,
+      "parent": "pt_shell",
+      "parameters": {
+        "text": "",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)"
+      }
+    },
+    {
+      "id": "pt_call",
+      "type": "CloudFunction2",
+      "label": "planTemplates (staff only)",
+      "x": 700,
+      "y": 40,
+      "parameters": {
+        "function": "planTemplates"
+      }
+    },
+    {
+      "id": "pt_shape",
+      "type": "JavaScriptFunction",
+      "label": "Template rows, in words",
+      "x": 700,
+      "y": 160,
+      "parameters": {
+        "functionScript": "// One row per template, in the reader's words; archived ones only when asked for.\nif (Inputs.templates === undefined || Inputs.meta === undefined) return;\nconst fill = (s, v) => Object.keys(v).reduce((out, k) => out.split('{' + k + '}').join(String(v[k])), String(s || ''));\nconst all = Array.isArray(Inputs.templates) ? Inputs.templates : [];\nconst shown = all.filter((t) => Inputs.showArchived === true || !t.archived);\nOutputs.rows = shown.map((t) => {\n  const items = t.items || [];\n  const live = items.filter((i) => i.kind === 'live').length;\n  const days = items.reduce((m, i) => Math.max(m, Number(i.dayOffset) || 0), 0);\n  return {\n    id: t.id,\n    title: t.title,\n    description: t.description || '',\n    archived: t.archived === true,\n    meta: fill(days ? Inputs.meta : Inputs.metaNoDays, { steps: items.length, live, days })\n  };\n});\nOutputs.hasRows = shown.length > 0;\nOutputs.none = shown.length === 0;\n"
+      },
+      "ports": [
+        {
+          "name": "in-templates",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-showArchived",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-meta",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-metaNoDays",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-hasRows",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-none",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "id": "pt_fail_sw",
+      "type": "Switch",
+      "label": "Remember the read failed",
+      "x": 700,
+      "y": 1840,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "pt_edit_sw",
+      "type": "Switch",
+      "label": "Editing, or not",
+      "x": 700,
+      "y": 880,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "pt_not_editing",
+      "type": "Inverter",
+      "label": "Not editing",
+      "x": 700,
+      "y": 1000
+    },
+    {
+      "id": "pt_said_sw",
+      "type": "Switch",
+      "label": "Show the sentence",
+      "x": 700,
+      "y": 760,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "pt_new_fn",
+      "type": "JavaScriptFunction",
+      "label": "A new, empty template",
+      "x": 700,
+      "y": 640,
+      "parameters": {
+        "functionScript": "Outputs.template = { items: [] };\nOutputs.open();\n"
+      },
+      "ports": [
+        {
+          "name": "out-template",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "out-open",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "pt_pick_fn",
+      "type": "JavaScriptFunction",
+      "label": "The template the row asked to edit",
+      "x": 1000,
+      "y": 1000,
+      "parameters": {
+        "runOnChange-in-templates": false,
+        "runOnChange-in-itemId": false,
+        "functionScript": "const t = (Inputs.templates || []).find((x) => x.id === Inputs.itemId);\nif (!t) return;\nOutputs.template = t;\nOutputs.open();\n"
+      },
+      "ports": [
+        {
+          "name": "in-templates",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-itemId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-template",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "out-open",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "pt_arch_fn",
+      "type": "JavaScriptFunction",
+      "label": "Archive or restore: whichever it is not",
+      "x": 1000,
+      "y": 1240,
+      "parameters": {
+        "runOnChange-in-templates": false,
+        "runOnChange-in-itemId": false,
+        "runOnChange-in-archivedSaid": false,
+        "runOnChange-in-restoredSaid": false,
+        "functionScript": "const t = (Inputs.templates || []).find((x) => x.id === Inputs.itemId);\nif (!t) return;\nconst archived = t.archived !== true;\nOutputs.id = t.id;\nOutputs.archived = archived;\nOutputs.say = String(archived ? Inputs.archivedSaid : Inputs.restoredSaid).split('{title}').join(t.title);\nOutputs.go();\n"
+      },
+      "ports": [
+        {
+          "name": "in-templates",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-itemId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-archivedSaid",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-restoredSaid",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-archived",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-say",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "pt_arch_call",
+      "type": "CloudFunction2",
+      "label": "archivePlanTemplate (staff only)",
+      "x": 1000,
+      "y": 1360,
+      "parameters": {
+        "function": "archivePlanTemplate"
+      }
+    },
+    {
+      "id": "pt_saved_fn",
+      "type": "JavaScriptFunction",
+      "label": "Saved, in a sentence",
+      "x": 1000,
+      "y": 760,
+      "parameters": {
+        "runOnChange-in-title": false,
+        "runOnChange-in-said": false,
+        "functionScript": "Outputs.say = String(Inputs.said || '').split('{title}').join(String(Inputs.title || ''));\nOutputs.done();\n"
+      },
+      "ports": [
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-said",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-say",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "pt_t_tab",
+      "type": "Translation",
+      "label": "The browser tab's title",
+      "x": 1300,
+      "y": 40,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.tab"
+      }
+    },
+    {
+      "id": "pt_t_new",
+      "type": "Translation",
+      "label": "New template",
+      "x": 1300,
+      "y": 100,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.new"
+      }
+    },
+    {
+      "id": "pt_t_arch_cb",
+      "type": "Translation",
+      "label": "Show archived",
+      "x": 1300,
+      "y": 160,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.showArchived"
+      }
+    },
+    {
+      "id": "pt_t_meta",
+      "type": "Translation",
+      "label": "{steps} steps · {live} live sessions · over {days} days",
+      "x": 1300,
+      "y": 220,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.meta"
+      }
+    },
+    {
+      "id": "pt_t_meta0",
+      "type": "Translation",
+      "label": "{steps} steps · {live} live sessions",
+      "x": 1300,
+      "y": 280,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.metaNoDays"
+      }
+    },
+    {
+      "id": "pt_t_failed",
+      "type": "Translation",
+      "label": "Could not read",
+      "x": 1300,
+      "y": 1840,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.failed"
+      }
+    },
+    {
+      "id": "pt_t_saved",
+      "type": "Translation",
+      "label": "Saved, in a sentence",
+      "x": 1300,
+      "y": 760,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.saved"
+      }
+    },
+    {
+      "id": "pt_t_archived",
+      "type": "Translation",
+      "label": "Archived, in a sentence",
+      "x": 1300,
+      "y": 1240,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.archived"
+      }
+    },
+    {
+      "id": "pt_t_restored",
+      "type": "Translation",
+      "label": "Restored, in a sentence",
+      "x": 1300,
+      "y": 1300,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.restored"
+      }
+    }
+  ],
+  "visualRoots": [
+    "pt_page"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "3aa77b39-99b4-58e9-838f-1b261ba1193f",
+  "name": "Home in words",
+  "path": "/Home/Home in words",
+  "type": "visual",
+  "created": "2026-11-09T12:35:46.391Z",
+  "modified": "2026-11-12T14:55:51.224Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Turns learnerHome's answer into what Home draws: for every sentence a Strings key and the values that fill it (each part fills its own), dates in the learner's time zone (their profile's, else the browser's), kind icons and status chips from the option sets, and one row per shared step. It decides nothing: up next, complete and order come from learnerHome."
+}

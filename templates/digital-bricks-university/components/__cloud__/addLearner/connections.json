@@ -1,0 +1,325 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "38f8299b-c039-5229-8b3a-5502b19da2fe",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "al_req",
+      "fromProperty": "pm-name",
+      "toId": "al_check",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "al_req",
+      "fromProperty": "pm-email",
+      "toId": "al_check",
+      "toProperty": "in-email"
+    },
+    {
+      "fromId": "al_req",
+      "fromProperty": "pm-organisation",
+      "toId": "al_check",
+      "toProperty": "in-organisation"
+    },
+    {
+      "fromId": "al_req",
+      "fromProperty": "receive",
+      "toId": "al_check",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "al_check",
+      "fromProperty": "out-email",
+      "toId": "al_account",
+      "toProperty": "username"
+    },
+    {
+      "fromId": "al_check",
+      "fromProperty": "out-email",
+      "toId": "al_account",
+      "toProperty": "email"
+    },
+    {
+      "fromId": "al_check",
+      "fromProperty": "out-name",
+      "toId": "al_account",
+      "toProperty": "prop-name"
+    },
+    {
+      "fromId": "al_check",
+      "fromProperty": "out-organisation",
+      "toId": "al_account",
+      "toProperty": "prop-organisation"
+    },
+    {
+      "fromId": "al_check",
+      "fromProperty": "out-go",
+      "toId": "al_account",
+      "toProperty": "create"
+    },
+    {
+      "fromId": "al_account",
+      "fromProperty": "userId",
+      "toId": "al_roles",
+      "toProperty": "userId"
+    },
+    {
+      "fromId": "al_account",
+      "fromProperty": "done",
+      "toId": "al_roles",
+      "toProperty": "read"
+    },
+    {
+      "fromId": "al_account",
+      "fromProperty": "unchanged",
+      "toId": "al_roles",
+      "toProperty": "read"
+    },
+    {
+      "fromId": "al_roles",
+      "fromProperty": "roles",
+      "toId": "al_decide",
+      "toProperty": "in-roles"
+    },
+    {
+      "fromId": "al_roles",
+      "fromProperty": "done",
+      "toId": "al_decide",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "al_roles",
+      "fromProperty": "unchanged",
+      "toId": "al_decide",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "al_account",
+      "fromProperty": "userId",
+      "toId": "al_role",
+      "toProperty": "userId"
+    },
+    {
+      "fromId": "al_decide",
+      "fromProperty": "out-go",
+      "toId": "al_role",
+      "toProperty": "add"
+    },
+    {
+      "fromId": "al_check",
+      "fromProperty": "out-why",
+      "toId": "al_deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "al_check",
+      "fromProperty": "out-refuse",
+      "toId": "al_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "al_decide",
+      "fromProperty": "out-why",
+      "toId": "al_deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "al_decide",
+      "fromProperty": "out-refuse",
+      "toId": "al_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "al_account",
+      "fromProperty": "failure",
+      "toId": "al_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "al_roles",
+      "fromProperty": "failure",
+      "toId": "al_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "al_role",
+      "fromProperty": "failure",
+      "toId": "al_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "al_account",
+      "fromProperty": "userId",
+      "toId": "al_plan",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "al_check",
+      "fromProperty": "out-name",
+      "toId": "al_plan",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "al_req",
+      "fromProperty": "pm-templateId",
+      "toId": "al_plan",
+      "toProperty": "in-templateId"
+    },
+    {
+      "fromId": "al_role",
+      "fromProperty": "done",
+      "toId": "al_plan",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "al_role",
+      "fromProperty": "unchanged",
+      "toId": "al_plan",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "al_plan",
+      "fromProperty": "out-learnerId",
+      "toId": "al_res",
+      "toProperty": "pm-learnerId"
+    },
+    {
+      "fromId": "al_plan",
+      "fromProperty": "out-created",
+      "toId": "al_res",
+      "toProperty": "pm-created"
+    },
+    {
+      "fromId": "al_plan",
+      "fromProperty": "out-mailed",
+      "toId": "al_res",
+      "toProperty": "pm-mailed"
+    },
+    {
+      "fromId": "al_plan",
+      "fromProperty": "out-existing",
+      "toId": "al_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "al_plan",
+      "fromProperty": "out-why",
+      "toId": "al_deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "al_plan",
+      "fromProperty": "out-refuse",
+      "toId": "al_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "al_plan",
+      "fromProperty": "out-failed",
+      "toId": "al_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "al_plan",
+      "fromProperty": "failure",
+      "toId": "al_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "al_plan",
+      "fromProperty": "out-job",
+      "toId": "al_steps",
+      "toProperty": "job"
+    },
+    {
+      "fromId": "al_steps",
+      "fromProperty": "reason",
+      "toId": "al_deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "al_steps",
+      "fromProperty": "missing",
+      "toId": "al_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "al_steps",
+      "fromProperty": "failed",
+      "toId": "al_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "al_account",
+      "fromProperty": "userId",
+      "toId": "al_mail",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "al_check",
+      "fromProperty": "out-email",
+      "toId": "al_mail",
+      "toProperty": "in-email"
+    },
+    {
+      "fromId": "al_check",
+      "fromProperty": "out-name",
+      "toId": "al_mail",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "al_req",
+      "fromProperty": "userId",
+      "toId": "al_mail",
+      "toProperty": "in-callerId"
+    },
+    {
+      "fromId": "al_plan",
+      "fromProperty": "out-mail",
+      "toId": "al_mail",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "al_steps",
+      "fromProperty": "done",
+      "toId": "al_mail",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "al_mail",
+      "fromProperty": "out-learnerId",
+      "toId": "al_res",
+      "toProperty": "pm-learnerId"
+    },
+    {
+      "fromId": "al_mail",
+      "fromProperty": "out-created",
+      "toId": "al_res",
+      "toProperty": "pm-created"
+    },
+    {
+      "fromId": "al_mail",
+      "fromProperty": "out-mailed",
+      "toId": "al_res",
+      "toProperty": "pm-mailed"
+    },
+    {
+      "fromId": "al_mail",
+      "fromProperty": "out-done",
+      "toId": "al_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "al_mail",
+      "fromProperty": "out-failed",
+      "toId": "al_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "al_mail",
+      "fromProperty": "failure",
+      "toId": "al_fail",
+      "toProperty": "send"
+    }
+  ]
+}

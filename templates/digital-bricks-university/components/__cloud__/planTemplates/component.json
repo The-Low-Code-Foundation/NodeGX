@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e789b66d-a7fa-5100-889a-645bf4c64b7c",
+  "name": "planTemplates",
+  "path": "/#__cloud__/planTemplates",
+  "type": "cloud",
+  "created": "2026-11-09T10:28:19.160Z",
+  "modified": "2026-11-09T10:28:30.825Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach's plan templates with their items, archived ones included and flagged, sorted by title; plus the homework library's titles, which a template's homework items name (security: role:staff)."
+}

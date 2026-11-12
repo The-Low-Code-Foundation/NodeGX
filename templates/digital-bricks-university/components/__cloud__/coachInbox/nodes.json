@@ -1,0 +1,117 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "14abae7d-efb1-5cf4-8530-0b0bcdada0b0",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ci_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach opens the inbox, or a tab counts it",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "countOnly",
+        "allowNoAuth": false,
+        "ptype-countOnly": "boolean",
+        "preq-countOnly": false
+      }
+    },
+    {
+      "id": "ci_ask",
+      "type": "JavaScriptFunction",
+      "label": "Ask for the list",
+      "x": 40,
+      "y": 180,
+      "parameters": {
+        "runOnChange-in-countOnly": false,
+        "functionScript": "// role:staff is checked by nodegx.security.json before this runs. A fresh request object each call,\n// so shared/Inbox items works the list out once per call.\nOutputs.request = { at: Date.now() };\n"
+      },
+      "ports": [
+        {
+          "name": "out-request",
+          "plug": "output",
+          "type": "*",
+          "displayName": "request",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "ci_items",
+      "type": "/#__cloud__/shared/Inbox items",
+      "label": "What is waiting",
+      "x": 40,
+      "y": 300
+    },
+    {
+      "id": "ci_shape",
+      "type": "JavaScriptFunction",
+      "label": "The list, or only its count",
+      "x": 40,
+      "y": 420,
+      "parameters": {
+        "runOnChange-in-items": false,
+        "runOnChange-in-countOnly": false,
+        "functionScript": "// The Inbox tab needs the count only: no hand-ins, no messages travel for it.\nconst items = Array.isArray(Inputs.items) ? Inputs.items : [];\nOutputs.items = Inputs.countOnly === true ? [] : items;\nOutputs.count = items.length;\nOutputs.go();\n"
+      },
+      "ports": [
+        {
+          "name": "in-items",
+          "plug": "input",
+          "type": "*",
+          "displayName": "items",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-countOnly",
+          "plug": "input",
+          "type": "*",
+          "displayName": "countOnly",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-items",
+          "plug": "output",
+          "type": "*",
+          "displayName": "items",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "plug": "output",
+          "type": "*",
+          "displayName": "count",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "go",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "ci_res",
+      "type": "noodl.cloud.response",
+      "label": "The inbox",
+      "x": 40,
+      "y": 560,
+      "parameters": {
+        "params": "items,count"
+      }
+    },
+    {
+      "id": "ci_fail",
+      "type": "noodl.cloud.response",
+      "label": "Could not work it out",
+      "x": 320,
+      "y": 560,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "The inbox could not be read. Try again in a moment."
+      }
+    }
+  ]
+}

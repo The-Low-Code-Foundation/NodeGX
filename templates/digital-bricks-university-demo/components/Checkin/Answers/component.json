@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a6d0aa5b-5530-5823-8177-3660958bca69",
+  "name": "Answers",
+  "path": "/Checkin/Answers",
+  "type": "visual",
+  "created": "2026-11-12T14:53:29.545Z",
+  "modified": "2026-11-12T14:53:29.545Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A check-in's answers, read-only, against the questions they were given to (the answer's own copy of its form). Used on the check-in page, the learner's plan and the inbox."
+}

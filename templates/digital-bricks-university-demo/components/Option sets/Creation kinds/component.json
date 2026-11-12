@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "061e6d82-30e0-5367-8d3c-ee2d0069d649",
+  "name": "Creation kinds",
+  "path": "/Option sets/Creation kinds",
+  "type": "logic",
+  "created": "2026-11-12T13:42:04.958Z",
+  "modified": "2026-11-12T13:56:20.149Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The six kinds of creation (SCOPE R7), in the order My creations offers them: the badge words and colours, the filter's words, and the file endings each is first guessed from (a link is a link, text is a prompt). saveCreation and handIn hold the same six."
+}

@@ -1,0 +1,235 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e601787d-3e7c-562c-8524-2a7fc9650239",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ps_t_head",
+      "fromProperty": "Translation",
+      "toId": "ps_head",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ps_t_title",
+      "fromProperty": "Translation",
+      "toId": "ps_title",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ps_t_meet",
+      "fromProperty": "Translation",
+      "toId": "ps_meet",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ps_t_book",
+      "fromProperty": "Translation",
+      "toId": "ps_book",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ps_t_status",
+      "fromProperty": "Translation",
+      "toId": "ps_status",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ps_t_save",
+      "fromProperty": "Translation",
+      "toId": "ps_save",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ps_t_cancel",
+      "fromProperty": "Translation",
+      "toId": "ps_cancel",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ps_in",
+      "fromProperty": "plan",
+      "toId": "ps_open",
+      "toProperty": "in-plan"
+    },
+    {
+      "fromId": "ps_statuses",
+      "fromProperty": "items",
+      "toId": "ps_open",
+      "toProperty": "in-statuses"
+    },
+    {
+      "fromId": "ps_t_active",
+      "fromProperty": "Translation",
+      "toId": "ps_open",
+      "toProperty": "in-active"
+    },
+    {
+      "fromId": "ps_t_paused",
+      "fromProperty": "Translation",
+      "toId": "ps_open",
+      "toProperty": "in-paused"
+    },
+    {
+      "fromId": "ps_t_finished",
+      "fromProperty": "Translation",
+      "toId": "ps_open",
+      "toProperty": "in-finished"
+    },
+    {
+      "fromId": "ps_in",
+      "fromProperty": "load",
+      "toId": "ps_open",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ps_open",
+      "fromProperty": "out-statusItems",
+      "toId": "ps_status",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "ps_open",
+      "fromProperty": "out-status",
+      "toId": "ps_status",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "ps_open",
+      "fromProperty": "out-title",
+      "toId": "ps_title",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "ps_open",
+      "fromProperty": "out-meetingLink",
+      "toId": "ps_meet",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "ps_open",
+      "fromProperty": "out-bookingLink",
+      "toId": "ps_book",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "ps_open",
+      "fromProperty": "out-opened",
+      "toId": "ps_title",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "ps_open",
+      "fromProperty": "out-opened",
+      "toId": "ps_meet",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "ps_open",
+      "fromProperty": "out-opened",
+      "toId": "ps_book",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "ps_open",
+      "fromProperty": "out-opened",
+      "toId": "ps_msg_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ps_open",
+      "fromProperty": "out-id",
+      "toId": "ps_call",
+      "toProperty": "in-planId"
+    },
+    {
+      "fromId": "ps_open",
+      "fromProperty": "out-title",
+      "toId": "ps_call",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "ps_open",
+      "fromProperty": "out-meetingLink",
+      "toId": "ps_call",
+      "toProperty": "in-meetingLink"
+    },
+    {
+      "fromId": "ps_open",
+      "fromProperty": "out-bookingLink",
+      "toId": "ps_call",
+      "toProperty": "in-bookingLink"
+    },
+    {
+      "fromId": "ps_open",
+      "fromProperty": "out-status",
+      "toId": "ps_call",
+      "toProperty": "in-status"
+    },
+    {
+      "fromId": "ps_title",
+      "fromProperty": "onTextChanged",
+      "toId": "ps_call",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "ps_meet",
+      "fromProperty": "onTextChanged",
+      "toId": "ps_call",
+      "toProperty": "in-meetingLink"
+    },
+    {
+      "fromId": "ps_book",
+      "fromProperty": "onTextChanged",
+      "toId": "ps_call",
+      "toProperty": "in-bookingLink"
+    },
+    {
+      "fromId": "ps_status",
+      "fromProperty": "value",
+      "toId": "ps_call",
+      "toProperty": "in-status"
+    },
+    {
+      "fromId": "ps_save",
+      "fromProperty": "onClick",
+      "toId": "ps_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ps_save",
+      "fromProperty": "onClick",
+      "toId": "ps_msg_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ps_call",
+      "fromProperty": "error",
+      "toId": "ps_msg",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ps_call",
+      "fromProperty": "failure",
+      "toId": "ps_msg_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "ps_msg_sw",
+      "fromProperty": "state",
+      "toId": "ps_msg",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ps_call",
+      "fromProperty": "done",
+      "toId": "ps_out",
+      "toProperty": "saved"
+    },
+    {
+      "fromId": "ps_cancel",
+      "fromProperty": "onClick",
+      "toId": "ps_out",
+      "toProperty": "closed"
+    }
+  ]
+}

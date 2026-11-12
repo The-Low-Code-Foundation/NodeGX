@@ -1,0 +1,264 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "53573221-6d78-5111-8d88-004a582b1946",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rr_row",
+      "type": "Group",
+      "label": "Row",
+      "children": [
+        "rr_text",
+        "rr_open"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border)",
+        "alignItems": "center",
+        "columnGap": "var(--space-4)"
+      },
+      "x": 40,
+      "y": 40,
+      "metadata": {
+        "comment": "Not wrapped: the words shrink beside Open plan on a phone."
+      }
+    },
+    {
+      "id": "rr_name",
+      "type": "Text",
+      "label": "Name",
+      "parent": "rr_text",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "rr_detail",
+      "type": "Text",
+      "label": "Organisation and address",
+      "parent": "rr_text",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "rr_plan_line",
+      "type": "Group",
+      "label": "Plan and progress",
+      "parent": "rr_text",
+      "children": [
+        "rr_plan",
+        "rr_progress",
+        "rr_unread"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-1)",
+        "paddingTop": "var(--space-1)"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "rr_plan",
+      "type": "Text",
+      "label": "Plan",
+      "parent": "rr_plan_line",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "color": "var(--accent-foreground)"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "rr_progress",
+      "type": "Text",
+      "label": "Progress",
+      "parent": "rr_plan_line",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 160,
+      "y": 640,
+      "metadata": {
+        "comment": "Content height, so a long progress (steps, not shared, creations) wraps on a phone instead of pushing Open plan off the screen. Content size never wraps."
+      }
+    },
+    {
+      "id": "rr_in",
+      "type": "Component Inputs",
+      "label": "Row in",
+      "ports": [
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "detail",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "plan",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "progress",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "learnerId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "unread",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasUnread",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "rr_text",
+      "type": "Group",
+      "label": "Who, and their plan",
+      "x": 100,
+      "y": 100,
+      "parent": "rr_row",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "rr_name",
+        "rr_detail",
+        "rr_plan_line"
+      ]
+    },
+    {
+      "id": "rr_open",
+      "type": "net.noodl.controls.button",
+      "label": "Open plan",
+      "x": 100,
+      "y": 760,
+      "parent": "rr_row",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-9)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-chevron-right",
+          "codeAsClass": true
+        },
+        "iconPlacement": "right",
+        "iconColor": "var(--muted-foreground)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1)"
+      }
+    },
+    {
+      "id": "rr_to_plan",
+      "type": "RouterNavigate",
+      "label": "→ This learner's plan",
+      "x": 410,
+      "y": 760,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Learner plan"
+      }
+    },
+    {
+      "id": "rr_t_open",
+      "type": "Translation",
+      "label": "Open plan",
+      "x": 410,
+      "y": 640,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "learners.open"
+      }
+    },
+    {
+      "id": "rr_unread",
+      "type": "Text",
+      "label": "Unread messages (DBU-07)",
+      "parent": "rr_plan_line",
+      "parameters": {
+        "text": "",
+        "mounted": false,
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--primary)"
+      },
+      "x": 220,
+      "y": 760
+    }
+  ],
+  "visualRoots": [
+    "rr_row"
+  ]
+}

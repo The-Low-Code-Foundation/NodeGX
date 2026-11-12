@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "fa0b25ba-f0ab-5c24-8b14-c8027f2cec0a",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ack_req",
+      "type": "noodl.cloud.request",
+      "label": "A learner sends her answers",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "stepId,answers",
+        "allowNoAuth": false,
+        "ptype-stepId": "string",
+        "preq-stepId": true
+      },
+      "metadata": {
+        "comment": "authenticated in nodegx.security.json. Identity is the session's userId."
+      }
+    },
+    {
+      "id": "ack_fn",
+      "type": "JavaScriptFunction",
+      "label": "Check the answers, then save them once",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "runOnChange-in-stepId": false,
+        "runOnChange-in-answers": false,
+        "runOnChange-in-userId": false,
+        "functionScript": "/*\n * ANSWERING A CHECK-IN (DBU-10). Only her own shared check-in, only once it has gone out, only once.\n * The answers are checked against the STEP'S copy of the form, in question order:\n *  - a question shows only when its condition holds on the answers above it (the Hub's SurveyForm\n *    rules: {field, value | [values]}, {field, not}, {field, operator, value}); the answer to a\n *    hidden one is dropped. Checkin/Question applies the same rules on the page: change both.\n *  - scale: a whole number min..max · number: min..max, a comma reads as a point · text up to 500\n *    characters, textarea up to 5,000 · radio: one option's value · checkbox: some options' values.\n *  - required and shown, it must be answered. An empty answer is no answer.\n * Saved as one CheckinResponse with its own copy of the form, so an answer always has its questions.\n * The step is done. Rings her plan doorbell and the staff's inbox bell.\n */\n(async () => {\n  const refuse = (why) => { Outputs.why = why; Outputs.refuse(); };\n  try {\n    const R = Noodl.Records;\n    const me = String(Inputs.userId || '');\n    if (!me) throw new Error('no session user');\n    const q = (c, where) => R.query(c, where, { limit: 2, plain: true });\n    const id = String(Inputs.stepId || '');\n    const steps = id ? await q('Step', { objectId: { equalTo: id } }) : [];\n    const s = steps[0];\n    if (!s || s.learner !== me || s.shared !== true || s.kind !== 'checkin') return refuse('This check-in could not be found. Open it from your Home page.');\n    if (s.status === 'done' || (await q('CheckinResponse', { step: { equalTo: id } })).length) return refuse('You have already sent your answers to this check-in. Thank you!');\n    if (s.status !== 'sent') return refuse('This check-in is not open yet. It arrives by email on the day it is due.');\n\n    const given = Inputs.answers && typeof Inputs.answers === 'object' && !Array.isArray(Inputs.answers) ? Inputs.answers : {};\n    const form = s.form && Array.isArray(s.form.questions) ? s.form : { questions: [] };\n    const shown = (qn, sofar) => {\n      const c = qn.condition;\n      if (!c || !c.field) return true;\n      const v = sofar[c.field];\n      if (Array.isArray(c.value)) return c.value.includes(v);\n      if (c.operator) {\n        const n = Number(v);\n        if (v === undefined || !Number.isFinite(n)) return false;\n        if (c.operator === '>') return n > c.value;\n        if (c.operator === '<') return n < c.value;\n        if (c.operator === '>=') return n >= c.value;\n        if (c.operator === '<=') return n <= c.value;\n        return false;\n      }\n      if (c.not !== undefined) return v !== c.not;\n      return v === c.value;\n    };\n    const clean = {};\n    for (const qn of form.questions) {\n      if (!qn || !qn.id || !shown(qn, clean)) continue;\n      const label = '“' + String(qn.label || qn.id) + '”';\n      const raw = given[qn.id];\n      const values = (Array.isArray(qn.options) ? qn.options : []).map((o) => (o && typeof o === 'object' ? o.value : o));\n      let v;\n      if (raw === undefined || raw === null || (typeof raw === 'string' && !raw.trim()) || (Array.isArray(raw) && !raw.length)) v = undefined;\n      else if (qn.type === 'scale') {\n        const n = Number(raw);\n        const lo = Number.isFinite(qn.min) ? qn.min : 1;\n        const hi = Number.isFinite(qn.max) ? qn.max : 5;\n        if (!Number.isInteger(n) || n < lo || n > hi) return refuse(label + ': pick a number from ' + lo + ' to ' + hi + '.');\n        v = n;\n      } else if (qn.type === 'number') {\n        const n = Number(String(raw).trim().replace(',', '.'));\n        if (!Number.isFinite(n)) return refuse(label + ': write a number, like 2 or 1.5.');\n        if (Number.isFinite(qn.min) && n < qn.min) return refuse(label + ': write a number of at least ' + qn.min + '.');\n        if (Number.isFinite(qn.max) && n > qn.max) return refuse(label + ': write a number up to ' + qn.max + '.');\n        v = Math.round(n * 100) / 100;\n      } else if (qn.type === 'radio') {\n        if (!values.includes(raw)) return refuse(label + ': pick one of the answers offered.');\n        v = raw;\n      } else if (qn.type === 'checkbox') {\n        const list = Array.isArray(raw) ? [...new Set(raw)] : [];\n        if (!list.length || !list.every((x) => values.includes(x))) return refuse(label + ': tick the answers offered.');\n        v = values.filter((x) => list.includes(x));\n      } else {\n        const t = String(raw).replace(/\\r\\n/g, '\\n').trim();\n        const max = qn.type === 'textarea' ? 5000 : 500;\n        if (t.length > max) return refuse(label + ': keep it under ' + max.toLocaleString('en-GB') + ' characters.');\n        v = t;\n      }\n      if (v === undefined) {\n        if (qn.required === true) return refuse('Answer ' + label + ' before you send.');\n        continue;\n      }\n      clean[qn.id] = v;\n    }\n\n    let row;\n    try {\n      row = await R.create('CheckinResponse', { step: id, learner: me, answers: clean, form }, { plain: true });\n    } catch (e) {\n      // The unique index on `step`: another press got there first.\n      if ((await q('CheckinResponse', { step: { equalTo: id } })).length) return refuse('You have already sent your answers to this check-in. Thank you!');\n      throw e;\n    }\n    await R.save(id, { status: 'done' }, { className: 'Step' });\n    await R.create('Doorbell', { learner: me, topic: 'plan' }, { acl: { [me]: { read: true }, 'role:staff': { read: true } } });\n    await R.create('Doorbell', { learner: me, topic: 'inbox' }, { acl: { 'role:staff': { read: true } } });\n    Outputs.answeredAt = (row && row.createdAt) || new Date().toISOString();\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:answerCheckin]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-stepId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-answers",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-answeredAt",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-why",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "ack_res",
+      "type": "noodl.cloud.response",
+      "label": "Sent",
+      "x": 40,
+      "y": 280,
+      "parameters": {
+        "params": "answeredAt"
+      }
+    },
+    {
+      "id": "ack_deny",
+      "type": "noodl.cloud.response",
+      "label": "A refusal she can act on",
+      "x": 40,
+      "y": 400,
+      "parameters": {
+        "status": "failure"
+      }
+    },
+    {
+      "id": "ack_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "x": 40,
+      "y": 520,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "Your answers could not be sent. Try again in a moment."
+      }
+    }
+  ]
+}

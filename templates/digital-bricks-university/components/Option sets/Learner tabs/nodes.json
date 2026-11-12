@@ -1,0 +1,40 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "a05163cb-1534-5c97-8f93-1e76fe98848d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "lt_data",
+      "type": "Static Data",
+      "label": "Learner tabs",
+      "parameters": {
+        "type": "json",
+        "json": "[{\"id\":\"home\",\"labelKey\":\"tabs.home\",\"path\":\"/home\"},{\"id\":\"homework\",\"labelKey\":\"tabs.homework\",\"path\":\"/homework?step=\"},{\"id\":\"creations\",\"labelKey\":\"tabs.creations\",\"path\":\"/creations\"},{\"id\":\"messages\",\"labelKey\":\"tabs.messages\",\"path\":\"/messages\"}]"
+      },
+      "x": 40,
+      "y": 40,
+      "metadata": {
+        "comment": "Each tab names its words by key (common namespace, in Strings): the words themselves live there, in every language. Homework's path says ?step= (empty) on purpose: from inside one homework the page stays mounted, and the router only pushes a query value that is in the address, so a bare /homework would leave the old homework on screen (PLATFORM.md D9)."
+      }
+    },
+    {
+      "id": "lt_out",
+      "type": "Component Outputs",
+      "label": "Tabs out",
+      "ports": [
+        {
+          "name": "items",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    }
+  ]
+}

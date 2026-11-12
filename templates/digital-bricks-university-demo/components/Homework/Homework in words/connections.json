@@ -1,0 +1,247 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "612b3c44-b16f-53c7-8dd0-b0c39cb0cdae",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hw_words_in",
+      "fromProperty": "me",
+      "toId": "hw_words_fn",
+      "toProperty": "in-me"
+    },
+    {
+      "fromId": "hw_words_in",
+      "fromProperty": "list",
+      "toId": "hw_words_fn",
+      "toProperty": "in-list"
+    },
+    {
+      "fromId": "hw_words_in",
+      "fromProperty": "step",
+      "toId": "hw_words_fn",
+      "toProperty": "in-step"
+    },
+    {
+      "fromId": "hw_words_in",
+      "fromProperty": "versions",
+      "toId": "hw_words_fn",
+      "toProperty": "in-versions"
+    },
+    {
+      "fromId": "hw_words_statuses",
+      "fromProperty": "items",
+      "toId": "hw_words_fn",
+      "toProperty": "in-statuses"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-timezone",
+      "toId": "hw_words_out",
+      "toProperty": "timezone"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-showList",
+      "toId": "hw_words_out",
+      "toProperty": "showList"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-listEmpty",
+      "toId": "hw_words_out",
+      "toProperty": "listEmpty"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-listRows",
+      "toId": "hw_words_out",
+      "toProperty": "listRows"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-showOne",
+      "toId": "hw_words_out",
+      "toProperty": "showOne"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-pageTitleKey",
+      "toId": "hw_words_out",
+      "toProperty": "pageTitleKey"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-pageName",
+      "toId": "hw_words_out",
+      "toProperty": "pageName"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-pageLeadKey",
+      "toId": "hw_words_out",
+      "toProperty": "pageLeadKey"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-stepId",
+      "toId": "hw_words_out",
+      "toProperty": "stepId"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-headKey",
+      "toId": "hw_words_out",
+      "toProperty": "headKey"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-n",
+      "toId": "hw_words_out",
+      "toProperty": "n"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-date",
+      "toId": "hw_words_out",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-title",
+      "toId": "hw_words_out",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-statusKey",
+      "toId": "hw_words_out",
+      "toProperty": "statusKey"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-statusBg",
+      "toId": "hw_words_out",
+      "toProperty": "statusBg"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-statusFg",
+      "toId": "hw_words_out",
+      "toProperty": "statusFg"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-brief",
+      "toId": "hw_words_out",
+      "toProperty": "brief"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-checklist",
+      "toId": "hw_words_out",
+      "toProperty": "checklist"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-hasChecklist",
+      "toId": "hw_words_out",
+      "toProperty": "hasChecklist"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-resources",
+      "toId": "hw_words_out",
+      "toProperty": "resources"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-hasResources",
+      "toId": "hw_words_out",
+      "toProperty": "hasResources"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-canHandIn",
+      "toId": "hw_words_out",
+      "toProperty": "canHandIn"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-nextVersion",
+      "toId": "hw_words_out",
+      "toProperty": "nextVersion"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-versions",
+      "toId": "hw_words_out",
+      "toProperty": "versions"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-hasVersions",
+      "toId": "hw_words_out",
+      "toProperty": "hasVersions"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-verdictShown",
+      "toId": "hw_words_out",
+      "toProperty": "verdictShown"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-verdictKey",
+      "toId": "hw_words_out",
+      "toProperty": "verdictKey"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-verdictV",
+      "toId": "hw_words_out",
+      "toProperty": "verdictV"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-verdictWhen",
+      "toId": "hw_words_out",
+      "toProperty": "verdictWhen"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-verdictNote",
+      "toId": "hw_words_out",
+      "toProperty": "verdictNote"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-verdictHasNote",
+      "toId": "hw_words_out",
+      "toProperty": "verdictHasNote"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-verdictBg",
+      "toId": "hw_words_out",
+      "toProperty": "verdictBg"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-verdictFg",
+      "toId": "hw_words_out",
+      "toProperty": "verdictFg"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-verdictBorder",
+      "toId": "hw_words_out",
+      "toProperty": "verdictBorder"
+    },
+    {
+      "fromId": "hw_words_fn",
+      "fromProperty": "out-done",
+      "toId": "hw_words_out",
+      "toProperty": "ready"
+    }
+  ]
+}

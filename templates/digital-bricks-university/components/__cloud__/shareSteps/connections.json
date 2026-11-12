@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b4539501-93fe-5c1e-8bb2-7d0b0c592792",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sh_req",
+      "fromProperty": "pm-planId",
+      "toId": "sh_fn",
+      "toProperty": "in-planId"
+    },
+    {
+      "fromId": "sh_req",
+      "fromProperty": "pm-stepIds",
+      "toId": "sh_fn",
+      "toProperty": "in-stepIds"
+    },
+    {
+      "fromId": "sh_req",
+      "fromProperty": "pm-shared",
+      "toId": "sh_fn",
+      "toProperty": "in-shared"
+    },
+    {
+      "fromId": "sh_req",
+      "fromProperty": "pm-allReady",
+      "toId": "sh_fn",
+      "toProperty": "in-allReady"
+    },
+    {
+      "fromId": "sh_req",
+      "fromProperty": "receive",
+      "toId": "sh_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "sh_fn",
+      "fromProperty": "out-changed",
+      "toId": "sh_res",
+      "toProperty": "pm-changed"
+    },
+    {
+      "fromId": "sh_fn",
+      "fromProperty": "out-left",
+      "toId": "sh_res",
+      "toProperty": "pm-left"
+    },
+    {
+      "fromId": "sh_fn",
+      "fromProperty": "out-done",
+      "toId": "sh_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sh_fn",
+      "fromProperty": "out-why",
+      "toId": "sh_deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "sh_fn",
+      "fromProperty": "out-refuse",
+      "toId": "sh_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sh_fn",
+      "fromProperty": "out-failed",
+      "toId": "sh_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sh_fn",
+      "fromProperty": "failure",
+      "toId": "sh_fail",
+      "toProperty": "send"
+    }
+  ]
+}

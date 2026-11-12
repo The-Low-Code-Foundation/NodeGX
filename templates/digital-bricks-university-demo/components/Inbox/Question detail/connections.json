@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "19f48789-bcd4-5439-878b-03040ecfe8c3",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "qd_t_settle",
+      "fromProperty": "Translation",
+      "toId": "qd_settle",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "qd_t_hint",
+      "fromProperty": "Translation",
+      "toId": "qd_hint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "qd_in",
+      "fromProperty": "learnerId",
+      "toId": "qd_conv",
+      "toProperty": "learnerId"
+    },
+    {
+      "fromId": "qd_in",
+      "fromProperty": "messageId",
+      "toId": "qd_cf",
+      "toProperty": "in-messageId"
+    },
+    {
+      "fromId": "qd_settle",
+      "fromProperty": "onClick",
+      "toId": "qd_cf",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "qd_settle",
+      "fromProperty": "onClick",
+      "toId": "qd_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "qd_cf",
+      "fromProperty": "error",
+      "toId": "qd_refused",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "qd_cf",
+      "fromProperty": "failure",
+      "toId": "qd_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "qd_sw",
+      "fromProperty": "state",
+      "toId": "qd_refused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "qd_cf",
+      "fromProperty": "done",
+      "toId": "qd_out",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "qd_cf",
+      "fromProperty": "failure",
+      "toId": "qd_out",
+      "toProperty": "changed"
+    }
+  ]
+}

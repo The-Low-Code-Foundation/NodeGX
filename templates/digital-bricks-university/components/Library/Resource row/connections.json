@@ -1,0 +1,139 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "58a0a17d-6480-52df-8f44-38b3d54aa77d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rr_in-2",
+      "fromProperty": "label",
+      "toId": "rr_label",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "rr_in-2",
+      "fromProperty": "url",
+      "toId": "rr_url",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "rr_in-2",
+      "fromProperty": "fileName",
+      "toId": "rr_file",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rr_in-2",
+      "fromProperty": "isFile",
+      "toId": "rr_icon_file",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rr_in-2",
+      "fromProperty": "isFile",
+      "toId": "rr_file",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rr_in-2",
+      "fromProperty": "isFile",
+      "toId": "rr_is_link",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rr_is_link",
+      "fromProperty": "result",
+      "toId": "rr_icon_link",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rr_is_link",
+      "fromProperty": "result",
+      "toId": "rr_url",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rr_t_label",
+      "fromProperty": "Translation",
+      "toId": "rr_label",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "rr_t_url",
+      "fromProperty": "Translation",
+      "toId": "rr_url",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "rr_t_up",
+      "fromProperty": "Translation",
+      "toId": "rr_up",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "rr_t_down",
+      "fromProperty": "Translation",
+      "toId": "rr_down",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "rr_t_remove",
+      "fromProperty": "Translation",
+      "toId": "rr_remove",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "rr_item",
+      "fromProperty": "itemId",
+      "toId": "rr_set_label",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "rr_item",
+      "fromProperty": "itemId",
+      "toId": "rr_set_url",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "rr_label",
+      "fromProperty": "onTextChanged",
+      "toId": "rr_set_label",
+      "toProperty": "prop-label"
+    },
+    {
+      "fromId": "rr_label",
+      "fromProperty": "textChanged",
+      "toId": "rr_set_label",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "rr_url",
+      "fromProperty": "onTextChanged",
+      "toId": "rr_set_url",
+      "toProperty": "prop-url"
+    },
+    {
+      "fromId": "rr_url",
+      "fromProperty": "textChanged",
+      "toId": "rr_set_url",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "rr_up",
+      "fromProperty": "onClick",
+      "toId": "rr_out",
+      "toProperty": "up"
+    },
+    {
+      "fromId": "rr_down",
+      "fromProperty": "onClick",
+      "toId": "rr_out",
+      "toProperty": "down"
+    },
+    {
+      "fromId": "rr_remove",
+      "fromProperty": "onClick",
+      "toId": "rr_out",
+      "toProperty": "remove"
+    }
+  ]
+}

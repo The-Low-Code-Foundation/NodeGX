@@ -1,0 +1,375 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "1dd5f1c2-e79e-5279-8491-3865ac491eaf",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "lp_root",
+      "type": "Group",
+      "label": "Library picker",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "lp_head",
+        "lp_lede",
+        "lp_search",
+        "lp_list",
+        "lp_none",
+        "lp_failed",
+        "lp_close"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      }
+    },
+    {
+      "id": "lp_head",
+      "type": "Text",
+      "label": "Pick from the homework library",
+      "x": 100,
+      "y": 160,
+      "parent": "lp_root",
+      "parameters": {
+        "text": "",
+        "as": "h2",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "lp_lede",
+      "type": "Text",
+      "label": "Adding copies it",
+      "x": 100,
+      "y": 280,
+      "parent": "lp_root",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "lp_search",
+      "type": "net.noodl.controls.textinput",
+      "label": "Search",
+      "x": 100,
+      "y": 400,
+      "parent": "lp_root",
+      "parameters": {
+        "type": "text",
+        "inputMode": "search",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 420,
+          "unit": "px"
+        }
+      }
+    },
+    {
+      "id": "lp_list",
+      "type": "Group",
+      "label": "The items",
+      "x": 100,
+      "y": 520,
+      "parent": "lp_root",
+      "children": [
+        "lp_rows"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "lp_rows",
+      "type": "For Each",
+      "label": "One row per item",
+      "x": 160,
+      "y": 640,
+      "parent": "lp_list",
+      "parameters": {
+        "template": "/Plan/Library pick row"
+      }
+    },
+    {
+      "id": "lp_none",
+      "type": "Group",
+      "label": "Shown when nothing matches",
+      "x": 100,
+      "y": 760,
+      "parent": "lp_root",
+      "children": [
+        "lp_empty"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "lp_empty",
+      "type": "/Shell/Empty state",
+      "label": "Nothing to pick",
+      "x": 160,
+      "y": 880,
+      "parent": "lp_none",
+      "parameters": {
+        "icon": {
+          "class": "lucide",
+          "code": "icon-library",
+          "codeAsClass": true
+        },
+        "titleKey": "plan.picker.emptyTitle",
+        "bodyKey": "plan.picker.emptyBody"
+      }
+    },
+    {
+      "id": "lp_failed",
+      "type": "Text",
+      "label": "Why not, in a sentence",
+      "x": 100,
+      "y": 1000,
+      "parent": "lp_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)"
+      }
+    },
+    {
+      "id": "lp_close",
+      "type": "net.noodl.controls.button",
+      "label": "Close",
+      "x": 100,
+      "y": 1120,
+      "parent": "lp_root",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)"
+      }
+    },
+    {
+      "id": "lp_in",
+      "type": "Component Inputs",
+      "label": "Picker in",
+      "x": 500,
+      "y": 40,
+      "ports": [
+        {
+          "name": "planId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "load",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "lp_out",
+      "type": "Component Outputs",
+      "label": "Picker out",
+      "x": 500,
+      "y": 1120,
+      "ports": [
+        {
+          "name": "added",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "addedId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "closed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "lp_read",
+      "type": "CloudFunction2",
+      "label": "library (staff only)",
+      "x": 500,
+      "y": 160,
+      "parameters": {
+        "function": "library"
+      }
+    },
+    {
+      "id": "lp_shape",
+      "type": "JavaScriptFunction",
+      "label": "What can be picked, matching the search",
+      "x": 500,
+      "y": 280,
+      "parameters": {
+        "functionScript": "// Archived items are never offered (DBU-03). The search matches a title or a tag.\nif (Inputs.items === undefined) return;\nconst fill = (s, v) => Object.keys(v).reduce((out, k) => out.split('{' + k + '}').join(String(v[k])), String(s || ''));\nconst words = String(Inputs.search || '').trim().toLowerCase();\nconst offered = (Array.isArray(Inputs.items) ? Inputs.items : []).filter((i) => i.archived !== true);\nconst matching = offered.filter((i) => !words || String(i.title || '').toLowerCase().includes(words) ||\n  (i.tags || []).some((t) => String(t).toLowerCase().includes(words)));\nOutputs.rows = matching.map((i) => ({\n  id: i.id,\n  title: i.title,\n  meta: [Number.isInteger(i.estimatedMinutes) ? fill(Inputs.minutes, { min: i.estimatedMinutes }) : '', (i.tags || []).join(', ')].filter(Boolean).join(' · ')\n}));\nOutputs.hasRows = matching.length > 0;\nOutputs.none = matching.length === 0;\n"
+      },
+      "ports": [
+        {
+          "name": "in-items",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-search",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-minutes",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-hasRows",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-none",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "id": "lp_add",
+      "type": "CloudFunction2",
+      "label": "addStep: this homework, copied (staff only)",
+      "x": 500,
+      "y": 760,
+      "parameters": {
+        "function": "addStep",
+        "in-kind": "homework"
+      }
+    },
+    {
+      "id": "lp_fail_sw",
+      "type": "Switch",
+      "label": "Show why, once there is a why",
+      "x": 500,
+      "y": 1000,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "lp_t_head",
+      "type": "Translation",
+      "label": "Pick from the homework library",
+      "x": 800,
+      "y": 160,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.picker.heading"
+      }
+    },
+    {
+      "id": "lp_t_lede",
+      "type": "Translation",
+      "label": "Adding copies it",
+      "x": 800,
+      "y": 220,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.picker.lede"
+      }
+    },
+    {
+      "id": "lp_t_search",
+      "type": "Translation",
+      "label": "Search",
+      "x": 800,
+      "y": 280,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.picker.search"
+      }
+    },
+    {
+      "id": "lp_t_min",
+      "type": "Translation",
+      "label": "{min} min",
+      "x": 800,
+      "y": 340,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.detailMinutes"
+      }
+    },
+    {
+      "id": "lp_t_close",
+      "type": "Translation",
+      "label": "Close",
+      "x": 800,
+      "y": 400,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.picker.close"
+      }
+    },
+    {
+      "id": "lp_t_failed",
+      "type": "Translation",
+      "label": "Could not read the library",
+      "x": 800,
+      "y": 460,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.picker.failed"
+      }
+    }
+  ],
+  "visualRoots": [
+    "lp_root"
+  ]
+}

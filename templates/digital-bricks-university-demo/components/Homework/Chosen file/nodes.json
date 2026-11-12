@@ -1,0 +1,178 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5d38081e-dd7e-5669-8b9f-6b7d462ebd32",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cf_root",
+      "type": "Group",
+      "label": "A chosen file",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "cf_icon",
+        "cf_name",
+        "cf_remove"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-1)",
+        "backgroundColor": "var(--background)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-md)",
+        "dataAttributes": "data-testid",
+        "data-testid": "chosen-file"
+      }
+    },
+    {
+      "id": "cf_icon",
+      "type": "net.noodl.visual.icon",
+      "label": "File icon",
+      "x": 100,
+      "y": 160,
+      "parent": "cf_root",
+      "parameters": {
+        "iconSize": 16,
+        "iconColor": "var(--muted-foreground)",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-file",
+          "codeAsClass": true
+        }
+      }
+    },
+    {
+      "id": "cf_name",
+      "type": "Text",
+      "label": "{name} · {size}",
+      "x": 100,
+      "y": 280,
+      "parent": "cf_root",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "color": "var(--foreground)",
+        "wordBreak": "break-all",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "cf_remove",
+      "type": "net.noodl.controls.button",
+      "label": "Remove",
+      "x": 100,
+      "y": 400,
+      "parent": "cf_root",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-x",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1)",
+        "iconColor": "var(--muted-foreground)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "minHeight": "var(--space-11)"
+      }
+    },
+    {
+      "id": "cf_in",
+      "type": "Component Inputs",
+      "label": "The file",
+      "x": 470,
+      "y": 160,
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "size",
+          "plug": "output",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "cf_out",
+      "type": "Component Outputs",
+      "label": "Remove it",
+      "x": 470,
+      "y": 520,
+      "ports": [
+        {
+          "name": "remove",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "cf_t_name",
+      "type": "Translation",
+      "label": "{name} · {size}",
+      "x": 470,
+      "y": 280,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "work.chosen"
+      }
+    },
+    {
+      "id": "cf_fill_name",
+      "type": "String Format",
+      "label": "Name and size",
+      "x": 470,
+      "y": 400,
+      "parameters": {
+        "format": "{name} {size}"
+      }
+    },
+    {
+      "id": "cf_t_remove",
+      "type": "Translation",
+      "label": "Remove",
+      "x": 470,
+      "y": 640,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "work.removeFile"
+      }
+    }
+  ],
+  "visualRoots": [
+    "cf_root"
+  ]
+}

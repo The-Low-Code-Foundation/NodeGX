@@ -1,0 +1,421 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6119738f-dd2d-5ebe-8e5e-0b6ba35493da",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cie_t_title",
+      "fromProperty": "Translation",
+      "toId": "cie_title",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "cie_t_sends",
+      "fromProperty": "Translation",
+      "toId": "cie_sends",
+      "toProperty": "Label"
+    },
+    {
+      "fromId": "cie_t_hint",
+      "fromProperty": "Translation",
+      "toId": "cie_hint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cie_t_save",
+      "fromProperty": "Translation",
+      "toId": "cie_save",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "cie_t_cancel",
+      "fromProperty": "Translation",
+      "toId": "cie_cancel",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "cie_in",
+      "fromProperty": "step",
+      "toId": "cie_open",
+      "toProperty": "in-step"
+    },
+    {
+      "fromId": "cie_root",
+      "fromProperty": "didMount",
+      "toId": "cie_open",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cie_open",
+      "fromProperty": "out-title",
+      "toId": "cie_title",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "cie_open",
+      "fromProperty": "out-opened",
+      "toId": "cie_title",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "cie_open",
+      "fromProperty": "out-sends",
+      "toId": "cie_sends",
+      "toProperty": "Value"
+    },
+    {
+      "fromId": "cie_open",
+      "fromProperty": "out-opened",
+      "toId": "cie_sends",
+      "toProperty": "Reset"
+    },
+    {
+      "fromId": "cie_open",
+      "fromProperty": "out-opened",
+      "toId": "cie_msg_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "cie_open",
+      "fromProperty": "out-id",
+      "toId": "cie_gather",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "cie_open",
+      "fromProperty": "out-title",
+      "toId": "cie_gather",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "cie_open",
+      "fromProperty": "out-sends",
+      "toId": "cie_gather",
+      "toProperty": "in-sends"
+    },
+    {
+      "fromId": "cie_title",
+      "fromProperty": "onTextChanged",
+      "toId": "cie_gather",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "cie_sends",
+      "fromProperty": "Value",
+      "toId": "cie_gather",
+      "toProperty": "in-sends"
+    },
+    {
+      "fromId": "cie_save",
+      "fromProperty": "onClick",
+      "toId": "cie_gather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cie_save",
+      "fromProperty": "onClick",
+      "toId": "cie_msg_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "cie_gather",
+      "fromProperty": "out-id",
+      "toId": "cie_call",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "cie_gather",
+      "fromProperty": "out-title",
+      "toId": "cie_call",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "cie_gather",
+      "fromProperty": "out-sendsAt",
+      "toId": "cie_call",
+      "toProperty": "in-sendsAt"
+    },
+    {
+      "fromId": "cie_gather",
+      "fromProperty": "out-go",
+      "toId": "cie_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "cie_call",
+      "fromProperty": "error",
+      "toId": "cie_msg",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cie_call",
+      "fromProperty": "failure",
+      "toId": "cie_msg_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "cie_msg_sw",
+      "fromProperty": "state",
+      "toId": "cie_msg",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cie_gather",
+      "fromProperty": "out-title",
+      "toId": "cie_out",
+      "toProperty": "savedTitle"
+    },
+    {
+      "fromId": "cie_call",
+      "fromProperty": "done",
+      "toId": "cie_out",
+      "toProperty": "saved"
+    },
+    {
+      "fromId": "cie_cancel",
+      "fromProperty": "onClick",
+      "toId": "cie_out",
+      "toProperty": "closed"
+    },
+    {
+      "fromId": "cie_in",
+      "fromProperty": "anchors",
+      "toId": "cie_open",
+      "toProperty": "in-anchors"
+    },
+    {
+      "fromId": "cie_forms",
+      "fromProperty": "items",
+      "toId": "cie_open",
+      "toProperty": "in-forms"
+    },
+    {
+      "fromId": "cie_t_fa",
+      "fromProperty": "Translation",
+      "toId": "cie_open",
+      "toProperty": "in-tAfterSession"
+    },
+    {
+      "fromId": "cie_t_fe",
+      "fromProperty": "Translation",
+      "toId": "cie_open",
+      "toProperty": "in-tEndOfProgramme"
+    },
+    {
+      "fromId": "cie_t_fs",
+      "fromProperty": "Translation",
+      "toId": "cie_open",
+      "toProperty": "in-tSixWeek"
+    },
+    {
+      "fromId": "cie_t_wd",
+      "fromProperty": "Translation",
+      "toId": "cie_open",
+      "toProperty": "in-tWhenDate"
+    },
+    {
+      "fromId": "cie_t_wa",
+      "fromProperty": "Translation",
+      "toId": "cie_open",
+      "toProperty": "in-tWhenAfter"
+    },
+    {
+      "fromId": "cie_t_none",
+      "fromProperty": "Translation",
+      "toId": "cie_open",
+      "toProperty": "in-tNoAnchor"
+    },
+    {
+      "fromId": "cie_t_form",
+      "fromProperty": "Translation",
+      "toId": "cie_form",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "cie_t_locked",
+      "fromProperty": "Translation",
+      "toId": "cie_locked",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cie_t_when",
+      "fromProperty": "Translation",
+      "toId": "cie_when",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "cie_t_astep",
+      "fromProperty": "Translation",
+      "toId": "cie_anchor",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "cie_t_adays",
+      "fromProperty": "Translation",
+      "toId": "cie_days",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "cie_t_ahint",
+      "fromProperty": "Translation",
+      "toId": "cie_after_hint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cie_open",
+      "fromProperty": "out-formItems",
+      "toId": "cie_form",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "cie_open",
+      "fromProperty": "out-form",
+      "toId": "cie_form",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cie_open",
+      "fromProperty": "out-unlocked",
+      "toId": "cie_form",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "cie_open",
+      "fromProperty": "out-locked",
+      "toId": "cie_locked",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cie_open",
+      "fromProperty": "out-unlocked",
+      "toId": "cie_when_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cie_open",
+      "fromProperty": "out-whenItems",
+      "toId": "cie_when",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "cie_open",
+      "fromProperty": "out-when",
+      "toId": "cie_when",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cie_open",
+      "fromProperty": "out-anchorItems",
+      "toId": "cie_anchor",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "cie_open",
+      "fromProperty": "out-anchor",
+      "toId": "cie_anchor",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cie_open",
+      "fromProperty": "out-days",
+      "toId": "cie_days",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "cie_open",
+      "fromProperty": "out-opened",
+      "toId": "cie_days",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "cie_open",
+      "fromProperty": "out-when",
+      "toId": "cie_mode",
+      "toProperty": "in-when"
+    },
+    {
+      "fromId": "cie_when",
+      "fromProperty": "value",
+      "toId": "cie_mode",
+      "toProperty": "in-when"
+    },
+    {
+      "fromId": "cie_mode",
+      "fromProperty": "out-isDate",
+      "toId": "cie_date_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cie_mode",
+      "fromProperty": "out-isAfter",
+      "toId": "cie_after_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cie_open",
+      "fromProperty": "out-form",
+      "toId": "cie_gather",
+      "toProperty": "in-form"
+    },
+    {
+      "fromId": "cie_form",
+      "fromProperty": "value",
+      "toId": "cie_gather",
+      "toProperty": "in-form"
+    },
+    {
+      "fromId": "cie_open",
+      "fromProperty": "out-when",
+      "toId": "cie_gather",
+      "toProperty": "in-when"
+    },
+    {
+      "fromId": "cie_when",
+      "fromProperty": "value",
+      "toId": "cie_gather",
+      "toProperty": "in-when"
+    },
+    {
+      "fromId": "cie_open",
+      "fromProperty": "out-anchor",
+      "toId": "cie_gather",
+      "toProperty": "in-anchor"
+    },
+    {
+      "fromId": "cie_anchor",
+      "fromProperty": "value",
+      "toId": "cie_gather",
+      "toProperty": "in-anchor"
+    },
+    {
+      "fromId": "cie_open",
+      "fromProperty": "out-days",
+      "toId": "cie_gather",
+      "toProperty": "in-days"
+    },
+    {
+      "fromId": "cie_days",
+      "fromProperty": "onTextChanged",
+      "toId": "cie_gather",
+      "toProperty": "in-days"
+    },
+    {
+      "fromId": "cie_gather",
+      "fromProperty": "out-formId",
+      "toId": "cie_call",
+      "toProperty": "in-formId"
+    },
+    {
+      "fromId": "cie_gather",
+      "fromProperty": "out-sendAfterStep",
+      "toId": "cie_call",
+      "toProperty": "in-sendAfterStep"
+    },
+    {
+      "fromId": "cie_gather",
+      "fromProperty": "out-sendAfterDays",
+      "toId": "cie_call",
+      "toProperty": "in-sendAfterDays"
+    }
+  ]
+}

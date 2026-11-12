@@ -1,0 +1,211 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "27191227-bd45-501a-8693-e73092ae6f82",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "iw_in",
+      "fromProperty": "items",
+      "toId": "iw_fn",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "iw_in",
+      "fromProperty": "selectedId",
+      "toId": "iw_fn",
+      "toProperty": "in-selectedId"
+    },
+    {
+      "fromId": "iw_in",
+      "fromProperty": "narrow",
+      "toId": "iw_fn",
+      "toProperty": "in-narrow"
+    },
+    {
+      "fromId": "iw_kinds",
+      "fromProperty": "items",
+      "toId": "iw_fn",
+      "toProperty": "in-kinds"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-rows",
+      "toId": "iw_out",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-hasItems",
+      "toId": "iw_out",
+      "toProperty": "hasItems"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-none",
+      "toId": "iw_out",
+      "toProperty": "none"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-showList",
+      "toId": "iw_out",
+      "toProperty": "showList"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-showDetail",
+      "toId": "iw_out",
+      "toProperty": "showDetail"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-showBack",
+      "toId": "iw_out",
+      "toProperty": "showBack"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-curId",
+      "toId": "iw_out",
+      "toProperty": "curId"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-curLearnerId",
+      "toId": "iw_out",
+      "toProperty": "curLearnerId"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-curLearner",
+      "toId": "iw_out",
+      "toProperty": "curLearner"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-curFirst",
+      "toId": "iw_out",
+      "toProperty": "curFirst"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-curKindKey",
+      "toId": "iw_out",
+      "toProperty": "curKindKey"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-curKindBg",
+      "toId": "iw_out",
+      "toProperty": "curKindBg"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-curKindFg",
+      "toId": "iw_out",
+      "toProperty": "curKindFg"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-isReview",
+      "toId": "iw_out",
+      "toProperty": "isReview"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-isQuestion",
+      "toId": "iw_out",
+      "toProperty": "isQuestion"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-isQuiet",
+      "toId": "iw_out",
+      "toProperty": "isQuiet"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-curTitle",
+      "toId": "iw_out",
+      "toProperty": "curTitle"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-curStepId",
+      "toId": "iw_out",
+      "toProperty": "curStepId"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-curSubmissions",
+      "toId": "iw_out",
+      "toProperty": "curSubmissions"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-curMessageId",
+      "toId": "iw_out",
+      "toProperty": "curMessageId"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-curFlagId",
+      "toId": "iw_out",
+      "toProperty": "curFlagId"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-curFacts",
+      "toId": "iw_out",
+      "toProperty": "curFacts"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-curNextKey",
+      "toId": "iw_out",
+      "toProperty": "curNextKey"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-curNextTitle",
+      "toId": "iw_out",
+      "toProperty": "curNextTitle"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-go",
+      "toId": "iw_out",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-isCheckin",
+      "toId": "iw_out",
+      "toProperty": "isCheckin"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-hasTitle",
+      "toId": "iw_out",
+      "toProperty": "hasTitle"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-curResponseId",
+      "toId": "iw_out",
+      "toProperty": "curResponseId"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-curQuestions",
+      "toId": "iw_out",
+      "toProperty": "curQuestions"
+    },
+    {
+      "fromId": "iw_fn",
+      "fromProperty": "out-curAnswers",
+      "toId": "iw_out",
+      "toProperty": "curAnswers"
+    }
+  ]
+}

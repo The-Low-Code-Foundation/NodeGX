@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "aeed8702-7845-51c5-86ef-cf99b097e6e3",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mr_req",
+      "fromProperty": "receive",
+      "toId": "mr_ask1",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mr_ask1",
+      "fromProperty": "out-request",
+      "toId": "mr_facts",
+      "toProperty": "request"
+    },
+    {
+      "fromId": "mr_facts",
+      "fromProperty": "learners",
+      "toId": "mr_quiet",
+      "toProperty": "in-learners"
+    },
+    {
+      "fromId": "mr_facts",
+      "fromProperty": "done",
+      "toId": "mr_quiet",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mr_quiet",
+      "fromProperty": "out-request",
+      "toId": "mr_items",
+      "toProperty": "request"
+    },
+    {
+      "fromId": "mr_items",
+      "fromProperty": "items",
+      "toId": "mr_digest",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "mr_items",
+      "fromProperty": "done",
+      "toId": "mr_digest",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mr_quiet",
+      "fromProperty": "out-raised",
+      "toId": "mr_res",
+      "toProperty": "pm-raised"
+    },
+    {
+      "fromId": "mr_quiet",
+      "fromProperty": "out-closed",
+      "toId": "mr_res",
+      "toProperty": "pm-closed"
+    },
+    {
+      "fromId": "mr_digest",
+      "fromProperty": "out-digest",
+      "toId": "mr_res",
+      "toProperty": "pm-digest"
+    },
+    {
+      "fromId": "mr_digest",
+      "fromProperty": "out-done",
+      "toId": "mr_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mr_facts",
+      "fromProperty": "failed",
+      "toId": "mr_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mr_items",
+      "fromProperty": "failed",
+      "toId": "mr_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mr_quiet",
+      "fromProperty": "out-failed",
+      "toId": "mr_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mr_quiet",
+      "fromProperty": "failure",
+      "toId": "mr_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mr_ask1",
+      "fromProperty": "failure",
+      "toId": "mr_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mr_digest",
+      "fromProperty": "failure",
+      "toId": "mr_fail",
+      "toProperty": "send"
+    }
+  ]
+}

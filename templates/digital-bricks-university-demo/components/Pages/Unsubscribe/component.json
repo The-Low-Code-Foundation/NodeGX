@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2d38c5bf-21ac-5249-895c-04a8243204ae",
+  "name": "Unsubscribe",
+  "path": "/Pages/Unsubscribe",
+  "type": "page",
+  "created": "2026-11-12T10:27:57.566Z",
+  "modified": "2026-11-12T10:27:57.566Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Stop message emails, from the link in a \"Richard replied\" email (DBU-07). Public, without the shell: the link carries the account id and its signature, and the unsubscribe function turns message emails off only when the signature is right. It answers the same either way."
+}

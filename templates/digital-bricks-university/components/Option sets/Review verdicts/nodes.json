@@ -1,0 +1,40 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f887b0ef-1a28-5dda-8272-f3e7d98b583f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rvd_data",
+      "type": "Static Data",
+      "label": "Review verdicts",
+      "parameters": {
+        "type": "json",
+        "json": "[{\"id\":\"verdict-pending\",\"value\":\"pending\",\"labelKey\":\"work.reviewPending\",\"bg\":\"var(--waiting-bg)\",\"fg\":\"var(--waiting-fg)\"},{\"id\":\"verdict-approved\",\"value\":\"approved\",\"labelKey\":\"plan.statusApproved\",\"bg\":\"var(--done-bg)\",\"fg\":\"var(--done-fg)\"},{\"id\":\"verdict-changes\",\"value\":\"changes\",\"labelKey\":\"plan.statusChangesAsked\",\"bg\":\"var(--homework-bg)\",\"fg\":\"var(--homework-fg)\"},{\"id\":\"verdict-superseded\",\"value\":\"superseded\",\"labelKey\":\"work.reviewSuperseded\",\"bg\":\"var(--muted)\",\"fg\":\"var(--subtle-foreground)\"}]"
+      },
+      "x": 40,
+      "y": 40,
+      "metadata": {
+        "comment": "pending, approved and changes are Submission.review. superseded is shown, never stored: an older version still pending once a newer one came in, which reviewSubmission will never take."
+      }
+    },
+    {
+      "id": "rvd_out",
+      "type": "Component Outputs",
+      "label": "Verdicts out",
+      "ports": [
+        {
+          "name": "items",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    }
+  ]
+}

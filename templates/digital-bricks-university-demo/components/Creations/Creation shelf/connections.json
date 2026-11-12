@@ -1,0 +1,241 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5e069497-4abe-57a2-8b81-d72cc586edc4",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cs_in",
+      "fromProperty": "items",
+      "toId": "cs_shelf",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "cs_kinds",
+      "fromProperty": "items",
+      "toId": "cs_shelf",
+      "toProperty": "kinds"
+    },
+    {
+      "fromId": "cs_in",
+      "fromProperty": "mode",
+      "toId": "cs_shelf",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "chips",
+      "toId": "cs_chips",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "hasItems",
+      "toId": "cs_filters",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cs_chips",
+      "fromProperty": "itemActionItemId",
+      "toId": "cs_shelf",
+      "toProperty": "chipId"
+    },
+    {
+      "fromId": "cs_chips",
+      "fromProperty": "itemOutputSignal-pick",
+      "toId": "cs_shelf",
+      "toProperty": "pickFilter"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "cards",
+      "toId": "cs_cards",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "showGrid",
+      "toId": "cs_grid",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cs_cards",
+      "fromProperty": "itemActionItemId",
+      "toId": "cs_shelf",
+      "toProperty": "cardId"
+    },
+    {
+      "fromId": "cs_cards",
+      "fromProperty": "itemOutputSignal-open",
+      "toId": "cs_shelf",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "cs_cards",
+      "fromProperty": "itemOutputSignal-edit",
+      "toId": "cs_shelf",
+      "toProperty": "edit"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "editItem",
+      "toId": "cs_out",
+      "toProperty": "editItem"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "edit",
+      "toId": "cs_out",
+      "toProperty": "edit"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "edit",
+      "toId": "cs_shelf",
+      "toProperty": "close"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "isOpen",
+      "toId": "cs_view_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "opened",
+      "toId": "cs_view_box",
+      "toProperty": "scrollIntoView"
+    },
+    {
+      "fromId": "cs_view",
+      "fromProperty": "closed",
+      "toId": "cs_shelf",
+      "toProperty": "close"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "vTitle",
+      "toId": "cs_view",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "vKindKey",
+      "toId": "cs_view",
+      "toProperty": "kindKey"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "vKindBg",
+      "toId": "cs_view",
+      "toProperty": "kindBg"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "vKindFg",
+      "toId": "cs_view",
+      "toProperty": "kindFg"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "vMadeWith",
+      "toId": "cs_view",
+      "toProperty": "madeWith"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "vHasMadeWith",
+      "toId": "cs_view",
+      "toProperty": "hasMadeWith"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "vStepTitle",
+      "toId": "cs_view",
+      "toProperty": "stepTitle"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "vHasStep",
+      "toId": "cs_view",
+      "toProperty": "hasStep"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "vDescription",
+      "toId": "cs_view",
+      "toProperty": "description"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "vHasDescription",
+      "toId": "cs_view",
+      "toProperty": "hasDescription"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "vIsFile",
+      "toId": "cs_view",
+      "toProperty": "isFile"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "vIsLink",
+      "toId": "cs_view",
+      "toProperty": "isLink"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "vIsText",
+      "toId": "cs_view",
+      "toProperty": "isText"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "vFiles",
+      "toId": "cs_view",
+      "toProperty": "files"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "vUrl",
+      "toId": "cs_view",
+      "toProperty": "url"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "vText",
+      "toId": "cs_view",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cs_t_none_kind",
+      "fromProperty": "Translation",
+      "toId": "cs_none_kind",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "noneOfKind",
+      "toId": "cs_none_kind",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cs_shelf",
+      "fromProperty": "none",
+      "toId": "cs_empty_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cs_in",
+      "fromProperty": "emptyTitleKey",
+      "toId": "cs_empty",
+      "toProperty": "titleKey"
+    },
+    {
+      "fromId": "cs_in",
+      "fromProperty": "emptyBodyKey",
+      "toId": "cs_empty",
+      "toProperty": "bodyKey"
+    }
+  ]
+}

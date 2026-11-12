@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "cf11fb08-069f-59f4-8292-578d6520a542",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "lr_in-2",
+      "fromProperty": "latest",
+      "toId": "lr_fn",
+      "toProperty": "in-latest"
+    },
+    {
+      "fromId": "lr_t_title",
+      "fromProperty": "Translation",
+      "toId": "lr_title-2",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lr_fn",
+      "fromProperty": "out-isNew",
+      "toId": "lr_new_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lr_fn",
+      "fromProperty": "out-has",
+      "toId": "lr_when",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lr_fn",
+      "fromProperty": "out-when",
+      "toId": "lr_when",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lr_fn",
+      "fromProperty": "out-hasTag",
+      "toId": "lr_tag",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lr_t_about",
+      "fromProperty": "Translation",
+      "toId": "lr_fill_tag",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "lr_fn",
+      "fromProperty": "out-tag",
+      "toId": "lr_fill_tag",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "lr_fill_tag",
+      "fromProperty": "formatted",
+      "toId": "lr_tag",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lr_fn",
+      "fromProperty": "out-hasBody",
+      "toId": "lr_body",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lr_fn",
+      "fromProperty": "out-body",
+      "toId": "lr_body",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lr_fn",
+      "fromProperty": "out-none",
+      "toId": "lr_none",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lr_t_none",
+      "fromProperty": "Translation",
+      "toId": "lr_none",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lr_t_open",
+      "fromProperty": "Translation",
+      "toId": "lr_open",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "lr_open",
+      "fromProperty": "onClick",
+      "toId": "lr_go",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "lr_in-2",
+      "fromProperty": "me",
+      "toId": "lr_fn",
+      "toProperty": "in-me"
+    }
+  ]
+}

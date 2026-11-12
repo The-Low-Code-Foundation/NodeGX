@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f887b0ef-1a28-5dda-8272-f3e7d98b583f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rvd_data",
+      "fromProperty": "items",
+      "toId": "rvd_out",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "rvd_data",
+      "fromProperty": "count",
+      "toId": "rvd_out",
+      "toProperty": "count"
+    }
+  ]
+}

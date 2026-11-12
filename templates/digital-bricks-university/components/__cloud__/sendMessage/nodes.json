@@ -1,0 +1,141 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "038360db-3fbd-58de-89e7-eea20f32dc56",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sm_req",
+      "type": "noodl.cloud.request",
+      "label": "A learner sends a message",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "body,stepId,files",
+        "allowNoAuth": false,
+        "ptype-body": "string",
+        "preq-body": false,
+        "ptype-stepId": "string",
+        "preq-stepId": false,
+        "ptype-files": "array",
+        "preq-files": false
+      }
+    },
+    {
+      "id": "sm_fn",
+      "type": "JavaScriptFunction",
+      "label": "Check it, then save it",
+      "x": 40,
+      "y": 200,
+      "parameters": {
+        "runOnChange-in-userId": false,
+        "runOnChange-in-body": false,
+        "runOnChange-in-stepId": false,
+        "runOnChange-in-files": false,
+        "functionScript": "/*\n * A LEARNER WRITES TO RICHARD (DBU-07). Identity is the session: no parameter names a person.\n * A message may be about one of her shared homework steps (it then shows in that homework's\n * thread as well as in Messages), and may carry up to 5 files she uploaded privately, checked\n * exactly as hand-ins are (DBU-06): hers, private, up to 50 MB, a kind on the list, and bytes\n * that are what the name says. Saved with mailPending; shared/Message mail tells the coach next.\n */\n(async () => {\n  const refuse = (why) => { Outputs.why = why; Outputs.refuse(); };\n  try {\n    const me = String(Inputs.userId || '');\n    if (!me) throw new Error('no session user');\n    const q = (c, where) => Noodl.Records.query(c, where, { limit: 1000, plain: true });\n    const MAX_BYTES = 50 * 1024 * 1024;\n    const MAX_FILES = 5;\n    const MEDIA = ['application/octet-stream'];\n    const OFFICE = ['application/zip'];\n    const TYPES = {\n      pdf: ['application/pdf'], docx: OFFICE, pptx: OFFICE, xlsx: OFFICE,\n      html: ['text/html'], htm: ['text/html'],\n      png: ['image/png'], jpg: ['image/jpeg'], jpeg: ['image/jpeg'], webp: ['image/webp'],\n      mp3: ['audio/mpeg'], m4a: MEDIA.concat(['audio/mp4']), mp4: MEDIA.concat(['video/mp4']), webm: MEDIA.concat(['video/webm', 'audio/webm'])\n    };\n\n    const body = String(Inputs.body || '').trim();\n    const names = Array.isArray(Inputs.files) ? Inputs.files.map((x) => String(x || '')).filter(Boolean) : [];\n    if (!body && !names.length) return refuse('Write your message first.');\n    if (body.length > 5000) return refuse('Keep a message under 5,000 characters, or send it in two.');\n\n    const stepId = String(Inputs.stepId || '');\n    if (stepId) {\n      const steps = await q('Step', { objectId: { equalTo: stepId } });\n      const step = steps[0];\n      if (!step || step.learner !== me || step.shared !== true || step.kind !== 'homework') return refuse('This homework is not one of yours. Reload the page.');\n    }\n\n    const attachments = [];\n    if (names.length > MAX_FILES) return refuse('Attach up to ' + MAX_FILES + ' files to one message.');\n    if (new Set(names).size !== names.length) return refuse('The same file is attached twice. Remove one and send again.');\n    for (const name of names) {\n      const rows = await q('_Files', { storedName: { equalTo: name } });\n      const f = rows.length === 1 ? rows[0] : null;\n      const owner = f && f.owner && typeof f.owner === 'object' ? f.owner.objectId : f && f.owner;\n      // Never name a file that is not the caller's: its name is someone else's.\n      if (!f || owner !== me) return refuse((names.length > 1 ? 'One of these files is' : 'That file is') + ' not one you uploaded. Attach it again.');\n      const original = String(f.originalName || '');\n      const said = (why) => refuse(names.length > 1 ? original + ': ' + why : why);\n      if (f.private !== true) return said('That file was not uploaded privately. Attach it again.');\n      if (Number(f.size) > MAX_BYTES) return said('That file is larger than 50 MB. Put it online and send the link instead.');\n      const dot = original.lastIndexOf('.');\n      const ext = dot > 0 ? original.slice(dot + 1).toLowerCase() : '';\n      const allowed = TYPES[ext];\n      if (!allowed) return said('Files of this kind can\\'t be attached. Use Word, PowerPoint, Excel, PDF, HTML, an image (PNG, JPG, WebP), audio (MP3, M4A) or video (MP4, WebM), or send a link.');\n      if (!allowed.includes(f.contentType)) return said('This file is not a real .' + ext + ' file. Save it again in that format, then attach it.');\n      attachments.push({ file: name, name: original });\n    }\n\n    const created = await Noodl.Records.create('Message', {\n      learner: me, author: me, step: stepId || null, body, attachments,\n      readAt: null, mailPending: true, mailedAt: null\n    }, { plain: true });\n    await Noodl.Records.create('Doorbell', { learner: me, topic: 'message' },\n      { acl: { [me]: { read: true }, 'role:staff': { read: true } } });\n\n    Outputs.messageId = created.objectId || created.id;\n    Outputs.mail = { learnerId: me, to: 'coach', at: Date.now() };\n  } catch (e) {\n    console.error('[dbu:sendMessage]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "displayName": "userId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-body",
+          "displayName": "body",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-files",
+          "displayName": "files",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-stepId",
+          "displayName": "stepId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-refuse",
+          "displayName": "refuse",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-failed",
+          "displayName": "failed",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-why",
+          "displayName": "why",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-messageId",
+          "displayName": "messageId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mail",
+          "displayName": "mail",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "sm_mail",
+      "type": "/#__cloud__/shared/Message mail",
+      "label": "Tell the coach (at once, or grouped)",
+      "x": 40,
+      "y": 360
+    },
+    {
+      "id": "sm_res",
+      "type": "noodl.cloud.response",
+      "label": "Sent",
+      "x": 40,
+      "y": 480,
+      "parameters": {
+        "params": "messageId"
+      }
+    },
+    {
+      "id": "sm_deny",
+      "type": "noodl.cloud.response",
+      "label": "A refusal the learner can act on",
+      "x": 320,
+      "y": 480,
+      "parameters": {
+        "status": "failure"
+      }
+    },
+    {
+      "id": "sm_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "x": 600,
+      "y": 480,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "Your message could not be sent. Try again in a moment."
+      }
+    }
+  ]
+}

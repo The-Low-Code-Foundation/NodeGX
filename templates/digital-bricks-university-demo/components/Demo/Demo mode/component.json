@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "033aa031-4f74-5ee7-8d59-772afe7d83cf",
+  "name": "Demo mode",
+  "path": "/Demo/Demo mode",
+  "type": "logic",
+  "created": "2026-11-12T16:56:43.485Z",
+  "modified": "2026-11-12T16:56:43.485Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Whether the app is running as the browser-only demo on nodegx.io (DBU-11), and as whom. In the template it always says \"not the demo\", so nothing of Demo/ shows."
+}

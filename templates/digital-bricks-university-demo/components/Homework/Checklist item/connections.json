@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "9cfc8dab-be55-5526-8442-282237b74d61",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ci_in",
+      "fromProperty": "text",
+      "toId": "ci_text",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ci_in",
+      "fromProperty": "optional",
+      "toId": "ci_optional",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ci_t_optional",
+      "fromProperty": "Translation",
+      "toId": "ci_optional",
+      "toProperty": "text"
+    }
+  ]
+}

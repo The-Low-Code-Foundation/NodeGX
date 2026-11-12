@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "64126eff-6f8a-5012-8d0d-4c9ee6ba9221",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "car_in",
+      "fromProperty": "id",
+      "toId": "car_testid",
+      "toProperty": "id"
+    },
+    {
+      "fromId": "car_testid",
+      "fromProperty": "formatted",
+      "toId": "car_row",
+      "toProperty": "data-testid"
+    },
+    {
+      "fromId": "car_in",
+      "fromProperty": "label",
+      "toId": "car_q",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "car_in",
+      "fromProperty": "answerKey",
+      "toId": "car_t",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "car_t",
+      "fromProperty": "Translation",
+      "toId": "car_fill",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "car_in",
+      "fromProperty": "value",
+      "toId": "car_fill",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "car_in",
+      "fromProperty": "max",
+      "toId": "car_fill",
+      "toProperty": "max"
+    },
+    {
+      "fromId": "car_in",
+      "fromProperty": "suffix",
+      "toId": "car_fill",
+      "toProperty": "suffix"
+    },
+    {
+      "fromId": "car_fill",
+      "fromProperty": "formatted",
+      "toId": "car_a",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "car_in",
+      "fromProperty": "answerFg",
+      "toId": "car_a",
+      "toProperty": "color"
+    }
+  ]
+}

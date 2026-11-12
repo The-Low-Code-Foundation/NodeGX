@@ -1,0 +1,80 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "45a0bfbf-5e12-5db6-8158-d06f0af7e063",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "fc_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach opens a learner's file",
+      "parameters": {
+        "params": "name",
+        "allowNoAuth": false,
+        "ptype-name": "string",
+        "preq-name": true
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "fc_find",
+      "type": "JavaScriptFunction",
+      "label": "Does the file exist?",
+      "parameters": {
+        "functionScript": "(async () => {\n  try {\n    const name = String(Inputs.name || '');\n    const rows = name ? await Noodl.Records.query('_Files', { storedName: { equalTo: name } }, { limit: 2, plain: true }) : [];\n    if (rows.length !== 1) throw new Error('no file ' + name);\n    Outputs.name = name;\n  } catch (e) {\n    console.error('[dbu:fileLinkAsCoach]', String((e && e.message) || e));\n    Outputs.refused();\n  }\n})();\n",
+        "runOnChange-in-name": false
+      },
+      "ports": [
+        {
+          "name": "in-name",
+          "plug": "input",
+          "type": "*",
+          "displayName": "name",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-name",
+          "plug": "output",
+          "type": "*",
+          "displayName": "name",
+          "group": "Outputs"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "fc_sign",
+      "type": "/#__cloud__/shared/Signed file link",
+      "label": "Sign it",
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "fc_res",
+      "type": "noodl.cloud.response",
+      "label": "The link",
+      "parameters": {
+        "params": "url,expiresAt"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "fc_deny",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "This file could not be opened."
+      },
+      "x": 40,
+      "y": 520
+    }
+  ]
+}

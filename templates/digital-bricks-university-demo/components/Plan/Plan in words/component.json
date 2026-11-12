@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "025c0810-fa38-5acb-8519-9001ef2c2123",
+  "name": "Plan in words",
+  "path": "/Plan/Plan in words",
+  "type": "logic",
+  "created": "2026-11-09T10:49:30.732Z",
+  "modified": "2026-11-12T14:58:00.439Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Turns learnerAsCoach's answer into what the plan page shows: the learner's name and detail, the counts, where the plan started from, and one row per step (kind, status, Draft or Shared, a line of detail in the reader's words, its calendar details). Also the rows the learner sees: shared steps only."
+}

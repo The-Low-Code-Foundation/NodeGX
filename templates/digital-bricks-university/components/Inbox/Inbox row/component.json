@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a11ea9d8-ae40-585a-8efb-6e40a0f1628d",
+  "name": "Inbox row",
+  "path": "/Inbox/Inbox row",
+  "type": "visual",
+  "created": "2026-11-12T13:09:46.272Z",
+  "modified": "2026-11-12T13:09:46.272Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One thing waiting in the coach's inbox (DBU-08): its kind, the learner, a one-line summary and how long it has waited. Tinted when it is the one open on the right; a press opens it."
+}

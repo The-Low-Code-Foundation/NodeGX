@@ -1,0 +1,413 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5edacb88-2351-5980-82c5-8a9a8a6f4957",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "st_page",
+      "type": "Page",
+      "label": "Settings",
+      "children": [
+        "st_shell"
+      ],
+      "parameters": {
+        "urlPath": "coach/settings"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "st_shell",
+      "type": "/Shell/App shell",
+      "label": "Coach shell",
+      "parent": "st_page",
+      "children": [
+        "st_head",
+        "st_body"
+      ],
+      "parameters": {
+        "coach": true,
+        "current": "settings"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "st_head",
+      "type": "/Shell/Page head",
+      "label": "Head",
+      "parent": "st_shell",
+      "parameters": {
+        "titleKey": "settings.title",
+        "leadKey": "settings.lead"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "st_t_tab",
+      "type": "Translation",
+      "label": "The browser tab's title",
+      "x": 500,
+      "y": 40,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "settings.tab"
+      }
+    },
+    {
+      "id": "st_body",
+      "type": "Group",
+      "label": "Settings body (reads on mount)",
+      "parent": "st_shell",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "st_card",
+        "st_failed"
+      ],
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "st_card",
+      "type": "Group",
+      "label": "Coach address",
+      "parent": "st_body",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 640,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "stretch",
+        "rowGap": "var(--space-3)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "dataAttributes": "data-testid",
+        "data-testid": "coach-settings"
+      },
+      "children": [
+        "st_name",
+        "st_name_hint",
+        "st_email",
+        "st_hint",
+        "st_save_row",
+        "st_saved",
+        "st_refused"
+      ],
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "st_email",
+      "type": "net.noodl.controls.textinput",
+      "label": "Coach address",
+      "parent": "st_card",
+      "parameters": {
+        "type": "email",
+        "useLabel": true,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 280,
+      "y": 640
+    },
+    {
+      "id": "st_hint",
+      "type": "Text",
+      "label": "Where they land, and the default",
+      "parent": "st_card",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "st_save_row",
+      "type": "Group",
+      "label": "Save",
+      "parent": "st_card",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "paddingTop": "var(--space-1)"
+      },
+      "children": [
+        "st_save"
+      ],
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "st_save",
+      "type": "net.noodl.controls.button",
+      "label": "Save",
+      "parent": "st_save_row",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize"
+      },
+      "x": 340,
+      "y": 1000
+    },
+    {
+      "id": "st_saved",
+      "type": "Text",
+      "label": "Saved, with the address now used",
+      "parent": "st_card",
+      "parameters": {
+        "text": "",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "color": "var(--done-fg)"
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "st_refused",
+      "type": "Text",
+      "label": "Why it was not saved (the function's words)",
+      "parent": "st_card",
+      "parameters": {
+        "text": "",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)"
+      },
+      "x": 280,
+      "y": 1240
+    },
+    {
+      "id": "st_failed",
+      "type": "Text",
+      "label": "Could not read the settings",
+      "parent": "st_body",
+      "parameters": {
+        "text": "",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)"
+      },
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "st_read",
+      "type": "CloudFunction2",
+      "label": "coachSettings (staff only)",
+      "parameters": {
+        "function": "coachSettings"
+      },
+      "x": 590,
+      "y": 640
+    },
+    {
+      "id": "st_write",
+      "type": "CloudFunction2",
+      "label": "saveCoachSettings (staff only)",
+      "parameters": {
+        "function": "saveCoachSettings"
+      },
+      "x": 590,
+      "y": 760
+    },
+    {
+      "id": "st_t_email",
+      "type": "Translation",
+      "label": "Learner messages are emailed to",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "settings.coachEmail"
+      },
+      "x": 590,
+      "y": 880
+    },
+    {
+      "id": "st_t_hint",
+      "type": "Translation",
+      "label": "Hint",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "settings.coachEmailHint"
+      },
+      "x": 590,
+      "y": 1000
+    },
+    {
+      "id": "st_t_save",
+      "type": "Translation",
+      "label": "Save",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "settings.save"
+      },
+      "x": 590,
+      "y": 1120
+    },
+    {
+      "id": "st_t_saved",
+      "type": "Translation",
+      "label": "Saved. ... {email}",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "settings.saved"
+      },
+      "x": 590,
+      "y": 1840
+    },
+    {
+      "id": "st_t_failed",
+      "type": "Translation",
+      "label": "Could not read",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "settings.failed"
+      },
+      "x": 590,
+      "y": 1600
+    },
+    {
+      "id": "st_fill_saved",
+      "type": "String Format",
+      "label": "Saved, filled in",
+      "parameters": {
+        "format": "Saved. Learner messages now go to {email}."
+      },
+      "x": 590,
+      "y": 1240
+    },
+    {
+      "id": "st_saved_sw",
+      "type": "Switch",
+      "label": "Saved",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 590,
+      "y": 1360
+    },
+    {
+      "id": "st_refused_sw",
+      "type": "Switch",
+      "label": "Not saved",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 590,
+      "y": 1480
+    },
+    {
+      "id": "st_fail_sw",
+      "type": "Switch",
+      "label": "Could not read",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 590,
+      "y": 1720
+    },
+    {
+      "id": "st_loaded_sw",
+      "type": "Switch",
+      "label": "Read once",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 590,
+      "y": 520
+    },
+    {
+      "id": "st_name",
+      "type": "net.noodl.controls.textinput",
+      "label": "Coach name (what learners see)",
+      "parent": "st_card",
+      "parameters": {
+        "type": "text",
+        "useLabel": true,
+        "maxLength": 60,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "dataAttributes": "data-testid",
+        "data-testid": "coach-name"
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "st_name_hint",
+      "type": "Text",
+      "label": "Where learners see it, and the default",
+      "parent": "st_card",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "st_t_name",
+      "type": "Translation",
+      "label": "Your name, as learners see it",
+      "x": 900,
+      "y": 40,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "settings.coachName"
+      }
+    },
+    {
+      "id": "st_t_name_hint",
+      "type": "Translation",
+      "label": "Name hint",
+      "x": 900,
+      "y": 120,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "settings.coachNameHint"
+      }
+    }
+  ],
+  "visualRoots": [
+    "st_page"
+  ]
+}

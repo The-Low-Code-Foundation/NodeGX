@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "17ddcc12-2493-533c-83f1-93543a5f529f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pc_in",
+      "fromProperty": "labelKey",
+      "toId": "pc_t",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "pc_t",
+      "fromProperty": "Translation",
+      "toId": "pc_text",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pc_in",
+      "fromProperty": "bg",
+      "toId": "pc_root",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "pc_in",
+      "fromProperty": "fg",
+      "toId": "pc_text",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "pc_in",
+      "fromProperty": "outlined",
+      "toId": "pc_edge",
+      "toProperty": "outlined"
+    },
+    {
+      "fromId": "pc_edge",
+      "fromProperty": "result",
+      "toId": "pc_root",
+      "toProperty": "borderStyle"
+    }
+  ]
+}

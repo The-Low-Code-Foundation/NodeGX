@@ -1,0 +1,157 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "be485cfe-a196-59ad-89c4-b2f5d20a931d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rv_t_label",
+      "fromProperty": "Translation",
+      "toId": "rv_note",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "rv_t_ok",
+      "fromProperty": "Translation",
+      "toId": "rv_approve",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "rv_t_ch",
+      "fromProperty": "Translation",
+      "toId": "rv_changes",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "rv_t_need",
+      "fromProperty": "Translation",
+      "toId": "rv_need",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rv_in",
+      "fromProperty": "submissionId",
+      "toId": "rv_cf_ok",
+      "toProperty": "in-submissionId"
+    },
+    {
+      "fromId": "rv_in",
+      "fromProperty": "submissionId",
+      "toId": "rv_cf_ch",
+      "toProperty": "in-submissionId"
+    },
+    {
+      "fromId": "rv_note",
+      "fromProperty": "onTextChanged",
+      "toId": "rv_cf_ok",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "rv_note",
+      "fromProperty": "onTextChanged",
+      "toId": "rv_cf_ch",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "rv_note",
+      "fromProperty": "onTextChanged",
+      "toId": "rv_check",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "rv_approve",
+      "fromProperty": "onClick",
+      "toId": "rv_cf_ok",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "rv_approve",
+      "fromProperty": "onClick",
+      "toId": "rv_need_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "rv_approve",
+      "fromProperty": "onClick",
+      "toId": "rv_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "rv_changes",
+      "fromProperty": "onClick",
+      "toId": "rv_check",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rv_changes",
+      "fromProperty": "onClick",
+      "toId": "rv_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "rv_check",
+      "fromProperty": "out-go",
+      "toId": "rv_cf_ch",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "rv_check",
+      "fromProperty": "out-go",
+      "toId": "rv_need_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "rv_check",
+      "fromProperty": "out-empty",
+      "toId": "rv_need_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "rv_need_sw",
+      "fromProperty": "state",
+      "toId": "rv_need",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rv_cf_ok",
+      "fromProperty": "done",
+      "toId": "rv_out",
+      "toProperty": "reviewed"
+    },
+    {
+      "fromId": "rv_cf_ch",
+      "fromProperty": "done",
+      "toId": "rv_out",
+      "toProperty": "reviewed"
+    },
+    {
+      "fromId": "rv_cf_ok",
+      "fromProperty": "failure",
+      "toId": "rv_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "rv_cf_ch",
+      "fromProperty": "failure",
+      "toId": "rv_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "rv_cf_ok",
+      "fromProperty": "error",
+      "toId": "rv_failed",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rv_cf_ch",
+      "fromProperty": "error",
+      "toId": "rv_failed",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rv_fail_sw",
+      "fromProperty": "state",
+      "toId": "rv_failed",
+      "toProperty": "mounted"
+    }
+  ]
+}

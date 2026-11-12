@@ -1,0 +1,120 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "15e80bed-0c2e-51e7-8a36-17ddf85f00b4",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ph_root",
+      "type": "Group",
+      "label": "Page head",
+      "x": 40,
+      "y": 200,
+      "children": [
+        "ph_title",
+        "ph_lead"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1-5)"
+      }
+    },
+    {
+      "id": "ph_title",
+      "type": "Text",
+      "label": "Title",
+      "parent": "ph_root",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": "var(--font-bold)",
+        "lineHeight": "var(--leading-tight)",
+        "letterSpacing": "var(--tracking-tight)",
+        "color": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 320
+    },
+    {
+      "id": "ph_lead",
+      "type": "Text",
+      "label": "Lead",
+      "parent": "ph_root",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-normal)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 440
+    },
+    {
+      "id": "ph_inputs",
+      "type": "Component Inputs",
+      "label": "Head in",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "titleKey",
+          "plug": "output",
+          "type": "string",
+          "displayName": "Title key"
+        },
+        {
+          "name": "leadKey",
+          "plug": "output",
+          "type": "string",
+          "displayName": "Lead key"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string",
+          "displayName": "Name (fills {name})"
+        }
+      ]
+    },
+    {
+      "id": "ph_t_title",
+      "type": "Translation",
+      "label": "The title, in the reader's language",
+      "x": 400,
+      "y": 60,
+      "parameters": {
+        "Namespace": "pages"
+      }
+    },
+    {
+      "id": "ph_fill",
+      "type": "String Format",
+      "label": "Put the name into the title",
+      "x": 400,
+      "y": 160,
+      "parameters": {
+        "format": "{name}"
+      },
+      "metadata": {
+        "comment": "The format arrives from the Translation; a title with no {name} passes through unchanged."
+      }
+    },
+    {
+      "id": "ph_t_lead",
+      "type": "Translation",
+      "label": "The lead, in the reader's language",
+      "x": 400,
+      "y": 260,
+      "parameters": {
+        "Namespace": "pages"
+      }
+    }
+  ],
+  "visualRoots": [
+    "ph_root"
+  ]
+}

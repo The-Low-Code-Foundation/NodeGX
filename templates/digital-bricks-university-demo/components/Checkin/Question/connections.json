@@ -1,0 +1,205 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f8c1b5ac-abc1-5858-836e-437908b19b51",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cq_in",
+      "fromProperty": "shown",
+      "toId": "cq_row",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cq_in",
+      "fromProperty": "qid",
+      "toId": "cq_testid",
+      "toProperty": "qid"
+    },
+    {
+      "fromId": "cq_testid",
+      "fromProperty": "formatted",
+      "toId": "cq_row",
+      "toProperty": "data-testid"
+    },
+    {
+      "fromId": "cq_in",
+      "fromProperty": "labelKey",
+      "toId": "cq_t_label",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "cq_t_label",
+      "fromProperty": "Translation",
+      "toId": "cq_label_fill",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "cq_in",
+      "fromProperty": "label",
+      "toId": "cq_label_fill",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "cq_label_fill",
+      "fromProperty": "formatted",
+      "toId": "cq_label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cq_in",
+      "fromProperty": "hint",
+      "toId": "cq_hint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cq_in",
+      "fromProperty": "hasHint",
+      "toId": "cq_hint",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cq_in",
+      "fromProperty": "hasChoices",
+      "toId": "cq_pick",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cq_in",
+      "fromProperty": "choices",
+      "toId": "cq_choice_rows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "cq_in",
+      "fromProperty": "hasEnds",
+      "toId": "cq_ends",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cq_in",
+      "fromProperty": "minLabel",
+      "toId": "cq_min",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cq_in",
+      "fromProperty": "maxLabel",
+      "toId": "cq_max",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cq_in",
+      "fromProperty": "isLine",
+      "toId": "cq_line_row",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cq_in",
+      "fromProperty": "inputMode",
+      "toId": "cq_line",
+      "toProperty": "inputMode"
+    },
+    {
+      "fromId": "cq_in",
+      "fromProperty": "text",
+      "toId": "cq_line",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "cq_in",
+      "fromProperty": "suffix",
+      "toId": "cq_suffix",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cq_in",
+      "fromProperty": "hasSuffix",
+      "toId": "cq_suffix",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cq_in",
+      "fromProperty": "isLong",
+      "toId": "cq_long",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cq_in",
+      "fromProperty": "text",
+      "toId": "cq_long",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "cq_item",
+      "fromProperty": "itemId",
+      "toId": "cq_set_line",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "cq_line",
+      "fromProperty": "onTextChanged",
+      "toId": "cq_set_line",
+      "toProperty": "prop-value"
+    },
+    {
+      "fromId": "cq_line",
+      "fromProperty": "textChanged",
+      "toId": "cq_set_line",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "cq_set_line",
+      "fromProperty": "done",
+      "toId": "cq_out",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "cq_item",
+      "fromProperty": "itemId",
+      "toId": "cq_set_long",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "cq_long",
+      "fromProperty": "onTextChanged",
+      "toId": "cq_set_long",
+      "toProperty": "prop-value"
+    },
+    {
+      "fromId": "cq_long",
+      "fromProperty": "textChanged",
+      "toId": "cq_set_long",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "cq_set_long",
+      "fromProperty": "done",
+      "toId": "cq_out",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "cq_item",
+      "fromProperty": "itemId",
+      "toId": "cq_pick_fn",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "cq_choice_rows",
+      "fromProperty": "itemActionItemId",
+      "toId": "cq_pick_fn",
+      "toProperty": "in-choiceId"
+    },
+    {
+      "fromId": "cq_choice_rows",
+      "fromProperty": "itemOutputSignal-pick",
+      "toId": "cq_pick_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cq_pick_fn",
+      "fromProperty": "out-changed",
+      "toId": "cq_out",
+      "toProperty": "changed"
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b909d224-1b39-5523-8a2b-30049fbb6c5e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mm2_req",
+      "fromProperty": "userId",
+      "toId": "mm2_fn",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "mm2_req",
+      "fromProperty": "pm-stepId",
+      "toId": "mm2_fn",
+      "toProperty": "in-stepId"
+    },
+    {
+      "fromId": "mm2_req",
+      "fromProperty": "receive",
+      "toId": "mm2_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mm2_fn",
+      "fromProperty": "out-messages",
+      "toId": "mm2_res",
+      "toProperty": "pm-messages"
+    },
+    {
+      "fromId": "mm2_fn",
+      "fromProperty": "out-me",
+      "toId": "mm2_res",
+      "toProperty": "pm-me"
+    },
+    {
+      "fromId": "mm2_fn",
+      "fromProperty": "out-emailOn",
+      "toId": "mm2_res",
+      "toProperty": "pm-emailOn"
+    },
+    {
+      "fromId": "mm2_fn",
+      "fromProperty": "out-done",
+      "toId": "mm2_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mm2_fn",
+      "fromProperty": "out-refused",
+      "toId": "mm2_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mm2_fn",
+      "fromProperty": "out-failed",
+      "toId": "mm2_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mm2_fn",
+      "fromProperty": "failure",
+      "toId": "mm2_deny",
+      "toProperty": "send"
+    }
+  ]
+}

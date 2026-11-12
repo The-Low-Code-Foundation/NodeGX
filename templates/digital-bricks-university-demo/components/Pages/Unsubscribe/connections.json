@@ -1,0 +1,145 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2d38c5bf-21ac-5249-895c-04a8243204ae",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "un_t_tab",
+      "fromProperty": "Translation",
+      "toId": "un_page",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "un_t_name",
+      "fromProperty": "Translation",
+      "toId": "un_name",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "un_t_title",
+      "fromProperty": "Translation",
+      "toId": "un_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "un_t_body",
+      "fromProperty": "Translation",
+      "toId": "un_body",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "un_t_button",
+      "fromProperty": "Translation",
+      "toId": "un_button",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "un_t_done",
+      "fromProperty": "Translation",
+      "toId": "un_done",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "un_t_broken",
+      "fromProperty": "Translation",
+      "toId": "un_broken",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "un_url",
+      "fromProperty": "pm-u",
+      "toId": "un_check",
+      "toProperty": "in-u"
+    },
+    {
+      "fromId": "un_url",
+      "fromProperty": "pm-s",
+      "toId": "un_check",
+      "toProperty": "in-s"
+    },
+    {
+      "fromId": "un_url",
+      "fromProperty": "pm-u",
+      "toId": "un_call",
+      "toProperty": "in-u"
+    },
+    {
+      "fromId": "un_url",
+      "fromProperty": "pm-s",
+      "toId": "un_call",
+      "toProperty": "in-s"
+    },
+    {
+      "fromId": "un_done_sw",
+      "fromProperty": "state",
+      "toId": "un_check",
+      "toProperty": "in-done"
+    },
+    {
+      "fromId": "un_check",
+      "fromProperty": "out-broken",
+      "toId": "un_broken",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "un_check",
+      "fromProperty": "out-ask",
+      "toId": "un_body",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "un_check",
+      "fromProperty": "out-ask",
+      "toId": "un_button",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "un_card-2",
+      "fromProperty": "didMount",
+      "toId": "un_check",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "un_button",
+      "fromProperty": "onClick",
+      "toId": "un_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "un_button",
+      "fromProperty": "onClick",
+      "toId": "un_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "un_call",
+      "fromProperty": "done",
+      "toId": "un_done_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "un_call",
+      "fromProperty": "failure",
+      "toId": "un_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "un_call",
+      "fromProperty": "error",
+      "toId": "un_failed",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "un_done_sw",
+      "fromProperty": "state",
+      "toId": "un_done",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "un_fail_sw",
+      "fromProperty": "state",
+      "toId": "un_failed",
+      "toProperty": "mounted"
+    }
+  ]
+}

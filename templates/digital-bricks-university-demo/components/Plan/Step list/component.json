@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "38e0ed2e-20f3-555a-81bf-089e5f544bcf",
+  "name": "Step list",
+  "path": "/Plan/Step list",
+  "type": "visual",
+  "created": "2026-11-09T10:45:25.764Z",
+  "modified": "2026-11-09T13:14:49.066Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A plan's steps in order, as a card: drag a step (or move it from the keyboard) to reorder, share or unshare it, remove it, or open its editor in place (one at a time); then the buttons that add steps. Read-only, it shows the rows alone. Tells the page when anything changed."
+}

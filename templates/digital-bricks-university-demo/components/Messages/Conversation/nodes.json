@@ -1,0 +1,626 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "9db044fc-44ad-5e0a-8fde-ff0f721c241e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cv_root",
+      "type": "Group",
+      "label": "Conversation",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "cv_title",
+        "cv_pref",
+        "cv_off",
+        "cv_empty",
+        "cv_list",
+        "cv_failed",
+        "cv_composer"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "dataAttributes": "data-testid",
+        "data-testid": "conversation"
+      }
+    },
+    {
+      "id": "cv_title",
+      "type": "Text",
+      "label": "Messages about this homework / with {first}",
+      "x": 100,
+      "y": 160,
+      "parent": "cv_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "cv_pref",
+      "type": "Group",
+      "label": "Reply emails on or off (learner, Messages page)",
+      "x": 100,
+      "y": 280,
+      "parent": "cv_root",
+      "children": [
+        "cv_pref_text",
+        "cv_pref_btn"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-2)"
+      }
+    },
+    {
+      "id": "cv_pref_text",
+      "type": "Text",
+      "label": "We email you when Richard replies",
+      "x": 160,
+      "y": 400,
+      "parent": "cv_pref",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "cv_pref_btn",
+      "type": "net.noodl.controls.button",
+      "label": "Stop these emails / Email me again",
+      "x": 160,
+      "y": 520,
+      "parent": "cv_pref",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "minHeight": "var(--space-11)"
+      }
+    },
+    {
+      "id": "cv_off",
+      "type": "Text",
+      "label": "This learner gets no emails (coach)",
+      "x": 100,
+      "y": 640,
+      "parent": "cv_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "cv_empty",
+      "type": "Text",
+      "label": "No messages yet",
+      "x": 100,
+      "y": 760,
+      "parent": "cv_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "cv_list",
+      "type": "Group",
+      "label": "The messages, oldest first",
+      "x": 100,
+      "y": 880,
+      "parent": "cv_root",
+      "children": [
+        "cv_rows"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      }
+    },
+    {
+      "id": "cv_rows",
+      "type": "For Each",
+      "label": "One per message",
+      "x": 160,
+      "y": 1000,
+      "parent": "cv_list",
+      "parameters": {
+        "template": "/Messages/Message row"
+      }
+    },
+    {
+      "id": "cv_failed",
+      "type": "Text",
+      "label": "Could not read",
+      "x": 100,
+      "y": 1120,
+      "parent": "cv_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "cv_composer",
+      "type": "/Messages/Composer",
+      "label": "Write a message",
+      "x": 100,
+      "y": 1240,
+      "parent": "cv_root"
+    },
+    {
+      "id": "cv_in",
+      "type": "Component Inputs",
+      "label": "Whose conversation, and how much of it",
+      "x": 520,
+      "y": 40,
+      "ports": [
+        {
+          "name": "mode",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "stepId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "learnerId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "scoped",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "tagged",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "showEmailPref",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "titleKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "emptyKey",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "metadata": {
+        "comment": "mode 'learner' reads myMessages (the session says whose); 'coach' reads messagesAsCoach for learnerId. stepId narrows a learner's to one homework's thread. tagged shows each message's homework. titleKey and emptyKey are Strings keys ({first} is filled for the coach)."
+      }
+    },
+    {
+      "id": "cv_go",
+      "type": "JavaScriptFunction",
+      "label": "Read again: as the learner, or as the coach",
+      "x": 520,
+      "y": 160,
+      "parameters": {
+        "runOnChange-in-mode": false,
+        "runOnChange-in-stepId": true,
+        "runOnChange-in-learnerId": true,
+        "functionScript": "// On mount, on a doorbell, after sending, after the email switch, and when the homework (stepId) or the learner changes.\n// scoped: one homework's thread only, so never read (and mark read) the whole conversation before stepId arrives.\nif (Inputs.mode === 'coach') { if (Inputs.learnerId) Outputs.readCoach(); }\nelse if (Inputs.scoped !== true || Inputs.stepId) Outputs.readLearner();",
+        "runOnChange-in-scoped": false
+      },
+      "ports": [
+        {
+          "name": "in-stepId",
+          "displayName": "stepId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-mode",
+          "displayName": "mode",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-learnerId",
+          "displayName": "learnerId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-readCoach",
+          "displayName": "readCoach",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-readLearner",
+          "displayName": "readLearner",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "cv_read_l",
+      "type": "CloudFunction2",
+      "label": "myMessages (my own conversation only)",
+      "x": 520,
+      "y": 280,
+      "parameters": {
+        "function": "myMessages"
+      }
+    },
+    {
+      "id": "cv_read_c",
+      "type": "CloudFunction2",
+      "label": "messagesAsCoach (staff only)",
+      "x": 760,
+      "y": 280,
+      "parameters": {
+        "function": "messagesAsCoach"
+      }
+    },
+    {
+      "id": "cv_bell",
+      "type": "SubscribeToChanges",
+      "label": "The doorbell: a message, a read, a reply",
+      "x": 1000,
+      "y": 160,
+      "parameters": {
+        "collectionName": "Doorbell"
+      }
+    },
+    {
+      "id": "cv_shape",
+      "type": "JavaScriptFunction",
+      "label": "Rows, in keys and values",
+      "x": 520,
+      "y": 880,
+      "parameters": {
+        "functionScript": "/*\n * One row per message, oldest first (DBU-07). Times in the reader's zone (their profile, else the\n * browser's). The coach's messages sit on the live tint on both sides. A file opens with fileLink\n * for the learner (her own files) and fileLinkAsCoach for the coach.\n */\nconst coach = Inputs.mode === 'coach';\nconst loaded = Array.isArray(Inputs.messages);\nconst list = loaded ? Inputs.messages : [];\nlet tz = String((Inputs.me && Inputs.me.timezone) || '');\ntry { new Date().toLocaleString('en-GB', { timeZone: tz || undefined }); } catch (e) { tz = ''; }\nconst zone = tz || Intl.DateTimeFormat().resolvedOptions().timeZone;\nconst when = (iso) => {\n  const d = new Date(iso);\n  if (!iso || isNaN(d)) return '';\n  return d.toLocaleDateString('en-GB', { timeZone: zone, weekday: 'short', day: 'numeric', month: 'short' }) + ', ' +\n    d.toLocaleTimeString('en-GB', { timeZone: zone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });\n};\nconst you = String(Inputs.you || '');\nOutputs.items = list.map((m) => {\n  const fromCoach = coach ? m.mine === true : m.mine !== true;\n  const files = (Array.isArray(m.attachments) ? m.attachments : []).filter((a) => a && a.file)\n    .map((a, j) => ({ id: m.id + '-file-' + j, file: a.file, fileName: a.fileName, mode: coach ? 'coach' : 'own' }));\n  const tag = Inputs.tagged === true && m.stepTitle ? String(m.stepTitle) : '';\n  return {\n    id: m.id,\n    who: m.mine === true ? you : String(m.who || ''),\n    when: when(m.at),\n    isNew: m.isNew === true,\n    tag,\n    hasTag: !!tag,\n    body: String(m.body || ''),\n    hasBody: !!String(m.body || '').trim(),\n    files,\n    hasFiles: files.length > 0,\n    bg: fromCoach ? 'var(--live-bg)' : 'var(--surface)',\n    edge: fromCoach ? 'var(--live-border)' : 'var(--border)'\n  };\n});\nOutputs.hasMessages = list.length > 0;\nOutputs.none = loaded && list.length === 0;\nconst off = Inputs.emailOn === false;\nOutputs.showPref = loaded && !coach && Inputs.showEmailPref === true;\nOutputs.offCoach = loaded && coach && off;\nOutputs.prefKey = off ? 'messages.emailOff' : 'messages.emailOn';\nOutputs.prefButtonKey = off ? 'messages.startEmails' : 'messages.stopEmails';\nOutputs.nextState = off ? 'on' : 'off';\nOutputs.first = String((Inputs.learner && Inputs.learner.first) || '');\nOutputs.hasTitle = !!Inputs.titleKey;\nOutputs.canAttach = !coach;\nOutputs.labelKey = coach ? 'messages.replyTo' : 'messages.yourMessage';"
+      },
+      "ports": [
+        {
+          "name": "in-mode",
+          "displayName": "mode",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-messages",
+          "displayName": "messages",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-me",
+          "displayName": "me",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-you",
+          "displayName": "you",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-tagged",
+          "displayName": "tagged",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-emailOn",
+          "displayName": "emailOn",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-showEmailPref",
+          "displayName": "showEmailPref",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-learner",
+          "displayName": "learner",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-titleKey",
+          "displayName": "titleKey",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-items",
+          "displayName": "items",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasMessages",
+          "displayName": "hasMessages",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-none",
+          "displayName": "none",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showPref",
+          "displayName": "showPref",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-offCoach",
+          "displayName": "offCoach",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-prefKey",
+          "displayName": "prefKey",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-prefButtonKey",
+          "displayName": "prefButtonKey",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-nextState",
+          "displayName": "nextState",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-first",
+          "displayName": "first",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasTitle",
+          "displayName": "hasTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-canAttach",
+          "displayName": "canAttach",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-labelKey",
+          "displayName": "labelKey",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "cv_t_you",
+      "type": "Translation",
+      "label": "You",
+      "x": 760,
+      "y": 880,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "messages.you"
+      }
+    },
+    {
+      "id": "cv_t_title",
+      "type": "Translation",
+      "label": "The heading",
+      "x": 1000,
+      "y": 400,
+      "parameters": {
+        "Namespace": "pages"
+      }
+    },
+    {
+      "id": "cv_fill_title",
+      "type": "String Format",
+      "label": "Their first name into the heading",
+      "x": 1240,
+      "y": 400,
+      "parameters": {
+        "format": "{first}"
+      }
+    },
+    {
+      "id": "cv_t_empty",
+      "type": "Translation",
+      "label": "Nothing yet",
+      "x": 1000,
+      "y": 760,
+      "parameters": {
+        "Namespace": "pages"
+      }
+    },
+    {
+      "id": "cv_fill_empty",
+      "type": "String Format",
+      "label": "Their first name into the empty line",
+      "x": 1240,
+      "y": 760,
+      "parameters": {
+        "format": "{first}"
+      }
+    },
+    {
+      "id": "cv_t_pref",
+      "type": "Translation",
+      "label": "Emails on, or off",
+      "x": 1000,
+      "y": 520,
+      "parameters": {
+        "Namespace": "pages"
+      }
+    },
+    {
+      "id": "cv_t_pref_btn",
+      "type": "Translation",
+      "label": "Stop, or start again",
+      "x": 1240,
+      "y": 520,
+      "parameters": {
+        "Namespace": "pages"
+      }
+    },
+    {
+      "id": "cv_pref_cf",
+      "type": "CloudFunction2",
+      "label": "setEmailPreference (my own account)",
+      "x": 1480,
+      "y": 520,
+      "parameters": {
+        "function": "setEmailPreference"
+      }
+    },
+    {
+      "id": "cv_t_off",
+      "type": "Translation",
+      "label": "{first} gets no emails",
+      "x": 1000,
+      "y": 640,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "messages.emailOffCoach"
+      }
+    },
+    {
+      "id": "cv_fill_off",
+      "type": "String Format",
+      "label": "Their first name into the line",
+      "x": 1240,
+      "y": 640,
+      "parameters": {
+        "format": "{first}"
+      }
+    },
+    {
+      "id": "cv_t_failed",
+      "type": "Translation",
+      "label": "Could not read",
+      "x": 1000,
+      "y": 1120,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "messages.failed"
+      }
+    },
+    {
+      "id": "cv_fail_sw",
+      "type": "Switch",
+      "label": "Remember the read failed",
+      "x": 1240,
+      "y": 1120,
+      "parameters": {
+        "onFromStart": false
+      }
+    }
+  ],
+  "visualRoots": [
+    "cv_root"
+  ]
+}

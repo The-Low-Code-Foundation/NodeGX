@@ -1,0 +1,235 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "cf040904-259b-5143-8951-2a3629179dbd",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hse_t_note",
+      "fromProperty": "Translation",
+      "toId": "hse_note",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hse_t_title",
+      "fromProperty": "Translation",
+      "toId": "hse_title",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hse_t_due",
+      "fromProperty": "Translation",
+      "toId": "hse_due",
+      "toProperty": "Label"
+    },
+    {
+      "fromId": "hse_t_duehint",
+      "fromProperty": "Translation",
+      "toId": "hse_due_hint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hse_t_save",
+      "fromProperty": "Translation",
+      "toId": "hse_save",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hse_t_cancel",
+      "fromProperty": "Translation",
+      "toId": "hse_cancel",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hse_in",
+      "fromProperty": "step",
+      "toId": "hse_open",
+      "toProperty": "in-step"
+    },
+    {
+      "fromId": "hse_root",
+      "fromProperty": "didMount",
+      "toId": "hse_open",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hse_open",
+      "fromProperty": "out-fromLibrary",
+      "toId": "hse_note",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hse_open",
+      "fromProperty": "out-title",
+      "toId": "hse_title",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "hse_open",
+      "fromProperty": "out-opened",
+      "toId": "hse_title",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "hse_open",
+      "fromProperty": "out-due",
+      "toId": "hse_due",
+      "toProperty": "Value"
+    },
+    {
+      "fromId": "hse_open",
+      "fromProperty": "out-opened",
+      "toId": "hse_due",
+      "toProperty": "Reset"
+    },
+    {
+      "fromId": "hse_open",
+      "fromProperty": "out-brief",
+      "toId": "hse_brief",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hse_open",
+      "fromProperty": "out-opened",
+      "toId": "hse_brief",
+      "toProperty": "load"
+    },
+    {
+      "fromId": "hse_open",
+      "fromProperty": "out-opened",
+      "toId": "hse_msg_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "hse_open",
+      "fromProperty": "out-id",
+      "toId": "hse_gather",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "hse_open",
+      "fromProperty": "out-title",
+      "toId": "hse_gather",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "hse_open",
+      "fromProperty": "out-due",
+      "toId": "hse_gather",
+      "toProperty": "in-due"
+    },
+    {
+      "fromId": "hse_open",
+      "fromProperty": "out-brief",
+      "toId": "hse_gather",
+      "toProperty": "in-brief"
+    },
+    {
+      "fromId": "hse_title",
+      "fromProperty": "onTextChanged",
+      "toId": "hse_gather",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "hse_due",
+      "fromProperty": "Value",
+      "toId": "hse_gather",
+      "toProperty": "in-due"
+    },
+    {
+      "fromId": "hse_brief",
+      "fromProperty": "value",
+      "toId": "hse_gather",
+      "toProperty": "in-brief"
+    },
+    {
+      "fromId": "hse_save",
+      "fromProperty": "onClick",
+      "toId": "hse_gather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hse_save",
+      "fromProperty": "onClick",
+      "toId": "hse_msg_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "hse_gather",
+      "fromProperty": "out-id",
+      "toId": "hse_call",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "hse_gather",
+      "fromProperty": "out-title",
+      "toId": "hse_call",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "hse_gather",
+      "fromProperty": "out-dueAt",
+      "toId": "hse_call",
+      "toProperty": "in-dueAt"
+    },
+    {
+      "fromId": "hse_gather",
+      "fromProperty": "out-brief",
+      "toId": "hse_call",
+      "toProperty": "in-brief"
+    },
+    {
+      "fromId": "hse_gather",
+      "fromProperty": "out-handInChecklist",
+      "toId": "hse_call",
+      "toProperty": "in-handInChecklist"
+    },
+    {
+      "fromId": "hse_gather",
+      "fromProperty": "out-resources",
+      "toId": "hse_call",
+      "toProperty": "in-resources"
+    },
+    {
+      "fromId": "hse_gather",
+      "fromProperty": "out-go",
+      "toId": "hse_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "hse_call",
+      "fromProperty": "error",
+      "toId": "hse_msg",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hse_call",
+      "fromProperty": "failure",
+      "toId": "hse_msg_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "hse_msg_sw",
+      "fromProperty": "state",
+      "toId": "hse_msg",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hse_gather",
+      "fromProperty": "out-title",
+      "toId": "hse_out",
+      "toProperty": "savedTitle"
+    },
+    {
+      "fromId": "hse_call",
+      "fromProperty": "done",
+      "toId": "hse_out",
+      "toProperty": "saved"
+    },
+    {
+      "fromId": "hse_cancel",
+      "fromProperty": "onClick",
+      "toId": "hse_out",
+      "toProperty": "closed"
+    }
+  ]
+}

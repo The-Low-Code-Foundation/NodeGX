@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "44d58feb-0f92-5c71-8a35-6e6e02eac791",
+  "name": "Learner plan",
+  "path": "/Pages/Learner plan",
+  "type": "page",
+  "created": "2026-11-09T10:50:51.604Z",
+  "modified": "2026-11-12T15:00:15.858Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Coach: one learner's plan builder (DBU-04). The head with the counts and where it started from; Plan settings, Save as template and See as the learner; the steps to add, reorder, edit in place, share and remove; and the homework library picker. Opened from the roster as /coach/plan?learner=<id>."
+}

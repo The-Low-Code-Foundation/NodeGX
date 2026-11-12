@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "97ec95ee-a0d9-51dc-8457-518509e9759a",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "fl_req",
+      "type": "noodl.cloud.request",
+      "label": "A learner opens their file",
+      "parameters": {
+        "params": "name",
+        "allowNoAuth": false,
+        "ptype-name": "string",
+        "preq-name": true
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "fl_own",
+      "type": "JavaScriptFunction",
+      "label": "Is it the caller's file?",
+      "parameters": {
+        "functionScript": "(async () => {\n  try {\n    const me = String(Inputs.userId || '');\n    const name = String(Inputs.name || '');\n    if (!me || !name) throw new Error('missing user or name');\n    const rows = await Noodl.Records.query('_Files', { storedName: { equalTo: name } }, { limit: 2, plain: true });\n    const owner = rows.length === 1 ? rows[0].owner : null;\n    const ownerId = owner && typeof owner === 'object' ? owner.objectId : owner;\n    if (ownerId !== me) throw new Error('not your file');\n    Outputs.name = name;\n  } catch (e) {\n    console.error('[dbu:fileLink]', String((e && e.message) || e));\n    Outputs.refused();\n  }\n})();\n",
+        "runOnChange-in-userId": false,
+        "runOnChange-in-name": false
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "userId",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-name",
+          "plug": "input",
+          "type": "*",
+          "displayName": "name",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-name",
+          "plug": "output",
+          "type": "*",
+          "displayName": "name",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "Ownership is the backend's _Files.owner, written from the uploader's session; nothing a caller sends can change it. Coach resources (DBU-03) will need a second rule here: a resource of a shared step in the caller's plan."
+      },
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "fl_sign",
+      "type": "/#__cloud__/shared/Signed file link",
+      "label": "Sign it",
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "fl_res",
+      "type": "noodl.cloud.response",
+      "label": "The link",
+      "parameters": {
+        "params": "url,expiresAt"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "fl_deny",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "This file could not be opened."
+      },
+      "x": 40,
+      "y": 520
+    }
+  ]
+}

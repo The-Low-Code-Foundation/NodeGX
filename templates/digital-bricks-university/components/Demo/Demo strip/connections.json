@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "97e73bb8-251d-5675-85f1-8e7561acf2d1",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ds_mode",
+      "fromProperty": "isDemo",
+      "toId": "ds_band",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ds_mode",
+      "fromProperty": "learnerView",
+      "toId": "ds_to_coach",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ds_mode",
+      "fromProperty": "coachView",
+      "toId": "ds_to_learner",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ds_to_coach",
+      "fromProperty": "onClick",
+      "toId": "ds_go_coach",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ds_to_learner",
+      "fromProperty": "onClick",
+      "toId": "ds_go_learner",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ds_reset",
+      "fromProperty": "onClick",
+      "toId": "ds_go_reset",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ds_t_note",
+      "fromProperty": "Translation",
+      "toId": "ds_note",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ds_t_coach",
+      "fromProperty": "Translation",
+      "toId": "ds_to_coach",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ds_t_learner",
+      "fromProperty": "Translation",
+      "toId": "ds_to_learner",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ds_t_reset",
+      "fromProperty": "Translation",
+      "toId": "ds_reset",
+      "toProperty": "label"
+    }
+  ]
+}

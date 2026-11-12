@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "68e318af-c791-55de-833a-560a52a2ef1e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ik_data",
+      "type": "Static Data",
+      "label": "Inbox kinds",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "type": "json",
+        "json": "[{\"id\":\"inbox-review\",\"value\":\"review\",\"labelKey\":\"inbox.kindReview\",\"bg\":\"var(--homework-bg)\",\"fg\":\"var(--homework-fg)\"},{\"id\":\"inbox-question\",\"value\":\"question\",\"labelKey\":\"inbox.kindQuestion\",\"bg\":\"var(--live-bg)\",\"fg\":\"var(--live-fg)\"},{\"id\":\"inbox-quiet\",\"value\":\"quiet\",\"labelKey\":\"inbox.kindQuiet\",\"bg\":\"var(--waiting-bg)\",\"fg\":\"var(--waiting-fg)\"},{\"id\":\"inbox-checkin\",\"value\":\"checkin\",\"labelKey\":\"inbox.kindCheckin\",\"bg\":\"var(--checkin-bg)\",\"fg\":\"var(--checkin-fg)\"}]"
+      }
+    },
+    {
+      "id": "ik_out",
+      "type": "Component Outputs",
+      "label": "Kinds out",
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "items",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        }
+      ]
+    }
+  ]
+}

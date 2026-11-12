@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7b13c6ae-a5e8-51a1-8551-6c5f5c26b38e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sc_req-2",
+      "fromProperty": "receive",
+      "toId": "sc_fn-2",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "sc_fn-2",
+      "fromProperty": "out-sent",
+      "toId": "sc_res-2",
+      "toProperty": "pm-sent"
+    },
+    {
+      "fromId": "sc_fn-2",
+      "fromProperty": "out-mailed",
+      "toId": "sc_res-2",
+      "toProperty": "pm-mailed"
+    },
+    {
+      "fromId": "sc_fn-2",
+      "fromProperty": "out-done",
+      "toId": "sc_res-2",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sc_fn-2",
+      "fromProperty": "failure",
+      "toId": "sc_fail-2",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sc_fn-2",
+      "fromProperty": "out-unsent",
+      "toId": "sc_res-2",
+      "toProperty": "pm-unsent"
+    },
+    {
+      "fromId": "sc_fn-2",
+      "fromProperty": "out-failed",
+      "toId": "sc_fail-2",
+      "toProperty": "send"
+    }
+  ]
+}

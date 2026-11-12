@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "ddc1aed2-995b-5a22-8f66-fdc3484b5781",
+  "name": "Library row",
+  "path": "/Library/Library row",
+  "type": "visual",
+  "created": "2026-11-07T22:08:51.571Z",
+  "modified": "2026-11-07T22:16:29.201Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One library item on the list: title (with an Archived chip when it is), its time and what it holds, its tags, and Edit, Duplicate, Archive or Restore. Tells the list which was pressed."
+}

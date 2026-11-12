@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "55ae5f6e-1a90-55a9-86e2-d33cee9e879f",
+  "name": "File viewer",
+  "path": "/Work/File viewer",
+  "type": "visual",
+  "created": "2026-11-09T13:08:03.580Z",
+  "modified": "2026-11-09T13:17:43.066Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Shows one stored file in place, or downloads it under its own name. The link is minted at the press by the function that checks who may have it (fileLink for your own file, fileLinkAsCoach for the coach, resourceLink for a homework's resource) and never stored. HTML runs only in an iframe sandboxed to allow-scripts; PDFs in a plain frame; images, audio and video in their own elements; Word, PowerPoint and Excel download."
+}

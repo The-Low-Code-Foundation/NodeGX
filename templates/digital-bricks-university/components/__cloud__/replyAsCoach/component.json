@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "26c05a54-322e-58a6-8a24-5898312893a8",
+  "name": "replyAsCoach",
+  "path": "/#__cloud__/replyAsCoach",
+  "type": "cloud",
+  "created": "2026-11-12T10:10:10.508Z",
+  "modified": "2026-11-12T10:10:10.508Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach writes to one learner (DBU-07): a reply or the first word, optionally about one of her shared homework steps. Saves the message, rings her bell, then emails her unless she turned message emails off."
+}

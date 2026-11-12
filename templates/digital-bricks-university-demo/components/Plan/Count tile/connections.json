@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "de741eae-1c8b-5598-8095-91582811c7c7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ctl_in",
+      "fromProperty": "labelKey",
+      "toId": "ctl_t",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "ctl_t",
+      "fromProperty": "Translation",
+      "toId": "ctl_label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ctl_in",
+      "fromProperty": "value",
+      "toId": "ctl_value",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ctl_in",
+      "fromProperty": "bg",
+      "toId": "ctl_root",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "ctl_in",
+      "fromProperty": "fg",
+      "toId": "ctl_label",
+      "toProperty": "color"
+    }
+  ]
+}

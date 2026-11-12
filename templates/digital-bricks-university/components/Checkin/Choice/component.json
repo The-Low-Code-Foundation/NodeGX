@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d67a4fcb-08d3-560d-881d-7cf7e25057fe",
+  "name": "Choice",
+  "path": "/Checkin/Choice",
+  "type": "visual",
+  "created": "2026-11-12T14:51:50.960Z",
+  "modified": "2026-11-12T14:51:50.960Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One answer to pick in a check-in question: a point on a scale, or one option. Checkin/Question sets its colours when it is picked."
+}

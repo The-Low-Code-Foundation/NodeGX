@@ -1,0 +1,304 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "66b703a7-9464-5f17-8c3c-2b9638b91c14",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mr_root",
+      "type": "Group",
+      "label": "Message",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "mr_head",
+        "mr_tag",
+        "mr_body_box",
+        "mr_files"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "dataAttributes": "data-testid",
+        "data-testid": "message"
+      }
+    },
+    {
+      "id": "mr_head",
+      "type": "Group",
+      "label": "Who, when, and New",
+      "x": 100,
+      "y": 160,
+      "parent": "mr_root",
+      "children": [
+        "mr_who",
+        "mr_new_box"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-1)"
+      }
+    },
+    {
+      "id": "mr_who",
+      "type": "Text",
+      "label": "Richard · Thu 12 Nov, 11:13",
+      "x": 160,
+      "y": 280,
+      "parent": "mr_head",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "mr_new_box",
+      "type": "Group",
+      "label": "New, while unread",
+      "x": 160,
+      "y": 400,
+      "parent": "mr_head",
+      "children": [
+        "mr_new"
+      ],
+      "parameters": {
+        "mounted": false,
+        "sizeMode": "contentSize"
+      }
+    },
+    {
+      "id": "mr_new",
+      "type": "/Plan/Chip",
+      "label": "New",
+      "x": 220,
+      "y": 520,
+      "parent": "mr_new_box",
+      "parameters": {
+        "labelKey": "messages.new",
+        "bg": "var(--primary)",
+        "fg": "var(--primary-foreground)"
+      }
+    },
+    {
+      "id": "mr_tag",
+      "type": "Text",
+      "label": "About the homework: …",
+      "x": 100,
+      "y": 640,
+      "parent": "mr_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "mr_body_box",
+      "type": "Group",
+      "label": "The text, when there is some",
+      "x": 100,
+      "y": 760,
+      "parent": "mr_root",
+      "children": [
+        "mr_body"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "mr_body",
+      "type": "/Shell/Formatted text",
+      "label": "What they wrote, HTML off",
+      "x": 160,
+      "y": 880,
+      "parent": "mr_body_box"
+    },
+    {
+      "id": "mr_files",
+      "type": "Group",
+      "label": "Attached files",
+      "x": 100,
+      "y": 1000,
+      "parent": "mr_root",
+      "children": [
+        "mr_rows"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      }
+    },
+    {
+      "id": "mr_rows",
+      "type": "For Each",
+      "label": "One per file",
+      "x": 160,
+      "y": 1120,
+      "parent": "mr_files",
+      "parameters": {
+        "template": "/Work/Version file"
+      }
+    },
+    {
+      "id": "mr_in",
+      "type": "Component Inputs",
+      "label": "The message",
+      "x": 470,
+      "y": 160,
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "who",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "when",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "isNew",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "tag",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasTag",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "body",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasBody",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "files",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hasFiles",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "bg",
+          "plug": "output",
+          "type": "color"
+        },
+        {
+          "name": "edge",
+          "plug": "output",
+          "type": "color"
+        }
+      ],
+      "metadata": {
+        "comment": "Worked out by Messages/Conversation; the row only draws."
+      }
+    },
+    {
+      "id": "mr_t_head",
+      "type": "Translation",
+      "label": "{who} · {when}",
+      "x": 470,
+      "y": 280,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "messages.head"
+      }
+    },
+    {
+      "id": "mr_fill_head",
+      "type": "String Format",
+      "label": "Who and when into the head",
+      "x": 470,
+      "y": 400,
+      "parameters": {
+        "format": "{who} {when}"
+      },
+      "metadata": {
+        "comment": "The format arrives from the Translation; this default only declares the inputs."
+      }
+    },
+    {
+      "id": "mr_t_about",
+      "type": "Translation",
+      "label": "About the homework: {title}",
+      "x": 470,
+      "y": 640,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "messages.about"
+      }
+    },
+    {
+      "id": "mr_fill_tag",
+      "type": "String Format",
+      "label": "The homework into the tag",
+      "x": 470,
+      "y": 760,
+      "parameters": {
+        "format": "{title}"
+      }
+    }
+  ],
+  "visualRoots": [
+    "mr_root"
+  ]
+}

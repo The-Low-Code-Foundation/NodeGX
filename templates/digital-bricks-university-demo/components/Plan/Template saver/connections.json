@@ -1,0 +1,187 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f42e8c4f-5a78-5174-8542-08d18874064d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tsv_t_head",
+      "fromProperty": "Translation",
+      "toId": "tsv_head",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tsv_t_lede",
+      "fromProperty": "Translation",
+      "toId": "tsv_lede",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tsv_t_title",
+      "fromProperty": "Translation",
+      "toId": "tsv_title",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tsv_t_desc",
+      "fromProperty": "Translation",
+      "toId": "tsv_desc",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tsv_t_save",
+      "fromProperty": "Translation",
+      "toId": "tsv_save",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tsv_t_cancel",
+      "fromProperty": "Translation",
+      "toId": "tsv_cancel",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tsv_in",
+      "fromProperty": "suggestedTitle",
+      "toId": "tsv_open",
+      "toProperty": "in-suggestedTitle"
+    },
+    {
+      "fromId": "tsv_in",
+      "fromProperty": "load",
+      "toId": "tsv_open",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tsv_open",
+      "fromProperty": "out-title",
+      "toId": "tsv_title",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "tsv_open",
+      "fromProperty": "out-description",
+      "toId": "tsv_desc",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "tsv_open",
+      "fromProperty": "out-opened",
+      "toId": "tsv_title",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "tsv_open",
+      "fromProperty": "out-opened",
+      "toId": "tsv_desc",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "tsv_open",
+      "fromProperty": "out-opened",
+      "toId": "tsv_msg_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "tsv_in",
+      "fromProperty": "planId",
+      "toId": "tsv_call",
+      "toProperty": "in-planId"
+    },
+    {
+      "fromId": "tsv_open",
+      "fromProperty": "out-title",
+      "toId": "tsv_call",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "tsv_open",
+      "fromProperty": "out-description",
+      "toId": "tsv_call",
+      "toProperty": "in-description"
+    },
+    {
+      "fromId": "tsv_title",
+      "fromProperty": "onTextChanged",
+      "toId": "tsv_call",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "tsv_desc",
+      "fromProperty": "onTextChanged",
+      "toId": "tsv_call",
+      "toProperty": "in-description"
+    },
+    {
+      "fromId": "tsv_save",
+      "fromProperty": "onClick",
+      "toId": "tsv_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "tsv_save",
+      "fromProperty": "onClick",
+      "toId": "tsv_msg_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "tsv_call",
+      "fromProperty": "error",
+      "toId": "tsv_msg",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tsv_call",
+      "fromProperty": "failure",
+      "toId": "tsv_msg_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "tsv_msg_sw",
+      "fromProperty": "state",
+      "toId": "tsv_msg",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tsv_t_saved",
+      "fromProperty": "Translation",
+      "toId": "tsv_said",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "tsv_title",
+      "fromProperty": "onTextChanged",
+      "toId": "tsv_said",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "tsv_open",
+      "fromProperty": "out-title",
+      "toId": "tsv_said",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "tsv_call",
+      "fromProperty": "out-count",
+      "toId": "tsv_said",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "tsv_said",
+      "fromProperty": "formatted",
+      "toId": "tsv_out",
+      "toProperty": "said"
+    },
+    {
+      "fromId": "tsv_call",
+      "fromProperty": "done",
+      "toId": "tsv_out",
+      "toProperty": "saved"
+    },
+    {
+      "fromId": "tsv_cancel",
+      "fromProperty": "onClick",
+      "toId": "tsv_out",
+      "toProperty": "closed"
+    }
+  ]
+}

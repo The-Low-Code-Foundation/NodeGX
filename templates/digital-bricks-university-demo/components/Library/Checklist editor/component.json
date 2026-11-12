@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "0d86937c-75d9-5b3b-88e9-2ca65c7a0d3f",
+  "name": "Checklist editor",
+  "path": "/Library/Checklist editor",
+  "type": "visual",
+  "created": "2026-11-07T22:10:16.891Z",
+  "modified": "2026-11-07T22:16:53.075Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The hand-in list being edited: its heading and hint, one row per item from a named client-side array, Add an item, and Remove. The Homework editor fills the array when it opens and reads it when it saves."
+}

@@ -1,0 +1,111 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b909d224-1b39-5523-8a2b-30049fbb6c5e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mm2_req",
+      "type": "noodl.cloud.request",
+      "label": "A learner opens her messages",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "stepId",
+        "allowNoAuth": false,
+        "ptype-stepId": "string",
+        "preq-stepId": false
+      }
+    },
+    {
+      "id": "mm2_fn",
+      "type": "JavaScriptFunction",
+      "label": "Read my conversation, mark Richard's read",
+      "x": 40,
+      "y": 200,
+      "parameters": {
+        "runOnChange-in-userId": false,
+        "runOnChange-in-stepId": false,
+        "functionScript": "/*\n * A LEARNER READS HER CONVERSATION WITH THE COACH (DBU-07): only her own, whatever is sent.\n * With stepId, only the messages about that homework (one of her shared homework steps).\n * Reading marks the coach's messages that are shown as read, and rings her bell once if it\n * marked any, so the unread count in the tabs clears (the bell re-reads, and then marks nothing).\n * A homework tag names the homework only while she can see it (shared).\n */\n(async () => {\n  try {\n    const me = String(Inputs.userId || '');\n    if (!me) throw new Error('no session user');\n    const R = Noodl.Records;\n    const q = (c, where) => R.query(c, where, { limit: 1000, plain: true });\n    const stepId = String(Inputs.stepId || '');\n    const steps = (await q('Step', { learner: { equalTo: me } })).filter((s) => s.shared === true && s.kind === 'homework');\n    if (stepId && !steps.some((s) => s.objectId === stepId)) { Outputs.refused(); return; }\n\n    let rows = await q('Message', { learner: { equalTo: me } });\n    if (stepId) rows = rows.filter((m) => m.step === stepId);\n    rows.sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));\n\n    const others = [...new Set(rows.map((m) => m.author).filter((a) => a !== me))];\n    const people = others.length ? await q('_User', { objectId: { containedIn: others } }) : [];\n    const users = await q('_User', { objectId: { equalTo: me } });\n    const user = users[0] || {};\n    const nameOf = (id) => { const u = people.find((p) => p.objectId === id); return String((u && u.name) || 'Coach').split(' ')[0]; };\n    const titleOf = (id) => { const s = steps.find((x) => x.objectId === id); return s ? String(s.title || '') : ''; };\n\n    const now = new Date().toISOString();\n    const unread = rows.filter((m) => m.author !== me && !m.readAt);\n    Outputs.messages = rows.map((m) => ({\n      id: m.objectId,\n      mine: m.author === me,\n      who: m.author === me ? '' : nameOf(m.author),\n      body: String(m.body || ''),\n      at: m.createdAt,\n      stepId: m.step || '',\n      stepTitle: m.step ? titleOf(m.step) : '',\n      attachments: (Array.isArray(m.attachments) ? m.attachments : []).map((a) => ({ file: a.file, fileName: a.name })),\n      isNew: m.author !== me && !m.readAt\n    }));\n    Outputs.me = { name: user.name || '', timezone: user.timezone || '' };\n    Outputs.emailOn = !user.emailOptOutAt;\n    for (const m of unread) await R.save(m.objectId, { readAt: now }, { className: 'Message' });\n    if (unread.length) {\n      await R.create('Doorbell', { learner: me, topic: 'message' }, { acl: { [me]: { read: true }, 'role:staff': { read: true } } });\n    }\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:myMessages]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();"
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "displayName": "userId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-stepId",
+          "displayName": "stepId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-failed",
+          "displayName": "failed",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-messages",
+          "displayName": "messages",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-me",
+          "displayName": "me",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-emailOn",
+          "displayName": "emailOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "mm2_res",
+      "type": "noodl.cloud.response",
+      "label": "My conversation",
+      "x": 40,
+      "y": 360,
+      "parameters": {
+        "params": "messages,me,emailOn"
+      }
+    },
+    {
+      "id": "mm2_deny",
+      "type": "noodl.cloud.response",
+      "label": "Not my homework, or could not read",
+      "x": 320,
+      "y": 360,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "These messages could not be read."
+      }
+    }
+  ]
+}

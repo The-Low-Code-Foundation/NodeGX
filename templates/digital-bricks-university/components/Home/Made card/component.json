@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "7ecd4a9c-937f-5859-8870-c4f826485ebc",
+  "name": "Made card",
+  "path": "/Home/Made card",
+  "type": "visual",
+  "created": "2026-11-09T12:37:48.653Z",
+  "modified": "2026-11-12T13:50:19.468Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Things you've made, on the learner's Home (DBU-09): how many things she keeps in My creations and the newest one, with Open My creations; before there are any, what will be kept there."
+}

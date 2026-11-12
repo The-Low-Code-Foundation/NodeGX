@@ -1,0 +1,274 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "36b9556f-64c2-50f9-8fb4-1b943ba34a3b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cal_root",
+      "type": "Group",
+      "label": "Calendar links",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "cal_ics",
+        "cal_google"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-1)",
+        "rowGap": "var(--space-1)",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "metadata": {
+        "comment": "Content-sized but never wider than its parent, so the two buttons wrap onto two lines in a narrow card (the learner's Home on a phone, DBU-05)."
+      }
+    },
+    {
+      "id": "cal_ics",
+      "type": "net.noodl.controls.button",
+      "label": "Calendar file",
+      "x": 100,
+      "y": 160,
+      "parent": "cal_root",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--accent-foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-11)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-calendar-plus",
+          "codeAsClass": true
+        },
+        "iconColor": "var(--accent-foreground)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)"
+      }
+    },
+    {
+      "id": "cal_google",
+      "type": "net.noodl.controls.button",
+      "label": "Google Calendar",
+      "x": 100,
+      "y": 280,
+      "parent": "cal_root",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--accent-foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-11)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-external-link",
+          "codeAsClass": true
+        },
+        "iconColor": "var(--accent-foreground)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)"
+      },
+      "metadata": {
+        "comment": "44px tall (space-11), like every button: the learner's Home places these on a phone (DBU-05)."
+      }
+    },
+    {
+      "id": "cal_in",
+      "type": "Component Inputs",
+      "label": "The session",
+      "x": 400,
+      "y": 40,
+      "ports": [
+        {
+          "name": "stepId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "startsAt",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "durationMin",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "meetingLink",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "details",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "attendeeName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "attendeeEmail",
+          "plug": "output",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "cal_ics_fn",
+      "type": "JavaScriptFunction",
+      "label": "Make the .ics file and hand it over",
+      "x": 400,
+      "y": 160,
+      "parameters": {
+        "runOnChange-in-stepId": false,
+        "runOnChange-in-title": false,
+        "runOnChange-in-startsAt": false,
+        "runOnChange-in-durationMin": false,
+        "runOnChange-in-meetingLink": false,
+        "runOnChange-in-details": false,
+        "runOnChange-in-attendeeName": false,
+        "runOnChange-in-attendeeEmail": false,
+        "functionScript": "/*\n * Ported from the Hub's ics-generator.js (legacy/hub/frontend/src/lib/ics-generator.js):\n * one VEVENT in UTC, reminders a day and 15 minutes before, the meeting link as the\n * location. No organiser line: who the coach is lives in the backend, never in the graph.\n * The file is built in the browser and handed over as a download; nothing is uploaded.\n */\nconst start = new Date(Inputs.startsAt);\nif (isNaN(start)) return;\nconst minutes = Number(Inputs.durationMin) || 60;\nconst end = new Date(start.getTime() + minutes * 60000);\nconst stamp = (d) => d.toISOString().split('-').join('').split(':').join('').slice(0, 15) + 'Z';\nconst esc = (t) => String(t || '').split('\\\\').join('\\\\\\\\').split(';').join('\\\\;').split(',').join('\\\\,').split('\\n').join('\\\\n');\nconst link = String(Inputs.meetingLink || '');\nconst lines = [\n  'BEGIN:VCALENDAR',\n  'VERSION:2.0',\n  'PRODID:-//Digital Bricks University//Plan//EN',\n  'CALSCALE:GREGORIAN',\n  'METHOD:PUBLISH',\n  'BEGIN:VEVENT',\n  'UID:step-' + Inputs.stepId + '@digital-bricks-university',\n  'DTSTAMP:' + stamp(new Date()),\n  'DTSTART:' + stamp(start),\n  'DTEND:' + stamp(end),\n  'SUMMARY:' + esc(Inputs.title),\n  'DESCRIPTION:' + esc([Inputs.details, link].filter(Boolean).join('\\n')),\n  link ? 'LOCATION:' + esc(link) : '',\n  link ? 'URL:' + link : '',\n  Inputs.attendeeEmail ? 'ATTENDEE;CN=' + esc(Inputs.attendeeName) + ':mailto:' + Inputs.attendeeEmail : '',\n  'STATUS:CONFIRMED',\n  'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + esc(Inputs.title), 'TRIGGER:-P1D', 'END:VALARM',\n  'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + esc(Inputs.title), 'TRIGGER:-PT15M', 'END:VALARM',\n  'END:VEVENT',\n  'END:VCALENDAR'\n].filter(Boolean);\nconst blob = new Blob([lines.join('\\r\\n')], { type: 'text/calendar;charset=utf-8' });\nconst url = URL.createObjectURL(blob);\nconst a = document.createElement('a');\na.href = url;\na.download = (String(Inputs.title || 'session').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean).join('-') || 'session') + '.ics';\ndocument.body.appendChild(a);\na.click();\ndocument.body.removeChild(a);\nsetTimeout(() => URL.revokeObjectURL(url), 1000);\n"
+      },
+      "ports": [
+        {
+          "name": "in-stepId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-startsAt",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-durationMin",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-meetingLink",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-details",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-attendeeName",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-attendeeEmail",
+          "plug": "input",
+          "type": "*"
+        }
+      ]
+    },
+    {
+      "id": "cal_g_fn",
+      "type": "JavaScriptFunction",
+      "label": "Open Google Calendar with the session filled in",
+      "x": 400,
+      "y": 280,
+      "parameters": {
+        "runOnChange-in-title": false,
+        "runOnChange-in-startsAt": false,
+        "runOnChange-in-durationMin": false,
+        "runOnChange-in-meetingLink": false,
+        "runOnChange-in-details": false,
+        "functionScript": "// Google's 'add an event' address, as the Hub built it (generateGoogleCalendarURL).\nconst start = new Date(Inputs.startsAt);\nif (isNaN(start)) return;\nconst end = new Date(start.getTime() + (Number(Inputs.durationMin) || 60) * 60000);\nconst g = (d) => d.toISOString().split('-').join('').split(':').join('').slice(0, 15) + 'Z';\nconst link = String(Inputs.meetingLink || '');\nconst params = new URLSearchParams({\n  action: 'TEMPLATE',\n  text: String(Inputs.title || ''),\n  dates: g(start) + '/' + g(end),\n  details: [Inputs.details, link].filter(Boolean).join('\\n\\n'),\n  location: link\n});\nwindow.open('https://calendar.google.com/calendar/render?' + params.toString(), '_blank', 'noopener');\n"
+      },
+      "ports": [
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-startsAt",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-durationMin",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-meetingLink",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-details",
+          "plug": "input",
+          "type": "*"
+        }
+      ]
+    },
+    {
+      "id": "cal_t_ics",
+      "type": "Translation",
+      "label": "Calendar file",
+      "x": 400,
+      "y": 400,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.ics"
+      }
+    },
+    {
+      "id": "cal_t_g",
+      "type": "Translation",
+      "label": "Google Calendar",
+      "x": 400,
+      "y": 460,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.google"
+      }
+    }
+  ],
+  "visualRoots": [
+    "cal_root"
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "1fb80e46-cbde-578f-81e6-c046607b6be1",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mc_req",
+      "fromProperty": "userId",
+      "toId": "mc_fn",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "mc_req",
+      "fromProperty": "pm-learnerId",
+      "toId": "mc_fn",
+      "toProperty": "in-learnerId"
+    },
+    {
+      "fromId": "mc_req",
+      "fromProperty": "receive",
+      "toId": "mc_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mc_fn",
+      "fromProperty": "out-messages",
+      "toId": "mc_res",
+      "toProperty": "pm-messages"
+    },
+    {
+      "fromId": "mc_fn",
+      "fromProperty": "out-me",
+      "toId": "mc_res",
+      "toProperty": "pm-me"
+    },
+    {
+      "fromId": "mc_fn",
+      "fromProperty": "out-learner",
+      "toId": "mc_res",
+      "toProperty": "pm-learner"
+    },
+    {
+      "fromId": "mc_fn",
+      "fromProperty": "out-emailOn",
+      "toId": "mc_res",
+      "toProperty": "pm-emailOn"
+    },
+    {
+      "fromId": "mc_fn",
+      "fromProperty": "out-done",
+      "toId": "mc_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mc_fn",
+      "fromProperty": "out-refused",
+      "toId": "mc_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mc_fn",
+      "fromProperty": "out-failed",
+      "toId": "mc_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "mc_fn",
+      "fromProperty": "failure",
+      "toId": "mc_deny",
+      "toProperty": "send"
+    }
+  ]
+}

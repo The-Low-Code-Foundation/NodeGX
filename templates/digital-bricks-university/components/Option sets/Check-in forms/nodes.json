@@ -1,0 +1,40 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f110ff80-e095-528a-8e16-b4e0657ab20c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cfo_data",
+      "type": "Static Data",
+      "label": "Check-in forms",
+      "parameters": {
+        "type": "json",
+        "json": "[{\"id\":\"cf-after-session\",\"value\":\"after-session\",\"labelKey\":\"plan.formAfterSession\"},{\"id\":\"cf-end-of-programme\",\"value\":\"end-of-programme\",\"labelKey\":\"plan.formEndOfProgramme\"},{\"id\":\"cf-six-week-impact\",\"value\":\"six-week-impact\",\"labelKey\":\"plan.formSixWeek\"}]"
+      },
+      "metadata": {
+        "comment": "value is the form id in __cloud__/shared/Checkin forms. Never rename one: steps and answers keep it."
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "cfo_out",
+      "type": "Component Outputs",
+      "label": "The forms",
+      "ports": [
+        {
+          "name": "items",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    }
+  ]
+}

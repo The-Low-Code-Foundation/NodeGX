@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "7ee5a3e7-c3d2-53b5-8037-aece8a12f809",
+  "name": "Creation card",
+  "path": "/Creations/Creation card",
+  "type": "visual",
+  "created": "2026-11-12T13:42:46.212Z",
+  "modified": "2026-11-12T13:42:46.212Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One creation in the My creations grid (DBU-09): its kind badge, title, what it was made with, the homework it came from and a \"Used in class\" chip, with Open and, for its owner, Edit."
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "612b3c44-b16f-53c7-8dd0-b0c39cb0cdae",
+  "name": "Homework in words",
+  "path": "/Homework/Homework in words",
+  "type": "visual",
+  "created": "2026-11-09T13:12:37.648Z",
+  "modified": "2026-11-09T13:12:37.648Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Turns myHomework's answer into what the homework page draws (DBU-06): with no ?step, the list of the learner's homework; with one, the homework card, where the newest hand-in stands, the next version's number, and the versions. Keys and the values for their {tags}; dates in the learner's zone (their profile's, else the browser's). It decides nothing the server has not."
+}

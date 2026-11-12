@@ -1,0 +1,115 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "fda61f29-877d-5e62-8e83-25a9ba0c4e3a",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sc_req",
+      "fromProperty": "userId",
+      "toId": "sc_fn",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "sc_req",
+      "fromProperty": "pm-id",
+      "toId": "sc_fn",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "sc_req",
+      "fromProperty": "pm-form",
+      "toId": "sc_fn",
+      "toProperty": "in-form"
+    },
+    {
+      "fromId": "sc_req",
+      "fromProperty": "pm-file",
+      "toId": "sc_fn",
+      "toProperty": "in-file"
+    },
+    {
+      "fromId": "sc_req",
+      "fromProperty": "pm-url",
+      "toId": "sc_fn",
+      "toProperty": "in-url"
+    },
+    {
+      "fromId": "sc_req",
+      "fromProperty": "pm-text",
+      "toId": "sc_fn",
+      "toProperty": "in-text"
+    },
+    {
+      "fromId": "sc_req",
+      "fromProperty": "pm-title",
+      "toId": "sc_fn",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "sc_req",
+      "fromProperty": "pm-kind",
+      "toId": "sc_fn",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "sc_req",
+      "fromProperty": "pm-madeWith",
+      "toId": "sc_fn",
+      "toProperty": "in-madeWith"
+    },
+    {
+      "fromId": "sc_req",
+      "fromProperty": "pm-description",
+      "toId": "sc_fn",
+      "toProperty": "in-description"
+    },
+    {
+      "fromId": "sc_req",
+      "fromProperty": "pm-usedInClass",
+      "toId": "sc_fn",
+      "toProperty": "in-usedInClass"
+    },
+    {
+      "fromId": "sc_req",
+      "fromProperty": "receive",
+      "toId": "sc_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "sc_fn",
+      "fromProperty": "out-creationId",
+      "toId": "sc_res",
+      "toProperty": "pm-creationId"
+    },
+    {
+      "fromId": "sc_fn",
+      "fromProperty": "out-done",
+      "toId": "sc_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sc_fn",
+      "fromProperty": "out-why",
+      "toId": "sc_deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "sc_fn",
+      "fromProperty": "out-refuse",
+      "toId": "sc_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sc_fn",
+      "fromProperty": "out-failed",
+      "toId": "sc_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sc_fn",
+      "fromProperty": "failure",
+      "toId": "sc_fail",
+      "toProperty": "send"
+    }
+  ]
+}

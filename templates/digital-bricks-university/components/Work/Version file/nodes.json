@@ -1,0 +1,127 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "eec6024a-c3fa-59f0-84f8-5329c05c3bec",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "vf_root",
+      "type": "Group",
+      "label": "One file",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "vf_line",
+        "vf_viewer"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      }
+    },
+    {
+      "id": "vf_line",
+      "type": "Group",
+      "label": "Its name",
+      "x": 100,
+      "y": 160,
+      "parent": "vf_root",
+      "children": [
+        "vf_icon",
+        "vf_name"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)"
+      }
+    },
+    {
+      "id": "vf_icon",
+      "type": "net.noodl.visual.icon",
+      "label": "File icon",
+      "x": 160,
+      "y": 280,
+      "parent": "vf_line",
+      "parameters": {
+        "iconSize": 16,
+        "iconColor": "var(--muted-foreground)",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-file",
+          "codeAsClass": true
+        }
+      }
+    },
+    {
+      "id": "vf_name",
+      "type": "Text",
+      "label": "File name",
+      "x": 160,
+      "y": 400,
+      "parent": "vf_line",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "wordBreak": "break-all",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "vf_viewer",
+      "type": "/Work/File viewer",
+      "label": "Show or download it",
+      "x": 100,
+      "y": 520,
+      "parent": "vf_root"
+    },
+    {
+      "id": "vf_in",
+      "type": "Component Inputs",
+      "label": "The file",
+      "x": 470,
+      "y": 280,
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "file",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "fileName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "mode",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "metadata": {
+        "comment": "Worked out by Work/Versions: mode is own (the learner, fileLink) or coach (fileLinkAsCoach)."
+      }
+    }
+  ],
+  "visualRoots": [
+    "vf_root"
+  ]
+}

@@ -1,0 +1,476 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "d7496402-417b-51f7-8624-b9028ea99d7b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sn_root",
+      "type": "Group",
+      "label": "Session next",
+      "children": [
+        "sn_card",
+        "sn_none"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "sn_card",
+      "type": "Group",
+      "label": "The next booked session",
+      "parent": "sn_root",
+      "children": [
+        "sn_head",
+        "sn_title",
+        "sn_prep",
+        "sn_actions"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2-5)",
+        "backgroundColor": "var(--live-bg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--live-border)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "dataAttributes": "data-testid",
+        "data-testid": "home-session-next"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "sn_head",
+      "type": "Group",
+      "label": "Which session, and when",
+      "parent": "sn_card",
+      "children": [
+        "sn_icon",
+        "sn_head_text"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "sn_icon",
+      "type": "net.noodl.visual.icon",
+      "label": "Live session icon",
+      "parent": "sn_head",
+      "parameters": {
+        "iconSize": 18,
+        "iconColor": "var(--live-fg)",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-video",
+          "codeAsClass": true
+        }
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "sn_head_text",
+      "type": "Text",
+      "label": "Live session 3 · Thu 12 Nov, 14:00–15:30",
+      "parent": "sn_head",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--live-fg)"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "sn_title",
+      "type": "Text",
+      "label": "Title",
+      "parent": "sn_card",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "sn_prep",
+      "type": "Text",
+      "label": "What to bring",
+      "parent": "sn_card",
+      "parameters": {
+        "text": "",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "sn_actions",
+      "type": "Group",
+      "label": "Join and calendar",
+      "parent": "sn_card",
+      "children": [
+        "sn_join",
+        "sn_cal"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "marginTop": "var(--space-1)"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "sn_join",
+      "type": "net.noodl.controls.button",
+      "label": "Join call",
+      "parent": "sn_actions",
+      "parameters": {
+        "label": "",
+        "mounted": false,
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-video",
+          "codeAsClass": true
+        },
+        "iconColor": "var(--primary-foreground)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-2)"
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "sn_cal",
+      "type": "/Plan/Calendar links",
+      "label": "Add to calendar",
+      "parent": "sn_actions",
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "sn_none",
+      "type": "Group",
+      "label": "Nothing booked",
+      "parent": "sn_root",
+      "children": [
+        "sn_none_title",
+        "sn_none_body",
+        "sn_book"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1-5)",
+        "backgroundColor": "var(--background)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "x": 100,
+      "y": 1240
+    },
+    {
+      "id": "sn_none_title",
+      "type": "Text",
+      "label": "No session booked",
+      "parent": "sn_none",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "sn_none_body",
+      "type": "Text",
+      "label": "Book one, or wait to hear",
+      "parent": "sn_none",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "sn_book",
+      "type": "net.noodl.controls.button",
+      "label": "Book a session",
+      "parent": "sn_none",
+      "parameters": {
+        "label": "",
+        "mounted": false,
+        "marginTop": "var(--space-1)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-calendar-plus",
+          "codeAsClass": true
+        },
+        "iconColor": "var(--primary-foreground)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-2)"
+      },
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "sn_in",
+      "type": "Component Inputs",
+      "label": "The next session",
+      "ports": [
+        {
+          "name": "shown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "none",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "n",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "date",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "start",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "end",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "prep",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasPrep",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "joinLink",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasJoin",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "stepId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "startsAt",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "durationMin",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "calDetails",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "attendeeName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "noneKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "bookingLink",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "canBook",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 470,
+      "y": 160
+    },
+    {
+      "id": "sn_t_head",
+      "type": "Translation",
+      "label": "Live session {n} · {date}, {start}–{end}",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.liveHead"
+      },
+      "x": 470,
+      "y": 1840
+    },
+    {
+      "id": "sn_fill",
+      "type": "String Format",
+      "label": "Number, day and times into the head",
+      "parameters": {
+        "format": "{n} {date} {start} {end}"
+      },
+      "metadata": {
+        "comment": "The format arrives from the Translation; this default only declares the inputs."
+      },
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "sn_t_join",
+      "type": "Translation",
+      "label": "Join call",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.join"
+      },
+      "x": 470,
+      "y": 1000
+    },
+    {
+      "id": "sn_t_none_title",
+      "type": "Translation",
+      "label": "No session booked",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.liveNoneTitle"
+      },
+      "x": 470,
+      "y": 1360
+    },
+    {
+      "id": "sn_t_none_body",
+      "type": "Translation",
+      "label": "Book one, or wait to hear",
+      "parameters": {
+        "Namespace": "pages"
+      },
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "sn_t_book",
+      "type": "Translation",
+      "label": "Book a session",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.book"
+      },
+      "x": 470,
+      "y": 1600
+    },
+    {
+      "id": "sn_open_call",
+      "type": "net.noodl.externallink",
+      "label": "Open the meeting in a new tab",
+      "parameters": {
+        "openInNewTab": true
+      },
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "sn_open_book",
+      "type": "net.noodl.externallink",
+      "label": "Open the booking page in a new tab",
+      "parameters": {
+        "openInNewTab": true
+      },
+      "x": 470,
+      "y": 1720
+    }
+  ],
+  "visualRoots": [
+    "sn_root"
+  ]
+}

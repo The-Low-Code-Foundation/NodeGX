@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "0947f180-df4a-5b5e-818f-cf83e7b2bccf",
+  "name": "Creations of",
+  "path": "/#__cloud__/shared/Creations of",
+  "type": "cloud",
+  "created": "2026-11-12T13:36:03.210Z",
+  "modified": "2026-11-12T14:35:22.843Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One learner's creations (DBU-09), newest first, each with what it holds: its own file, link or text, or the hand-in version it points at. Callers decide who may read them (myCreations: the caller; creationsAsCoach: staff); this helper checks nothing."
+}

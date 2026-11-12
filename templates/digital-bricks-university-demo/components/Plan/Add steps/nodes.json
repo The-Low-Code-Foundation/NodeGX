@@ -1,0 +1,445 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "0a03f4c0-3a7a-5bba-8295-aea808f9092d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ads_root",
+      "type": "Group",
+      "label": "Add and share",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "ads_live",
+        "ads_hw",
+        "ads_ci",
+        "ads_pick",
+        "ads_ready"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-2-5)",
+        "rowGap": "var(--space-2-5)",
+        "paddingTop": "var(--space-1)"
+      }
+    },
+    {
+      "id": "ads_live",
+      "type": "net.noodl.controls.button",
+      "label": "+ Live session",
+      "x": 100,
+      "y": 160,
+      "parent": "ads_root",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--live-bg)",
+        "color": "var(--live-fg)",
+        "fontWeight": "var(--font-semibold)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--live-border)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-plus",
+          "codeAsClass": true
+        },
+        "iconColor": "var(--live-fg)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)"
+      }
+    },
+    {
+      "id": "ads_hw",
+      "type": "net.noodl.controls.button",
+      "label": "+ Homework",
+      "x": 100,
+      "y": 280,
+      "parent": "ads_root",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--homework-bg)",
+        "color": "var(--homework-fg)",
+        "fontWeight": "var(--font-semibold)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--homework-border)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-plus",
+          "codeAsClass": true
+        },
+        "iconColor": "var(--homework-fg)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)"
+      }
+    },
+    {
+      "id": "ads_ci",
+      "type": "net.noodl.controls.button",
+      "label": "+ Check-in",
+      "x": 100,
+      "y": 400,
+      "parent": "ads_root",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--checkin-bg)",
+        "color": "var(--checkin-fg)",
+        "fontWeight": "var(--font-semibold)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-plus",
+          "codeAsClass": true
+        },
+        "iconColor": "var(--checkin-fg)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)"
+      }
+    },
+    {
+      "id": "ads_pick",
+      "type": "net.noodl.controls.button",
+      "label": "Pick from homework library",
+      "x": 100,
+      "y": 520,
+      "parent": "ads_root",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--accent-foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-library",
+          "codeAsClass": true
+        },
+        "iconColor": "var(--accent-foreground)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)"
+      }
+    },
+    {
+      "id": "ads_ready",
+      "type": "net.noodl.controls.button",
+      "label": "Share everything that's ready",
+      "x": 100,
+      "y": 640,
+      "parent": "ads_root",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "fontWeight": "var(--font-semibold)",
+        "fontSize": "var(--text-sm)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-send",
+          "codeAsClass": true
+        },
+        "iconColor": "var(--primary-foreground)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)"
+      }
+    },
+    {
+      "id": "ads_in",
+      "type": "Component Inputs",
+      "label": "Which plan",
+      "x": 440,
+      "y": 40,
+      "ports": [
+        {
+          "name": "planId",
+          "plug": "output",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "ads_out",
+      "type": "Component Outputs",
+      "label": "What happened",
+      "x": 440,
+      "y": 760,
+      "ports": [
+        {
+          "name": "added",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "addedId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "changed",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "pickLibrary",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "said",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "saidShow",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "ads_c_live",
+      "type": "CloudFunction2",
+      "label": "addStep: a live session",
+      "x": 440,
+      "y": 160,
+      "parameters": {
+        "function": "addStep",
+        "in-kind": "live"
+      }
+    },
+    {
+      "id": "ads_c_hw",
+      "type": "CloudFunction2",
+      "label": "addStep: a homework",
+      "x": 440,
+      "y": 280,
+      "parameters": {
+        "function": "addStep",
+        "in-kind": "homework"
+      }
+    },
+    {
+      "id": "ads_c_ci",
+      "type": "CloudFunction2",
+      "label": "addStep: a check-in",
+      "x": 440,
+      "y": 400,
+      "parameters": {
+        "function": "addStep",
+        "in-kind": "checkin"
+      }
+    },
+    {
+      "id": "ads_c_ready",
+      "type": "CloudFunction2",
+      "label": "shareSteps: everything that's ready",
+      "x": 440,
+      "y": 640,
+      "parameters": {
+        "function": "shareSteps",
+        "in-shared": true,
+        "in-allReady": true
+      }
+    },
+    {
+      "id": "ads_ready_say",
+      "type": "JavaScriptFunction",
+      "label": "What sharing did, in a sentence",
+      "x": 740,
+      "y": 640,
+      "parameters": {
+        "runOnChange-in-changed": false,
+        "runOnChange-in-left": false,
+        "runOnChange-in-one": false,
+        "runOnChange-in-some": false,
+        "runOnChange-in-none": false,
+        "functionScript": "// shareSteps answers how many it shared and how many drafts are not ready yet.\nconst fill = (s, v) => Object.keys(v).reduce((out, k) => out.split('{' + k + '}').join(String(v[k])), String(s || ''));\nconst changed = Number(Inputs.changed) || 0;\nconst left = Number(Inputs.left) || 0;\nif (!changed) Outputs.said = Inputs.none;\nelse Outputs.said = fill(left ? Inputs.some : Inputs.one, { changed, left });\nOutputs.show();\n"
+      },
+      "ports": [
+        {
+          "name": "in-changed",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-left",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-one",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-some",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-none",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-said",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-show",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "ads_t_live",
+      "type": "Translation",
+      "label": "Live session",
+      "x": 740,
+      "y": 40,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.addLive"
+      }
+    },
+    {
+      "id": "ads_t_hw",
+      "type": "Translation",
+      "label": "Homework",
+      "x": 740,
+      "y": 100,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.addHomework"
+      }
+    },
+    {
+      "id": "ads_t_ci",
+      "type": "Translation",
+      "label": "Check-in",
+      "x": 740,
+      "y": 160,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.addCheckin"
+      }
+    },
+    {
+      "id": "ads_t_pick",
+      "type": "Translation",
+      "label": "Pick from homework library",
+      "x": 740,
+      "y": 220,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.pickLibrary"
+      }
+    },
+    {
+      "id": "ads_t_ready",
+      "type": "Translation",
+      "label": "Share everything that's ready",
+      "x": 740,
+      "y": 280,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.shareReady"
+      }
+    },
+    {
+      "id": "ads_t_new_live",
+      "type": "Translation",
+      "label": "New live session",
+      "x": 740,
+      "y": 340,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.newLive"
+      }
+    },
+    {
+      "id": "ads_t_new_hw",
+      "type": "Translation",
+      "label": "New homework",
+      "x": 740,
+      "y": 400,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.newHomework"
+      }
+    },
+    {
+      "id": "ads_t_new_ci",
+      "type": "Translation",
+      "label": "Check-in",
+      "x": 740,
+      "y": 460,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.newCheckin"
+      }
+    },
+    {
+      "id": "ads_t_one",
+      "type": "Translation",
+      "label": "{changed} shared.",
+      "x": 1040,
+      "y": 520,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.sharedReady"
+      }
+    },
+    {
+      "id": "ads_t_some",
+      "type": "Translation",
+      "label": "{changed} shared, {left} not ready",
+      "x": 1040,
+      "y": 580,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.sharedReadyLeft"
+      }
+    },
+    {
+      "id": "ads_t_none",
+      "type": "Translation",
+      "label": "Nothing new to share",
+      "x": 1040,
+      "y": 640,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.nothingReady"
+      }
+    }
+  ],
+  "visualRoots": [
+    "ads_root"
+  ]
+}

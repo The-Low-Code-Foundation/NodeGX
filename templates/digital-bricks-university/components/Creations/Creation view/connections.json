@@ -1,0 +1,157 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "eb2c2324-7dd6-5022-8a75-3efacd464181",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "crv_in",
+      "fromProperty": "title",
+      "toId": "crv_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "crv_t_close",
+      "fromProperty": "Translation",
+      "toId": "crv_close",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "crv_close",
+      "fromProperty": "onClick",
+      "toId": "crv_out",
+      "toProperty": "closed"
+    },
+    {
+      "fromId": "crv_in",
+      "fromProperty": "kindKey",
+      "toId": "crv_kind",
+      "toProperty": "labelKey"
+    },
+    {
+      "fromId": "crv_in",
+      "fromProperty": "kindBg",
+      "toId": "crv_kind",
+      "toProperty": "bg"
+    },
+    {
+      "fromId": "crv_in",
+      "fromProperty": "kindFg",
+      "toId": "crv_kind",
+      "toProperty": "fg"
+    },
+    {
+      "fromId": "crv_t_made",
+      "fromProperty": "Translation",
+      "toId": "crv_fill_made",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "crv_in",
+      "fromProperty": "madeWith",
+      "toId": "crv_fill_made",
+      "toProperty": "madeWith"
+    },
+    {
+      "fromId": "crv_fill_made",
+      "fromProperty": "formatted",
+      "toId": "crv_made",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "crv_in",
+      "fromProperty": "hasMadeWith",
+      "toId": "crv_made",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "crv_t_from",
+      "fromProperty": "Translation",
+      "toId": "crv_fill_from",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "crv_in",
+      "fromProperty": "stepTitle",
+      "toId": "crv_fill_from",
+      "toProperty": "step"
+    },
+    {
+      "fromId": "crv_fill_from",
+      "fromProperty": "formatted",
+      "toId": "crv_from",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "crv_in",
+      "fromProperty": "hasStep",
+      "toId": "crv_from",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "crv_in",
+      "fromProperty": "hasDescription",
+      "toId": "crv_desc",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "crv_in",
+      "fromProperty": "description",
+      "toId": "crv_desc_ft",
+      "toProperty": "markdown"
+    },
+    {
+      "fromId": "crv_in",
+      "fromProperty": "isFile",
+      "toId": "crv_file",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "crv_in",
+      "fromProperty": "files",
+      "toId": "crv_files",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "crv_in",
+      "fromProperty": "isLink",
+      "toId": "crv_link",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "crv_in",
+      "fromProperty": "url",
+      "toId": "crv_url",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "crv_t_open",
+      "fromProperty": "Translation",
+      "toId": "crv_open",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "crv_in",
+      "fromProperty": "url",
+      "toId": "crv_open_fn",
+      "toProperty": "in-url"
+    },
+    {
+      "fromId": "crv_open",
+      "fromProperty": "onClick",
+      "toId": "crv_open_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "crv_in",
+      "fromProperty": "isText",
+      "toId": "crv_text",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "crv_in",
+      "fromProperty": "text",
+      "toId": "crv_text_ft",
+      "toProperty": "markdown"
+    }
+  ]
+}

@@ -1,0 +1,423 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "bb2c5885-3821-54c9-889e-2ee7221792cc",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "qq_root",
+      "type": "Group",
+      "label": "Gone quiet",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "qq_facts_box",
+        "qq_nudge_box",
+        "qq_snooze_row",
+        "qq_refused"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-5)"
+      }
+    },
+    {
+      "id": "qq_facts_box",
+      "type": "Group",
+      "label": "What we know",
+      "x": 40,
+      "y": 160,
+      "parent": "qq_root",
+      "children": [
+        "qq_facts_h",
+        "qq_facts"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      }
+    },
+    {
+      "id": "qq_facts_h",
+      "type": "Text",
+      "label": "What we know (heading)",
+      "x": 40,
+      "y": 280,
+      "parent": "qq_facts_box",
+      "parameters": {
+        "text": "",
+        "as": "h3",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "qq_facts",
+      "type": "For Each",
+      "label": "One line per fact",
+      "x": 40,
+      "y": 400,
+      "parent": "qq_facts_box",
+      "parameters": {
+        "template": "/Inbox/Fact line"
+      }
+    },
+    {
+      "id": "qq_nudge_box",
+      "type": "Group",
+      "label": "The nudge",
+      "x": 40,
+      "y": 520,
+      "parent": "qq_root",
+      "children": [
+        "qq_nudge",
+        "qq_nudge_hint"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-5)",
+        "borderTopStyle": "solid",
+        "borderTopWidth": "var(--border-1)",
+        "borderTopColor": "var(--border)"
+      }
+    },
+    {
+      "id": "qq_nudge",
+      "type": "/Messages/Composer",
+      "label": "Edit the nudge and send it as a message",
+      "x": 40,
+      "y": 640,
+      "parent": "qq_nudge_box",
+      "parameters": {
+        "mode": "coach",
+        "canAttach": false,
+        "labelKey": "inbox.nudgeLabel"
+      }
+    },
+    {
+      "id": "qq_nudge_hint",
+      "type": "Text",
+      "label": "Sending it snoozes this a week",
+      "x": 40,
+      "y": 760,
+      "parent": "qq_nudge_box",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "qq_snooze_row",
+      "type": "Group",
+      "label": "Or snooze it",
+      "x": 40,
+      "y": 880,
+      "parent": "qq_root",
+      "children": [
+        "qq_snooze",
+        "qq_snooze_hint"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-5)",
+        "borderTopStyle": "solid",
+        "borderTopWidth": "var(--border-1)",
+        "borderTopColor": "var(--border)"
+      }
+    },
+    {
+      "id": "qq_snooze",
+      "type": "net.noodl.controls.button",
+      "label": "Snooze a week",
+      "x": 40,
+      "y": 1000,
+      "parent": "qq_snooze_row",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "minHeight": "var(--space-11)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-alarm-clock",
+          "codeAsClass": true
+        },
+        "iconColor": "var(--foreground)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)"
+      }
+    },
+    {
+      "id": "qq_snooze_hint",
+      "type": "Text",
+      "label": "What snoozing does",
+      "x": 40,
+      "y": 1120,
+      "parent": "qq_snooze_row",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontSize": "var(--text-xs)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--muted-foreground)",
+        "styleCss": "flex: 1 1 220px;"
+      }
+    },
+    {
+      "id": "qq_refused",
+      "type": "Text",
+      "label": "Why it was not snoozed",
+      "x": 40,
+      "y": 1240,
+      "parent": "qq_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "qq_in",
+      "type": "Component Inputs",
+      "label": "The learner gone quiet",
+      "x": 400,
+      "y": 40,
+      "ports": [
+        {
+          "name": "learnerId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "first",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "flagId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "facts",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "nextKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "nextTitle",
+          "plug": "output",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "qq_out",
+      "type": "Component Outputs",
+      "label": "Done something",
+      "x": 400,
+      "y": 1240,
+      "ports": [
+        {
+          "name": "changed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "qq_t_h",
+      "type": "Translation",
+      "label": "What we know",
+      "x": 400,
+      "y": 160,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "inbox.factsTitle"
+      }
+    },
+    {
+      "id": "qq_t_next",
+      "type": "Translation",
+      "label": "The nudge's next-step sentence",
+      "x": 400,
+      "y": 280,
+      "parameters": {
+        "Namespace": "pages"
+      }
+    },
+    {
+      "id": "qq_fill_next",
+      "type": "String Format",
+      "label": "The homework into it",
+      "x": 400,
+      "y": 400,
+      "parameters": {
+        "format": "{title}"
+      }
+    },
+    {
+      "id": "qq_t_nudge",
+      "type": "Translation",
+      "label": "The nudge",
+      "x": 400,
+      "y": 520,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "inbox.nudgeText"
+      }
+    },
+    {
+      "id": "qq_fill_nudge",
+      "type": "String Format",
+      "label": "Name and next step into it",
+      "x": 400,
+      "y": 640,
+      "parameters": {
+        "format": "{first} {next}"
+      }
+    },
+    {
+      "id": "qq_t_nhint",
+      "type": "Translation",
+      "label": "Sending it snoozes this a week",
+      "x": 700,
+      "y": 640,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "inbox.nudgeHint"
+      }
+    },
+    {
+      "id": "qq_fill_nhint",
+      "type": "String Format",
+      "label": "Their first name into it",
+      "x": 700,
+      "y": 760,
+      "parameters": {
+        "format": "{first}"
+      }
+    },
+    {
+      "id": "qq_t_snooze",
+      "type": "Translation",
+      "label": "Snooze a week",
+      "x": 700,
+      "y": 880,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "inbox.snooze"
+      }
+    },
+    {
+      "id": "qq_t_shint",
+      "type": "Translation",
+      "label": "What snoozing does",
+      "x": 700,
+      "y": 1000,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "inbox.snoozeHint"
+      }
+    },
+    {
+      "id": "qq_fill_shint",
+      "type": "String Format",
+      "label": "Their first name into it",
+      "x": 700,
+      "y": 1120,
+      "parameters": {
+        "format": "{first}"
+      }
+    },
+    {
+      "id": "qq_cf_nudged",
+      "type": "CloudFunction2",
+      "label": "snoozeQuiet, nudged (staff only)",
+      "x": 1000,
+      "y": 640,
+      "parameters": {
+        "function": "snoozeQuiet",
+        "in-nudged": true
+      }
+    },
+    {
+      "id": "qq_cf_snooze",
+      "type": "CloudFunction2",
+      "label": "snoozeQuiet (staff only)",
+      "x": 1000,
+      "y": 880,
+      "parameters": {
+        "function": "snoozeQuiet",
+        "in-nudged": false
+      }
+    },
+    {
+      "id": "qq_sw",
+      "type": "Switch",
+      "label": "Show: it was refused",
+      "x": 1000,
+      "y": 1120,
+      "parameters": {
+        "onFromStart": false
+      }
+    }
+  ],
+  "visualRoots": [
+    "qq_root"
+  ]
+}

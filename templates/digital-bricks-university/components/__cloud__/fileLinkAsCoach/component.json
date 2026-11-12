@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "45a0bfbf-5e12-5db6-8158-d06f0af7e063",
+  "name": "fileLinkAsCoach",
+  "path": "/#__cloud__/fileLinkAsCoach",
+  "type": "cloud",
+  "created": "2026-11-07T21:04:25.106Z",
+  "modified": "2026-11-07T21:04:25.106Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A 5-minute link to any learner's private file, for the coach (security: role:staff). Staff cannot be named in a file's ACL (defect D4), so this is how the coach reads hand-ins and attachments."
+}

@@ -1,0 +1,65 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f558a0de-5bd8-5cfa-8fcb-03695795c9ec",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cf_in-2",
+      "type": "Component Inputs",
+      "label": "Asked for the forms",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "fetch",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "metadata": {
+        "comment": "A signal, not a value: the forms never change while the backend runs, so a caller only needs to say when it wants them."
+      }
+    },
+    {
+      "id": "cf_fn",
+      "type": "JavaScriptFunction",
+      "label": "The forms",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "functionScript": "/*\n * THE BUILT-IN CHECK-IN FORMS (DBU-10). Defined here and nowhere else: addStep, saveStep and\n * shared/Steps from template copy one onto a step, and tools/lib/seed.mjs reads this literal for the\n * demo world. A step keeps its own copy (and a CheckinResponse keeps the copy it answered), so\n * changing a form here never changes a check-in already planned, sent or answered.\n *\n * RULES FOR CHANGING A FORM\n *  - A question's `id` is forever: answers are stored by it, and the 6-week estimate on My creations\n *    reads `hours_per_week`. Reword a label freely; never reuse an id for a different question.\n *  - Types: scale (min..max, minLabel/maxLabel), text, textarea, number (min, max, step, suffix),\n *    radio and checkbox (options: [{value, label}], value forever too). `required: true` must be\n *    answered when the question is shown.\n *  - A condition shows a question only when an earlier answer matches (the Hub's SurveyForm rules):\n *    {field, value} (or a list of values), {field, not}, {field, operator: '>'|'<'|'>='|'<=', value}.\n *    Checkin/Question and answerCheckin both apply them; change both together.\n *  - Labels are English, like the emails: they are content the step carries, not interface words.\n * The literal between the markers is strict JSON (seed.mjs parses it).\n */\nconst FORMS = /* FORMS */[\n  {\n    \"id\": \"after-session\", \"title\": \"After a session\", \"minutes\": 2,\n    \"questions\": [\n      { \"id\": \"useful\", \"type\": \"scale\", \"label\": \"How useful was the session for your teaching?\", \"min\": 1, \"max\": 5, \"minLabel\": \"Not useful\", \"maxLabel\": \"Very useful\", \"required\": true },\n      { \"id\": \"change\", \"type\": \"textarea\", \"label\": \"One thing you'd change for next time\", \"required\": false }\n    ]\n  },\n  {\n    \"id\": \"end-of-programme\", \"title\": \"End of programme\", \"minutes\": 2,\n    \"questions\": [\n      { \"id\": \"confidence_before\", \"type\": \"scale\", \"label\": \"Before the programme, how confident were you using AI to prepare lessons?\", \"min\": 1, \"max\": 5, \"minLabel\": \"Not at all\", \"maxLabel\": \"Very\", \"required\": true },\n      { \"id\": \"confidence_now\", \"type\": \"scale\", \"label\": \"And how confident are you now?\", \"min\": 1, \"max\": 5, \"minLabel\": \"Not at all\", \"maxLabel\": \"Very\", \"required\": true },\n      { \"id\": \"keep_doing\", \"type\": \"textarea\", \"label\": \"What will you keep doing after the programme?\", \"required\": true }\n    ]\n  },\n  {\n    \"id\": \"six-week-impact\", \"title\": \"6-week impact\", \"minutes\": 2,\n    \"questions\": [\n      { \"id\": \"still_using\", \"type\": \"radio\", \"label\": \"Are you still using what you learned?\", \"required\": true,\n        \"options\": [ { \"value\": \"weekly\", \"label\": \"Yes, every week\" }, { \"value\": \"sometimes\", \"label\": \"Now and then\" }, { \"value\": \"no\", \"label\": \"Not really\" } ] },\n      { \"id\": \"hours_per_week\", \"type\": \"number\", \"label\": \"About how many hours a week does it save you?\", \"hint\": \"Your own estimate. Half hours are fine.\", \"min\": 0, \"max\": 40, \"step\": 0.5, \"suffix\": \"hours a week\", \"required\": true,\n        \"condition\": { \"field\": \"still_using\", \"value\": [\"weekly\", \"sometimes\"] } },\n      { \"id\": \"in_the_way\", \"type\": \"textarea\", \"label\": \"What got in the way?\", \"required\": false,\n        \"condition\": { \"field\": \"still_using\", \"value\": \"no\" } },\n      { \"id\": \"story\", \"type\": \"textarea\", \"label\": \"One story: a lesson or a moment where it made a difference\", \"required\": false,\n        \"condition\": { \"field\": \"still_using\", \"not\": \"no\" } }\n    ]\n  }\n]/* END FORMS */;\nOutputs.forms = JSON.parse(JSON.stringify(FORMS));\nOutputs.done();\n"
+      },
+      "ports": [
+        {
+          "name": "out-forms",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "cf_out-2",
+      "type": "Component Outputs",
+      "label": "The forms",
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "forms",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "348aff7d-346a-552b-84cc-64fb2fd5553b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ss_req-2",
+      "fromProperty": "pm-coachEmail",
+      "toId": "ss_fn-2",
+      "toProperty": "in-coachEmail"
+    },
+    {
+      "fromId": "ss_req-2",
+      "fromProperty": "receive",
+      "toId": "ss_fn-2",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ss_fn-2",
+      "fromProperty": "out-coachEmail",
+      "toId": "ss_res-2",
+      "toProperty": "pm-coachEmail"
+    },
+    {
+      "fromId": "ss_fn-2",
+      "fromProperty": "out-done",
+      "toId": "ss_res-2",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ss_fn-2",
+      "fromProperty": "out-why",
+      "toId": "ss_deny-2",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "ss_fn-2",
+      "fromProperty": "out-refuse",
+      "toId": "ss_deny-2",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ss_fn-2",
+      "fromProperty": "out-failed",
+      "toId": "ss_fail-2",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ss_fn-2",
+      "fromProperty": "failure",
+      "toId": "ss_fail-2",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ss_req-2",
+      "fromProperty": "pm-coachName",
+      "toId": "ss_fn-2",
+      "toProperty": "in-coachName"
+    },
+    {
+      "fromId": "ss_fn-2",
+      "fromProperty": "out-coachName",
+      "toId": "ss_res-2",
+      "toProperty": "pm-coachName"
+    }
+  ]
+}

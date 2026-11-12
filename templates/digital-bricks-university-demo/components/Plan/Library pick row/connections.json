@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d2e8d20d-4568-55f8-8627-5a514656f0f9",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "lpr_in",
+      "fromProperty": "title",
+      "toId": "lpr_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lpr_in",
+      "fromProperty": "meta",
+      "toId": "lpr_meta",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lpr_t_add",
+      "fromProperty": "Translation",
+      "toId": "lpr_add",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "lpr_add",
+      "fromProperty": "onClick",
+      "toId": "lpr_out",
+      "toProperty": "add"
+    }
+  ]
+}

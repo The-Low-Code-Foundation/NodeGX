@@ -1,0 +1,259 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "97e73bb8-251d-5675-85f1-8e7561acf2d1",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ds_band",
+      "type": "Group",
+      "label": "Demo line",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "ds_row"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "backgroundColor": "var(--muted)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border)"
+      }
+    },
+    {
+      "id": "ds_row",
+      "type": "Group",
+      "label": "Row",
+      "x": 100,
+      "y": 160,
+      "parent": "ds_band",
+      "children": [
+        "ds_note",
+        "ds_actions"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 1120,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "justifyContent": "space-between",
+        "columnGap": "var(--space-4)",
+        "rowGap": "var(--space-1)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      }
+    },
+    {
+      "id": "ds_note",
+      "type": "Text",
+      "label": "Made-up people, nothing leaves",
+      "x": 160,
+      "y": 280,
+      "parent": "ds_row",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontSize": "var(--text-xs)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "ds_actions",
+      "type": "Group",
+      "label": "Switch and reset",
+      "x": 160,
+      "y": 400,
+      "parent": "ds_row",
+      "children": [
+        "ds_to_coach",
+        "ds_to_learner",
+        "ds_reset"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-1)"
+      }
+    },
+    {
+      "id": "ds_to_coach",
+      "type": "net.noodl.controls.button",
+      "label": "Look as Richard",
+      "x": 220,
+      "y": 520,
+      "parent": "ds_actions",
+      "parameters": {
+        "label": "",
+        "mounted": false,
+        "sizeMode": "contentSize",
+        "backgroundColor": "transparent",
+        "color": "var(--primary)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "minHeight": "var(--space-8)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      }
+    },
+    {
+      "id": "ds_to_learner",
+      "type": "net.noodl.controls.button",
+      "label": "Look as Camille",
+      "x": 220,
+      "y": 640,
+      "parent": "ds_actions",
+      "parameters": {
+        "label": "",
+        "mounted": false,
+        "sizeMode": "contentSize",
+        "backgroundColor": "transparent",
+        "color": "var(--primary)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "minHeight": "var(--space-8)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      }
+    },
+    {
+      "id": "ds_reset",
+      "type": "net.noodl.controls.button",
+      "label": "Reset demo",
+      "x": 220,
+      "y": 760,
+      "parent": "ds_actions",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-medium)",
+        "minHeight": "var(--space-8)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      }
+    },
+    {
+      "id": "ds_mode",
+      "type": "/Demo/Demo mode",
+      "label": "Is this the demo, and as whom?",
+      "x": 600,
+      "y": 40
+    },
+    {
+      "id": "ds_go_coach",
+      "type": "JavaScriptFunction",
+      "label": "Look as Richard",
+      "x": 600,
+      "y": 160,
+      "parameters": {
+        "functionScript": "if (typeof window !== 'undefined' && window.dbuDemo) window.dbuDemo.lookAs('richard');\n"
+      }
+    },
+    {
+      "id": "ds_go_learner",
+      "type": "JavaScriptFunction",
+      "label": "Look as Camille",
+      "x": 600,
+      "y": 280,
+      "parameters": {
+        "functionScript": "if (typeof window !== 'undefined' && window.dbuDemo) window.dbuDemo.lookAs('camille');\n"
+      }
+    },
+    {
+      "id": "ds_go_reset",
+      "type": "JavaScriptFunction",
+      "label": "Put the example world back",
+      "x": 600,
+      "y": 400,
+      "parameters": {
+        "functionScript": "if (typeof window !== 'undefined' && window.dbuDemo) window.dbuDemo.reset();\n"
+      },
+      "metadata": {
+        "comment": "demo/boot.js asks the service worker to rebuild the world from the fixtures (dates around today), keeps who you are looking as, and reloads."
+      }
+    },
+    {
+      "id": "ds_t_note",
+      "type": "Translation",
+      "label": "Made-up people",
+      "x": 900,
+      "y": 40,
+      "parameters": {
+        "Namespace": "common",
+        "Key": "demo.strip"
+      }
+    },
+    {
+      "id": "ds_t_coach",
+      "type": "Translation",
+      "label": "Look as Richard",
+      "x": 900,
+      "y": 100,
+      "parameters": {
+        "Namespace": "common",
+        "Key": "demo.toCoach"
+      }
+    },
+    {
+      "id": "ds_t_learner",
+      "type": "Translation",
+      "label": "Look as Camille",
+      "x": 900,
+      "y": 160,
+      "parameters": {
+        "Namespace": "common",
+        "Key": "demo.toLearner"
+      }
+    },
+    {
+      "id": "ds_t_reset",
+      "type": "Translation",
+      "label": "Reset demo",
+      "x": 900,
+      "y": 220,
+      "parameters": {
+        "Namespace": "common",
+        "Key": "demo.reset"
+      }
+    }
+  ],
+  "visualRoots": [
+    "ds_band"
+  ]
+}

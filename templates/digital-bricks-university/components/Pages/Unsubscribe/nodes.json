@@ -1,0 +1,384 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2d38c5bf-21ac-5249-895c-04a8243204ae",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "un_page",
+      "type": "Page",
+      "label": "Unsubscribe",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "un_ground"
+      ],
+      "parameters": {
+        "urlPath": "unsubscribe"
+      }
+    },
+    {
+      "id": "un_ground",
+      "type": "Group",
+      "label": "Ground",
+      "x": 100,
+      "y": 160,
+      "parent": "un_page",
+      "children": [
+        "un_column"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "backgroundColor": "var(--background)",
+        "paddingTop": "var(--space-20)",
+        "paddingBottom": "var(--space-20)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      }
+    },
+    {
+      "id": "un_column",
+      "type": "Group",
+      "label": "Column",
+      "x": 160,
+      "y": 280,
+      "parent": "un_ground",
+      "children": [
+        "un_name",
+        "un_card-2"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 440,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "rowGap": "var(--space-6)"
+      }
+    },
+    {
+      "id": "un_name",
+      "type": "Text",
+      "label": "Product name",
+      "x": 220,
+      "y": 400,
+      "parent": "un_column",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-tight)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "un_card-2",
+      "type": "Group",
+      "label": "Stop the emails",
+      "x": 220,
+      "y": 520,
+      "parent": "un_column",
+      "children": [
+        "un_title",
+        "un_body",
+        "un_button",
+        "un_done",
+        "un_broken",
+        "un_failed"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "stretch",
+        "rowGap": "var(--space-4)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-8)",
+        "paddingBottom": "var(--space-8)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "dataAttributes": "data-testid",
+        "data-testid": "unsubscribe"
+      }
+    },
+    {
+      "id": "un_title",
+      "type": "Text",
+      "label": "Stop message emails",
+      "x": 280,
+      "y": 640,
+      "parent": "un_card-2",
+      "parameters": {
+        "text": "",
+        "as": "h1",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "un_body",
+      "type": "Text",
+      "label": "What stops, and what does not",
+      "x": 280,
+      "y": 760,
+      "parent": "un_card-2",
+      "parameters": {
+        "text": "",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "un_button",
+      "type": "net.noodl.controls.button",
+      "label": "Stop these emails",
+      "x": 280,
+      "y": 880,
+      "parent": "un_card-2",
+      "parameters": {
+        "label": "",
+        "mounted": false,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "un_done",
+      "type": "Text",
+      "label": "Done",
+      "x": 280,
+      "y": 1000,
+      "parent": "un_card-2",
+      "parameters": {
+        "text": "",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--done-fg)"
+      },
+      "metadata": {
+        "comment": "The same words whatever the signature: unsubscribe answers a wrong one exactly as a right one, so the page cannot tell, and neither can someone guessing links."
+      }
+    },
+    {
+      "id": "un_broken",
+      "type": "Text",
+      "label": "The link has no id or no signature",
+      "x": 280,
+      "y": 1120,
+      "parent": "un_card-2",
+      "parameters": {
+        "text": "",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--attention)"
+      }
+    },
+    {
+      "id": "un_failed",
+      "type": "Text",
+      "label": "The request failed (the backend's words)",
+      "x": 280,
+      "y": 1240,
+      "parent": "un_card-2",
+      "parameters": {
+        "text": "",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--attention)"
+      }
+    },
+    {
+      "id": "un_url",
+      "type": "PageInputs",
+      "label": "?u= and &s= from the email",
+      "x": 600,
+      "y": 40,
+      "parameters": {
+        "queryParams": "u,s"
+      }
+    },
+    {
+      "id": "un_check",
+      "type": "JavaScriptFunction",
+      "label": "Is the link whole, and is it done?",
+      "x": 600,
+      "y": 140,
+      "parameters": {
+        "runOnChange-in-u": true,
+        "runOnChange-in-s": true,
+        "runOnChange-in-done": true,
+        "functionScript": "// A link cut short by a mail client has no id or no signature: say so, and offer nothing to press.\n// Once done, the button and its explanation go, and only Done stays.\nconst whole = !!String(Inputs.u || '').trim() && !!String(Inputs.s || '').trim();\nOutputs.ask = whole && Inputs.done !== true;\nOutputs.broken = !whole;\n"
+      },
+      "ports": [
+        {
+          "name": "in-u",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-s",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-done",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-ask",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-broken",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "id": "un_call",
+      "type": "CloudFunction2",
+      "label": "unsubscribe (public, rate-limited)",
+      "x": 600,
+      "y": 260,
+      "parameters": {
+        "function": "unsubscribe"
+      }
+    },
+    {
+      "id": "un_done_sw",
+      "type": "Switch",
+      "label": "Done",
+      "x": 600,
+      "y": 380,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "un_fail_sw",
+      "type": "Switch",
+      "label": "Failed",
+      "x": 600,
+      "y": 460,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "un_t_tab",
+      "type": "Translation",
+      "label": "The browser tab's title",
+      "x": 900,
+      "y": 40,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "unsubscribe.tab"
+      }
+    },
+    {
+      "id": "un_t_name",
+      "type": "Translation",
+      "label": "Product name",
+      "x": 900,
+      "y": 100,
+      "parameters": {
+        "Namespace": "common",
+        "Key": "productName"
+      }
+    },
+    {
+      "id": "un_t_title",
+      "type": "Translation",
+      "label": "Stop message emails",
+      "x": 900,
+      "y": 160,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "unsubscribe.title"
+      }
+    },
+    {
+      "id": "un_t_body",
+      "type": "Translation",
+      "label": "What stops",
+      "x": 900,
+      "y": 220,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "unsubscribe.body"
+      }
+    },
+    {
+      "id": "un_t_button",
+      "type": "Translation",
+      "label": "Stop these emails",
+      "x": 900,
+      "y": 280,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "unsubscribe.button"
+      }
+    },
+    {
+      "id": "un_t_done",
+      "type": "Translation",
+      "label": "Done",
+      "x": 900,
+      "y": 340,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "unsubscribe.done"
+      }
+    },
+    {
+      "id": "un_t_broken",
+      "type": "Translation",
+      "label": "Incomplete link",
+      "x": 900,
+      "y": 400,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "unsubscribe.broken"
+      }
+    }
+  ],
+  "visualRoots": [
+    "un_page"
+  ]
+}

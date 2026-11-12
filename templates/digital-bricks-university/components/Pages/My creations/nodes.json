@@ -1,0 +1,397 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "6ef85a2d-a40a-5394-8850-9d87d5b74ccb",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cr_page",
+      "type": "Page",
+      "label": "My creations",
+      "children": [
+        "cr_shell"
+      ],
+      "parameters": {
+        "urlPath": "creations"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "cr_shell",
+      "type": "/Shell/App shell",
+      "label": "Learner shell",
+      "parent": "cr_page",
+      "children": [
+        "cr_top",
+        "cr_estimate",
+        "cr_saved",
+        "cr_deleted",
+        "cr_edit_box",
+        "cr_shelf_box",
+        "cr_failed"
+      ],
+      "parameters": {
+        "coach": false,
+        "current": "creations"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "cr_top",
+      "type": "Group",
+      "label": "Head and the add button",
+      "parent": "cr_shell",
+      "children": [
+        "cr_head_box",
+        "cr_add"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "flex-end",
+        "justifyContent": "space-between",
+        "columnGap": "var(--space-6)",
+        "rowGap": "var(--space-4)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "cr_head_box",
+      "type": "Group",
+      "label": "Head",
+      "parent": "cr_top",
+      "children": [
+        "cr_head"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "column"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "cr_head",
+      "type": "/Shell/Page head",
+      "label": "Head",
+      "parent": "cr_head_box",
+      "parameters": {
+        "titleKey": "creations.title",
+        "leadKey": "creations.lead"
+      },
+      "x": 280,
+      "y": 520
+    },
+    {
+      "id": "cr_add",
+      "type": "net.noodl.controls.button",
+      "label": "+ Add a creation",
+      "parent": "cr_top",
+      "parameters": {
+        "label": "",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-plus",
+          "codeAsClass": true
+        },
+        "iconColor": "var(--primary-foreground)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-2)",
+        "dataAttributes": "data-testid",
+        "data-testid": "creation-add"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "cr_saved",
+      "type": "Text",
+      "label": "Saved, in a sentence",
+      "parent": "cr_shell",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "color": "var(--done-fg)"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "cr_deleted",
+      "type": "Text",
+      "label": "Deleted, in a sentence",
+      "parent": "cr_shell",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "cr_edit_box",
+      "type": "Group",
+      "label": "Shown while adding or editing",
+      "parent": "cr_shell",
+      "children": [
+        "cr_editor"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 720,
+          "unit": "px"
+        }
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "cr_editor",
+      "type": "/Creations/Creation editor",
+      "label": "Add or edit",
+      "parent": "cr_edit_box",
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "cr_shelf_box",
+      "type": "Group",
+      "label": "Shown when not editing",
+      "parent": "cr_shell",
+      "children": [
+        "cr_shelf"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "cr_shelf",
+      "type": "/Creations/Creation shelf",
+      "label": "Her creations",
+      "parent": "cr_shelf_box",
+      "parameters": {
+        "mode": "own",
+        "emptyTitleKey": "creations.emptyTitle",
+        "emptyBodyKey": "creations.emptyBody"
+      },
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "cr_failed",
+      "type": "Text",
+      "label": "Could not be read",
+      "parent": "cr_shell",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)"
+      },
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "cr_call",
+      "type": "CloudFunction2",
+      "label": "myCreations (her own only)",
+      "parameters": {
+        "function": "myCreations"
+      },
+      "x": 530,
+      "y": 1600
+    },
+    {
+      "id": "cr_fail_sw",
+      "type": "Switch",
+      "label": "Remember the read failed",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 530,
+      "y": 1720
+    },
+    {
+      "id": "cr_edit_sw",
+      "type": "Switch",
+      "label": "Adding or editing, or not",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 530,
+      "y": 1240
+    },
+    {
+      "id": "cr_not_editing",
+      "type": "Inverter",
+      "label": "Not editing",
+      "x": 530,
+      "y": 1480
+    },
+    {
+      "id": "cr_saved_sw",
+      "type": "Switch",
+      "label": "Show: saved",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 530,
+      "y": 760
+    },
+    {
+      "id": "cr_deleted_sw",
+      "type": "Switch",
+      "label": "Show: deleted",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 530,
+      "y": 1000
+    },
+    {
+      "id": "cr_new_fn",
+      "type": "JavaScriptFunction",
+      "label": "A new, empty creation",
+      "parameters": {
+        "functionScript": "// No id: the editor opens on Add a creation, with the file tab.\nOutputs.item = {};\nOutputs.open();\n"
+      },
+      "ports": [
+        {
+          "name": "out-item",
+          "plug": "output",
+          "type": "*",
+          "displayName": "item",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-open",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 530,
+      "y": 1360
+    },
+    {
+      "id": "cr_t_tab",
+      "type": "Translation",
+      "label": "The browser tab's title",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.tab"
+      },
+      "x": 530,
+      "y": 40
+    },
+    {
+      "id": "cr_t_add",
+      "type": "Translation",
+      "label": "Add a creation",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.add"
+      },
+      "x": 530,
+      "y": 640
+    },
+    {
+      "id": "cr_t_failed",
+      "type": "Translation",
+      "label": "Could not read",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.failed"
+      },
+      "x": 530,
+      "y": 1840
+    },
+    {
+      "id": "cr_t_saved",
+      "type": "Translation",
+      "label": "Saved: {title}",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.saved"
+      },
+      "x": 530,
+      "y": 1960
+    },
+    {
+      "id": "cr_fill_saved",
+      "type": "String Format",
+      "label": "The title into the sentence",
+      "parameters": {
+        "format": "{title}"
+      },
+      "x": 530,
+      "y": 880
+    },
+    {
+      "id": "cr_t_deleted",
+      "type": "Translation",
+      "label": "Deleted: {title}",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.deleted"
+      },
+      "x": 530,
+      "y": 2080
+    },
+    {
+      "id": "cr_fill_deleted",
+      "type": "String Format",
+      "label": "The title into the sentence",
+      "parameters": {
+        "format": "{title}"
+      },
+      "x": 530,
+      "y": 1120
+    },
+    {
+      "id": "cr_estimate",
+      "type": "/Creations/Estimate line",
+      "label": "Hours a week saved, your estimate",
+      "parent": "cr_shell",
+      "parameters": {
+        "textKey": "creations.estimate"
+      },
+      "x": 160,
+      "y": 1120
+    }
+  ],
+  "visualRoots": [
+    "cr_page"
+  ]
+}

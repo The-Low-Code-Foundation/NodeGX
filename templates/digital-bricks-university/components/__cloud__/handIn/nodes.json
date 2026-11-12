@@ -1,0 +1,156 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "cf6a1d79-126f-5a91-800b-5b165eb6b441",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hi_req",
+      "type": "noodl.cloud.request",
+      "label": "A learner hands in",
+      "parameters": {
+        "params": "stepId,kind,files,url,text,note,addToCreations",
+        "allowNoAuth": false,
+        "ptype-stepId": "string",
+        "preq-stepId": true,
+        "ptype-kind": "string",
+        "preq-kind": true,
+        "ptype-url": "string",
+        "ptype-text": "string",
+        "ptype-note": "string",
+        "ptype-files": "array",
+        "ptype-addToCreations": "boolean"
+      },
+      "metadata": {
+        "comment": "authenticated in nodegx.security.json. The caller is the session's user; a stepId or file of someone else's is refused below."
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "hi_fn",
+      "type": "JavaScriptFunction",
+      "label": "Check it, then record the next version",
+      "parameters": {
+        "runOnChange-in-userId": false,
+        "runOnChange-in-stepId": false,
+        "runOnChange-in-kind": false,
+        "runOnChange-in-url": false,
+        "runOnChange-in-text": false,
+        "runOnChange-in-note": false,
+        "functionScript": "/*\n * The only way a Submission is ever created. A file's type is judged from _Files, which\n * the backend filled by sniffing the bytes (PLATFORM.md feature 1): the extension must\n * match what the bytes are, so a page renamed .pdf is refused and an .html is only ever\n * text/html (shown in the sandbox, PLATFORM.md feature 5). Office files and media sniff\n * as zip and octet-stream (defect D5), so those names are kept and the kind is read from them.\n * A file version carries 1 to 5 files (`files`, stored names), reviewed as one (DECISIONS 2026-11-12).\n * The page offers the same list (Option sets/Hand-in file types); this one is the gate.\n * DBU-09: `addToCreations` also keeps it in My creations, pointing at this version (never a copy).\n */\n(async () => {\n  const refuse = (why) => { Outputs.why = why; Outputs.refuse(); };\n  try {\n    const me = String(Inputs.userId || '');\n    if (!me) throw new Error('no session user');\n    const q = (c, where) => Noodl.Records.query(c, where, { limit: 1000, plain: true });\n    const MAX_BYTES = 50 * 1024 * 1024;\n    const MAX_FILES = 5;\n    const MEDIA = ['application/octet-stream'];\n    const OFFICE = ['application/zip'];\n    const TYPES = {\n      pdf: ['application/pdf'], docx: OFFICE, pptx: OFFICE, xlsx: OFFICE,\n      html: ['text/html'], htm: ['text/html'],\n      png: ['image/png'], jpg: ['image/jpeg'], jpeg: ['image/jpeg'], webp: ['image/webp'],\n      mp3: ['audio/mpeg'], m4a: MEDIA.concat(['audio/mp4']), mp4: MEDIA.concat(['video/mp4']), webm: MEDIA.concat(['video/webm', 'audio/webm'])\n    };\n\n    const stepId = String(Inputs.stepId || '');\n    const steps = stepId ? await q('Step', { objectId: { equalTo: stepId } }) : [];\n    const step = steps[0];\n    if (!step || step.learner !== me || step.shared !== true || step.kind !== 'homework') return refuse('This homework is not one of yours. Reload the page.');\n    if (step.status === 'approved') return refuse('This homework is already approved, so it takes no new version.');\n\n    const note = String(Inputs.note || '').trim();\n    if (note.length > 2000) return refuse('Keep the note under 2,000 characters.');\n    const kind = String(Inputs.kind || '');\n    const row = { step: stepId, learner: me, kind, note: note || null, review: 'pending' };\n\n    if (kind === 'file') {\n      // Each file is checked on its own; a refusal names the file when there are several.\n      const names = Array.isArray(Inputs.files) ? Inputs.files.map((x) => String(x || '')).filter(Boolean) : [];\n      if (!names.length) return refuse('Choose a file to hand in.');\n      if (names.length > MAX_FILES) return refuse('Hand in up to ' + MAX_FILES + ' files in one version.');\n      if (new Set(names).size !== names.length) return refuse('The same file is in this version twice. Remove one and hand in again.');\n      const files = [];\n      for (const name of names) {\n        const rows = await q('_Files', { storedName: { equalTo: name } });\n        const f = rows.length === 1 ? rows[0] : null;\n        const owner = f && f.owner && typeof f.owner === 'object' ? f.owner.objectId : f && f.owner;\n        // Never name a file that is not the caller's: its name is someone else's.\n        if (!f || owner !== me) return refuse((names.length > 1 ? 'One of these files is' : 'That file is') + ' not one you uploaded. Choose it and upload it again.');\n        const original = String(f.originalName || '');\n        const said = (why) => refuse(names.length > 1 ? original + ': ' + why : why);\n        if (f.private !== true) return said('That file was not uploaded privately. Choose it and upload it again.');\n        if (Number(f.size) > MAX_BYTES) return said('That file is larger than 50 MB. Put it online and hand in a link instead.');\n        const dot = original.lastIndexOf('.');\n        const ext = dot > 0 ? original.slice(dot + 1).toLowerCase() : '';\n        const allowed = TYPES[ext];\n        if (!allowed) return said('Files of this kind can\\'t be handed in. Use Word, PowerPoint, Excel, PDF, HTML, an image (PNG, JPG, WebP), audio (MP3, M4A) or video (MP4, WebM), or hand in a link.');\n        if (!allowed.includes(f.contentType)) return said('This file is not a real .' + ext + ' file. Save it again in that format, then hand it in.');\n        files.push({ file: name, fileName: original });\n      }\n      row.files = files;\n    } else if (kind === 'link') {\n      const url = String(Inputs.url || '').trim();\n      let ok = false;\n      try { const u = new URL(url); ok = (u.protocol === 'https:' || u.protocol === 'http:') && !!u.hostname; } catch (e) { ok = false; }\n      if (!ok) return refuse('That is not a web address. Links start with https://');\n      if (url.length > 2000) return refuse('That link is too long. Use a shorter share link.');\n      row.url = url;\n    } else if (kind === 'text') {\n      const text = String(Inputs.text || '');\n      if (!text.trim()) return refuse('Write or paste something to hand in.');\n      if (text.length > 50000) return refuse('That is too long to paste. Keep it under 50,000 characters, or hand it in as a file.');\n      row.text = text;\n    } else {\n      return refuse('Choose a file, a link or some text to hand in.');\n    }\n\n    // (step, version) is unique: two hand-ins at once cannot share a number; the later one takes the next.\n    let created = null;\n    for (let attempt = 0; attempt < 3 && !created; attempt++) {\n      const versions = await q('Submission', { step: { equalTo: stepId } });\n      row.version = versions.reduce((m, v) => Math.max(m, Number(v.version) || 0), 0) + 1;\n      try {\n        created = await Noodl.Records.create('Submission', row, { plain: true });\n      } catch (e) {\n        if (attempt === 2) throw e;\n      }\n    }\n    const submissionId = created.objectId || created.id;\n    if (step.status !== 'handed_in') {\n      await Noodl.Records.save(stepId, { status: 'handed_in' }, { className: 'Step' });\n    }\n\n    // DBU-09, \"Also add it to My creations\": one creation per homework. A later version moves the\n    // pointer of the one already there (keeping the learner's title and words); none is made twice.\n    // Its kind is a first guess from what was handed in; the learner can change it.\n    let creationId = null;\n    if (Inputs.addToCreations === true) {\n      const mine = (await q('Creation', { fromStep: { equalTo: stepId } })).filter((c) => c.learner === me);\n      const kept = mine.find((c) => c.submission);\n      if (kept) {\n        await Noodl.Records.save(kept.objectId, { submission: submissionId }, { className: 'Creation' });\n        creationId = kept.objectId;\n      } else {\n        const KIND_OF = { docx: 'document', pptx: 'document', xlsx: 'document', pdf: 'document', html: 'interactive', htm: 'interactive', mp3: 'audio_video', m4a: 'audio_video', mp4: 'audio_video', webm: 'audio_video' };\n        const firstName = kind === 'file' ? String(row.files[0].fileName || '') : '';\n        const ext = firstName.lastIndexOf('.') > 0 ? firstName.slice(firstName.lastIndexOf('.') + 1).toLowerCase() : '';\n        const guess = kind === 'link' ? 'link' : kind === 'text' ? 'prompt' : (KIND_OF[ext] || 'other');\n        const made = await Noodl.Records.create('Creation', {\n          learner: me, title: step.title, kind: guess, fromStep: stepId, submission: submissionId, usedInClass: false\n        }, { plain: true });\n        creationId = made.objectId || made.id;\n      }\n    }\n\n    await Noodl.Records.create('Doorbell', { learner: me, topic: 'submission' },\n      { acl: { [me]: { read: true }, 'role:staff': { read: true } } });\n\n    Outputs.submissionId = submissionId;\n    Outputs.version = row.version;\n    Outputs.creationId = creationId;\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:handIn]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();",
+        "runOnChange-in-files": false,
+        "runOnChange-in-addToCreations": false
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-stepId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-kind",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-files",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-url",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-text",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-note",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-addToCreations",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-submissionId",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-version",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-creationId",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-why",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "hi_res",
+      "type": "noodl.cloud.response",
+      "label": "Handed in",
+      "parameters": {
+        "params": "submissionId,version,creationId"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "hi_deny",
+      "type": "noodl.cloud.response",
+      "label": "A refusal the learner can act on",
+      "parameters": {
+        "status": "failure"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "hi_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "Your work could not be handed in. Try again in a moment."
+      },
+      "x": 40,
+      "y": 520
+    }
+  ]
+}

@@ -1,0 +1,361 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "9db044fc-44ad-5e0a-8fde-ff0f721c241e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cv_root",
+      "fromProperty": "didMount",
+      "toId": "cv_go",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cv_bell",
+      "fromProperty": "created",
+      "toId": "cv_go",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cv_in",
+      "fromProperty": "mode",
+      "toId": "cv_go",
+      "toProperty": "in-mode"
+    },
+    {
+      "fromId": "cv_in",
+      "fromProperty": "stepId",
+      "toId": "cv_go",
+      "toProperty": "in-stepId"
+    },
+    {
+      "fromId": "cv_in",
+      "fromProperty": "learnerId",
+      "toId": "cv_go",
+      "toProperty": "in-learnerId"
+    },
+    {
+      "fromId": "cv_go",
+      "fromProperty": "out-readLearner",
+      "toId": "cv_read_l",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "cv_go",
+      "fromProperty": "out-readCoach",
+      "toId": "cv_read_c",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "cv_in",
+      "fromProperty": "stepId",
+      "toId": "cv_read_l",
+      "toProperty": "in-stepId"
+    },
+    {
+      "fromId": "cv_in",
+      "fromProperty": "learnerId",
+      "toId": "cv_read_c",
+      "toProperty": "in-learnerId"
+    },
+    {
+      "fromId": "cv_read_l",
+      "fromProperty": "out-messages",
+      "toId": "cv_shape",
+      "toProperty": "in-messages"
+    },
+    {
+      "fromId": "cv_read_l",
+      "fromProperty": "out-me",
+      "toId": "cv_shape",
+      "toProperty": "in-me"
+    },
+    {
+      "fromId": "cv_read_l",
+      "fromProperty": "out-emailOn",
+      "toId": "cv_shape",
+      "toProperty": "in-emailOn"
+    },
+    {
+      "fromId": "cv_read_c",
+      "fromProperty": "out-messages",
+      "toId": "cv_shape",
+      "toProperty": "in-messages"
+    },
+    {
+      "fromId": "cv_read_c",
+      "fromProperty": "out-me",
+      "toId": "cv_shape",
+      "toProperty": "in-me"
+    },
+    {
+      "fromId": "cv_read_c",
+      "fromProperty": "out-emailOn",
+      "toId": "cv_shape",
+      "toProperty": "in-emailOn"
+    },
+    {
+      "fromId": "cv_read_c",
+      "fromProperty": "out-learner",
+      "toId": "cv_shape",
+      "toProperty": "in-learner"
+    },
+    {
+      "fromId": "cv_in",
+      "fromProperty": "mode",
+      "toId": "cv_shape",
+      "toProperty": "in-mode"
+    },
+    {
+      "fromId": "cv_in",
+      "fromProperty": "tagged",
+      "toId": "cv_shape",
+      "toProperty": "in-tagged"
+    },
+    {
+      "fromId": "cv_in",
+      "fromProperty": "showEmailPref",
+      "toId": "cv_shape",
+      "toProperty": "in-showEmailPref"
+    },
+    {
+      "fromId": "cv_in",
+      "fromProperty": "titleKey",
+      "toId": "cv_shape",
+      "toProperty": "in-titleKey"
+    },
+    {
+      "fromId": "cv_t_you",
+      "fromProperty": "Translation",
+      "toId": "cv_shape",
+      "toProperty": "in-you"
+    },
+    {
+      "fromId": "cv_shape",
+      "fromProperty": "out-items",
+      "toId": "cv_rows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "cv_shape",
+      "fromProperty": "out-hasMessages",
+      "toId": "cv_list",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cv_shape",
+      "fromProperty": "out-none",
+      "toId": "cv_empty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cv_in",
+      "fromProperty": "emptyKey",
+      "toId": "cv_t_empty",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "cv_t_empty",
+      "fromProperty": "Translation",
+      "toId": "cv_fill_empty",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "cv_shape",
+      "fromProperty": "out-first",
+      "toId": "cv_fill_empty",
+      "toProperty": "first"
+    },
+    {
+      "fromId": "cv_fill_empty",
+      "fromProperty": "formatted",
+      "toId": "cv_empty",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cv_in",
+      "fromProperty": "titleKey",
+      "toId": "cv_t_title",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "cv_t_title",
+      "fromProperty": "Translation",
+      "toId": "cv_fill_title",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "cv_shape",
+      "fromProperty": "out-first",
+      "toId": "cv_fill_title",
+      "toProperty": "first"
+    },
+    {
+      "fromId": "cv_fill_title",
+      "fromProperty": "formatted",
+      "toId": "cv_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cv_shape",
+      "fromProperty": "out-hasTitle",
+      "toId": "cv_title",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cv_shape",
+      "fromProperty": "out-showPref",
+      "toId": "cv_pref",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cv_shape",
+      "fromProperty": "out-prefKey",
+      "toId": "cv_t_pref",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "cv_t_pref",
+      "fromProperty": "Translation",
+      "toId": "cv_pref_text",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cv_shape",
+      "fromProperty": "out-prefButtonKey",
+      "toId": "cv_t_pref_btn",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "cv_t_pref_btn",
+      "fromProperty": "Translation",
+      "toId": "cv_pref_btn",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "cv_shape",
+      "fromProperty": "out-nextState",
+      "toId": "cv_pref_cf",
+      "toProperty": "in-state"
+    },
+    {
+      "fromId": "cv_pref_btn",
+      "fromProperty": "onClick",
+      "toId": "cv_pref_cf",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "cv_pref_cf",
+      "fromProperty": "done",
+      "toId": "cv_go",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cv_shape",
+      "fromProperty": "out-offCoach",
+      "toId": "cv_off",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cv_t_off",
+      "fromProperty": "Translation",
+      "toId": "cv_fill_off",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "cv_shape",
+      "fromProperty": "out-first",
+      "toId": "cv_fill_off",
+      "toProperty": "first"
+    },
+    {
+      "fromId": "cv_fill_off",
+      "fromProperty": "formatted",
+      "toId": "cv_off",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cv_t_failed",
+      "fromProperty": "Translation",
+      "toId": "cv_failed",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cv_read_l",
+      "fromProperty": "failure",
+      "toId": "cv_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "cv_read_c",
+      "fromProperty": "failure",
+      "toId": "cv_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "cv_read_l",
+      "fromProperty": "done",
+      "toId": "cv_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "cv_read_c",
+      "fromProperty": "done",
+      "toId": "cv_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "cv_fail_sw",
+      "fromProperty": "state",
+      "toId": "cv_failed",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cv_in",
+      "fromProperty": "mode",
+      "toId": "cv_composer",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "cv_in",
+      "fromProperty": "stepId",
+      "toId": "cv_composer",
+      "toProperty": "stepId"
+    },
+    {
+      "fromId": "cv_in",
+      "fromProperty": "learnerId",
+      "toId": "cv_composer",
+      "toProperty": "learnerId"
+    },
+    {
+      "fromId": "cv_shape",
+      "fromProperty": "out-canAttach",
+      "toId": "cv_composer",
+      "toProperty": "canAttach"
+    },
+    {
+      "fromId": "cv_shape",
+      "fromProperty": "out-labelKey",
+      "toId": "cv_composer",
+      "toProperty": "labelKey"
+    },
+    {
+      "fromId": "cv_shape",
+      "fromProperty": "out-first",
+      "toId": "cv_composer",
+      "toProperty": "first"
+    },
+    {
+      "fromId": "cv_composer",
+      "fromProperty": "sent",
+      "toId": "cv_go",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cv_in",
+      "fromProperty": "scoped",
+      "toId": "cv_go",
+      "toProperty": "in-scoped"
+    }
+  ]
+}

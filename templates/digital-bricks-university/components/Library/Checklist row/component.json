@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e3cc6058-ba3b-56a0-85ef-9f9c8acfc694",
+  "name": "Checklist row",
+  "path": "/Library/Checklist row",
+  "type": "visual",
+  "created": "2026-11-07T22:09:39.600Z",
+  "modified": "2026-11-07T22:16:29.338Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One 'what to hand in' item being edited: its words, a Required tick and Remove. Writes the words and the tick onto its own record as they change, so the editor reads every row's current value when it saves."
+}

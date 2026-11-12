@@ -1,0 +1,639 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "538ac351-e5a5-5006-8fc5-45b5c892658a",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "le_root",
+      "type": "Group",
+      "label": "Live session editor",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "le_title",
+        "le_when",
+        "le_hint",
+        "le_meet",
+        "le_rec",
+        "le_sum",
+        "le_sum_hint",
+        "le_msg",
+        "le_actions"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 720,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)"
+      }
+    },
+    {
+      "id": "le_title",
+      "type": "net.noodl.controls.textinput",
+      "label": "Title",
+      "x": 100,
+      "y": 160,
+      "parent": "le_root",
+      "parameters": {
+        "type": "text",
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxLength": 140
+      }
+    },
+    {
+      "id": "le_when",
+      "type": "Group",
+      "label": "Date, time and length",
+      "x": 100,
+      "y": 280,
+      "parent": "le_root",
+      "children": [
+        "le_date",
+        "le_time",
+        "le_dur"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "flex-end",
+        "columnGap": "var(--space-4)",
+        "rowGap": "var(--space-3)"
+      }
+    },
+    {
+      "id": "le_date",
+      "type": "/Date Picker",
+      "label": "Date",
+      "x": 160,
+      "y": 400,
+      "parent": "le_when",
+      "parameters": {
+        "Show Label": true,
+        "Width": {
+          "value": 200,
+          "unit": "px"
+        }
+      }
+    },
+    {
+      "id": "le_time",
+      "type": "net.noodl.controls.options",
+      "label": "Start time",
+      "x": 160,
+      "y": 520,
+      "parent": "le_when",
+      "parameters": {
+        "useLabel": true,
+        "value": "",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 140,
+          "unit": "px"
+        }
+      }
+    },
+    {
+      "id": "le_dur",
+      "type": "net.noodl.controls.textinput",
+      "label": "Length in minutes",
+      "x": 160,
+      "y": 640,
+      "parent": "le_when",
+      "parameters": {
+        "type": "text",
+        "inputMode": "numeric",
+        "useLabel": true,
+        "sizeMode": "explicit",
+        "width": {
+          "value": 160,
+          "unit": "px"
+        }
+      }
+    },
+    {
+      "id": "le_hint",
+      "type": "Text",
+      "label": "Leave the date empty while it is to book",
+      "x": 100,
+      "y": 760,
+      "parent": "le_root",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "le_meet",
+      "type": "net.noodl.controls.textinput",
+      "label": "Meeting link for this session",
+      "x": 100,
+      "y": 880,
+      "parent": "le_root",
+      "parameters": {
+        "type": "url",
+        "inputMode": "url",
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "le_rec",
+      "type": "net.noodl.controls.textinput",
+      "label": "Recording link",
+      "x": 100,
+      "y": 1000,
+      "parent": "le_root",
+      "parameters": {
+        "type": "url",
+        "inputMode": "url",
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "le_sum",
+      "type": "net.noodl.controls.textinput",
+      "label": "Summary the learner sees",
+      "x": 100,
+      "y": 1120,
+      "parent": "le_root",
+      "parameters": {
+        "type": "textArea",
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "metadata": {
+        "comment": "Markdown, like a brief: the learner's pages show it through Shell/Formatted text with HTML off."
+      }
+    },
+    {
+      "id": "le_sum_hint",
+      "type": "Text",
+      "label": "How to format the summary",
+      "x": 100,
+      "y": 1240,
+      "parent": "le_root",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "le_msg",
+      "type": "Text",
+      "label": "Why it was not saved",
+      "x": 100,
+      "y": 1360,
+      "parent": "le_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--attention)"
+      }
+    },
+    {
+      "id": "le_actions",
+      "type": "Group",
+      "label": "Save and Cancel",
+      "x": 100,
+      "y": 1480,
+      "parent": "le_root",
+      "children": [
+        "le_save",
+        "le_cancel"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)"
+      }
+    },
+    {
+      "id": "le_save",
+      "type": "net.noodl.controls.button",
+      "label": "Save",
+      "x": 160,
+      "y": 1600,
+      "parent": "le_actions",
+      "parameters": {
+        "label": ""
+      }
+    },
+    {
+      "id": "le_cancel",
+      "type": "net.noodl.controls.button",
+      "label": "Cancel",
+      "x": 160,
+      "y": 1720,
+      "parent": "le_actions",
+      "parameters": {
+        "label": "",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)"
+      }
+    },
+    {
+      "id": "le_in",
+      "type": "Component Inputs",
+      "label": "The step",
+      "x": 500,
+      "y": 40,
+      "ports": [
+        {
+          "name": "step",
+          "plug": "output",
+          "type": "object"
+        }
+      ]
+    },
+    {
+      "id": "le_out",
+      "type": "Component Outputs",
+      "label": "Saved or closed",
+      "x": 500,
+      "y": 1600,
+      "ports": [
+        {
+          "name": "saved",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "savedTitle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "closed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "le_times",
+      "type": "/Option sets/Session times",
+      "label": "The start times on offer",
+      "x": 500,
+      "y": 160
+    },
+    {
+      "id": "le_open",
+      "type": "JavaScriptFunction",
+      "label": "Open the step: fill every field",
+      "x": 500,
+      "y": 280,
+      "parameters": {
+        "runOnChange-in-step": false,
+        "runOnChange-in-times": false,
+        "functionScript": "/*\n * Runs when the editor appears. A time is shown in the coach's zone (Europe/Paris), the\n * zone saveStep reads it back in, so what is typed is what is stored.\n */\nconst step = Inputs.step && typeof Inputs.step === 'object' ? Inputs.step : {};\nconst get = (m, k) => (m && typeof m.get === 'function' ? m.get(k) : m && m[k]);\nconst times = (Inputs.times || []).map((t) => get(t, 'value')).filter(Boolean);\nlet date = '';\nlet time = '';\nif (step.startsAt) {\n  const d = new Date(step.startsAt);\n  date = d.toLocaleDateString('en-CA', { timeZone: 'Europe/Paris' });\n  time = d.toLocaleTimeString('en-GB', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });\n}\nconst offered = time && !times.includes(time) ? times.concat([time]).sort() : times;\nOutputs.timeItems = offered.map((t) => ({ Label: t, Value: t }));\nOutputs.id = step.id || '';\nOutputs.title = step.title || '';\nOutputs.date = date;\nOutputs.time = time || '10:00';\nOutputs.duration = Number.isInteger(step.durationMin) ? String(step.durationMin) : '60';\nOutputs.meetingLink = step.meetingLink || '';\nOutputs.recordingUrl = step.recordingUrl || '';\nOutputs.summary = step.summary || '';\nOutputs.opened();\n"
+      },
+      "ports": [
+        {
+          "name": "in-step",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-times",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-timeItems",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-date",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-time",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-duration",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-meetingLink",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-recordingUrl",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-summary",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-opened",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "le_gather",
+      "type": "JavaScriptFunction",
+      "label": "Gather the session from the fields",
+      "x": 500,
+      "y": 760,
+      "parameters": {
+        "runOnChange-in-id": false,
+        "runOnChange-in-title": false,
+        "runOnChange-in-date": false,
+        "runOnChange-in-time": false,
+        "runOnChange-in-duration": false,
+        "runOnChange-in-meetingLink": false,
+        "runOnChange-in-recordingUrl": false,
+        "runOnChange-in-summary": false,
+        "functionScript": "// Read on Save only. A date with no time takes 10:00; no date means 'to book'.\n// saveStep checks every field again and answers in a sentence.\nconst date = String(Inputs.date || '').trim();\nOutputs.id = String(Inputs.id || '');\nOutputs.title = String(Inputs.title || '').trim();\nOutputs.startsAt = date ? date + 'T' + (String(Inputs.time || '') || '10:00') : '';\nOutputs.durationMin = String(Inputs.duration || '').trim();\nOutputs.meetingLink = String(Inputs.meetingLink || '').trim();\nOutputs.recordingUrl = String(Inputs.recordingUrl || '').trim();\nOutputs.summary = String(Inputs.summary || '');\nOutputs.go();\n"
+      },
+      "ports": [
+        {
+          "name": "in-id",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-date",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-time",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-duration",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-meetingLink",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-recordingUrl",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-summary",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-startsAt",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-durationMin",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-meetingLink",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-recordingUrl",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-summary",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "le_call",
+      "type": "CloudFunction2",
+      "label": "saveStep (staff only)",
+      "x": 500,
+      "y": 1240,
+      "parameters": {
+        "function": "saveStep"
+      }
+    },
+    {
+      "id": "le_msg_sw",
+      "type": "Switch",
+      "label": "Show why, once there is a why",
+      "x": 500,
+      "y": 1360,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "le_t_title",
+      "type": "Translation",
+      "label": "Title",
+      "x": 800,
+      "y": 160,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.title"
+      }
+    },
+    {
+      "id": "le_t_date",
+      "type": "Translation",
+      "label": "Date",
+      "x": 800,
+      "y": 220,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.date"
+      }
+    },
+    {
+      "id": "le_t_time",
+      "type": "Translation",
+      "label": "Start time",
+      "x": 800,
+      "y": 280,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.time"
+      }
+    },
+    {
+      "id": "le_t_dur",
+      "type": "Translation",
+      "label": "Length in minutes",
+      "x": 800,
+      "y": 340,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.duration"
+      }
+    },
+    {
+      "id": "le_t_hint",
+      "type": "Translation",
+      "label": "To book hint",
+      "x": 800,
+      "y": 400,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.toBookHint"
+      }
+    },
+    {
+      "id": "le_t_meet",
+      "type": "Translation",
+      "label": "Meeting link",
+      "x": 800,
+      "y": 460,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.meetingLink"
+      }
+    },
+    {
+      "id": "le_t_rec",
+      "type": "Translation",
+      "label": "Recording link",
+      "x": 800,
+      "y": 520,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.recording"
+      }
+    },
+    {
+      "id": "le_t_sum",
+      "type": "Translation",
+      "label": "Summary",
+      "x": 800,
+      "y": 580,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.summary"
+      }
+    },
+    {
+      "id": "le_t_sumhint",
+      "type": "Translation",
+      "label": "Summary hint",
+      "x": 800,
+      "y": 640,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.summaryHint"
+      }
+    },
+    {
+      "id": "le_t_save",
+      "type": "Translation",
+      "label": "Save",
+      "x": 800,
+      "y": 700,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.save"
+      }
+    },
+    {
+      "id": "le_t_cancel",
+      "type": "Translation",
+      "label": "Cancel",
+      "x": 800,
+      "y": 760,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.editor.cancel"
+      }
+    }
+  ],
+  "visualRoots": [
+    "le_root"
+  ]
+}

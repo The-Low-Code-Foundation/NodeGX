@@ -1,0 +1,336 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "d6e7f21c-9534-50a7-8444-cc691e6ae022",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "tr_row",
+      "type": "Group",
+      "label": "Row",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "tr_top",
+        "tr_meta",
+        "tr_desc",
+        "tr_actions"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1-5)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border)"
+      }
+    },
+    {
+      "id": "tr_top",
+      "type": "Group",
+      "label": "Title and Archived",
+      "x": 100,
+      "y": 160,
+      "parent": "tr_row",
+      "children": [
+        "tr_title",
+        "tr_arch_box"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-1)"
+      }
+    },
+    {
+      "id": "tr_title",
+      "type": "Text",
+      "label": "Title",
+      "x": 160,
+      "y": 280,
+      "parent": "tr_top",
+      "parameters": {
+        "text": "",
+        "as": "h3",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "tr_arch_box",
+      "type": "Group",
+      "label": "Shown when archived",
+      "x": 160,
+      "y": 400,
+      "parent": "tr_top",
+      "children": [
+        "tr_arch_chip"
+      ],
+      "parameters": {
+        "mounted": false,
+        "sizeMode": "contentSize",
+        "flexDirection": "row"
+      }
+    },
+    {
+      "id": "tr_arch_chip",
+      "type": "/Library/Tag chip",
+      "label": "Archived",
+      "x": 220,
+      "y": 520,
+      "parent": "tr_arch_box"
+    },
+    {
+      "id": "tr_meta",
+      "type": "Text",
+      "label": "Steps, live sessions, days",
+      "x": 100,
+      "y": 640,
+      "parent": "tr_row",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "color": "var(--accent-foreground)"
+      }
+    },
+    {
+      "id": "tr_desc",
+      "type": "Text",
+      "label": "Description",
+      "x": 100,
+      "y": 760,
+      "parent": "tr_row",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "maxWidth": {
+          "value": 720,
+          "unit": "px"
+        }
+      }
+    },
+    {
+      "id": "tr_actions",
+      "type": "Group",
+      "label": "Actions",
+      "x": 100,
+      "y": 880,
+      "parent": "tr_row",
+      "children": [
+        "tr_edit",
+        "tr_archive",
+        "tr_restore"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-1)"
+      }
+    },
+    {
+      "id": "tr_edit",
+      "type": "net.noodl.controls.button",
+      "label": "Edit",
+      "x": 160,
+      "y": 1000,
+      "parent": "tr_actions",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-9)"
+      }
+    },
+    {
+      "id": "tr_archive",
+      "type": "net.noodl.controls.button",
+      "label": "Archive",
+      "x": 160,
+      "y": 1120,
+      "parent": "tr_actions",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-9)"
+      }
+    },
+    {
+      "id": "tr_restore",
+      "type": "net.noodl.controls.button",
+      "label": "Restore",
+      "x": 160,
+      "y": 1240,
+      "parent": "tr_actions",
+      "parameters": {
+        "mounted": false,
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-9)"
+      }
+    },
+    {
+      "id": "tr_in",
+      "type": "Component Inputs",
+      "label": "Row in",
+      "x": 470,
+      "y": 280,
+      "ports": [
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "meta",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "archived",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "id": "tr_out",
+      "type": "Component Outputs",
+      "label": "Row out",
+      "x": 470,
+      "y": 1000,
+      "ports": [
+        {
+          "name": "edit",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "archive",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "tr_not_arch",
+      "type": "Inverter",
+      "label": "Not archived",
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "tr_t_edit",
+      "type": "Translation",
+      "label": "Edit",
+      "x": 770,
+      "y": 1000,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.edit"
+      }
+    },
+    {
+      "id": "tr_t_arch",
+      "type": "Translation",
+      "label": "Archive",
+      "x": 770,
+      "y": 1120,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.archive"
+      }
+    },
+    {
+      "id": "tr_t_restore",
+      "type": "Translation",
+      "label": "Restore",
+      "x": 770,
+      "y": 1240,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.restore"
+      }
+    },
+    {
+      "id": "tr_t_chip",
+      "type": "Translation",
+      "label": "Archived",
+      "x": 770,
+      "y": 520,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.archivedChip"
+      }
+    }
+  ],
+  "visualRoots": [
+    "tr_row"
+  ]
+}

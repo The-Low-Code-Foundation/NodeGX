@@ -1,0 +1,76 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "54776c6c-7879-560d-8e28-2c3e5d90f475",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ms_page",
+      "type": "Page",
+      "label": "Messages",
+      "children": [
+        "ms_shell"
+      ],
+      "parameters": {
+        "urlPath": "messages"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ms_shell",
+      "type": "/Shell/App shell",
+      "label": "Learner shell",
+      "parent": "ms_page",
+      "children": [
+        "ms_head",
+        "ms_conv"
+      ],
+      "parameters": {
+        "coach": false,
+        "current": "messages"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ms_head",
+      "type": "/Shell/Page head",
+      "label": "Head",
+      "parent": "ms_shell",
+      "parameters": {
+        "titleKey": "messages.title",
+        "leadKey": "messages.lead"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "ms_t_tab",
+      "type": "Translation",
+      "label": "The browser tab's title",
+      "x": 500,
+      "y": 40,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "messages.tab"
+      }
+    },
+    {
+      "id": "ms_conv",
+      "type": "/Messages/Conversation",
+      "label": "My conversation with Richard, every message",
+      "parent": "ms_shell",
+      "parameters": {
+        "mode": "learner",
+        "tagged": true,
+        "showEmailPref": true,
+        "emptyKey": "messages.emptyBody"
+      },
+      "x": 160,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "ms_page"
+  ]
+}

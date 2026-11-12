@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "dae4ea23-aa66-57f9-8aa2-98becbd25b4b",
+  "name": "Versions",
+  "path": "/Work/Versions",
+  "type": "visual",
+  "created": "2026-11-09T13:09:19.083Z",
+  "modified": "2026-11-12T08:53:24.852Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Every version of one homework's hand-in, newest first, one Version row each. Works the rows out once: when each was handed in and reviewed (in the reader's zone: the learner's profile, else the browser's; the coach's Europe/Paris), the kind and review chips from their option sets, and which row the coach may review (the newest, while it waits). Used on the learner's homework page and on the coach's plan."
+}

@@ -1,0 +1,1087 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "67205d70-035a-53e6-8928-a11b9b814292",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ce_t_k_doc",
+      "fromProperty": "Translation",
+      "toId": "ce_open",
+      "toProperty": "in-kDocument"
+    },
+    {
+      "fromId": "ce_t_k_int",
+      "fromProperty": "Translation",
+      "toId": "ce_open",
+      "toProperty": "in-kInteractive"
+    },
+    {
+      "fromId": "ce_t_k_prompt",
+      "fromProperty": "Translation",
+      "toId": "ce_open",
+      "toProperty": "in-kPrompt"
+    },
+    {
+      "fromId": "ce_t_k_av",
+      "fromProperty": "Translation",
+      "toId": "ce_open",
+      "toProperty": "in-kAudioVideo"
+    },
+    {
+      "fromId": "ce_t_k_link",
+      "fromProperty": "Translation",
+      "toId": "ce_open",
+      "toProperty": "in-kLink"
+    },
+    {
+      "fromId": "ce_t_k_other",
+      "fromProperty": "Translation",
+      "toId": "ce_open",
+      "toProperty": "in-kOther"
+    },
+    {
+      "fromId": "ce_kinds",
+      "fromProperty": "items",
+      "toId": "ce_open",
+      "toProperty": "in-kinds"
+    },
+    {
+      "fromId": "ce_in-2",
+      "fromProperty": "creation",
+      "toId": "ce_open",
+      "toProperty": "in-creation"
+    },
+    {
+      "fromId": "ce_in-2",
+      "fromProperty": "load",
+      "toId": "ce_open",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-kindItems",
+      "toId": "ce_kind",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-kind",
+      "toId": "ce_kind",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-title",
+      "toId": "ce_name",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-madeWith",
+      "toId": "ce_made",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-description",
+      "toId": "ce_desc",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-url",
+      "toId": "ce_url",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-text",
+      "toId": "ce_textarea",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-usedInClass",
+      "toId": "ce_used",
+      "toProperty": "checked"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-opened",
+      "toId": "ce_name",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-opened",
+      "toId": "ce_made",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-opened",
+      "toId": "ce_desc",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-opened",
+      "toId": "ce_url",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-opened",
+      "toId": "ce_textarea",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-opened",
+      "toId": "ce_files",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-toFile",
+      "toId": "ce_tab_state",
+      "toProperty": "to-file"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-opened",
+      "toId": "ce_busy_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-opened",
+      "toId": "ce_confirm_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-opened",
+      "toId": "ce_refused_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-opened",
+      "toId": "ce_server_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-opened",
+      "toId": "ce_upfail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-opened",
+      "toId": "ce_bad_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ce_t_head-2",
+      "fromProperty": "Translation",
+      "toId": "ce_head-2",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-headKey",
+      "toId": "ce_t_head-2",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-isNew",
+      "toId": "ce_view",
+      "toProperty": "in-isNew"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-fromHandIn",
+      "toId": "ce_view",
+      "toProperty": "in-fromHandIn"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-form",
+      "toId": "ce_view",
+      "toProperty": "in-form"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-canDelete",
+      "toId": "ce_view",
+      "toProperty": "in-canDelete"
+    },
+    {
+      "fromId": "ce_confirm_sw",
+      "fromProperty": "state",
+      "toId": "ce_view",
+      "toProperty": "in-confirming"
+    },
+    {
+      "fromId": "ce_tab_state",
+      "fromProperty": "showFile",
+      "toId": "ce_view",
+      "toProperty": "in-tabFile"
+    },
+    {
+      "fromId": "ce_tab_state",
+      "fromProperty": "showLink",
+      "toId": "ce_view",
+      "toProperty": "in-tabLink"
+    },
+    {
+      "fromId": "ce_tab_state",
+      "fromProperty": "showText",
+      "toId": "ce_view",
+      "toProperty": "in-tabText"
+    },
+    {
+      "fromId": "ce_view",
+      "fromProperty": "out-showTabs",
+      "toId": "ce_tabs",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ce_view",
+      "fromProperty": "out-showFile",
+      "toId": "ce_file",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ce_view",
+      "fromProperty": "out-showLink",
+      "toId": "ce_link",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ce_view",
+      "fromProperty": "out-showText",
+      "toId": "ce_text",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ce_view",
+      "fromProperty": "out-showDelete",
+      "toId": "ce_delete",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-showKept",
+      "toId": "ce_kept",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-keptKey",
+      "toId": "ce_t_kept",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "ce_t_kept",
+      "fromProperty": "Translation",
+      "toId": "ce_fill_kept",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-keptName",
+      "toId": "ce_fill_kept",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "ce_fill_kept",
+      "fromProperty": "formatted",
+      "toId": "ce_kept",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ce_t_tab_file",
+      "fromProperty": "Translation",
+      "toId": "ce_tab_file",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ce_t_tab_link",
+      "fromProperty": "Translation",
+      "toId": "ce_tab_link",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ce_t_tab_text",
+      "fromProperty": "Translation",
+      "toId": "ce_tab_text",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ce_tab_file",
+      "fromProperty": "onClick",
+      "toId": "ce_tab_state",
+      "toProperty": "to-file"
+    },
+    {
+      "fromId": "ce_tab_link",
+      "fromProperty": "onClick",
+      "toId": "ce_tab_state",
+      "toProperty": "to-link"
+    },
+    {
+      "fromId": "ce_tab_text",
+      "fromProperty": "onClick",
+      "toId": "ce_tab_state",
+      "toProperty": "to-text"
+    },
+    {
+      "fromId": "ce_tab_state",
+      "fromProperty": "fileBg",
+      "toId": "ce_tab_file",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "ce_tab_state",
+      "fromProperty": "fileFg",
+      "toId": "ce_tab_file",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "ce_tab_state",
+      "fromProperty": "fileFg",
+      "toId": "ce_tab_file",
+      "toProperty": "iconColor"
+    },
+    {
+      "fromId": "ce_tab_state",
+      "fromProperty": "linkBg",
+      "toId": "ce_tab_link",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "ce_tab_state",
+      "fromProperty": "linkFg",
+      "toId": "ce_tab_link",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "ce_tab_state",
+      "fromProperty": "linkFg",
+      "toId": "ce_tab_link",
+      "toProperty": "iconColor"
+    },
+    {
+      "fromId": "ce_tab_state",
+      "fromProperty": "textBg",
+      "toId": "ce_tab_text",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "ce_tab_state",
+      "fromProperty": "textFg",
+      "toId": "ce_tab_text",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "ce_tab_state",
+      "fromProperty": "textFg",
+      "toId": "ce_tab_text",
+      "toProperty": "iconColor"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-isNew",
+      "toId": "ce_guess",
+      "toProperty": "in-isNew"
+    },
+    {
+      "fromId": "ce_tab_state",
+      "fromProperty": "currentState",
+      "toId": "ce_guess",
+      "toProperty": "in-tab"
+    },
+    {
+      "fromId": "ce_files",
+      "fromProperty": "kindGuess",
+      "toId": "ce_guess",
+      "toProperty": "in-fileKind"
+    },
+    {
+      "fromId": "ce_guess",
+      "fromProperty": "out-kind",
+      "toId": "ce_kind",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "ce_t_drop",
+      "fromProperty": "Translation",
+      "toId": "ce_drop_text",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ce_t_choose",
+      "fromProperty": "Translation",
+      "toId": "ce_choose",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ce_choose",
+      "fromProperty": "onClick",
+      "toId": "ce_picker",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "ce_hk",
+      "fromProperty": "items",
+      "toId": "ce_files",
+      "toProperty": "kinds"
+    },
+    {
+      "fromId": "ce_kinds",
+      "fromProperty": "items",
+      "toId": "ce_files",
+      "toProperty": "creationKinds"
+    },
+    {
+      "fromId": "ce_files",
+      "fromProperty": "accept",
+      "toId": "ce_picker",
+      "toProperty": "acceptedFileTypes"
+    },
+    {
+      "fromId": "ce_picker",
+      "fromProperty": "file",
+      "toId": "ce_files",
+      "toProperty": "picked"
+    },
+    {
+      "fromId": "ce_picker",
+      "fromProperty": "name",
+      "toId": "ce_files",
+      "toProperty": "pickedName"
+    },
+    {
+      "fromId": "ce_picker",
+      "fromProperty": "sizeInBytes",
+      "toId": "ce_files",
+      "toProperty": "pickedSize"
+    },
+    {
+      "fromId": "ce_picker",
+      "fromProperty": "done",
+      "toId": "ce_files",
+      "toProperty": "addPicked"
+    },
+    {
+      "fromId": "ce_drop",
+      "fromProperty": "droppedFiles",
+      "toId": "ce_files",
+      "toProperty": "dropped"
+    },
+    {
+      "fromId": "ce_drop",
+      "fromProperty": "filesDropped",
+      "toId": "ce_files",
+      "toProperty": "addDropped"
+    },
+    {
+      "fromId": "ce_files",
+      "fromProperty": "hasFile",
+      "toId": "ce_chosen",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ce_t_chosen",
+      "fromProperty": "Translation",
+      "toId": "ce_fill_chosen",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "ce_files",
+      "fromProperty": "name",
+      "toId": "ce_fill_chosen",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "ce_files",
+      "fromProperty": "size",
+      "toId": "ce_fill_chosen",
+      "toProperty": "size"
+    },
+    {
+      "fromId": "ce_fill_chosen",
+      "fromProperty": "formatted",
+      "toId": "ce_chosen",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ce_files",
+      "fromProperty": "whyKey",
+      "toId": "ce_t_bad",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "ce_t_bad",
+      "fromProperty": "Translation",
+      "toId": "ce_fill_bad",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "ce_files",
+      "fromProperty": "whyName",
+      "toId": "ce_fill_bad",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "ce_fill_bad",
+      "fromProperty": "formatted",
+      "toId": "ce_bad",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ce_files",
+      "fromProperty": "refused",
+      "toId": "ce_bad_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "ce_files",
+      "fromProperty": "accepted",
+      "toId": "ce_bad_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ce_bad_sw",
+      "fromProperty": "state",
+      "toId": "ce_bad",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ce_t_types",
+      "fromProperty": "Translation",
+      "toId": "ce_types",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ce_t_url",
+      "fromProperty": "Translation",
+      "toId": "ce_url",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ce_t_ph",
+      "fromProperty": "Translation",
+      "toId": "ce_url",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "ce_t_text",
+      "fromProperty": "Translation",
+      "toId": "ce_textarea",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ce_t_name",
+      "fromProperty": "Translation",
+      "toId": "ce_name",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ce_t_kind",
+      "fromProperty": "Translation",
+      "toId": "ce_kind",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ce_t_made",
+      "fromProperty": "Translation",
+      "toId": "ce_made",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ce_t_made_ph",
+      "fromProperty": "Translation",
+      "toId": "ce_made",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "ce_t_desc",
+      "fromProperty": "Translation",
+      "toId": "ce_desc",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ce_t_used",
+      "fromProperty": "Translation",
+      "toId": "ce_used",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ce_t_save",
+      "fromProperty": "Translation",
+      "toId": "ce_save",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ce_t_busy",
+      "fromProperty": "Translation",
+      "toId": "ce_busy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ce_t_cancel",
+      "fromProperty": "Translation",
+      "toId": "ce_cancel",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ce_t_delete",
+      "fromProperty": "Translation",
+      "toId": "ce_delete",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ce_t_confirm",
+      "fromProperty": "Translation",
+      "toId": "ce_confirm_text",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ce_t_yes",
+      "fromProperty": "Translation",
+      "toId": "ce_yes",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ce_t_no",
+      "fromProperty": "Translation",
+      "toId": "ce_no",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ce_t_upfail",
+      "fromProperty": "Translation",
+      "toId": "ce_upfail",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-isNew",
+      "toId": "ce_check",
+      "toProperty": "in-isNew"
+    },
+    {
+      "fromId": "ce_tab_state",
+      "fromProperty": "currentState",
+      "toId": "ce_check",
+      "toProperty": "in-tab"
+    },
+    {
+      "fromId": "ce_files",
+      "fromProperty": "hasFile",
+      "toId": "ce_check",
+      "toProperty": "in-hasFile"
+    },
+    {
+      "fromId": "ce_url",
+      "fromProperty": "onTextChanged",
+      "toId": "ce_check",
+      "toProperty": "in-url"
+    },
+    {
+      "fromId": "ce_textarea",
+      "fromProperty": "onTextChanged",
+      "toId": "ce_check",
+      "toProperty": "in-text"
+    },
+    {
+      "fromId": "ce_name",
+      "fromProperty": "onTextChanged",
+      "toId": "ce_check",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-form",
+      "toId": "ce_check",
+      "toProperty": "in-form"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-fromHandIn",
+      "toId": "ce_check",
+      "toProperty": "in-fromHandIn"
+    },
+    {
+      "fromId": "ce_save",
+      "fromProperty": "onClick",
+      "toId": "ce_check",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ce_save",
+      "fromProperty": "onClick",
+      "toId": "ce_busy_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "ce_save",
+      "fromProperty": "onClick",
+      "toId": "ce_refused_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ce_save",
+      "fromProperty": "onClick",
+      "toId": "ce_server_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ce_save",
+      "fromProperty": "onClick",
+      "toId": "ce_upfail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ce_save",
+      "fromProperty": "onClick",
+      "toId": "ce_bad_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ce_check",
+      "fromProperty": "out-refuse",
+      "toId": "ce_busy_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ce_check",
+      "fromProperty": "out-refuse",
+      "toId": "ce_refused_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "ce_check",
+      "fromProperty": "out-whyKey",
+      "toId": "ce_t_refused",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "ce_t_refused",
+      "fromProperty": "Translation",
+      "toId": "ce_refused",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ce_refused_sw",
+      "fromProperty": "state",
+      "toId": "ce_refused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ce_check",
+      "fromProperty": "out-upload",
+      "toId": "ce_files",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "ce_files",
+      "fromProperty": "current",
+      "toId": "ce_upload",
+      "toProperty": "file"
+    },
+    {
+      "fromId": "ce_files",
+      "fromProperty": "uploadNow",
+      "toId": "ce_upload",
+      "toProperty": "upload"
+    },
+    {
+      "fromId": "ce_upload",
+      "fromProperty": "cloudFile",
+      "toId": "ce_files",
+      "toProperty": "cloudFile"
+    },
+    {
+      "fromId": "ce_upload",
+      "fromProperty": "done",
+      "toId": "ce_files",
+      "toProperty": "uploaded"
+    },
+    {
+      "fromId": "ce_upload",
+      "fromProperty": "failure",
+      "toId": "ce_busy_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ce_upload",
+      "fromProperty": "failure",
+      "toId": "ce_upfail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "ce_upfail_sw",
+      "fromProperty": "state",
+      "toId": "ce_upfail",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ce_files",
+      "fromProperty": "storedName",
+      "toId": "ce_send",
+      "toProperty": "in-storedName"
+    },
+    {
+      "fromId": "ce_files",
+      "fromProperty": "stored",
+      "toId": "ce_send",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ce_check",
+      "fromProperty": "out-send",
+      "toId": "ce_send",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-id",
+      "toId": "ce_send",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-isNew",
+      "toId": "ce_send",
+      "toProperty": "in-isNew"
+    },
+    {
+      "fromId": "ce_tab_state",
+      "fromProperty": "currentState",
+      "toId": "ce_send",
+      "toProperty": "in-tab"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-form",
+      "toId": "ce_send",
+      "toProperty": "in-form"
+    },
+    {
+      "fromId": "ce_url",
+      "fromProperty": "onTextChanged",
+      "toId": "ce_send",
+      "toProperty": "in-url"
+    },
+    {
+      "fromId": "ce_textarea",
+      "fromProperty": "onTextChanged",
+      "toId": "ce_send",
+      "toProperty": "in-text"
+    },
+    {
+      "fromId": "ce_send",
+      "fromProperty": "out-id",
+      "toId": "ce_cf",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "ce_send",
+      "fromProperty": "out-form",
+      "toId": "ce_cf",
+      "toProperty": "in-form"
+    },
+    {
+      "fromId": "ce_send",
+      "fromProperty": "out-file",
+      "toId": "ce_cf",
+      "toProperty": "in-file"
+    },
+    {
+      "fromId": "ce_send",
+      "fromProperty": "out-url",
+      "toId": "ce_cf",
+      "toProperty": "in-url"
+    },
+    {
+      "fromId": "ce_send",
+      "fromProperty": "out-text",
+      "toId": "ce_cf",
+      "toProperty": "in-text"
+    },
+    {
+      "fromId": "ce_name",
+      "fromProperty": "onTextChanged",
+      "toId": "ce_cf",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "ce_kind",
+      "fromProperty": "value",
+      "toId": "ce_cf",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "ce_made",
+      "fromProperty": "onTextChanged",
+      "toId": "ce_cf",
+      "toProperty": "in-madeWith"
+    },
+    {
+      "fromId": "ce_desc",
+      "fromProperty": "onTextChanged",
+      "toId": "ce_cf",
+      "toProperty": "in-description"
+    },
+    {
+      "fromId": "ce_used",
+      "fromProperty": "checked",
+      "toId": "ce_cf",
+      "toProperty": "in-usedInClass"
+    },
+    {
+      "fromId": "ce_send",
+      "fromProperty": "out-go",
+      "toId": "ce_cf",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ce_busy_sw",
+      "fromProperty": "state",
+      "toId": "ce_not_busy",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "ce_not_busy",
+      "fromProperty": "result",
+      "toId": "ce_save",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "ce_busy_sw",
+      "fromProperty": "state",
+      "toId": "ce_busy",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ce_cf",
+      "fromProperty": "done",
+      "toId": "ce_busy_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ce_cf",
+      "fromProperty": "failure",
+      "toId": "ce_busy_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ce_cf",
+      "fromProperty": "failure",
+      "toId": "ce_server_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "ce_cf",
+      "fromProperty": "error",
+      "toId": "ce_server",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ce_server_sw",
+      "fromProperty": "state",
+      "toId": "ce_server",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ce_cf",
+      "fromProperty": "done",
+      "toId": "ce_out",
+      "toProperty": "saved"
+    },
+    {
+      "fromId": "ce_name",
+      "fromProperty": "onTextChanged",
+      "toId": "ce_out",
+      "toProperty": "savedTitle"
+    },
+    {
+      "fromId": "ce_cancel",
+      "fromProperty": "onClick",
+      "toId": "ce_out",
+      "toProperty": "closed"
+    },
+    {
+      "fromId": "ce_delete",
+      "fromProperty": "onClick",
+      "toId": "ce_confirm_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "ce_no",
+      "fromProperty": "onClick",
+      "toId": "ce_confirm_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-id",
+      "toId": "ce_del_cf",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "ce_yes",
+      "fromProperty": "onClick",
+      "toId": "ce_del_cf",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ce_yes",
+      "fromProperty": "onClick",
+      "toId": "ce_server_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ce_confirm_sw",
+      "fromProperty": "state",
+      "toId": "ce_confirm",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ce_del_cf",
+      "fromProperty": "done",
+      "toId": "ce_confirm_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ce_del_cf",
+      "fromProperty": "done",
+      "toId": "ce_out",
+      "toProperty": "deleted"
+    },
+    {
+      "fromId": "ce_open",
+      "fromProperty": "out-title",
+      "toId": "ce_out",
+      "toProperty": "deletedTitle"
+    },
+    {
+      "fromId": "ce_del_cf",
+      "fromProperty": "failure",
+      "toId": "ce_server_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "ce_del_cf",
+      "fromProperty": "error",
+      "toId": "ce_server",
+      "toProperty": "text"
+    }
+  ]
+}

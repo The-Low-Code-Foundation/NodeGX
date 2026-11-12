@@ -1,0 +1,592 @@
+{
+ "_about": [
+  "The tables of SCOPE 'Data model' (DBU-01). tools/setup-backend.mjs applies `tables` through POST /admin/schema/apply; a NodeGX backend keeps its schema in its data directory, not in the project, so this file is the source of truth.",
+  "Every relation is a plain String holding the other row's objectId (`learner` is a _User objectId). Not a Pointer: a cloud function cannot filter on one (backend doctrine rule 4).",
+  "Domain times (startsAt, dueAt, reviewedAt, readAt…) are ISO-8601 strings. A row's own time (when a message was sent, when a version was handed in) is the backend's createdAt.",
+  "`enums` is the one owner of every fixed value: check-seed validates against it and the functions copy it. The backend does not enforce it.",
+  "_User is not declared: it is built in and takes the extra fields (name, organisation, jobTitle, timezone, lastSeenAt) without a schema. Who is the coach is the `staff` role, never a field.",
+  "Doorbell is the one collection a client may read (find, ACL-filtered): docs/DECISIONS.md 2026-11-07 'The doorbell'.",
+  "LibraryItem (DBU-03): handInChecklist is [{text, required}] (an older plain string reads as required); resources are [{label, url}] or [{label, file, fileName}] where file is a stored name the coach uploaded privately; archived hides an item from the plan pickers. A homework Step copies these fields in the same shapes.",
+  "PlanTemplate (DBU-04): items are [{kind, title, durationMin (live), libraryItem (homework), dayOffset}], a plan's shape and never a learner's data; archived hides a template from the plan builder and Add learner.",
+  "Submission (DBU-06, several files 2026-11-12): a file version's files are [{file, fileName}], 1 to 5 of them, file being the stored name of the learner's private upload; Richard reviews the version as one.",
+  "Message mail (DBU-07): a new message is saved with `mailPending: true`; shared/Message mail sends it (at once, or held up to 5 minutes and grouped with the next ones), then sets `mailPending: false` and `mailedAt`. Seeded messages are already mailed.",
+  "Setting (DBU-07): one row per key, written only by staff functions. `coachEmail` is where learner messages are mailed (default coach@example.com when there is no row: set the real one in Settings). `coachName` is the name learners see (DBU-11), read by the public coachName function.",
+  "Inbox (DBU-08): a question ends when the coach replies, or marks the learner's newest message `settledAt` (\"No reply needed\"); reading it does not. QuietFlag is one learner gone quiet, raised, updated and closed only by the daily `morningRound`: `reasons` are {kind: 'inactive', lastActiveAt} and {kind: 'overdue', stepId, title, dueAt}; `snoozedUntil` hides it (Snooze a week, or a nudge sent, `nudgedAt`); `closedAt` set means over. Setting `digestSentAt` is when the last morning digest went."
+ ],
+ "enums": {
+  "planStatus": [
+   "active",
+   "paused",
+   "finished"
+  ],
+  "stepKind": [
+   "live",
+   "homework",
+   "checkin"
+  ],
+  "stepStatus": {
+   "live": [
+    "to_book",
+    "booked",
+    "done",
+    "missed"
+   ],
+   "homework": [
+    "not_started",
+    "handed_in",
+    "changes_asked",
+    "approved"
+   ],
+   "checkin": [
+    "scheduled",
+    "sent",
+    "done"
+   ]
+  },
+  "submissionKind": [
+   "file",
+   "link",
+   "text"
+  ],
+  "review": [
+   "pending",
+   "approved",
+   "changes"
+  ],
+  "creationKind": [
+   "document",
+   "interactive",
+   "prompt",
+   "audio_video",
+   "link",
+   "other"
+  ],
+  "doorbellTopic": [
+   "plan",
+   "submission",
+   "message",
+   "creation",
+   "inbox"
+  ],
+  "quietReason": [
+   "inactive",
+   "overdue"
+  ]
+ },
+ "tables": [
+  {
+   "name": "Plan",
+   "columns": [
+    {
+     "name": "learner",
+     "type": "String"
+    },
+    {
+     "name": "title",
+     "type": "String"
+    },
+    {
+     "name": "status",
+     "type": "String"
+    },
+    {
+     "name": "meetingLink",
+     "type": "String"
+    },
+    {
+     "name": "bookingLink",
+     "type": "String"
+    },
+    {
+     "name": "startedOn",
+     "type": "String"
+    },
+    {
+     "name": "fromTemplate",
+     "type": "String"
+    }
+   ],
+   "indexes": [
+    {
+     "fields": [
+      "learner",
+      "status"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Step",
+   "columns": [
+    {
+     "name": "plan",
+     "type": "String"
+    },
+    {
+     "name": "learner",
+     "type": "String"
+    },
+    {
+     "name": "position",
+     "type": "Number"
+    },
+    {
+     "name": "kind",
+     "type": "String"
+    },
+    {
+     "name": "title",
+     "type": "String"
+    },
+    {
+     "name": "shared",
+     "type": "Boolean"
+    },
+    {
+     "name": "status",
+     "type": "String"
+    },
+    {
+     "name": "startsAt",
+     "type": "String"
+    },
+    {
+     "name": "durationMin",
+     "type": "Number"
+    },
+    {
+     "name": "meetingLink",
+     "type": "String"
+    },
+    {
+     "name": "prepNote",
+     "type": "String"
+    },
+    {
+     "name": "attended",
+     "type": "Boolean"
+    },
+    {
+     "name": "recordingUrl",
+     "type": "String"
+    },
+    {
+     "name": "summary",
+     "type": "String"
+    },
+    {
+     "name": "dueAt",
+     "type": "String"
+    },
+    {
+     "name": "brief",
+     "type": "String"
+    },
+    {
+     "name": "handInChecklist",
+     "type": "Array"
+    },
+    {
+     "name": "resources",
+     "type": "Array"
+    },
+    {
+     "name": "fromLibraryItem",
+     "type": "String"
+    },
+    {
+     "name": "form",
+     "type": "Object"
+    },
+    {
+     "name": "sendsAt",
+     "type": "String"
+    },
+    {
+     "name": "sendAfter",
+     "type": "Object"
+    },
+    {
+     "name": "sentAt",
+     "type": "String"
+    }
+   ],
+   "indexes": [
+    {
+     "fields": [
+      "plan",
+      "position"
+     ],
+     "unique": true
+    },
+    {
+     "fields": [
+      "learner"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Submission",
+   "columns": [
+    {
+     "name": "step",
+     "type": "String"
+    },
+    {
+     "name": "learner",
+     "type": "String"
+    },
+    {
+     "name": "version",
+     "type": "Number"
+    },
+    {
+     "name": "kind",
+     "type": "String"
+    },
+    {
+     "name": "files",
+     "type": "Array"
+    },
+    {
+     "name": "url",
+     "type": "String"
+    },
+    {
+     "name": "text",
+     "type": "String"
+    },
+    {
+     "name": "note",
+     "type": "String"
+    },
+    {
+     "name": "review",
+     "type": "String"
+    },
+    {
+     "name": "reviewNote",
+     "type": "String"
+    },
+    {
+     "name": "reviewedAt",
+     "type": "String"
+    }
+   ],
+   "indexes": [
+    {
+     "fields": [
+      "step",
+      "version"
+     ],
+     "unique": true
+    },
+    {
+     "fields": [
+      "learner"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Message",
+   "columns": [
+    {
+     "name": "learner",
+     "type": "String"
+    },
+    {
+     "name": "step",
+     "type": "String"
+    },
+    {
+     "name": "author",
+     "type": "String"
+    },
+    {
+     "name": "body",
+     "type": "String"
+    },
+    {
+     "name": "attachments",
+     "type": "Array"
+    },
+    {
+     "name": "readAt",
+     "type": "String"
+    },
+    {
+     "name": "mailPending",
+     "type": "Boolean"
+    },
+    {
+     "name": "mailedAt",
+     "type": "String"
+    },
+    {
+     "name": "settledAt",
+     "type": "String"
+    }
+   ],
+   "indexes": [
+    {
+     "fields": [
+      "learner"
+     ]
+    },
+    {
+     "fields": [
+      "mailPending"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Creation",
+   "columns": [
+    {
+     "name": "learner",
+     "type": "String"
+    },
+    {
+     "name": "title",
+     "type": "String"
+    },
+    {
+     "name": "kind",
+     "type": "String"
+    },
+    {
+     "name": "file",
+     "type": "String"
+    },
+    {
+     "name": "fileName",
+     "type": "String"
+    },
+    {
+     "name": "url",
+     "type": "String"
+    },
+    {
+     "name": "text",
+     "type": "String"
+    },
+    {
+     "name": "madeWith",
+     "type": "String"
+    },
+    {
+     "name": "description",
+     "type": "String"
+    },
+    {
+     "name": "fromStep",
+     "type": "String"
+    },
+    {
+     "name": "submission",
+     "type": "String"
+    },
+    {
+     "name": "usedInClass",
+     "type": "Boolean"
+    }
+   ],
+   "indexes": [
+    {
+     "fields": [
+      "learner"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "LibraryItem",
+   "columns": [
+    {
+     "name": "title",
+     "type": "String"
+    },
+    {
+     "name": "brief",
+     "type": "String"
+    },
+    {
+     "name": "handInChecklist",
+     "type": "Array"
+    },
+    {
+     "name": "resources",
+     "type": "Array"
+    },
+    {
+     "name": "tags",
+     "type": "Array"
+    },
+    {
+     "name": "estimatedMinutes",
+     "type": "Number"
+    },
+    {
+     "name": "archived",
+     "type": "Boolean"
+    }
+   ],
+   "indexes": []
+  },
+  {
+   "name": "PlanTemplate",
+   "columns": [
+    {
+     "name": "title",
+     "type": "String"
+    },
+    {
+     "name": "description",
+     "type": "String"
+    },
+    {
+     "name": "items",
+     "type": "Array"
+    },
+    {
+     "name": "archived",
+     "type": "Boolean"
+    }
+   ],
+   "indexes": []
+  },
+  {
+   "name": "CheckinResponse",
+   "columns": [
+    {
+     "name": "step",
+     "type": "String"
+    },
+    {
+     "name": "learner",
+     "type": "String"
+    },
+    {
+     "name": "answers",
+     "type": "Object"
+    },
+    {
+     "name": "form",
+     "type": "Object"
+    },
+    {
+     "name": "seenAt",
+     "type": "String"
+    }
+   ],
+   "indexes": [
+    {
+     "fields": [
+      "step"
+     ],
+     "unique": true
+    }
+   ]
+  },
+  {
+   "name": "CoachNote",
+   "columns": [
+    {
+     "name": "learner",
+     "type": "String"
+    },
+    {
+     "name": "body",
+     "type": "String"
+    }
+   ],
+   "indexes": [
+    {
+     "fields": [
+      "learner"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Doorbell",
+   "columns": [
+    {
+     "name": "learner",
+     "type": "String"
+    },
+    {
+     "name": "topic",
+     "type": "String"
+    }
+   ],
+   "indexes": [
+    {
+     "fields": [
+      "learner"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Setting",
+   "columns": [
+    {
+     "name": "key",
+     "type": "String"
+    },
+    {
+     "name": "value",
+     "type": "String"
+    }
+   ],
+   "indexes": [
+    {
+     "fields": [
+      "key"
+     ],
+     "unique": true
+    }
+   ]
+  },
+  {
+   "name": "QuietFlag",
+   "columns": [
+    {
+     "name": "learner",
+     "type": "String"
+    },
+    {
+     "name": "reasons",
+     "type": "Array"
+    },
+    {
+     "name": "raisedAt",
+     "type": "String"
+    },
+    {
+     "name": "snoozedUntil",
+     "type": "String"
+    },
+    {
+     "name": "nudgedAt",
+     "type": "String"
+    },
+    {
+     "name": "closedAt",
+     "type": "String"
+    }
+   ],
+   "indexes": [
+    {
+     "fields": [
+      "learner"
+     ]
+    }
+   ]
+  }
+ ]
+}

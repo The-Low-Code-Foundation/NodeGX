@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "6ef85a2d-a40a-5394-8850-9d87d5b74ccb",
+  "name": "My creations",
+  "path": "/Pages/My creations",
+  "type": "page",
+  "created": "2026-11-07T20:28:01.098Z",
+  "modified": "2026-11-12T15:00:13.960Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The learner's portfolio: empty until DBU-09."
+}

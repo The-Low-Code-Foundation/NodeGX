@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b4539501-93fe-5c1e-8bb2-7d0b0c592792",
+  "name": "shareSteps",
+  "path": "/#__cloud__/shareSteps",
+  "type": "cloud",
+  "created": "2026-11-09T10:27:53.380Z",
+  "modified": "2026-11-12T14:29:50.324Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach shares steps with the learner, or takes them back: named steps, or every draft that is ready. A homework is ready when it has a brief and a due date; a check-in when it has a send date (security: role:staff)."
+}

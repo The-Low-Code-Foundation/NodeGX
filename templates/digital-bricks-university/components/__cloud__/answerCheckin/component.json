@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "fa0b25ba-f0ab-5c24-8b14-c8027f2cec0a",
+  "name": "answerCheckin",
+  "path": "/#__cloud__/answerCheckin",
+  "type": "cloud",
+  "created": "2026-11-12T14:32:57.056Z",
+  "modified": "2026-11-12T14:32:57.056Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A learner sends her answers to a check-in that has gone out (DBU-10). Checked against the step's own copy of the form (types, required, conditions); saved once as a CheckinResponse, and the step is done (security: authenticated)."
+}

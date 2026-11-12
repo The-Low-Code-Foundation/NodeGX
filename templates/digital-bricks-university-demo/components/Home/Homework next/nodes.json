@@ -1,0 +1,343 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "4c5aa248-0310-52b9-810c-8da98b997ae8",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hn_root",
+      "type": "Group",
+      "label": "Homework next",
+      "children": [
+        "hn_card",
+        "hn_none"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "hn_card",
+      "type": "Group",
+      "label": "The homework owed",
+      "parent": "hn_root",
+      "children": [
+        "hn_head",
+        "hn_title",
+        "hn_body",
+        "hn_open"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2-5)",
+        "backgroundColor": "var(--homework-bg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--homework-border)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "dataAttributes": "data-testid",
+        "data-testid": "home-homework-next"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "hn_head",
+      "type": "Group",
+      "label": "Which homework, and when it is due",
+      "parent": "hn_card",
+      "children": [
+        "hn_icon",
+        "hn_head_text"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "hn_icon",
+      "type": "net.noodl.visual.icon",
+      "label": "Homework icon",
+      "parent": "hn_head",
+      "parameters": {
+        "iconSize": 18,
+        "iconColor": "var(--homework-fg)",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-pencil",
+          "codeAsClass": true
+        }
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "hn_head_text",
+      "type": "Text",
+      "label": "Homework 2 · due Tue 10 Nov",
+      "parent": "hn_head",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--homework-fg)"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "hn_title",
+      "type": "Text",
+      "label": "Title",
+      "parent": "hn_card",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "hn_body",
+      "type": "Text",
+      "label": "Where it stands",
+      "parent": "hn_card",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "hn_open",
+      "type": "net.noodl.controls.button",
+      "label": "Open homework",
+      "parent": "hn_card",
+      "parameters": {
+        "label": "",
+        "marginTop": "var(--space-1)"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "hn_none",
+      "type": "Group",
+      "label": "Nothing owed",
+      "parent": "hn_root",
+      "children": [
+        "hn_none_title",
+        "hn_none_body"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1-5)",
+        "backgroundColor": "var(--background)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "hn_none_title",
+      "type": "Text",
+      "label": "Nothing to hand in",
+      "parent": "hn_none",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "hn_none_body",
+      "type": "Text",
+      "label": "When the next one appears",
+      "parent": "hn_none",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "hn_in",
+      "type": "Component Inputs",
+      "label": "The homework owed",
+      "ports": [
+        {
+          "name": "shown",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "none",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "headKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "n",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "date",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "bodyKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "stepId",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 160
+    },
+    {
+      "id": "hn_t_head",
+      "type": "Translation",
+      "label": "Homework {n} · due {date}",
+      "parameters": {
+        "Namespace": "pages"
+      },
+      "x": 470,
+      "y": 1360
+    },
+    {
+      "id": "hn_fill",
+      "type": "String Format",
+      "label": "Number and due date into the head",
+      "parameters": {
+        "format": "{n} {date}"
+      },
+      "metadata": {
+        "comment": "The format arrives from the Translation; this default only declares the {n} and {date} inputs."
+      },
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "hn_t_body",
+      "type": "Translation",
+      "label": "Where it stands, in words",
+      "parameters": {
+        "Namespace": "pages"
+      },
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "hn_t_open",
+      "type": "Translation",
+      "label": "Open homework",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.openHomework"
+      },
+      "x": 470,
+      "y": 880
+    },
+    {
+      "id": "hn_t_none_title",
+      "type": "Translation",
+      "label": "Nothing to hand in",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.hwNoneTitle"
+      },
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "hn_t_none_body",
+      "type": "Translation",
+      "label": "When the next one appears",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "home.hwNoneBody"
+      },
+      "x": 470,
+      "y": 1240
+    },
+    {
+      "id": "hn_go",
+      "type": "RouterNavigate",
+      "label": "→ This homework",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Homework"
+      },
+      "x": 470,
+      "y": 1000
+    }
+  ],
+  "visualRoots": [
+    "hn_root"
+  ]
+}

@@ -1,0 +1,333 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "38f8299b-c039-5229-8b3a-5502b19da2fe",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "al_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach adds a learner",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "name,email,organisation,templateId",
+        "allowNoAuth": false,
+        "ptype-name": "string",
+        "preq-name": true,
+        "ptype-email": "string",
+        "preq-email": true,
+        "ptype-organisation": "string",
+        "preq-organisation": false,
+        "ptype-templateId": "string",
+        "preq-templateId": false
+      },
+      "metadata": {
+        "comment": "The gate is role:staff in nodegx.security.json. This function creates accounts, so it must never answer anyone else (backend doctrine 'Auth at the boundary')."
+      }
+    },
+    {
+      "id": "al_check",
+      "type": "JavaScriptFunction",
+      "label": "Can we add this person? Checked before anything is written",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "runOnChange-in-name": false,
+        "runOnChange-in-email": false,
+        "runOnChange-in-organisation": false,
+        "functionScript": "/*\n * Checked BEFORE anything is written, so a mistyped address creates no account.\n * The address is the identity: trimmed and lower-cased, because the sign-in form\n * finds the account by the address typed into it, and two spellings would be two\n * people. It is the account's username as well as its email (Create User keys on\n * the username), so a second press with the same address finds the account.\n */\nconst email = String(Inputs.email || '').trim().toLowerCase();\nconst name = String(Inputs.name || '').trim().replace(/\\s+/g, ' ');\nconst organisation = String(Inputs.organisation || '').trim();\nconst looksLikeEmail = email.length <= 254 && email.split('@').length === 2 && email.split('@')[1].includes('.') && !email.includes(' ');\nif (!name) {\n  Outputs.why = 'Give their name, as they would like you to use it.';\n  Outputs.refuse();\n} else if (!looksLikeEmail) {\n  Outputs.why = 'That does not look like an email address. Check it and try again.';\n  Outputs.refuse();\n} else {\n  Outputs.email = email;\n  Outputs.name = name;\n  Outputs.organisation = organisation;\n  Outputs.go();\n}\n"
+      },
+      "ports": [
+        {
+          "name": "in-name",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-email",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-organisation",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-email",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-name",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-organisation",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-why",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "al_account",
+      "type": "noodl.cloud.createuser",
+      "label": "The account: found, never made twice",
+      "x": 40,
+      "y": 280,
+      "parameters": {
+        "properties": "name,organisation,timezone",
+        "prop-timezone": "Europe/Paris",
+        "treatUnchangedAs": "unchanged"
+      },
+      "metadata": {
+        "comment": "No password: people sign in by an emailed link. 'Already exists' answers Unchanged with the existing userId, which is what makes a second press safe. Timezone starts as the coach's; DBU-05 lets the learner's be changed."
+      }
+    },
+    {
+      "id": "al_roles",
+      "type": "noodl.cloud.getuserroles",
+      "label": "Is that account a coach?",
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "al_decide",
+      "type": "JavaScriptFunction",
+      "label": "Refuse a coach's address",
+      "x": 40,
+      "y": 520,
+      "parameters": {
+        "runOnChange-in-roles": false,
+        "functionScript": "// A coach's account is not a learner: adding it would put a coach on their own roster.\n// Create User never makes a staff account, so a staff address always arrives here as an\n// EXISTING account, and nothing has been written.\nconst roles = Array.isArray(Inputs.roles) ? Inputs.roles.map((r) => (r && r.name) || r) : [];\nif (roles.includes('staff')) {\n  Outputs.why = 'That address belongs to a coach on this site, so it cannot be added as a learner.';\n  Outputs.refuse();\n} else {\n  Outputs.go();\n}\n"
+      },
+      "ports": [
+        {
+          "name": "in-roles",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-why",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "al_role",
+      "type": "noodl.cloud.addusertorole",
+      "label": "Make them a learner",
+      "x": 40,
+      "y": 640,
+      "parameters": {
+        "role": "learner",
+        "createRole": false,
+        "treatUnchangedAs": "done"
+      },
+      "metadata": {
+        "comment": "Create Role If Missing is off: the learner role is made by setup-backend, and a typo here must fail rather than invent a role no rule names."
+      }
+    },
+    {
+      "id": "al_res",
+      "type": "noodl.cloud.response",
+      "label": "Added, or already there",
+      "x": 40,
+      "y": 900,
+      "parameters": {
+        "params": "learnerId,created,mailed"
+      }
+    },
+    {
+      "id": "al_deny",
+      "type": "noodl.cloud.response",
+      "label": "A refusal the coach can act on",
+      "x": 300,
+      "y": 900,
+      "parameters": {
+        "status": "failure"
+      }
+    },
+    {
+      "id": "al_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "x": 560,
+      "y": 900,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "The learner could not be added. Try again; nothing is added twice."
+      }
+    },
+    {
+      "id": "al_plan",
+      "type": "JavaScriptFunction",
+      "label": "A plan, only if none yet",
+      "x": 40,
+      "y": 960,
+      "parameters": {
+        "runOnChange-in-userId": false,
+        "runOnChange-in-name": false,
+        "runOnChange-in-templateId": false,
+        "functionScript": "/*\n * IDEMPOTENT, IN THIS ORDER, so pressing again heals a half-finished add:\n *   1. the account and its role (before this node)\n *   2. a plan: only if the learner has none. Its steps come from the template through\n *      shared/Steps from template (the same helper the plan builder uses), as DRAFTS:\n *      learners never see an unshared step, so they land on \"Richard is preparing your\n *      programme\" until he shares one.\n *   3. the welcome email: only when this press made the plan, so a second press\n *      never mails twice.\n * The template is checked BEFORE the plan is made, so a missing one writes nothing.\n */\n(async () => {\n  try {\n    const R = Noodl.Records;\n    const q = (c, where) => R.query(c, where, { limit: 2, plain: true });\n    const userId = String(Inputs.userId || '');\n    if (!userId) throw new Error('no account');\n    Outputs.learnerId = userId;\n\n    const plans = await q('Plan', { learner: { equalTo: userId } });\n    if (plans.length) {\n      Outputs.created = false;\n      Outputs.mailed = false;\n      Outputs.existing();\n      return;\n    }\n\n    let template = null;\n    const templateId = String(Inputs.templateId || '');\n    if (templateId) {\n      const found = await q('PlanTemplate', { objectId: { equalTo: templateId } });\n      if (found.length !== 1) {\n        Outputs.why = 'That plan template no longer exists. Choose another, or start with an empty plan.';\n        Outputs.refuse();\n        return;\n      }\n      template = found[0];\n    }\n\n    const firstName = String(Inputs.name || '').split(' ')[0];\n    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Paris' });\n    const plan = await R.create('Plan', {\n      learner: userId,\n      title: template ? template.title : firstName + \"'s programme\",\n      status: 'active',\n      startedOn: today,\n      fromTemplate: template ? template.objectId : null\n    }, { plain: true });\n    const planId = plan.objectId || plan.id;\n\n    if (template) Outputs.job = { planId, learnerId: userId, templateId: template.objectId };\n    else Outputs.mail();\n  } catch (e) {\n    console.error('[dbu:addLearner plan]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-name",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-templateId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-learnerId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-created",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-mailed",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-why",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-job",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "out-existing",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-mail",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "al_steps",
+      "type": "/#__cloud__/shared/Steps from template",
+      "label": "The template's steps, as drafts",
+      "x": 40,
+      "y": 1080
+    },
+    {
+      "id": "al_mail",
+      "type": "JavaScriptFunction",
+      "label": "The welcome email",
+      "x": 40,
+      "y": 1200,
+      "parameters": {
+        "runOnChange-in-userId": false,
+        "runOnChange-in-email": false,
+        "runOnChange-in-name": false,
+        "runOnChange-in-callerId": false,
+        "functionScript": "// Only reached when this press made the plan. The link opens the sign-in page with the\n// address filled in: a magic link lasts 15 minutes, and a welcome email is often read the next day.\n(async () => {\n  try {\n    const q = (c, where) => Noodl.Records.query(c, where, { limit: 2, plain: true });\n    const email = String(Inputs.email || '');\n    const firstName = String(Inputs.name || '').split(' ')[0];\n    const callers = Inputs.callerId ? await q('_User', { objectId: { equalTo: String(Inputs.callerId) } }) : [];\n    const coach = (callers[0] && callers[0].name) || 'Your coach';\n    const coachFirst = coach.split(' ')[0];\n    const secret = globalThis._noodl_get_secret ? globalThis._noodl_get_secret('appUrl') : null;\n    const appUrl = secret && secret.found ? String(secret.value).replace(/\\/$/, '') : '';\n    let mailed = false;\n    if (appUrl && globalThis._noodl_send_email) {\n      const link = appUrl + '/sign-in?email=' + encodeURIComponent(email);\n      const text = [\n        'Hello ' + firstName + ',',\n        '',\n        \"I'm \" + coach + \", and I'll be your coach. I've added you to Digital Bricks University, where your coaching programme lives: our live sessions, your homework, and a place to ask me anything between sessions.\",\n        '',\n        \"What happens next: I'm preparing your programme now. When it's ready, your home page shows your first session and your first piece of homework.\",\n        '',\n        'To sign in, open this link and press \"Email me a sign-in link\". There is no password to remember: each time, we email you a link that signs you in.',\n        '',\n        link,\n        '',\n        'See you soon,',\n        coachFirst\n      ].join('\\n');\n      const res = await globalThis._noodl_send_email({ to: email, subject: 'Welcome to Digital Bricks University', text });\n      mailed = !!(res && res.success);\n      if (!mailed) console.error('[dbu:addLearner] welcome email not sent:', res && res.error);\n    } else {\n      console.error('[dbu:addLearner] no appUrl secret or no mailer: welcome email not sent (run tools/setup-signin.mjs)');\n    }\n    Outputs.learnerId = String(Inputs.userId || '');\n    Outputs.created = true;\n    Outputs.mailed = mailed;\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:addLearner mail]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-email",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-name",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-callerId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-learnerId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-created",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-mailed",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    }
+  ]
+}

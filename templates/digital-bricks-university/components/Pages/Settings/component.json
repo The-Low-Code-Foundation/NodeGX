@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "5edacb88-2351-5980-82c5-8a9a8a6f4957",
+  "name": "Settings",
+  "path": "/Pages/Settings",
+  "type": "page",
+  "created": "2026-11-07T20:28:01.400Z",
+  "modified": "2026-11-12T18:54:30.760Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach's settings: the address learner messages are emailed to (DBU-07). Read with coachSettings, saved with saveCoachSettings; empty puts the default back."
+}

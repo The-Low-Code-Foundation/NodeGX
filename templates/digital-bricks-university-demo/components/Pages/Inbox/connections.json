@@ -1,0 +1,325 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e27ddd3e-719e-597a-8c98-1606d9675140",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ib_t_tab",
+      "fromProperty": "Translation",
+      "toId": "ib_page",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "ib_t_failed",
+      "fromProperty": "Translation",
+      "toId": "ib_failed",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ib_t_back",
+      "fromProperty": "Translation",
+      "toId": "ib_back",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ib_t_open",
+      "fromProperty": "Translation",
+      "toId": "ib_open",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ib_body",
+      "fromProperty": "didMount",
+      "toId": "ib_cf",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ib_bell",
+      "fromProperty": "created",
+      "toId": "ib_cf",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ib_cf",
+      "fromProperty": "out-items",
+      "toId": "ib_words",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "ib_cf",
+      "fromProperty": "failure",
+      "toId": "ib_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "ib_cf",
+      "fromProperty": "done",
+      "toId": "ib_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ib_fail_sw",
+      "fromProperty": "state",
+      "toId": "ib_failed",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ib_state",
+      "fromProperty": "value-selectedId",
+      "toId": "ib_words",
+      "toProperty": "selectedId"
+    },
+    {
+      "fromId": "ib_narrow",
+      "fromProperty": "narrow",
+      "toId": "ib_words",
+      "toProperty": "narrow"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "rows",
+      "toId": "ib_rows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "none",
+      "toId": "ib_empty_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "hasItems",
+      "toId": "ib_cols",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "showList",
+      "toId": "ib_list",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "showDetail",
+      "toId": "ib_detail",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "showBack",
+      "toId": "ib_back",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ib_rows",
+      "fromProperty": "itemActionItemId",
+      "toId": "ib_set_open",
+      "toProperty": "prop-selectedId"
+    },
+    {
+      "fromId": "ib_rows",
+      "fromProperty": "itemOutputSignal-open",
+      "toId": "ib_set_open",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "ib_back",
+      "fromProperty": "onClick",
+      "toId": "ib_set_back",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "curKindKey",
+      "toId": "ib_dchip",
+      "toProperty": "labelKey"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "curKindBg",
+      "toId": "ib_dchip",
+      "toProperty": "bg"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "curKindFg",
+      "toId": "ib_dchip",
+      "toProperty": "fg"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "curLearner",
+      "toId": "ib_dname",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "curTitle",
+      "toId": "ib_dtitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "curLearnerId",
+      "toId": "ib_to_plan",
+      "toProperty": "pm-learner"
+    },
+    {
+      "fromId": "ib_open",
+      "fromProperty": "onClick",
+      "toId": "ib_to_plan",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "isReview",
+      "toId": "ib_review_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "isQuestion",
+      "toId": "ib_question_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "isQuiet",
+      "toId": "ib_quiet_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "curLearnerId",
+      "toId": "ib_review",
+      "toProperty": "learnerId"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "curFirst",
+      "toId": "ib_review",
+      "toProperty": "first"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "curStepId",
+      "toId": "ib_review",
+      "toProperty": "stepId"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "curSubmissions",
+      "toId": "ib_review",
+      "toProperty": "submissions"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "curLearnerId",
+      "toId": "ib_question",
+      "toProperty": "learnerId"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "curMessageId",
+      "toId": "ib_question",
+      "toProperty": "messageId"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "curLearnerId",
+      "toId": "ib_quiet",
+      "toProperty": "learnerId"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "curFirst",
+      "toId": "ib_quiet",
+      "toProperty": "first"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "curFlagId",
+      "toId": "ib_quiet",
+      "toProperty": "flagId"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "curFacts",
+      "toId": "ib_quiet",
+      "toProperty": "facts"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "curNextKey",
+      "toId": "ib_quiet",
+      "toProperty": "nextKey"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "curNextTitle",
+      "toId": "ib_quiet",
+      "toProperty": "nextTitle"
+    },
+    {
+      "fromId": "ib_review",
+      "fromProperty": "changed",
+      "toId": "ib_cf",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ib_question",
+      "fromProperty": "changed",
+      "toId": "ib_cf",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ib_quiet",
+      "fromProperty": "changed",
+      "toId": "ib_cf",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "hasTitle",
+      "toId": "ib_dtitle",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "isCheckin",
+      "toId": "ib_checkin_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "curResponseId",
+      "toId": "ib_checkin",
+      "toProperty": "responseId"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "curFirst",
+      "toId": "ib_checkin",
+      "toProperty": "first"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "curQuestions",
+      "toId": "ib_checkin",
+      "toProperty": "questions"
+    },
+    {
+      "fromId": "ib_words",
+      "fromProperty": "curAnswers",
+      "toId": "ib_checkin",
+      "toProperty": "answers"
+    },
+    {
+      "fromId": "ib_checkin",
+      "fromProperty": "changed",
+      "toId": "ib_cf",
+      "toProperty": "call"
+    }
+  ]
+}

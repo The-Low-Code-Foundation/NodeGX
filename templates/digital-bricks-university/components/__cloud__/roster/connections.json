@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c0a30590-6a25-5309-8c2a-b37c9a286ce8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ro_req",
+      "fromProperty": "receive",
+      "toId": "ro_list",
+      "toProperty": "read"
+    },
+    {
+      "fromId": "ro_list",
+      "fromProperty": "userIds",
+      "toId": "ro_fn",
+      "toProperty": "in-userIds"
+    },
+    {
+      "fromId": "ro_list",
+      "fromProperty": "done",
+      "toId": "ro_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ro_list",
+      "fromProperty": "unchanged",
+      "toId": "ro_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ro_fn",
+      "fromProperty": "out-templates",
+      "toId": "ro_res",
+      "toProperty": "pm-templates"
+    },
+    {
+      "fromId": "ro_fn",
+      "fromProperty": "out-failed",
+      "toId": "ro_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ro_fn",
+      "fromProperty": "failure",
+      "toId": "ro_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ro_list",
+      "fromProperty": "failure",
+      "toId": "ro_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ro_fn",
+      "fromProperty": "out-learners",
+      "toId": "ro_unread",
+      "toProperty": "in-learners"
+    },
+    {
+      "fromId": "ro_fn",
+      "fromProperty": "out-done",
+      "toId": "ro_unread",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ro_unread",
+      "fromProperty": "out-learners",
+      "toId": "ro_res",
+      "toProperty": "pm-learners"
+    },
+    {
+      "fromId": "ro_unread",
+      "fromProperty": "out-done",
+      "toId": "ro_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ro_unread",
+      "fromProperty": "out-failed",
+      "toId": "ro_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "ro_unread",
+      "fromProperty": "failure",
+      "toId": "ro_deny",
+      "toProperty": "send"
+    }
+  ]
+}

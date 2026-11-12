@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f558a0de-5bd8-5cfa-8fcb-03695795c9ec",
+  "name": "Checkin forms",
+  "path": "/#__cloud__/shared/Checkin forms",
+  "type": "cloud",
+  "created": "2026-11-12T14:26:17.412Z",
+  "modified": "2026-11-12T14:26:17.412Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The three built-in check-in forms (DBU-10): After a session, End of programme, 6-week impact. The one place they are defined; a step keeps a copy of its form, so editing one here never changes a check-in already planned or answered."
+}

@@ -1,0 +1,544 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "eb2c2324-7dd6-5022-8a75-3efacd464181",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "crv_root",
+      "type": "Group",
+      "label": "The creation, opened",
+      "children": [
+        "crv_head",
+        "crv_meta",
+        "crv_desc",
+        "crv_file",
+        "crv_link",
+        "crv_text"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-5)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "dataAttributes": "data-testid",
+        "data-testid": "creation-view"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "crv_head",
+      "type": "Group",
+      "label": "Title and Close",
+      "parent": "crv_root",
+      "children": [
+        "crv_title",
+        "crv_close"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "columnGap": "var(--space-3)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "crv_title",
+      "type": "Text",
+      "label": "Title",
+      "parent": "crv_head",
+      "parameters": {
+        "text": "",
+        "as": "h2",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "crv_close",
+      "type": "net.noodl.controls.button",
+      "label": "Close",
+      "parent": "crv_head",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-x",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)",
+        "iconColor": "var(--foreground)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "crv_meta",
+      "type": "Group",
+      "label": "Kind, made with, where it came from",
+      "parent": "crv_root",
+      "children": [
+        "crv_kind",
+        "crv_made",
+        "crv_from"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-1)"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "crv_kind",
+      "type": "/Plan/Chip",
+      "label": "Kind badge",
+      "parent": "crv_meta",
+      "parameters": {
+        "outlined": false
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "crv_made",
+      "type": "Text",
+      "label": "Made with {madeWith}",
+      "parent": "crv_meta",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "crv_from",
+      "type": "Text",
+      "label": "From your homework: {step}",
+      "parent": "crv_meta",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "crv_desc",
+      "type": "Group",
+      "label": "The description",
+      "parent": "crv_root",
+      "children": [
+        "crv_desc_ft"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "crv_desc_ft",
+      "type": "/Shell/Formatted text",
+      "label": "Description, HTML off",
+      "parent": "crv_desc",
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "crv_file",
+      "type": "Group",
+      "label": "Its files",
+      "parent": "crv_root",
+      "children": [
+        "crv_files"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)"
+      },
+      "x": 100,
+      "y": 1240
+    },
+    {
+      "id": "crv_files",
+      "type": "For Each",
+      "label": "One per file",
+      "parent": "crv_file",
+      "parameters": {
+        "template": "/Work/Version file"
+      },
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "crv_link",
+      "type": "Group",
+      "label": "A link",
+      "parent": "crv_root",
+      "children": [
+        "crv_url",
+        "crv_open"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 1480
+    },
+    {
+      "id": "crv_url",
+      "type": "Text",
+      "label": "The address",
+      "parent": "crv_link",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "wordBreak": "break-all",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "crv_open",
+      "type": "net.noodl.controls.button",
+      "label": "Open link",
+      "parent": "crv_link",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-external-link",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)",
+        "iconColor": "var(--foreground)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)"
+      },
+      "x": 160,
+      "y": 1720
+    },
+    {
+      "id": "crv_text",
+      "type": "Group",
+      "label": "The text",
+      "parent": "crv_root",
+      "children": [
+        "crv_text_ft"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)"
+      },
+      "x": 100,
+      "y": 1840
+    },
+    {
+      "id": "crv_text_ft",
+      "type": "/Shell/Formatted text",
+      "label": "What they wrote, HTML off",
+      "parent": "crv_text",
+      "x": 160,
+      "y": 1960
+    },
+    {
+      "id": "crv_in",
+      "type": "Component Inputs",
+      "label": "The creation",
+      "ports": [
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "kindKey",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "kindBg",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "kindFg",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "madeWith",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "hasMadeWith",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "stepTitle",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "hasStep",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "description",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "hasDescription",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "isFile",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "isLink",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "isText",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "files",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "url",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "text",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "crv_out",
+      "type": "Component Outputs",
+      "label": "Closed",
+      "ports": [
+        {
+          "name": "closed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "crv_open_fn",
+      "type": "JavaScriptFunction",
+      "label": "Open the link in a new tab",
+      "parameters": {
+        "runOnChange-in-url": false,
+        "functionScript": "// saveCreation and handIn only take http(s) links. noopener: the opened page gets no handle on this one.\nconst url = String(Inputs.url || '');\nif (url.startsWith('https://') || url.startsWith('http://')) window.open(url, '_blank', 'noopener,noreferrer');\n"
+      },
+      "ports": [
+        {
+          "name": "in-url",
+          "plug": "input",
+          "type": "*",
+          "displayName": "url",
+          "group": "Inputs"
+        }
+      ],
+      "x": 410,
+      "y": 1720
+    },
+    {
+      "id": "crv_t_close",
+      "type": "Translation",
+      "label": "Close",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.close"
+      },
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "crv_t_open",
+      "type": "Translation",
+      "label": "Open link",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "work.openLink"
+      },
+      "x": 410,
+      "y": 1840
+    },
+    {
+      "id": "crv_t_made",
+      "type": "Translation",
+      "label": "Made with {madeWith}",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.madeWith"
+      },
+      "x": 410,
+      "y": 1960
+    },
+    {
+      "id": "crv_fill_made",
+      "type": "String Format",
+      "label": "What it was made with, into the line",
+      "parameters": {
+        "format": "{madeWith}"
+      },
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "crv_t_from",
+      "type": "Translation",
+      "label": "From your homework: {step}",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.from"
+      },
+      "x": 410,
+      "y": 2080
+    },
+    {
+      "id": "crv_fill_from",
+      "type": "String Format",
+      "label": "The homework into the line",
+      "parameters": {
+        "format": "{step}"
+      },
+      "x": 410,
+      "y": 880
+    }
+  ],
+  "visualRoots": [
+    "crv_root"
+  ]
+}

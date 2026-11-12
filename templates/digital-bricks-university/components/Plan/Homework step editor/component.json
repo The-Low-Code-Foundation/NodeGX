@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "cf040904-259b-5143-8951-2a3629179dbd",
+  "name": "Homework step editor",
+  "path": "/Plan/Homework step editor",
+  "type": "visual",
+  "created": "2026-11-09T10:41:17.489Z",
+  "modified": "2026-11-09T10:41:17.489Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Edits one homework step in place, the learner's own copy: title, due date, the brief with its preview, the hand-in list and the resources. Saves through saveStep; the library item it came from is never changed."
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "df16bbea-14e8-5ae0-8ff9-54195cc22a7e",
+  "name": "savePlanTemplate",
+  "path": "/#__cloud__/savePlanTemplate",
+  "type": "cloud",
+  "created": "2026-11-09T10:29:14.817Z",
+  "modified": "2026-11-09T10:29:14.817Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach creates or edits a plan template: title, description and its ordered items (kind, title, duration, library item, day offset). Never learner data; checks every item and refuses in a sentence (security: role:staff)."
+}

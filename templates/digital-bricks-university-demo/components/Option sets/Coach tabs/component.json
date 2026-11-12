@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e0364ec7-b180-52c6-83db-83c595005efe",
+  "name": "Coach tabs",
+  "path": "/Option sets/Coach tabs",
+  "type": "visual",
+  "created": "2026-11-07T20:26:40.525Z",
+  "modified": "2026-11-07T21:33:27.232Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach's top-bar tabs, in order. Each has an id (what a page names as current), a label and a URL path."
+}

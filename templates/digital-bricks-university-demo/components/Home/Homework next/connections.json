@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4c5aa248-0310-52b9-810c-8da98b997ae8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hn_in",
+      "fromProperty": "shown",
+      "toId": "hn_card",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hn_in",
+      "fromProperty": "none",
+      "toId": "hn_none",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hn_in",
+      "fromProperty": "headKey",
+      "toId": "hn_t_head",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "hn_t_head",
+      "fromProperty": "Translation",
+      "toId": "hn_fill",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "hn_in",
+      "fromProperty": "n",
+      "toId": "hn_fill",
+      "toProperty": "n"
+    },
+    {
+      "fromId": "hn_in",
+      "fromProperty": "date",
+      "toId": "hn_fill",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "hn_fill",
+      "fromProperty": "formatted",
+      "toId": "hn_head_text",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hn_in",
+      "fromProperty": "title",
+      "toId": "hn_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hn_in",
+      "fromProperty": "bodyKey",
+      "toId": "hn_t_body",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "hn_t_body",
+      "fromProperty": "Translation",
+      "toId": "hn_body",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hn_t_open",
+      "fromProperty": "Translation",
+      "toId": "hn_open",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hn_t_none_title",
+      "fromProperty": "Translation",
+      "toId": "hn_none_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hn_t_none_body",
+      "fromProperty": "Translation",
+      "toId": "hn_none_body",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hn_in",
+      "fromProperty": "stepId",
+      "toId": "hn_go",
+      "toProperty": "pm-step"
+    },
+    {
+      "fromId": "hn_open",
+      "fromProperty": "onClick",
+      "toId": "hn_go",
+      "toProperty": "navigate"
+    }
+  ]
+}

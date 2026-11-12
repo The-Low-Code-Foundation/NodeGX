@@ -1,0 +1,395 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "ddc1aed2-995b-5a22-8f66-fdc3484b5781",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "lr_row",
+      "type": "Group",
+      "label": "Row",
+      "children": [
+        "lr_top",
+        "lr_meta",
+        "lr_tags",
+        "lr_actions"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "lr_top",
+      "type": "Group",
+      "label": "Title and Archived",
+      "parent": "lr_row",
+      "children": [
+        "lr_title",
+        "lr_arch_box"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-1)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "lr_title",
+      "type": "Text",
+      "label": "Title",
+      "parent": "lr_top",
+      "parameters": {
+        "text": "",
+        "as": "h3",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 280,
+      "metadata": {
+        "comment": "Full width so a long title wraps on a phone; the Archived chip wraps onto the line below it."
+      }
+    },
+    {
+      "id": "lr_arch_box",
+      "type": "Group",
+      "label": "Shown when archived",
+      "parent": "lr_top",
+      "children": [
+        "lr_arch_chip"
+      ],
+      "parameters": {
+        "mounted": false,
+        "sizeMode": "contentSize",
+        "flexDirection": "row"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "lr_arch_chip",
+      "type": "/Library/Tag chip",
+      "label": "Archived",
+      "parent": "lr_arch_box",
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "lr_meta",
+      "type": "Text",
+      "label": "Time and what it holds",
+      "parent": "lr_row",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "lr_tags",
+      "type": "Group",
+      "label": "Tags",
+      "parent": "lr_row",
+      "children": [
+        "lr_tag_rows"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "flex-start",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "lr_tag_rows",
+      "type": "For Each",
+      "label": "One chip per tag",
+      "parent": "lr_tags",
+      "parameters": {
+        "template": "/Library/Tag chip"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "lr_actions",
+      "type": "Group",
+      "label": "Actions",
+      "parent": "lr_row",
+      "children": [
+        "lr_edit",
+        "lr_dup",
+        "lr_archive",
+        "lr_restore"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-1)"
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "lr_edit",
+      "type": "net.noodl.controls.button",
+      "label": "Edit",
+      "parent": "lr_actions",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-9)"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "lr_dup",
+      "type": "net.noodl.controls.button",
+      "label": "Duplicate",
+      "parent": "lr_actions",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-9)"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "lr_archive",
+      "type": "net.noodl.controls.button",
+      "label": "Archive",
+      "parent": "lr_actions",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-9)"
+      },
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "lr_restore",
+      "type": "net.noodl.controls.button",
+      "label": "Restore",
+      "parent": "lr_actions",
+      "parameters": {
+        "mounted": false,
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-9)"
+      },
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "lr_in",
+      "type": "Component Inputs",
+      "label": "Row in",
+      "ports": [
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "meta",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "tags",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "archived",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "lr_out",
+      "type": "Component Outputs",
+      "label": "Row out",
+      "ports": [
+        {
+          "name": "edit",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "duplicate",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "archive",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "lr_not_arch",
+      "type": "Inverter",
+      "label": "Not archived",
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "lr_t_edit",
+      "type": "Translation",
+      "label": "Edit",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "library.edit"
+      },
+      "x": 470,
+      "y": 1240
+    },
+    {
+      "id": "lr_t_dup",
+      "type": "Translation",
+      "label": "Duplicate",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "library.duplicate"
+      },
+      "x": 470,
+      "y": 1360
+    },
+    {
+      "id": "lr_t_arch",
+      "type": "Translation",
+      "label": "Archive",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "library.archive"
+      },
+      "x": 470,
+      "y": 1600
+    },
+    {
+      "id": "lr_t_restore",
+      "type": "Translation",
+      "label": "Restore",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "library.restore"
+      },
+      "x": 470,
+      "y": 1720
+    },
+    {
+      "id": "lr_t_chip",
+      "type": "Translation",
+      "label": "Archived",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "library.archivedChip"
+      },
+      "x": 470,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "lr_row"
+  ]
+}

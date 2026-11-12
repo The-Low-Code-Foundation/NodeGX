@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c1413ad7-a297-5d70-8956-4fd6c712941e",
+  "name": "Homework",
+  "path": "/Pages/Homework",
+  "type": "page",
+  "created": "2026-11-07T20:28:01.073Z",
+  "modified": "2026-11-12T10:21:08.369Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The learner's homework: empty until DBU-06."
+}

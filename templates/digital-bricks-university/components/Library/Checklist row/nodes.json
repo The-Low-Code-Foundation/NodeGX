@@ -1,0 +1,196 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e3cc6058-ba3b-56a0-85ef-9f9c8acfc694",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cr_row",
+      "type": "Group",
+      "label": "Row",
+      "children": [
+        "cr_text",
+        "cr_controls"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-1)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "cr_text",
+      "type": "net.noodl.controls.textinput",
+      "label": "What to hand in",
+      "parent": "cr_row",
+      "parameters": {
+        "type": "text",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "cr_req",
+      "type": "net.noodl.controls.checkbox",
+      "label": "Required",
+      "parent": "cr_controls",
+      "parameters": {
+        "useLabel": true,
+        "labelSpacing": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "cr_remove",
+      "type": "net.noodl.controls.button",
+      "label": "Remove",
+      "parent": "cr_controls",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "minHeight": "var(--space-9)"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "cr_in",
+      "type": "Component Inputs",
+      "label": "Item in",
+      "ports": [
+        {
+          "name": "text",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "required",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "cr_out",
+      "type": "Component Outputs",
+      "label": "Item out",
+      "ports": [
+        {
+          "name": "remove",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 350,
+      "y": 760
+    },
+    {
+      "id": "cr_item",
+      "type": "For Each Actions",
+      "label": "This row's record",
+      "x": 350,
+      "y": 1000
+    },
+    {
+      "id": "cr_set_text",
+      "type": "SetModelProperties",
+      "label": "Keep the words",
+      "parameters": {
+        "properties": "text",
+        "type-text": "String"
+      },
+      "metadata": {
+        "comment": "One node per field: a node writing both would write the other field as it stood when this one changed, and the first change can come before the other has a value."
+      },
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "cr_set_req",
+      "type": "SetModelProperties",
+      "label": "Keep the tick",
+      "parameters": {
+        "properties": "required",
+        "type-required": "Boolean"
+      },
+      "x": 350,
+      "y": 520
+    },
+    {
+      "id": "cr_t_ph",
+      "type": "Translation",
+      "label": "Something to hand in",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.checklistPlaceholder"
+      },
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "cr_t_req",
+      "type": "Translation",
+      "label": "Required",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.required"
+      },
+      "x": 350,
+      "y": 640
+    },
+    {
+      "id": "cr_t_remove",
+      "type": "Translation",
+      "label": "Remove",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "libraryEditor.remove"
+      },
+      "x": 350,
+      "y": 880
+    },
+    {
+      "id": "cr_controls",
+      "type": "Group",
+      "label": "Required and Remove",
+      "parent": "cr_row",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-4)"
+      },
+      "children": [
+        "cr_req",
+        "cr_remove"
+      ],
+      "x": 100,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "cr_row"
+  ]
+}

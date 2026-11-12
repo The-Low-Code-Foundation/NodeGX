@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "3c15d0b7-2164-5ddb-878c-927d6aa21142",
+  "name": "Version row",
+  "path": "/Work/Version row",
+  "type": "visual",
+  "created": "2026-11-09T13:08:57.434Z",
+  "modified": "2026-11-12T08:53:07.091Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One version of a hand-in: its number and when it was handed in, what kind it is and its review, the learner's note, the work itself (its files, 1 to 5, each shown or downloaded; a link to open; or the text), Richard's note, and, for the coach on the newest version waiting for him, the review controls. One review covers every file of the version."
+}

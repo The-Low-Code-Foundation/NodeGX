@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "devOpen": false,
+  "defaults": {
+    "permissions": {
+      "find": "nobody",
+      "get": "nobody",
+      "create": "nobody",
+      "update": "nobody",
+      "delete": "nobody"
+    },
+    "creatorOwns": false
+  },
+  "collections": {
+    "Doorbell": {
+      "permissions": {
+        "find": "authenticated",
+        "get": "nobody",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    }
+  },
+  "functions": {
+    "myPlan": { "call": "authenticated" },
+    "learnerHome": { "call": "authenticated" },
+    "myHomework": { "call": "authenticated" },
+    "handIn": { "call": "authenticated" },
+    "fileLink": { "call": "authenticated" },
+    "learnerAsCoach": { "call": "role:staff" },
+    "reviewSubmission": { "call": "role:staff" },
+    "fileLinkAsCoach": { "call": "role:staff" },
+    "addLearner": { "call": "role:staff" },
+    "roster": { "call": "role:staff" },
+    "resourceLink": { "call": "authenticated" },
+    "library": { "call": "role:staff" },
+    "saveLibraryItem": { "call": "role:staff" },
+    "duplicateLibraryItem": { "call": "role:staff" },
+    "archiveLibraryItem": { "call": "role:staff" },
+    "addStep": { "call": "role:staff" },
+    "saveStep": { "call": "role:staff" },
+    "moveStep": { "call": "role:staff" },
+    "removeStep": { "call": "role:staff" },
+    "shareSteps": { "call": "role:staff" },
+    "savePlan": { "call": "role:staff" },
+    "applyTemplate": { "call": "role:staff" },
+    "planTemplates": { "call": "role:staff" },
+    "savePlanTemplate": { "call": "role:staff" },
+    "templateFromPlan": { "call": "role:staff" },
+    "archivePlanTemplate": { "call": "role:staff" },
+    "sendMessage": { "call": "authenticated" },
+    "myMessages": { "call": "authenticated" },
+    "myUnread": { "call": "authenticated" },
+    "setEmailPreference": { "call": "authenticated" },
+    "replyAsCoach": { "call": "role:staff" },
+    "messagesAsCoach": { "call": "role:staff" },
+    "coachUnread": { "call": "role:staff" },
+    "coachSettings": { "call": "role:staff" },
+    "saveCoachSettings": { "call": "role:staff" },
+    "unsubscribe": { "call": "public", "rateLimit": { "ratePerMinute": 10, "burst": 10 } },
+    "coachName": { "call": "public", "rateLimit": { "ratePerMinute": 30, "burst": 30 } },
+    "mailMessages": { "call": "nobody" },
+    "coachInbox": { "call": "role:staff" },
+    "snoozeQuiet": { "call": "role:staff" },
+    "settleQuestion": { "call": "role:staff" },
+    "morningRound": { "call": "nobody" },
+    "myCreations": { "call": "authenticated" },
+    "saveCreation": { "call": "authenticated" },
+    "deleteCreation": { "call": "authenticated" },
+    "creationsAsCoach": { "call": "role:staff" },
+    "myCheckin": { "call": "authenticated" },
+    "answerCheckin": { "call": "authenticated" },
+    "settleCheckin": { "call": "role:staff" },
+    "sendCheckins": { "call": "nobody" }
+  },
+  "files": {
+    "upload": "authenticated",
+    "read": "nobody",
+    "delete": "nobody"
+  },
+  "signup": "nobody"
+}

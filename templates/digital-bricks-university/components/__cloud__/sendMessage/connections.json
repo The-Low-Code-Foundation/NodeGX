@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "038360db-3fbd-58de-89e7-eea20f32dc56",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sm_req",
+      "fromProperty": "userId",
+      "toId": "sm_fn",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "sm_req",
+      "fromProperty": "pm-body",
+      "toId": "sm_fn",
+      "toProperty": "in-body"
+    },
+    {
+      "fromId": "sm_req",
+      "fromProperty": "pm-stepId",
+      "toId": "sm_fn",
+      "toProperty": "in-stepId"
+    },
+    {
+      "fromId": "sm_req",
+      "fromProperty": "pm-files",
+      "toId": "sm_fn",
+      "toProperty": "in-files"
+    },
+    {
+      "fromId": "sm_req",
+      "fromProperty": "receive",
+      "toId": "sm_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "sm_fn",
+      "fromProperty": "out-mail",
+      "toId": "sm_mail",
+      "toProperty": "request"
+    },
+    {
+      "fromId": "sm_fn",
+      "fromProperty": "out-messageId",
+      "toId": "sm_res",
+      "toProperty": "pm-messageId"
+    },
+    {
+      "fromId": "sm_mail",
+      "fromProperty": "done",
+      "toId": "sm_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sm_fn",
+      "fromProperty": "out-why",
+      "toId": "sm_deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "sm_fn",
+      "fromProperty": "out-refuse",
+      "toId": "sm_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sm_fn",
+      "fromProperty": "out-failed",
+      "toId": "sm_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sm_fn",
+      "fromProperty": "failure",
+      "toId": "sm_fail",
+      "toProperty": "send"
+    }
+  ]
+}

@@ -1,0 +1,277 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "82e0a068-0f99-555c-8ce8-73d797cd7ff9",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "phd_in",
+      "fromProperty": "detail",
+      "toId": "phd_detail",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "phd_in",
+      "fromProperty": "statusKey",
+      "toId": "phd_status",
+      "toProperty": "labelKey"
+    },
+    {
+      "fromId": "phd_in",
+      "fromProperty": "live",
+      "toId": "phd_live",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "phd_in",
+      "fromProperty": "homework",
+      "toId": "phd_hw",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "phd_in",
+      "fromProperty": "hours",
+      "toId": "phd_hours",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "phd_t_from",
+      "fromProperty": "Translation",
+      "toId": "phd_from_label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "phd_in",
+      "fromProperty": "startedFrom",
+      "toId": "phd_from_text",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "phd_in",
+      "fromProperty": "empty",
+      "toId": "phd_start_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "phd_in",
+      "fromProperty": "empty",
+      "toId": "phd_not_empty",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "phd_not_empty",
+      "fromProperty": "result",
+      "toId": "phd_from_text",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "phd_t_settings",
+      "fromProperty": "Translation",
+      "toId": "phd_settings",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "phd_t_save",
+      "fromProperty": "Translation",
+      "toId": "phd_save_tpl",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "phd_t_see",
+      "fromProperty": "Translation",
+      "toId": "phd_see_fill",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "phd_in",
+      "fromProperty": "firstName",
+      "toId": "phd_see_fill",
+      "toProperty": "first"
+    },
+    {
+      "fromId": "phd_see_fill",
+      "fromProperty": "formatted",
+      "toId": "phd_see",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "phd_t_back",
+      "fromProperty": "Translation",
+      "toId": "phd_back",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "phd_in",
+      "fromProperty": "learnerView",
+      "toId": "phd_back",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "phd_in",
+      "fromProperty": "learnerView",
+      "toId": "phd_not_lv",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "phd_not_lv",
+      "fromProperty": "result",
+      "toId": "phd_see",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "phd_not_lv",
+      "fromProperty": "result",
+      "toId": "phd_settings",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "phd_not_lv",
+      "fromProperty": "result",
+      "toId": "phd_save_tpl",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "phd_settings",
+      "fromProperty": "onClick",
+      "toId": "phd_out",
+      "toProperty": "settings"
+    },
+    {
+      "fromId": "phd_save_tpl",
+      "fromProperty": "onClick",
+      "toId": "phd_out",
+      "toProperty": "saveTemplate"
+    },
+    {
+      "fromId": "phd_see",
+      "fromProperty": "onClick",
+      "toId": "phd_out",
+      "toProperty": "seeAs"
+    },
+    {
+      "fromId": "phd_back",
+      "fromProperty": "onClick",
+      "toId": "phd_out",
+      "toProperty": "seeAs"
+    },
+    {
+      "fromId": "phd_in",
+      "fromProperty": "templates",
+      "toId": "phd_opts",
+      "toProperty": "in-templates"
+    },
+    {
+      "fromId": "phd_t_choose",
+      "fromProperty": "Translation",
+      "toId": "phd_opts",
+      "toProperty": "in-choose"
+    },
+    {
+      "fromId": "phd_opts",
+      "fromProperty": "out-items",
+      "toId": "phd_tpl",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "phd_t_start",
+      "fromProperty": "Translation",
+      "toId": "phd_start",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "phd_in",
+      "fromProperty": "planId",
+      "toId": "phd_apply",
+      "toProperty": "in-planId"
+    },
+    {
+      "fromId": "phd_tpl",
+      "fromProperty": "value",
+      "toId": "phd_apply",
+      "toProperty": "in-templateId"
+    },
+    {
+      "fromId": "phd_start",
+      "fromProperty": "onClick",
+      "toId": "phd_apply",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "phd_in",
+      "fromProperty": "templates",
+      "toId": "phd_started",
+      "toProperty": "in-templates"
+    },
+    {
+      "fromId": "phd_tpl",
+      "fromProperty": "value",
+      "toId": "phd_started",
+      "toProperty": "in-templateId"
+    },
+    {
+      "fromId": "phd_apply",
+      "fromProperty": "out-added",
+      "toId": "phd_started",
+      "toProperty": "in-added"
+    },
+    {
+      "fromId": "phd_t_started",
+      "fromProperty": "Translation",
+      "toId": "phd_started",
+      "toProperty": "in-said"
+    },
+    {
+      "fromId": "phd_apply",
+      "fromProperty": "done",
+      "toId": "phd_started",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "phd_apply",
+      "fromProperty": "done",
+      "toId": "phd_out",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "phd_started",
+      "fromProperty": "out-said",
+      "toId": "phd_out",
+      "toProperty": "said"
+    },
+    {
+      "fromId": "phd_started",
+      "fromProperty": "out-show",
+      "toId": "phd_out",
+      "toProperty": "saidShow"
+    },
+    {
+      "fromId": "phd_apply",
+      "fromProperty": "error",
+      "toId": "phd_out",
+      "toProperty": "said"
+    },
+    {
+      "fromId": "phd_apply",
+      "fromProperty": "failure",
+      "toId": "phd_out",
+      "toProperty": "saidShow"
+    },
+    {
+      "fromId": "phd_t_choose_label",
+      "fromProperty": "Translation",
+      "toId": "phd_from_label_empty",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "phd_in",
+      "fromProperty": "empty",
+      "toId": "phd_from_label_empty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "phd_not_empty",
+      "fromProperty": "result",
+      "toId": "phd_from_label",
+      "toProperty": "mounted"
+    }
+  ]
+}

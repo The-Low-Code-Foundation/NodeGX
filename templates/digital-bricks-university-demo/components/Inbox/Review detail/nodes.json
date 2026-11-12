@@ -1,0 +1,163 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "4c9aaedc-024e-537e-85f5-19846cef7b31",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rd_root",
+      "type": "Group",
+      "label": "Review",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "rd_lead",
+        "rd_versions",
+        "rd_reply_box"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-5)"
+      }
+    },
+    {
+      "id": "rd_lead",
+      "type": "Text",
+      "label": "What to do here",
+      "x": 40,
+      "y": 160,
+      "parent": "rd_root",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "rd_versions",
+      "type": "/Work/Versions",
+      "label": "The versions, newest first, with the verdict",
+      "x": 40,
+      "y": 280,
+      "parent": "rd_root",
+      "parameters": {
+        "mode": "coach",
+        "timezone": "Europe/Paris",
+        "canReview": true,
+        "headKey": "work.handIns"
+      }
+    },
+    {
+      "id": "rd_reply_box",
+      "type": "Group",
+      "label": "A message about this homework",
+      "x": 40,
+      "y": 400,
+      "parent": "rd_root",
+      "children": [
+        "rd_reply"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "paddingTop": "var(--space-5)",
+        "borderTopStyle": "solid",
+        "borderTopWidth": "var(--border-1)",
+        "borderTopColor": "var(--border)"
+      }
+    },
+    {
+      "id": "rd_reply",
+      "type": "/Messages/Composer",
+      "label": "Write to the learner about it",
+      "x": 40,
+      "y": 520,
+      "parent": "rd_reply_box",
+      "parameters": {
+        "mode": "coach",
+        "canAttach": false,
+        "labelKey": "inbox.replyAbout"
+      }
+    },
+    {
+      "id": "rd_in",
+      "type": "Component Inputs",
+      "label": "The hand-in",
+      "x": 400,
+      "y": 40,
+      "ports": [
+        {
+          "name": "learnerId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "first",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "stepId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "submissions",
+          "plug": "output",
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "id": "rd_out",
+      "type": "Component Outputs",
+      "label": "Done something",
+      "x": 400,
+      "y": 400,
+      "ports": [
+        {
+          "name": "changed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "rd_t_lead",
+      "type": "Translation",
+      "label": "Approve it, or ask for changes",
+      "x": 400,
+      "y": 160,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "inbox.reviewLead"
+      }
+    },
+    {
+      "id": "rd_fill_lead",
+      "type": "String Format",
+      "label": "Their first name into it",
+      "x": 400,
+      "y": 280,
+      "parameters": {
+        "format": "{first}"
+      }
+    }
+  ],
+  "visualRoots": [
+    "rd_root"
+  ]
+}

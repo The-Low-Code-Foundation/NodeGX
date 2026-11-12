@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "21092b56-1838-5c30-84c9-06b3b958a15b",
+  "name": "saveLibraryItem",
+  "path": "/#__cloud__/saveLibraryItem",
+  "type": "cloud",
+  "created": "2026-11-07T22:00:06.578Z",
+  "modified": "2026-11-07T22:00:06.578Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach creates or edits one library item (security: role:staff). Checks every field and refuses in a sentence; a resource file must be one the coach uploaded, or already on this item. Never touches homework already copied into a plan (SCOPE R4)."
+}

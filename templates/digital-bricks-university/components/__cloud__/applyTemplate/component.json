@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "aaf5af89-8b3e-5aee-8ce9-8d06b1be4a28",
+  "name": "applyTemplate",
+  "path": "/#__cloud__/applyTemplate",
+  "type": "cloud",
+  "created": "2026-11-09T10:28:19.064Z",
+  "modified": "2026-11-09T10:28:19.064Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach starts a learner's plan from a template: its items are added as DRAFT steps after any the plan already has, through shared/Steps from template (the helper addLearner uses). On an empty plan the plan also takes the template's title and remembers it as \\\"started from\\\" (security: role:staff)."
+}

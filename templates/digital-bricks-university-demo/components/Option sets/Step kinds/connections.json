@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f57de13a-1484-55ca-84e6-8396738d0d3a",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sk_data",
+      "fromProperty": "items",
+      "toId": "sk_out",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "sk_data",
+      "fromProperty": "count",
+      "toId": "sk_out",
+      "toProperty": "count"
+    }
+  ]
+}

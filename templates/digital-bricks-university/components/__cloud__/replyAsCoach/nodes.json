@@ -1,0 +1,141 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "26c05a54-322e-58a6-8a24-5898312893a8",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rc_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach writes to a learner",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "learnerId,body,stepId",
+        "allowNoAuth": false,
+        "ptype-learnerId": "string",
+        "preq-learnerId": true,
+        "ptype-body": "string",
+        "preq-body": true,
+        "ptype-stepId": "string",
+        "preq-stepId": false
+      }
+    },
+    {
+      "id": "rc_fn",
+      "type": "JavaScriptFunction",
+      "label": "Check it, then save it",
+      "x": 40,
+      "y": 200,
+      "parameters": {
+        "runOnChange-in-userId": false,
+        "runOnChange-in-learnerId": false,
+        "runOnChange-in-body": false,
+        "runOnChange-in-stepId": false,
+        "functionScript": "/*\n * THE COACH WRITES TO A LEARNER (DBU-07): a reply, or the first word. role:staff is checked by\n * nodegx.security.json before this runs. The learner must be a learner (someone with a plan);\n * a message about a homework must be about one of hers that she can see (shared). Text only:\n * Richard's files reach a learner as homework resources (DBU-03).\n * Saved with mailPending; shared/Message mail tells the learner next, unless she turned it off.\n */\n(async () => {\n  const refuse = (why) => { Outputs.why = why; Outputs.refuse(); };\n  try {\n    const me = String(Inputs.userId || '');\n    if (!me) throw new Error('no session user');\n    const q = (c, where) => Noodl.Records.query(c, where, { limit: 1000, plain: true });\n    const learnerId = String(Inputs.learnerId || '');\n    const users = learnerId ? await q('_User', { objectId: { equalTo: learnerId } }) : [];\n    const plans = users.length ? await q('Plan', { learner: { equalTo: learnerId } }) : [];\n    if (!users.length || !plans.length || learnerId === me) return refuse('This learner could not be found. Reload the page.');\n\n    const body = String(Inputs.body || '').trim();\n    if (!body) return refuse('Write your message first.');\n    if (body.length > 5000) return refuse('Keep a message under 5,000 characters, or send it in two.');\n\n    const stepId = String(Inputs.stepId || '');\n    if (stepId) {\n      const steps = await q('Step', { objectId: { equalTo: stepId } });\n      const step = steps[0];\n      if (!step || step.learner !== learnerId || step.kind !== 'homework') return refuse('That homework is not in this learner\\'s plan.');\n      if (step.shared !== true) return refuse('Share that homework first: the learner cannot see it yet.');\n    }\n\n    const created = await Noodl.Records.create('Message', {\n      learner: learnerId, author: me, step: stepId || null, body, attachments: [],\n      readAt: null, mailPending: true, mailedAt: null\n    }, { plain: true });\n    await Noodl.Records.create('Doorbell', { learner: learnerId, topic: 'message' },\n      { acl: { [learnerId]: { read: true }, 'role:staff': { read: true } } });\n\n    Outputs.messageId = created.objectId || created.id;\n    Outputs.mail = { learnerId, to: 'learner', at: Date.now() };\n  } catch (e) {\n    console.error('[dbu:replyAsCoach]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "displayName": "userId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-learnerId",
+          "displayName": "learnerId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-body",
+          "displayName": "body",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-stepId",
+          "displayName": "stepId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-refuse",
+          "displayName": "refuse",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-failed",
+          "displayName": "failed",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-why",
+          "displayName": "why",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-messageId",
+          "displayName": "messageId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mail",
+          "displayName": "mail",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "rc_mail",
+      "type": "/#__cloud__/shared/Message mail",
+      "label": "Tell the learner (unless she opted out)",
+      "x": 40,
+      "y": 360
+    },
+    {
+      "id": "rc_res",
+      "type": "noodl.cloud.response",
+      "label": "Sent",
+      "x": 40,
+      "y": 480,
+      "parameters": {
+        "params": "messageId"
+      }
+    },
+    {
+      "id": "rc_deny",
+      "type": "noodl.cloud.response",
+      "label": "A refusal the coach can act on",
+      "x": 320,
+      "y": 480,
+      "parameters": {
+        "status": "failure"
+      }
+    },
+    {
+      "id": "rc_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "x": 600,
+      "y": 480,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "The message could not be sent. Try again in a moment."
+      }
+    }
+  ]
+}

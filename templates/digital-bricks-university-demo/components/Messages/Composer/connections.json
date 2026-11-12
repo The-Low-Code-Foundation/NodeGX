@@ -1,0 +1,559 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ddfbfbb9-06cd-566f-8a9e-de05151fea56",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "co_in",
+      "fromProperty": "labelKey",
+      "toId": "co_t_label",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "co_t_label",
+      "fromProperty": "Translation",
+      "toId": "co_fill_label",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "co_in",
+      "fromProperty": "first",
+      "toId": "co_fill_label",
+      "toProperty": "first"
+    },
+    {
+      "fromId": "co_fill_label",
+      "fromProperty": "formatted",
+      "toId": "co_text",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "co_in",
+      "fromProperty": "canAttach",
+      "toId": "co_attach",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "co_t_choose",
+      "fromProperty": "Translation",
+      "toId": "co_choose",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "co_t_types",
+      "fromProperty": "Translation",
+      "toId": "co_types",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "co_choose",
+      "fromProperty": "onClick",
+      "toId": "co_picker",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "co_kinds",
+      "fromProperty": "items",
+      "toId": "co_files",
+      "toProperty": "kinds"
+    },
+    {
+      "fromId": "co_files",
+      "fromProperty": "accept",
+      "toId": "co_picker",
+      "toProperty": "acceptedFileTypes"
+    },
+    {
+      "fromId": "co_picker",
+      "fromProperty": "file",
+      "toId": "co_files",
+      "toProperty": "picked"
+    },
+    {
+      "fromId": "co_picker",
+      "fromProperty": "name",
+      "toId": "co_files",
+      "toProperty": "pickedName"
+    },
+    {
+      "fromId": "co_picker",
+      "fromProperty": "sizeInBytes",
+      "toId": "co_files",
+      "toProperty": "pickedSize"
+    },
+    {
+      "fromId": "co_picker",
+      "fromProperty": "done",
+      "toId": "co_files",
+      "toProperty": "addPicked"
+    },
+    {
+      "fromId": "co_files",
+      "fromProperty": "items",
+      "toId": "co_rows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "co_rows",
+      "fromProperty": "itemActionItemId",
+      "toId": "co_files",
+      "toProperty": "removeId"
+    },
+    {
+      "fromId": "co_rows",
+      "fromProperty": "itemOutputSignal-remove",
+      "toId": "co_files",
+      "toProperty": "remove"
+    },
+    {
+      "fromId": "co_files",
+      "fromProperty": "hasFiles",
+      "toId": "co_list",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "co_files",
+      "fromProperty": "whyKey",
+      "toId": "co_t_bad",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "co_t_bad",
+      "fromProperty": "Translation",
+      "toId": "co_fill_bad",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "co_files",
+      "fromProperty": "whyName",
+      "toId": "co_fill_bad",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "co_fill_bad",
+      "fromProperty": "formatted",
+      "toId": "co_bad",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "co_files",
+      "fromProperty": "refused",
+      "toId": "co_bad_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "co_files",
+      "fromProperty": "accepted",
+      "toId": "co_bad_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "co_bad_sw",
+      "fromProperty": "state",
+      "toId": "co_bad",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "co_t_go",
+      "fromProperty": "Translation",
+      "toId": "co_go",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "co_go",
+      "fromProperty": "onClick",
+      "toId": "co_check",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "co_go",
+      "fromProperty": "onClick",
+      "toId": "co_busy_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "co_go",
+      "fromProperty": "onClick",
+      "toId": "co_refused_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "co_go",
+      "fromProperty": "onClick",
+      "toId": "co_server_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "co_go",
+      "fromProperty": "onClick",
+      "toId": "co_upfail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "co_go",
+      "fromProperty": "onClick",
+      "toId": "co_done_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "co_go",
+      "fromProperty": "onClick",
+      "toId": "co_bad_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "co_text",
+      "fromProperty": "onTextChanged",
+      "toId": "co_check",
+      "toProperty": "in-text"
+    },
+    {
+      "fromId": "co_files",
+      "fromProperty": "hasFiles",
+      "toId": "co_check",
+      "toProperty": "in-hasFiles"
+    },
+    {
+      "fromId": "co_check",
+      "fromProperty": "out-whyKey",
+      "toId": "co_t_refused",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "co_t_refused",
+      "fromProperty": "Translation",
+      "toId": "co_refused",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "co_check",
+      "fromProperty": "out-refuse",
+      "toId": "co_refused_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "co_check",
+      "fromProperty": "out-refuse",
+      "toId": "co_busy_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "co_check",
+      "fromProperty": "out-upload",
+      "toId": "co_files",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "co_files",
+      "fromProperty": "current",
+      "toId": "co_upload",
+      "toProperty": "file"
+    },
+    {
+      "fromId": "co_files",
+      "fromProperty": "uploadNext",
+      "toId": "co_upload",
+      "toProperty": "upload"
+    },
+    {
+      "fromId": "co_upload",
+      "fromProperty": "cloudFile",
+      "toId": "co_files",
+      "toProperty": "cloudFile"
+    },
+    {
+      "fromId": "co_upload",
+      "fromProperty": "done",
+      "toId": "co_files",
+      "toProperty": "uploaded"
+    },
+    {
+      "fromId": "co_upload",
+      "fromProperty": "failure",
+      "toId": "co_files",
+      "toProperty": "abort"
+    },
+    {
+      "fromId": "co_upload",
+      "fromProperty": "failure",
+      "toId": "co_upfail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "co_upload",
+      "fromProperty": "failure",
+      "toId": "co_busy_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "co_t_upfail",
+      "fromProperty": "Translation",
+      "toId": "co_upfail",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "co_upfail_sw",
+      "fromProperty": "state",
+      "toId": "co_upfail",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "co_in",
+      "fromProperty": "mode",
+      "toId": "co_send",
+      "toProperty": "in-mode"
+    },
+    {
+      "fromId": "co_check",
+      "fromProperty": "out-text",
+      "toId": "co_send",
+      "toProperty": "in-text"
+    },
+    {
+      "fromId": "co_check",
+      "fromProperty": "out-withFiles",
+      "toId": "co_send",
+      "toProperty": "in-withFiles"
+    },
+    {
+      "fromId": "co_files",
+      "fromProperty": "names",
+      "toId": "co_send",
+      "toProperty": "in-files"
+    },
+    {
+      "fromId": "co_check",
+      "fromProperty": "out-send",
+      "toId": "co_send",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "co_files",
+      "fromProperty": "allUploaded",
+      "toId": "co_send",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "co_send",
+      "fromProperty": "out-body",
+      "toId": "co_cf_l",
+      "toProperty": "in-body"
+    },
+    {
+      "fromId": "co_send",
+      "fromProperty": "out-files",
+      "toId": "co_cf_l",
+      "toProperty": "in-files"
+    },
+    {
+      "fromId": "co_in",
+      "fromProperty": "stepId",
+      "toId": "co_cf_l",
+      "toProperty": "in-stepId"
+    },
+    {
+      "fromId": "co_send",
+      "fromProperty": "out-goLearner",
+      "toId": "co_cf_l",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "co_send",
+      "fromProperty": "out-body",
+      "toId": "co_cf_c",
+      "toProperty": "in-body"
+    },
+    {
+      "fromId": "co_in",
+      "fromProperty": "stepId",
+      "toId": "co_cf_c",
+      "toProperty": "in-stepId"
+    },
+    {
+      "fromId": "co_in",
+      "fromProperty": "learnerId",
+      "toId": "co_cf_c",
+      "toProperty": "in-learnerId"
+    },
+    {
+      "fromId": "co_send",
+      "fromProperty": "out-goCoach",
+      "toId": "co_cf_c",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "co_files",
+      "fromProperty": "busyKey",
+      "toId": "co_t_busy",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "co_t_busy",
+      "fromProperty": "Translation",
+      "toId": "co_fill_busy",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "co_files",
+      "fromProperty": "busyI",
+      "toId": "co_fill_busy",
+      "toProperty": "i"
+    },
+    {
+      "fromId": "co_files",
+      "fromProperty": "busyN",
+      "toId": "co_fill_busy",
+      "toProperty": "n"
+    },
+    {
+      "fromId": "co_fill_busy",
+      "fromProperty": "formatted",
+      "toId": "co_busy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "co_busy_sw",
+      "fromProperty": "state",
+      "toId": "co_busy",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "co_busy_sw",
+      "fromProperty": "state",
+      "toId": "co_not_busy",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "co_not_busy",
+      "fromProperty": "result",
+      "toId": "co_go",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "co_refused_sw",
+      "fromProperty": "state",
+      "toId": "co_refused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "co_server_sw",
+      "fromProperty": "state",
+      "toId": "co_server",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "co_done_sw",
+      "fromProperty": "state",
+      "toId": "co_done",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "co_send",
+      "fromProperty": "out-doneKey",
+      "toId": "co_t_done",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "co_t_done",
+      "fromProperty": "Translation",
+      "toId": "co_done",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "co_cf_l",
+      "fromProperty": "done",
+      "toId": "co_busy_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "co_cf_l",
+      "fromProperty": "done",
+      "toId": "co_done_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "co_cf_l",
+      "fromProperty": "done",
+      "toId": "co_text",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "co_cf_l",
+      "fromProperty": "done",
+      "toId": "co_files",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "co_cf_l",
+      "fromProperty": "done",
+      "toId": "co_out",
+      "toProperty": "sent"
+    },
+    {
+      "fromId": "co_cf_l",
+      "fromProperty": "failure",
+      "toId": "co_busy_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "co_cf_l",
+      "fromProperty": "failure",
+      "toId": "co_server_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "co_cf_l",
+      "fromProperty": "error",
+      "toId": "co_server",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "co_cf_c",
+      "fromProperty": "done",
+      "toId": "co_busy_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "co_cf_c",
+      "fromProperty": "done",
+      "toId": "co_done_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "co_cf_c",
+      "fromProperty": "done",
+      "toId": "co_text",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "co_cf_c",
+      "fromProperty": "done",
+      "toId": "co_out",
+      "toProperty": "sent"
+    },
+    {
+      "fromId": "co_cf_c",
+      "fromProperty": "failure",
+      "toId": "co_busy_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "co_cf_c",
+      "fromProperty": "failure",
+      "toId": "co_server_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "co_cf_c",
+      "fromProperty": "error",
+      "toId": "co_server",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "co_in",
+      "fromProperty": "draft",
+      "toId": "co_text",
+      "toProperty": "startValue"
+    }
+  ]
+}

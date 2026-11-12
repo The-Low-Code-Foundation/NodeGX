@@ -1,0 +1,118 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "1fb80e46-cbde-578f-81e6-c046607b6be1",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mc_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach opens a learner's messages",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "learnerId",
+        "allowNoAuth": false,
+        "ptype-learnerId": "string",
+        "preq-learnerId": true
+      }
+    },
+    {
+      "id": "mc_fn",
+      "type": "JavaScriptFunction",
+      "label": "Read the conversation, mark hers read",
+      "x": 40,
+      "y": 200,
+      "parameters": {
+        "runOnChange-in-userId": false,
+        "runOnChange-in-learnerId": false,
+        "functionScript": "/*\n * THE COACH READS ONE LEARNER'S CONVERSATION (DBU-07). role:staff is checked by\n * nodegx.security.json. Reading marks the learner's messages read and rings her bell once if it\n * marked any, so the coach's unread counts clear. `emailOn` says whether she gets an email when\n * he replies, so the page can tell him when she will only see it on her next visit.\n */\n(async () => {\n  try {\n    const me = String(Inputs.userId || '');\n    if (!me) throw new Error('no session user');\n    const R = Noodl.Records;\n    const q = (c, where) => R.query(c, where, { limit: 1000, plain: true });\n    const learnerId = String(Inputs.learnerId || '');\n    const users = learnerId ? await q('_User', { objectId: { equalTo: learnerId } }) : [];\n    const plans = users.length ? await q('Plan', { learner: { equalTo: learnerId } }) : [];\n    if (!users.length || !plans.length) { Outputs.refused(); return; }\n    const learner = users[0];\n\n    const rows = (await q('Message', { learner: { equalTo: learnerId } }))\n      .sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));\n    const steps = await q('Step', { learner: { equalTo: learnerId } });\n    const titleOf = (id) => { const s = steps.find((x) => x.objectId === id); return s ? String(s.title || '') : ''; };\n    const coaches = [...new Set(rows.map((m) => m.author).filter((a) => a !== learnerId))];\n    const people = coaches.length ? await q('_User', { objectId: { containedIn: coaches } }) : [];\n    const nameOf = (id) => { const u = people.find((p) => p.objectId === id); return String((u && u.name) || 'Coach').split(' ')[0]; };\n    const first = String(learner.name || learner.email || '').split(' ')[0];\n\n    const now = new Date().toISOString();\n    const unread = rows.filter((m) => m.author === learnerId && !m.readAt);\n    Outputs.messages = rows.map((m) => ({\n      id: m.objectId,\n      mine: m.author !== learnerId,\n      who: m.author === learnerId ? first : (m.author === me ? '' : nameOf(m.author)),\n      body: String(m.body || ''),\n      at: m.createdAt,\n      stepId: m.step || '',\n      stepTitle: m.step ? titleOf(m.step) : '',\n      attachments: (Array.isArray(m.attachments) ? m.attachments : []).map((a) => ({ file: a.file, fileName: a.name })),\n      isNew: m.author === learnerId && !m.readAt\n    }));\n    const mine = await q('_User', { objectId: { equalTo: me } });\n    Outputs.me = { name: (mine[0] && mine[0].name) || '', timezone: (mine[0] && mine[0].timezone) || '' };\n    Outputs.learner = { id: learnerId, name: learner.name || learner.email || '', first };\n    Outputs.emailOn = !learner.emailOptOutAt;\n    for (const m of unread) await R.save(m.objectId, { readAt: now }, { className: 'Message' });\n    if (unread.length) {\n      await R.create('Doorbell', { learner: learnerId, topic: 'message' }, { acl: { [learnerId]: { read: true }, 'role:staff': { read: true } } });\n    }\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:messagesAsCoach]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "displayName": "userId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-learnerId",
+          "displayName": "learnerId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-failed",
+          "displayName": "failed",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-messages",
+          "displayName": "messages",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-me",
+          "displayName": "me",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-learner",
+          "displayName": "learner",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-emailOn",
+          "displayName": "emailOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "mc_res",
+      "type": "noodl.cloud.response",
+      "label": "The conversation",
+      "x": 40,
+      "y": 360,
+      "parameters": {
+        "params": "messages,me,learner,emailOn"
+      }
+    },
+    {
+      "id": "mc_deny",
+      "type": "noodl.cloud.response",
+      "label": "Not a learner, or could not read",
+      "x": 320,
+      "y": 360,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "These messages could not be read."
+      }
+    }
+  ]
+}

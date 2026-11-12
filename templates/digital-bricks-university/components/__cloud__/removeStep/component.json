@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "1480cfda-0ee5-5045-8eec-f040bc350bd8",
+  "name": "removeStep",
+  "path": "/#__cloud__/removeStep",
+  "type": "cloud",
+  "created": "2026-11-09T10:27:10.120Z",
+  "modified": "2026-11-12T14:30:09.145Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach removes a step from a plan and the rest are renumbered 1..n. A step the learner has already handed in to, written about or answered is refused: unshare it instead, so nothing of hers is orphaned (security: role:staff)."
+}

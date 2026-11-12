@@ -1,0 +1,284 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2579363e-9bfa-5354-8478-ca84fad7cfc1",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "di_card",
+      "type": "Group",
+      "label": "The demo's way in",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "di_pitch",
+        "di_lede",
+        "di_doors",
+        "di_unsupported",
+        "di_template"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "stretch",
+        "rowGap": "var(--space-4)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-8)",
+        "paddingBottom": "var(--space-8)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      }
+    },
+    {
+      "id": "di_pitch",
+      "type": "Text",
+      "label": "The pitch",
+      "x": 100,
+      "y": 160,
+      "parent": "di_card",
+      "parameters": {
+        "text": "",
+        "as": "h1",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "di_lede",
+      "type": "Text",
+      "label": "What this demo is",
+      "x": 100,
+      "y": 280,
+      "parent": "di_card",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "di_doors",
+      "type": "Group",
+      "label": "Two doors",
+      "x": 100,
+      "y": 400,
+      "parent": "di_card",
+      "children": [
+        "di_learner",
+        "di_coach"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "stretch",
+        "rowGap": "var(--space-3)",
+        "marginTop": "var(--space-2)"
+      }
+    },
+    {
+      "id": "di_learner",
+      "type": "net.noodl.controls.button",
+      "label": "Look as Camille",
+      "x": 160,
+      "y": 520,
+      "parent": "di_doors",
+      "parameters": {
+        "label": "",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      }
+    },
+    {
+      "id": "di_coach",
+      "type": "net.noodl.controls.button",
+      "label": "Look as Richard",
+      "x": 160,
+      "y": 640,
+      "parent": "di_doors",
+      "parameters": {
+        "label": "",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)"
+      }
+    },
+    {
+      "id": "di_unsupported",
+      "type": "Text",
+      "label": "This browser cannot run it",
+      "x": 100,
+      "y": 760,
+      "parent": "di_card",
+      "parameters": {
+        "text": "",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--attention)"
+      }
+    },
+    {
+      "id": "di_template",
+      "type": "net.noodl.controls.button",
+      "label": "Get the template",
+      "x": 100,
+      "y": 880,
+      "parent": "di_card",
+      "parameters": {
+        "label": "",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "transparent",
+        "color": "var(--primary)",
+        "fontWeight": "var(--font-medium)",
+        "minHeight": "var(--space-8)"
+      }
+    },
+    {
+      "id": "di_mode",
+      "type": "/Demo/Demo mode",
+      "label": "Is this the demo?",
+      "x": 600,
+      "y": 40
+    },
+    {
+      "id": "di_go_learner",
+      "type": "JavaScriptFunction",
+      "label": "Look as Camille",
+      "x": 600,
+      "y": 160,
+      "parameters": {
+        "functionScript": "// demo/boot.js: a stored session for her, then the app's own gate takes her Home.\nif (typeof window !== 'undefined' && window.dbuDemo) window.dbuDemo.lookAs('camille');\n"
+      }
+    },
+    {
+      "id": "di_go_coach",
+      "type": "JavaScriptFunction",
+      "label": "Look as Richard",
+      "x": 600,
+      "y": 280,
+      "parameters": {
+        "functionScript": "// demo/boot.js: a stored session for him, then the app's own gate takes him to Learners.\nif (typeof window !== 'undefined' && window.dbuDemo) window.dbuDemo.lookAs('richard');\n"
+      }
+    },
+    {
+      "id": "di_open_template",
+      "type": "net.noodl.externallink",
+      "label": "Open the template's page",
+      "x": 600,
+      "y": 400,
+      "parameters": {
+        "openInNewTab": true
+      }
+    },
+    {
+      "id": "di_t_pitch",
+      "type": "Translation",
+      "label": "The pitch",
+      "x": 900,
+      "y": 40,
+      "parameters": {
+        "Namespace": "common",
+        "Key": "demo.pitch"
+      }
+    },
+    {
+      "id": "di_t_lede",
+      "type": "Translation",
+      "label": "What this demo is",
+      "x": 900,
+      "y": 100,
+      "parameters": {
+        "Namespace": "common",
+        "Key": "demo.lede"
+      }
+    },
+    {
+      "id": "di_t_learner",
+      "type": "Translation",
+      "label": "Look as Camille",
+      "x": 900,
+      "y": 160,
+      "parameters": {
+        "Namespace": "common",
+        "Key": "demo.asLearner"
+      }
+    },
+    {
+      "id": "di_t_coach",
+      "type": "Translation",
+      "label": "Look as Richard",
+      "x": 900,
+      "y": 220,
+      "parameters": {
+        "Namespace": "common",
+        "Key": "demo.asCoach"
+      }
+    },
+    {
+      "id": "di_t_unsupported",
+      "type": "Translation",
+      "label": "Cannot run here",
+      "x": 900,
+      "y": 280,
+      "parameters": {
+        "Namespace": "common",
+        "Key": "demo.unsupported"
+      }
+    },
+    {
+      "id": "di_t_template",
+      "type": "Translation",
+      "label": "Get the template",
+      "x": 900,
+      "y": 340,
+      "parameters": {
+        "Namespace": "common",
+        "Key": "demo.template"
+      }
+    },
+    {
+      "id": "di_t_url",
+      "type": "Translation",
+      "label": "The template's page",
+      "x": 900,
+      "y": 400,
+      "parameters": {
+        "Namespace": "common",
+        "Key": "demo.templateUrl"
+      }
+    }
+  ],
+  "visualRoots": [
+    "di_card"
+  ]
+}

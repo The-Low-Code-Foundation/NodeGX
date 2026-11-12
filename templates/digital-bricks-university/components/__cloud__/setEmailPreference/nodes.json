@@ -1,0 +1,114 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "351a050e-7d3f-52f8-8bd7-8f0891d0fc58",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ep_req",
+      "type": "noodl.cloud.request",
+      "label": "On or off, for me",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "state",
+        "allowNoAuth": false,
+        "ptype-state": "string",
+        "preq-state": true
+      }
+    },
+    {
+      "id": "ep_fn",
+      "type": "JavaScriptFunction",
+      "label": "Stamp or clear emailOptOutAt",
+      "x": 40,
+      "y": 180,
+      "parameters": {
+        "runOnChange-in-userId": false,
+        "runOnChange-in-state": false,
+        "functionScript": "/*\n * TURN MESSAGE EMAILS ON OR OFF FOR THE SIGNED-IN ACCOUNT (DBU-07), from the Messages page.\n * The only thing that turns them back on (the unsubscribe link only ever turns them off).\n * Turning off keeps the first stamp, so \"when did she ask\" stays the moment she first asked.\n * Sign-in emails are the backend's own and are never affected.\n */\n(async () => {\n  try {\n    const me = String(Inputs.userId || '');\n    if (!me) throw new Error('no session user');\n    const state = String(Inputs.state || '');\n    if (state !== 'on' && state !== 'off') { Outputs.why = 'Choose on or off.'; Outputs.refuse(); return; }\n    const users = await Noodl.Records.query('_User', { objectId: { equalTo: me } }, { limit: 2, plain: true });\n    if (users.length !== 1) throw new Error('no account');\n    const stamp = state === 'on' ? null : users[0].emailOptOutAt || new Date().toISOString();\n    await Noodl.Records.save(me, { emailOptOutAt: stamp }, { className: '_User' });\n    Outputs.emailOn = state === 'on';\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:setEmailPreference]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "displayName": "userId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-state",
+          "displayName": "state",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-refuse",
+          "displayName": "refuse",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "displayName": "done",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-failed",
+          "displayName": "failed",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-why",
+          "displayName": "why",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-emailOn",
+          "displayName": "emailOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "ep_res",
+      "type": "noodl.cloud.response",
+      "label": "Now on, or off",
+      "x": 40,
+      "y": 320,
+      "parameters": {
+        "params": "emailOn"
+      }
+    },
+    {
+      "id": "ep_deny",
+      "type": "noodl.cloud.response",
+      "label": "Neither on nor off",
+      "x": 320,
+      "y": 320,
+      "parameters": {
+        "status": "failure"
+      }
+    },
+    {
+      "id": "ep_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "x": 600,
+      "y": 320,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "This could not be changed. Try again in a moment."
+      }
+    }
+  ]
+}

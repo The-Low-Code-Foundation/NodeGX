@@ -1,0 +1,562 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c1413ad7-a297-5d70-8956-4fd6c712941e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hw_page",
+      "type": "Page",
+      "label": "Homework",
+      "parameters": {
+        "urlPath": "homework"
+      },
+      "children": [
+        "hw_shell"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "hw_shell",
+      "type": "/Shell/App shell",
+      "label": "Learner shell",
+      "parent": "hw_page",
+      "parameters": {
+        "coach": false,
+        "current": "homework"
+      },
+      "children": [
+        "hw_top",
+        "hw_missing",
+        "hw_content"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "hw_top",
+      "type": "Group",
+      "label": "Back and head",
+      "parent": "hw_shell",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "hw_back",
+        "hw_head"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "hw_back",
+      "type": "net.noodl.controls.button",
+      "label": "All homework",
+      "parent": "hw_top",
+      "parameters": {
+        "mounted": false,
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-2)",
+        "minHeight": "var(--space-11)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-arrow-left",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)",
+        "iconColor": "var(--muted-foreground)"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "hw_head",
+      "type": "/Shell/Page head",
+      "label": "Head",
+      "parent": "hw_top",
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "hw_missing",
+      "type": "Group",
+      "label": "Shown when this homework cannot be opened",
+      "parent": "hw_shell",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "children": [
+        "hw_missing_state"
+      ],
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "hw_missing_state",
+      "type": "/Shell/Empty state",
+      "label": "This homework isn't available",
+      "parent": "hw_missing",
+      "parameters": {
+        "icon": {
+          "class": "lucide",
+          "code": "icon-lock",
+          "codeAsClass": true
+        },
+        "titleKey": "homework.missingTitle",
+        "bodyKey": "homework.missingBody"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "hw_empty_box",
+      "type": "Group",
+      "label": "Shown while there is no homework",
+      "parent": "hw_content",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "children": [
+        "hw_empty"
+      ],
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "hw_empty",
+      "type": "/Shell/Empty state",
+      "label": "No homework yet",
+      "parent": "hw_empty_box",
+      "parameters": {
+        "icon": {
+          "class": "lucide",
+          "code": "icon-pencil",
+          "codeAsClass": true
+        },
+        "titleKey": "homework.emptyTitle",
+        "bodyKey": "homework.emptyBody"
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "hw_list",
+      "type": "Group",
+      "label": "Your homework",
+      "parent": "hw_content",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      },
+      "children": [
+        "hw_list_rows"
+      ],
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "hw_list_rows",
+      "type": "For Each",
+      "label": "One row per homework",
+      "parent": "hw_list",
+      "parameters": {
+        "template": "/Homework/Homework row"
+      },
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "hw_cols",
+      "type": "net.noodl.visual.columns",
+      "label": "The homework, and beside it your work",
+      "parent": "hw_content",
+      "parameters": {
+        "mounted": false,
+        "sizing": "layoutString",
+        "layoutString": "1 1",
+        "smallBreakpoint": 900,
+        "smallLayout": "1",
+        "marginX": 24,
+        "marginY": 24
+      },
+      "metadata": {
+        "comment": "The brief on the left, your work on the right, in equal halves so a preview has room; one column under 900px of room, the brief first. Columns is the only node that reflows."
+      },
+      "children": [
+        "hw_left",
+        "hw_right"
+      ],
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "hw_left",
+      "type": "Group",
+      "label": "The homework",
+      "parent": "hw_cols",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "children": [
+        "hw_brief"
+      ],
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "hw_brief",
+      "type": "/Homework/Brief card",
+      "label": "Brief, what to hand in, resources",
+      "parent": "hw_left",
+      "x": 280,
+      "y": 1600
+    },
+    {
+      "id": "hw_right",
+      "type": "Group",
+      "label": "Your work",
+      "parent": "hw_cols",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-5)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      },
+      "children": [
+        "hw_work_h",
+        "hw_verdict",
+        "hw_handin_box",
+        "hw_versions_box",
+        "hw_thread"
+      ],
+      "x": 220,
+      "y": 1720
+    },
+    {
+      "id": "hw_work_h",
+      "type": "Text",
+      "label": "Your work",
+      "parent": "hw_right",
+      "parameters": {
+        "text": "",
+        "as": "h2",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      },
+      "x": 280,
+      "y": 1840
+    },
+    {
+      "id": "hw_verdict",
+      "type": "/Homework/Verdict",
+      "label": "Where the newest hand-in stands",
+      "parent": "hw_right",
+      "x": 280,
+      "y": 1960
+    },
+    {
+      "id": "hw_handin_box",
+      "type": "Group",
+      "label": "Hand in, unless approved",
+      "parent": "hw_right",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "children": [
+        "hw_handin"
+      ],
+      "x": 280,
+      "y": 2080
+    },
+    {
+      "id": "hw_handin",
+      "type": "/Homework/Hand in",
+      "label": "Hand in a new version",
+      "parent": "hw_handin_box",
+      "x": 340,
+      "y": 2200
+    },
+    {
+      "id": "hw_versions_box",
+      "type": "Group",
+      "label": "What you've handed in",
+      "parent": "hw_right",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "paddingTop": "var(--space-5)",
+        "borderTopStyle": "solid",
+        "borderTopWidth": "var(--border-1)",
+        "borderTopColor": "var(--border)"
+      },
+      "children": [
+        "hw_versions"
+      ],
+      "x": 280,
+      "y": 2320
+    },
+    {
+      "id": "hw_versions",
+      "type": "/Work/Versions",
+      "label": "Every version, newest first",
+      "parent": "hw_versions_box",
+      "parameters": {
+        "mode": "own",
+        "canReview": false,
+        "headKey": "homework.yourVersions"
+      },
+      "x": 340,
+      "y": 2440
+    },
+    {
+      "id": "hw_t_tab",
+      "type": "Translation",
+      "label": "The browser tab's title",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "homework.tab"
+      },
+      "x": 590,
+      "y": 40
+    },
+    {
+      "id": "hw_url",
+      "type": "PageInputs",
+      "label": "?step= from Home",
+      "parameters": {
+        "queryParams": "step"
+      },
+      "metadata": {
+        "comment": "Home's Open homework and this page's own list link here with the step's id (DBU-05). No step: the list."
+      },
+      "x": 590,
+      "y": 1960
+    },
+    {
+      "id": "hw_read",
+      "type": "CloudFunction2",
+      "label": "myHomework (only my shared homework)",
+      "parameters": {
+        "function": "myHomework"
+      },
+      "x": 590,
+      "y": 280
+    },
+    {
+      "id": "hw_step_fn",
+      "type": "JavaScriptFunction",
+      "label": "When ?step= changes, read again",
+      "parameters": {
+        "functionScript": "// Opening another homework, the list, or the Homework tab changes ?step= without leaving the page.\n// No step reads as '' (the list), so the read never keeps a step that is no longer in the address.\nOutputs.stepId = String(Inputs.step || '');\nOutputs.go();"
+      },
+      "ports": [
+        {
+          "name": "in-step",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-stepId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 590,
+      "y": 2080
+    },
+    {
+      "id": "hw_bell",
+      "type": "SubscribeToChanges",
+      "label": "My doorbell: a verdict, or my own hand-in",
+      "parameters": {
+        "collectionName": "Doorbell"
+      },
+      "metadata": {
+        "comment": "The bell carries no content (PLATFORM.md 4): it only says read again. handIn and reviewSubmission ring it."
+      },
+      "x": 590,
+      "y": 2200
+    },
+    {
+      "id": "hw_words",
+      "type": "/Homework/Homework in words",
+      "label": "The homework, in keys and values",
+      "x": 590,
+      "y": 640
+    },
+    {
+      "id": "hw_fail_sw",
+      "type": "Switch",
+      "label": "Remember the read failed",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 590,
+      "y": 760
+    },
+    {
+      "id": "hw_t_back",
+      "type": "Translation",
+      "label": "All homework",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "homework.back"
+      },
+      "x": 590,
+      "y": 400
+    },
+    {
+      "id": "hw_t_work",
+      "type": "Translation",
+      "label": "Your work",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "homework.yourWork"
+      },
+      "x": 590,
+      "y": 1840
+    },
+    {
+      "id": "hw_go_list",
+      "type": "RouterNavigate",
+      "label": "→ All my homework",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Homework",
+        "pm-step": ""
+      },
+      "x": 590,
+      "y": 520
+    },
+    {
+      "id": "hw_content",
+      "type": "Group",
+      "label": "The list or the homework, unless the read failed",
+      "parent": "hw_shell",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-6)"
+      },
+      "metadata": {
+        "comment": "Hidden when myHomework refuses (another learner's step, an unshared one): what the last good read drew must not stay on screen under the 'isn't available' card."
+      },
+      "children": [
+        "hw_empty_box",
+        "hw_list",
+        "hw_cols"
+      ],
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "hw_not_failed",
+      "type": "Inverter",
+      "label": "The read did not fail",
+      "x": 590,
+      "y": 880
+    },
+    {
+      "id": "hw_thread",
+      "type": "/Messages/Conversation",
+      "label": "Messages about this homework, and a composer",
+      "parent": "hw_right",
+      "parameters": {
+        "mode": "learner",
+        "tagged": false,
+        "showEmailPref": false,
+        "titleKey": "messages.threadTitle",
+        "emptyKey": "messages.threadEmpty",
+        "scoped": true
+      },
+      "metadata": {
+        "comment": "Only this homework's thread (DBU-07): every message also shows, tagged, under Messages."
+      },
+      "x": 340,
+      "y": 2560
+    }
+  ],
+  "visualRoots": [
+    "hw_page"
+  ]
+}

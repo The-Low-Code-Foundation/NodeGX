@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5d38081e-dd7e-5669-8b9f-6b7d462ebd32",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cf_t_name",
+      "fromProperty": "Translation",
+      "toId": "cf_fill_name",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "cf_in",
+      "fromProperty": "name",
+      "toId": "cf_fill_name",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "cf_in",
+      "fromProperty": "size",
+      "toId": "cf_fill_name",
+      "toProperty": "size"
+    },
+    {
+      "fromId": "cf_fill_name",
+      "fromProperty": "formatted",
+      "toId": "cf_name",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cf_t_remove",
+      "fromProperty": "Translation",
+      "toId": "cf_remove",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "cf_remove",
+      "fromProperty": "onClick",
+      "toId": "cf_out",
+      "toProperty": "remove"
+    }
+  ]
+}

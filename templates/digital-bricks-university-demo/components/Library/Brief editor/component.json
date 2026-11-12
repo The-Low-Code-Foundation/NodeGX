@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "1e0baa1a-4277-514e-87ef-198deeea9f97",
+  "name": "Brief editor",
+  "path": "/Library/Brief editor",
+  "type": "visual",
+  "created": "2026-11-07T22:11:07.023Z",
+  "modified": "2026-11-07T22:11:07.023Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The brief: a text area written in plain Markdown, a one-line hint, and a live preview of exactly what the learner will see (Shell/Formatted text, HTML off)."
+}

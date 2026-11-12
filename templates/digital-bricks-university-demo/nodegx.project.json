@@ -1,0 +1,356 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/project-v2.json",
+  "name": "Digital Bricks University (demo)",
+  "id": "7b0c5d1e-dbu1-4d3e-9a11-de0000000011",
+  "version": "5",
+  "nodegxVersion": "0.2.9",
+  "runtimeVersion": "react19",
+  "created": "2026-11-07T20:22:55.715Z",
+  "modified": "2026-11-07T20:22:55.715Z",
+  "settings": {
+    "htmlTitle": "Digital Bricks University",
+    "navigationPathType": "hash",
+    "bodyScroll": true,
+    "headCode": "<script src=\"demo/boot.js\"></script>"
+  },
+  "structure": {
+    "componentsDir": "components",
+    "assetsDir": "assets"
+  },
+  "rootNodeId": "fff776b7-5899-43e9-85b4-49747de82807",
+  "metadata": {
+    "designTokens": {
+      "version": 1,
+      "customTokens": [
+        {
+          "name": "--font-sans",
+          "value": "Inter, ui-sans-serif, system-ui, sans-serif",
+          "category": "typography-family",
+          "isCustom": true,
+          "description": "Inter, falling back to the system sans-serif stack"
+        },
+        {
+          "name": "--background",
+          "value": "#F9FAFB",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Page/app background"
+        },
+        {
+          "name": "--surface",
+          "value": "#FFFFFF",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Card and panel surfaces"
+        },
+        {
+          "name": "--surface-raised",
+          "value": "#FFFFFF",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Elevated surface (dialogs, dropdowns)"
+        },
+        {
+          "name": "--foreground",
+          "value": "#111827",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Default text color"
+        },
+        {
+          "name": "--muted",
+          "value": "#F3F4F6",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Subtle backgrounds, disabled states"
+        },
+        {
+          "name": "--muted-foreground",
+          "value": "#4B5563",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Text color on muted background"
+        },
+        {
+          "name": "--subtle-foreground",
+          "value": "#6B7280",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--border",
+          "value": "#E5E7EB",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Default border color"
+        },
+        {
+          "name": "--border-subtle",
+          "value": "#F3F4F6",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Subtle/light border"
+        },
+        {
+          "name": "--border-strong",
+          "value": "#D1D5DB",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Strong/dark border"
+        },
+        {
+          "name": "--border-control",
+          "value": "#9CA3AF",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Border for controls — meets 3:1 against surface, unlike --border"
+        },
+        {
+          "name": "--primary",
+          "value": "#4F46E5",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Main brand and action color"
+        },
+        {
+          "name": "--primary-hover",
+          "value": "#4338CA",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Primary color on hover"
+        },
+        {
+          "name": "--primary-foreground",
+          "value": "#FFFFFF",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Text color on primary background"
+        },
+        {
+          "name": "--accent",
+          "value": "#EEF2FF",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Highlights and selections"
+        },
+        {
+          "name": "--accent-foreground",
+          "value": "#4338CA",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Text color on accent background"
+        },
+        {
+          "name": "--ring",
+          "value": "#6366F1",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Focus ring color"
+        },
+        {
+          "name": "--radius-md",
+          "value": "8px",
+          "category": "border-radius",
+          "isCustom": true
+        },
+        {
+          "name": "--radius-lg",
+          "value": "12px",
+          "category": "border-radius",
+          "isCustom": true
+        },
+        {
+          "name": "--radius-xl",
+          "value": "14px",
+          "category": "border-radius",
+          "isCustom": true
+        },
+        {
+          "name": "--coach-badge",
+          "value": "#111827",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--coach-badge-foreground",
+          "value": "#FFFFFF",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--attention",
+          "value": "#EA580C",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--live-bg",
+          "value": "#EEF2FF",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--live-border",
+          "value": "#C7D2FE",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--live-fg",
+          "value": "#3730A3",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--homework-bg",
+          "value": "#FFF7ED",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--homework-border",
+          "value": "#FED7AA",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--homework-fg",
+          "value": "#9A3412",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--checkin-bg",
+          "value": "#F3F4F6",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--checkin-fg",
+          "value": "#4B5563",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--done-bg",
+          "value": "#ECFDF5",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--done-border",
+          "value": "#A7F3D0",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--done-fg",
+          "value": "#047857",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--waiting-bg",
+          "value": "#F3F4F6",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--waiting-fg",
+          "value": "#4B5563",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--file-doc-bg",
+          "value": "#DBEAFE",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--file-doc-fg",
+          "value": "#1E40AF",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--file-html-bg",
+          "value": "#FFEDD5",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--file-html-fg",
+          "value": "#9A3412",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--file-prompt-bg",
+          "value": "#EDE9FE",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--file-prompt-fg",
+          "value": "#5B21B6",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--file-audio-bg",
+          "value": "#CCFBF1",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--file-audio-fg",
+          "value": "#115E59",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--file-video-bg",
+          "value": "#E0E7FF",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--file-video-fg",
+          "value": "#3730A3",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--file-pdf-bg",
+          "value": "#FEE2E2",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--file-pdf-fg",
+          "value": "#991B1B",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--file-link-bg",
+          "value": "#E5E7EB",
+          "category": "color-semantic",
+          "isCustom": true
+        },
+        {
+          "name": "--file-link-fg",
+          "value": "#374151",
+          "category": "color-semantic",
+          "isCustom": true
+        }
+      ]
+    },
+    "cloudservices": {
+      "endpoint": "demo-api",
+      "appId": "nodegx-backend",
+      "type": "nodegx"
+    }
+  }
+}

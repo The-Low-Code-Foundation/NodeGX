@@ -1,0 +1,86 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "42489d9a-facc-5aae-8769-2488bfcf1b37",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cs_req",
+      "type": "noodl.cloud.request",
+      "label": "The coach opens Settings",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "",
+        "allowNoAuth": false
+      }
+    },
+    {
+      "id": "cs_fn",
+      "type": "JavaScriptFunction",
+      "label": "Read the coach address and name",
+      "x": 40,
+      "y": 180,
+      "parameters": {
+        "functionScript": "// The coach's settings (DBU-07, DBU-11): where learner messages are mailed (the Setting row, else the\n// default placeholder) and the name learners see (empty: they see \"your coach\"). Staff only.\n(async () => {\n  try {\n    const read = async (key) => {\n      const rows = await Noodl.Records.query('Setting', { key: { equalTo: key } }, { limit: 2, plain: true });\n      return rows[0] ? String(rows[0].value || '').trim() : '';\n    };\n    Outputs.defaultCoachEmail = 'coach@example.com';\n    Outputs.coachEmail = (await read('coachEmail')) || 'coach@example.com';\n    Outputs.coachName = await read('coachName');\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:coachSettings]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "done",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "failed",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-defaultCoachEmail",
+          "plug": "output",
+          "type": "*",
+          "displayName": "defaultCoachEmail",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-coachEmail",
+          "plug": "output",
+          "type": "*",
+          "displayName": "coachEmail",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-coachName",
+          "plug": "output",
+          "type": "*",
+          "displayName": "coachName",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "cs_res",
+      "type": "noodl.cloud.response",
+      "label": "The settings",
+      "x": 40,
+      "y": 320,
+      "parameters": {
+        "params": "coachEmail,defaultCoachEmail,coachName"
+      }
+    },
+    {
+      "id": "cs_deny",
+      "type": "noodl.cloud.response",
+      "label": "Could not read",
+      "x": 320,
+      "y": 320,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "The settings could not be read."
+      }
+    }
+  ]
+}

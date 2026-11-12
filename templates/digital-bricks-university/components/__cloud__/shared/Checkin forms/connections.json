@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f558a0de-5bd8-5cfa-8fcb-03695795c9ec",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cf_in-2",
+      "fromProperty": "fetch",
+      "toId": "cf_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cf_fn",
+      "fromProperty": "out-forms",
+      "toId": "cf_out-2",
+      "toProperty": "forms"
+    },
+    {
+      "fromId": "cf_fn",
+      "fromProperty": "out-done",
+      "toId": "cf_out-2",
+      "toProperty": "done"
+    }
+  ]
+}

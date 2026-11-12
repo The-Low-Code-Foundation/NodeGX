@@ -1,0 +1,301 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "38e0ed2e-20f3-555a-81bf-089e5f544bcf",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sl_t_h",
+      "fromProperty": "Translation",
+      "toId": "sl_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sl_t_hint",
+      "fromProperty": "Translation",
+      "toId": "sl_hint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sl_in",
+      "fromProperty": "rows",
+      "toId": "sl_merge",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "sl_in",
+      "fromProperty": "readOnly",
+      "toId": "sl_merge",
+      "toProperty": "in-readOnly"
+    },
+    {
+      "fromId": "sl_merge",
+      "fromProperty": "out-items",
+      "toId": "sl_rows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "sl_merge",
+      "fromProperty": "out-hasRows",
+      "toId": "sl_zone",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sl_merge",
+      "fromProperty": "out-showEmpty",
+      "toId": "sl_none",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sl_in",
+      "fromProperty": "readOnly",
+      "toId": "sl_not_ro",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "sl_not_ro",
+      "fromProperty": "result",
+      "toId": "sl_add_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sl_rows",
+      "fromProperty": "itemActionItemId",
+      "toId": "sl_toggle",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "sl_rows",
+      "fromProperty": "itemOutputSignal-edit",
+      "toId": "sl_toggle",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "sl_toggle",
+      "fromProperty": "out-go",
+      "toId": "sl_set_open",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "sl_rows",
+      "fromProperty": "itemOutputSignal-closed",
+      "toId": "sl_set_close",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "sl_rows",
+      "fromProperty": "itemOutputSignal-saved",
+      "toId": "sl_set_close",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "sl_rows",
+      "fromProperty": "itemOutputSignal-saved",
+      "toId": "sl_out",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "sl_rows",
+      "fromProperty": "itemActionItemId",
+      "toId": "sl_share",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "sl_in",
+      "fromProperty": "rows",
+      "toId": "sl_share",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "sl_rows",
+      "fromProperty": "itemOutputSignal-share",
+      "toId": "sl_share",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "sl_in",
+      "fromProperty": "planId",
+      "toId": "sl_c_share",
+      "toProperty": "in-planId"
+    },
+    {
+      "fromId": "sl_share",
+      "fromProperty": "out-stepIds",
+      "toId": "sl_c_share",
+      "toProperty": "in-stepIds"
+    },
+    {
+      "fromId": "sl_share",
+      "fromProperty": "out-shared",
+      "toId": "sl_c_share",
+      "toProperty": "in-shared"
+    },
+    {
+      "fromId": "sl_share",
+      "fromProperty": "out-go",
+      "toId": "sl_c_share",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "sl_c_share",
+      "fromProperty": "done",
+      "toId": "sl_out",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "sl_rows",
+      "fromProperty": "itemActionItemId",
+      "toId": "sl_c_remove",
+      "toProperty": "in-stepId"
+    },
+    {
+      "fromId": "sl_rows",
+      "fromProperty": "itemOutputSignal-remove",
+      "toId": "sl_c_remove",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "sl_c_remove",
+      "fromProperty": "done",
+      "toId": "sl_out",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "sl_zone",
+      "fromProperty": "droppedValue",
+      "toId": "sl_c_move",
+      "toProperty": "in-stepId"
+    },
+    {
+      "fromId": "sl_zone",
+      "fromProperty": "dropIndex",
+      "toId": "sl_c_move",
+      "toProperty": "in-index"
+    },
+    {
+      "fromId": "sl_zone",
+      "fromProperty": "dropped",
+      "toId": "sl_c_move",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "sl_c_move",
+      "fromProperty": "done",
+      "toId": "sl_out",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "sl_c_move",
+      "fromProperty": "failure",
+      "toId": "sl_out",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "sl_in",
+      "fromProperty": "planId",
+      "toId": "sl_add",
+      "toProperty": "planId"
+    },
+    {
+      "fromId": "sl_add",
+      "fromProperty": "added",
+      "toId": "sl_set_open",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "sl_add",
+      "fromProperty": "changed",
+      "toId": "sl_out",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "sl_add",
+      "fromProperty": "said",
+      "toId": "sl_out",
+      "toProperty": "said"
+    },
+    {
+      "fromId": "sl_add",
+      "fromProperty": "saidShow",
+      "toId": "sl_out",
+      "toProperty": "saidShow"
+    },
+    {
+      "fromId": "sl_add",
+      "fromProperty": "pickLibrary",
+      "toId": "sl_out",
+      "toProperty": "pickLibrary"
+    },
+    {
+      "fromId": "sl_c_share",
+      "fromProperty": "error",
+      "toId": "sl_out",
+      "toProperty": "said"
+    },
+    {
+      "fromId": "sl_c_remove",
+      "fromProperty": "error",
+      "toId": "sl_out",
+      "toProperty": "said"
+    },
+    {
+      "fromId": "sl_c_move",
+      "fromProperty": "error",
+      "toId": "sl_out",
+      "toProperty": "said"
+    },
+    {
+      "fromId": "sl_c_share",
+      "fromProperty": "failure",
+      "toId": "sl_out",
+      "toProperty": "saidShow"
+    },
+    {
+      "fromId": "sl_c_remove",
+      "fromProperty": "failure",
+      "toId": "sl_out",
+      "toProperty": "saidShow"
+    },
+    {
+      "fromId": "sl_c_move",
+      "fromProperty": "failure",
+      "toId": "sl_out",
+      "toProperty": "saidShow"
+    },
+    {
+      "fromId": "sl_state",
+      "fromProperty": "value-openId",
+      "toId": "sl_merge",
+      "toProperty": "in-openId"
+    },
+    {
+      "fromId": "sl_state",
+      "fromProperty": "value-openId",
+      "toId": "sl_toggle",
+      "toProperty": "in-current"
+    },
+    {
+      "fromId": "sl_toggle",
+      "fromProperty": "out-next",
+      "toId": "sl_set_open",
+      "toProperty": "prop-openId"
+    },
+    {
+      "fromId": "sl_add",
+      "fromProperty": "addedId",
+      "toId": "sl_set_open",
+      "toProperty": "prop-openId"
+    },
+    {
+      "fromId": "sl_not_ro",
+      "fromProperty": "result",
+      "toId": "sl_hint",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sl_rows",
+      "fromProperty": "itemOutputSignal-reviewed",
+      "toId": "sl_out",
+      "toProperty": "changed"
+    }
+  ]
+}

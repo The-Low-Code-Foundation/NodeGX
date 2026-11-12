@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "388e8a9f-6fa1-58d3-8be8-bba6c3a36730",
+  "name": "Sign in",
+  "path": "/Pages/Sign in",
+  "type": "page",
+  "created": "2026-11-07T20:28:01.155Z",
+  "modified": "2026-11-12T19:15:36.242Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Sign in, without the shell. Says sign-in is not switched on yet; the email-link form arrives in DBU-02."
+}

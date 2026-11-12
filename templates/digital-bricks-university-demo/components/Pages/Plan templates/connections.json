@@ -1,0 +1,337 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "bc63d8c9-c7ca-550e-812a-df5cd185c3cf",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pt_t_tab",
+      "fromProperty": "Translation",
+      "toId": "pt_page",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "pt_t_new",
+      "fromProperty": "Translation",
+      "toId": "pt_new",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "pt_t_arch_cb",
+      "fromProperty": "Translation",
+      "toId": "pt_arch_cb",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "pt_t_failed",
+      "fromProperty": "Translation",
+      "toId": "pt_failed",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pt_top",
+      "fromProperty": "didMount",
+      "toId": "pt_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "pt_editor",
+      "fromProperty": "saved",
+      "toId": "pt_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "pt_arch_call",
+      "fromProperty": "done",
+      "toId": "pt_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "pt_call",
+      "fromProperty": "failure",
+      "toId": "pt_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "pt_call",
+      "fromProperty": "done",
+      "toId": "pt_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pt_fail_sw",
+      "fromProperty": "state",
+      "toId": "pt_failed",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pt_call",
+      "fromProperty": "out-templates",
+      "toId": "pt_shape",
+      "toProperty": "in-templates"
+    },
+    {
+      "fromId": "pt_arch_cb",
+      "fromProperty": "checked",
+      "toId": "pt_shape",
+      "toProperty": "in-showArchived"
+    },
+    {
+      "fromId": "pt_t_meta",
+      "fromProperty": "Translation",
+      "toId": "pt_shape",
+      "toProperty": "in-meta"
+    },
+    {
+      "fromId": "pt_t_meta0",
+      "fromProperty": "Translation",
+      "toId": "pt_shape",
+      "toProperty": "in-metaNoDays"
+    },
+    {
+      "fromId": "pt_shape",
+      "fromProperty": "out-rows",
+      "toId": "pt_rows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pt_shape",
+      "fromProperty": "out-hasRows",
+      "toId": "pt_list",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pt_shape",
+      "fromProperty": "out-none",
+      "toId": "pt_none",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pt_call",
+      "fromProperty": "out-library",
+      "toId": "pt_editor",
+      "toProperty": "library"
+    },
+    {
+      "fromId": "pt_new",
+      "fromProperty": "onClick",
+      "toId": "pt_new_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pt_new_fn",
+      "fromProperty": "out-template",
+      "toId": "pt_editor",
+      "toProperty": "template"
+    },
+    {
+      "fromId": "pt_new_fn",
+      "fromProperty": "out-open",
+      "toId": "pt_editor",
+      "toProperty": "load"
+    },
+    {
+      "fromId": "pt_new_fn",
+      "fromProperty": "out-open",
+      "toId": "pt_edit_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "pt_call",
+      "fromProperty": "out-templates",
+      "toId": "pt_pick_fn",
+      "toProperty": "in-templates"
+    },
+    {
+      "fromId": "pt_rows",
+      "fromProperty": "itemActionItemId",
+      "toId": "pt_pick_fn",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "pt_rows",
+      "fromProperty": "itemOutputSignal-edit",
+      "toId": "pt_pick_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pt_pick_fn",
+      "fromProperty": "out-template",
+      "toId": "pt_editor",
+      "toProperty": "template"
+    },
+    {
+      "fromId": "pt_pick_fn",
+      "fromProperty": "out-open",
+      "toId": "pt_editor",
+      "toProperty": "load"
+    },
+    {
+      "fromId": "pt_pick_fn",
+      "fromProperty": "out-open",
+      "toId": "pt_edit_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "pt_editor",
+      "fromProperty": "closed",
+      "toId": "pt_edit_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pt_editor",
+      "fromProperty": "saved",
+      "toId": "pt_edit_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pt_edit_sw",
+      "fromProperty": "state",
+      "toId": "pt_edit_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pt_edit_sw",
+      "fromProperty": "state",
+      "toId": "pt_not_editing",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pt_not_editing",
+      "fromProperty": "result",
+      "toId": "pt_list_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pt_not_editing",
+      "fromProperty": "result",
+      "toId": "pt_new",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pt_call",
+      "fromProperty": "out-templates",
+      "toId": "pt_arch_fn",
+      "toProperty": "in-templates"
+    },
+    {
+      "fromId": "pt_rows",
+      "fromProperty": "itemActionItemId",
+      "toId": "pt_arch_fn",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "pt_t_archived",
+      "fromProperty": "Translation",
+      "toId": "pt_arch_fn",
+      "toProperty": "in-archivedSaid"
+    },
+    {
+      "fromId": "pt_t_restored",
+      "fromProperty": "Translation",
+      "toId": "pt_arch_fn",
+      "toProperty": "in-restoredSaid"
+    },
+    {
+      "fromId": "pt_rows",
+      "fromProperty": "itemOutputSignal-archive",
+      "toId": "pt_arch_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pt_arch_fn",
+      "fromProperty": "out-id",
+      "toId": "pt_arch_call",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "pt_arch_fn",
+      "fromProperty": "out-archived",
+      "toId": "pt_arch_call",
+      "toProperty": "in-archived"
+    },
+    {
+      "fromId": "pt_arch_fn",
+      "fromProperty": "out-go",
+      "toId": "pt_arch_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "pt_editor",
+      "fromProperty": "savedTitle",
+      "toId": "pt_saved_fn",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "pt_t_saved",
+      "fromProperty": "Translation",
+      "toId": "pt_saved_fn",
+      "toProperty": "in-said"
+    },
+    {
+      "fromId": "pt_editor",
+      "fromProperty": "saved",
+      "toId": "pt_saved_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pt_arch_fn",
+      "fromProperty": "out-say",
+      "toId": "pt_said",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pt_saved_fn",
+      "fromProperty": "out-say",
+      "toId": "pt_said",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pt_arch_call",
+      "fromProperty": "error",
+      "toId": "pt_said",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pt_arch_call",
+      "fromProperty": "done",
+      "toId": "pt_said_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "pt_arch_call",
+      "fromProperty": "failure",
+      "toId": "pt_said_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "pt_saved_fn",
+      "fromProperty": "out-done",
+      "toId": "pt_said_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "pt_new",
+      "fromProperty": "onClick",
+      "toId": "pt_said_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pt_rows",
+      "fromProperty": "itemOutputSignal-edit",
+      "toId": "pt_said_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pt_rows",
+      "fromProperty": "itemOutputSignal-archive",
+      "toId": "pt_said_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pt_said_sw",
+      "fromProperty": "state",
+      "toId": "pt_said",
+      "toProperty": "mounted"
+    }
+  ]
+}

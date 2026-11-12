@@ -1,0 +1,161 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "4b916c63-0daa-5950-872f-c26c3c3e38ad",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "fff776b7-5899-43e9-85b4-49747de82807",
+      "type": "Router",
+      "label": "Main Router",
+      "parameters": {
+        "name": "Main",
+        "pages": {
+          "startPage": "/Pages/Home",
+          "routes": [
+            "/Pages/Home",
+            "/Pages/Homework",
+            "/Pages/My creations",
+            "/Pages/Messages",
+            "/Pages/Sign in",
+            "/Pages/Learners",
+            "/Pages/Inbox",
+            "/Pages/Plan templates",
+            "/Pages/Homework library",
+            "/Pages/Settings",
+            "/Pages/Not found",
+            "/Pages/Learner plan",
+            "/Pages/Unsubscribe",
+            "/Pages/Check-in"
+          ]
+        }
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "app_strings",
+      "type": "/Strings",
+      "label": "Every word on screen",
+      "x": 400,
+      "y": 40,
+      "metadata": {
+        "comment": "Placed once, here, so the bundles load before any page asks for a key."
+      }
+    },
+    {
+      "id": "app_user",
+      "type": "net.noodl.user.User",
+      "label": "Who is signed in",
+      "x": 400,
+      "y": 140
+    },
+    {
+      "id": "app_gate",
+      "type": "JavaScriptFunction",
+      "label": "THE GATE: where this person may be",
+      "x": 400,
+      "y": 240,
+      "parameters": {
+        "functionScript": "/*\n * ONE GATE, IN ONE PLACE (DBU-02). A page that forgot its own check would be the one somebody\n * could open, so no page checks.\n *\n *   Signed out: every page but Sign in, Not found and Unsubscribe goes to Sign in.\n *   Unsubscribe (DBU-07) is open to everyone, signed in or not: its link comes from an email.\n *   Signed in, on Sign in: on to their side (staff to Learners, a learner to Home).\n *   A learner on a coach page: Not found. Not an error, and not the coach's page.\n *   Staff on a learner page: Learners. A coach has no plan of their own.\n *\n * PUBLIC and COACH are lists of what is allowed, so a page added later is closed to the\n * signed-out by default, and open only to learners until it is listed as a coach page.\n *\n * Who is staff is the backend's role, never an address. Roles not known yet are waited for,\n * never guessed: `roles` is undefined until the backend has said (a magic link's exchange\n * carries them, a stored session is re-read on load).\n *\n * NONE OF THIS KEEPS DATA PRIVATE. Every read and write is a cloud function behind\n * nodegx.security.json; this decides what the browser draws.\n */\nconst PUBLIC = ['Pages/Sign in', 'Pages/Not found', 'Pages/Unsubscribe'];\nconst ANYONE = ['Pages/Unsubscribe'];\nconst COACH = ['Pages/Learners', 'Pages/Learner plan', 'Pages/Inbox', 'Pages/Plan templates', 'Pages/Homework library', 'Pages/Settings'];\nconst page = String(Inputs.page || '').replace(/^\\/+/, '');\nif (!page || ANYONE.includes(page)) return;\nif (Inputs.signedIn !== true) {\n  if (!PUBLIC.includes(page)) Outputs.toSignIn();\n  return;\n}\nif (!Array.isArray(Inputs.roles)) return;\nconst staff = Inputs.roles.map((r) => (r && r.name) || r).includes('staff');\nif (page === 'Pages/Sign in') {\n  if (staff) Outputs.toLearners();\n  else Outputs.toHome();\n} else if (staff && !COACH.includes(page) && page !== 'Pages/Not found') {\n  Outputs.toLearners();\n} else if (!staff && COACH.includes(page)) {\n  Outputs.toNotFound();\n}\n"
+      },
+      "ports": [
+        {
+          "name": "in-page",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-signedIn",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-roles",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-toSignIn",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-toHome",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-toLearners",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-toNotFound",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "app_to_signin",
+      "type": "RouterNavigate",
+      "label": "→ Sign in",
+      "x": 700,
+      "y": 160,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Sign in"
+      }
+    },
+    {
+      "id": "app_to_home",
+      "type": "RouterNavigate",
+      "label": "→ Home",
+      "x": 700,
+      "y": 220,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Home"
+      }
+    },
+    {
+      "id": "app_to_learners",
+      "type": "RouterNavigate",
+      "label": "→ Learners",
+      "x": 700,
+      "y": 280,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Learners"
+      }
+    },
+    {
+      "id": "app_to_notfound",
+      "type": "RouterNavigate",
+      "label": "→ Not found",
+      "x": 700,
+      "y": 340,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Not found"
+      }
+    },
+    {
+      "id": "app_coach",
+      "type": "JavaScriptFunction",
+      "label": "The coach's name, for every word that names them",
+      "x": 400,
+      "y": 360,
+      "parameters": {
+        "functionScript": "// Once per visit, as soon as it is known whether someone is signed in: the name learners see\n// (Settings), into every word that names the coach. Nothing set, or no answer: the words keep\n// their own \"your coach\". (Not on the router's page: that made Home ask before the gate had\n// sent a signed-out visitor away.)\n// In the demo it waits for the service worker (window.dbuDemo.ready): on a first visit that never\n// settles, because the page reloads under the worker, so nothing reaches the web server instead.\nif (Inputs.signedIn === undefined || window.__dbuCoachNameAsked) return;\nwindow.__dbuCoachNameAsked = true;\nconst demoReady = window.dbuDemo ? window.dbuDemo.ready : Promise.resolve(true);\nPromise.resolve(demoReady).then((ok) => {\n  if (!ok) return null;\n  return Noodl.CloudFunctions.run('coachName', {});\n}).then((r) => {\n  const name = String((r && r.name) || '').trim();\n  if (!name) return;\n  Outputs.words = { coachName: name, coachNameStart: name };\n  Outputs.ready();\n}).catch(() => {});"
+      },
+      "ports": [],
+      "metadata": {
+        "comment": "DBU-11: the template names no coach. The words say $t(coachName); this reads the name the coach set in Settings (public coachName function, the name only) once per visit and hands it to Strings. No name set: the words keep \"your coach\"."
+      }
+    }
+  ],
+  "visualRoots": [
+    "fff776b7-5899-43e9-85b4-49747de82807"
+  ]
+}

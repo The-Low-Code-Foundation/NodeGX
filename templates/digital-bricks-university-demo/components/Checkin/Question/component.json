@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f8c1b5ac-abc1-5858-836e-437908b19b51",
+  "name": "Question",
+  "path": "/Checkin/Question",
+  "type": "visual",
+  "created": "2026-11-12T14:52:22.561Z",
+  "modified": "2026-11-12T14:52:27.264Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One check-in question, drawn for its type (a scale, options to pick, a line or a longer text) as a row of Checkin/Form's list. It keeps its answer in its own record and says when the answer changed."
+}

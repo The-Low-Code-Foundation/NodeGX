@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "8b7845b2-4cd5-5ae3-8bbc-0077ab7484b8",
+  "name": "Resources editor",
+  "path": "/Library/Resources editor",
+  "type": "visual",
+  "created": "2026-11-07T22:10:54.884Z",
+  "modified": "2026-11-07T22:10:54.884Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The resources being edited: heading and hint, one row per resource from a named client-side array, Add a link, Upload a file (uploaded privately as the coach), and Up, Down and Remove on each row."
+}

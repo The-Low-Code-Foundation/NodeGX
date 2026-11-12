@@ -1,0 +1,624 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e27ddd3e-719e-597a-8c98-1606d9675140",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ib_page",
+      "type": "Page",
+      "label": "Inbox",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "ib_shell"
+      ],
+      "parameters": {
+        "urlPath": "coach/inbox"
+      }
+    },
+    {
+      "id": "ib_shell",
+      "type": "/Shell/App shell",
+      "label": "Coach shell",
+      "x": 40,
+      "y": 160,
+      "parent": "ib_page",
+      "children": [
+        "ib_head",
+        "ib_body"
+      ],
+      "parameters": {
+        "coach": true,
+        "current": "inbox"
+      }
+    },
+    {
+      "id": "ib_head",
+      "type": "/Shell/Page head",
+      "label": "Head",
+      "x": 40,
+      "y": 280,
+      "parent": "ib_shell",
+      "parameters": {
+        "titleKey": "inbox.title",
+        "leadKey": "inbox.lead"
+      }
+    },
+    {
+      "id": "ib_failed",
+      "type": "Text",
+      "label": "The inbox could not be read",
+      "x": 40,
+      "y": 400,
+      "parent": "ib_body",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)"
+      }
+    },
+    {
+      "id": "ib_empty_box",
+      "type": "Group",
+      "label": "Shown when nothing is waiting",
+      "x": 40,
+      "y": 520,
+      "parent": "ib_body",
+      "children": [
+        "ib_empty"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "ib_empty",
+      "type": "/Shell/Empty state",
+      "label": "Nothing waiting",
+      "x": 40,
+      "y": 640,
+      "parent": "ib_empty_box",
+      "parameters": {
+        "icon": {
+          "class": "lucide",
+          "code": "icon-inbox",
+          "codeAsClass": true
+        },
+        "titleKey": "inbox.emptyTitle",
+        "bodyKey": "inbox.emptyBody"
+      }
+    },
+    {
+      "id": "ib_cols",
+      "type": "Group",
+      "label": "The list and the open item",
+      "x": 40,
+      "y": 760,
+      "parent": "ib_body",
+      "children": [
+        "ib_list",
+        "ib_detail"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "flex-start",
+        "columnGap": "var(--space-6)",
+        "rowGap": "var(--space-6)"
+      }
+    },
+    {
+      "id": "ib_list",
+      "type": "Group",
+      "label": "Everything waiting, oldest first",
+      "x": 40,
+      "y": 880,
+      "parent": "ib_cols",
+      "children": [
+        "ib_rows"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "clip": true,
+        "styleCss": "flex: 1 1 320px; min-width: 0;"
+      },
+      "metadata": {
+        "comment": "flex 1 1 320px beside the detail's 999 1 420px: about 320px wide when both fit on one line, the whole width when it is alone (a narrow screen shows the list or the item, never both)."
+      }
+    },
+    {
+      "id": "ib_rows",
+      "type": "For Each",
+      "label": "One row per item",
+      "x": 40,
+      "y": 1000,
+      "parent": "ib_list",
+      "parameters": {
+        "template": "/Inbox/Inbox row"
+      }
+    },
+    {
+      "id": "ib_detail",
+      "type": "Group",
+      "label": "The open item",
+      "x": 40,
+      "y": 1120,
+      "parent": "ib_cols",
+      "children": [
+        "ib_back",
+        "ib_dhead",
+        "ib_review_box",
+        "ib_question_box",
+        "ib_quiet_box",
+        "ib_checkin_box"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-5)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "styleCss": "flex: 999 1 420px; min-width: 0;",
+        "dataAttributes": "data-testid",
+        "data-testid": "inbox-detail"
+      }
+    },
+    {
+      "id": "ib_back",
+      "type": "net.noodl.controls.button",
+      "label": "Back to the inbox (narrow screens)",
+      "x": 40,
+      "y": 1240,
+      "parent": "ib_detail",
+      "parameters": {
+        "mounted": false,
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "transparent",
+        "color": "var(--primary)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-2)",
+        "minHeight": "var(--space-11)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-arrow-left",
+          "codeAsClass": true
+        },
+        "iconColor": "var(--primary)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)"
+      }
+    },
+    {
+      "id": "ib_dhead",
+      "type": "Group",
+      "label": "Who, what kind, and their plan",
+      "x": 40,
+      "y": 1360,
+      "parent": "ib_detail",
+      "children": [
+        "ib_who",
+        "ib_open"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "justifyContent": "space-between",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-2)"
+      }
+    },
+    {
+      "id": "ib_who",
+      "type": "Group",
+      "label": "Name and kind",
+      "x": 40,
+      "y": 1480,
+      "parent": "ib_dhead",
+      "children": [
+        "ib_dchip",
+        "ib_dname",
+        "ib_dtitle"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)"
+      }
+    },
+    {
+      "id": "ib_dchip",
+      "type": "/Plan/Chip",
+      "label": "Kind",
+      "x": 40,
+      "y": 1600,
+      "parent": "ib_who",
+      "parameters": {
+        "outlined": false
+      }
+    },
+    {
+      "id": "ib_dname",
+      "type": "Text",
+      "label": "Learner",
+      "x": 40,
+      "y": 1720,
+      "parent": "ib_who",
+      "parameters": {
+        "text": "",
+        "as": "h2",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "ib_dtitle",
+      "type": "Text",
+      "label": "The homework, when it is about one",
+      "x": 40,
+      "y": 1840,
+      "parent": "ib_who",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "color": "var(--accent-foreground)"
+      }
+    },
+    {
+      "id": "ib_open",
+      "type": "net.noodl.controls.button",
+      "label": "Open plan",
+      "x": 40,
+      "y": 1960,
+      "parent": "ib_dhead",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "minHeight": "var(--space-11)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-chevron-right",
+          "codeAsClass": true
+        },
+        "iconPlacement": "right",
+        "iconColor": "var(--muted-foreground)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1)"
+      }
+    },
+    {
+      "id": "ib_review_box",
+      "type": "Group",
+      "label": "A hand-in to review",
+      "x": 40,
+      "y": 2080,
+      "parent": "ib_detail",
+      "children": [
+        "ib_review"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "ib_review",
+      "type": "/Inbox/Review detail",
+      "label": "Review it",
+      "x": 40,
+      "y": 2200,
+      "parent": "ib_review_box"
+    },
+    {
+      "id": "ib_question_box",
+      "type": "Group",
+      "label": "A question",
+      "x": 40,
+      "y": 2320,
+      "parent": "ib_detail",
+      "children": [
+        "ib_question"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "ib_question",
+      "type": "/Inbox/Question detail",
+      "label": "Answer it",
+      "x": 40,
+      "y": 2440,
+      "parent": "ib_question_box"
+    },
+    {
+      "id": "ib_quiet_box",
+      "type": "Group",
+      "label": "Gone quiet",
+      "x": 40,
+      "y": 2560,
+      "parent": "ib_detail",
+      "children": [
+        "ib_quiet"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "ib_quiet",
+      "type": "/Inbox/Quiet detail",
+      "label": "Nudge or snooze",
+      "x": 40,
+      "y": 2680,
+      "parent": "ib_quiet_box"
+    },
+    {
+      "id": "ib_t_tab",
+      "type": "Translation",
+      "label": "The browser tab's title",
+      "x": 520,
+      "y": 40,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "inbox.tab"
+      }
+    },
+    {
+      "id": "ib_t_failed",
+      "type": "Translation",
+      "label": "Could not read",
+      "x": 520,
+      "y": 400,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "inbox.failed"
+      }
+    },
+    {
+      "id": "ib_t_back",
+      "type": "Translation",
+      "label": "Back to the inbox",
+      "x": 520,
+      "y": 1240,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "inbox.back"
+      }
+    },
+    {
+      "id": "ib_t_open",
+      "type": "Translation",
+      "label": "Open plan",
+      "x": 520,
+      "y": 1960,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "learners.open"
+      }
+    },
+    {
+      "id": "ib_cf",
+      "type": "CloudFunction2",
+      "label": "coachInbox (staff only)",
+      "x": 520,
+      "y": 640,
+      "parameters": {
+        "function": "coachInbox"
+      }
+    },
+    {
+      "id": "ib_bell",
+      "type": "SubscribeToChanges",
+      "label": "The doorbell: read again",
+      "x": 520,
+      "y": 520,
+      "parameters": {
+        "collectionName": "Doorbell"
+      }
+    },
+    {
+      "id": "ib_fail_sw",
+      "type": "Switch",
+      "label": "Remember the read failed",
+      "x": 520,
+      "y": 760,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "ib_words",
+      "type": "/Inbox/Inbox in words",
+      "label": "The inbox, in words",
+      "x": 820,
+      "y": 640
+    },
+    {
+      "id": "ib_state",
+      "type": "net.noodl.ComponentObject",
+      "label": "Which item is open",
+      "x": 820,
+      "y": 880,
+      "parameters": {
+        "properties": "selectedId"
+      }
+    },
+    {
+      "id": "ib_set_open",
+      "type": "net.noodl.SetComponentObjectProperties",
+      "label": "Open an item",
+      "x": 820,
+      "y": 1000,
+      "parameters": {
+        "properties": "selectedId"
+      }
+    },
+    {
+      "id": "ib_set_back",
+      "type": "net.noodl.SetComponentObjectProperties",
+      "label": "Back to the list",
+      "x": 820,
+      "y": 1240,
+      "parameters": {
+        "properties": "selectedId",
+        "prop-selectedId": ""
+      }
+    },
+    {
+      "id": "ib_narrow",
+      "type": "Javascript2",
+      "label": "Narrow screen? (list and item on separate screens)",
+      "x": 820,
+      "y": 520,
+      "parameters": {
+        "code": "/*\n * Below 860px the list and the open item do not fit side by side (320px + 420px + the gaps), so the\n * inbox shows one at a time: the list, or the item with Back (DBU-08: \"on a phone, a separate screen\").\n */\nScript.Outputs = { narrow: 'boolean' };\nconst check = () => {\n  const narrow = typeof window !== 'undefined' && window.innerWidth < 860;\n  if (Script.Outputs.narrow !== narrow) Script.Outputs.narrow = narrow;\n};\nScript.OnInit = function () {\n  check();\n  if (typeof window !== 'undefined') window.addEventListener('resize', check);\n};\nScript.OnDestroy = function () {\n  if (typeof window !== 'undefined') window.removeEventListener('resize', check);\n};\n"
+      }
+    },
+    {
+      "id": "ib_to_plan",
+      "type": "RouterNavigate",
+      "label": "→ This learner's plan",
+      "x": 520,
+      "y": 2080,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Learner plan"
+      }
+    },
+    {
+      "id": "ib_body",
+      "type": "Group",
+      "label": "The inbox (reads on mount)",
+      "x": 40,
+      "y": 340,
+      "parent": "ib_shell",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-6)"
+      },
+      "children": [
+        "ib_failed",
+        "ib_empty_box",
+        "ib_cols"
+      ]
+    },
+    {
+      "id": "ib_checkin_box",
+      "type": "Group",
+      "label": "A check-in answered",
+      "parent": "ib_detail",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "children": [
+        "ib_checkin"
+      ],
+      "x": 340,
+      "y": 2800
+    },
+    {
+      "id": "ib_checkin",
+      "type": "/Inbox/Checkin detail",
+      "label": "Read it, then Done",
+      "parent": "ib_checkin_box",
+      "x": 400,
+      "y": 2920
+    }
+  ],
+  "visualRoots": [
+    "ib_page"
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "dae4ea23-aa66-57f9-8aa2-98becbd25b4b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "vs_in",
+      "fromProperty": "headKey",
+      "toId": "vs_t_head",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "vs_t_head",
+      "fromProperty": "Translation",
+      "toId": "vs_head",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "vs_in",
+      "fromProperty": "submissions",
+      "toId": "vs_fn",
+      "toProperty": "in-submissions"
+    },
+    {
+      "fromId": "vs_in",
+      "fromProperty": "mode",
+      "toId": "vs_fn",
+      "toProperty": "in-mode"
+    },
+    {
+      "fromId": "vs_in",
+      "fromProperty": "timezone",
+      "toId": "vs_fn",
+      "toProperty": "in-timezone"
+    },
+    {
+      "fromId": "vs_in",
+      "fromProperty": "canReview",
+      "toId": "vs_fn",
+      "toProperty": "in-canReview"
+    },
+    {
+      "fromId": "vs_kinds",
+      "fromProperty": "items",
+      "toId": "vs_fn",
+      "toProperty": "in-kinds"
+    },
+    {
+      "fromId": "vs_verdicts",
+      "fromProperty": "items",
+      "toId": "vs_fn",
+      "toProperty": "in-verdicts"
+    },
+    {
+      "fromId": "vs_fn",
+      "fromProperty": "out-rows",
+      "toId": "vs_rows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "vs_fn",
+      "fromProperty": "out-count",
+      "toId": "vs_out",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "vs_rows",
+      "fromProperty": "itemOutputSignal-reviewed",
+      "toId": "vs_out",
+      "toProperty": "reviewed"
+    }
+  ]
+}

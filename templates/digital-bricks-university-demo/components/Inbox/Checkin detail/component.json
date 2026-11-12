@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "fc9ae6e7-a1fe-590c-83dd-656e2eaf14e6",
+  "name": "Checkin detail",
+  "path": "/Inbox/Checkin detail",
+  "type": "visual",
+  "created": "2026-11-12T14:59:37.641Z",
+  "modified": "2026-11-12T14:59:37.641Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A check-in a learner answered, in the coach's inbox: the answers, and Done, which takes it off the list (settleCheckin). The answers stay on the learner's plan."
+}

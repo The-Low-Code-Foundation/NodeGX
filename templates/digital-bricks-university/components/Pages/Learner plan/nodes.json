@@ -1,0 +1,799 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "44d58feb-0f92-5c71-8a35-6e6e02eac791",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pg_page",
+      "type": "Page",
+      "label": "Learner plan",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "pg_shell"
+      ],
+      "parameters": {
+        "urlPath": "coach/plan"
+      }
+    },
+    {
+      "id": "pg_shell",
+      "type": "/Shell/App shell",
+      "label": "Coach shell",
+      "x": 100,
+      "y": 160,
+      "parent": "pg_page",
+      "children": [
+        "pg_top",
+        "pg_body",
+        "pg_noplan",
+        "pg_failed"
+      ],
+      "parameters": {
+        "coach": true,
+        "current": "learners"
+      }
+    },
+    {
+      "id": "pg_top",
+      "type": "Group",
+      "label": "Back, and the head",
+      "x": 160,
+      "y": 280,
+      "parent": "pg_shell",
+      "children": [
+        "pg_back",
+        "pg_head"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-2)"
+      }
+    },
+    {
+      "id": "pg_back",
+      "type": "net.noodl.controls.button",
+      "label": "← All learners",
+      "x": 220,
+      "y": 400,
+      "parent": "pg_top",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--background)",
+        "color": "var(--accent-foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "paddingLeft": "var(--space-1)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-arrow-left",
+          "codeAsClass": true
+        },
+        "iconColor": "var(--accent-foreground)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1)"
+      }
+    },
+    {
+      "id": "pg_head",
+      "type": "/Shell/Page head",
+      "label": "Head",
+      "x": 220,
+      "y": 520,
+      "parent": "pg_top",
+      "parameters": {
+        "titleKey": "plan.title",
+        "leadKey": "plan.lead"
+      }
+    },
+    {
+      "id": "pg_body",
+      "type": "Group",
+      "label": "The plan, once read",
+      "x": 160,
+      "y": 640,
+      "parent": "pg_shell",
+      "children": [
+        "pg_card",
+        "pg_msgs",
+        "pg_head_said",
+        "pg_tpl_said",
+        "pg_settings_box",
+        "pg_tpl_box",
+        "pg_pick_box",
+        "pg_lv_box",
+        "pg_list",
+        "pg_list_said",
+        "pg_made"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-5)"
+      }
+    },
+    {
+      "id": "pg_card",
+      "type": "/Plan/Plan head",
+      "label": "Counts and buttons",
+      "x": 220,
+      "y": 760,
+      "parent": "pg_body"
+    },
+    {
+      "id": "pg_head_said",
+      "type": "Text",
+      "label": "What starting from a template did",
+      "x": 220,
+      "y": 880,
+      "parent": "pg_body",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "pg_tpl_said",
+      "type": "Text",
+      "label": "What saving as a template did",
+      "x": 220,
+      "y": 1000,
+      "parent": "pg_body",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "pg_settings_box",
+      "type": "Group",
+      "label": "Plan settings, while open",
+      "x": 220,
+      "y": 1120,
+      "parent": "pg_body",
+      "children": [
+        "pg_settings"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "pg_settings",
+      "type": "/Plan/Plan settings",
+      "label": "Plan settings",
+      "x": 280,
+      "y": 1240,
+      "parent": "pg_settings_box"
+    },
+    {
+      "id": "pg_tpl_box",
+      "type": "Group",
+      "label": "Save as template, while open",
+      "x": 220,
+      "y": 1360,
+      "parent": "pg_body",
+      "children": [
+        "pg_tpl"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      }
+    },
+    {
+      "id": "pg_tpl",
+      "type": "/Plan/Template saver",
+      "label": "Save as template",
+      "x": 280,
+      "y": 1480,
+      "parent": "pg_tpl_box"
+    },
+    {
+      "id": "pg_pick_box",
+      "type": "Group",
+      "label": "The library picker, while open",
+      "x": 220,
+      "y": 1600,
+      "parent": "pg_body",
+      "children": [
+        "pg_pick"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "metadata": {
+        "comment": "Below the steps, under the button that opens it."
+      }
+    },
+    {
+      "id": "pg_pick",
+      "type": "/Plan/Library picker",
+      "label": "Pick from the library",
+      "x": 280,
+      "y": 1720,
+      "parent": "pg_pick_box"
+    },
+    {
+      "id": "pg_lv_box",
+      "type": "Group",
+      "label": "Seeing as the learner: what that means",
+      "x": 220,
+      "y": 1840,
+      "parent": "pg_body",
+      "children": [
+        "pg_lv_title",
+        "pg_lv_body",
+        "pg_lv_empty"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)",
+        "backgroundColor": "var(--accent)",
+        "borderRadius": "var(--radius-lg)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)"
+      }
+    },
+    {
+      "id": "pg_lv_title",
+      "type": "Text",
+      "label": "What {first} sees",
+      "x": 280,
+      "y": 1960,
+      "parent": "pg_lv_box",
+      "parameters": {
+        "text": "",
+        "as": "h2",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--accent-foreground)"
+      }
+    },
+    {
+      "id": "pg_lv_body",
+      "type": "Text",
+      "label": "Only shared steps",
+      "x": 280,
+      "y": 2080,
+      "parent": "pg_lv_box",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "pg_lv_empty",
+      "type": "Text",
+      "label": "Nothing shared yet",
+      "x": 280,
+      "y": 2200,
+      "parent": "pg_lv_box",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "pg_list",
+      "type": "/Plan/Step list",
+      "label": "The steps",
+      "x": 220,
+      "y": 2320,
+      "parent": "pg_body"
+    },
+    {
+      "id": "pg_list_said",
+      "type": "Text",
+      "label": "What sharing did, or why not",
+      "x": 220,
+      "y": 2440,
+      "parent": "pg_body",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      },
+      "metadata": {
+        "comment": "Above the steps, where it is seen whichever row caused it. Each source of a sentence has its own line: a Function re-sends a value only when it changes, so one shared line could keep an older sentence."
+      }
+    },
+    {
+      "id": "pg_noplan",
+      "type": "Text",
+      "label": "This learner has no plan",
+      "x": 160,
+      "y": 2560,
+      "parent": "pg_shell",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)"
+      }
+    },
+    {
+      "id": "pg_failed",
+      "type": "Text",
+      "label": "The plan could not be read",
+      "x": 160,
+      "y": 2680,
+      "parent": "pg_shell",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)"
+      }
+    },
+    {
+      "id": "pg_url",
+      "type": "PageInputs",
+      "label": "?learner= from the roster",
+      "x": 700,
+      "y": 40,
+      "parameters": {
+        "queryParams": "learner"
+      }
+    },
+    {
+      "id": "pg_read",
+      "type": "CloudFunction2",
+      "label": "learnerAsCoach (staff only)",
+      "x": 700,
+      "y": 160,
+      "parameters": {
+        "function": "learnerAsCoach"
+      }
+    },
+    {
+      "id": "pg_words",
+      "type": "/Plan/Plan in words",
+      "label": "The plan, in words",
+      "x": 700,
+      "y": 280
+    },
+    {
+      "id": "pg_nav_back",
+      "type": "RouterNavigate",
+      "label": "→ Learners",
+      "x": 700,
+      "y": 400,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Learners"
+      }
+    },
+    {
+      "id": "pg_set_sw",
+      "type": "Switch",
+      "label": "Settings open",
+      "x": 700,
+      "y": 1120,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "pg_tpl_sw",
+      "type": "Switch",
+      "label": "Save as template open",
+      "x": 700,
+      "y": 1360,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "pg_pick_sw",
+      "type": "Switch",
+      "label": "Picker open",
+      "x": 700,
+      "y": 1600,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "pg_lv_sw",
+      "type": "Switch",
+      "label": "Seeing as the learner",
+      "x": 700,
+      "y": 1840,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "pg_head_said_sw",
+      "type": "Switch",
+      "label": "Show what starting did",
+      "x": 1000,
+      "y": 880,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "pg_tpl_said_sw",
+      "type": "Switch",
+      "label": "Show what saving did",
+      "x": 1000,
+      "y": 1000,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "pg_list_said_sw",
+      "type": "Switch",
+      "label": "Show what sharing did",
+      "x": 1000,
+      "y": 2440,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "pg_fail_sw",
+      "type": "Switch",
+      "label": "Remember the read failed",
+      "x": 700,
+      "y": 2680,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "pg_lv_fill",
+      "type": "String Format",
+      "label": "What {first} sees",
+      "x": 1000,
+      "y": 1960,
+      "parameters": {
+        "format": "{first}"
+      }
+    },
+    {
+      "id": "pg_lv_empty_fill",
+      "type": "String Format",
+      "label": "Nothing shared yet, so {first} sees…",
+      "x": 1000,
+      "y": 2200,
+      "parameters": {
+        "format": "{first}"
+      }
+    },
+    {
+      "id": "pg_t_tab",
+      "type": "Translation",
+      "label": "The browser tab's title",
+      "x": 1300,
+      "y": 40,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.tab"
+      }
+    },
+    {
+      "id": "pg_t_back",
+      "type": "Translation",
+      "label": "All learners",
+      "x": 1300,
+      "y": 400,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.back"
+      }
+    },
+    {
+      "id": "pg_t_lv",
+      "type": "Translation",
+      "label": "What {first} sees",
+      "x": 1300,
+      "y": 1960,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.learnerViewTitle"
+      }
+    },
+    {
+      "id": "pg_t_lv_body",
+      "type": "Translation",
+      "label": "Only shared steps",
+      "x": 1300,
+      "y": 2080,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.learnerViewBody"
+      }
+    },
+    {
+      "id": "pg_t_lv_empty",
+      "type": "Translation",
+      "label": "Nothing shared yet",
+      "x": 1300,
+      "y": 2200,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.learnerViewEmpty"
+      }
+    },
+    {
+      "id": "pg_t_noplan",
+      "type": "Translation",
+      "label": "No plan",
+      "x": 1300,
+      "y": 2560,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.noPlan"
+      }
+    },
+    {
+      "id": "pg_t_failed",
+      "type": "Translation",
+      "label": "Could not read",
+      "x": 1300,
+      "y": 2680,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.failed"
+      }
+    },
+    {
+      "id": "pg_msgs",
+      "type": "Group",
+      "label": "Messages with this learner",
+      "parent": "pg_body",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-lg)"
+      },
+      "metadata": {
+        "comment": "DBU-07: the reply link in a learner-message email lands on this page, so the conversation sits right under the plan's head."
+      },
+      "children": [
+        "pg_conv"
+      ],
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "pg_conv",
+      "type": "/Messages/Conversation",
+      "label": "The conversation, and a reply box",
+      "parent": "pg_msgs",
+      "parameters": {
+        "mode": "coach",
+        "tagged": true,
+        "titleKey": "messages.coachTitle",
+        "emptyKey": "messages.coachEmpty"
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "pg_made",
+      "type": "Group",
+      "label": "Their creations (DBU-09, read-only)",
+      "parent": "pg_body",
+      "children": [
+        "pg_made_head",
+        "pg_made_lead",
+        "pg_made_est",
+        "pg_made_shelf",
+        "pg_made_failed"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "dataAttributes": "data-testid",
+        "data-testid": "coach-creations"
+      },
+      "x": 220,
+      "y": 2560
+    },
+    {
+      "id": "pg_made_head",
+      "type": "Text",
+      "label": "Creations",
+      "parent": "pg_made",
+      "parameters": {
+        "text": "",
+        "as": "h2",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      },
+      "x": 280,
+      "y": 2680
+    },
+    {
+      "id": "pg_made_lead",
+      "type": "Text",
+      "label": "What they keep; only they can change it",
+      "parent": "pg_made",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 280,
+      "y": 2800
+    },
+    {
+      "id": "pg_made_shelf",
+      "type": "/Creations/Creation shelf",
+      "label": "Their creations, read-only",
+      "parent": "pg_made",
+      "parameters": {
+        "mode": "coach",
+        "emptyTitleKey": "creations.coachEmptyTitle",
+        "emptyBodyKey": "creations.coachEmptyBody"
+      },
+      "x": 280,
+      "y": 2920
+    },
+    {
+      "id": "pg_made_failed",
+      "type": "Text",
+      "label": "Could not be read",
+      "parent": "pg_made",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)"
+      },
+      "x": 280,
+      "y": 3040
+    },
+    {
+      "id": "pg_made_read",
+      "type": "CloudFunction2",
+      "label": "creationsAsCoach (staff only)",
+      "parameters": {
+        "function": "creationsAsCoach"
+      },
+      "x": 530,
+      "y": 2920
+    },
+    {
+      "id": "pg_made_fail_sw",
+      "type": "Switch",
+      "label": "Remember the creations read failed",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 530,
+      "y": 3040
+    },
+    {
+      "id": "pg_t_made_head",
+      "type": "Translation",
+      "label": "Creations",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.coachHead"
+      },
+      "x": 530,
+      "y": 2680
+    },
+    {
+      "id": "pg_t_made_lead",
+      "type": "Translation",
+      "label": "What they keep",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.coachLead"
+      },
+      "x": 530,
+      "y": 2800
+    },
+    {
+      "id": "pg_t_made_failed",
+      "type": "Translation",
+      "label": "Could not read their creations",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.coachFailed"
+      },
+      "x": 530,
+      "y": 3160
+    },
+    {
+      "id": "pg_made_est",
+      "type": "/Creations/Estimate line",
+      "label": "Hours a week saved, their estimate",
+      "parent": "pg_made",
+      "parameters": {
+        "textKey": "creations.coachEstimate"
+      },
+      "x": 280,
+      "y": 3160
+    }
+  ],
+  "visualRoots": [
+    "pg_page"
+  ]
+}

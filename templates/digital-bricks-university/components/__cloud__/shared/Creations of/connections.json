@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0947f180-df4a-5b5e-818f-cf83e7b2bccf",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "co_in-2",
+      "fromProperty": "learner",
+      "toId": "co_fn",
+      "toProperty": "in-learner"
+    },
+    {
+      "fromId": "co_fn",
+      "fromProperty": "out-items",
+      "toId": "co_out-2",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "co_fn",
+      "fromProperty": "out-done",
+      "toId": "co_out-2",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "co_fn",
+      "fromProperty": "out-failed",
+      "toId": "co_out-2",
+      "toProperty": "failed"
+    },
+    {
+      "fromId": "co_fn",
+      "fromProperty": "out-estimate",
+      "toId": "co_out-2",
+      "toProperty": "estimate"
+    }
+  ]
+}

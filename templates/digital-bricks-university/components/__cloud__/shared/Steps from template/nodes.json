@@ -1,0 +1,137 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "43baf556-7926-5796-8e8d-ec05469fa776",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sft_in",
+      "type": "Component Inputs",
+      "label": "The job: which plan, whose, which template",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "job",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "metadata": {
+        "comment": "One object, not three values and a signal: the helper runs when a new job arrives, so its values can never trail its trigger (Signed file link works the same way). Callers send {planId, learnerId, templateId}."
+      }
+    },
+    {
+      "id": "sft_fn",
+      "type": "JavaScriptFunction",
+      "label": "Append the template's items as drafts",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "runOnChange-in-job": false,
+        "functionScript": "/*\n * The template's items become UNSHARED steps after the plan's last one, so the learner\n * sees nothing until the coach shares them. Positions stay 1..n.\n *  - live: 'to book', the template's duration (60 if none). No date: the session is booked.\n *  - homework: copied from its library item (SCOPE R4: a later library edit never reaches\n *    it), due at 18:00 Paris on today + the item's day offset.\n *  - check-in: a copy of the item's form (by id), else \"After a session\" (DBU-10), sent at\n *    09:00 Paris on today + offset.\n * Runs when the forms arrive, which the job asked for (sft_ask).\n */\nconst job = Inputs.job;\nif (job && typeof job === 'object') {\n  (async () => {\n    try {\n      const R = Noodl.Records;\n      const q = (c, where) => R.query(c, where, { limit: 1000, plain: true });\n      const planId = String(job.planId || '');\n      const learnerId = String(job.learnerId || '');\n      const templateId = String(job.templateId || '');\n      if (!planId || !learnerId) throw new Error('no plan or learner in the job');\n      const found = templateId ? await q('PlanTemplate', { objectId: { equalTo: templateId } }) : [];\n      if (found.length !== 1) {\n        Outputs.reason = 'That plan template no longer exists. Choose another, or start with an empty plan.';\n        Outputs.missing();\n        return;\n      }\n      const items = Array.isArray(found[0].items) ? found[0].items : [];\n      const forms = Array.isArray(Inputs.forms) ? Inputs.forms : [];\n      const formOf = (id) => forms.find((f) => f.id === id) || forms.find((f) => f.id === 'after-session');\n      if (!formOf('after-session')) throw new Error('no after-session form');\n\n      const TZ = 'Europe/Paris';\n      const offsetMs = (utc) => {\n        const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });\n        const p = Object.fromEntries(fmt.formatToParts(new Date(utc)).map((x) => [x.type, x.value]));\n        return Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second) - utc;\n      };\n      const today = new Date().toLocaleDateString('en-CA', { timeZone: TZ });\n      const parisAt = (days, hh) => {\n        const [y, m, d] = today.split('-').map(Number);\n        const guess = Date.UTC(y, m - 1, d + days, hh, 0);\n        return new Date(guess - offsetMs(guess)).toISOString();\n      };\n      const offset = (i) => (Number.isInteger(i.dayOffset) && i.dayOffset >= 0 ? i.dayOffset : 0);\n\n      const existing = await q('Step', { plan: { equalTo: planId } });\n      const last = existing.reduce((m, s) => Math.max(m, Number(s.position) || 0), 0);\n      const libraryIds = items.map((i) => i.libraryItem).filter(Boolean);\n      const library = libraryIds.length ? await q('LibraryItem', { objectId: { containedIn: libraryIds } }) : [];\n      const firstStatus = { live: 'to_book', homework: 'not_started', checkin: 'scheduled' };\n\n      let added = 0;\n      for (const item of items) {\n        if (!firstStatus[item.kind]) continue;\n        const step = { plan: planId, learner: learnerId, position: last + added + 1, kind: item.kind, title: String(item.title || ''), shared: false, status: firstStatus[item.kind] };\n        if (item.kind === 'live') step.durationMin = Number.isInteger(item.durationMin) ? item.durationMin : 60;\n        if (item.kind === 'homework') {\n          step.dueAt = parisAt(offset(item), 18);\n          step.handInChecklist = [];\n          step.resources = [];\n          const lib = library.find((l) => l.objectId === item.libraryItem);\n          if (lib) Object.assign(step, { fromLibraryItem: lib.objectId, brief: lib.brief || '', handInChecklist: lib.handInChecklist || [], resources: lib.resources || [] });\n        }\n        if (item.kind === 'checkin') {\n          step.sendsAt = parisAt(offset(item), 9);\n          step.form = formOf(item.form);\n        }\n        await R.create('Step', step);\n        added++;\n      }\n      Outputs.added = added;\n      Outputs.done();\n    } catch (e) {\n      console.error('[dbu:Steps from template]', String((e && e.message) || e));\n      Outputs.reason = 'The template could not be applied. Try again.';\n      Outputs.failed();\n    }\n  })();\n}\n",
+        "runOnChange-in-forms": false
+      },
+      "ports": [
+        {
+          "name": "in-job",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-forms",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-added",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "out-reason",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-missing",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "sft_out",
+      "type": "Component Outputs",
+      "label": "How many were added, or why not",
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "added",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "reason",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "missing",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "failed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "sft_ask",
+      "type": "JavaScriptFunction",
+      "label": "A job arrived: fetch the forms first",
+      "x": 300,
+      "y": 40,
+      "parameters": {
+        "runOnChange-in-job": true,
+        "functionScript": "// A check-in takes a copy of a built-in form (DBU-10), so the forms come before the steps.\nif (Inputs.job && typeof Inputs.job === 'object') Outputs.go();\n"
+      },
+      "ports": [
+        {
+          "name": "in-job",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "sft_forms",
+      "type": "/#__cloud__/shared/Checkin forms",
+      "label": "The check-in forms",
+      "x": 300,
+      "y": 160
+    }
+  ]
+}

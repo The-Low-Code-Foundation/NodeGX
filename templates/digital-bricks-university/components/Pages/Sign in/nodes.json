@@ -1,0 +1,427 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "388e8a9f-6fa1-58d3-8be8-bba6c3a36730",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "si_page",
+      "type": "Page",
+      "label": "Sign in",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "si_ground"
+      ],
+      "parameters": {
+        "urlPath": "sign-in"
+      }
+    },
+    {
+      "id": "si_ground",
+      "type": "Group",
+      "label": "Ground",
+      "parent": "si_page",
+      "children": [
+        "si_column"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "backgroundColor": "var(--background)",
+        "paddingTop": "var(--space-20)",
+        "paddingBottom": "var(--space-20)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "si_column",
+      "type": "Group",
+      "label": "Column",
+      "parent": "si_ground",
+      "children": [
+        "si_name",
+        "si_card",
+        "si_privacy",
+        "si_demo_intro"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 440,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "rowGap": "var(--space-6)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "si_name",
+      "type": "Text",
+      "label": "Product name",
+      "parent": "si_column",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-tight)",
+        "color": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "si_card",
+      "type": "Group",
+      "label": "The way in",
+      "parent": "si_column",
+      "children": [
+        "si_title",
+        "si_lede",
+        "si_email",
+        "si_send",
+        "si_sent",
+        "si_failed"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "stretch",
+        "rowGap": "var(--space-4)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-8)",
+        "paddingBottom": "var(--space-8)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "si_title",
+      "type": "Text",
+      "label": "Sign in",
+      "parent": "si_card",
+      "parameters": {
+        "text": "",
+        "as": "h1",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      },
+      "x": 280,
+      "y": 640
+    },
+    {
+      "id": "si_lede",
+      "type": "Text",
+      "label": "What happens",
+      "parent": "si_card",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "si_email",
+      "type": "net.noodl.controls.textinput",
+      "label": "Email address",
+      "parent": "si_card",
+      "parameters": {
+        "type": "email",
+        "useLabel": true,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "si_send",
+      "type": "net.noodl.controls.button",
+      "label": "Email me a sign-in link",
+      "parent": "si_card",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "si_sent",
+      "type": "Text",
+      "label": "If that address has an account, a link is on its way",
+      "parent": "si_card",
+      "parameters": {
+        "text": "",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      },
+      "metadata": {
+        "comment": "The same sentence whatever address was typed: the backend answers a known and an unknown address identically, and a page that said more would rebuild the account check it removed."
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "si_failed",
+      "type": "Text",
+      "label": "The request itself failed",
+      "parent": "si_card",
+      "parameters": {
+        "text": "",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--attention)"
+      },
+      "x": 280,
+      "y": 1240
+    },
+    {
+      "id": "si_url",
+      "type": "PageInputs",
+      "label": "?email= from the welcome email",
+      "x": 600,
+      "y": 40,
+      "parameters": {
+        "queryParams": "email"
+      }
+    },
+    {
+      "id": "si_redirect",
+      "type": "JavaScriptFunction",
+      "label": "Come back to this app",
+      "x": 600,
+      "y": 140,
+      "parameters": {
+        "functionScript": "// The link brings the person back to the start of this app, on whatever origin it is served\n// from. The backend sends NO mail for an origin missing from its redirect allow-list\n// (tools/setup-signin.mjs), which looks exactly like a mail that never came.\nif (typeof window !== 'undefined') Outputs.redirect = window.location.origin + '/';\n"
+      },
+      "ports": [
+        {
+          "name": "out-redirect",
+          "plug": "output",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "si_request",
+      "type": "net.noodl.user.RequestMagicLink",
+      "label": "Ask the backend to email a link",
+      "x": 600,
+      "y": 240
+    },
+    {
+      "id": "si_sent_sw",
+      "type": "Switch",
+      "label": "Remember the request was accepted",
+      "x": 600,
+      "y": 340,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "si_fail_sw",
+      "type": "Switch",
+      "label": "Remember the request failed",
+      "x": 600,
+      "y": 440,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "si_t_tab",
+      "type": "Translation",
+      "label": "The browser tab's title",
+      "x": 900,
+      "y": 40,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "signIn.tab"
+      }
+    },
+    {
+      "id": "si_t_name",
+      "type": "Translation",
+      "label": "Product name",
+      "x": 900,
+      "y": 100,
+      "parameters": {
+        "Namespace": "common",
+        "Key": "productName"
+      }
+    },
+    {
+      "id": "si_t_title",
+      "type": "Translation",
+      "label": "Sign in",
+      "x": 900,
+      "y": 160,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "signIn.title"
+      }
+    },
+    {
+      "id": "si_t_lede",
+      "type": "Translation",
+      "label": "What happens",
+      "x": 900,
+      "y": 220,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "signIn.lede"
+      }
+    },
+    {
+      "id": "si_t_email",
+      "type": "Translation",
+      "label": "Email address",
+      "x": 900,
+      "y": 280,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "signIn.email"
+      }
+    },
+    {
+      "id": "si_t_send",
+      "type": "Translation",
+      "label": "Email me a sign-in link",
+      "x": 900,
+      "y": 340,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "signIn.send"
+      }
+    },
+    {
+      "id": "si_t_sent",
+      "type": "Translation",
+      "label": "A link is on its way",
+      "x": 900,
+      "y": 400,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "signIn.sent"
+      }
+    },
+    {
+      "id": "si_t_failed",
+      "type": "Translation",
+      "label": "Could not ask",
+      "x": 900,
+      "y": 460,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "signIn.failed"
+      }
+    },
+    {
+      "id": "si_demo_intro",
+      "type": "/Demo/Demo intro",
+      "label": "The demo's way in (only in the demo)",
+      "x": 220,
+      "y": 1360,
+      "parent": "si_column"
+    },
+    {
+      "id": "si_demo_mode",
+      "type": "/Demo/Demo mode",
+      "label": "Is this the demo?",
+      "x": 600,
+      "y": 560,
+      "metadata": {
+        "comment": "DBU-11: the browser-only demo has no email sign-in; its intro takes the form's place. In the template this always says 'not the demo'."
+      }
+    },
+    {
+      "id": "si_privacy",
+      "type": "net.noodl.controls.button",
+      "label": "How we look after your data",
+      "x": 160,
+      "y": 1400,
+      "parent": "si_column",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentHeight",
+        "backgroundColor": "transparent",
+        "color": "var(--primary)",
+        "fontSize": "var(--text-sm)",
+        "minHeight": "var(--space-8)"
+      }
+    },
+    {
+      "id": "si_t_privacy",
+      "type": "Translation",
+      "label": "How we look after your data",
+      "x": 900,
+      "y": 1000,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "signIn.privacy"
+      }
+    },
+    {
+      "id": "si_open_privacy",
+      "type": "net.noodl.externallink",
+      "label": "Open the privacy notice",
+      "x": 600,
+      "y": 1400,
+      "parameters": {
+        "openInNewTab": true,
+        "link": "/privacy.html"
+      },
+      "metadata": {
+        "comment": "The notice is the deployment's own page (hosting/privacy.html, published as /privacy.html by build-production-site), so it is a plain address on this origin. Hidden in the demo, which publishes no notice."
+      }
+    }
+  ],
+  "visualRoots": [
+    "si_page"
+  ]
+}

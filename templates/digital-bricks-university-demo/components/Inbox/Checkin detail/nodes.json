@@ -1,0 +1,257 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "fc9ae6e7-a1fe-590c-83dd-656e2eaf14e6",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "icd_root",
+      "type": "Group",
+      "label": "Check-in answered",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-5)"
+      },
+      "children": [
+        "icd_lead",
+        "icd_answers",
+        "icd_done_row",
+        "icd_refused"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "icd_lead",
+      "type": "Text",
+      "label": "Her answers, kept on her plan",
+      "parent": "icd_root",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "icd_answers",
+      "type": "/Checkin/Answers",
+      "label": "The answers",
+      "parent": "icd_root",
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "icd_done_row",
+      "type": "Group",
+      "label": "Done",
+      "parent": "icd_root",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-5)",
+        "borderTopStyle": "solid",
+        "borderTopWidth": "var(--border-1)",
+        "borderTopColor": "var(--border)"
+      },
+      "children": [
+        "icd_done",
+        "icd_hint"
+      ],
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "icd_done",
+      "type": "net.noodl.controls.button",
+      "label": "Done",
+      "parent": "icd_done_row",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "minHeight": "var(--space-11)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-check",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)",
+        "iconColor": "var(--primary-foreground)",
+        "dataAttributes": "data-testid",
+        "data-testid": "inbox-checkin-done"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "icd_hint",
+      "type": "Text",
+      "label": "What Done does",
+      "parent": "icd_done_row",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "fontSize": "var(--text-xs)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--muted-foreground)",
+        "styleCss": "flex: 1 1 220px;"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "icd_refused",
+      "type": "Text",
+      "label": "Why it was not done",
+      "parent": "icd_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "icd_in",
+      "type": "Component Inputs",
+      "label": "The answer",
+      "ports": [
+        {
+          "name": "responseId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "first",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "questions",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "answers",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "icd_out",
+      "type": "Component Outputs",
+      "label": "Done something",
+      "ports": [
+        {
+          "name": "changed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 1000
+    },
+    {
+      "id": "icd_t_lead",
+      "type": "Translation",
+      "label": "Her answers",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "inbox.checkinLead"
+      },
+      "x": 410,
+      "y": 1120
+    },
+    {
+      "id": "icd_fill_lead",
+      "type": "String Format",
+      "label": "Her first name into it",
+      "parameters": {
+        "format": "{first}"
+      },
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "icd_t_done",
+      "type": "Translation",
+      "label": "Done",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "inbox.checkinDone"
+      },
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "icd_t_hint",
+      "type": "Translation",
+      "label": "What Done does",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "inbox.checkinDoneHint"
+      },
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "icd_cf",
+      "type": "CloudFunction2",
+      "label": "settleCheckin (staff only)",
+      "parameters": {
+        "function": "settleCheckin"
+      },
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "icd_sw",
+      "type": "Switch",
+      "label": "Show: it was refused",
+      "parameters": {
+        "onFromStart": false
+      },
+      "x": 410,
+      "y": 880
+    }
+  ],
+  "visualRoots": [
+    "icd_root"
+  ]
+}

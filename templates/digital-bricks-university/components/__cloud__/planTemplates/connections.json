@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e789b66d-a7fa-5100-889a-645bf4c64b7c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pt_req",
+      "fromProperty": "receive",
+      "toId": "pt_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pt_fn",
+      "fromProperty": "out-templates",
+      "toId": "pt_res",
+      "toProperty": "pm-templates"
+    },
+    {
+      "fromId": "pt_fn",
+      "fromProperty": "out-library",
+      "toId": "pt_res",
+      "toProperty": "pm-library"
+    },
+    {
+      "fromId": "pt_fn",
+      "fromProperty": "out-done",
+      "toId": "pt_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "pt_fn",
+      "fromProperty": "out-failed",
+      "toId": "pt_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "pt_fn",
+      "fromProperty": "failure",
+      "toId": "pt_fail",
+      "toProperty": "send"
+    }
+  ]
+}

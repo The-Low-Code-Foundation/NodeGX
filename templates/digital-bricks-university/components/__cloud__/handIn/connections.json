@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "cf6a1d79-126f-5a91-800b-5b165eb6b441",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hi_req",
+      "fromProperty": "userId",
+      "toId": "hi_fn",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "hi_req",
+      "fromProperty": "pm-stepId",
+      "toId": "hi_fn",
+      "toProperty": "in-stepId"
+    },
+    {
+      "fromId": "hi_req",
+      "fromProperty": "pm-kind",
+      "toId": "hi_fn",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "hi_req",
+      "fromProperty": "pm-url",
+      "toId": "hi_fn",
+      "toProperty": "in-url"
+    },
+    {
+      "fromId": "hi_req",
+      "fromProperty": "pm-text",
+      "toId": "hi_fn",
+      "toProperty": "in-text"
+    },
+    {
+      "fromId": "hi_req",
+      "fromProperty": "pm-note",
+      "toId": "hi_fn",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "hi_req",
+      "fromProperty": "receive",
+      "toId": "hi_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hi_fn",
+      "fromProperty": "out-submissionId",
+      "toId": "hi_res",
+      "toProperty": "pm-submissionId"
+    },
+    {
+      "fromId": "hi_fn",
+      "fromProperty": "out-version",
+      "toId": "hi_res",
+      "toProperty": "pm-version"
+    },
+    {
+      "fromId": "hi_fn",
+      "fromProperty": "out-done",
+      "toId": "hi_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "hi_fn",
+      "fromProperty": "out-why",
+      "toId": "hi_deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "hi_fn",
+      "fromProperty": "out-refuse",
+      "toId": "hi_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "hi_fn",
+      "fromProperty": "out-failed",
+      "toId": "hi_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "hi_fn",
+      "fromProperty": "failure",
+      "toId": "hi_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "hi_req",
+      "fromProperty": "pm-files",
+      "toId": "hi_fn",
+      "toProperty": "in-files"
+    },
+    {
+      "fromId": "hi_req",
+      "fromProperty": "pm-addToCreations",
+      "toId": "hi_fn",
+      "toProperty": "in-addToCreations"
+    },
+    {
+      "fromId": "hi_fn",
+      "fromProperty": "out-creationId",
+      "toId": "hi_res",
+      "toProperty": "pm-creationId"
+    }
+  ]
+}

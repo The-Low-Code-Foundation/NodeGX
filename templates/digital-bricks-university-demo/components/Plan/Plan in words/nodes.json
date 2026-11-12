@@ -1,0 +1,559 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "025c0810-fa38-5acb-8519-9001ef2c2123",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "piw_in",
+      "type": "Component Inputs",
+      "label": "learnerAsCoach's answer",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "learner",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "plan",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "steps",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "submissions",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "learnerView",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "checkins",
+          "plug": "output",
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "id": "piw_kinds",
+      "type": "/Option sets/Step kinds",
+      "label": "Step kinds",
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "piw_statuses",
+      "type": "/Option sets/Step statuses",
+      "label": "Step statuses",
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "piw_fn",
+      "type": "JavaScriptFunction",
+      "label": "The plan, in the reader's words",
+      "x": 340,
+      "y": 160,
+      "parameters": {
+        "functionScript": "/*\n * Everything the plan page draws, worked out once. Times are shown in the coach's zone\n * (Europe/Paris), the zone saveStep reads them back in. Words come from Strings with\n * {tags} (CONVENTIONS, Words); kinds and statuses from their option sets.\n * A homework row also carries its hand-ins as they came (Work/Versions shapes them, DBU-06).\n * A check-in row (DBU-10) carries the steps it may follow (anchors: this plan's live sessions and\n * homework) and, once answered, its answer with the answer's own copy of its questions.\n */\nif (Inputs.steps === undefined || Inputs.kinds === undefined || Inputs.statuses === undefined || Inputs.t === undefined) return;\nconst t = Inputs.t;\nconst fill = (s, v) => Object.keys(v).reduce((out, k) => out.split('{' + k + '}').join(String(v[k])), String(s || ''));\nconst get = (m, k) => (m && typeof m.get === 'function' ? m.get(k) : m && m[k]);\nconst kinds = (Inputs.kinds || []).map((k) => ({ value: get(k, 'value'), labelKey: get(k, 'labelKey'), bg: get(k, 'bg'), fg: get(k, 'fg') }));\nconst statuses = (Inputs.statuses || []).map((s) => ({ value: get(s, 'value'), kind: get(s, 'kind'), labelKey: get(s, 'labelKey'), bg: get(s, 'bg'), fg: get(s, 'fg') }));\nconst TZ = 'Europe/Paris';\nconst day = (iso) => new Date(iso).toLocaleDateString('en-GB', { timeZone: TZ, weekday: 'short', day: 'numeric', month: 'short' });\nconst time = (iso) => new Date(iso).toLocaleTimeString('en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });\n\nconst learner = Inputs.learner || {};\nconst plan = Inputs.plan || null;\nconst steps = Array.isArray(Inputs.steps) ? Inputs.steps : [];\nconst subs = Array.isArray(Inputs.submissions) ? Inputs.submissions : [];\nconst answers = Array.isArray(Inputs.checkins) ? Inputs.checkins : [];\nconst name = learner.name || learner.email || '';\nconst first = name.split(' ')[0];\nconst anchors = steps.filter((s) => s.kind === 'live' || s.kind === 'homework').map((s) => ({ id: s.id, label: s.title || '' }));\n\nconst rowOf = (s) => {\n  const kind = kinds.find((k) => k.value === s.kind) || {};\n  const status = statuses.find((x) => x.kind === s.kind && x.value === s.status) || {};\n  const minutes = Number.isInteger(s.durationMin) ? s.durationMin : 60;\n  const handIns = s.kind === 'homework' ? subs.filter((x) => x.step === s.id) : [];\n  const answer = s.kind === 'checkin' ? answers.find((a) => a.step === s.id) || null : null;\n  let detail = [];\n  if (s.kind === 'live') {\n    detail.push(s.startsAt ? day(s.startsAt) + ', ' + time(s.startsAt) : t.toBook);\n    detail.push(fill(t.minutes, { min: minutes }));\n    if (s.attended === true) detail.push(t.attended);\n  } else if (s.kind === 'homework') {\n    detail.push(s.dueAt ? fill(t.due, { date: day(s.dueAt) }) : t.noDue);\n    if (s.fromLibraryItem) detail.push(t.fromLibrary);\n    if (!String(s.brief || '').trim()) detail.push(t.noBrief);\n    if (handIns.length) detail.push(fill(t.versions, { n: handIns.length }));\n  } else {\n    const anchor = s.sendAfter && s.sendAfter.step ? steps.find((x) => x.id === s.sendAfter.step) : null;\n    if (anchor) {\n      const days = Number(s.sendAfter.days) || 0;\n      detail.push(fill(days === 0 ? t.afterSame : t.after, { days, title: anchor.title || '' }));\n    }\n    if (s.sendsAt) detail.push(fill(t.sends, { date: day(s.sendsAt) }));\n    else if (!anchor) detail.push(t.noSend);\n    if (answer && answer.answeredAt) detail.push(fill(t.answered, { date: day(answer.answeredAt) }));\n  }\n  const shared = s.shared === true;\n  return {\n    id: s.id,\n    kindKey: kind.labelKey || '',\n    kindBg: kind.bg || 'var(--muted)',\n    kindFg: kind.fg || 'var(--muted-foreground)',\n    statusKey: status.labelKey || '',\n    statusBg: status.bg || 'var(--muted)',\n    statusFg: status.fg || 'var(--muted-foreground)',\n    shared,\n    draft: !shared,\n    sharedKey: shared ? 'plan.shared' : 'plan.draft',\n    title: s.title || '',\n    detail: detail.join(' · '),\n    rowBg: shared ? 'var(--surface)' : 'var(--background)',\n    rowBorder: shared ? 'solid' : 'dashed',\n    isLive: s.kind === 'live',\n    isHomework: s.kind === 'homework',\n    isCheckin: s.kind === 'checkin',\n    step: s,\n    handIns,\n    hasHandIns: handIns.length > 0,\n    anchors: s.kind === 'checkin' ? anchors : [],\n    hasAnswers: !!answer,\n    answerQuestions: answer && answer.form && Array.isArray(answer.form.questions) ? answer.form.questions : [],\n    answerValues: answer && answer.answers ? answer.answers : {},\n    hasTime: s.kind === 'live' && !!s.startsAt,\n    startsAt: s.startsAt || '',\n    durationMin: minutes,\n    meetingLink: s.meetingLink || (plan && plan.meetingLink) || '',\n    calDetails: plan ? plan.title : '',\n    attendeeName: name,\n    attendeeEmail: learner.email || ''\n  };\n};\nconst rows = steps.map(rowOf);\nconst live = steps.filter((s) => s.kind === 'live');\nconst liveMinutes = live.reduce((m, s) => m + (Number.isInteger(s.durationMin) ? s.durationMin : 60), 0);\nconst h = Math.floor(liveMinutes / 60);\nconst m = liveMinutes % 60;\n\nOutputs.name = name;\nOutputs.first = first;\nOutputs.detail = [learner.jobTitle, learner.organisation, learner.email].filter(Boolean).join(' · ');\nOutputs.planId = plan ? plan.id : '';\nOutputs.hasPlan = !!plan;\nOutputs.noPlan = !plan;\nOutputs.statusKey = plan ? 'plan.plan' + plan.status.charAt(0).toUpperCase() + plan.status.slice(1) : '';\nOutputs.live = String(live.length);\nOutputs.homework = String(steps.filter((s) => s.kind === 'homework').length);\nOutputs.hours = m ? fill(t.hoursMinutes, { h, m }) : fill(t.hours, { h });\nOutputs.empty = steps.length === 0;\nOutputs.startedFrom = (plan && plan.templateTitle) || t.blank;\nOutputs.suggestedTitle = plan ? plan.title : '';\nconst shown = Inputs.learnerView === true ? rows.filter((r) => r.shared) : rows;\nOutputs.rows = shown;\nOutputs.nothingShared = Inputs.learnerView === true && shown.length === 0;\nOutputs.done();"
+      },
+      "ports": [
+        {
+          "name": "in-learner",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "in-plan",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "in-steps",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "in-submissions",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "in-learnerView",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "in-checkins",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "in-kinds",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "in-statuses",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "in-t",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "out-name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-first",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-detail",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-planId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-hasPlan",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-noPlan",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-statusKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-live",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-homework",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-hours",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-empty",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-startedFrom",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-suggestedTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-nothingShared",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "piw_words",
+      "type": "JavaScriptFunction",
+      "label": "The words it uses, gathered",
+      "x": 340,
+      "y": 40,
+      "parameters": {
+        "functionScript": "// One object, so the shaping waits for every word at once (each Translation arrives on its own).\nconst keys = ['toBook', 'minutes', 'attended', 'due', 'noDue', 'fromLibrary', 'noBrief', 'versions', 'sends', 'noSend', 'hours', 'hoursMinutes', 'blank', 'after', 'afterSame', 'answered'];\nif (keys.some((k) => Inputs[k] === undefined)) return;\nOutputs.t = keys.reduce((o, k) => Object.assign(o, { [k]: Inputs[k] }), {});"
+      },
+      "ports": [
+        {
+          "name": "in-toBook",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-minutes",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-attended",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-due",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-noDue",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-fromLibrary",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-noBrief",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-versions",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-sends",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-noSend",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-hours",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-hoursMinutes",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-blank",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-after",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-afterSame",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "in-answered",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "out-t",
+          "plug": "output",
+          "type": "object"
+        }
+      ]
+    },
+    {
+      "id": "piw_out",
+      "type": "Component Outputs",
+      "label": "What the page draws",
+      "x": 640,
+      "y": 160,
+      "ports": [
+        {
+          "name": "name",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "first",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "detail",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "planId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hasPlan",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "noPlan",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "statusKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "live",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "homework",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hours",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "empty",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "startedFrom",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "suggestedTitle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "nothingShared",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "ready",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "piw_t1",
+      "type": "Translation",
+      "label": "No date yet",
+      "x": 40,
+      "y": 400,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.detailToBook"
+      }
+    },
+    {
+      "id": "piw_t2",
+      "type": "Translation",
+      "label": "{min} min",
+      "x": 40,
+      "y": 460,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.detailMinutes"
+      }
+    },
+    {
+      "id": "piw_t3",
+      "type": "Translation",
+      "label": "attended",
+      "x": 40,
+      "y": 520,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.detailAttended"
+      }
+    },
+    {
+      "id": "piw_t4",
+      "type": "Translation",
+      "label": "Due {date}",
+      "x": 40,
+      "y": 580,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.detailDue"
+      }
+    },
+    {
+      "id": "piw_t5",
+      "type": "Translation",
+      "label": "No due date",
+      "x": 40,
+      "y": 640,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.detailNoDue"
+      }
+    },
+    {
+      "id": "piw_t6",
+      "type": "Translation",
+      "label": "from the library",
+      "x": 40,
+      "y": 700,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.detailFromLibrary"
+      }
+    },
+    {
+      "id": "piw_t7",
+      "type": "Translation",
+      "label": "no brief yet",
+      "x": 40,
+      "y": 760,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.detailNoBrief"
+      }
+    },
+    {
+      "id": "piw_t8",
+      "type": "Translation",
+      "label": "version {n} handed in",
+      "x": 40,
+      "y": 820,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.detailVersions"
+      }
+    },
+    {
+      "id": "piw_t9",
+      "type": "Translation",
+      "label": "Sends {date}",
+      "x": 40,
+      "y": 880,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.detailSends"
+      }
+    },
+    {
+      "id": "piw_t10",
+      "type": "Translation",
+      "label": "No send date",
+      "x": 40,
+      "y": 940,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.detailNoSend"
+      }
+    },
+    {
+      "id": "piw_t11",
+      "type": "Translation",
+      "label": "{h} h",
+      "x": 40,
+      "y": 1000,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "library.hours"
+      }
+    },
+    {
+      "id": "piw_t12",
+      "type": "Translation",
+      "label": "Blank plan",
+      "x": 40,
+      "y": 1060,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.blankPlan"
+      }
+    },
+    {
+      "id": "piw_t13",
+      "type": "Translation",
+      "label": "{h} h {m} min",
+      "x": 40,
+      "y": 1120,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "library.hoursMinutes"
+      }
+    },
+    {
+      "id": "piw_t14",
+      "type": "Translation",
+      "label": "{days} days after “{title}”",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.detailAfter"
+      },
+      "x": 40,
+      "y": 1240
+    },
+    {
+      "id": "piw_t15",
+      "type": "Translation",
+      "label": "On the day of “{title}”",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.detailAfterSame"
+      },
+      "x": 40,
+      "y": 1360
+    },
+    {
+      "id": "piw_t16",
+      "type": "Translation",
+      "label": "answered {date}",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "plan.detailAnswered"
+      },
+      "x": 40,
+      "y": 1480
+    }
+  ]
+}

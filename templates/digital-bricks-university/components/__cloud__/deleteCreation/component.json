@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2a9c0de0-ea2d-559b-81fa-d1c3bbc24998",
+  "name": "deleteCreation",
+  "path": "/#__cloud__/deleteCreation",
+  "type": "cloud",
+  "created": "2026-11-12T13:36:52.672Z",
+  "modified": "2026-11-12T13:36:52.672Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Deletes one of the caller's own creations (DBU-09; security: authenticated). Only the Creation row goes: a hand-in it points at, and that hand-in's files, are never touched."
+}

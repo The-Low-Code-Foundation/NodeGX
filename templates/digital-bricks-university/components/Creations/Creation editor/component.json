@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "67205d70-035a-53e6-8928-a11b9b814292",
+  "name": "Creation editor",
+  "path": "/Creations/Creation editor",
+  "type": "visual",
+  "created": "2026-11-12T13:47:19.380Z",
+  "modified": "2026-11-12T13:56:48.643Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Add a creation (a file, a link or text) or edit one of the learner's own (DBU-09): title, kind (first guessed from the file, link or text, and changeable), made with, a description and \"I've used it in class\". A creation from a hand-in, or one holding its own file, keeps what it holds: only its words change. Delete asks first and never touches the hand-in. saveCreation and deleteCreation do the work."
+}

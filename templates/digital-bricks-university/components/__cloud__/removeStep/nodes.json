@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "1480cfda-0ee5-5045-8eec-f040bc350bd8",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rs_req-2",
+      "type": "noodl.cloud.request",
+      "label": "The coach removes a step",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "stepId",
+        "allowNoAuth": false,
+        "ptype-stepId": "string",
+        "preq-stepId": true
+      },
+      "metadata": {
+        "comment": "role:staff in nodegx.security.json."
+      }
+    },
+    {
+      "id": "rs_fn-2",
+      "type": "JavaScriptFunction",
+      "label": "Remove it unless the learner has worked on it",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "runOnChange-in-stepId": false,
+        "functionScript": "/*\n * Removing is for drafts and mistakes. Hand-ins, messages and check-in answers point at a\n * step by its id, so a step with any of them stays: the coach unshares it instead, and the\n * learner's work is never left pointing at nothing. Library files are never deleted here\n * either: copies in other plans may name them (DECISIONS, DBU-03).\n * A check-in sent \"N days after\" the removed step keeps the day it had and loses the rule\n * (DBU-10): it is then sent on that date, which the coach can change.\n */\n(async () => {\n  const refuse = (why) => { Outputs.why = why; Outputs.refuse(); };\n  try {\n    const R = Noodl.Records;\n    const q = (c, where, limit) => R.query(c, where, { limit: limit || 1000, plain: true });\n    const id = String(Inputs.stepId || '');\n    const found = id ? await q('Step', { objectId: { equalTo: id } }, 2) : [];\n    if (found.length !== 1) return refuse('That step is no longer in the plan. Reload the page.');\n    const step = found[0];\n    for (const [table, what] of [['Submission', 'handed work in for it'], ['Message', 'written about it'], ['CheckinResponse', 'answered it']]) {\n      if ((await q(table, { step: { equalTo: id } }, 1)).length) {\n        return refuse('“' + step.title + '” stays: the learner has ' + what + '. Unshare it instead if they should not see it.');\n      }\n    }\n    await R.delete(id, { className: 'Step' });\n    const rest = (await q('Step', { plan: { equalTo: step.plan } }))\n      .sort((a, b) => (a.position - b.position) || String(a.objectId).localeCompare(String(b.objectId)));\n    for (let i = 0; i < rest.length; i++) {\n      const change = {};\n      if (rest[i].position !== i + 1) change.position = i + 1;\n      if (rest[i].sendAfter && rest[i].sendAfter.step === id) change.sendAfter = null;\n      if (Object.keys(change).length) await R.save(rest[i].objectId, change, { className: 'Step' });\n    }\n    if (step.shared === true) {\n      await R.create('Doorbell', { learner: step.learner, topic: 'plan' }, { acl: { [step.learner]: { read: true }, 'role:staff': { read: true } } });\n    }\n    Outputs.title = step.title;\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:removeStep]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-stepId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-why",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "rs_res-2",
+      "type": "noodl.cloud.response",
+      "label": "Removed",
+      "x": 40,
+      "y": 280,
+      "parameters": {
+        "params": "title"
+      }
+    },
+    {
+      "id": "rs_deny-2",
+      "type": "noodl.cloud.response",
+      "label": "A refusal the coach can act on",
+      "x": 40,
+      "y": 400,
+      "parameters": {
+        "status": "failure"
+      }
+    },
+    {
+      "id": "rs_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "x": 40,
+      "y": 520,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "The step could not be removed. Reload the page and try again."
+      }
+    }
+  ]
+}

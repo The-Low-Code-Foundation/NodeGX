@@ -1,0 +1,108 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "78f855f3-210f-54b2-87d0-4c7f0f1e8063",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mck_req",
+      "type": "noodl.cloud.request",
+      "label": "A learner opens a check-in",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "stepId",
+        "allowNoAuth": false,
+        "ptype-stepId": "string",
+        "preq-stepId": true
+      },
+      "metadata": {
+        "comment": "authenticated in nodegx.security.json. Identity is the session's userId, never a parameter."
+      }
+    },
+    {
+      "id": "mck_fn",
+      "type": "JavaScriptFunction",
+      "label": "Read my check-in",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "runOnChange-in-stepId": false,
+        "runOnChange-in-userId": false,
+        "functionScript": "/*\n * ONE CHECK-IN, AS ITS LEARNER SEES IT (DBU-10). Hers, shared and a check-in, or refused with the\n * same sentence whatever the reason, so the answer never says whose a step is.\n *   state 'waiting'   still to send: the page says when it opens (sendsAt; null if not dated yet)\n *   state 'open'      sent: the form to answer\n *   state 'answered'  done: the form she answered (the response's own copy) and her answers\n */\n(async () => {\n  const refuse = (why) => { Outputs.why = why; Outputs.refuse(); };\n  try {\n    const me = String(Inputs.userId || '');\n    if (!me) throw new Error('no session user');\n    const q = (c, where) => Noodl.Records.query(c, where, { limit: 2, plain: true });\n    const id = String(Inputs.stepId || '');\n    const steps = id ? await q('Step', { objectId: { equalTo: id } }) : [];\n    const s = steps[0];\n    if (!s || s.learner !== me || s.shared !== true || s.kind !== 'checkin') return refuse('This check-in could not be found. Open it from your Home page.');\n    const responses = s.status === 'done' ? await q('CheckinResponse', { step: { equalTo: id } }) : [];\n    const r = responses.find((x) => x.learner === me) || null;\n    const users = await q('_User', { objectId: { equalTo: me } });\n    const form = (r && r.form) || s.form || { questions: [] };\n    Outputs.checkin = {\n      id: s.objectId,\n      title: s.title || '',\n      state: r ? 'answered' : s.status === 'scheduled' ? 'waiting' : 'open',\n      sendsAt: s.sendsAt || null,\n      sentAt: s.sentAt || null,\n      answeredAt: r ? r.createdAt : null,\n      minutes: Number.isInteger(form.minutes) ? form.minutes : 2,\n      questions: Array.isArray(form.questions) ? form.questions : [],\n      answers: r ? r.answers || {} : null\n    };\n    Outputs.me = { timezone: (users[0] && users[0].timezone) || '' };\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:myCheckin]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-stepId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-checkin",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "out-me",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "out-why",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "mck_res",
+      "type": "noodl.cloud.response",
+      "label": "The check-in",
+      "x": 40,
+      "y": 280,
+      "parameters": {
+        "params": "checkin,me"
+      }
+    },
+    {
+      "id": "mck_deny",
+      "type": "noodl.cloud.response",
+      "label": "Not hers, or not shared",
+      "x": 40,
+      "y": 400,
+      "parameters": {
+        "status": "failure"
+      }
+    },
+    {
+      "id": "mck_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "x": 40,
+      "y": 520,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "This check-in could not be read. Reload the page to try again."
+      }
+    }
+  ]
+}

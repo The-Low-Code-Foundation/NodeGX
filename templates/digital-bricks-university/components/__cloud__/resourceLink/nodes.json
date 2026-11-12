@@ -1,0 +1,93 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "bad6d3ad-f179-5da1-828b-f3fe1b7505c3",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rl_req",
+      "type": "noodl.cloud.request",
+      "label": "A learner opens a resource",
+      "parameters": {
+        "params": "stepId,file",
+        "allowNoAuth": false,
+        "ptype-stepId": "string",
+        "preq-stepId": true,
+        "ptype-file": "string",
+        "preq-file": true
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rl_check",
+      "type": "JavaScriptFunction",
+      "label": "Is it on a shared step of the caller's?",
+      "parameters": {
+        "functionScript": "(async () => {\n  try {\n    const me = String(Inputs.userId || '');\n    const stepId = String(Inputs.stepId || '');\n    const file = String(Inputs.file || '');\n    if (!me || !stepId || !file) throw new Error('missing user, step or file');\n    const steps = await Noodl.Records.query('Step', { objectId: { equalTo: stepId } }, { limit: 2, plain: true });\n    const step = steps.length === 1 ? steps[0] : null;\n    if (!step || step.learner !== me || step.shared !== true || step.kind !== 'homework') throw new Error('not a shared homework step of the caller');\n    const listed = (Array.isArray(step.resources) ? step.resources : []).some((r) => r && r.file === file);\n    if (!listed) throw new Error('that step lists no such file');\n    Outputs.name = file;\n  } catch (e) {\n    console.error('[dbu:resourceLink]', String((e && e.message) || e));\n    Outputs.refused();\n  }\n})();",
+        "runOnChange-in-userId": false,
+        "runOnChange-in-stepId": false,
+        "runOnChange-in-file": false
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-stepId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-file",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-name",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "metadata": {
+        "comment": "The file is the coach's upload, so fileLink (owner only) refuses it. The step is the permission: hers, shared, homework, and listing this exact file. An unshared draft step does not count (learners never see one)."
+      },
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "rl_sign",
+      "type": "/#__cloud__/shared/Signed file link",
+      "label": "Sign it",
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "rl_res",
+      "type": "noodl.cloud.response",
+      "label": "The link",
+      "parameters": {
+        "params": "url,expiresAt"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "rl_deny",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "This file could not be opened."
+      },
+      "x": 40,
+      "y": 520
+    }
+  ]
+}

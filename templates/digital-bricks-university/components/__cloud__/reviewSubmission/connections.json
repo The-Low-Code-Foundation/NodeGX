@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d36c76b1-aa34-5649-8c7c-e8b977b66258",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rs_req",
+      "fromProperty": "pm-submissionId",
+      "toId": "rs_fn",
+      "toProperty": "in-submissionId"
+    },
+    {
+      "fromId": "rs_req",
+      "fromProperty": "pm-verdict",
+      "toId": "rs_fn",
+      "toProperty": "in-verdict"
+    },
+    {
+      "fromId": "rs_req",
+      "fromProperty": "pm-note",
+      "toId": "rs_fn",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "rs_req",
+      "fromProperty": "receive",
+      "toId": "rs_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rs_fn",
+      "fromProperty": "out-review",
+      "toId": "rs_res",
+      "toProperty": "pm-review"
+    },
+    {
+      "fromId": "rs_fn",
+      "fromProperty": "out-stepStatus",
+      "toId": "rs_res",
+      "toProperty": "pm-stepStatus"
+    },
+    {
+      "fromId": "rs_fn",
+      "fromProperty": "out-reviewedAt",
+      "toId": "rs_res",
+      "toProperty": "pm-reviewedAt"
+    },
+    {
+      "fromId": "rs_fn",
+      "fromProperty": "out-done",
+      "toId": "rs_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "rs_fn",
+      "fromProperty": "out-failed",
+      "toId": "rs_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "rs_fn",
+      "fromProperty": "failure",
+      "toId": "rs_deny",
+      "toProperty": "send"
+    }
+  ]
+}

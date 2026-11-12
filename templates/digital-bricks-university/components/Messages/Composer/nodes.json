@@ -1,0 +1,775 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "ddfbfbb9-06cd-566f-8a9e-de05151fea56",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "co_root",
+      "type": "Group",
+      "label": "Composer",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "co_text",
+        "co_attach",
+        "co_actions",
+        "co_refused",
+        "co_server",
+        "co_upfail",
+        "co_done"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "dataAttributes": "data-testid",
+        "data-testid": "composer"
+      }
+    },
+    {
+      "id": "co_text",
+      "type": "net.noodl.controls.textinput",
+      "label": "The message",
+      "x": 100,
+      "y": 160,
+      "parent": "co_root",
+      "parameters": {
+        "type": "textArea",
+        "useLabel": true,
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 120,
+          "unit": "px"
+        },
+        "lineHeight": "var(--leading-relaxed)",
+        "runOnChange-startValue": true
+      },
+      "metadata": {
+        "comment": "draft (DBU-08: the inbox's prewritten nudge) fills the box whenever it changes; the writer edits it before sending."
+      }
+    },
+    {
+      "id": "co_attach",
+      "type": "Group",
+      "label": "Attach files (learners only)",
+      "x": 100,
+      "y": 280,
+      "parent": "co_root",
+      "children": [
+        "co_choose",
+        "co_list",
+        "co_bad",
+        "co_types"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      }
+    },
+    {
+      "id": "co_choose",
+      "type": "net.noodl.controls.button",
+      "label": "Attach a file",
+      "x": 160,
+      "y": 400,
+      "parent": "co_attach",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-paperclip",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)",
+        "iconColor": "var(--foreground)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-medium)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "minHeight": "var(--space-11)"
+      }
+    },
+    {
+      "id": "co_list",
+      "type": "Group",
+      "label": "The attached files",
+      "x": 160,
+      "y": 520,
+      "parent": "co_attach",
+      "children": [
+        "co_rows"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      }
+    },
+    {
+      "id": "co_rows",
+      "type": "For Each",
+      "label": "One row per attached file",
+      "x": 220,
+      "y": 640,
+      "parent": "co_list",
+      "parameters": {
+        "template": "/Homework/Chosen file"
+      }
+    },
+    {
+      "id": "co_bad",
+      "type": "Text",
+      "label": "Not a file we take",
+      "x": 160,
+      "y": 760,
+      "parent": "co_attach",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "co_types",
+      "type": "Text",
+      "label": "What can be attached",
+      "x": 160,
+      "y": 880,
+      "parent": "co_attach",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "co_actions",
+      "type": "Group",
+      "label": "Send",
+      "x": 100,
+      "y": 1000,
+      "parent": "co_root",
+      "children": [
+        "co_go",
+        "co_busy"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-2)"
+      }
+    },
+    {
+      "id": "co_go",
+      "type": "net.noodl.controls.button",
+      "label": "Send",
+      "x": 160,
+      "y": 1120,
+      "parent": "co_actions",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-send",
+          "codeAsClass": true
+        },
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)",
+        "iconColor": "var(--primary-foreground)"
+      }
+    },
+    {
+      "id": "co_busy",
+      "type": "Text",
+      "label": "Sending, or which file is uploading",
+      "x": 160,
+      "y": 1240,
+      "parent": "co_actions",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "co_refused",
+      "type": "Text",
+      "label": "Nothing to send",
+      "x": 100,
+      "y": 1360,
+      "parent": "co_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "co_server",
+      "type": "Text",
+      "label": "Why the function refused",
+      "x": 100,
+      "y": 1480,
+      "parent": "co_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "co_upfail",
+      "type": "Text",
+      "label": "A file did not upload",
+      "x": 100,
+      "y": 1600,
+      "parent": "co_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--attention)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "co_done",
+      "type": "Text",
+      "label": "Sent",
+      "x": 100,
+      "y": 1720,
+      "parent": "co_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "color": "var(--done-fg)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "co_in",
+      "type": "Component Inputs",
+      "label": "Who writes, to whom, about what",
+      "x": 520,
+      "y": 40,
+      "ports": [
+        {
+          "name": "mode",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "stepId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "learnerId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "canAttach",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "labelKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "first",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "draft",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "metadata": {
+        "comment": "mode 'learner' sends through sendMessage (the session says who); 'coach' through replyAsCoach to learnerId. stepId ties the message to one homework; empty is a general message."
+      }
+    },
+    {
+      "id": "co_out",
+      "type": "Component Outputs",
+      "label": "Sent",
+      "x": 520,
+      "y": 1720,
+      "ports": [
+        {
+          "name": "sent",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "co_t_label",
+      "type": "Translation",
+      "label": "The box's label",
+      "x": 520,
+      "y": 160,
+      "parameters": {
+        "Namespace": "pages"
+      }
+    },
+    {
+      "id": "co_fill_label",
+      "type": "String Format",
+      "label": "Their first name into the label",
+      "x": 760,
+      "y": 160,
+      "parameters": {
+        "format": "{first}"
+      }
+    },
+    {
+      "id": "co_kinds",
+      "type": "/Option sets/Hand-in kinds",
+      "label": "The kinds a file may be",
+      "x": 520,
+      "y": 280
+    },
+    {
+      "id": "co_files",
+      "type": "Javascript2",
+      "label": "The files for this message",
+      "x": 520,
+      "y": 520,
+      "parameters": {
+        "code": "/*\n * The files attached to the next message (DBU-07, the hand-in rules of DBU-06): up to 5, each a kind on the list and up to 50 MB,\n * judged from the name and size before anything is uploaded. A file that breaks a rule is\n * not added, and `refused` says why, naming it; the same file twice is added once.\n * Send sends them one after another through the Upload File node: `start` copies the\n * list, `uploadNext` puts each on `current`, the node's done comes back as `uploaded`.\n * After the last one `names` holds every stored name and `allUploaded` fires.\n * sendMessage checks every file again, from its bytes, and has the last word.\n */\nconst MAX_FILES = 5;\nconst MAX_BYTES = 50 * 1024 * 1024;\nlet chosen = [];\nlet seq = 0;\nlet queue = [];\nlet stored = [];\nlet total = 0;\n\nScript.Inputs = {\n  kinds: 'array', picked: '*', pickedName: 'string', pickedSize: 'number',\n  dropped: 'array', removeId: 'string', cloudFile: '*'\n};\nScript.Outputs = {\n  items: 'array', hasFiles: 'boolean', accept: 'string',\n  whyKey: 'string', whyName: 'string', refused: 'signal', accepted: 'signal',\n  current: '*', uploadNext: 'signal', names: 'array', allUploaded: 'signal',\n  busyKey: 'string', busyI: 'string', busyN: 'string'\n};\n\nconst get = (m, k) => (m && typeof m.get === 'function' ? m.get(k) : m && m[k]);\nconst exts = () => (Script.Inputs.kinds || []).map((k) => get(k, 'ext')).filter(Boolean);\nconst sizeText = (n) => (n >= 1024 * 1024 ? (n / (1024 * 1024)).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB');\n\nfunction publish() {\n  Script.Outputs.items = chosen.map((c) => ({ id: c.id, name: c.name, size: sizeText(c.size) }));\n  Script.Outputs.hasFiles = chosen.length > 0;\n}\nfunction refuse(key, name) {\n  Script.Outputs.whyKey = key;\n  Script.Outputs.whyName = name;\n  Script.Outputs.refused();\n}\n// true when the file is in the list (added now, or already there)\nfunction add(file, rawName, rawSize) {\n  const name = String(rawName || '');\n  const size = Number(rawSize) || 0;\n  if (!file || !name) return true;\n  if (chosen.some((c) => c.name === name && c.size === size)) return true;\n  const dot = name.lastIndexOf('.');\n  const ext = dot > 0 ? name.slice(dot + 1).toLowerCase() : '';\n  if (!exts().includes(ext)) { refuse('messages.badType', name); return false; }\n  if (size > MAX_BYTES) { refuse('messages.tooBig', name); return false; }\n  if (chosen.length >= MAX_FILES) { refuse('messages.tooMany', name); return false; }\n  seq += 1;\n  chosen.push({ id: 'chosen-' + seq, file, name, size });\n  return true;\n}\nfunction next() {\n  const c = queue.shift();\n  if (c) {\n    Script.Outputs.busyKey = 'work.uploading';\n    Script.Outputs.busyI = String(total - queue.length);\n    Script.Outputs.busyN = String(total);\n    Script.Outputs.current = c.file;\n    Script.Outputs.uploadNext();\n    return;\n  }\n  Script.Outputs.busyKey = 'messages.sending';\n  Script.Outputs.names = stored.slice();\n  Script.Outputs.allUploaded();\n}\n\nScript.OnInit = function () {\n  Script.Outputs.busyKey = 'messages.sending';\n  publish();\n};\nScript.Setters.kinds = function () {\n  Script.Outputs.accept = exts().map((e) => '.' + e).join(',');\n};\nScript.Signals.addPicked = function () {\n  const ok = add(Script.Inputs.picked, Script.Inputs.pickedName, Script.Inputs.pickedSize);\n  publish();\n  if (ok) Script.Outputs.accepted();\n};\nScript.Signals.addDropped = function () {\n  let ok = true;\n  Array.from(Script.Inputs.dropped || []).forEach((f) => { if (!add(f, f && f.name, f && f.size)) ok = false; });\n  publish();\n  if (ok) Script.Outputs.accepted();\n};\nScript.Signals.remove = function () {\n  const id = String(Script.Inputs.removeId || '');\n  chosen = chosen.filter((c) => c.id !== id);\n  publish();\n  Script.Outputs.accepted();\n};\nScript.Signals.start = function () {\n  queue = chosen.slice();\n  total = queue.length;\n  stored = [];\n  next();\n};\nScript.Signals.uploaded = function () {\n  const f = Script.Inputs.cloudFile;\n  const name = f ? (typeof f.getName === 'function' ? f.getName() : String(f.name || '')) : '';\n  if (name) stored.push(name);\n  next();\n};\nScript.Signals.abort = function () {\n  queue = [];\n  stored = [];\n  Script.Outputs.busyKey = 'messages.sending';\n};\nScript.Signals.clear = function () {\n  chosen = [];\n  queue = [];\n  stored = [];\n  publish();\n};\n"
+      }
+    },
+    {
+      "id": "co_picker",
+      "type": "Open File Picker",
+      "label": "Choose a file",
+      "x": 760,
+      "y": 400
+    },
+    {
+      "id": "co_upload",
+      "type": "Upload File",
+      "label": "Upload it privately",
+      "x": 760,
+      "y": 520,
+      "parameters": {
+        "private": true
+      }
+    },
+    {
+      "id": "co_check",
+      "type": "JavaScriptFunction",
+      "label": "Anything to send?",
+      "x": 520,
+      "y": 1000,
+      "parameters": {
+        "runOnChange-in-text": false,
+        "runOnChange-in-hasFiles": false,
+        "functionScript": "// Text, files, or both; never nothing. Files are uploaded first, then everything goes in one message.\nconst text = String(Inputs.text || '');\nconst withFiles = Inputs.hasFiles === true;\nif (!text.trim() && !withFiles) { Outputs.whyKey = 'messages.needText'; Outputs.refuse(); return; }\nOutputs.text = text;\nOutputs.withFiles = withFiles;\nif (withFiles) Outputs.upload(); else Outputs.send();"
+      },
+      "ports": [
+        {
+          "name": "in-text",
+          "displayName": "text",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-hasFiles",
+          "displayName": "hasFiles",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-refuse",
+          "displayName": "refuse",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-upload",
+          "displayName": "upload",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-send",
+          "displayName": "send",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-whyKey",
+          "displayName": "whyKey",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-text",
+          "displayName": "text",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-withFiles",
+          "displayName": "withFiles",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "co_send",
+      "type": "JavaScriptFunction",
+      "label": "To sendMessage, or to replyAsCoach",
+      "x": 760,
+      "y": 1000,
+      "parameters": {
+        "runOnChange-in-mode": false,
+        "runOnChange-in-text": false,
+        "runOnChange-in-withFiles": false,
+        "runOnChange-in-files": false,
+        "functionScript": "// Runs once every file is uploaded, or straight from the check when there are none, and fires one call.\nconst coach = Inputs.mode === 'coach';\nOutputs.body = String(Inputs.text || '');\nOutputs.files = !coach && Inputs.withFiles === true && Array.isArray(Inputs.files) ? Inputs.files.slice() : [];\nOutputs.doneKey = coach ? 'messages.sentCoach' : 'messages.sentLearner';\nif (coach) Outputs.goCoach(); else Outputs.goLearner();"
+      },
+      "ports": [
+        {
+          "name": "in-mode",
+          "displayName": "mode",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-text",
+          "displayName": "text",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-withFiles",
+          "displayName": "withFiles",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-files",
+          "displayName": "files",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-goCoach",
+          "displayName": "goCoach",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-goLearner",
+          "displayName": "goLearner",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-body",
+          "displayName": "body",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-files",
+          "displayName": "files",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-doneKey",
+          "displayName": "doneKey",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "co_cf_l",
+      "type": "CloudFunction2",
+      "label": "sendMessage (my own conversation only)",
+      "x": 520,
+      "y": 1240,
+      "parameters": {
+        "function": "sendMessage"
+      }
+    },
+    {
+      "id": "co_cf_c",
+      "type": "CloudFunction2",
+      "label": "replyAsCoach (staff only)",
+      "x": 760,
+      "y": 1240,
+      "parameters": {
+        "function": "replyAsCoach"
+      }
+    },
+    {
+      "id": "co_busy_sw",
+      "type": "Switch",
+      "label": "Sending, or not",
+      "x": 1000,
+      "y": 1120,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "co_not_busy",
+      "type": "Inverter",
+      "label": "Not sending",
+      "x": 1000,
+      "y": 1000
+    },
+    {
+      "id": "co_refused_sw",
+      "type": "Switch",
+      "label": "Show: nothing to send",
+      "x": 1000,
+      "y": 1360,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "co_server_sw",
+      "type": "Switch",
+      "label": "Show: the function refused",
+      "x": 1000,
+      "y": 1480,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "co_upfail_sw",
+      "type": "Switch",
+      "label": "Show: upload failed",
+      "x": 1000,
+      "y": 1600,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "co_done_sw",
+      "type": "Switch",
+      "label": "Show: sent",
+      "x": 1000,
+      "y": 1720,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "co_bad_sw",
+      "type": "Switch",
+      "label": "Show: that file was not added",
+      "x": 1000,
+      "y": 760,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "co_t_choose",
+      "type": "Translation",
+      "label": "Attach a file",
+      "x": 1240,
+      "y": 400,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "messages.attach"
+      }
+    },
+    {
+      "id": "co_t_types",
+      "type": "Translation",
+      "label": "What can be attached",
+      "x": 1240,
+      "y": 880,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "messages.attachTypes"
+      }
+    },
+    {
+      "id": "co_t_bad",
+      "type": "Translation",
+      "label": "Why that file is refused",
+      "x": 1240,
+      "y": 760,
+      "parameters": {
+        "Namespace": "pages"
+      }
+    },
+    {
+      "id": "co_fill_bad",
+      "type": "String Format",
+      "label": "The file's name into the sentence",
+      "x": 1480,
+      "y": 760,
+      "parameters": {
+        "format": "{name}"
+      }
+    },
+    {
+      "id": "co_t_go",
+      "type": "Translation",
+      "label": "Send",
+      "x": 1240,
+      "y": 1120,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "messages.send"
+      }
+    },
+    {
+      "id": "co_t_busy",
+      "type": "Translation",
+      "label": "Sending, or uploading {i} of {n}",
+      "x": 1240,
+      "y": 1240,
+      "parameters": {
+        "Namespace": "pages"
+      }
+    },
+    {
+      "id": "co_fill_busy",
+      "type": "String Format",
+      "label": "Which file is uploading",
+      "x": 1480,
+      "y": 1240,
+      "parameters": {
+        "format": "{i} {n}"
+      }
+    },
+    {
+      "id": "co_t_refused",
+      "type": "Translation",
+      "label": "Write your message first",
+      "x": 1240,
+      "y": 1360,
+      "parameters": {
+        "Namespace": "pages"
+      }
+    },
+    {
+      "id": "co_t_upfail",
+      "type": "Translation",
+      "label": "A file did not upload",
+      "x": 1240,
+      "y": 1600,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "messages.uploadFailed"
+      }
+    },
+    {
+      "id": "co_t_done",
+      "type": "Translation",
+      "label": "Sent, in the writer's words",
+      "x": 1240,
+      "y": 1720,
+      "parameters": {
+        "Namespace": "pages"
+      }
+    }
+  ],
+  "visualRoots": [
+    "co_root"
+  ]
+}

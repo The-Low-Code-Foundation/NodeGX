@@ -1,0 +1,979 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "aac6b72f-c0f9-5b27-83df-af5189736159",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "te_card",
+      "type": "Group",
+      "label": "Template editor",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "te_headbox",
+        "te_fields",
+        "te_steps_head",
+        "te_list",
+        "te_none",
+        "te_add",
+        "te_msg",
+        "te_actions"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      }
+    },
+    {
+      "id": "te_headbox",
+      "type": "Group",
+      "label": "Heading",
+      "x": 100,
+      "y": 160,
+      "parent": "te_card",
+      "children": [
+        "te_h",
+        "te_lede"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)"
+      }
+    },
+    {
+      "id": "te_h",
+      "type": "Text",
+      "label": "New or Edit template",
+      "x": 160,
+      "y": 280,
+      "parent": "te_headbox",
+      "parameters": {
+        "text": "",
+        "as": "h2",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "te_lede",
+      "type": "Text",
+      "label": "A template is a plan's shape",
+      "x": 160,
+      "y": 400,
+      "parent": "te_headbox",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "maxWidth": {
+          "value": 640,
+          "unit": "px"
+        }
+      }
+    },
+    {
+      "id": "te_fields",
+      "type": "Group",
+      "label": "Title and description",
+      "x": 100,
+      "y": 520,
+      "parent": "te_card",
+      "children": [
+        "te_title",
+        "te_desc"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 720,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)"
+      }
+    },
+    {
+      "id": "te_title",
+      "type": "net.noodl.controls.textinput",
+      "label": "Title",
+      "x": 160,
+      "y": 640,
+      "parent": "te_fields",
+      "parameters": {
+        "type": "text",
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxLength": 140
+      }
+    },
+    {
+      "id": "te_desc",
+      "type": "net.noodl.controls.textinput",
+      "label": "Description",
+      "x": 160,
+      "y": 760,
+      "parent": "te_fields",
+      "parameters": {
+        "type": "textArea",
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "te_steps_head",
+      "type": "Text",
+      "label": "Steps",
+      "x": 100,
+      "y": 880,
+      "parent": "te_card",
+      "parameters": {
+        "text": "",
+        "as": "h3",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "te_list",
+      "type": "Group",
+      "label": "The steps",
+      "x": 100,
+      "y": 1000,
+      "parent": "te_card",
+      "children": [
+        "te_rows"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      }
+    },
+    {
+      "id": "te_rows",
+      "type": "For Each",
+      "label": "One row per step",
+      "x": 160,
+      "y": 1120,
+      "parent": "te_list",
+      "parameters": {
+        "template": "/Templates/Template item row"
+      }
+    },
+    {
+      "id": "te_none",
+      "type": "Text",
+      "label": "No steps yet",
+      "x": 100,
+      "y": 1240,
+      "parent": "te_card",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "te_add",
+      "type": "Group",
+      "label": "Add a step",
+      "x": 100,
+      "y": 1360,
+      "parent": "te_card",
+      "children": [
+        "te_add_live",
+        "te_add_hw",
+        "te_add_ci"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)"
+      }
+    },
+    {
+      "id": "te_add_live",
+      "type": "net.noodl.controls.button",
+      "label": "+ Live session",
+      "x": 160,
+      "y": 1480,
+      "parent": "te_add",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--live-bg)",
+        "color": "var(--live-fg)",
+        "fontWeight": "var(--font-semibold)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--live-border)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-plus",
+          "codeAsClass": true
+        },
+        "iconColor": "var(--live-fg)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)"
+      }
+    },
+    {
+      "id": "te_add_hw",
+      "type": "net.noodl.controls.button",
+      "label": "+ Homework",
+      "x": 160,
+      "y": 1600,
+      "parent": "te_add",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--homework-bg)",
+        "color": "var(--homework-fg)",
+        "fontWeight": "var(--font-semibold)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--homework-border)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-plus",
+          "codeAsClass": true
+        },
+        "iconColor": "var(--homework-fg)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)"
+      }
+    },
+    {
+      "id": "te_add_ci",
+      "type": "net.noodl.controls.button",
+      "label": "+ Check-in",
+      "x": 160,
+      "y": 1720,
+      "parent": "te_add",
+      "parameters": {
+        "label": "",
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--checkin-bg)",
+        "color": "var(--checkin-fg)",
+        "fontWeight": "var(--font-semibold)",
+        "fontSize": "var(--text-sm)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "useIcon": true,
+        "iconSourceType": "icon",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-plus",
+          "codeAsClass": true
+        },
+        "iconColor": "var(--checkin-fg)",
+        "iconSize": 16,
+        "iconSpacing": "var(--space-1-5)"
+      }
+    },
+    {
+      "id": "te_msg",
+      "type": "Text",
+      "label": "Why it was not saved",
+      "x": 100,
+      "y": 1840,
+      "parent": "te_card",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--attention)"
+      }
+    },
+    {
+      "id": "te_actions",
+      "type": "Group",
+      "label": "Save and Cancel",
+      "x": 100,
+      "y": 1960,
+      "parent": "te_card",
+      "children": [
+        "te_save",
+        "te_cancel"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)"
+      }
+    },
+    {
+      "id": "te_save",
+      "type": "net.noodl.controls.button",
+      "label": "Save",
+      "x": 160,
+      "y": 2080,
+      "parent": "te_actions",
+      "parameters": {
+        "label": ""
+      }
+    },
+    {
+      "id": "te_cancel",
+      "type": "net.noodl.controls.button",
+      "label": "Cancel",
+      "x": 160,
+      "y": 2200,
+      "parent": "te_actions",
+      "parameters": {
+        "label": "",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)"
+      }
+    },
+    {
+      "id": "te_in",
+      "type": "Component Inputs",
+      "label": "Editor in",
+      "x": 520,
+      "y": 40,
+      "ports": [
+        {
+          "name": "template",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "library",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "load",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "te_out",
+      "type": "Component Outputs",
+      "label": "Editor out",
+      "x": 520,
+      "y": 2080,
+      "ports": [
+        {
+          "name": "saved",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "savedTitle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "closed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "te_kinds",
+      "type": "/Option sets/Step kinds",
+      "label": "Step kinds",
+      "x": 520,
+      "y": 160
+    },
+    {
+      "id": "te_arr",
+      "type": "Collection2",
+      "label": "The steps being edited",
+      "x": 520,
+      "y": 1000,
+      "parameters": {
+        "collectionId": "template-draft-items"
+      },
+      "metadata": {
+        "comment": "An app-wide Array: one template editor exists, on one page (shared on purpose)."
+      }
+    },
+    {
+      "id": "te_open",
+      "type": "JavaScriptFunction",
+      "label": "Open the template: fill the fields and the steps",
+      "x": 520,
+      "y": 280,
+      "parameters": {
+        "runOnChange-in-template": false,
+        "runOnChange-in-library": false,
+        "runOnChange-in-kinds": false,
+        "runOnChange-in-newHeading": false,
+        "runOnChange-in-editHeading": false,
+        "runOnChange-in-noLibrary": false,
+        "functionScript": "/*\n * Runs each time the page opens the editor, for a new template ({}) or an existing one.\n * The steps are records in the named Array; each row writes its own fields as the coach types\n * (Templates/Template item row) and 'Gather' reads them back. Archived library items are\n * offered only where a step already names one.\n */\nconst tpl = Inputs.template && typeof Inputs.template === 'object' ? Inputs.template : {};\nconst get = (m, k) => (m && typeof m.get === 'function' ? m.get(k) : m && m[k]);\nconst kindInfo = {};\n(Inputs.kinds || []).forEach((k) => { kindInfo[get(k, 'value')] = { kindKey: get(k, 'labelKey'), kindBg: get(k, 'bg'), kindFg: get(k, 'fg') }; });\nconst items = Array.isArray(tpl.items) ? tpl.items : [];\nconst named = new Set(items.map((i) => i.libraryItem).filter(Boolean));\nconst library = (Inputs.library || []).filter((l) => !l.archived || named.has(l.id));\nconst libraryOptions = [{ Label: Inputs.noLibrary, Value: '' }].concat(library.map((l) => ({ Label: l.title, Value: l.id })));\nconst uid = () => 'tpli-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);\nNoodl.Arrays['template-draft-items'] = items.map((i) => Object.assign({ id: uid(), kind: i.kind }, kindInfo[i.kind] || {}, {\n  isLive: i.kind === 'live',\n  isHomework: i.kind === 'homework',\n  title: i.title || '',\n  dayOffset: String(Number.isInteger(i.dayOffset) ? i.dayOffset : 0),\n  durationMin: i.kind === 'live' ? String(Number.isInteger(i.durationMin) ? i.durationMin : 60) : '',\n  libraryItem: i.libraryItem || '',\n  libraryOptions\n}));\nOutputs.kindInfo = kindInfo;\nOutputs.libraryOptions = libraryOptions;\nOutputs.id = tpl.id || '';\nOutputs.title = tpl.title || '';\nOutputs.description = tpl.description || '';\nOutputs.heading = tpl.id ? Inputs.editHeading : Inputs.newHeading;\nOutputs.opened();\n"
+      },
+      "ports": [
+        {
+          "name": "in-template",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-library",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-kinds",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-newHeading",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-editHeading",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-noLibrary",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-kindInfo",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "out-libraryOptions",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-description",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-heading",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-opened",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "te_titles",
+      "type": "JavaScriptFunction",
+      "label": "A new step's title, by kind",
+      "x": 820,
+      "y": 1360,
+      "parameters": {
+        "functionScript": "if (Inputs.live === undefined || Inputs.homework === undefined || Inputs.checkin === undefined) return;\nOutputs.titles = { live: Inputs.live, homework: Inputs.homework, checkin: Inputs.checkin };\n"
+      },
+      "ports": [
+        {
+          "name": "in-live",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-homework",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-checkin",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-titles",
+          "plug": "output",
+          "type": "object"
+        }
+      ]
+    },
+    {
+      "id": "te_gather",
+      "type": "JavaScriptFunction",
+      "label": "Gather the template from the fields and the steps",
+      "x": 520,
+      "y": 1840,
+      "parameters": {
+        "runOnChange-in-id": false,
+        "runOnChange-in-title": false,
+        "runOnChange-in-description": false,
+        "functionScript": "// Read on Save only. savePlanTemplate keeps only the shape and checks every step again.\nconst get = (m, k) => (m && typeof m.get === 'function' ? m.get(k) : m && m[k]);\nOutputs.items = (Noodl.Arrays['template-draft-items'] || []).map((m) => ({\n  kind: get(m, 'kind'),\n  title: String(get(m, 'title') || ''),\n  dayOffset: String(get(m, 'dayOffset') || '').trim(),\n  durationMin: String(get(m, 'durationMin') || '').trim(),\n  libraryItem: String(get(m, 'libraryItem') || '')\n}));\nOutputs.id = String(Inputs.id || '');\nOutputs.title = String(Inputs.title || '').trim();\nOutputs.description = String(Inputs.description || '');\nOutputs.go();\n"
+      },
+      "ports": [
+        {
+          "name": "in-id",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-description",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-items",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "out-id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-description",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "te_call",
+      "type": "CloudFunction2",
+      "label": "savePlanTemplate (staff only)",
+      "x": 820,
+      "y": 1840,
+      "parameters": {
+        "function": "savePlanTemplate"
+      }
+    },
+    {
+      "id": "te_msg_sw",
+      "type": "Switch",
+      "label": "Show why, once there is a why",
+      "x": 820,
+      "y": 1960,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "te_empty",
+      "type": "Expression",
+      "label": "No steps yet?",
+      "x": 1120,
+      "y": 1100,
+      "parameters": {
+        "expression": "count === 0"
+      }
+    },
+    {
+      "id": "te_t_new",
+      "type": "Translation",
+      "label": "New template",
+      "x": 1120,
+      "y": 280,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.editor.newHeading"
+      }
+    },
+    {
+      "id": "te_t_edit",
+      "type": "Translation",
+      "label": "Edit template",
+      "x": 1120,
+      "y": 340,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.editor.editHeading"
+      }
+    },
+    {
+      "id": "te_t_lede",
+      "type": "Translation",
+      "label": "A template is a plan's shape",
+      "x": 1120,
+      "y": 400,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.editor.lede"
+      }
+    },
+    {
+      "id": "te_t_title",
+      "type": "Translation",
+      "label": "Title",
+      "x": 1120,
+      "y": 640,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.editor.title"
+      }
+    },
+    {
+      "id": "te_t_desc",
+      "type": "Translation",
+      "label": "Description",
+      "x": 1120,
+      "y": 760,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.editor.description"
+      }
+    },
+    {
+      "id": "te_t_steps",
+      "type": "Translation",
+      "label": "Steps",
+      "x": 1120,
+      "y": 880,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.editor.steps"
+      }
+    },
+    {
+      "id": "te_t_none",
+      "type": "Translation",
+      "label": "No steps yet",
+      "x": 1120,
+      "y": 1240,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.editor.noSteps"
+      }
+    },
+    {
+      "id": "te_t_nolib",
+      "type": "Translation",
+      "label": "No library item",
+      "x": 1120,
+      "y": 460,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.editor.noLibrary"
+      }
+    },
+    {
+      "id": "te_t_add_live",
+      "type": "Translation",
+      "label": "Live session",
+      "x": 1120,
+      "y": 1480,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.editor.addLive"
+      }
+    },
+    {
+      "id": "te_t_add_hw",
+      "type": "Translation",
+      "label": "Homework",
+      "x": 1120,
+      "y": 1600,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.editor.addHomework"
+      }
+    },
+    {
+      "id": "te_t_add_ci",
+      "type": "Translation",
+      "label": "Check-in",
+      "x": 1120,
+      "y": 1720,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.editor.addCheckin"
+      }
+    },
+    {
+      "id": "te_t_new_live",
+      "type": "Translation",
+      "label": "New live session title",
+      "x": 1120,
+      "y": 1300,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.editor.newLive"
+      }
+    },
+    {
+      "id": "te_t_new_hw",
+      "type": "Translation",
+      "label": "New homework title",
+      "x": 1120,
+      "y": 1360,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.editor.newHomework"
+      }
+    },
+    {
+      "id": "te_t_new_ci",
+      "type": "Translation",
+      "label": "New check-in title",
+      "x": 1120,
+      "y": 1420,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.editor.newCheckin"
+      }
+    },
+    {
+      "id": "te_t_save",
+      "type": "Translation",
+      "label": "Save",
+      "x": 1120,
+      "y": 2080,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.editor.save"
+      }
+    },
+    {
+      "id": "te_t_cancel",
+      "type": "Translation",
+      "label": "Cancel",
+      "x": 1120,
+      "y": 2200,
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "templates.editor.cancel"
+      }
+    },
+    {
+      "id": "te_add_live_fn",
+      "type": "JavaScriptFunction",
+      "label": "Add a live session, on the last step's day",
+      "x": 820,
+      "y": 1480,
+      "parameters": {
+        "runOnChange-in-kindInfo": false,
+        "runOnChange-in-libraryOptions": false,
+        "runOnChange-in-titles": false,
+        "functionScript": "/*\n * One node per button, not one shared node told which kind: a Function sends a value only\n * when it changes, so 'live' after 'homework' after 'live' would arrive as 'homework'.\n */\nconst kind = 'live';\nconst ID = 'template-draft-items';\nconst info = (Inputs.kindInfo || {})[kind];\nif (!info) return;\nconst list = Noodl.Arrays[ID] || [];\nconst lastDay = list.length ? Number(list[list.length - 1].get('dayOffset')) || 0 : 0;\nNoodl.Arrays[ID] = list.concat([Object.assign({ id: 'tpli-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8), kind }, info, {\n  isLive: true, isHomework: false, title: (Inputs.titles || {})[kind] || '', dayOffset: String(lastDay), durationMin: '60', libraryItem: '', libraryOptions: Inputs.libraryOptions || []\n})]);\n"
+      },
+      "ports": [
+        {
+          "name": "in-kindInfo",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-libraryOptions",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-titles",
+          "plug": "input",
+          "type": "*"
+        }
+      ]
+    },
+    {
+      "id": "te_add_hw_fn",
+      "type": "JavaScriptFunction",
+      "label": "Add a homework, on the last step's day",
+      "x": 820,
+      "y": 1600,
+      "parameters": {
+        "runOnChange-in-kindInfo": false,
+        "runOnChange-in-libraryOptions": false,
+        "runOnChange-in-titles": false,
+        "functionScript": "// As 'Add a live session', for a homework: no length, and a library item to pick.\nconst kind = 'homework';\nconst ID = 'template-draft-items';\nconst info = (Inputs.kindInfo || {})[kind];\nif (!info) return;\nconst list = Noodl.Arrays[ID] || [];\nconst lastDay = list.length ? Number(list[list.length - 1].get('dayOffset')) || 0 : 0;\nNoodl.Arrays[ID] = list.concat([Object.assign({ id: 'tpli-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8), kind }, info, {\n  isLive: false, isHomework: true, title: (Inputs.titles || {})[kind] || '', dayOffset: String(lastDay), durationMin: '', libraryItem: '', libraryOptions: Inputs.libraryOptions || []\n})]);\n"
+      },
+      "ports": [
+        {
+          "name": "in-kindInfo",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-libraryOptions",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-titles",
+          "plug": "input",
+          "type": "*"
+        }
+      ]
+    },
+    {
+      "id": "te_add_ci_fn",
+      "type": "JavaScriptFunction",
+      "label": "Add a check-in, on the last step's day",
+      "x": 820,
+      "y": 1720,
+      "parameters": {
+        "runOnChange-in-kindInfo": false,
+        "runOnChange-in-libraryOptions": false,
+        "runOnChange-in-titles": false,
+        "functionScript": "// As 'Add a live session', for a check-in: no length, no library item.\nconst kind = 'checkin';\nconst ID = 'template-draft-items';\nconst info = (Inputs.kindInfo || {})[kind];\nif (!info) return;\nconst list = Noodl.Arrays[ID] || [];\nconst lastDay = list.length ? Number(list[list.length - 1].get('dayOffset')) || 0 : 0;\nNoodl.Arrays[ID] = list.concat([Object.assign({ id: 'tpli-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8), kind }, info, {\n  isLive: false, isHomework: false, title: (Inputs.titles || {})[kind] || '', dayOffset: String(lastDay), durationMin: '', libraryItem: '', libraryOptions: Inputs.libraryOptions || []\n})]);\n"
+      },
+      "ports": [
+        {
+          "name": "in-kindInfo",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-libraryOptions",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "in-titles",
+          "plug": "input",
+          "type": "*"
+        }
+      ]
+    },
+    {
+      "id": "te_up_fn",
+      "type": "JavaScriptFunction",
+      "label": "Move the row up",
+      "x": 820,
+      "y": 1000,
+      "parameters": {
+        "runOnChange-in-itemId": false,
+        "functionScript": "const ID = 'template-draft-items';\nconst list = (Noodl.Arrays[ID] || []).slice();\nconst i = list.findIndex((m) => m.getId() === String(Inputs.itemId || ''));\nif (i < 1) return;\nlist.splice(i - 1, 0, list.splice(i, 1)[0]);\nNoodl.Arrays[ID] = list;\n"
+      },
+      "ports": [
+        {
+          "name": "in-itemId",
+          "plug": "input",
+          "type": "*"
+        }
+      ]
+    },
+    {
+      "id": "te_down_fn",
+      "type": "JavaScriptFunction",
+      "label": "Move the row down",
+      "x": 820,
+      "y": 1120,
+      "parameters": {
+        "runOnChange-in-itemId": false,
+        "functionScript": "const ID = 'template-draft-items';\nconst list = (Noodl.Arrays[ID] || []).slice();\nconst i = list.findIndex((m) => m.getId() === String(Inputs.itemId || ''));\nif (i < 0 || i >= list.length - 1) return;\nlist.splice(i + 1, 0, list.splice(i, 1)[0]);\nNoodl.Arrays[ID] = list;\n"
+      },
+      "ports": [
+        {
+          "name": "in-itemId",
+          "plug": "input",
+          "type": "*"
+        }
+      ]
+    },
+    {
+      "id": "te_remove_fn",
+      "type": "JavaScriptFunction",
+      "label": "Remove the row that asked",
+      "x": 820,
+      "y": 1240,
+      "parameters": {
+        "runOnChange-in-itemId": false,
+        "functionScript": "const ID = 'template-draft-items';\nconst gone = String(Inputs.itemId || '');\nif (!gone) return;\nNoodl.Arrays[ID] = (Noodl.Arrays[ID] || []).filter((m) => m.getId() !== gone);\n"
+      },
+      "ports": [
+        {
+          "name": "in-itemId",
+          "plug": "input",
+          "type": "*"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "te_card"
+  ]
+}

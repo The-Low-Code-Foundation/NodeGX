@@ -1,0 +1,373 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "48ee755b-c2b6-5631-848c-d065ae775821",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hl_t_tab",
+      "fromProperty": "Translation",
+      "toId": "hl_page",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "hl_t_new",
+      "fromProperty": "Translation",
+      "toId": "hl_new",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hl_t_failed",
+      "fromProperty": "Translation",
+      "toId": "hl_failed",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hl_top",
+      "fromProperty": "didMount",
+      "toId": "hl_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "hl_editor",
+      "fromProperty": "saved",
+      "toId": "hl_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "hl_dup_call",
+      "fromProperty": "done",
+      "toId": "hl_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "hl_arch_call",
+      "fromProperty": "done",
+      "toId": "hl_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "hl_call",
+      "fromProperty": "out-items",
+      "toId": "hl_list",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "hl_call",
+      "fromProperty": "failure",
+      "toId": "hl_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "hl_call",
+      "fromProperty": "done",
+      "toId": "hl_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "hl_fail_sw",
+      "fromProperty": "state",
+      "toId": "hl_failed",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hl_new",
+      "fromProperty": "onClick",
+      "toId": "hl_new_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hl_new_fn",
+      "fromProperty": "out-item",
+      "toId": "hl_editor",
+      "toProperty": "item"
+    },
+    {
+      "fromId": "hl_new_fn",
+      "fromProperty": "out-open",
+      "toId": "hl_editor",
+      "toProperty": "load"
+    },
+    {
+      "fromId": "hl_new_fn",
+      "fromProperty": "out-open",
+      "toId": "hl_edit_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "hl_call",
+      "fromProperty": "out-items",
+      "toId": "hl_pick_fn",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "hl_list",
+      "fromProperty": "itemId",
+      "toId": "hl_pick_fn",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "hl_list",
+      "fromProperty": "edit",
+      "toId": "hl_pick_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hl_pick_fn",
+      "fromProperty": "out-item",
+      "toId": "hl_editor",
+      "toProperty": "item"
+    },
+    {
+      "fromId": "hl_pick_fn",
+      "fromProperty": "out-open",
+      "toId": "hl_editor",
+      "toProperty": "load"
+    },
+    {
+      "fromId": "hl_pick_fn",
+      "fromProperty": "out-open",
+      "toId": "hl_edit_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "hl_editor",
+      "fromProperty": "closed",
+      "toId": "hl_edit_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "hl_editor",
+      "fromProperty": "saved",
+      "toId": "hl_edit_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "hl_edit_sw",
+      "fromProperty": "state",
+      "toId": "hl_edit_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hl_edit_sw",
+      "fromProperty": "state",
+      "toId": "hl_not_editing",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hl_not_editing",
+      "fromProperty": "result",
+      "toId": "hl_list_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hl_not_editing",
+      "fromProperty": "result",
+      "toId": "hl_new",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hl_call",
+      "fromProperty": "out-items",
+      "toId": "hl_dup_fn",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "hl_list",
+      "fromProperty": "itemId",
+      "toId": "hl_dup_fn",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "hl_t_copy",
+      "fromProperty": "Translation",
+      "toId": "hl_dup_fn",
+      "toProperty": "in-copyTitle"
+    },
+    {
+      "fromId": "hl_t_dup",
+      "fromProperty": "Translation",
+      "toId": "hl_dup_fn",
+      "toProperty": "in-said"
+    },
+    {
+      "fromId": "hl_list",
+      "fromProperty": "duplicate",
+      "toId": "hl_dup_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hl_dup_fn",
+      "fromProperty": "out-id",
+      "toId": "hl_dup_call",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "hl_dup_fn",
+      "fromProperty": "out-title",
+      "toId": "hl_dup_call",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "hl_dup_fn",
+      "fromProperty": "out-go",
+      "toId": "hl_dup_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "hl_call",
+      "fromProperty": "out-items",
+      "toId": "hl_arch_fn",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "hl_list",
+      "fromProperty": "itemId",
+      "toId": "hl_arch_fn",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "hl_t_arch",
+      "fromProperty": "Translation",
+      "toId": "hl_arch_fn",
+      "toProperty": "in-archivedSaid"
+    },
+    {
+      "fromId": "hl_t_restored",
+      "fromProperty": "Translation",
+      "toId": "hl_arch_fn",
+      "toProperty": "in-restoredSaid"
+    },
+    {
+      "fromId": "hl_list",
+      "fromProperty": "archive",
+      "toId": "hl_arch_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hl_arch_fn",
+      "fromProperty": "out-id",
+      "toId": "hl_arch_call",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "hl_arch_fn",
+      "fromProperty": "out-archived",
+      "toId": "hl_arch_call",
+      "toProperty": "in-archived"
+    },
+    {
+      "fromId": "hl_arch_fn",
+      "fromProperty": "out-go",
+      "toId": "hl_arch_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "hl_editor",
+      "fromProperty": "savedTitle",
+      "toId": "hl_saved_fn",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "hl_t_saved",
+      "fromProperty": "Translation",
+      "toId": "hl_saved_fn",
+      "toProperty": "in-said"
+    },
+    {
+      "fromId": "hl_editor",
+      "fromProperty": "saved",
+      "toId": "hl_saved_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hl_dup_fn",
+      "fromProperty": "out-say",
+      "toId": "hl_said",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hl_arch_fn",
+      "fromProperty": "out-say",
+      "toId": "hl_said",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hl_saved_fn",
+      "fromProperty": "out-say",
+      "toId": "hl_said",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hl_dup_call",
+      "fromProperty": "error",
+      "toId": "hl_said",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hl_arch_call",
+      "fromProperty": "error",
+      "toId": "hl_said",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hl_dup_call",
+      "fromProperty": "done",
+      "toId": "hl_said_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "hl_dup_call",
+      "fromProperty": "failure",
+      "toId": "hl_said_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "hl_arch_call",
+      "fromProperty": "done",
+      "toId": "hl_said_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "hl_arch_call",
+      "fromProperty": "failure",
+      "toId": "hl_said_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "hl_editor",
+      "fromProperty": "saved",
+      "toId": "hl_said_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "hl_new",
+      "fromProperty": "onClick",
+      "toId": "hl_said_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "hl_list",
+      "fromProperty": "edit",
+      "toId": "hl_said_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "hl_list",
+      "fromProperty": "duplicate",
+      "toId": "hl_said_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "hl_list",
+      "fromProperty": "archive",
+      "toId": "hl_said_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "hl_said_sw",
+      "fromProperty": "state",
+      "toId": "hl_said",
+      "toProperty": "mounted"
+    }
+  ]
+}

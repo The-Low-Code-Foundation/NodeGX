@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "66b703a7-9464-5f17-8c3c-2b9638b91c14",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mr_t_head",
+      "fromProperty": "Translation",
+      "toId": "mr_fill_head",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "mr_in",
+      "fromProperty": "who",
+      "toId": "mr_fill_head",
+      "toProperty": "who"
+    },
+    {
+      "fromId": "mr_in",
+      "fromProperty": "when",
+      "toId": "mr_fill_head",
+      "toProperty": "when"
+    },
+    {
+      "fromId": "mr_fill_head",
+      "fromProperty": "formatted",
+      "toId": "mr_who",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mr_in",
+      "fromProperty": "isNew",
+      "toId": "mr_new_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mr_in",
+      "fromProperty": "hasTag",
+      "toId": "mr_tag",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mr_t_about",
+      "fromProperty": "Translation",
+      "toId": "mr_fill_tag",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "mr_in",
+      "fromProperty": "tag",
+      "toId": "mr_fill_tag",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "mr_fill_tag",
+      "fromProperty": "formatted",
+      "toId": "mr_tag",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mr_in",
+      "fromProperty": "hasBody",
+      "toId": "mr_body_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mr_in",
+      "fromProperty": "body",
+      "toId": "mr_body",
+      "toProperty": "markdown"
+    },
+    {
+      "fromId": "mr_in",
+      "fromProperty": "hasFiles",
+      "toId": "mr_files",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mr_in",
+      "fromProperty": "files",
+      "toId": "mr_rows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "mr_in",
+      "fromProperty": "bg",
+      "toId": "mr_root",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "mr_in",
+      "fromProperty": "edge",
+      "toId": "mr_root",
+      "toProperty": "borderColor"
+    }
+  ]
+}

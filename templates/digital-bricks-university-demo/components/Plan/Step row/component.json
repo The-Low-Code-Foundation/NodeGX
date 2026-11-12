@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "0b2273fc-163d-5042-8dac-7ee74cb469b4",
+  "name": "Step row",
+  "path": "/Plan/Step row",
+  "type": "visual",
+  "created": "2026-11-09T10:43:14.830Z",
+  "modified": "2026-11-12T14:58:20.978Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One step of a learner's plan: a grip to drag it by, its kind, status and Draft or Shared, its title and a line of detail; the actions; a homework's hand-ins with the review of the newest; and, when it is open, its editor in place. A draft has a dashed edge. Read-only, it shows only what the learner would see."
+}

@@ -1,0 +1,90 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "9120a10d-5903-50a7-83ab-6d24c1142b85",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mp_req",
+      "type": "noodl.cloud.request",
+      "label": "A learner asks for their plan",
+      "parameters": {
+        "params": "",
+        "allowNoAuth": false
+      },
+      "metadata": {
+        "comment": "No parameters on purpose: there is nothing a caller can send to read someone else's plan."
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "mp_fn",
+      "type": "JavaScriptFunction",
+      "label": "Read my plan",
+      "parameters": {
+        "functionScript": "/*\n * The learner's view of their programme. Identity is the session's userId.\n * Learners never see a Step that is not shared (SCOPE), so the filter is here,\n * on the server, not in the page.\n * Which plan: the active one; with none active, the most recently started.\n * `me` carries the learner's own name, for Home's greeting (DBU-02).\n */\n(async () => {\n  try {\n    const me = String(Inputs.userId || '');\n    if (!me) throw new Error('no session user');\n    const q = (c, where) => Noodl.Records.query(c, where, { limit: 1000, plain: true });\n    const pick = (row, fields) => {\n      const out = { id: row.objectId };\n      fields.forEach((f) => { out[f] = row[f] === undefined ? null : row[f]; });\n      return out;\n    };\n\n    // Who I am, for the greeting: my own name and nothing else of the account.\n    const users = await q('_User', { objectId: { equalTo: me } });\n    Outputs.me = { name: (users[0] && users[0].name) || '' };\n\n    const plans = await q('Plan', { learner: { equalTo: me } });\n    const active = plans.filter((p) => p.status === 'active');\n    if (active.length > 1) throw new Error('more than one active plan for ' + me);\n    const byStart = plans.slice().sort((a, b) => String(b.startedOn).localeCompare(String(a.startedOn)));\n    const plan = active[0] || byStart[0] || null;\n    if (!plan) {\n      Outputs.plan = null;\n      Outputs.steps = [];\n      Outputs.submissions = [];\n      Outputs.done();\n      return;\n    }\n\n    const rows = await q('Step', { plan: { equalTo: plan.objectId } });\n    const steps = rows\n      .filter((s) => s.learner === me && s.shared === true)\n      .sort((a, b) => a.position - b.position);\n    const shared = new Set(steps.map((s) => s.objectId));\n    const subs = (await q('Submission', { learner: { equalTo: me } })).filter((s) => shared.has(s.step));\n\n    Outputs.plan = pick(plan, ['title', 'status', 'meetingLink', 'bookingLink', 'startedOn']);\n    Outputs.steps = steps.map((s) => pick(s, [\n      'position', 'kind', 'title', 'status', 'startsAt', 'durationMin', 'meetingLink', 'prepNote', 'attended',\n      'recordingUrl', 'summary', 'dueAt', 'brief', 'handInChecklist', 'resources', 'sendsAt'\n    ]));\n    Outputs.submissions = subs\n      .map((s) => Object.assign(pick(s, ['step', 'version', 'kind', 'files', 'url', 'text', 'note', 'review', 'reviewNote', 'reviewedAt']),\n        { handedInAt: s.createdAt }))\n      .sort((a, b) => a.version - b.version);\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:myPlan]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n",
+        "runOnChange-in-userId": false
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-plan",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-steps",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-submissions",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-me",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "mp_res",
+      "type": "noodl.cloud.response",
+      "label": "The plan",
+      "parameters": {
+        "params": "plan,steps,submissions,me"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "mp_deny",
+      "type": "noodl.cloud.response",
+      "label": "Could not read",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "Your plan could not be read."
+      },
+      "x": 40,
+      "y": 400
+    }
+  ]
+}

@@ -1,0 +1,253 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5e069497-4abe-57a2-8b81-d72cc586edc4",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cs_root",
+      "type": "Group",
+      "label": "Creations",
+      "children": [
+        "cs_filters",
+        "cs_view_box",
+        "cs_grid",
+        "cs_none_kind",
+        "cs_empty_box"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "cs_filters",
+      "type": "Group",
+      "label": "Filters",
+      "parent": "cs_root",
+      "children": [
+        "cs_chips"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "cs_chips",
+      "type": "For Each",
+      "label": "One per kind she has, after All",
+      "parent": "cs_filters",
+      "parameters": {
+        "template": "/Creations/Filter chip"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "cs_view_box",
+      "type": "Group",
+      "label": "The one opened",
+      "parent": "cs_root",
+      "children": [
+        "cs_view"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "cs_view",
+      "type": "/Creations/Creation view",
+      "label": "Opened",
+      "parent": "cs_view_box",
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "cs_grid",
+      "type": "net.noodl.visual.columns",
+      "label": "The grid",
+      "parent": "cs_root",
+      "children": [
+        "cs_cards"
+      ],
+      "parameters": {
+        "mounted": false,
+        "sizing": "autoFit",
+        "minWidth": 260,
+        "marginX": 16,
+        "marginY": 16
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "cs_cards",
+      "type": "For Each",
+      "label": "One card per creation",
+      "parent": "cs_grid",
+      "parameters": {
+        "template": "/Creations/Creation card"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "cs_none_kind",
+      "type": "Text",
+      "label": "None of this kind",
+      "parent": "cs_root",
+      "parameters": {
+        "mounted": false,
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "cs_empty_box",
+      "type": "Group",
+      "label": "Shown when there is nothing yet",
+      "parent": "cs_root",
+      "children": [
+        "cs_empty"
+      ],
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "cs_empty",
+      "type": "/Shell/Empty state",
+      "label": "Nothing kept yet",
+      "parent": "cs_empty_box",
+      "parameters": {
+        "icon": {
+          "class": "lucide",
+          "code": "icon-folder-open",
+          "codeAsClass": true
+        }
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "cs_in",
+      "type": "Component Inputs",
+      "label": "The creations",
+      "ports": [
+        {
+          "name": "items",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "mode",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "emptyTitleKey",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "emptyBodyKey",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 410,
+      "y": 1120
+    },
+    {
+      "id": "cs_out",
+      "type": "Component Outputs",
+      "label": "Edit one",
+      "ports": [
+        {
+          "name": "edit",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "editItem",
+          "plug": "input",
+          "type": "*"
+        }
+      ],
+      "x": 410,
+      "y": 1240
+    },
+    {
+      "id": "cs_kinds",
+      "type": "/Option sets/Creation kinds",
+      "label": "Creation kinds",
+      "x": 410,
+      "y": 1360
+    },
+    {
+      "id": "cs_shelf",
+      "type": "Javascript2",
+      "label": "The cards, the filters and the one opened",
+      "parameters": {
+        "code": "/*\n * The grid draws only; this decides what it shows. Filters: All, then each kind she has at least one\n * of, in the option set's order, with how many. Choosing one shows only that kind; if its last one is\n * deleted, All again. One creation is open at a time, drawn above the grid. Row ids are prefixed\n * (a For Each row is a Model named by its id for the whole app); the prefix is taken off here.\n * A kind row's own id is ck-<kind>; the value a Creation holds is its `kind`.\n */\nlet filter = 'all';\nlet openId = '';\n\nScript.Inputs = { items: 'array', kinds: 'array', mode: 'string', chipId: 'string', cardId: 'string' };\nScript.Outputs = {\n  cards: 'array', chips: 'array', hasItems: 'boolean', showGrid: 'boolean', none: 'boolean', noneOfKind: 'boolean',\n  isOpen: 'boolean', vTitle: 'string', vKindKey: 'string', vKindBg: 'string', vKindFg: 'string',\n  vMadeWith: 'string', vHasMadeWith: 'boolean', vStepTitle: 'string', vHasStep: 'boolean',\n  vDescription: 'string', vHasDescription: 'boolean', vIsFile: 'boolean', vIsLink: 'boolean', vIsText: 'boolean',\n  vFiles: 'array', vUrl: 'string', vText: 'string', opened: 'signal', editItem: '*', edit: 'signal'\n};\n\nconst get = (m, k) => (m && typeof m.get === 'function' ? m.get(k) : m && m[k]);\nconst CARD = 'creation-card-';\nconst CHIP = 'creation-filter-';\nconst items = () => Array.from(Script.Inputs.items || []);\nconst kindOf = (id) => (Script.Inputs.kinds || []).find((k) => get(k, 'kind') === id) || null;\n\nfunction shape() {\n  const all = items();\n  const own = Script.Inputs.mode !== 'coach';\n  const counts = {};\n  all.forEach((c) => { counts[c.kind] = (counts[c.kind] || 0) + 1; });\n  if (filter !== 'all' && !counts[filter]) filter = 'all';\n  const shown = filter === 'all' ? all : all.filter((c) => c.kind === filter);\n  const badge = (c) => {\n    const k = kindOf(c.kind) || kindOf('other');\n    return { kindKey: get(k, 'labelKey') || '', kindBg: get(k, 'bg') || '', kindFg: get(k, 'fg') || '' };\n  };\n  Script.Outputs.cards = shown.map((c) => Object.assign({\n    id: CARD + c.id,\n    title: c.title,\n    madeWith: c.madeWith || '',\n    hasMadeWith: !!c.madeWith,\n    stepTitle: c.stepTitle || '',\n    hasStep: !!c.stepTitle,\n    usedInClass: c.usedInClass === true,\n    canEdit: own\n  }, badge(c)));\n  const chips = [{ id: CHIP + 'all', kind: 'all', labelKey: 'creations.filterAll', n: String(all.length), selected: filter === 'all' }];\n  (Script.Inputs.kinds || []).forEach((k) => {\n    const id = get(k, 'kind');\n    if (counts[id]) chips.push({ id: CHIP + id, kind: id, labelKey: get(k, 'filterKey'), n: String(counts[id]), selected: filter === id });\n  });\n  Script.Outputs.chips = chips;\n  Script.Outputs.hasItems = all.length > 0;\n  Script.Outputs.showGrid = shown.length > 0;\n  Script.Outputs.none = all.length === 0;\n  Script.Outputs.noneOfKind = all.length > 0 && shown.length === 0;\n\n  const o = all.find((c) => c.id === openId) || null;\n  if (!o) openId = '';\n  Script.Outputs.isOpen = !!o;\n  const b = o ? badge(o) : {};\n  Script.Outputs.vTitle = o ? o.title : '';\n  Script.Outputs.vKindKey = b.kindKey || '';\n  Script.Outputs.vKindBg = b.kindBg || '';\n  Script.Outputs.vKindFg = b.kindFg || '';\n  Script.Outputs.vMadeWith = o ? o.madeWith || '' : '';\n  Script.Outputs.vHasMadeWith = !!(o && o.madeWith);\n  Script.Outputs.vStepTitle = o ? o.stepTitle || '' : '';\n  Script.Outputs.vHasStep = !!(o && o.stepTitle);\n  Script.Outputs.vDescription = o ? o.description || '' : '';\n  Script.Outputs.vHasDescription = !!(o && o.description);\n  Script.Outputs.vIsFile = !!o && o.form === 'file';\n  Script.Outputs.vIsLink = !!o && o.form === 'link';\n  Script.Outputs.vIsText = !!o && o.form === 'text';\n  Script.Outputs.vFiles = o && o.form === 'file'\n    ? (o.files || []).map((f, i) => ({ id: 'creation-file-' + o.id + '-' + i, file: f.file, fileName: f.fileName, mode: own ? 'own' : 'coach' }))\n    : [];\n  Script.Outputs.vUrl = o ? o.url || '' : '';\n  Script.Outputs.vText = o ? o.text || '' : '';\n}\n\nScript.OnInit = function () { shape(); };\nScript.Setters.items = function () { shape(); };\nScript.Setters.kinds = function () { shape(); };\nScript.Setters.mode = function () { shape(); };\nScript.Signals.pickFilter = function () {\n  filter = String(Script.Inputs.chipId || '').replace(CHIP, '') || 'all';\n  shape();\n};\nScript.Signals.open = function () {\n  openId = String(Script.Inputs.cardId || '').replace(CARD, '');\n  shape();\n  Script.Outputs.opened();\n};\nScript.Signals.close = function () {\n  openId = '';\n  shape();\n};\nScript.Signals.edit = function () {\n  const id = String(Script.Inputs.cardId || '').replace(CARD, '');\n  const c = items().find((x) => x.id === id);\n  if (!c) return;\n  Script.Outputs.editItem = c;\n  Script.Outputs.edit();\n};\n"
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "cs_t_none_kind",
+      "type": "Translation",
+      "label": "None of this kind",
+      "parameters": {
+        "Namespace": "pages",
+        "Key": "creations.noneOfKind"
+      },
+      "x": 410,
+      "y": 880
+    }
+  ],
+  "visualRoots": [
+    "cs_root"
+  ]
+}

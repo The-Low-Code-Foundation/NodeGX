@@ -1,0 +1,349 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "260f91a8-a346-57f7-8d56-01df5190f556",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "home_t_tab",
+      "fromProperty": "Translation",
+      "toId": "home_page",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "home_read",
+      "fromProperty": "out-me",
+      "toId": "home_words",
+      "toProperty": "me"
+    },
+    {
+      "fromId": "home_read",
+      "fromProperty": "out-plan",
+      "toId": "home_words",
+      "toProperty": "plan"
+    },
+    {
+      "fromId": "home_read",
+      "fromProperty": "out-steps",
+      "toId": "home_words",
+      "toProperty": "steps"
+    },
+    {
+      "fromId": "home_read",
+      "fromProperty": "out-upNext",
+      "toId": "home_words",
+      "toProperty": "upNext"
+    },
+    {
+      "fromId": "home_read",
+      "fromProperty": "out-progress",
+      "toId": "home_words",
+      "toProperty": "progress"
+    },
+    {
+      "fromId": "home_read",
+      "fromProperty": "out-counts",
+      "toId": "home_words",
+      "toProperty": "counts"
+    },
+    {
+      "fromId": "home_read",
+      "fromProperty": "failure",
+      "toId": "home_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "home_read",
+      "fromProperty": "done",
+      "toId": "home_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "home_fail_sw",
+      "fromProperty": "state",
+      "toId": "home_failed",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "home_t_failed",
+      "fromProperty": "Translation",
+      "toId": "home_failed",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "first",
+      "toId": "home_head",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "hasPlan",
+      "toId": "home_planline",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "home_t_plan",
+      "fromProperty": "Translation",
+      "toId": "home_plan_fill",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "planTitle",
+      "toId": "home_plan_fill",
+      "toProperty": "plan"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "week",
+      "toId": "home_plan_fill",
+      "toProperty": "week"
+    },
+    {
+      "fromId": "home_plan_fill",
+      "fromProperty": "formatted",
+      "toId": "home_planline",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "preparing",
+      "toId": "home_prep",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "hasSteps",
+      "toId": "home_cols",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "hwShown",
+      "toId": "home_upnext",
+      "toProperty": "hwShown"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "hwNone",
+      "toId": "home_upnext",
+      "toProperty": "hwNone"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "hwHeadKey",
+      "toId": "home_upnext",
+      "toProperty": "hwHeadKey"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "hwN",
+      "toId": "home_upnext",
+      "toProperty": "hwN"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "hwDate",
+      "toId": "home_upnext",
+      "toProperty": "hwDate"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "hwTitle",
+      "toId": "home_upnext",
+      "toProperty": "hwTitle"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "hwBodyKey",
+      "toId": "home_upnext",
+      "toProperty": "hwBodyKey"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "hwStepId",
+      "toId": "home_upnext",
+      "toProperty": "hwStepId"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "liveShown",
+      "toId": "home_upnext",
+      "toProperty": "liveShown"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "liveNone",
+      "toId": "home_upnext",
+      "toProperty": "liveNone"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "liveN",
+      "toId": "home_upnext",
+      "toProperty": "liveN"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "liveDate",
+      "toId": "home_upnext",
+      "toProperty": "liveDate"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "liveStart",
+      "toId": "home_upnext",
+      "toProperty": "liveStart"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "liveEnd",
+      "toId": "home_upnext",
+      "toProperty": "liveEnd"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "liveTitle",
+      "toId": "home_upnext",
+      "toProperty": "liveTitle"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "livePrep",
+      "toId": "home_upnext",
+      "toProperty": "livePrep"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "hasPrep",
+      "toId": "home_upnext",
+      "toProperty": "hasPrep"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "joinLink",
+      "toId": "home_upnext",
+      "toProperty": "joinLink"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "hasJoin",
+      "toId": "home_upnext",
+      "toProperty": "hasJoin"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "liveStepId",
+      "toId": "home_upnext",
+      "toProperty": "liveStepId"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "liveStartsAt",
+      "toId": "home_upnext",
+      "toProperty": "liveStartsAt"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "liveDuration",
+      "toId": "home_upnext",
+      "toProperty": "liveDuration"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "calDetails",
+      "toId": "home_upnext",
+      "toProperty": "calDetails"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "attendeeName",
+      "toId": "home_upnext",
+      "toProperty": "attendeeName"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "liveNoneKey",
+      "toId": "home_upnext",
+      "toProperty": "liveNoneKey"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "bookingLink",
+      "toId": "home_upnext",
+      "toProperty": "bookingLink"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "canBook",
+      "toId": "home_upnext",
+      "toProperty": "canBook"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "rows",
+      "toId": "home_programme",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "countLive",
+      "toId": "home_programme",
+      "toProperty": "live"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "countHomework",
+      "toId": "home_programme",
+      "toProperty": "homework"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "progressDone",
+      "toId": "home_progress",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "progressTotal",
+      "toId": "home_progress",
+      "toProperty": "total"
+    },
+    {
+      "fromId": "home_words",
+      "fromProperty": "progressPercent",
+      "toId": "home_progress",
+      "toProperty": "percent"
+    },
+    {
+      "fromId": "home_read",
+      "fromProperty": "out-latest",
+      "toId": "home_latest",
+      "toProperty": "latest"
+    },
+    {
+      "fromId": "home_read",
+      "fromProperty": "out-me",
+      "toId": "home_latest",
+      "toProperty": "me"
+    },
+    {
+      "fromId": "home_top",
+      "fromProperty": "didMount",
+      "toId": "home_go",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "home_bell",
+      "fromProperty": "created",
+      "toId": "home_go",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "home_go",
+      "fromProperty": "out-go",
+      "toId": "home_read",
+      "toProperty": "call"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "713305a1-e8b2-537e-8c8d-78e1e251b1f1",
+  "name": "Resource item",
+  "path": "/Homework/Resource item",
+  "type": "visual",
+  "created": "2026-11-09T13:11:09.394Z",
+  "modified": "2026-11-09T13:11:09.394Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One resource on the learner's homework: a link that opens in a new tab, or Richard's file, shown or downloaded through resourceLink (only from a shared homework of hers that lists it)."
+}

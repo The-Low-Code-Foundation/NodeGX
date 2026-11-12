@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "9db044fc-44ad-5e0a-8fde-ff0f721c241e",
+  "name": "Conversation",
+  "path": "/Messages/Conversation",
+  "type": "visual",
+  "created": "2026-11-12T10:20:43.863Z",
+  "modified": "2026-11-12T10:21:08.079Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A learner's conversation with the coach (DBU-07), oldest first, with a composer under it. As the learner (myMessages): all of it, or one homework's thread, and the switch for reply emails. As the coach (messagesAsCoach): one learner's, and a line when that learner gets no emails. Re-reads on the doorbell and after sending; reading marks the other side's messages read."
+}

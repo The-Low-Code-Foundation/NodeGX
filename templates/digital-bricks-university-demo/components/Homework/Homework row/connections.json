@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c4d53d98-3c24-54c3-820e-92f6936aed1f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hr_in",
+      "fromProperty": "id",
+      "toId": "hr_testid",
+      "toProperty": "id"
+    },
+    {
+      "fromId": "hr_testid",
+      "fromProperty": "formatted",
+      "toId": "hr_root",
+      "toProperty": "data-testid"
+    },
+    {
+      "fromId": "hr_in",
+      "fromProperty": "headKey",
+      "toId": "hr_t_head",
+      "toProperty": "Key"
+    },
+    {
+      "fromId": "hr_t_head",
+      "fromProperty": "Translation",
+      "toId": "hr_fill",
+      "toProperty": "format"
+    },
+    {
+      "fromId": "hr_in",
+      "fromProperty": "n",
+      "toId": "hr_fill",
+      "toProperty": "n"
+    },
+    {
+      "fromId": "hr_in",
+      "fromProperty": "date",
+      "toId": "hr_fill",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "hr_fill",
+      "fromProperty": "formatted",
+      "toId": "hr_head",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hr_in",
+      "fromProperty": "title",
+      "toId": "hr_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hr_in",
+      "fromProperty": "statusKey",
+      "toId": "hr_status",
+      "toProperty": "labelKey"
+    },
+    {
+      "fromId": "hr_in",
+      "fromProperty": "statusBg",
+      "toId": "hr_status",
+      "toProperty": "bg"
+    },
+    {
+      "fromId": "hr_in",
+      "fromProperty": "statusFg",
+      "toId": "hr_status",
+      "toProperty": "fg"
+    },
+    {
+      "fromId": "hr_t_open",
+      "fromProperty": "Translation",
+      "toId": "hr_open",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hr_in",
+      "fromProperty": "id",
+      "toId": "hr_go",
+      "toProperty": "pm-step"
+    },
+    {
+      "fromId": "hr_open",
+      "fromProperty": "onClick",
+      "toId": "hr_go",
+      "toProperty": "navigate"
+    }
+  ]
+}

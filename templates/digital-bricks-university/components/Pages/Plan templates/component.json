@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "bc63d8c9-c7ca-550e-812a-df5cd185c3cf",
+  "name": "Plan templates",
+  "path": "/Pages/Plan templates",
+  "type": "page",
+  "created": "2026-11-07T20:28:01.243Z",
+  "modified": "2026-11-09T11:09:06.361Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Coach: the plan templates (DBU-04). List them with their size, show archived ones, create, edit (steps in order with their days, lengths and library homework), archive and restore. A plan is saved as a template from the learner's plan page."
+}

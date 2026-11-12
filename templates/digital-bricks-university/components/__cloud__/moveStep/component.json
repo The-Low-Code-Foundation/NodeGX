@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "3d7e7a3a-03aa-5940-83b4-5ff06eed1884",
+  "name": "moveStep",
+  "path": "/#__cloud__/moveStep",
+  "type": "cloud",
+  "created": "2026-11-09T10:27:10.019Z",
+  "modified": "2026-11-09T10:32:33.461Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The coach moves one step to a new place in its plan; every position is renumbered 1..n in this one call, so two quick drags cannot leave two steps at the same position (security: role:staff)."
+}

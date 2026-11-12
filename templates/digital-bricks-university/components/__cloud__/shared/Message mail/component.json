@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "0e0aa5d0-cd3e-5e92-8f67-542a6940efce",
+  "name": "Message mail",
+  "path": "/#__cloud__/shared/Message mail",
+  "type": "cloud",
+  "created": "2026-11-12T10:09:30.498Z",
+  "modified": "2026-11-12T18:50:04.886Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The one owner of message mail (DBU-07): sends a learner's waiting messages to the coach, or the coach's waiting replies to the learner, as one email per learner and direction, at most one every 5 minutes. Always answers done."
+}

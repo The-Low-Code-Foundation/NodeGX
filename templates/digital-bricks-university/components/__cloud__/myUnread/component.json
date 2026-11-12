@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d592c8d2-09f8-5527-8bfb-94f804974bb3",
+  "name": "myUnread",
+  "path": "/#__cloud__/myUnread",
+  "type": "cloud",
+  "created": "2026-11-12T10:10:52.000Z",
+  "modified": "2026-11-12T13:07:00.254Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "How many of the coach's messages the signed-in learner has not read yet (DBU-07): the count on her Messages tab."
+}

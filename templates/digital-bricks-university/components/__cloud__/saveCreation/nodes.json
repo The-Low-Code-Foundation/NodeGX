@@ -1,0 +1,191 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "fda61f29-877d-5e62-8e83-25a9ba0c4e3a",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sc_req",
+      "type": "noodl.cloud.request",
+      "label": "A learner saves a creation",
+      "parameters": {
+        "params": "id,form,file,url,text,title,kind,madeWith,description,usedInClass",
+        "allowNoAuth": false,
+        "ptype-id": "string",
+        "ptype-form": "string",
+        "ptype-file": "string",
+        "ptype-url": "string",
+        "ptype-text": "string",
+        "ptype-title": "string",
+        "ptype-kind": "string",
+        "ptype-madeWith": "string",
+        "ptype-description": "string",
+        "ptype-usedInClass": "boolean"
+      },
+      "x": 40,
+      "y": 40,
+      "metadata": {
+        "comment": "No field is marked required: the function answers a missing title or kind in a sentence the learner can act on, not a 400 naming a field."
+      }
+    },
+    {
+      "id": "sc_fn",
+      "type": "JavaScriptFunction",
+      "label": "Check it, then add or change it",
+      "parameters": {
+        "runOnChange-in-userId": false,
+        "runOnChange-in-id": false,
+        "runOnChange-in-form": false,
+        "runOnChange-in-file": false,
+        "runOnChange-in-url": false,
+        "runOnChange-in-text": false,
+        "runOnChange-in-title": false,
+        "runOnChange-in-kind": false,
+        "runOnChange-in-madeWith": false,
+        "runOnChange-in-description": false,
+        "runOnChange-in-usedInClass": false,
+        "functionScript": "/*\n * The only way a Creation is added or changed, apart from handIn's \"Also add it to My creations\".\n * Whose it is comes from the session. Kinds are SCOPE R7's six (backend/schema.json creationKind).\n * A file is judged as handIn judges a hand-in (its bytes, sniffed into _Files), from the same list:\n * change TYPES here, in handIn and in Option sets/Hand-in kinds together.\n * Editing never changes what a creation holds when it points at a hand-in, nor swaps its file.\n */\n(async () => {\n  const refuse = (why) => { Outputs.why = why; Outputs.refuse(); };\n  try {\n    const me = String(Inputs.userId || '');\n    if (!me) throw new Error('no session user');\n    const q = (c, where) => Noodl.Records.query(c, where, { limit: 1000, plain: true });\n    const KINDS = ['document', 'interactive', 'prompt', 'audio_video', 'link', 'other'];\n    const MAX_BYTES = 50 * 1024 * 1024;\n    const MEDIA = ['application/octet-stream'];\n    const OFFICE = ['application/zip'];\n    const TYPES = {\n      pdf: ['application/pdf'], docx: OFFICE, pptx: OFFICE, xlsx: OFFICE,\n      html: ['text/html'], htm: ['text/html'],\n      png: ['image/png'], jpg: ['image/jpeg'], jpeg: ['image/jpeg'], webp: ['image/webp'],\n      mp3: ['audio/mpeg'], m4a: MEDIA.concat(['audio/mp4']), mp4: MEDIA.concat(['video/mp4']), webm: MEDIA.concat(['video/webm', 'audio/webm'])\n    };\n    const checkLink = (raw) => {\n      const url = String(raw || '').trim();\n      let ok = false;\n      try { const u = new URL(url); ok = (u.protocol === 'https:' || u.protocol === 'http:') && !!u.hostname; } catch (e) { ok = false; }\n      if (!ok) return { why: 'That is not a web address. Links start with https://' };\n      if (url.length > 2000) return { why: 'That link is too long. Use a shorter share link.' };\n      return { url };\n    };\n    const checkText = (raw) => {\n      const text = String(raw || '');\n      if (!text.trim()) return { why: 'Write or paste something to keep.' };\n      if (text.length > 50000) return { why: 'That is too long to paste. Keep it under 50,000 characters, or add it as a file.' };\n      return { text };\n    };\n\n    const title = String(Inputs.title || '').trim();\n    if (!title) return refuse('Give it a title.');\n    if (title.length > 200) return refuse('Keep the title under 200 characters.');\n    const kind = String(Inputs.kind || '');\n    if (!KINDS.includes(kind)) return refuse('Choose what kind of thing it is.');\n    const madeWith = String(Inputs.madeWith || '').trim();\n    if (madeWith.length > 200) return refuse('Keep \"Made with\" under 200 characters.');\n    const description = String(Inputs.description || '').trim();\n    if (description.length > 2000) return refuse('Keep the description under 2,000 characters.');\n    const words = { title, kind, madeWith: madeWith || null, description: description || null, usedInClass: Inputs.usedInClass === true };\n\n    const id = String(Inputs.id || '');\n    let savedId = id;\n    if (id) {\n      const rows = await q('Creation', { objectId: { equalTo: id } });\n      const row = rows[0];\n      if (!row || row.learner !== me) return refuse('This is not one of your creations. Reload the page.');\n      const change = Object.assign({}, words);\n      if (!row.submission && !row.file) {\n        if (row.url) {\n          const l = checkLink(Inputs.url);\n          if (l.why) return refuse(l.why);\n          change.url = l.url;\n        } else if (row.text) {\n          const t = checkText(Inputs.text);\n          if (t.why) return refuse(t.why);\n          change.text = t.text;\n        }\n      }\n      await Noodl.Records.save(id, change, { className: 'Creation' });\n    } else {\n      const row = Object.assign({ learner: me, fromStep: null, submission: null }, words);\n      const form = String(Inputs.form || '');\n      if (form === 'file') {\n        const name = String(Inputs.file || '');\n        if (!name) return refuse('Choose a file to keep.');\n        const found = await q('_Files', { storedName: { equalTo: name } });\n        const f = found.length === 1 ? found[0] : null;\n        const owner = f && f.owner && typeof f.owner === 'object' ? f.owner.objectId : f && f.owner;\n        if (!f || owner !== me) return refuse('That file is not one you uploaded. Choose it and upload it again.');\n        if (f.private !== true) return refuse('That file was not uploaded privately. Choose it and upload it again.');\n        if (Number(f.size) > MAX_BYTES) return refuse('That file is larger than 50 MB. Put it online and add a link instead.');\n        const original = String(f.originalName || '');\n        const dot = original.lastIndexOf('.');\n        const ext = dot > 0 ? original.slice(dot + 1).toLowerCase() : '';\n        const allowed = TYPES[ext];\n        if (!allowed) return refuse('Files of this kind can\\'t be kept here. Use Word, PowerPoint, Excel, PDF, HTML, an image (PNG, JPG, WebP), audio (MP3, M4A) or video (MP4, WebM), or add a link.');\n        if (!allowed.includes(f.contentType)) return refuse('This file is not a real .' + ext + ' file. Save it again in that format, then add it.');\n        row.file = name;\n        row.fileName = original;\n      } else if (form === 'link') {\n        const l = checkLink(Inputs.url);\n        if (l.why) return refuse(l.why);\n        row.url = l.url;\n      } else if (form === 'text') {\n        const t = checkText(Inputs.text);\n        if (t.why) return refuse(t.why);\n        row.text = t.text;\n      } else {\n        return refuse('Choose a file, a link or some text to keep.');\n      }\n      const created = await Noodl.Records.create('Creation', row, { plain: true });\n      savedId = created.objectId || created.id;\n    }\n    await Noodl.Records.create('Doorbell', { learner: me, topic: 'creation' },\n      { acl: { [me]: { read: true }, 'role:staff': { read: true } } });\n    Outputs.creationId = savedId;\n    Outputs.done();\n  } catch (e) {\n    console.error('[dbu:saveCreation]', String((e && e.message) || e));\n    Outputs.failed();\n  }\n})();\n"
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "userId",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-id",
+          "plug": "input",
+          "type": "*",
+          "displayName": "id",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-form",
+          "plug": "input",
+          "type": "*",
+          "displayName": "form",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-file",
+          "plug": "input",
+          "type": "*",
+          "displayName": "file",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-url",
+          "plug": "input",
+          "type": "*",
+          "displayName": "url",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-text",
+          "plug": "input",
+          "type": "*",
+          "displayName": "text",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "*",
+          "displayName": "title",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-kind",
+          "plug": "input",
+          "type": "*",
+          "displayName": "kind",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-madeWith",
+          "plug": "input",
+          "type": "*",
+          "displayName": "madeWith",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-description",
+          "plug": "input",
+          "type": "*",
+          "displayName": "description",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-usedInClass",
+          "plug": "input",
+          "type": "*",
+          "displayName": "usedInClass",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-creationId",
+          "plug": "output",
+          "type": "*",
+          "displayName": "creationId",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-why",
+          "plug": "output",
+          "type": "*",
+          "displayName": "why",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "sc_res",
+      "type": "noodl.cloud.response",
+      "label": "Saved",
+      "parameters": {
+        "params": "creationId"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "sc_deny",
+      "type": "noodl.cloud.response",
+      "label": "A refusal the learner can act on",
+      "parameters": {
+        "status": "failure"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "sc_fail",
+      "type": "noodl.cloud.response",
+      "label": "Something broke",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "Your creation could not be saved. Try again in a moment."
+      },
+      "x": 40,
+      "y": 520
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "0a2a2177-145a-5678-860f-ed580eac4e1b",
+  "name": "Verdict",
+  "path": "/Homework/Verdict",
+  "type": "visual",
+  "created": "2026-11-09T13:11:53.773Z",
+  "modified": "2026-11-09T13:11:53.773Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Where the newest hand-in stands, at the top of 'Your work': with Richard, approved, or changes asked, with his note. Colours and words arrive worked out; this only draws them."
+}

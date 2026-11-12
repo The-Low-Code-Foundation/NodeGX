@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "48f6b9a3-ee8f-5f00-8787-24ad0847cd54",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sq_req",
+      "fromProperty": "pm-flagId",
+      "toId": "sq_fn",
+      "toProperty": "in-flagId"
+    },
+    {
+      "fromId": "sq_req",
+      "fromProperty": "pm-nudged",
+      "toId": "sq_fn",
+      "toProperty": "in-nudged"
+    },
+    {
+      "fromId": "sq_req",
+      "fromProperty": "receive",
+      "toId": "sq_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "sq_fn",
+      "fromProperty": "out-snoozedUntil",
+      "toId": "sq_res",
+      "toProperty": "pm-snoozedUntil"
+    },
+    {
+      "fromId": "sq_fn",
+      "fromProperty": "out-done",
+      "toId": "sq_res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sq_fn",
+      "fromProperty": "out-why",
+      "toId": "sq_deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "sq_fn",
+      "fromProperty": "out-refuse",
+      "toId": "sq_deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sq_fn",
+      "fromProperty": "out-failed",
+      "toId": "sq_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sq_fn",
+      "fromProperty": "failure",
+      "toId": "sq_fail",
+      "toProperty": "send"
+    }
+  ]
+}

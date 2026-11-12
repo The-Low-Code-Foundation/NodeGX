@@ -1,0 +1,40 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3760b289-13de-50c8-8809-2e0e7e0124f6",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hk_data",
+      "type": "Static Data",
+      "label": "Hand-in kinds",
+      "parameters": {
+        "type": "json",
+        "json": "[{\"id\":\"hk-docx\",\"ext\":\"docx\",\"kind\":\"word\",\"labelKey\":\"work.kindWord\",\"bg\":\"var(--file-doc-bg)\",\"fg\":\"var(--file-doc-fg)\",\"preview\":\"none\"},{\"id\":\"hk-pptx\",\"ext\":\"pptx\",\"kind\":\"powerpoint\",\"labelKey\":\"work.kindPowerpoint\",\"bg\":\"var(--file-doc-bg)\",\"fg\":\"var(--file-doc-fg)\",\"preview\":\"none\"},{\"id\":\"hk-xlsx\",\"ext\":\"xlsx\",\"kind\":\"excel\",\"labelKey\":\"work.kindExcel\",\"bg\":\"var(--file-doc-bg)\",\"fg\":\"var(--file-doc-fg)\",\"preview\":\"none\"},{\"id\":\"hk-pdf\",\"ext\":\"pdf\",\"kind\":\"pdf\",\"labelKey\":\"work.kindPdf\",\"bg\":\"var(--file-pdf-bg)\",\"fg\":\"var(--file-pdf-fg)\",\"preview\":\"frame\"},{\"id\":\"hk-html\",\"ext\":\"html\",\"kind\":\"html\",\"labelKey\":\"work.kindHtml\",\"bg\":\"var(--file-html-bg)\",\"fg\":\"var(--file-html-fg)\",\"preview\":\"sandbox\"},{\"id\":\"hk-htm\",\"ext\":\"htm\",\"kind\":\"html\",\"labelKey\":\"work.kindHtml\",\"bg\":\"var(--file-html-bg)\",\"fg\":\"var(--file-html-fg)\",\"preview\":\"sandbox\"},{\"id\":\"hk-png\",\"ext\":\"png\",\"kind\":\"image\",\"labelKey\":\"work.kindImage\",\"bg\":\"var(--muted)\",\"fg\":\"var(--muted-foreground)\",\"preview\":\"image\"},{\"id\":\"hk-jpg\",\"ext\":\"jpg\",\"kind\":\"image\",\"labelKey\":\"work.kindImage\",\"bg\":\"var(--muted)\",\"fg\":\"var(--muted-foreground)\",\"preview\":\"image\"},{\"id\":\"hk-jpeg\",\"ext\":\"jpeg\",\"kind\":\"image\",\"labelKey\":\"work.kindImage\",\"bg\":\"var(--muted)\",\"fg\":\"var(--muted-foreground)\",\"preview\":\"image\"},{\"id\":\"hk-webp\",\"ext\":\"webp\",\"kind\":\"image\",\"labelKey\":\"work.kindImage\",\"bg\":\"var(--muted)\",\"fg\":\"var(--muted-foreground)\",\"preview\":\"image\"},{\"id\":\"hk-mp3\",\"ext\":\"mp3\",\"kind\":\"audio\",\"labelKey\":\"work.kindAudio\",\"bg\":\"var(--file-audio-bg)\",\"fg\":\"var(--file-audio-fg)\",\"preview\":\"audio\"},{\"id\":\"hk-m4a\",\"ext\":\"m4a\",\"kind\":\"audio\",\"labelKey\":\"work.kindAudio\",\"bg\":\"var(--file-audio-bg)\",\"fg\":\"var(--file-audio-fg)\",\"preview\":\"audio\"},{\"id\":\"hk-mp4\",\"ext\":\"mp4\",\"kind\":\"video\",\"labelKey\":\"work.kindVideo\",\"bg\":\"var(--file-video-bg)\",\"fg\":\"var(--file-video-fg)\",\"preview\":\"video\"},{\"id\":\"hk-webm\",\"ext\":\"webm\",\"kind\":\"video\",\"labelKey\":\"work.kindVideo\",\"bg\":\"var(--file-video-bg)\",\"fg\":\"var(--file-video-fg)\",\"preview\":\"video\"},{\"id\":\"hk-link\",\"ext\":\"\",\"kind\":\"link\",\"labelKey\":\"work.kindLink\",\"bg\":\"var(--file-link-bg)\",\"fg\":\"var(--file-link-fg)\",\"preview\":\"none\"},{\"id\":\"hk-text\",\"ext\":\"\",\"kind\":\"text\",\"labelKey\":\"work.kindText\",\"bg\":\"var(--file-prompt-bg)\",\"fg\":\"var(--file-prompt-fg)\",\"preview\":\"none\"}]"
+      },
+      "metadata": {
+        "comment": "The page's list (what the picker offers, what a version's chip says, how it previews). The gate is handIn's own copy, which also checks the type the backend sniffed from the bytes: change both together. HTML previews only in a sandbox (PLATFORM.md feature 5); Office files never preview."
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "hk_out",
+      "type": "Component Outputs",
+      "label": "Hand-in kinds out",
+      "ports": [
+        {
+          "name": "items",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    }
+  ]
+}

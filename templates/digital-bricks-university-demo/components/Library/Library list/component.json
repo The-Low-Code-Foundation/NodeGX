@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f1009616-a916-59c0-8c97-db3e0fc616ba",
+  "name": "Library list",
+  "path": "/Library/Library list",
+  "type": "visual",
+  "created": "2026-11-07T22:09:27.024Z",
+  "modified": "2026-11-07T22:09:27.024Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The library's list: a search box (title or tag), Show archived, one row per item, and an empty state for an empty library or a search that finds nothing. Publishes which row asked to be edited, duplicated or archived."
+}

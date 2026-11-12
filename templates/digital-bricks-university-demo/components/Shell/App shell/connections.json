@@ -1,0 +1,121 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "873ff58d-c4a2-5094-860f-ef98713fac1b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "as_inputs",
+      "fromProperty": "coach",
+      "toId": "as_badge",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "as_inputs",
+      "fromProperty": "coach",
+      "toId": "as_mark",
+      "toProperty": "in-coach"
+    },
+    {
+      "fromId": "as_inputs",
+      "fromProperty": "current",
+      "toId": "as_mark",
+      "toProperty": "in-current"
+    },
+    {
+      "fromId": "as_learner_tabs",
+      "fromProperty": "items",
+      "toId": "as_mark",
+      "toProperty": "in-learnerTabs"
+    },
+    {
+      "fromId": "as_coach_tabs",
+      "fromProperty": "items",
+      "toId": "as_mark",
+      "toProperty": "in-coachTabs"
+    },
+    {
+      "fromId": "as_mark",
+      "fromProperty": "out-tabs",
+      "toId": "as_repeat",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "as_t_name",
+      "fromProperty": "Translation",
+      "toId": "as_name",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "as_t_badge",
+      "fromProperty": "Translation",
+      "toId": "as_badge_text",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "as_t_signout",
+      "fromProperty": "Translation",
+      "toId": "as_signout",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "as_signout",
+      "fromProperty": "onClick",
+      "toId": "as_logout",
+      "toProperty": "login"
+    },
+    {
+      "fromId": "as_root",
+      "fromProperty": "didMount",
+      "toId": "as_count_go",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "as_bell",
+      "fromProperty": "created",
+      "toId": "as_count_go",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "as_inputs",
+      "fromProperty": "coach",
+      "toId": "as_count_go",
+      "toProperty": "in-coach"
+    },
+    {
+      "fromId": "as_count_go",
+      "fromProperty": "out-countLearner",
+      "toId": "as_unread_l",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "as_count_go",
+      "fromProperty": "out-countCoach",
+      "toId": "as_unread_c",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "as_unread_l",
+      "fromProperty": "out-unread",
+      "toId": "as_mark",
+      "toProperty": "in-unread"
+    },
+    {
+      "fromId": "as_unread_c",
+      "fromProperty": "out-unread",
+      "toId": "as_mark",
+      "toProperty": "in-unread"
+    },
+    {
+      "fromId": "as_count_go",
+      "fromProperty": "out-countCoach",
+      "toId": "as_inbox_c",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "as_inbox_c",
+      "fromProperty": "out-count",
+      "toId": "as_mark",
+      "toProperty": "in-inbox"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "51b2f524-843a-5d8c-8fc8-54846225f503",
+  "name": "Hand in",
+  "path": "/Homework/Hand in",
+  "type": "visual",
+  "created": "2026-11-09T13:10:42.716Z",
+  "modified": "2026-11-12T13:49:59.136Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Hand in a new version (SCOPE R5): files (dragged in or added one by one, up to 5, each uploaded privately, in turn), a link, or written or pasted text, with an optional note for Richard. A file of a kind not on the list, over 50 MB, or past the fifth is not added, and a sentence names it; handIn checks every file again and has the last word. 'Also add to My creations' is shown, switched off, until DBU-09."
+}

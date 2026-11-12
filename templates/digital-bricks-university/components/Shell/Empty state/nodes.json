@@ -1,0 +1,165 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "ac5b7167-ff7b-5d40-8aca-c0f70f68a939",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "es_card",
+      "type": "Group",
+      "label": "Empty card",
+      "x": 40,
+      "y": 200,
+      "children": [
+        "es_bubble",
+        "es_title",
+        "es_body"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "rowGap": "var(--space-3)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingTop": "var(--space-12)",
+        "paddingBottom": "var(--space-12)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      }
+    },
+    {
+      "id": "es_bubble",
+      "type": "Group",
+      "label": "Icon bubble",
+      "parent": "es_card",
+      "children": [
+        "es_icon"
+      ],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 48,
+          "unit": "px"
+        },
+        "height": {
+          "value": 48,
+          "unit": "px"
+        },
+        "borderRadius": "var(--radius-full)",
+        "backgroundColor": "var(--accent)",
+        "alignItems": "center",
+        "justifyContent": "center"
+      },
+      "x": 100,
+      "y": 320
+    },
+    {
+      "id": "es_icon",
+      "type": "net.noodl.visual.icon",
+      "label": "Icon",
+      "parent": "es_bubble",
+      "parameters": {
+        "iconSize": 22,
+        "iconColor": "var(--accent-foreground)",
+        "iconIconSource": {
+          "class": "lucide",
+          "code": "icon-inbox",
+          "codeAsClass": true
+        }
+      },
+      "x": 160,
+      "y": 440
+    },
+    {
+      "id": "es_title",
+      "type": "Text",
+      "label": "What this is",
+      "parent": "es_card",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-lg)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 560
+    },
+    {
+      "id": "es_body",
+      "type": "Text",
+      "label": "What will appear, and when",
+      "parent": "es_card",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "textAlignX": "center",
+        "maxWidth": {
+          "value": 520,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 680
+    },
+    {
+      "id": "es_inputs",
+      "type": "Component Inputs",
+      "label": "Empty state in",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "icon",
+          "plug": "output",
+          "type": "icon",
+          "displayName": "Icon"
+        },
+        {
+          "name": "titleKey",
+          "plug": "output",
+          "type": "string",
+          "displayName": "Title key"
+        },
+        {
+          "name": "bodyKey",
+          "plug": "output",
+          "type": "string",
+          "displayName": "Body key"
+        }
+      ]
+    },
+    {
+      "id": "es_t_title",
+      "type": "Translation",
+      "label": "What this is, in the reader's language",
+      "x": 400,
+      "y": 60,
+      "parameters": {
+        "Namespace": "pages"
+      }
+    },
+    {
+      "id": "es_t_body",
+      "type": "Translation",
+      "label": "What will appear, in the reader's language",
+      "x": 400,
+      "y": 160,
+      "parameters": {
+        "Namespace": "pages"
+      }
+    }
+  ],
+  "visualRoots": [
+    "es_card"
+  ]
+}

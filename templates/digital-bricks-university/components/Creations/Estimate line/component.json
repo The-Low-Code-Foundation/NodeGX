@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "cdcccd85-418c-5e80-836f-4f2fcc6876a1",
+  "name": "Estimate line",
+  "path": "/Creations/Estimate line",
+  "type": "visual",
+  "created": "2026-11-12T15:00:13.039Z",
+  "modified": "2026-11-12T15:00:13.039Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "\"About 3 hours a week saved\": the learner's own estimate from her latest 6-week check-in, shown on My creations and on the coach's view of them. Hidden when there is none."
+}
