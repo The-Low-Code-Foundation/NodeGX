@@ -112,7 +112,7 @@ moment a fixed view hands the camera back, and checks she never runs at the came
 (drives in `tests/lab-*.json`; `tests/lab-cape.json` shows the cape from the side, close at the clasp, jogging and
 sprinting).
 
-**On the web: https://nodegx.io/lab/lumiere/** (unlisted, `noindex`; live since 2026-11-01, round 1c). To update it:
+**On the web: https://nodegx.io/lab/lumiere/** (unlisted, `noindex`; live since 2026-11-01; round 2 pushed 2026-11-12, the live smoke and wing drives green on the GPU). To update it:
 
 ```sh
 node tools/build-static.mjs ~/vscode_projects/nodegx-web/site/lab/lumiere   # the copy a full site deploy keeps

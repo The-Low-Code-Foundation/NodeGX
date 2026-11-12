@@ -12,8 +12,9 @@ did all of it (README.md, "Round 2"):
 - **Repetition with variables:** `BAKERY` (main.mjs), `SONGS` (piano.mjs), `DANCES` (dance.mjs) are data.
 
 Suite green on the GPU, `DRIVE_GPU=1 sh tools/run-all.sh`: 12 drives, 80 checks (README.md "Checks"; in software GL the
-first four time out when the machine is busy). Nothing is committed (the whole folder is untracked). **The live copy at
-nodegx.io/lab/lumiere is still round 1c**: rebuild and re-push it only when Richard asks (README.md has the commands).
+first four time out when the machine is busy). Round 2 is committed (d057e1bef on `cline-dev`, not pushed to GitHub)
+and **live at nodegx.io/lab/lumiere since 2026-11-12** (the live smoke and wing drives passed). Rebuild and re-push it
+only when Richard asks (README.md has the commands; the site repo's `site/lab/` copy is untracked there, as before).
 
 **Read first:** BRIEF.md (Richard's words), SCOPE.md §13 "As built" (where round 2 parts from the scope tables),
 README.md "Round 2", the URL switches and the files.
