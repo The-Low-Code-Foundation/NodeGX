@@ -1,0 +1,257 @@
+[
+ {
+  "waitFor": "window.__game && __game.ready",
+  "timeout": 120000,
+  "label": "the game loads"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "shot": "01-title.png"
+ },
+ {
+  "eval": "document.querySelector('#title').hidden === false && document.querySelectorAll('#years .chip').length",
+  "expect": "n => n === 7",
+  "label": "the title shows the seven school years"
+ },
+ {
+  "clickSel": "#subjects .chip",
+  "text": "French"
+ },
+ {
+  "eval": "__game.save.chooser.subject + ' ' + document.querySelectorAll('#topics .chip').length",
+  "expect": "s => s.startsWith('french') && Number(s.split(' ')[1]) >= 3",
+  "label": "choosing French lists its topics"
+ },
+ {
+  "clickSel": "#subjects .chip",
+  "text": "Maths"
+ },
+ {
+  "clickSel": "#name"
+ },
+ {
+  "type": "Lila"
+ },
+ {
+  "clickSel": "#start"
+ },
+ {
+  "waitFor": "__game.state === 'card'",
+  "timeout": 20000,
+  "label": "the welcome card"
+ },
+ {
+  "shot": "02-welcome.png"
+ },
+ {
+  "clickSel": "#card-buttons button"
+ },
+ {
+  "waitFor": "__game.state === 'explore' && __game.place.id === 'hall'",
+  "timeout": 10000
+ },
+ {
+  "wait": 1200
+ },
+ {
+  "shot": "03-hall.png"
+ },
+ {
+  "eval": "__game.save.name",
+  "expect": "n => n === 'Lila'",
+  "label": "her name is kept"
+ },
+ {
+  "eval": "__game.walkTo(-6.4, -0.6); 1"
+ },
+ {
+  "waitFor": "!document.querySelector('#prompt').hidden && document.querySelector('#prompt').textContent.includes('Dressing')",
+  "timeout": 30000,
+  "label": "walking to the Dressing Room door shows its plaque"
+ },
+ {
+  "shot": "04-door.png"
+ },
+ {
+  "eval": "document.querySelector('#prompt').textContent",
+  "expect": "t => /20 HP: 5/.test(t)",
+  "label": "the plaque says a hit costs 20 HP and 5 knock her out"
+ },
+ {
+  "clickSel": "#prompt button.primary"
+ },
+ {
+  "waitFor": "__game.battle && document.querySelector('#commands') && !document.querySelector('#commands').hidden",
+  "timeout": 30000,
+  "label": "the fight starts with the command window"
+ },
+ {
+  "shot": "05-battle.png"
+ },
+ {
+  "clickSel": "#commands button",
+  "text": "Magic"
+ },
+ {
+  "waitFor": "!document.querySelector('#question').hidden",
+  "timeout": 5000
+ },
+ {
+  "eval": "document.querySelectorAll('#q-choices button').length",
+  "expect": "n => n >= 2 && n <= 4",
+  "label": "a question with up to four answers"
+ },
+ {
+  "shot": "06-question.png"
+ },
+ {
+  "eval": "__game.answer(false)",
+  "expect": "r => r === true"
+ },
+ {
+  "wait": 1700
+ },
+ {
+  "shot": "07-hit.png"
+ },
+ {
+  "waitFor": "!document.querySelector('#commands').hidden",
+  "timeout": 20000
+ },
+ {
+  "eval": "__game.save.hp",
+  "expect": "hp => hp === 80",
+  "label": "a wrong answer costs 20 HP"
+ },
+ {
+  "eval": "window.__things = __game.place.scene.children.length; 1"
+ },
+ {
+  "eval": "document.querySelector('#commands button').click(); 1"
+ },
+ {
+  "waitFor": "!document.querySelector('#question').hidden",
+  "timeout": 5000
+ },
+ {
+  "eval": "__game.answer(true)",
+  "expect": "r => r === true"
+ },
+ {
+  "wait": 900
+ },
+ {
+  "shot": "08-cast.png"
+ },
+ {
+  "waitFor": "!document.querySelector('#commands').hidden",
+  "timeout": 20000
+ },
+ {
+  "eval": "__game.save.mp",
+  "expect": "mp => mp === 25",
+  "label": "a spell costs 5 magic"
+ },
+ {
+  "eval": "__game.place.scene.children.length - __things",
+  "expect": "n => n === 0",
+  "label": "nothing the spell made is left in the room (its ring and glow once stayed for good)"
+ },
+ {
+  "eval": "document.querySelector('#commands button').click(); 1"
+ },
+ {
+  "waitFor": "!document.querySelector('#question').hidden",
+  "timeout": 5000
+ },
+ {
+  "eval": "__game.answer(true)"
+ },
+ {
+  "waitFor": "!document.querySelector('#commands').hidden",
+  "timeout": 20000
+ },
+ {
+  "eval": "document.querySelector('#commands button').click(); 1"
+ },
+ {
+  "waitFor": "!document.querySelector('#question').hidden",
+  "timeout": 5000
+ },
+ {
+  "eval": "__game.answer(true)"
+ },
+ {
+  "waitFor": "__game.save.won.includes('dressing')",
+  "timeout": 30000,
+  "label": "three right answers free the moth and win the room"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "shot": "09a-sweep-start.png"
+ },
+ {
+  "wait": 900
+ },
+ {
+  "shot": "09b-sweep-mid.png"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "waitFor": "!document.querySelector('#card').hidden",
+  "timeout": 20000,
+  "label": "the reward card"
+ },
+ {
+  "shot": "10-reward.png"
+ },
+ {
+  "clickSel": "#card-buttons button",
+  "text": "Try"
+ },
+ {
+  "waitFor": "__game.state === 'wardrobe'",
+  "timeout": 5000,
+  "label": "the wardrobe opens"
+ },
+ {
+  "wait": 1200
+ },
+ {
+  "shot": "11-wardrobe.png"
+ },
+ {
+  "clickSel": "#w-groups button",
+  "text": "Mint"
+ },
+ {
+  "clickSel": "#w-groups button",
+  "text": "Star tiara"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "shot": "12-dressed.png"
+ },
+ {
+  "eval": "JSON.stringify(__game.save.look)",
+  "expect": "l => l.dress === 'mint' && l.hat === 'tiara' && l.cape === 'starlight'",
+  "label": "the new look is saved (the cloak went on by itself)"
+ },
+ {
+  "clickSel": "#w-done"
+ },
+ {
+  "wait": 1200
+ },
+ {
+  "shot": "13-room-won.png"
+ }
+]

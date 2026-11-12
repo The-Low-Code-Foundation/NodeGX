@@ -1,0 +1,81 @@
+[
+ {
+  "waitFor": "window.__game && __game.ready && __game.state === 'explore'",
+  "timeout": 120000,
+  "label": "the Hall loads, every room won"
+ },
+ {
+  "eval": "window.__lum = () => new Promise((res) => requestAnimationFrame(() => { const g = __game; g.view.render(); const src = g.view.renderer.domElement; const c = document.createElement('canvas'); c.width = 400; c.height = Math.round(400 * src.height / src.width); const x = c.getContext('2d'); x.drawImage(src, 0, 0, c.width, c.height); const d = x.getImageData(0, 0, c.width, c.height).data; let sum = 0, blown = 0, n = d.length / 4; const L = []; for (let i = 0; i < d.length; i += 4) { const l = (0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]) / 255; sum += l; L.push(l); if (l > 0.93) blown++; } L.sort((a, b) => a - b); res({ place: g.place.id, mean: +(sum / n).toFixed(3), p50: +L[n >> 1].toFixed(3), p90: +L[Math.floor(n * 0.9)].toFixed(3), blown: +(100 * blown / n).toFixed(1) }); })); window.__lums = []; 1"
+ },
+ {
+  "wait": 3000
+ },
+ {
+  "eval": "(async () => { __lums.push(await __lum()); return JSON.stringify(__lums.at(-1)); })()"
+ },
+ {
+  "shot": "hall.png"
+ },
+ {
+  "eval": "void __game.enter('dressing'); 1"
+ },
+ {
+  "waitFor": "__game.place.id === 'dressing' && __game.state === 'explore'",
+  "timeout": 20000
+ },
+ {
+  "eval": "(async () => { const g = __game, h = g.hero; h.group.position.set(0, 0, 0.6); h.group.rotation.set(0, Math.PI, 0); g.cam.yaw = 0; g.follow(); for (let i = 0; i < 3; i++) await new Promise((r) => requestAnimationFrame(r)); g.cam.pos.copy(g.cam.toPos); g.cam.look.copy(g.cam.toLook); return 1; })()"
+ },
+ {
+  "wait": 3000
+ },
+ {
+  "eval": "(async () => { __lums.push(await __lum()); return JSON.stringify(__lums.at(-1)); })()"
+ },
+ {
+  "shot": "dressing.png"
+ },
+ {
+  "eval": "void __game.enter('kitchen'); 1"
+ },
+ {
+  "waitFor": "__game.place.id === 'kitchen' && __game.state === 'explore'",
+  "timeout": 20000
+ },
+ {
+  "eval": "(async () => { const g = __game, h = g.hero; h.group.position.set(0, 0, 0.6); h.group.rotation.set(0, Math.PI, 0); g.cam.yaw = 0; g.follow(); for (let i = 0; i < 3; i++) await new Promise((r) => requestAnimationFrame(r)); g.cam.pos.copy(g.cam.toPos); g.cam.look.copy(g.cam.toLook); return 1; })()"
+ },
+ {
+  "wait": 3000
+ },
+ {
+  "eval": "(async () => { __lums.push(await __lum()); return JSON.stringify(__lums.at(-1)); })()"
+ },
+ {
+  "shot": "kitchen.png"
+ },
+ {
+  "eval": "void __game.enter('library'); 1"
+ },
+ {
+  "waitFor": "__game.place.id === 'library' && __game.state === 'explore'",
+  "timeout": 20000
+ },
+ {
+  "eval": "(async () => { const g = __game, h = g.hero; h.group.position.set(0, 0, 0.6); h.group.rotation.set(0, Math.PI, 0); g.cam.yaw = 0; g.follow(); for (let i = 0; i < 3; i++) await new Promise((r) => requestAnimationFrame(r)); g.cam.pos.copy(g.cam.toPos); g.cam.look.copy(g.cam.toLook); return 1; })()"
+ },
+ {
+  "wait": 3000
+ },
+ {
+  "eval": "(async () => { __lums.push(await __lum()); return JSON.stringify(__lums.at(-1)); })()"
+ },
+ {
+  "shot": "library.png"
+ },
+ {
+  "eval": "JSON.stringify(__lums)",
+  "expect": "a => a.length >= 4 && a.every((r) => r.blown < 3 && r.p90 < 0.9 && r.mean > 0.2)",
+  "label": "no won place is washed out: under 3% of the picture near white, the brightest tenth under 0.9, yet not gloomy (mean over 0.2). Before round 2: Hall 10% near white, Dressing 8.8%, Kitchen 7.6%"
+ }
+]

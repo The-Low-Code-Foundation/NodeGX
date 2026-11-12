@@ -1,0 +1,4 @@
+node_modules/
+public/assets/
+shots/
+.server.log

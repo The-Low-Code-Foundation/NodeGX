@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <!-- The game's modules are one folder up; every relative URL below resolves from there. -->
+    <base href="../" />
+    <title>Creature Lab</title>
+    <script type="importmap">
+      { "imports": { "three": "/vendor/three/three.module.js", "three/addons/": "/vendor/three-addons/", "@pixiv/three-vrm": "/vendor/three-vrm/three-vrm.module.js" } }
+    </script>
+    <style>
+      html, body { margin: 0; height: 100%; background: #07060c; color: #eee; font: 14px system-ui, sans-serif; overflow: hidden; }
+      #view { position: fixed; inset: 0; }
+      #panel { position: fixed; left: 12px; top: 12px; display: grid; gap: 6px; background: rgba(20, 14, 34, 0.8); border: 1px solid #b59340; border-radius: 8px; padding: 10px; }
+      #panel .row { display: flex; gap: 6px; align-items: center; }
+      #panel b { width: 70px; }
+      button { background: #3b2a5e; color: #fff; border: 1px solid #7a62b0; border-radius: 5px; padding: 4px 9px; cursor: pointer; }
+      #panel.hide { display: none; }
+    </style>
+  </head>
+  <body>
+    <div id="view"></div>
+    <div id="panel"></div>
+    <script type="module" src="lab/creatures.mjs"></script>
+  </body>
+</html>

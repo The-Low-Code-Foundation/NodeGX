@@ -1,0 +1,95 @@
+[
+{
+"waitFor": "window.__game && __game.ready && __game.battle && !document.querySelector('#commands').hidden",
+"timeout": 150000,
+"label": "the Ballroom fight starts"
+},
+{
+"eval": "JSON.stringify(__game.battle.foes.map((f) => [f.name, f.hp, +f.c.size.toFixed(2)]))",
+"expect": "a => a.length === 1 && /Midnight Moth Queen/.test(a[0][0]) && a[0][1] === 200 && a[0][2] > 1.4",
+"label": "the Midnight Moth Queen, 200, half as big again"
+},
+{
+"wait": 1500
+},
+{
+"shot": "01-queen.png"
+},
+{
+"eval": "void (async () => { const g = __game; const q = (s) => document.querySelector(s); while (g.battle) { if (!q('#commands').hidden) q('#commands button').click(); else if (!q('#question').hidden) g.answer(true); await new Promise((r) => setTimeout(r, 250)); } })(); 1"
+},
+{
+"waitFor": "__game.save.won.includes('ballroom') && !document.querySelector('#card').hidden",
+"timeout": 300000,
+"label": "the Ballroom is won"
+},
+{
+"eval": "document.querySelector('#card').textContent",
+"expect": "t => /Madame Lune/.test(t) && /Dawn Staff/.test(t)",
+"label": "the reward card: Madame Lune and the Dawn Staff"
+},
+{
+"eval": "__game.stats().power",
+"expect": "n => n === 30",
+"label": "the Dawn Staff: power 30"
+},
+{
+"eval": "[...document.querySelectorAll('#card-buttons button')].find((b) => /Dance/.test(b.textContent)).click(); 1"
+},
+{
+"waitFor": "__game.mini && __game.mini.kind === 'dance' && !document.querySelector('#dance').hidden",
+"timeout": 10000,
+"label": "Dance! opens the ball"
+},
+{
+"eval": "__game.mini.start('waltz'); window.__auto = setInterval(() => { const m = __game.mini; const n = m && m.next(); if (n && n.in < 0.03) m.hit(n.lane); }, 4); 1"
+},
+{
+"wait": 6000
+},
+{
+"shot": "02-dancing.png"
+},
+{
+"waitFor": "__game.mini.result",
+"timeout": 120000,
+"label": "the waltz ends"
+},
+{
+"eval": "clearInterval(window.__auto); JSON.stringify(__game.mini.result)",
+"expect": "r => r.stars === 3 && r.points === r.of",
+"label": "hitting every arrow on the line is all Perfect: three stars"
+},
+{
+"eval": "__game.mini.start('polka'); 1"
+},
+{
+"waitFor": "__game.mini.result && __game.mini.result.id === 'polka'",
+"timeout": 120000,
+"label": "the polka ends, untouched"
+},
+{
+"eval": "JSON.stringify([__game.mini.result, __game.save.dances])",
+"expect": "([r, d]) => r.points === 0 && r.stars === 0 && d.waltz === 3 && d.polka === 0",
+"label": "a dance with no steps scores nothing, and the waltz keeps its three stars"
+},
+{
+"wait": 600
+},
+{
+"shot": "03-after.png"
+},
+{
+"eval": "document.querySelector('#d-done').click(); 1"
+},
+{
+"waitFor": "__game.state === 'explore' && !__game.mini",
+"timeout": 10000,
+"label": "curtseying gives her back the room"
+},
+{
+"eval": "document.querySelector('#hud').hidden",
+"expect": "h => h === false",
+"label": "the HUD is back"
+}
+]

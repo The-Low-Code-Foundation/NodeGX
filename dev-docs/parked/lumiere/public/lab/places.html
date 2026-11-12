@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <base href="../" />
+    <title>Places lab</title>
+    <style>html,body{margin:0;height:100%;background:#000;overflow:hidden}#view{position:fixed;inset:0}</style>
+    <script type="importmap">
+      { "imports": { "three": "/vendor/three/three.module.js", "three/addons/": "/vendor/three-addons/", "@pixiv/three-vrm": "/vendor/three-vrm/three-vrm.module.js" } }
+    </script>
+  </head>
+  <body>
+    <div id="view"></div>
+    <script type="module">
+      // ?place=hall|dressing|kitchen|library&f=0..1
+      import * as THREE from 'three';
+      import { makeView, params } from './src/look.mjs';
+      import { buildPlace } from './src/castle.mjs';
+      import { loadHeroine, Heroine } from './src/hero.mjs';
+      const view = makeView(document.getElementById('view'));
+      const body = await loadHeroine({ renderer: view.renderer });
+      let place, hero;
+      function show(id, f) {
+        place = buildPlace(id);
+        view.setScene(place.scene);
+        place.setRestored(f);
+        hero = hero ?? new Heroine(body);
+        hero.wear({ hat: 'witch', cape: 'none', dress: 'violet', hair: 'chestnut' });
+        place.scene.add(hero.group);
+        const b = place.battle;
+        if (b) {
+          hero.group.position.set(b.hero[0], 0, b.hero[1]);
+          hero.group.lookAt(b.foes[0][0], 0, b.foes[0][1]);
+          view.camera.position.set(...b.camera);
+          view.camera.lookAt(...b.look);
+        } else {
+          hero.group.position.set(place.spawn.x, 0, place.spawn.z);
+          hero.group.rotation.y = place.spawn.face;
+          view.camera.position.set(0, 3.2, place.spawn.z + 3.2);
+          view.camera.lookAt(0, 2.0, place.spawn.z - 6);
+        }
+        window.__lab.place = place;
+      }
+      window.__lab = { view, THREE, show, get hero() { return hero; } };
+      show(params.get('place') ?? 'hall', Number(params.get('f') ?? 0));
+      const clock = new THREE.Timer();
+      view.renderer.setAnimationLoop((t) => {
+        clock.update(t);
+        const dt = Math.min(clock.getDelta(), 0.1);
+        hero?.update(dt);
+        place?.update(dt, t / 1000);
+        view.render();
+      });
+      window.__lab.ready = true;
+    </script>
+  </body>
+</html>

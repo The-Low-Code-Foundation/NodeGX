@@ -1,0 +1,11 @@
+[
+  { "waitFor": "window.__lab && __lab.ready && __lab.frames > 20", "timeout": 60000 },
+  { "eval": "JSON.stringify({ windows: __lab.ext.windowCount, calls: __lab.info().calls, tris: __lab.info().triangles })", "label": "the château has its windows", "expect": "r => r.windows > 40" },
+  { "shot": "night.png" },
+  { "eval": "__lab.set(0.5); 1" },
+  { "wait": 800 },
+  { "shot": "half.png" },
+  { "eval": "__lab.set(1); document.getElementById('ui40').click(); 1" },
+  { "wait": 800 },
+  { "shot": "restored.png" }
+]

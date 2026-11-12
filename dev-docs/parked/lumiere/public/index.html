@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex" />
+    <title>Château Lumière</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@600;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+    <script type="importmap">
+      { "imports": { "three": "/vendor/three/three.module.js", "three/addons/": "/vendor/three-addons/", "@pixiv/three-vrm": "/vendor/three-vrm/three-vrm.module.js" } }
+    </script>
+  </head>
+  <body>
+    <div id="view"></div>
+    <div id="pops"></div>
+
+    <section id="loading">
+      <h1 class="logo">Château <span>Lumière</span></h1>
+      <div class="progress"><i></i></div>
+      <p>Lighting the candles…</p>
+    </section>
+
+    <section id="title" hidden>
+      <div class="win title-card">
+        <h1 class="logo">Château <span>Lumière</span></h1>
+        <p class="tagline">The château is yours. The curse is not. Take it back, one room at a time.</p>
+        <label class="field">Your sorceress’s name <input id="name" maxlength="16" autocomplete="off" spellcheck="false" /></label>
+        <div class="chooser">
+          <h3>Your magic comes from…</h3>
+          <div class="row" id="years"></div>
+          <div class="row" id="subjects"></div>
+          <div class="row" id="topics"></div>
+        </div>
+        <div class="row actions">
+          <button id="start" class="big">Enter the château</button>
+        </div>
+        <p class="small" id="title-note"></p>
+      </div>
+    </section>
+
+    <section id="hud" hidden>
+      <div class="win party-card">
+        <div class="who" id="hud-name"></div>
+        <div class="meter hp"><b>HP</b><span class="bar"><i></i></span><em></em></div>
+        <div class="meter mp"><b>MP</b><span class="bar"><i></i></span><em></em></div>
+      </div>
+      <div class="top-right">
+        <div class="win bag" id="bag"></div>
+        <button class="win round" id="menu-btn" title="Menu">☰</button>
+      </div>
+      <div id="where" class="win"></div>
+      <div id="prompt" class="win" hidden></div>
+      <div id="tip"></div>
+    </section>
+
+    <section id="battle" hidden>
+      <div id="banner" hidden></div>
+      <div class="win" id="foes"></div>
+      <div class="battle-right">
+        <div class="win" id="commands" hidden></div>
+        <div class="win" id="party"></div>
+      </div>
+      <div class="win" id="question" hidden>
+        <svg id="q-moon" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" class="track" /><circle cx="20" cy="20" r="18" class="left" /><text x="20" y="25" text-anchor="middle">☾</text></svg>
+        <p id="q-prompt"></p>
+        <div id="q-choices"></div>
+        <p id="q-explain" hidden></p>
+      </div>
+      <p id="hint"></p>
+    </section>
+
+    <section id="card" class="modal" hidden>
+      <div class="win card-body">
+        <div class="icon" id="card-icon"></div>
+        <h2 id="card-title"></h2>
+        <p id="card-text"></p>
+        <div class="row" id="card-buttons"></div>
+      </div>
+    </section>
+
+    <section id="menu" class="modal" hidden>
+      <div class="win card-body menu-body">
+        <h2>Paused</h2>
+        <div class="chooser">
+          <h3>Questions</h3>
+          <div class="row" id="m-years"></div>
+          <div class="row" id="m-subjects"></div>
+          <div class="row" id="m-topics"></div>
+        </div>
+        <h3>Thinking time</h3>
+        <div class="row" id="m-timer"></div>
+        <h3>Sound and picture</h3>
+        <div class="row"><button id="m-sound"></button><button id="m-quality"></button></div>
+        <div class="row actions"><button class="big" id="m-resume">Back to the game</button></div>
+        <p class="small"><button class="link" id="m-reset">Start a new château…</button></p>
+      </div>
+    </section>
+
+    <section id="wardrobe" hidden>
+      <div class="win side-panel">
+        <h2>The Enchanted Wardrobe</h2>
+        <div id="w-groups"></div>
+        <div class="row actions"><button class="big" id="w-done">All done</button></div>
+      </div>
+    </section>
+
+    <section id="cakes" hidden>
+      <div class="win side-panel">
+        <h2>Magic Cakes</h2>
+        <p class="small" id="c-step"></p>
+        <div id="c-options"></div>
+        <div class="row actions"><button id="c-back">↩</button><button class="big" id="c-next">Next</button></div>
+      </div>
+      <div class="win speech" id="speech" hidden></div>
+    </section>
+
+    <div id="fade"></div>
+    <script type="module" src="src/main.mjs"></script>
+  </body>
+</html>

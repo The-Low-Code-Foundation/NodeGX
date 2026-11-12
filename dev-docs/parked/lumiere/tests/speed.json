@@ -1,0 +1,66 @@
+[
+ {
+  "waitFor": "window.__game && __game.ready && __game.state === 'explore'",
+  "timeout": 120000,
+  "label": "the hall loads"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "eval": "const h = __game.hero; JSON.stringify({ walk: h.walkSpeed, jog: h.runSpeed, sprint: h.sprintSpeed })",
+  "expect": "r => r.sprint > r.jog && r.jog > r.walk",
+  "label": "three paces read off the clips"
+ },
+ {
+  "eval": "__game.hero.group.position.set(-6.4, 0, 2); __game.walkTo(0, -1.8); 1"
+ },
+ {
+  "waitFor": "__game.hero.speed > 4.6 && __game.hero.current.getClip().name === 'Sprint_Loop'",
+  "timeout": 8000,
+  "label": "a far tap sprints, on the sprint animation"
+ },
+ {
+  "shot": "01-sprint.png"
+ },
+ {
+  "waitFor": "!__game.hero.target",
+  "timeout": 8000,
+  "label": "she arrives"
+ },
+ {
+  "eval": "__game.walkTo(0.9, -1.8); 1"
+ },
+ {
+  "waitFor": "__game.hero.speed > 0.5",
+  "timeout": 3000
+ },
+ {
+  "eval": "__game.hero.current.getClip().name",
+  "expect": "n => n === 'Walk_Loop'",
+  "label": "a short tap walks"
+ },
+ {
+  "waitFor": "!__game.hero.target",
+  "timeout": 6000
+ },
+ {
+  "eval": "__game.walkTo(-2.6, 1.6); 1"
+ },
+ {
+  "wait": 900
+ },
+ {
+  "shot": "02-trail.png"
+ },
+ {
+  "waitFor": "!__game.hero.target",
+  "timeout": 8000
+ },
+ {
+  "wait": 600
+ },
+ {
+  "shot": "03-hall-view.png"
+ }
+]

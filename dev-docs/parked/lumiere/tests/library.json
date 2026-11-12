@@ -1,0 +1,78 @@
+[
+ {
+  "waitFor": "window.__game && __game.ready && __game.battle && !document.querySelector('#commands').hidden",
+  "timeout": 120000,
+  "label": "the Library fight starts"
+ },
+ {
+  "wait": 600
+ },
+ {
+  "shot": "01-grimoire.png"
+ },
+ {
+  "eval": "document.querySelector('#commands button').click(); 1"
+ },
+ {
+  "waitFor": "!document.querySelector('#question').hidden",
+  "timeout": 5000
+ },
+ {
+  "eval": "__game.answer(false)"
+ },
+ {
+  "wait": 1200
+ },
+ {
+  "shot": "02-pages.png"
+ },
+ {
+  "waitFor": "__game.place.id === 'hall' && __game.state === 'explore'",
+  "timeout": 30000,
+  "label": "one wrong answer in the Library knocks her out, back to the Hall"
+ },
+ {
+  "eval": "__game.save.hp",
+  "expect": "hp => hp === 30",
+  "label": "she wakes with 30 HP"
+ },
+ {
+  "waitFor": "__game.toasts.some(t => /potions/.test(t))",
+  "timeout": 10000,
+  "label": "she is told to find potions"
+ },
+ {
+  "wait": 1200
+ },
+ {
+  "shot": "03-woke-in-hall.png"
+ },
+ {
+  "eval": "__game.walkTo(-3.6, 2.6); 1"
+ },
+ {
+  "waitFor": "__game.save.bag.heart === 2",
+  "timeout": 30000,
+  "label": "walking past the heart potion puts it in her bag"
+ },
+ {
+  "eval": "__game.useItem('heart'); __game.save.hp",
+  "expect": "hp => hp === 80",
+  "label": "a Heart Potion gives back 50"
+ },
+ {
+  "eval": "__game.walkTo(-5.0, -5.6); 1"
+ },
+ {
+  "waitFor": "!document.querySelector('#prompt').hidden && document.querySelector('#prompt').textContent.includes('Library')",
+  "timeout": 30000
+ },
+ {
+  "eval": "document.querySelector('#prompt').textContent",
+  "expect": "t => /One wrong answer/.test(t)",
+  "label": "the Library door warns: one wrong answer"
+ },
+ {
+  "shot": "04-library-door.png"
+ }
+]

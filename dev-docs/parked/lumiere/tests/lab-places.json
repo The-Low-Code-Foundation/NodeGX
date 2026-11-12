@@ -1,0 +1,12 @@
+[
+  { "waitFor": "window.__lab && __lab.ready", "timeout": 90000 },
+  { "wait": 800 },
+  { "shot": "hall-dark.png" },
+  { "eval": "__lab.place.setRestored(1); 1" }, { "wait": 400 }, { "shot": "hall-won.png" },
+  { "eval": "__lab.show('dressing', 0); 1" }, { "wait": 800 }, { "shot": "dressing-dark.png" },
+  { "eval": "__lab.place.setRestored(1); 1" }, { "wait": 400 }, { "shot": "dressing-won.png" },
+  { "eval": "__lab.show('kitchen', 0); 1" }, { "wait": 800 }, { "shot": "kitchen-dark.png" },
+  { "eval": "__lab.place.setRestored(1); 1" }, { "wait": 400 }, { "shot": "kitchen-won.png" },
+  { "eval": "__lab.show('library', 0); 1" }, { "wait": 800 }, { "shot": "library-dark.png" },
+  { "eval": "__lab.place.setRestored(1); 1" }, { "wait": 400 }, { "shot": "library-won.png" }
+]

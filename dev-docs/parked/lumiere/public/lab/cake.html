@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <base href="../" />
+    <title>Lab: Magic Cakes</title>
+    <script type="importmap">
+      { "imports": { "three": "/vendor/three/three.module.js", "three/addons/": "/vendor/three-addons/", "@pixiv/three-vrm": "/vendor/three-vrm/three-vrm.module.js" } }
+    </script>
+    <style>
+      html, body { margin: 0; height: 100%; background: #2a1620; overflow: hidden; font: 14px system-ui, sans-serif; color: #fff; }
+      #view { position: fixed; inset: 0; }
+      #ui { position: fixed; left: 16px; top: 16px; background: rgba(60,20,50,.78); padding: 12px 14px; border-radius: 12px; width: 230px; }
+      #ui label { display: inline-block; margin: 2px 8px 2px 0; }
+      select, button { margin: 3px 0 8px; }
+      h3 { margin: 4px 0; font-size: 13px; opacity: .8; }
+    </style>
+  </head>
+  <body>
+    <div id="view"></div>
+    <div id="ui">
+      <h3>Sponge</h3><select id="sponge"></select>
+      <h3>Tiers</h3><select id="tiers"></select>
+      <h3>Icing</h3><select id="icing"></select>
+      <h3>Toppings</h3><div id="tops"></div>
+      <button id="rand">Surprise me</button>
+    </div>
+    <script type="module">
+      import * as THREE from 'three';
+      import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+      import { makeView, canvasTexture, params } from './src/look.mjs';
+      import { CAKE_OPTIONS, makeCake, disposeCake } from './src/cake.mjs';
+      const view = makeView(document.getElementById('view'), { quality: params.get('quality') ?? 'high' });
+      const scene = new THREE.Scene();
+      view.setScene(scene);
+      // A warm kitchen out of focus behind: a gradient with soft bokeh lights.
+      scene.background = canvasTexture(512, 256, (g, w, h) => {
+        const grad = g.createLinearGradient(0, 0, 0, h);
+        grad.addColorStop(0, '#5a2a3a'); grad.addColorStop(0.6, '#a8584e'); grad.addColorStop(1, '#3a1a20');
+        g.fillStyle = grad; g.fillRect(0, 0, w, h);
+        for (let i = 0; i < 40; i++) {
+          const x = Math.random() * w, y = Math.random() * h * 0.7, s = 6 + Math.random() * 22;
+          const b = g.createRadialGradient(x, y, 0, x, y, s);
+          b.addColorStop(0, 'rgba(255,214,150,0.55)'); b.addColorStop(1, 'rgba(255,214,150,0)');
+          g.fillStyle = b; g.fillRect(x - s, y - s, s * 2, s * 2);
+        }
+      }, { repeat: [1, 1] });
+      scene.add(new THREE.HemisphereLight(0xffe2d0, 0x5a3040, 1.2));
+      const key = new THREE.DirectionalLight(0xffe6c8, 2.6);
+      key.position.set(1.2, 2.2, 1.4);
+      key.castShadow = true;
+      key.shadow.mapSize.set(1024, 1024);
+      key.shadow.camera.left = key.shadow.camera.bottom = -1; key.shadow.camera.right = key.shadow.camera.top = 1;
+      key.shadow.bias = -0.0005;
+      scene.add(key);
+      const rim = new THREE.DirectionalLight(0xffb0d8, 1.4);
+      rim.position.set(-1.5, 1.2, -1.5);
+      scene.add(rim);
+      const candleGlow = new THREE.PointLight(0xffb060, 0, 1.2, 2);
+      scene.add(candleGlow);
+      // A round table with a gingham cloth.
+      const cloth = canvasTexture(128, 128, (g) => {
+        g.fillStyle = '#fff6f8'; g.fillRect(0, 0, 128, 128);
+        g.fillStyle = 'rgba(255,120,170,0.45)'; g.fillRect(0, 0, 64, 128); g.fillRect(0, 0, 128, 64);
+        g.fillStyle = 'rgba(255,90,150,0.35)'; g.fillRect(0, 0, 64, 64);
+      }, { repeat: [10, 10] });
+      const table = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 0.04, 64), new THREE.MeshStandardMaterial({ map: cloth, roughness: 0.9 }));
+      table.position.y = -0.02;
+      table.receiveShadow = true;
+      scene.add(table);
+      const camera = view.camera;
+      camera.position.set(0, 0.62, 1.15);
+      const controls = new OrbitControls(camera, view.renderer.domElement);
+      controls.target.set(0, 0.36, 0);
+      controls.autoRotate = !params.get('still');
+      controls.autoRotateSpeed = 0.8;
+      controls.update();
+
+      const sel = (id, list, label) => {
+        const el = document.getElementById(id);
+        for (const o of list) el.add(new Option(label(o), o.id ?? o));
+        el.onchange = rebuild;
+        return el;
+      };
+      const sponge = sel('sponge', CAKE_OPTIONS.sponge, (o) => o.name);
+      const tiers = sel('tiers', CAKE_OPTIONS.tiers, (o) => `${o} tier${o > 1 ? 's' : ''}`);
+      const icing = sel('icing', CAKE_OPTIONS.icing, (o) => o.name);
+      const tops = document.getElementById('tops');
+      for (const t of CAKE_OPTIONS.toppings) tops.insertAdjacentHTML('beforeend', `<label><input type="checkbox" value="${t.id}"> ${t.name}</label>`);
+      tops.onchange = rebuild;
+      let cake = null;
+      function recipe() {
+        return { sponge: sponge.value, tiers: +tiers.value, icing: icing.value, toppings: [...tops.querySelectorAll('input:checked')].map((i) => i.value) };
+      }
+      function set(rc) {
+        sponge.value = rc.sponge; tiers.value = rc.tiers; icing.value = rc.icing;
+        tops.querySelectorAll('input').forEach((i) => (i.checked = rc.toppings.includes(i.value)));
+        rebuild();
+      }
+      function rebuild() {
+        disposeCake(cake);
+        cake = makeCake(recipe());
+        scene.add(cake);
+        const f = cake.userData.flames;
+        candleGlow.intensity = f.length ? 0.6 : 0;
+        if (f.length) candleGlow.position.copy(f[0]).add(new THREE.Vector3(0, 0.05, 0));
+        controls.target.y = cake.userData.height * 0.62;
+        window.__lab.recipe = cake.userData.recipe;
+      }
+      document.getElementById('rand').onclick = () => {
+        const p = (l) => l[Math.floor(Math.random() * l.length)];
+        set({ sponge: p(CAKE_OPTIONS.sponge).id, tiers: p(CAKE_OPTIONS.tiers), icing: p(CAKE_OPTIONS.icing).id, toppings: CAKE_OPTIONS.toppings.filter(() => Math.random() < 0.4).map((t) => t.id) });
+      };
+      window.__lab = { ready: false, set, frames: 0, view, get cake() { return cake; }, get geometries() { return view.renderer.info.memory.geometries; } };
+      set({ sponge: 'strawberry', tiers: 2, icing: 'pink', toppings: ['strawberries', 'sprinkles', 'candles'] });
+      const clock = new THREE.Timer();
+      function loop(ts) {
+        clock.update(ts);
+        const dt = Math.min(0.1, clock.getDelta());
+        controls.update(dt);
+        cake?.userData.update(dt);
+        view.render();
+        window.__lab.frames++;
+        requestAnimationFrame(loop);
+      }
+      requestAnimationFrame(loop);
+      window.__lab.ready = true;
+    </script>
+  </body>
+</html>

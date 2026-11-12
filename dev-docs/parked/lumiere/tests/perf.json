@@ -1,0 +1,22 @@
+[
+ {
+  "waitFor": "window.__game && __game.ready && __game.state === 'explore'",
+  "timeout": 120000,
+  "label": "the hall loads"
+ },
+ {
+  "wait": 2000
+ },
+ {
+  "eval": "(() => { const v = __game.view, gl = v.renderer.getContext(), px = new Uint8Array(4); const run = (n) => { const t0 = performance.now(); for (let i = 0; i < n; i++) { v.render(); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); } return (performance.now() - t0) / n; }; run(5); const hall = run(40); return JSON.stringify({ msPerFrame: +hall.toFixed(2) }); })()",
+  "label": "forced frames in the hall (ms each, GPU waited for)"
+ },
+ {
+  "eval": "(() => { const m = __game.place.scene.children.find((o) => o.isReflector); if (m) m.visible = false; const v = __game.view, gl = v.renderer.getContext(), px = new Uint8Array(4); const run = (n) => { const t0 = performance.now(); for (let i = 0; i < n; i++) { v.render(); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); } return (performance.now() - t0) / n; }; run(5); const r = run(40); if (m) m.visible = true; return JSON.stringify({ noMirror: +r.toFixed(2), hadMirror: !!m }); })()",
+  "label": "the same without the mirror"
+ },
+ {
+  "eval": "(() => { const v = __game.view, gl = v.renderer.getContext(), px = new Uint8Array(4); const t0 = performance.now(); for (let i = 0; i < 40; i++) gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); return JSON.stringify({ readbackOnly: +((performance.now() - t0) / 40).toFixed(2) }); })()",
+  "label": "readback alone"
+ }
+]

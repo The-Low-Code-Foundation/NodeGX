@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <base href="../" />
+    <title>Lab: the château at night</title>
+    <script type="importmap">
+      { "imports": { "three": "/vendor/three/three.module.js", "three/addons/": "/vendor/three-addons/", "@pixiv/three-vrm": "/vendor/three-vrm/three-vrm.module.js" } }
+    </script>
+    <style>
+      html, body { margin: 0; height: 100%; background: #0b0820; overflow: hidden; font: 14px system-ui, sans-serif; color: #eee; }
+      #view { position: fixed; inset: 0; }
+      #ui { position: fixed; left: 16px; bottom: 16px; background: rgba(20,12,50,.75); padding: 10px 14px; border-radius: 10px; }
+      #fake { position: fixed; left: 0; top: 0; bottom: 0; width: 40%; outline: 1px dashed rgba(255,255,255,.25); pointer-events: none; display: none; }
+    </style>
+  </head>
+  <body>
+    <div id="view"></div>
+    <div id="fake"></div>
+    <div id="ui">Restored <input id="f" type="range" min="0" max="1" step="0.01" value="0" /> <span id="fv">0</span>
+      <label><input type="checkbox" id="ui40" /> show UI area</label></div>
+    <script type="module">
+      import * as THREE from 'three';
+      import { makeView, params } from './src/look.mjs';
+      import { makeExterior } from './src/exterior.mjs';
+      const view = makeView(document.getElementById('view'), { quality: params.get('quality') ?? 'high' });
+      const ext = makeExterior();
+      view.setScene(ext.scene);
+      const f = document.getElementById('f');
+      const set = (v) => { ext.setRestored(v); f.value = v; document.getElementById('fv').textContent = v; };
+      f.oninput = () => set(+f.value);
+      document.getElementById('ui40').onchange = (e) => (document.getElementById('fake').style.display = e.target.checked ? 'block' : 'none');
+      if (params.get('f')) set(+params.get('f'));
+      const clock = new THREE.Clock();
+      let frames = 0;
+      function loop() {
+        const dt = Math.min(0.1, clock.getDelta());
+        ext.update(params.get('still') ? 0 : dt, view.camera);
+        view.render();
+        frames++;
+        requestAnimationFrame(loop);
+      }
+      loop();
+      window.__lab = { ready: true, ext, set, view, get frames() { return frames; }, info: () => view.renderer.info.render };
+    </script>
+  </body>
+</html>

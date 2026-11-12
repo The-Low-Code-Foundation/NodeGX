@@ -1,0 +1,17 @@
+[
+  { "waitFor": "window.__lab && __lab.ready", "timeout": 90000 },
+  { "wait": 1500 },
+  { "shot": "front.png" },
+  { "eval": "__lab.view.camera.position.set(0.6, 1.6, 1.6); __lab.view.camera.lookAt(-1.1, 1.3, 0); 1" },
+  { "wait": 400 },
+  { "shot": "close.png" },
+  { "eval": "__lab.view.camera.position.set(2.5, 1.4, -2.5); __lab.view.camera.lookAt(0, 1.0, 0); 1" },
+  { "wait": 400 },
+  { "shot": "back.png" },
+  { "eval": "__lab.heroes.forEach(h => h.play('Spell_Simple_Shoot', {once:true})); __lab.view.camera.position.set(0, 1.3, 4.2); __lab.view.camera.lookAt(0, 0.95, 0); 1" },
+  { "wait": 500 },
+  { "shot": "cast.png" },
+  { "eval": "__lab.heroes.forEach(h => h.play('Walk_Loop')); 1" },
+  { "wait": 700 },
+  { "shot": "walk.png" }
+]

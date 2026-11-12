@@ -1,0 +1,59 @@
+[
+{
+"waitFor": "window.__game && __game.ready && __game.state === 'explore' && __game.place.id === 'dressing'",
+"timeout": 150000,
+"label": "the won Dressing Room loads"
+},
+{
+"eval": "(() => { const f = __game.place.feature; __game.hero.group.position.set(f.x, 0, f.z + 0.4); return f.kind; })()",
+"expect": "k => k === 'wardrobe'"
+},
+{
+"waitFor": "!document.querySelector('#prompt').hidden && /Wardrobe/.test(document.querySelector('#prompt').textContent)",
+"timeout": 10000,
+"label": "the wardrobe offers itself"
+},
+{
+"eval": "document.querySelector('#prompt button.primary').click(); 1"
+},
+{
+"waitFor": "!document.querySelector('#wardrobe').hidden",
+"timeout": 5000,
+"label": "the wardrobe opens"
+},
+{
+"eval": "(() => { const b = (t) => [...document.querySelectorAll('#w-groups button')].find((x) => x.textContent.includes(t)); return [b('Moon crown').disabled, b('Moonlight ballgown').disabled, b('Midnight cape').disabled, b('Lilac').disabled, b('Caramel').disabled]; })()",
+"expect": "a => a.join() === 'true,true,true,false,false'",
+"label": "before the Ballroom: the crown, the ballgowns and the midnight cape are locked; the Music and Tea Room hair is open"
+},
+{
+"eval": "document.querySelector('#w-done').click(); __game.save.won.push('ballroom'); document.querySelector('#prompt button.primary') ? 1 : 0"
+},
+{
+"waitFor": "__game.state === 'explore' && !document.querySelector('#prompt').hidden",
+"timeout": 10000
+},
+{
+"eval": "document.querySelector('#prompt button.primary').click(); 1"
+},
+{
+"waitFor": "!document.querySelector('#wardrobe').hidden",
+"timeout": 5000
+},
+{
+"eval": "(() => { const b = (t) => [...document.querySelectorAll('#w-groups button')].find((x) => x.textContent.includes(t)); for (const t of ['Moon crown', 'Starry-night ballgown', 'Midnight cape', 'Lilac']) { if (b(t).disabled) return t + ' locked'; b(t).click(); } return JSON.stringify(__game.save.look); })()",
+"expect": "l => l.hat === 'crown' && l.dress === 'starry' && l.cape === 'midnight' && l.hair === 'lilac'",
+"label": "with the Ballroom won she can wear the moon crown, a ballgown and the midnight cape"
+},
+{
+"wait": 1500
+},
+{
+"shot": "01-ballgown.png"
+},
+{
+"eval": "document.querySelector('#w-done').click(); __game.state",
+"expect": "s => s === 'explore'",
+"label": "closing the wardrobe gives her back the room"
+}
+]

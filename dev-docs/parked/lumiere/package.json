@@ -1,0 +1,19 @@
+{
+  "name": "chateau-lumiere",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Château Lumière: a junior sorceress wins back a haunted château room by room, casting spells by answering Rocket School questions. three.js + the life sim's anime (VRM) heroine, no bundler.",
+  "type": "module",
+  "license": "GPL-3.0",
+  "scripts": {
+    "prestart": "node tools/ensure-installed.mjs",
+    "start": "node server.mjs --open",
+    "serve": "node server.mjs",
+    "lan": "node server.mjs --lan",
+    "test": "sh tools/run-all.sh"
+  },
+  "dependencies": {
+    "three": "0.186.1",
+    "@pixiv/three-vrm": "3.5.5"
+  }
+}

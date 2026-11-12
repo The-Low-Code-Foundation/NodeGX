@@ -1,0 +1,107 @@
+[
+{
+"waitFor": "window.__game && __game.ready && __game.state === 'explore' && __game.place.id === 'library'",
+"timeout": 150000,
+"label": "the won Library loads"
+},
+{
+"eval": "(() => { const f = __game.place.feature; __game.hero.group.position.set(f.x, 0, f.z + 0.4); return f.kind; })()",
+"expect": "k => k === 'books'",
+"label": "the reading desk is Hoot's reading nook"
+},
+{
+"waitFor": "!document.querySelector('#prompt').hidden && /Hoot/.test(document.querySelector('#prompt').textContent)",
+"timeout": 10000,
+"label": "Hoot offers a read"
+},
+{
+"eval": "document.querySelector('#prompt button.primary').click(); 1"
+},
+{
+"waitFor": "!document.querySelector('#books').hidden",
+"timeout": 5000,
+"label": "the shelf opens"
+},
+{
+"eval": "document.querySelectorAll('#b-spines .spine').length",
+"expect": "n => n === 6",
+"label": "six books on the shelf"
+},
+{
+"eval": "document.querySelector('#b-spines [data-book=recipe]').click(); document.querySelector('#b-left').textContent + document.querySelector('#b-right').textContent",
+"expect": "t => /Moon Biscuits/.test(t)",
+"label": "great-aunt's recipe opens on its first pages"
+},
+{
+"wait": 1500
+},
+{
+"shot": "01-recipe.png"
+},
+{
+"eval": "for (let i = 0; i < 5; i++) document.querySelector('#b-next').click(); document.querySelector('#b-left').textContent",
+"expect": "t => /egg yolks/.test(t)",
+"label": "after the last page, Hoot's question"
+},
+{
+"eval": "[...document.querySelectorAll('#b-right button')].find((b) => /Twelve/.test(b.textContent)).click(); __game.save.books.recipe ?? false",
+"expect": "s => s === false",
+"label": "a wrong answer is no star"
+},
+{
+"eval": "[...document.querySelectorAll('#b-right button')].find((b) => b.textContent === 'One').click(); __game.save.books.recipe",
+"expect": "s => s === true",
+"label": "the right answer is a star"
+},
+{
+"wait": 1200
+},
+{
+"shot": "02-star.png"
+},
+{
+"eval": "document.querySelector('#b-spines [data-book=bestiary]').click(); document.querySelector('#b-left').textContent + ' ' + document.querySelector('#b-right').textContent",
+"expect": "t => /silk butterfly/.test(t)",
+"label": "the bestiary has the Tatter Moth's page filled in (its room is won)"
+},
+{
+"eval": "document.querySelector('#b-next').click(); document.querySelector('#b-next').click(); document.querySelector('#b-left').textContent + ' ' + document.querySelector('#b-right').textContent",
+"expect": "t => /\\?\\?\\?/.test(t)",
+"label": "…and a blank page for a creature not yet freed"
+},
+{
+"eval": "__game.stats().maxMp",
+"expect": "n => n === 30",
+"label": "magic is 30 before the quill"
+},
+{
+"eval": "(() => { for (const id of ['story', 'bestiary', 'jokes', 'wing', 'moon']) { document.querySelector(`#b-spines [data-book=${id}]`).click(); for (let i = 0; i < 6; i++) if (!document.querySelector('#b-next').disabled) document.querySelector('#b-next').click(); } return 1; })()"
+},
+{
+"eval": "void (async () => { const B = await import('/src/books.mjs'); for (const b of B.BOOKS) { if (__game.save.books[b.id]) continue; document.querySelector(`#b-spines [data-book=${b.id}]`).click(); await new Promise((r) => setTimeout(r, 50)); while (!document.querySelector('#b-next').disabled) document.querySelector('#b-next').click(); document.querySelectorAll('#b-right button[data-a]')[b.ask.a].click(); await new Promise((r) => setTimeout(r, 1100)); } window.__read = true; })(); 1"
+},
+{
+"waitFor": "window.__read && __game.save.quill",
+"timeout": 30000,
+"label": "a star on every book wins the Owl Quill"
+},
+{
+"wait": 1200
+},
+{
+"eval": "__game.stats().maxMp",
+"expect": "n => n === 40",
+"label": "the Owl Quill: 40 magic"
+},
+{
+"shot": "03-quill.png"
+},
+{
+"eval": "document.querySelector('#b-done').click(); 1"
+},
+{
+"waitFor": "__game.state === 'explore' && !__game.mini",
+"timeout": 10000,
+"label": "thanking Hoot gives her back the room"
+}
+]

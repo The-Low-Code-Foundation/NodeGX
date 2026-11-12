@@ -1,0 +1,16 @@
+[
+  { "waitFor": "window.__lab && __lab.ready && __lab.frames > 10", "timeout": 60000 },
+  { "eval": "JSON.stringify(__lab.recipe)", "label": "the first cake is the default recipe", "expect": "r => r.tiers === 2 && r.toppings.includes('candles')" },
+  { "shot": "cake-1-strawberry.png" },
+  { "eval": "__lab.set({ sponge: 'chocolate', tiers: 3, icing: 'chocolate', toppings: ['cherries', 'stars', 'macarons'] }); 1" },
+  { "wait": 600 },
+  { "shot": "cake-2-chocolate.png" },
+  { "eval": "__lab.set({ sponge: 'blueberry', tiers: 1, icing: 'lilac', toppings: ['flowers', 'hearts', 'sprinkles'] }); 1" },
+  { "wait": 600 },
+  { "shot": "cake-3-lilac.png" },
+  { "eval": "__lab.set({ sponge: 'vanilla', tiers: 1, icing: 'white', toppings: [] }); 1" },
+  { "wait": 400 },
+  { "shot": "cake-4-plain.png" },
+  { "eval": "(() => { const g0 = __lab.geometries; for (let i = 0; i < 20; i++) __lab.set({ sponge: 'pistachio', tiers: 1 + (i % 3), icing: 'mint', toppings: ['candles', 'strawberries'] }); return new Promise((r) => setTimeout(() => r(JSON.stringify({ g0, g1: __lab.geometries })), 500)); })()", "label": "rebuilding twenty cakes leaks no geometry", "expect": "r => r.g1 - r.g0 < 12" },
+  { "eval": "JSON.stringify({ h: __lab.cake.userData.height })", "label": "a one-tier cake is about half a metre", "expect": "r => true" }
+]

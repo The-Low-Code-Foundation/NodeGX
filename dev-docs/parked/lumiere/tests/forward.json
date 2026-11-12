@@ -1,0 +1,36 @@
+[
+ {
+  "waitFor": "window.__game && __game.ready && __game.state === 'explore' && __game.place.id === 'dressing'",
+  "timeout": 120000,
+  "label": "the dressing room loads, won"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "eval": "void (async () => { const g = __game, h = g.hero, cam = g.cam, b = g.place.bounds; const T = g.view.camera.constructor; const out = window.__runs = []; const frame = () => new Promise((r) => requestAnimationFrame(r)); const key = (type) => dispatchEvent(new KeyboardEvent(type, { code: 'KeyW' })); const spots = []; for (const fx of [0.15, 0.5, 0.85]) for (const fz of [0.15, 0.5, 0.85]) spots.push([b.minX + (b.maxX - b.minX) * fx, b.minZ + (b.maxZ - b.minZ) * fz]); for (const [x, z] of spots) for (let k = 0; k < 8; k++) { const yaw = (k / 8) * Math.PI * 2; h.group.position.set(x, 0, z); h.target = null; cam.yaw = yaw; h.group.rotation.y = yaw + Math.PI; for (let i = 0; i < 4; i++) await frame(); cam.pos.copy(cam.toPos); cam.look.copy(cam.toLook); await frame(); key('keydown'); let prev = h.group.position.clone(); let n = 0, back = 0, side = 0, moon = 0; for (let i = 0; i < 180; i++) { await frame(); const p = h.group.position.clone(); const mv = p.clone().sub(prev).setY(0); prev = p; if (mv.length() < 1e-3) continue; mv.normalize(); const c = g.view.camera; const f = new c.position.constructor(); c.getWorldDirection(f); f.setY(0).normalize(); const d = f.dot(mv); n++; if (i > 20 && Math.sin(h.group.rotation.y) * mv.x + Math.cos(h.group.rotation.y) * mv.z < 0) moon++; if (i < 3) continue; if (d < -0.2) back++; else if (d < 0.5) side++; } key('keyup'); out.push({ x: +x.toFixed(1), z: +z.toFixed(1), yaw: k, n, back, side, moon }); } window.__fwd = out; })(); 1"
+ },
+ {
+  "waitFor": "window.__fwd",
+  "timeout": 900000,
+  "label": "every spot and heading tried"
+ },
+ {
+  "eval": "const o = window.__fwd || __runs; JSON.stringify({ runs: o.length, frames: o.reduce((a, r) => a + r.n, 0), back: o.reduce((a, r) => a + r.back, 0), side: o.reduce((a, r) => a + r.side, 0), moon: o.reduce((a, r) => a + r.moon, 0), runsWithBack: o.filter((r) => r.back).length, worst: o.filter((r) => r.back).sort((a, b) => b.back - a.back).slice(0, 8) })",
+  "expect": "r => r.back === 0 && r.moon === 0",
+  "label": "holding forward never runs her towards the camera"
+ },
+ {
+  "eval": "void (async () => { const g = __game, h = g.hero, cam = g.cam, b = g.place.bounds; const out = window.__swing = []; const frame = () => new Promise((r) => requestAnimationFrame(r)); const key = (type) => dispatchEvent(new KeyboardEvent(type, { code: 'KeyW' })); const V = g.view.camera.position.constructor; for (const [x, z] of [[0, 0], [1.5, -0.8], [-1, 1], [1, 1.5]]) for (let k = 0; k < 4; k++) { const face = (k / 4) * Math.PI * 2; h.group.position.set(x, 0, z); h.target = null; h.group.rotation.y = face; cam.yaw = face + Math.PI; cam.mode = 'fixed'; const front = new V(x + Math.sin(face) * 2.4, 1.5, z + Math.cos(face) * 2.4); cam.pos.copy(front); cam.toPos.copy(front); cam.look.set(x, 1.1, z); cam.toLook.set(x, 1.1, z); for (let i = 0; i < 4; i++) await frame(); g.follow({ fromView: true }); key('keydown'); let prev = h.group.position.clone(), n = 0, back = 0; for (let i = 0; i < 60; i++) { await frame(); const p = h.group.position.clone(); const mv = p.clone().sub(prev).setY(0); prev = p; if (mv.length() < 1e-3) continue; mv.normalize(); const f = new V(); g.view.camera.getWorldDirection(f); f.setY(0).normalize(); n++; if (f.dot(mv) < -0.2) back++; } key('keyup'); out.push({ x, z, face: k, n, back }); } window.__swung = true; })(); 1"
+ },
+ {
+  "waitFor": "window.__swung",
+  "timeout": 300000,
+  "label": "every swing tried"
+ },
+ {
+  "eval": "(() => { const o = __swing; return JSON.stringify({ runs: o.length, frames: o.reduce((a, r) => a + r.n, 0), back: o.reduce((a, r) => a + r.back, 0), runsWithBack: o.filter((r) => r.back).length, worst: o.filter((r) => r.back).sort((a, b) => b.back - a.back).slice(0, 5) }); })()",
+  "expect": "r => r.back === 0",
+  "label": "pressing forward the moment a fight, the wardrobe or the cakes hand the camera back never runs her at it"
+ }
+]

@@ -1,0 +1,14 @@
+[
+ { "waitFor": "window.__game && __game.ready && __game.battle", "timeout": 120000, "label": "the fight starts" },
+ { "eval": "void (async () => { const g = __game; const q = (s) => document.querySelector(s); while (g.battle) { if (!q('#commands').hidden) q('#commands button').click(); else if (!q('#question').hidden) g.answer(true); await new Promise((r) => setTimeout(r, 250)); } })(); 1" },
+ { "waitFor": "__game.save.won.length === 1 && !document.querySelector('#card').hidden", "timeout": 180000, "label": "the room is won and its reward card shows" },
+ { "eval": "[...document.querySelectorAll('#card-buttons button')].pop().click(); 1" },
+ { "waitFor": "__game.state === 'explore'", "timeout": 10000 },
+ { "wait": 1500 },
+ { "shot": "01-after-win.png" },
+ { "eval": "(() => { const r = __game.hero.group.rotation; return JSON.stringify({ x: +r.x.toFixed(3), y: +r.y.toFixed(3), z: +r.z.toFixed(3) }); })()", "expect": "r => r.x === 0 && r.z === 0", "label": "after the fight her turn is a plain yaw" },
+ { "eval": "void (async () => { const g = __game, h = g.hero; const frame = () => new Promise((r) => requestAnimationFrame(r)); const V = g.view.camera.position.constructor; const out = window.__face = { runs: [], wrong: [] }; for (const code of ['KeyW', 'KeyD', 'KeyS', 'KeyA']) { const sp = g.place.spawn; h.group.position.set(sp.x, 0, sp.z - 2.2); dispatchEvent(new KeyboardEvent('keydown', { code })); let prev = h.group.position.clone(), n = 0, wrong = 0; for (let i = 0; i < 26; i++) { await frame(); const p = h.group.position.clone(); const mv = p.clone().sub(prev).setY(0); prev = p; if (mv.length() < 1e-3 || i < 8) continue; mv.normalize(); h.group.updateMatrixWorld(true); const f = new V(0, 0, 1).transformDirection(h.group.matrixWorld).setY(0).normalize(); n++; if (f.dot(mv) < 0) { wrong++; out.wrong.push(code + ' ' + f.dot(mv).toFixed(2) + ' at ' + p.x.toFixed(1) + ',' + p.z.toFixed(1)); } } dispatchEvent(new KeyboardEvent('keyup', { code })); for (let i = 0; i < 10; i++) await frame(); out.runs.push({ code, n, wrong }); } window.__faced = true; })(); 1" },
+ { "waitFor": "window.__faced", "timeout": 300000 },
+ { "shot": "02-after-walk.png" },
+ { "eval": "JSON.stringify(window.__face)", "expect": "o => o.runs.every((x) => x.n > 5 && x.wrong === 0)", "label": "after a won fight she never walks backwards, any direction (before the fix: 44 of 44 and 45 of 45 frames facing away; sliding along a wall is not counted)" }
+]
