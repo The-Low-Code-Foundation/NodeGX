@@ -1,8 +1,8 @@
 # ODT-003 — The build without a bundler on the person's machine
 
-**Phase:** [135](README.md) · **Kind:** product · **Depends on:** ODT-000 (e) ✅ · **State:** 🔨 BUILT 2026-11-07
-(session 4), graded on the installed extension's own Node, cloud bundler and engine (§3); the live redeploy through
-it is Richard's command (§4).
+**Phase:** [135](README.md) · **Kind:** product · **Depends on:** ODT-000 (e) ✅ · **State:** ✅ DONE 2026-11-12. Built
+2026-11-07 (session 4), graded on the installed extension's own Node, cloud bundler and engine (§3); live redeploy by
+Richard 2026-11-12, every account, record and file kept (§4).
 
 ## 1. What was missing
 
@@ -67,8 +67,14 @@ session then runs the checker with `--file <the path the upload printed>`.
 
 | reading | answer |
 |---|---|
-| the redeploy through the kit | ⏳ |
-| `check-campus-deploy.mjs … --file …` after | ⏳ |
+| before (`--upload`), 2026-11-12 | ✅ 17/17, deployed 6×, 2 answers; file `/files/f451002cacd59e1c_open-day.txt` |
+| the redeploy through the kit | ✅ step 3 *"the prebuilt Worker (nothing bundled on this computer)"*, step 5 *"through its API, with your NodeGX sign-in"* (the expired token refreshed itself; no browser); *"updated (its data and its credential kept)"*; site 24 files, 2 sent |
+| `check-campus-deploy.mjs … --file …` after | ✅ 15/15, deployed 7×, 2 answers, the file uploaded before still opens (200) |
+
+The route Richard ran was `@nodegx/backend` 0.1.1's packed tarball (the 0.4.4 release pack,
+`npx -y -p nodegx-backend-0.1.1.tgz nodegx-online deploy cloudflare …/c-campus --name hst-campus`), on his own Node:
+the same pack-time Worker builder as the `.mcpb`'s copy (§3), and the release that ships it. The command above, on the
+extension's own Node, was not run live; the MCP tool route over it is ODT-004's.
 
 ## 5. Acceptance
 
@@ -78,4 +84,4 @@ session then runs the checker with `--file <the path the upload printed>`.
    same one (§3).
 3. ✅ The engine's refusals stop the deploy when it is run without `nodegx deploy` (test 3).
 4. ✅ The size it adds is written down (§3).
-5. ⏳ A live redeploy through the kit keeps every account, record and file (§4).
+5. ✅ A live redeploy through the kit keeps every account, record and file (§4, 2026-11-12).
